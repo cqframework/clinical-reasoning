@@ -1,10 +1,10 @@
-package com.alphora.cql.cli;
+package com.alphora.cql.service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class InputParameters {
+public class ServiceParameters {
     public Set<String> expressions;
     public Map<String,String> modelUris;
     public String terminologyUri;

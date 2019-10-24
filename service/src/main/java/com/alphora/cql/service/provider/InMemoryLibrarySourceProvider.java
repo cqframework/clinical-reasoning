@@ -1,4 +1,4 @@
-package com.alphora.cql.service;
+package com.alphora.cql.service.provider;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

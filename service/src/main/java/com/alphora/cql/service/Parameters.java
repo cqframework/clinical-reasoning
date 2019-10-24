@@ -2,13 +2,17 @@ package com.alphora.cql.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class ServiceParameters {
-    public Set<String> expressions;
+import org.apache.commons.lang3.tuple.Pair;
+
+public class Parameters {
+    // LibraryName, ExpressionName
+    public List<Pair<String, String>> expressions;
     public Map<String,String> modelUris;
     public String terminologyUri;
-    public Map<String,String> parameters;
+    // LibraryName, ParameterName, Value
+    // LibraryName may be null.
+    public Map<Pair<String, String>,String> parameters;
     public Map<String,String> contextParameters;
     public String libraryPath;
     public String libraryName;

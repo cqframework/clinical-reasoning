@@ -1,20 +1,21 @@
 package com.alphora.cql.cli;
 
-import joptsimple.OptionException;
+import static java.util.Arrays.asList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.alphora.cql.service.Parameters;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import joptsimple.util.KeyValuePair;
-
-import static java.util.Arrays.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.alphora.cql.service.ServiceParameters;
 
 
 public class ArgumentProcessor {
@@ -29,7 +30,7 @@ public class ArgumentProcessor {
     public static final String[] CONTEXT_PARAMETER_OPTIONS = {"c", "context"};
     public static final String[] EXPRESSION_OPTIONS = {"e", "expression"};
 
-    public static OptionParser build() {
+    public OptionParser build() {
         OptionParser parser = new OptionParser();
 
         OptionSpecBuilder libraryBuilder = parser.acceptsAll(asList(LIBRARY_OPTIONS),"Use multiple times to define multiple libraries.");
@@ -68,7 +69,7 @@ public class ArgumentProcessor {
         return parser;
     }
 
-    public static OptionSet parse(String[] args) {
+    public OptionSet parse(String[] args) {
         OptionParser parser = build();
         OptionSet options = parser.parse(args);
         if (options.has(HELP_OPTIONS[0])) {
@@ -85,8 +86,8 @@ public class ArgumentProcessor {
         return options;
     }
 
-    public static ServiceParameters parseAndConvert(String[] args) {
-        OptionSet options = parse(args);
+    public Parameters parseAndConvert(String[] args) {
+        OptionSet options = this.parse(args);
 
         List<String> libraries = (List<String>)options.valuesOf(LIBRARY_OPTIONS[0]);
         String libraryPath = (String)options.valueOf(LIBRARY_PATH_OPTIONS[0]);
@@ -104,21 +105,21 @@ public class ArgumentProcessor {
         List<KeyValuePair> parameters = (List<KeyValuePair>)options.valuesOf(PARAMETER_OPTIONS[0]);
         List<KeyValuePair> contextParameters = (List<KeyValuePair>)options.valuesOf(CONTEXT_PARAMETER_OPTIONS[0]);
 
-        ServiceParameters ip = new ServiceParameters();
+        Parameters ip = new Parameters();
         ip.libraries = libraries;
         ip.libraryPath = libraryPath;
         ip.libraryName = libraryName;
-        ip.expressions = toSet(expressions);
+        ip.expressions = toListOfExpressions(expressions);
         ip.terminologyUri = terminologyUri;
         ip.modelUris = toMap("Model parameters", models);
-        ip.parameters = toMap("Parameters", parameters);
+        ip.parameters = toParameterMap(parameters);
         ip.contextParameters = toMap("Context Parameters", contextParameters);
 
         return ip;
 
     }
 
-    private static Map<String, String> toMap(String typeOfKeyValuePair, List<KeyValuePair> keyValuePairs) {
+    private Map<String, String> toMap(String typeOfKeyValuePair, List<KeyValuePair> keyValuePairs) {
         HashMap<String, String> map = new HashMap<>();
 
         for (KeyValuePair kvp : keyValuePairs) {
@@ -132,7 +133,30 @@ public class ArgumentProcessor {
         return map;
     }
 
-    private static Set<String> toSet(List<String> strings) {
-        return strings.stream().distinct().collect(Collectors.toSet());
+    private List<Pair<String, String>> toListOfExpressions(List<String> strings) {
+        List<Pair<String, String>> listOfExpressions = new ArrayList<Pair<String, String>>();
+
+        for (String s : strings) {
+            String[] parts = s.split(".");
+            if (parts == null || parts.length < 2) {
+                new IllegalArgumentException(String.format("%s is not a valid expression. Use the format libraryName.expressionName.", s));
+            }
+
+            listOfExpressions.add(Pair.of(parts[0], parts[1]));
+        }
+
+        return listOfExpressions;
+    }
+
+    // Converts parameters from the CLI format of [libraryName.]parameterName=value to a map. Library name is optional.
+    private Map<Pair<String,String>, String> toParameterMap(List<KeyValuePair> keyValuePairs) {
+        HashMap<Pair<String,String>, String> map = new HashMap<>();
+
+        for (KeyValuePair kvp : keyValuePairs) {
+            String[] parts = kvp.key.split(".");
+            map.put(Pair.of(parts.length > 1 ? parts[0] : null, parts.length > 1 ? parts[1] : parts[0]), kvp.value);
+        }
+
+        return map;
     }
 }

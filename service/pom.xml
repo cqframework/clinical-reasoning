@@ -13,4 +13,19 @@
         <artifactId>base</artifactId>
         <version>${revision}</version>
     </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opencds.cqf</groupId>
+            <artifactId>cql-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf</groupId>
+            <artifactId>cql-engine-fhir</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-to-elm</artifactId>
+        </dependency>
+    </dependencies>
 </project>

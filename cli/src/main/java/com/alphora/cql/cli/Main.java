@@ -2,12 +2,14 @@ package com.alphora.cql.cli;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.EnumSet;
 import java.util.Map.Entry;
 
-import com.alphora.cql.service.ServiceParameters;
+import com.alphora.cql.service.Parameters;
+import com.alphora.cql.service.Response;
+import com.alphora.cql.service.Service;
 
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.execution.EvaluationResult;
 import org.opencds.cqf.cql.execution.LibraryResult;
 
 public class Main {
@@ -17,9 +19,9 @@ public class Main {
         // TODO: Update cql engine dependencies
         disableAccessWarnings();
 
-        ServiceParameters params = null;
+        Parameters params = null;
         try {
-            params = ArgumentProcessor.parseAndConvert(args);
+            params = new ArgumentProcessor().parseAndConvert(args);
         }
         catch (Exception e) {
             System.err.println(e.getMessage());
@@ -27,9 +29,10 @@ public class Main {
         }
 
         try {
-            EvaluationResult result = com.alphora.cql.service.Service.evaluate(params);
+            Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
+            Response response  = service.evaluate(params);
 
-            for (Entry<VersionedIdentifier, LibraryResult> libraryEntry : result.libraryResults.entrySet()) {
+            for (Entry<VersionedIdentifier, LibraryResult> libraryEntry : response.evaluationResult.libraryResults.entrySet()) {
                 for (Entry<String, Object> expressionEntry : libraryEntry.getValue().expressionResults.entrySet()) {
                     System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(), expressionEntry.getValue()));
                 }

@@ -20,14 +20,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.sf.jopt-simple</groupId>
-            <artifactId>jopt-simple</artifactId>
-            <version>${jopt-version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.alphora.cql</groupId>
             <artifactId>service</artifactId>
             <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>${jopt-version}</version>
         </dependency>
     </dependencies>
 

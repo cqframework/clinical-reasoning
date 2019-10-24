@@ -1,14 +1,12 @@
-package com.alphora.cql.service;
+package com.alphora.cql.service.loader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -23,20 +21,20 @@ import org.hl7.elm.r1.ObjectFactory;
 import org.opencds.cqf.cql.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.execution.LibraryLoader;
 
-public class LibraryManagerLibraryLoader implements LibraryLoader {
+public class TranslatingLibraryLoader implements LibraryLoader {
 
     
     private LibraryManager libraryManager;
     private JAXBContext jaxbContext;
 
-    public LibraryManagerLibraryLoader(LibraryManager libraryManager) {
+    public TranslatingLibraryLoader(LibraryManager libraryManager) {
         this.libraryManager = libraryManager;
     }
 
     public Library load(VersionedIdentifier libraryIdentifier) {
         try {
             List<CqlTranslatorException> errors = new ArrayList<>();
-            TranslatedLibrary library = this.libraryManager.resolveLibrary(Helpers.toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), errors);
+            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), errors);
             return this.readXml(this.toXml(library.getLibrary()));
         }
         catch (Exception e) {
@@ -71,5 +69,9 @@ public class LibraryManagerLibraryLoader implements LibraryLoader {
         }
 
         return this.jaxbContext;
+    }
+
+    public org.hl7.elm.r1.VersionedIdentifier toElmIdentifier(String name, String version) {
+        return new org.hl7.elm.r1.VersionedIdentifier().withId(name).withVersion(version);
     }
 }

@@ -137,7 +137,7 @@ public class ArgumentProcessor {
         List<Pair<String, String>> listOfExpressions = new ArrayList<Pair<String, String>>();
 
         for (String s : strings) {
-            String[] parts = s.split(".");
+            String[] parts = s.split("\\.");
             if (parts == null || parts.length < 2) {
                 new IllegalArgumentException(String.format("%s is not a valid expression. Use the format libraryName.expressionName.", s));
             }

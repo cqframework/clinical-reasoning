@@ -13,6 +13,8 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.data.CompositeDataProvider;
 import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.data.ModelResolver;
+import org.opencds.cqf.cql.data.RetrieveProvider;
+import org.opencds.cqf.cql.file.fhir.FileBasedFhirRetrieveProvider;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.type.*;
 
@@ -109,19 +111,19 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
     private DataProvider getFhirProvider(String version, String uri, TerminologyProvider terminologyProvider) {
         switch (version) {
         case "3.0.0":
+            FhirContext context = FhirContext.forDstu3();
+            ModelResolver model = new Dstu3FhirModelResolver(context);
+            FhirRetrieveProvider retrieve;
+
             if (Helpers.isFileUri(uri)) {
-                throw new NotImplementedException("TODO");
-            } else {
-                FhirContext context = FhirContext.forDstu3();
-                ModelResolver model = new Dstu3FhirModelResolver(context);
-
-                FhirRetrieveProvider retrieve = new Dstu3RestFhirRetrieveProvider(context, uri);
+                retrieve = new FileBasedFhirRetrieveProvider(uri, null, context, model);
+            } else {        
+                retrieve = new Dstu3RestFhirRetrieveProvider(context, uri);
                 retrieve.setTerminologyProvider(terminologyProvider);
-                retrieve.setExpandValueSets(true);
-
-                DataProvider provider = new CompositeDataProvider(model, retrieve);
-                return provider;
+                retrieve.setExpandValueSets(true);               
             }
+            DataProvider provider = new CompositeDataProvider(model, retrieve);
+            return provider;
         case "4.0.0":
             throw new NotImplementedException("TODO");
 

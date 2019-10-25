@@ -13,7 +13,6 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.data.CompositeDataProvider;
 import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.data.ModelResolver;
-import org.opencds.cqf.cql.data.RetrieveProvider;
 import org.opencds.cqf.cql.file.fhir.FileBasedFhirRetrieveProvider;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.type.*;

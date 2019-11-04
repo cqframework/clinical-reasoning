@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.alphora.cql.service.Helpers;
+import com.alphora.cql.service.provider.FileBasedFhirRetrieveProvider;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,10 +13,12 @@ import org.cqframework.cql.elm.execution.UsingDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.data.CompositeDataProvider;
 import org.opencds.cqf.cql.data.DataProvider;
-import org.opencds.cqf.cql.data.ModelResolver;
-import org.opencds.cqf.cql.file.fhir.FileBasedFhirRetrieveProvider;
+import org.opencds.cqf.cql.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.model.ModelResolver;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.type.*;
+import org.opencds.cqf.cql.retrieve.*;
+import org.opencds.cqf.cql.runtime.Code;
+import org.opencds.cqf.cql.runtime.Interval;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -112,16 +115,18 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
         case "3.0.0":
             FhirContext context = FhirContext.forDstu3();
             ModelResolver model = new Dstu3FhirModelResolver(context);
-            FhirRetrieveProvider retrieve;
-
+            FhirRetrieveProvider fhirRetrieveProvider = null;
+            
             if (Helpers.isFileUri(uri)) {
-                retrieve = new FileBasedFhirRetrieveProvider(uri, null, context, model);
-            } else {        
-                retrieve = new Dstu3RestFhirRetrieveProvider(context, uri);
-                retrieve.setTerminologyProvider(terminologyProvider);
-                retrieve.setExpandValueSets(true);               
+                //file retriever
+                fhirRetrieveProvider = new FileBasedFhirRetrieveProvider(uri, terminologyProvider, context, model);
+            } else {    
+                //server retriever 
+                fhirRetrieveProvider = new RestFhirRetrieveProvider(context, uri);
+                fhirRetrieveProvider.setTerminologyProvider(terminologyProvider);
+                fhirRetrieveProvider.setExpandValueSets(true);               
             }
-            DataProvider provider = new CompositeDataProvider(model, retrieve);
+            DataProvider provider = new CompositeDataProvider(model, fhirRetrieveProvider);
             return provider;
         case "4.0.0":
             throw new NotImplementedException("TODO");

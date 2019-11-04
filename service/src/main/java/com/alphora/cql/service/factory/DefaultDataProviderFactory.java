@@ -115,17 +115,19 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
         case "3.0.0":
             FhirContext context = FhirContext.forDstu3();
             ModelResolver model = new Dstu3FhirModelResolver(context);
-            FhirRetrieveProvider fhirRetrieveProvider = null;
-            
+            FhirRetrieveProvider fhirRetrieveProvider = null;    
+
             if (Helpers.isFileUri(uri)) {
                 //file retriever
                 fhirRetrieveProvider = new FileBasedFhirRetrieveProvider(uri, terminologyProvider, context, model);
             } else {    
                 //server retriever 
-                fhirRetrieveProvider = new RestFhirRetrieveProvider(context, uri);
-                fhirRetrieveProvider.setTerminologyProvider(terminologyProvider);
-                fhirRetrieveProvider.setExpandValueSets(true);               
+                fhirRetrieveProvider = new RestFhirRetrieveProvider(context, uri);         
             }
+
+            fhirRetrieveProvider.setTerminologyProvider(terminologyProvider);
+            fhirRetrieveProvider.setExpandValueSets(true);  
+            
             DataProvider provider = new CompositeDataProvider(model, fhirRetrieveProvider);
             return provider;
         case "4.0.0":

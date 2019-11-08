@@ -18,7 +18,7 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.cql.exception.DataProviderException;
 import org.opencds.cqf.cql.exception.UnknownPath;
 import org.opencds.cqf.cql.model.ModelResolver;
-import org.opencds.cqf.cql.retrieve.FhirRetrieveProvider;
+import org.opencds.cqf.cql.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.runtime.Code;
 import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
@@ -55,11 +55,12 @@ How do I use it?
       - etc...
 */
 
-public class FileBasedFhirRetrieveProvider extends FhirRetrieveProvider {
+public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 
 	private Path path;
 	protected FhirContext fhirContext;
 	protected ModelResolver modelResolver;
+	protected TerminologyProvider terminologyProvider;
 
 	public FileBasedFhirRetrieveProvider(String path, TerminologyProvider terminologyProvider, FhirContext fhirContext, ModelResolver modelResolver) {
 		this.fhirContext = fhirContext;
@@ -391,24 +392,4 @@ public class FileBasedFhirRetrieveProvider extends FhirRetrieveProvider {
 		}
 		return false;
 	}
-
-	@Override
-	protected Iterable<Object> executeQueries(String dataType, List<SearchParameterMap> queries) {
-		return null;
-	}
-
-    // public DateTime toDateTime(DateTimeType hapiDt) {
-    //     int year = hapiDt.getYear() == null ? 1 : hapiDt.getYear();
-    //     // months in HAPI are zero-indexed -- don't want that, hence the plus one
-    //     int month = hapiDt..getMonth() == null ? 1 : hapiDt.getMonth() + 1;
-    //     int day = hapiDt.getDay() == null ? 1 : hapiDt.getDay();
-    //     int hour = hapiDt.getHour() == null ? 0 : hapiDt.getHour();
-    //     int minute = hapiDt.getMinute() == null ? 0 : hapiDt.getMinute();
-    //     int sec = hapiDt.getSecond() == null ? 0 : hapiDt.getSecond();
-    //     int millis = hapiDt.getMillis() == null ? 0 : hapiDt.getMillis();
-    //     if (hapiDt.getTimeZone() == null) {
-    //         return new DateTime(TemporalHelper.zoneToOffset(ZoneOffset.systemDefault().getRules().getOffset(Instant.now())), year, month, day, hour, minute, sec, millis);
-    //     }
-    //     return new DateTime(TemporalHelper.zoneToOffset(ZoneOffset.of(hapiDt.getTimeZone().getID())), year, month, day, hour, minute, sec, millis);
-	// }
 }

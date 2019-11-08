@@ -26,7 +26,6 @@ import org.opencds.cqf.cql.terminology.ValueSetInfo;
 import org.opencds.cqf.cql.terminology.fhir.FhirTerminologyProvider;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
 /*
 What the heck does this thing do?
@@ -104,9 +103,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 		}
 
 		if (dataType != null) {
-			// TODO: this isn't right - Patient is a valid fhir resource.
-			if (!dataType.equals("Patient"))
-				toResults = toResults.resolve(dataType.toLowerCase());
+			toResults = toResults.resolve(dataType);
 		} else { // Just in case -- probably redundant error checking...
 			throw new DataProviderException(
 					"A data type (i.e. Procedure, Valueset, etc...) must be specified for clinical data retrieval");

@@ -31,10 +31,19 @@ public class Main {
         try {
             Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
             Response response  = service.evaluate(params);
+            EvaluationResultsSerializer serializer = new EvaluationResultsSerializer();
 
             for (Entry<VersionedIdentifier, LibraryResult> libraryEntry : response.evaluationResult.libraryResults.entrySet()) {
                 for (Entry<String, Object> expressionEntry : libraryEntry.getValue().expressionResults.entrySet()) {
-                    System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(), expressionEntry.getValue()));
+                    if (!params.verbose)
+                    {
+                        System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(), expressionEntry.getValue()));
+                    }
+                    else {
+                        String lineSeperator = System.getProperty("line.separator");
+                        String expressionEntryValue = serializer.serializeResult(expressionEntry.getValue()).replace("\\n", lineSeperator).replace("\\", "");
+                        System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(), expressionEntryValue));
+                    }
                 }
             }
         }

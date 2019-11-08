@@ -29,6 +29,7 @@ public class ArgumentProcessor {
     public static final String[] PARAMETER_OPTIONS = {"p", "parameter"};
     public static final String[] CONTEXT_PARAMETER_OPTIONS = {"c", "context"};
     public static final String[] EXPRESSION_OPTIONS = {"e", "expression"};
+    public static final String[] OUTPUT_FORMAT_OPTIONS = {"v", "verbose"};
 
     public OptionParser build() {
         OptionParser parser = new OptionParser();
@@ -63,6 +64,9 @@ public class ArgumentProcessor {
         OptionSpec<KeyValuePair> context = parser.acceptsAll(asList(CONTEXT_PARAMETER_OPTIONS), 
             "Use the form contextParameterName=value. (e.g. Patient=123) Use multiple times to specify multiple context parameters.")
             .withRequiredArg().ofType(KeyValuePair.class).describedAs("value of context parameter");
+
+        OptionSpec<Boolean> verbose = parser.acceptsAll(asList(OUTPUT_FORMAT_OPTIONS), "Show simplified results")
+        .withOptionalArg().ofType(Boolean.class).describedAs("String representation of a boolean value");
 
         OptionSpec<Void> help = parser.acceptsAll(asList(HELP_OPTIONS), "Show this help page").forHelp();
 
@@ -100,6 +104,11 @@ public class ArgumentProcessor {
         }
     
         String terminologyUri = (String)options.valueOf(TERMINOLOGY_URI_OPTIONS[0]);
+        boolean verbose;
+        if(options.has(OUTPUT_FORMAT_OPTIONS[0])) {
+            verbose = (Boolean)options.valueOf(OUTPUT_FORMAT_OPTIONS[0]);
+        }
+        else verbose = false;
 
         List<KeyValuePair> models = (List<KeyValuePair>)options.valuesOf(MODEL_OPTIONS[0]);
         List<KeyValuePair> parameters = (List<KeyValuePair>)options.valuesOf(PARAMETER_OPTIONS[0]);
@@ -114,6 +123,7 @@ public class ArgumentProcessor {
         ip.modelUris = toMap("Model parameters", models);
         ip.parameters = toParameterMap(parameters);
         ip.contextParameters = toMap("Context Parameters", contextParameters);
+        ip.verbose = verbose;
 
         return ip;
 

@@ -33,7 +33,6 @@ public class DefaultTerminologyProviderFactory implements TerminologyProviderFac
             break;
         default:
             throw new IllegalArgumentException(String.format("Unknown FHIR terminology provider version: %s", version));
-
         }
 
         if (Helpers.isFileUri(terminologyUri)) {

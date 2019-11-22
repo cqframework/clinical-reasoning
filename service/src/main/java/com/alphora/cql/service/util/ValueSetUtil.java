@@ -143,6 +143,43 @@ public class ValueSetUtil {
 
 		return contains;
 	}
+
+	public static Iterable<Code> getCodesInCompose(FhirContext fhirContext, IBaseResource valueSet) {
+		List<IBase> includes = getIncludes(fhirContext, valueSet);
+
+        if (includes == null) {
+            return null;
+        }
+
+		BaseRuntimeChildDefinition conceptChild = getIncludeConceptDefinition(fhirContext);
+
+		IAccessor versionAccessor = null;
+		IAccessor systemAccessor = null;
+		IAccessor codeAccessor = null;
+		IAccessor displayAccessor = null;
+
+		List<Code> codes = new ArrayList<>();
+		for (IBase include : includes) {
+
+			String version = getStringValueFromPrimitiveAccessor(include, versionAccessor);
+			String system = getStringValueFromPrimitiveAccessor(include, systemAccessor);
+
+			List<IBase> concepts = conceptChild.getAccessor().getValues(include);
+
+			for (IBase c : concepts) {
+
+				String code = getStringValueFromPrimitiveAccessor(c, codeAccessor);
+				String display = getStringValueFromPrimitiveAccessor(c, displayAccessor);
+				codes.add(new Code()
+					.withSystem(system)
+					.withCode(code)
+					.withDisplay(display)
+					.withVersion(version));
+			}
+		}
+    
+        return codes;
+	}
 	
 	public static Iterable<Code> getCodesInExpansion(FhirContext fhirContext, IBaseResource valueSet) {
 		List<IBase> contains = getContains(fhirContext, valueSet);
@@ -281,4 +318,10 @@ public class ValueSetUtil {
 		RuntimeResourceBlockDefinition containsBlockDefinition = (RuntimeResourceBlockDefinition)containsDefinition.getChildByName("contains");
 		return containsBlockDefinition.getChildByName("display");
 	}
+
+	// private static BaseRuntimeChildDefinition getConceptCodeDefinition(FhirContext fhirContext) {
+	// 	BaseRuntimeChildDefinition conceptDefinition = getConceptDefinition(includeOrExcludeChild)
+	// 	RuntimeResourceBlockDefinition containsBlockDefinition = (RuntimeResourceBlockDefinition)containsDefinition.getChildByName("contains");
+	// 	return containsBlockDefinition.getChildByName("code");
+	// }
 }

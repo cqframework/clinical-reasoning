@@ -48,8 +48,10 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
         if (codes == null) {
             return false;
         }
+
+        // TODO: Handle Versions
         for (Code c : codes) {
-            if (c.equivalent(code)) {
+            if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
                 return true;
             }
         }
@@ -92,7 +94,11 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
             Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
 
             if (codes == null) {
-                throw new IllegalArgumentException(String.format("No expansion found for ValueSet %s. The File-based ValueSet provider requires ValueSets to be expanded.", valueSet.getId()));
+               // codes = ValueSetUtil.getCodesInCompose(fhirContext, valueSet);
+            }
+
+            if (codes == null) {
+                throw new IllegalArgumentException(String.format("Unable to load codes for valueset %s located at %s.", valueSet.getId(), vsPath.toString()));
             }
 
             this.valueSetIndex.put(valueSet, codes);

@@ -345,48 +345,18 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 	}
 
 	public boolean checkCodeMembership(Object codeObj, String vsId) {
-		FhirTerminologyProvider terminologyProvider = (FhirTerminologyProvider) this.terminologyProvider;
 		ValueSetInfo valueSet = new ValueSetInfo().withId(vsId);
-		ValueSet vs;
-		if (vsId.startsWith("http")) {
-			Bundle bundle = (Bundle) terminologyProvider.getFhirClient().search().forResource(ValueSet.class)
-					.where(ValueSet.URL.matches().value(vsId)).execute();
-			if (bundle.hasEntry() && bundle.getEntry().size() > 0 && bundle.getEntry().get(0).hasResource()) {
-				vs = (ValueSet) bundle.getEntry().get(0).getResource();
-			} else {
-				return false;
-			}
-		} else {
-			vs = terminologyProvider.getFhirClient().read().resource(ValueSet.class).withId(vsId).execute();
-		}
 		Iterable<Coding> conceptCodes = ((CodeableConcept) codeObj).getCoding();
-		boolean needsExpand = false;
-		if (valueSet != null && vs.hasCompose() && vs.getCompose().hasInclude()) {
-			for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
-				if (include.hasFilter() || include.hasValueSet()) {
-					needsExpand = true;
-					continue;
-				}
-				for (Coding code : conceptCodes) {
-					if (code.getSystem().equals(include.getSystem())) {
-						for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
-							if (code.getCode().equals(concept.getCode())) {
-								return true;
-							}
-						}
-					}
-				}
+
+		// TODO: Handle expansion.
+		for (Coding code : conceptCodes) {
+			boolean result = this.terminologyProvider.in(new Code().withCode(code.getCode()).withSystem(code.getSystem()), valueSet);
+			if (result) {
+				return true;
 			}
+			
 		}
-		if (needsExpand) {
-			for (Coding code : conceptCodes) {
-				if (terminologyProvider.in(
-						new Code().withCode(code.getCodeElement().getValue()).withSystem(code.getSystem()),
-						new ValueSetInfo().withId(vsId))) {
-					return true;
-				}
-			}
-		}
+
 		return false;
 	}
 }

@@ -2,18 +2,14 @@ package com.alphora.cql.service.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.runtime.Code;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -97,6 +93,26 @@ public class ValueSetUtilTests {
         assertEquals("2018-03", first.getVersion());
     }
 
+    private void testGetCodesInCompose(FhirContext fhirContext, String path) {
+        IBaseResource valueSet = this.loadValueSet(fhirContext, path);
+        Iterable<Code> codes = ValueSetUtil.getCodesInCompose(fhirContext, valueSet);
+        assertNotNull(codes);
+
+        List<Code> codeList = new ArrayList<>();
+        for (Code c : codes) {
+            codeList.add(c);
+        }
+
+        assertEquals(3, codeList.size());
+
+        Code first = codeList.get(0);
+
+        assertEquals("000", first.getCode());
+        assertEquals("http://cql.alphora.com/unit-test", first.getSystem());
+        assertEquals("000 Code", first.getDisplay());
+        assertEquals("2018-03", first.getVersion());
+    }
+
     @Test
     public void testGetCompose() {
         this.testGetCompose(DSTU3_CONTEXT, DSTU3_PATH);
@@ -131,6 +147,12 @@ public class ValueSetUtilTests {
     public void testGetCodesInExpansion() {
         this.testGetCodesInExpansion(DSTU3_CONTEXT, DSTU3_PATH);  
         this.testGetCodesInExpansion(R4_CONTEXT, R4_PATH); 
+    }
+
+    @Test
+    public void testGetCodesInCompose() {
+        this.testGetCodesInCompose(DSTU3_CONTEXT, DSTU3_PATH);  
+        this.testGetCodesInCompose(R4_CONTEXT, R4_PATH); 
     }
 
 }

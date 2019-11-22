@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.alphora.cql.service.Helpers;
 
@@ -94,7 +93,7 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
             Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
 
             if (codes == null) {
-               // codes = ValueSetUtil.getCodesInCompose(fhirContext, valueSet);
+                codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
             }
 
             if (codes == null) {

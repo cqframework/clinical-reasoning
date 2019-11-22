@@ -153,10 +153,10 @@ public class ValueSetUtil {
 
 		BaseRuntimeChildDefinition conceptChild = getIncludeConceptDefinition(fhirContext);
 
-		IAccessor versionAccessor = null;
-		IAccessor systemAccessor = null;
-		IAccessor codeAccessor = null;
-		IAccessor displayAccessor = null;
+		IAccessor versionAccessor = getIncludeVersionDefinition(fhirContext).getAccessor();
+		IAccessor systemAccessor = getIncludeSystemDefinition(fhirContext).getAccessor();
+		IAccessor codeAccessor = getIncludeConceptCodeDefinition(fhirContext).getAccessor();
+		IAccessor displayAccessor = getIncludeConceptDisplayDefinition(fhirContext).getAccessor();
 
 		List<Code> codes = new ArrayList<>();
 		for (IBase include : includes) {
@@ -229,7 +229,7 @@ public class ValueSetUtil {
 		IBase baseValue = values.get(0);
 
 		if (!(baseValue instanceof IPrimitiveType)) {
-			throw new IllegalArgumentException("Non-Primitive value encountered while trying to access primitive value.");
+			throw new IllegalArgumentException("Non-primitive value encountered while trying to access primitive value.");
 		}
 		else {
 			return ((IPrimitiveType)baseValue).getValueAsString();
@@ -319,9 +319,27 @@ public class ValueSetUtil {
 		return containsBlockDefinition.getChildByName("display");
 	}
 
-	// private static BaseRuntimeChildDefinition getConceptCodeDefinition(FhirContext fhirContext) {
-	// 	BaseRuntimeChildDefinition conceptDefinition = getConceptDefinition(includeOrExcludeChild)
-	// 	RuntimeResourceBlockDefinition containsBlockDefinition = (RuntimeResourceBlockDefinition)containsDefinition.getChildByName("contains");
-	// 	return containsBlockDefinition.getChildByName("code");
-	// }
+	private static BaseRuntimeChildDefinition getIncludeConceptCodeDefinition(FhirContext fhirContext) {
+		BaseRuntimeChildDefinition includeConceptDefinition = getIncludeConceptDefinition(fhirContext);
+		RuntimeResourceBlockDefinition containsBlockDefinition = (RuntimeResourceBlockDefinition)includeConceptDefinition.getChildByName("concept");
+		return containsBlockDefinition.getChildByName("code");
+	}
+
+	private static BaseRuntimeChildDefinition getIncludeConceptDisplayDefinition(FhirContext fhirContext) {
+		BaseRuntimeChildDefinition includeConceptDefinition = getIncludeConceptDefinition(fhirContext);
+		RuntimeResourceBlockDefinition containsBlockDefinition = (RuntimeResourceBlockDefinition)includeConceptDefinition.getChildByName("concept");
+		return containsBlockDefinition.getChildByName("display");
+	}
+
+	private static BaseRuntimeChildDefinition getIncludeSystemDefinition(FhirContext fhirContext) {
+		BaseRuntimeChildDefinition includeDefinition = getIncludeDefinition(fhirContext);
+		RuntimeResourceBlockDefinition includeBlockDefinition = (RuntimeResourceBlockDefinition)includeDefinition.getChildByName("include");
+		return includeBlockDefinition.getChildByName("system");
+	}
+
+	private static BaseRuntimeChildDefinition getIncludeVersionDefinition(FhirContext fhirContext) {
+		BaseRuntimeChildDefinition includeDefinition = getIncludeDefinition(fhirContext);
+		RuntimeResourceBlockDefinition includeBlockDefinition = (RuntimeResourceBlockDefinition)includeDefinition.getChildByName("include");
+		return includeBlockDefinition.getChildByName("version");
+	}
 }

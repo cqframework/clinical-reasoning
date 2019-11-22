@@ -133,7 +133,7 @@ public class Service {
             }
         }
 
-        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create(parameters.terminologyUri);
+        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create("FHIR", "3.0.0", parameters.terminologyUri);
         Map<String, DataProvider> dataProviders = this.dataProviderFactory.create(libraries, parameters.modelUris, terminologyProvider);
 
         Map<String, Object> resolvedContextParameters = this.parameterResolver.resolvecontextParameters(parameters.contextParameters);

@@ -24,21 +24,17 @@ import com.alphora.cql.service.util.ValueSetUtil;
 
 public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
 
-
-    public FileBasedFhirTerminologyProvider(FhirContext fhirContext) {
-        this.fhirContext = fhirContext;
-    }
-
     private String uri;
     private FhirContext fhirContext;
 
     private Map<ValueSetInfo, Iterable<Code>> valueSetIndex = new HashMap<>();
 
-    public FileBasedFhirTerminologyProvider(String uri) {
+    public FileBasedFhirTerminologyProvider(FhirContext fhirContext, String uri) {
         if (uri == null || uri.isEmpty() || !Helpers.isFileUri(uri)) {
             throw new IllegalArgumentException("File Terminology provider requires a valid path to Terminology resources");
         }
 
+        this.fhirContext = fhirContext;
         this.uri = uri;
     }
 
@@ -98,7 +94,7 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
             if (codes == null) {
                 throw new IllegalArgumentException(String.format("No expansion found for ValueSet %s. The File-based ValueSet provider requires ValueSets to be expanded.", valueSet.getId()));
             }
-            
+
             this.valueSetIndex.put(valueSet, codes);
         }
         catch (IOException e) {

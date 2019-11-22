@@ -6,4 +6,4 @@ target
 .settings
 .flattened-pom.xml
 
-*.log
+*.log*

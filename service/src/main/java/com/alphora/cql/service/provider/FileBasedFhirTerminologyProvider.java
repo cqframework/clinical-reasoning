@@ -1,6 +1,7 @@
 package com.alphora.cql.service.provider;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -25,8 +26,9 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
 
     private String uri;
     private FhirContext fhirContext;
+    private boolean initialized;
 
-    private Map<ValueSetInfo, Iterable<Code>> valueSetIndex = new HashMap<>();
+    private Map<String, Iterable<Code>> valueSetIndex = new HashMap<>();
 
     public FileBasedFhirTerminologyProvider(FhirContext fhirContext, String uri) {
         if (uri == null || uri.isEmpty() || !Helpers.isFileUri(uri)) {
@@ -35,6 +37,7 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
 
         this.fhirContext = fhirContext;
         this.uri = uri;
+        this.initialized = false;
     }
 
     @Override
@@ -64,46 +67,71 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
             throw new IllegalArgumentException("valueset must not be null when attempting to expand");
         }
 
-        if (!this.valueSetIndex.containsKey(valueSet)) {
-            this.loadValueSet(valueSet);
+        if (!this.initialized) {
+            this.initialize();
         }
 
-        return this.valueSetIndex.get(valueSet);
+        if (!this.valueSetIndex.containsKey(valueSet.getId())) {
+            throw new IllegalArgumentException(String.format("Unable to locate valueset %s", valueSet.getId()));
+        }
+
+        return this.valueSetIndex.get(valueSet.getId());
     }
 
     @Override
+    // TODO: We dont know about codes systems...
 	public Code lookup(Code code, CodeSystemInfo codeSystem) {
 		return null;
     }
 
-    private void loadValueSet(ValueSetInfo valueSet) {
-        String id = valueSet.getId();
-        Path vsPath = Path.of(this.uri, "valueset" + id + ".json");
-        File file = vsPath.toFile();
+    private void initialize() {
+        FilenameFilter filter = new FilenameFilter() { 
+  
+            public boolean accept(File f, String name) 
+            { 
+                return name.endsWith(".json") || name.endsWith(".xml");
+            } 
+        };
 
-        if (!file.exists()) {
-            throw new IllegalArgumentException(String.format("Unable to locate valueset %s", valueSet.getId()));
+        File parent = new File(this.uri);
+
+        File[] files = parent.listFiles(filter);
+
+        for (File f : files) {
+            this.loadAsValueSet(f.getAbsolutePath());
         }
 
+
+        this.initialized = true;
+    }
+
+    private void loadAsValueSet(String path) {
+        Path filePath = Path.of(path);
         try {
-            String content = new String (Files.readAllBytes(vsPath));
-            IParser parser = this.fhirContext.newJsonParser();
+            String content = new String (Files.readAllBytes(filePath));
+
+            IParser parser = path.endsWith(".json") ? this.fhirContext.newJsonParser() : this.fhirContext.newXmlParser();
             IBaseResource resource = parser.parseResource(new StringReader(content));
 
+            String resourceType = ValueSetUtil.getResourceType(this.fhirContext, resource);
+
+            // Skip resources that are not ValueSets;
+            if (!resourceType.equals("ValueSet")) {
+                return;
+            }
+
+            String url = ValueSetUtil.getUrl(fhirContext, resource);
             Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
 
             if (codes == null) {
                 codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
             }
 
-            if (codes == null) {
-                throw new IllegalArgumentException(String.format("Unable to load codes for valueset %s located at %s.", valueSet.getId(), vsPath.toString()));
-            }
+            this.valueSetIndex.put(url, codes);
 
-            this.valueSetIndex.put(valueSet, codes);
         }
         catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Unable to load valueset %s located at %s.", valueSet.getId(), vsPath.toString()));
+            throw new IllegalArgumentException(String.format("Unable to load resource located at %s.", path));
         }
     }
 }

@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "java",
             "name": "Debug (Launch) - Current File",
@@ -12,7 +13,7 @@
         },
         {
             "type": "java",
-            "name": "Debug (Launch)-Main<cli>",
+            "name": "Debug (EXM 124)",
             "request": "launch",
             "mainClass": "com.alphora.cql.cli.Main",
             "projectName": "cli",
@@ -27,6 +28,25 @@
                 "http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir", 
                 "-c", 
                 "Patient=denom-cms124-stu3"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 130)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp", 
+                "/home/jp/repos/connectathon/cql/FHIR-3.0.0", 
+                "--ln", 
+                "EXM130_FHIR3", 
+                "-m", 
+                "FHIR=/home/jp/repos/connectathon/tests/FHIR-3.0.0/EXM130_FHIR3-7.2.000", 
+                "-t", 
+                "/home/jp/repos/connectathon/resources/fhir3/valuesets", 
+                "-c", 
+                "Patient=numer-cms130-stu3"
             ]
         },
         {

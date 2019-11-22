@@ -23,16 +23,16 @@ public class DefaultTerminologyProviderFactory implements TerminologyProviderFac
         FhirContext context;
         switch (version) {
             case "2.0.0":
-            context = FhirContext.forDstu2_1();
-            break;
-        case "3.0.0":
-            context = FhirContext.forDstu3();
-            break;
-        case "4.0.0":
-            context = FhirContext.forR4();
-            break;
-        default:
-            throw new IllegalArgumentException(String.format("Unknown FHIR terminology provider version: %s", version));
+                context = FhirContext.forDstu2_1();
+                break;
+            case "3.0.0":
+                context = FhirContext.forDstu3();
+                break;
+            case "4.0.0":
+                context = FhirContext.forR4();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unknown FHIR terminology provider version: %s", version));
         }
 
         if (Helpers.isFileUri(terminologyUri)) {

@@ -212,6 +212,21 @@ public class ValueSetUtil {
 		return codes;
 	}
 
+	public static String getUrl(FhirContext fhirContext, IBaseResource valueSet) {
+		BaseRuntimeChildDefinition urlDef = getUrlDefinition(fhirContext);
+		return getStringValueFromPrimitiveAccessor(valueSet, urlDef.getAccessor());
+	}
+
+	public static String getId(FhirContext fhirContext, IBaseResource valueSet) {
+		BaseRuntimeChildDefinition idDef = getIdDefinition(fhirContext);
+		return getStringValueFromPrimitiveAccessor(valueSet, idDef.getAccessor());
+	}
+
+	public static String getResourceType(FhirContext fhirContext, IBaseResource resource) {
+		RuntimeResourceDefinition def = fhirContext.getResourceDefinition(resource);
+		return def.getName();
+	}
+
 	private static String getStringValueFromPrimitiveAccessor(IBase value, IAccessor accessor) {
 		if (value == null || accessor == null) {
 			return null;
@@ -341,5 +356,15 @@ public class ValueSetUtil {
 		BaseRuntimeChildDefinition includeDefinition = getIncludeDefinition(fhirContext);
 		RuntimeResourceBlockDefinition includeBlockDefinition = (RuntimeResourceBlockDefinition)includeDefinition.getChildByName("include");
 		return includeBlockDefinition.getChildByName("version");
+	}
+
+	private static BaseRuntimeChildDefinition getUrlDefinition(FhirContext fhirContext) {
+		RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
+        return def.getChildByName("url");
+	}
+
+	private static BaseRuntimeChildDefinition getIdDefinition(FhirContext fhirContext) {
+		RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
+        return def.getChildByName("id");
 	}
 }

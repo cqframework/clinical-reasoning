@@ -113,6 +113,25 @@ public class ValueSetUtilTests {
         assertEquals("2018-03", first.getVersion());
     }
 
+    private void testGetUrl(FhirContext fhirContext, String path) {
+        IBaseResource valueSet = this.loadValueSet(fhirContext, path);
+        String url = ValueSetUtil.getUrl(fhirContext, valueSet);
+        assertNotNull(url);
+    }
+
+
+    private void testGetId(FhirContext fhirContext, String path) {
+        IBaseResource valueSet = this.loadValueSet(fhirContext, path);
+        String id = ValueSetUtil.getId(fhirContext, valueSet);
+        assertNotNull(id);
+    }
+
+    private void testGetResourceType(FhirContext fhirContext, String path) {
+        IBaseResource valueSet = this.loadValueSet(fhirContext, path);
+        String type = ValueSetUtil.getResourceType(fhirContext, valueSet);
+        assertNotNull(type);
+    }
+
     @Test
     public void testGetCompose() {
         this.testGetCompose(DSTU3_CONTEXT, DSTU3_PATH);
@@ -154,5 +173,24 @@ public class ValueSetUtilTests {
         this.testGetCodesInCompose(DSTU3_CONTEXT, DSTU3_PATH);  
         this.testGetCodesInCompose(R4_CONTEXT, R4_PATH); 
     }
+
+    @Test
+    public void testGetUrl() {
+        this.testGetUrl(DSTU3_CONTEXT, DSTU3_PATH);  
+        this.testGetUrl(R4_CONTEXT, R4_PATH); 
+    }
+
+    @Test
+    public void testGetId() {
+        this.testGetId(DSTU3_CONTEXT, DSTU3_PATH);  
+        this.testGetId(R4_CONTEXT, R4_PATH); 
+    }
+
+    @Test
+    public void testGetResourceType() {
+        this.testGetResourceType(DSTU3_CONTEXT, DSTU3_PATH);  
+        this.testGetResourceType(R4_CONTEXT, R4_PATH); 
+    }
+
 
 }

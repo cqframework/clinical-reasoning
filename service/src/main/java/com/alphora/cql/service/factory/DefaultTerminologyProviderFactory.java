@@ -1,6 +1,8 @@
 package com.alphora.cql.service.factory;
 
 
+import com.alphora.cql.service.Helpers;
+
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.terminology.fhir.FhirTerminologyProvider;
 
@@ -10,7 +12,12 @@ public class DefaultTerminologyProviderFactory implements TerminologyProviderFac
         if (terminologyUri == null || terminologyUri.isEmpty()) {
             return null;
         }
-        
-        return new FhirTerminologyProvider().setEndpoint(terminologyUri, false);
+
+        if (Helpers.isFileUri(terminologyUri)) {
+            return null;
+        }
+        else {
+            return new FhirTerminologyProvider().setEndpoint(terminologyUri, false);
+        }
     }
 }

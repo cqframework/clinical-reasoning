@@ -4,3 +4,6 @@ target
 .classpath
 .project
 .settings
+.flattened-pom.xml
+
+*.log

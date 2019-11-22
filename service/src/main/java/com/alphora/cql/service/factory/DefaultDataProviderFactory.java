@@ -13,16 +13,20 @@ import org.cqframework.cql.elm.execution.UsingDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.data.CompositeDataProvider;
 import org.opencds.cqf.cql.data.DataProvider;
+import org.opencds.cqf.cql.model.Dstu2FhirModelResolver;
 import org.opencds.cqf.cql.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.model.ModelResolver;
+import org.opencds.cqf.cql.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.retrieve.*;
-import org.opencds.cqf.cql.runtime.Code;
-import org.opencds.cqf.cql.runtime.Interval;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
 
-// TODO: Dyanamic data provider registration
+// TODO: Dynamic data provider registration
 public class DefaultDataProviderFactory implements DataProviderFactory {
 
     @SuppressWarnings("serial")
@@ -111,31 +115,42 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
     }
 
     private DataProvider getFhirProvider(String version, String uri, TerminologyProvider terminologyProvider) {
+        FhirContext context;
+        ModelResolver modelResolver;
+        RetrieveProvider retrieveProvider;
+        ISearchParamRegistry searchParamRegistry;
         switch (version) {
-        case "3.0.0":
-            FhirContext context = FhirContext.forDstu3();
-            ModelResolver model = new Dstu3FhirModelResolver(context);
-            RetrieveProvider retrieveProvider = null;    
+            case "2.0.0":
+                context = FhirContext.forDstu2_1();
+                modelResolver = new Dstu2FhirModelResolver();
+                searchParamRegistry = new SearchParamRegistryDstu2();
+                break;
+            case "3.0.0":
+                context = FhirContext.forDstu3();
+                modelResolver = new Dstu3FhirModelResolver();
+                searchParamRegistry = new SearchParamRegistryDstu3();
+                break;
+            case "4.0.0":
+                context = FhirContext.forR4();
+                modelResolver = new R4FhirModelResolver();
+                searchParamRegistry = new SearchParamRegistryR4();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unknown FHIR data provider version: %s", version));
+        }    
 
-            if (Helpers.isFileUri(uri)) {
-                //file retriever
-                retrieveProvider = new FileBasedFhirRetrieveProvider(uri, terminologyProvider, context, model);
-            } else {    
-                //server retriever 
-                FhirRetrieveProvider fhirRetrieveProvider = new RestFhirRetrieveProvider(context, uri);  
-                fhirRetrieveProvider.setTerminologyProvider(terminologyProvider);
-                fhirRetrieveProvider.setExpandValueSets(true);
-                retrieveProvider = fhirRetrieveProvider;        
-            }
-            
-            DataProvider provider = new CompositeDataProvider(model, retrieveProvider);
-            return provider;
-        case "4.0.0":
-            throw new NotImplementedException("TODO");
-
-        default:
-            throw new IllegalArgumentException(String.format("Unknown FHIR data provider vesion: %s", version));
+        if (Helpers.isFileUri(uri)) {
+            //file retriever
+            retrieveProvider = new FileBasedFhirRetrieveProvider(uri, terminologyProvider, context, modelResolver);
+        } else {    
+            //server retriever 
+            RestFhirRetrieveProvider fhirRetrieveProvider = new RestFhirRetrieveProvider(searchParamRegistry, context.newRestfulGenericClient(uri));
+            fhirRetrieveProvider.setTerminologyProvider(terminologyProvider);
+            fhirRetrieveProvider.setExpandValueSets(true);
+            retrieveProvider = fhirRetrieveProvider;        
         }
+            
+        return new CompositeDataProvider(modelResolver, retrieveProvider);
     }
 
     private DataProvider getQdmProvider(String version, String uri, TerminologyProvider terminologyProvider) {

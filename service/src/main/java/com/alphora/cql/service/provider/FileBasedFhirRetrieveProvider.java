@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.ValueSet;
 //import org.hl7.fhir.instance.model.*;
 import org.opencds.cqf.cql.exception.DataProviderException;
 import org.opencds.cqf.cql.exception.UnknownPath;
@@ -23,7 +21,6 @@ import org.opencds.cqf.cql.runtime.Code;
 import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.terminology.ValueSetInfo;
-import org.opencds.cqf.cql.terminology.fhir.FhirTerminologyProvider;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -235,6 +232,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 						if (codeMatch)
 							break;
 						Object resCodes = this.modelResolver.resolvePath(res, codePath);
+						// TODO: Make this version independent.
 						if (resCodes instanceof Iterable) {
 							for (Object codeObj : (Iterable) resCodes) {
 								Iterable<Coding> conceptCodes = ((CodeableConcept) codeObj).getCoding();

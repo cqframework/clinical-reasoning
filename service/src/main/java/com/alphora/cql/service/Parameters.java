@@ -16,6 +16,7 @@ public class Parameters {
     public Map<String,String> contextParameters;
     public String libraryPath;
     public String libraryName;
+    public String libraryVersion;
     public List<String> libraries;
     public Boolean verbose;
 }

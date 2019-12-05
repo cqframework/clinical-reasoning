@@ -8,5 +8,5 @@ import org.opencds.cqf.cql.execution.LibraryLoader;
 
 public interface LibraryLoaderFactory {
     LibraryLoader create(List<String> libraries, EnumSet<CqlTranslator.Options> translatorOptions);
-    LibraryLoader create (String libraryPath, EnumSet<CqlTranslator.Options> translatorOptions);
+    LibraryLoader create(String libraryPath, EnumSet<CqlTranslator.Options> translatorOptions);
 }

@@ -113,7 +113,7 @@ public class Service {
         // Either that or have the library manager just give them all to us.
         Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
         if (parameters.libraryName != null) {
-            Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, null));
+            Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, parameters.libraryVersion));
             if (lib != null) {
                 libraries.put(lib.getIdentifier(), lib);
             }

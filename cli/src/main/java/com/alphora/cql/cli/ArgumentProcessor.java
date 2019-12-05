@@ -24,6 +24,7 @@ public class ArgumentProcessor {
     public static final String[] LIBRARY_OPTIONS = {"l", "library"};
     public static final String[] LIBRARY_PATH_OPTIONS = {"lp", "library-path"};
     public static final String[] LIBRARY_NAME_OPTIONS = {"ln", "library-name"};
+    public static final String[] LIBRARY_VERSION_OPTIONS = {"lv", "library-version"};
     public static final String[] TERMINOLOGY_URI_OPTIONS = {"t","terminology-uri"};
     public static final String[] MODEL_OPTIONS = {"m","model"};
     public static final String[] PARAMETER_OPTIONS = {"p", "parameter"};
@@ -36,8 +37,9 @@ public class ArgumentProcessor {
 
         OptionSpecBuilder libraryBuilder = parser.acceptsAll(asList(LIBRARY_OPTIONS),"Use multiple times to define multiple libraries.");
         OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(LIBRARY_PATH_OPTIONS), "All files ending in .cql will be processed");
-        OptionSpecBuilder libraryNameBuilder = parser.acceptsAll(asList(LIBRARY_NAME_OPTIONS), "Required if multiple libraries are defined and --expression is ommitted");        
-        OptionSpecBuilder expressionBuilder = parser.acceptsAll(asList(EXPRESSION_OPTIONS), "Use the form libraryName.expressionName. (e.g. Common.\"Numerator\") Use multiple times to specify multiple expressions. If ommitted all the expressions of the primary library will be evaluated.");
+        OptionSpecBuilder libraryNameBuilder = parser.acceptsAll(asList(LIBRARY_NAME_OPTIONS), "Required if multiple libraries are defined and --expression is omitted");
+        OptionSpecBuilder libraryVersionBuilder = parser.acceptsAll(asList(LIBRARY_VERSION_OPTIONS), "If omitted most recent version of the library will be used");     
+        OptionSpecBuilder expressionBuilder = parser.acceptsAll(asList(EXPRESSION_OPTIONS), "Use the form libraryName.expressionName. (e.g. Common.\"Numerator\") Use multiple times to specify multiple expressions. If omitted all the expressions of the primary library will be evaluated.");
 
         // Set up inter-depedencies.
         parser.mutuallyExclusive(libraryBuilder, libraryPathBuilder);
@@ -46,6 +48,7 @@ public class ArgumentProcessor {
         OptionSpec<String> library = libraryBuilder.withRequiredArg().describedAs("library content");
         OptionSpec<String> libraryPath = libraryPathBuilder.requiredUnless(library).withRequiredArg().describedAs("input directory for libraries");
         OptionSpec<String> libraryName = libraryNameBuilder.withRequiredArg().describedAs("name of primary library");
+        OptionSpec<String> libraryVersion = libraryVersionBuilder.availableIf(libraryName).withRequiredArg().describedAs("version of primary library");
         OptionSpec<String> expression = expressionBuilder.withRequiredArg().describedAs("expression to evaluate");
 
         // TODO: Terminology user / password (and other auth options)
@@ -58,7 +61,7 @@ public class ArgumentProcessor {
             .withRequiredArg().ofType(KeyValuePair.class).describedAs("path of data for model ");
 
         OptionSpec<KeyValuePair> parameter = parser.acceptsAll(asList(PARAMETER_OPTIONS), 
-            "Use the form [libraryName.]parameterName=value. (e.g. Common.\"Measurement Period\"=[@2015-01-01, @2016-01-01]). Library name is optional. If ommited parameter will be set for all libraries. The parameter values must be CQL types. Use multiple times to specify multiple parameters.")
+            "Use the form [libraryName.]parameterName=value. (e.g. Common.\"Measurement Period\"=[@2015-01-01, @2016-01-01]). Library name is optional. If omitted parameter will be set for all libraries. The parameter values must be CQL types. Use multiple times to specify multiple parameters.")
             .withRequiredArg().ofType(KeyValuePair.class).describedAs("value of parameter");
 
         OptionSpec<KeyValuePair> context = parser.acceptsAll(asList(CONTEXT_PARAMETER_OPTIONS), 
@@ -96,6 +99,7 @@ public class ArgumentProcessor {
         List<String> libraries = (List<String>)options.valuesOf(LIBRARY_OPTIONS[0]);
         String libraryPath = (String)options.valueOf(LIBRARY_PATH_OPTIONS[0]);
         String libraryName = (String)options.valueOf(LIBRARY_NAME_OPTIONS[0]);
+        String libraryVersion = (String)options.valueOf(LIBRARY_VERSION_OPTIONS[0]);
         List<String> expressions = (List<String>)options.valuesOf(EXPRESSION_OPTIONS[0]);
 
         // This is validation we couldn't define in terms of the jopt API.
@@ -118,6 +122,7 @@ public class ArgumentProcessor {
         ip.libraries = libraries;
         ip.libraryPath = libraryPath;
         ip.libraryName = libraryName;
+        ip.libraryVersion = libraryVersion;
         ip.expressions = toListOfExpressions(expressions);
         ip.terminologyUri = terminologyUri;
         ip.modelUris = toMap("Model parameters", models);

@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 import com.alphora.cql.service.Parameters;
 import com.alphora.cql.service.Response;
 import com.alphora.cql.service.Service;
+import com.serialization.EvaluationResultsSerializer;
+import com.serialization.VerboseEvaluationResultsSerializer;
 
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.execution.LibraryResult;
@@ -31,36 +33,11 @@ public class Main {
         try {
             Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
             Response response  = service.evaluate(params);
-            EvaluationResultsSerializer serializer = new EvaluationResultsSerializer();
+            EvaluationResultsSerializer serializer = new VerboseEvaluationResultsSerializer();
+            boolean verbose = params.verbose;
 
             for (Entry<VersionedIdentifier, LibraryResult> libraryEntry : response.evaluationResult.libraryResults.entrySet()) {
-                for (Entry<String, Object> expressionEntry : libraryEntry.getValue().expressionResults.entrySet()) {
-                    if (!params.verbose)
-                    {
-                        String serializedExpressionEntry = serializer.serializeResult(expressionEntry.getValue());
-                        String objectString = (expressionEntry.getValue() == null) ? null : expressionEntry.getValue().toString();
-                        int idStartingIndex = serializedExpressionEntry.indexOf("id");
-                        int idEndingIndex = serializedExpressionEntry.indexOf("\\n", idStartingIndex);
-                        String expressionEntryValue;
-
-                        if (idStartingIndex != -1 && idEndingIndex != -1) {
-                            int objectStringIdIndex = (objectString == null) ? -1 : objectString.indexOf("@");
-                            if(objectStringIdIndex != -1) {
-                                objectString = objectString.substring(0, objectStringIdIndex) + "_"; 
-                            }
-                            expressionEntryValue = objectString
-                                + serializedExpressionEntry.substring(idStartingIndex, idEndingIndex).replace("\\", "").replace("\"", "");
-                        }
-                        else expressionEntryValue = objectString;
-
-                        System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(), expressionEntryValue));
-                    }
-                    else {
-                        String lineSeperator = System.getProperty("line.separator");
-                        String expressionEntryValue = serializer.serializeResult(expressionEntry.getValue()).replace("\\n", lineSeperator).replace("\\", "");
-                        System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(), expressionEntryValue));
-                    }
-                }
+                serializer.printResults(verbose, libraryEntry);
             }
         }
         catch (Exception e) {

@@ -7,12 +7,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-//import org.hl7.fhir.instance.model.*;
+import com.alphora.cql.service.util.CodeUtil;
+
 import org.opencds.cqf.cql.exception.DataProviderException;
 import org.opencds.cqf.cql.exception.UnknownPath;
 import org.opencds.cqf.cql.model.ModelResolver;
@@ -214,44 +212,27 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 					// now we need to get the codes in the resource and check for membership in the
 					// valueset
 					Object resCodes = this.modelResolver.resolvePath(res, codePath);
-					if (resCodes instanceof Iterable) {
-						for (Object codeObj : (Iterable) resCodes) {
-							boolean inValSet = checkCodeMembership(codeObj, valueSet);
+					ArrayList<Code> resVersionIndependentCodes = CodeUtil.getCodesFromCodeableConceptsObject(resCodes, fhirContext);
+					if(resVersionIndependentCodes != null) {
+						for (Code code : resVersionIndependentCodes) {
+							boolean inValSet = checkCodeMembership(code, valueSet);
 							if (inValSet && results.indexOf(res) == -1)
 								results.add(res);
-							else if (!inValSet)
-								results.remove(res);
 						}
-					} else if (resCodes instanceof CodeableConcept) {
-						if (checkCodeMembership(resCodes, valueSet) && results.indexOf(res) == -1)
-							results.add(res);
 					}
 				} else if (codes != null && codes.iterator().hasNext()) {
 					boolean codeMatch = false;
 					for (Code code : codes) {
 						if (codeMatch)
 							break;
+
 						Object resCodes = this.modelResolver.resolvePath(res, codePath);
-						// TODO: Make this version independent.
-						if (resCodes instanceof Iterable) {
-							for (Object codeObj : (Iterable) resCodes) {
-								Iterable<Coding> conceptCodes = ((CodeableConcept) codeObj).getCoding();
-								if (isCodeMatch(code, conceptCodes)) {
-									codeMatch = true;
-									break;
-								}
-							}
-						} else if (resCodes instanceof CodeableConcept) {
-							if (isCodeMatch(code, ((CodeableConcept) resCodes).getCoding())) {
-								codeMatch = true;
-								break;
-							}
-						} else if (resCodes instanceof Coding) {
-							if (isCodeMatch(code, Collections.singletonList((Coding) resCodes))) {
-								codeMatch = true;
-								break;
-							}
+						ArrayList<Code> resVersionIndependentCodes = CodeUtil.getCodesFromCodeableConceptsObject(resCodes, fhirContext);
+						if(resVersionIndependentCodes != null && isCodeMatch(code, resVersionIndependentCodes)) {
+							codeMatch = true;
+							break;
 						}
+						
 					}
 					if (codeMatch && results.indexOf(res) == -1) {
 						results.add(res);
@@ -265,10 +246,10 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 		return results;
 	}
 
-	private boolean isCodeMatch(Code code, Iterable<Coding> codes) {
-		for (Coding coding : codes) {
-			if (coding.getCodeElement().getValue().equals(code.getCode())
-					&& coding.getSystem().equals(code.getSystem())) {
+	private boolean isCodeMatch(Code code, Iterable<Code> codes) {
+		for (Code otherCode : codes) {
+			if (code.getCode().equals(otherCode.getCode())
+					&& code.getSystem().equals(otherCode.getSystem())) {
 				return true;
 			}
 		}
@@ -342,19 +323,9 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 		return fileContent.toString();
 	}
 
-	public boolean checkCodeMembership(Object codeObj, String vsId) {
+	public boolean checkCodeMembership(Code code, String vsId) {
 		ValueSetInfo valueSet = new ValueSetInfo().withId(vsId);
-		Iterable<Coding> conceptCodes = ((CodeableConcept) codeObj).getCoding();
-
-		// TODO: Handle expansion.
-		for (Coding code : conceptCodes) {
-			boolean result = this.terminologyProvider.in(new Code().withCode(code.getCode()).withSystem(code.getSystem()), valueSet);
-			if (result) {
-				return true;
-			}
-			
-		}
-
-		return false;
+		boolean result = this.terminologyProvider.in(code, valueSet);
+		return result;
 	}
 }

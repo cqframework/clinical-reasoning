@@ -136,15 +136,9 @@ public class Service {
             }
         }
 
-        String model = null;
-        String version = null;
-        Map<String, String> modelsAndVersion = getModelAndVersionFromLibrary(parameters, libraries);
-        for (Map.Entry<String, String> entry : modelsAndVersion.entrySet()) {
-            model = entry.getKey();
-            version = entry.getValue();
-        }
-        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create(model, version, parameters.terminologyUri);
-        Map<String, DataProvider> dataProviders = this.dataProviderFactory.create(libraries, parameters.modelUris, terminologyProvider);
+        Map<String, Pair<String, String>> modelVersionAndUrls = getModelVersionAndUrls(libraries, parameters.modelUris);
+        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create(modelVersionAndUrls, parameters.terminologyUri);
+        Map<String, DataProvider> dataProviders = this.dataProviderFactory.create(modelVersionAndUrls, terminologyProvider);
 
         Map<String, Object> resolvedContextParameters = this.parameterResolver.resolvecontextParameters(parameters.contextParameters);
         Map<VersionedIdentifier, Map<String, Object>> resolvedEvaluationParameters = this.parameterResolver.resolveParameters(libraries, evaluationParameters);
@@ -161,12 +155,18 @@ public class Service {
 
         Response response = new Response();
         response.evaluationResult = result;
-        EvaluationResultsSerializer.setFhirContext(version);
+
+        // TODO: Non-static serializers for different models.
+        Pair<String, String> versionAndUrl = modelVersionAndUrls.get("FHIR");
+        if (versionAndUrl != null) {
+            EvaluationResultsSerializer.setFhirContext(versionAndUrl.getLeft());
+        }
+
         return response;
     }
 
-    private Map<String, String> getModelAndVersionFromLibrary(Parameters parameters, Map<VersionedIdentifier, Library> libraries) {
-        Map<String, String> modelsAndVersion = new HashMap<String, String>();
+    private Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
+        Map<String, String> modelUris) {
         final Map<String, String> shorthandMap = new HashMap<String, String>() {
             {
                 put("FHIR", "http://hl7.org/fhir");
@@ -174,13 +174,13 @@ public class Service {
                 put("QDM", "urn:healthit-gov:qdm:v5_4");
             }
         };
-        //Assuming it's the same version as the library for now.
-        String model = null;
-        String version = null;
-        for (Map.Entry<String, String> modelUri : parameters.modelUris.entrySet()) {
+
+        Map<String, Pair<String, String>> versions = new HashMap<>();
+        for (Map.Entry<String, String> modelUri : modelUris.entrySet()) {
             String uri = shorthandMap.containsKey(modelUri.getKey()) ? shorthandMap.get(modelUri.getKey())
                     : modelUri.getKey();
-            model = modelUri.getKey();
+
+            String version = null;
             for (Library library : libraries.values()) {
                 if (version != null) {
                     break;
@@ -196,16 +196,25 @@ public class Service {
                 }
             }
 
-            if (model == null) {
-                model = "FHIR";
-            }
-            
             if (version == null) {
-                version = "3.0.0";
+                throw new IllegalArgumentException(
+                        String.format("A uri was specified for %s but is not used.", modelUri.getKey()));
             }
-            modelsAndVersion.put(model, version);
+
+            if (versions.containsKey(uri)) {
+                if (!versions.get(uri).getKey().equals(version)) {
+                    throw new IllegalArgumentException(String.format(
+                            "Libraries are using multiple versions of %s. Only one version is supported at a time.",
+                            modelUri.getKey()));
+                }
+
+            } else {
+                versions.put(uri, Pair.of(version, modelUri.getValue()));
+            }
+
         }
-        return modelsAndVersion;
+
+        return versions;
     }
 
     public VersionedIdentifier toExecutionIdentifier(String name, String version) {

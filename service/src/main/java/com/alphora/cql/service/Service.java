@@ -16,10 +16,12 @@ import com.alphora.cql.service.factory.LibraryLoaderFactory;
 import com.alphora.cql.service.factory.TerminologyProviderFactory;
 import com.alphora.cql.service.resolver.DefaultParameterResolver;
 import com.alphora.cql.service.resolver.ParameterResolver;
+import com.serialization.EvaluationResultsSerializer;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.UsingDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.execution.CqlEngine;
@@ -111,6 +113,7 @@ public class Service {
 
         // TOOD: Recursive resolve ALL libraries, not just those that are used by parameters, expressions, and library name.
         // Either that or have the library manager just give them all to us.
+
         Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
         if (parameters.libraryName != null) {
             Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, parameters.libraryVersion));
@@ -133,7 +136,14 @@ public class Service {
             }
         }
 
-        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create("FHIR", "3.0.0", parameters.terminologyUri);
+        String model = null;
+        String version = null;
+        Map<String, String> modelsAndVersion = getModelAndVersionFromLibrary(parameters, libraries);
+        for (Map.Entry<String, String> entry : modelsAndVersion.entrySet()) {
+            model = entry.getKey();
+            version = entry.getValue();
+        }
+        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create(model, version, parameters.terminologyUri);
         Map<String, DataProvider> dataProviders = this.dataProviderFactory.create(libraries, parameters.modelUris, terminologyProvider);
 
         Map<String, Object> resolvedContextParameters = this.parameterResolver.resolvecontextParameters(parameters.contextParameters);
@@ -151,7 +161,51 @@ public class Service {
 
         Response response = new Response();
         response.evaluationResult = result;
+        EvaluationResultsSerializer.setFhirContext(version);
         return response;
+    }
+
+    private Map<String, String> getModelAndVersionFromLibrary(Parameters parameters, Map<VersionedIdentifier, Library> libraries) {
+        Map<String, String> modelsAndVersion = new HashMap<String, String>();
+        final Map<String, String> shorthandMap = new HashMap<String, String>() {
+            {
+                put("FHIR", "http://hl7.org/fhir");
+                put("QUICK", "http://hl7.org/fhir");
+                put("QDM", "urn:healthit-gov:qdm:v5_4");
+            }
+        };
+        //Assuming it's the same version as the library for now.
+        String model = null;
+        String version = null;
+        for (Map.Entry<String, String> modelUri : parameters.modelUris.entrySet()) {
+            String uri = shorthandMap.containsKey(modelUri.getKey()) ? shorthandMap.get(modelUri.getKey())
+                    : modelUri.getKey();
+            model = modelUri.getKey();
+            for (Library library : libraries.values()) {
+                if (version != null) {
+                    break;
+                }
+
+                if (library.getUsings() != null && library.getUsings().getDef() != null) {
+                    for (UsingDef u : library.getUsings().getDef()) {
+                        if (u.getUri().equals(uri)) {
+                            version = u.getVersion();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (model == null) {
+                model = "FHIR";
+            }
+            
+            if (version == null) {
+                version = "3.0.0";
+            }
+            modelsAndVersion.put(model, version);
+        }
+        return modelsAndVersion;
     }
 
     public VersionedIdentifier toExecutionIdentifier(String name, String version) {

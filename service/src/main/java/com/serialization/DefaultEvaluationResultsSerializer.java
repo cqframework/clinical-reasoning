@@ -1,0 +1,3 @@
+package com.serialization;
+
+public class DefaultEvaluationResultsSerializer extends EvaluationResultsSerializer{}

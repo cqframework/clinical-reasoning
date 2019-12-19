@@ -21,11 +21,12 @@ public class CodeUtil {
 
     private static List<Code> tryIterableThenConcept(FhirContext fhirContext, Object object) {
         List<Code> codes = new ArrayList<Code>();
-        try {
+        if(object instanceof Iterable) {
             for (Object concept : (Iterable)object) {
                 codes.addAll(tryConceptThenCoding(fhirContext, concept));
             }
-        } catch (Exception e) {
+        }
+        else {
             codes.addAll(tryConceptThenCoding(fhirContext, object));
         }
         return codes;

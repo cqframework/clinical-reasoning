@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "type": "java",
             "name": "Debug (Launch) - Current File",
@@ -19,11 +20,11 @@
             "projectName": "cli",
             "args": [
                 "--lp", 
-                "/home/jp/repos/connectathon/cql/FHIR-3.0.0", 
+                "../connectathon/cql/FHIR-3.0.0", 
                 "--ln", 
                 "EXM124_FHIR3", 
                 "-m", 
-                "FHIR=/home/jp/repos/connectathon/tests/FHIR-3.0.0/EXM124_FHIR3-7.2.000", 
+                "FHIR=../connectathon/tests/FHIR-3.0.0/EXM124_FHIR3-7.2.000", 
                 "-t", 
                 "http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir", 
                 "-c", 
@@ -38,15 +39,34 @@
             "projectName": "cli",
             "args": [
                 "--lp", 
-                "/home/jp/repos/connectathon/cql/FHIR-3.0.0", 
+                "../connectathon/cql/FHIR-3.0.0", 
                 "--ln", 
                 "EXM130_FHIR3", 
                 "-m", 
-                "FHIR=/home/jp/repos/connectathon/tests/FHIR-3.0.0/EXM130_FHIR3-7.2.000", 
+                "FHIR=../connectathon/tests/FHIR-3.0.0/EXM130_FHIR3-7.2.000", 
                 "-t", 
-                "/home/jp/repos/connectathon/resources/fhir3/valuesets", 
+                "../connectathon/resources/fhir3/valuesets", 
                 "-c", 
                 "Patient=numer-cms130-stu3"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 104)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp", 
+                "../connectathon/fhir3/cql", 
+                "--ln", 
+                "EXM104_FHIR3", 
+                "-m", 
+                "FHIR=../connectathon/fhir3/tests/EXM104_FHIR3-8.1.000", 
+                "-t", 
+                "../connectathon/resources/fhir3/valuesets", 
+                "-c", 
+                "Patient=numer-EXM104-FHIR3"
             ]
         },
         {

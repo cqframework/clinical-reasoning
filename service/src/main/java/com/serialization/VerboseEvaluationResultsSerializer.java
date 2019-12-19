@@ -7,6 +7,9 @@ import com.google.gson.*;
 
 import org.opencds.cqf.cql.execution.LibraryResult;
 import org.opencds.cqf.cql.retrieve.FhirBundleCursor;
+
+import ca.uhn.fhir.parser.IParser;
+
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Map.Entry;
@@ -124,12 +127,14 @@ public class VerboseEvaluationResultsSerializer extends EvaluationResultsSeriali
         Iterator it = result.iterator();
         List<Object> findings = new ArrayList<>();
 
+        IParser parser = this.getFhirContext().newJsonParser().setPrettyPrint(true);
+
         while (it.hasNext()) {
             // returning full JSON retrieve response
-            findings.add(this.getFhirContext()
-                    .newJsonParser()
-                    .setPrettyPrint(true)
-                    .encodeResourceToString((org.hl7.fhir.instance.model.api.IBaseResource)it.next()));
+            Object next = it.next();
+            if (next != null) {
+                findings.add(parser.encodeResourceToString((org.hl7.fhir.instance.model.api.IBaseResource)next));
+            }
         }
 
         results.add("result", new JsonPrimitive(findings.toString()));

@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.alphora.cql.service.Helpers;
 
+import org.apache.commons.io.FileSystemUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.runtime.Code;
 import org.opencds.cqf.cql.terminology.CodeSystemInfo;
@@ -93,7 +96,8 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
             } 
         };
 
-        File parent = new File(this.uri);
+        Path path = Paths.get(this.uri);
+        File parent = new File(path.toAbsolutePath().toString());
 
         File[] files = parent.listFiles(filter);
 

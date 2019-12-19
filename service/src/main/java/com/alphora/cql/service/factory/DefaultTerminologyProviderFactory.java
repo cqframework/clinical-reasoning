@@ -19,10 +19,13 @@ public class DefaultTerminologyProviderFactory implements TerminologyProviderFac
             return null;
         }
 
-        // We currently only support FHIR
-        Pair<String, String> versionAndUrl = modelVersionsAndUrls.get("FHIR");
+        // We currently only support FHIR-based terminology
+        // We assume that the terminology version is the same
+        // As the data version
+        Pair<String, String> versionAndUrl = modelVersionsAndUrls.get("http://hl7.org/fhir");
         if (versionAndUrl == null) {
-            throw new IllegalArgumentException("Only FHIR-based terminology is supported at this time.");
+            // Assume FHIR 3.0.0
+            versionAndUrl = Pair.of("3.0.0", null);
         }
 
         boolean isFileUri = Helpers.isFileUri(terminologyUri);

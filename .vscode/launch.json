@@ -20,11 +20,11 @@
             "projectName": "cli",
             "args": [
                 "--lp", 
-                "../connectathon/cql/FHIR-3.0.0", 
+                "../connectathon/fhir3/cql", 
                 "--ln", 
                 "EXM124_FHIR3", 
                 "-m", 
-                "FHIR=../connectathon/tests/FHIR-3.0.0/EXM124_FHIR3-7.2.000", 
+                "FHIR=../connectathon/fhir3/tests/EXM124_FHIR3-7.2.000", 
                 "-t", 
                 "http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir", 
                 "-c", 
@@ -43,9 +43,9 @@
                 "--ln", 
                 "EXM130_FHIR3", 
                 "-m", 
-                "FHIR=../connectathon/tests/FHIR-3.0.0/EXM130_FHIR3-7.2.000", 
+                "FHIR=../connectathon/fhir3/tests/EXM130_FHIR3-7.2.000", 
                 "-t", 
-                "../connectathon/resources/fhir3/valuesets", 
+                "../connectathon/fhir3/resources/valuesets", 
                 "-c", 
                 "Patient=numer-cms130-stu3"
             ]
@@ -64,7 +64,7 @@
                 "-m", 
                 "FHIR=../connectathon/fhir3/tests/EXM104_FHIR3-8.1.000", 
                 "-t", 
-                "../connectathon/resources/fhir3/valuesets", 
+                "../connectathon/fhir3/resources/valuesets", 
                 "-c", 
                 "Patient=numer-EXM104-FHIR3"
             ]

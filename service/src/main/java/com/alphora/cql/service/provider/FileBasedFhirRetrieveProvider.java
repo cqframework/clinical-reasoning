@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.alphora.cql.service.util.CodeUtil;
 
+import org.apache.commons.io.FilenameUtils;
 import org.opencds.cqf.cql.exception.DataProviderException;
 import org.opencds.cqf.cql.exception.UnknownPath;
 import org.opencds.cqf.cql.model.ModelResolver;
@@ -62,6 +63,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 		if (path.isEmpty()) {
 			throw new UnknownPath("Cannot resolve empty path");
 		}
+
 		this.path = Paths.get(path);
 		this.terminologyProvider = terminologyProvider;
 	}

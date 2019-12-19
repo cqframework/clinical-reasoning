@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import com.alphora.cql.service.Parameters;
 import com.alphora.cql.service.Response;
 import com.alphora.cql.service.Service;
+import com.serialization.DefaultEvaluationResultsSerializer;
 import com.serialization.EvaluationResultsSerializer;
 import com.serialization.VerboseEvaluationResultsSerializer;
 
@@ -33,8 +34,11 @@ public class Main {
         try {
             Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
             Response response  = service.evaluate(params);
-            EvaluationResultsSerializer serializer = new VerboseEvaluationResultsSerializer();
+            EvaluationResultsSerializer serializer;
             boolean verbose = params.verbose;
+
+            serializer = new DefaultEvaluationResultsSerializer();
+
 
             for (Entry<VersionedIdentifier, LibraryResult> libraryEntry : response.evaluationResult.libraryResults.entrySet()) {
                 serializer.printResults(verbose, libraryEntry);

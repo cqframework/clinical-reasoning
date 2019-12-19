@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -51,7 +53,8 @@ public class DefaultLibraryLoaderFactory implements LibraryLoaderFactory {
     }
 
     List<String> getLibrariesFromPath(String path) {
-        File directory = new File(path);
+        Path directoryPath = Paths.get(path);
+        File directory = new File(directoryPath.toAbsolutePath().toString());
         File[] files = directory.listFiles((d, name) -> name.endsWith(".cql"));
 
         return Arrays.asList(files).stream().map(x -> x.toPath()).filter(Files::isRegularFile).map(t -> {

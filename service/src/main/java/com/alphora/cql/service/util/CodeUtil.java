@@ -16,35 +16,30 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 public class CodeUtil {
 
     public static List<Code> getElmCodesFromObject(Object object, FhirContext fhirContext) {
-        List<Code> codesInIterable = getCodesInIterable(fhirContext, object);
-        List<Code> codesInConcept = getCodesInConcept(fhirContext, object);
-        List<Code> codesInCoding = getCodesInCoding(fhirContext, object);
-
-        if (codesInIterable != null && !codesInIterable.isEmpty()) {
-            return codesInIterable;
-        }
-
-        if (codesInConcept != null && !codesInConcept.isEmpty()) {
-            return codesInConcept;
-        }
-
-        if (codesInCoding != null && !codesInCoding.isEmpty()) {
-            return codesInCoding;
-        }
-
-        else return null;
+        return tryIterableThenConcept(fhirContext, object);
     }
 
-    private static List<Code> getCodesInIterable(FhirContext fhirContext, Object object) {
+    private static List<Code> tryIterableThenConcept(FhirContext fhirContext, Object object) {
         List<Code> codes = new ArrayList<Code>();
         try {
             for (Object concept : (Iterable)object) {
-                codes.addAll(getCodesInConcept(fhirContext, concept));
+                codes.addAll(tryConceptThenCoding(fhirContext, concept));
             }
         } catch (Exception e) {
-            //TODO: handle exception
+            codes.addAll(tryConceptThenCoding(fhirContext, object));
         }
         return codes;
+    }
+
+    private static List<Code> tryConceptThenCoding(FhirContext fhirContext, Object object) {
+        RuntimeCompositeDatatypeDefinition conceptDefinition = (RuntimeCompositeDatatypeDefinition)getElementDefinition(fhirContext, "CodeableConcept");
+        List<IBase> codingObjects = getCodingObjectsFromDefinition(conceptDefinition, object);
+        if(codingObjects == null) {
+            return getCodesInCoding(fhirContext, object);
+        }
+        //would like to get the coding element definition from the codingObject rather than hardcoding it here
+        RuntimeCompositeDatatypeDefinition codingDefinition = (RuntimeCompositeDatatypeDefinition)getElementDefinition(fhirContext, "Coding");
+        return getCodeChildren(codingDefinition, codingObjects);
     }
 
     private static List<Code> getCodesInCoding(FhirContext fhirContext, Object object) {
@@ -54,42 +49,21 @@ public class CodeUtil {
         if (codingObjects == null) {
             return null;
         }
-
-        BaseRuntimeChildDefinition versionDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("version");
-        BaseRuntimeChildDefinition codeDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("code");
-        BaseRuntimeChildDefinition systemDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("system");
-        BaseRuntimeChildDefinition displayDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("display");
-
-
-        List<Code> codes = new ArrayList<>();
-        for (IBase coding : codingObjects) {
-            String code = getStringValueFromPrimitiveDefinition(coding, codeDefinition);
-            String display = getStringValueFromPrimitiveDefinition(coding, displayDefinition);
-            String system = getStringValueFromPrimitiveDefinition(coding, systemDefinition);
-			String version = getStringValueFromPrimitiveDefinition(coding, versionDefinition);
-				codes.add(new Code()
-					.withSystem(system)
-					.withCode(code)
-					.withDisplay(display)
-					.withVersion(version));
-        }
-        return codes;
+        return getCodeChildren(codingDefinition, codingObjects);
     }
 
-    private static List<Code> getCodesInConcept(FhirContext fhirContext, Object object) {
-        RuntimeCompositeDatatypeDefinition conceptDefinition = (RuntimeCompositeDatatypeDefinition)getElementDefinition(fhirContext, "CodeableConcept");
-        List<IBase> codingObjects = getCodingObjectsFromDefinition(conceptDefinition, object);
-        if(codingObjects == null) {
-            return null;
-        }
-        //would like to get the coding element definition from the codingObject rather than hardcoding it here
-        RuntimeCompositeDatatypeDefinition codingDefinition = (RuntimeCompositeDatatypeDefinition)getElementDefinition(fhirContext, "Coding");
-        
+    private static List<Code> getCodeChildren(RuntimeCompositeDatatypeDefinition codingDefinition, List<IBase> codingObjects) {
         BaseRuntimeChildDefinition versionDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("version");
         BaseRuntimeChildDefinition codeDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("code");
         BaseRuntimeChildDefinition systemDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("system");
         BaseRuntimeChildDefinition displayDefinition = (BaseRuntimeChildDefinition)codingDefinition.getChildByName("display");
 
+        return generateCodes(codingObjects, versionDefinition, codeDefinition, systemDefinition, displayDefinition);
+    }
+
+    private static List<Code> generateCodes(List<IBase> codingObjects, BaseRuntimeChildDefinition versionDefinition,
+            BaseRuntimeChildDefinition codeDefinition, BaseRuntimeChildDefinition systemDefinition,
+            BaseRuntimeChildDefinition displayDefinition) {
 
         List<Code> codes = new ArrayList<>();
         for (IBase coding : codingObjects) {

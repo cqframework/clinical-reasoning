@@ -62,7 +62,7 @@
                 "--ln", 
                 "EXM104_FHIR3", 
                 "-m", 
-                "FHIR=../connectathon/fhir3/tests/EXM104_FHIR3-8.1.000", 
+                "FHIR=http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir", 
                 "-t", 
                 "../connectathon/fhir3/resources/valuesets", 
                 "-c", 

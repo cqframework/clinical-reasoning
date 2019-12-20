@@ -1,5 +1,6 @@
 package com.alphora.cql.service.factory;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,12 +17,17 @@ import org.opencds.cqf.cql.model.ModelResolver;
 import org.opencds.cqf.cql.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.retrieve.*;
+import org.opencds.cqf.cql.searchparam.SearchParameterResolver;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.subscription.module.standalone.FhirClientSearchParamProvider;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 // TODO: Dynamic data provider registration
 public class DefaultDataProviderFactory implements DataProviderFactory {
@@ -61,7 +67,7 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
         FhirContext context;
         ModelResolver modelResolver;
         RetrieveProvider retrieveProvider;
-        ISearchParamRegistry searchParamRegistry;
+        BaseSearchParamRegistry<?> searchParamRegistry;
         switch (version) {
             case "2.0.0":
                 context = FhirContext.forDstu2_1();
@@ -83,11 +89,18 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
         }    
 
         if (Helpers.isFileUri(uri)) {
-            //file retriever
             retrieveProvider = new FileBasedFhirRetrieveProvider(uri, terminologyProvider, context, modelResolver);
         } else {    
-            //server retriever 
-            RestFhirRetrieveProvider fhirRetrieveProvider = new RestFhirRetrieveProvider(searchParamRegistry, context.newRestfulGenericClient(uri));
+            // Have to do some trickery here due to the fact we're not running in a Spring context,
+            // which the HAPI classes assume
+            IGenericClient client = context.newRestfulGenericClient(uri);
+            FhirClientSearchParamProvider searchParamProvider = new FhirClientSearchParamProvider(client);
+            searchParamRegistry.setSearchParamProviderForUnitTest(searchParamProvider);
+            setSuperPrivateField(searchParamRegistry, "myFhirContext", context);
+            setSuperPrivateField(searchParamRegistry, "myModelConfig", new ModelConfig());
+            searchParamRegistry.postConstruct();
+
+            RestFhirRetrieveProvider fhirRetrieveProvider = new RestFhirRetrieveProvider(new SearchParameterResolver(searchParamRegistry), context.newRestfulGenericClient(uri));
             fhirRetrieveProvider.setTerminologyProvider(terminologyProvider);
             fhirRetrieveProvider.setExpandValueSets(true);
             retrieveProvider = fhirRetrieveProvider;        
@@ -98,6 +111,16 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
 
     private DataProvider getQdmProvider(String version, String uri, TerminologyProvider terminologyProvider) {
         throw new NotImplementedException("QDM data providers are not yet implemented");
+    }
+
+    public static void setSuperPrivateField(Object target, String fieldName, Object value){
+        try{
+            Field privateField = target.getClass().getSuperclass().getDeclaredField(fieldName);
+            privateField.setAccessible(true);
+            privateField.set(target, value);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
     }
 
    

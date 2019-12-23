@@ -24,7 +24,8 @@ public class TranslatingLibraryLoader implements LibraryLoader {
 
     
     private LibraryManager libraryManager;
-    private JAXBContext jaxbContext;
+    private static JAXBContext jaxbContext;
+    private static Marshaller marshaller;
 
     public TranslatingLibraryLoader(LibraryManager libraryManager) {
         this.libraryManager = libraryManager;
@@ -55,19 +56,26 @@ public class TranslatingLibraryLoader implements LibraryLoader {
     }
 
     public String convertToXml(org.hl7.elm.r1.Library library) throws JAXBException {
-        Marshaller marshaller = getJaxbContext().createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         StringWriter writer = new StringWriter();
-        marshaller.marshal(new ObjectFactory().createLibrary(library), writer);
+        this.getMarshaller().marshal(new ObjectFactory().createLibrary(library), writer);
         return writer.getBuffer().toString();
     }
 
-    private JAXBContext getJaxbContext() throws JAXBException {
-        if (this.jaxbContext == null) {
-            this.jaxbContext = JAXBContext.newInstance(org.hl7.elm.r1.Library.class, org.hl7.cql_annotations.r1.Annotation.class);
+    private Marshaller getMarshaller() throws JAXBException {
+        if (marshaller == null) {
+            marshaller = this.getJaxbContext().createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         }
 
-        return this.jaxbContext;
+        return marshaller;
+    }
+
+    private JAXBContext getJaxbContext() throws JAXBException {
+        if (jaxbContext == null) {
+            jaxbContext = JAXBContext.newInstance(org.hl7.elm.r1.Library.class, org.hl7.cql_annotations.r1.Annotation.class);
+        }
+
+        return jaxbContext;
     }
 
     public org.hl7.elm.r1.VersionedIdentifier toElmIdentifier(String name, String version) {

@@ -7,3 +7,8 @@ target
 .flattened-pom.xml
 
 *.log*
+
+Snap.*
+core.*
+heapdump.*
+javacore.*

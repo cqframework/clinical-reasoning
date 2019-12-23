@@ -108,11 +108,7 @@ public class ArgumentProcessor {
         }
     
         String terminologyUri = (String)options.valueOf(TERMINOLOGY_URI_OPTIONS[0]);
-        boolean verbose;
-        if(options.has(OUTPUT_FORMAT_OPTIONS[0])) {
-            verbose = (Boolean)options.valueOf(OUTPUT_FORMAT_OPTIONS[0]);
-        }
-        else verbose = false;
+        Boolean verbose = (Boolean)options.valueOf(OUTPUT_FORMAT_OPTIONS[0]);
 
         List<KeyValuePair> models = (List<KeyValuePair>)options.valuesOf(MODEL_OPTIONS[0]);
         List<KeyValuePair> parameters = (List<KeyValuePair>)options.valuesOf(PARAMETER_OPTIONS[0]);

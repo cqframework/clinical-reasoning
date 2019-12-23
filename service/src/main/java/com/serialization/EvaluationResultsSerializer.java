@@ -22,7 +22,7 @@ public abstract class EvaluationResultsSerializer {
         return new Bundle();
     }
 
-    public void printResults(boolean verbose, Entry<VersionedIdentifier, LibraryResult> libraryEntry) {
+    public void printResults(Boolean verbose, Entry<VersionedIdentifier, LibraryResult> libraryEntry) {
         for (Entry<String, Object> expressionEntry : libraryEntry.getValue().expressionResults.entrySet()) {
             this.expressionEntry = expressionEntry;
             System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(),

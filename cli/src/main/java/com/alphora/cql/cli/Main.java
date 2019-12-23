@@ -35,13 +35,12 @@ public class Main {
             Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
             Response response  = service.evaluate(params);
             EvaluationResultsSerializer serializer;
-            boolean verbose = params.verbose;
 
             serializer = new DefaultEvaluationResultsSerializer();
 
 
             for (Entry<VersionedIdentifier, LibraryResult> libraryEntry : response.evaluationResult.libraryResults.entrySet()) {
-                serializer.printResults(verbose, libraryEntry);
+                serializer.printResults(params.verbose, libraryEntry);
             }
         }
         catch (Exception e) {

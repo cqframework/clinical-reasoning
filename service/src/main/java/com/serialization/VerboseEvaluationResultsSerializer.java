@@ -23,9 +23,9 @@ public class VerboseEvaluationResultsSerializer extends EvaluationResultsSeriali
     private Object expressionEntryObject;
 
     @Override
-    public void printResults(boolean verbose, Entry<VersionedIdentifier, LibraryResult> libraryEntry) {
+    public void printResults(Boolean verbose, Entry<VersionedIdentifier, LibraryResult> libraryEntry) {
 
-        this.verbose = verbose;
+        this.verbose = verbose != null && verbose;
         
         for (Entry<String, Object> expressionEntry : libraryEntry.getValue().expressionResults.entrySet()) {
 

@@ -1,9 +1,14 @@
-package com.alphora.cql.service.evaluation;
+package com.alphora.cql.measure.r4;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+
+import com.alphora.cql.measure.common.MeasureEvaluation;
+import com.alphora.cql.measure.common.MeasurePopulationType;
+import com.alphora.cql.measure.common.MeasureReportType;
+import com.alphora.cql.measure.common.MeasureScoring;
 
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;

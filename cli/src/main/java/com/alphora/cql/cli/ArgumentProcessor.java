@@ -21,10 +21,17 @@ import joptsimple.util.KeyValuePair;
 public class ArgumentProcessor {
 
     public static final String[] HELP_OPTIONS = {"h", "help", "?"};
+
     public static final String[] LIBRARY_OPTIONS = {"l", "library"};
+
     public static final String[] LIBRARY_PATH_OPTIONS = {"lp", "library-path"};
     public static final String[] LIBRARY_NAME_OPTIONS = {"ln", "library-name"};
     public static final String[] LIBRARY_VERSION_OPTIONS = {"lv", "library-version"};
+
+    public static final String[] MEASURE_PATH_OPTIONS = { "mp", "measure-path"};
+    public static final String[] MEASURE_NAME_OPTIONS = {"mn", "measure-name"};
+    public static final String[] MEASURE_VERSION_OPTIONS = {"mv", "measure-version"};
+
     public static final String[] TERMINOLOGY_URI_OPTIONS = {"t","terminology-uri"};
     public static final String[] MODEL_OPTIONS = {"m","model"};
     public static final String[] PARAMETER_OPTIONS = {"p", "parameter"};
@@ -36,20 +43,40 @@ public class ArgumentProcessor {
         OptionParser parser = new OptionParser();
 
         OptionSpecBuilder libraryBuilder = parser.acceptsAll(asList(LIBRARY_OPTIONS),"Use multiple times to define multiple libraries.");
+        
         OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(LIBRARY_PATH_OPTIONS), "All files ending in .cql will be processed");
         OptionSpecBuilder libraryNameBuilder = parser.acceptsAll(asList(LIBRARY_NAME_OPTIONS), "Required if multiple libraries are defined and --expression is omitted");
         OptionSpecBuilder libraryVersionBuilder = parser.acceptsAll(asList(LIBRARY_VERSION_OPTIONS), "If omitted most recent version of the library will be used");     
+        
         OptionSpecBuilder expressionBuilder = parser.acceptsAll(asList(EXPRESSION_OPTIONS), "Use the form libraryName.expressionName. (e.g. Common.\"Numerator\") Use multiple times to specify multiple expressions. If omitted all the expressions of the primary library will be evaluated.");
 
+        OptionSpecBuilder measurePathBuilder = parser.acceptsAll(asList(MEASURE_PATH_OPTIONS), "FHIR .json files expected.");
+        OptionSpecBuilder measureNameBuilder = parser.acceptsAll(asList(MEASURE_PATH_OPTIONS), "Required if measure-path specified. Mutually exclusive with library-name.");
+        OptionSpecBuilder measureVersionBuilder = parser.acceptsAll(asList(LIBRARY_VERSION_OPTIONS), "If omitted most recent version of the measure will be used");  
+        
         // Set up inter-depedencies.
+        // Can't define libraries inline and in a directory
         parser.mutuallyExclusive(libraryBuilder, libraryPathBuilder);
+        
+         // Can't define expressions and a library name
         parser.mutuallyExclusive(expressionBuilder, libraryNameBuilder);
+        
+         // Can't define libraries and measures
+        parser.mutuallyExclusive(measureNameBuilder, libraryNameBuilder);
+        parser.mutuallyExclusive(measureNameBuilder, libraryBuilder);
+        parser.mutuallyExclusive(measurePathBuilder, libraryNameBuilder);
+        parser.mutuallyExclusive(measurePathBuilder, libraryBuilder);
 
         OptionSpec<String> library = libraryBuilder.withRequiredArg().describedAs("library content");
-        OptionSpec<String> libraryPath = libraryPathBuilder.requiredUnless(library).withRequiredArg().describedAs("input directory for libraries");
+        OptionSpec<String> libraryPath = libraryPathBuilder.requiredUnless("l", "mp", "mn").withRequiredArg().describedAs("input directory for libraries");
         OptionSpec<String> libraryName = libraryNameBuilder.withRequiredArg().describedAs("name of primary library");
         OptionSpec<String> libraryVersion = libraryVersionBuilder.availableIf(libraryName).withRequiredArg().describedAs("version of primary library");
         OptionSpec<String> expression = expressionBuilder.withRequiredArg().describedAs("expression to evaluate");
+
+        OptionSpec<String> measureName = measureNameBuilder.withRequiredArg().describedAs("name of measure");
+        OptionSpec<String> measureVersion = measureVersionBuilder.availableIf(measureName).withRequiredArg().describedAs("version of measure");
+        OptionSpec<String> measurePath = measurePathBuilder.requiredUnless("l", "lp", "ln").withRequiredArg().describedAs("input directory for measures");
+
 
         // TODO: Terminology user / password (and other auth options)
         OptionSpec<String> terminologyUri = parser.acceptsAll(asList(TERMINOLOGY_URI_OPTIONS),"Supports FHIR-based terminology")
@@ -101,6 +128,10 @@ public class ArgumentProcessor {
         String libraryName = (String)options.valueOf(LIBRARY_NAME_OPTIONS[0]);
         String libraryVersion = (String)options.valueOf(LIBRARY_VERSION_OPTIONS[0]);
         List<String> expressions = (List<String>)options.valuesOf(EXPRESSION_OPTIONS[0]);
+
+        String measurePath =  (String)options.valueOf(MEASURE_PATH_OPTIONS[0]);
+        String measureName =  (String)options.valueOf(MEASURE_NAME_OPTIONS[0]);
+        String measureVersion =  (String)options.valueOf(MEASURE_VERSION_OPTIONS[0]);
 
         // This is validation we couldn't define in terms of the jopt API.
         if ((libraries.size() > 1 || libraryPath != null)  && !(libraryName != null || !expressions.isEmpty())){

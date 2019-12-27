@@ -1,4 +1,4 @@
-package com.serialization;
+package com.alphora.cql.service.serialization;
 
 import java.util.Iterator;
 import java.util.List;

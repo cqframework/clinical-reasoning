@@ -1,4 +1,4 @@
-package com.alphora.cql.service.evaluation;
+package com.alphora.cql.measure.common;
 
 import java.util.HashMap;
 import java.util.Map;

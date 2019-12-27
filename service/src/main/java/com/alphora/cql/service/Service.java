@@ -16,7 +16,7 @@ import com.alphora.cql.service.factory.LibraryLoaderFactory;
 import com.alphora.cql.service.factory.TerminologyProviderFactory;
 import com.alphora.cql.service.resolver.DefaultParameterResolver;
 import com.alphora.cql.service.resolver.ParameterResolver;
-import com.serialization.EvaluationResultsSerializer;
+import com.alphora.cql.service.serialization.EvaluationResultsSerializer;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslator;

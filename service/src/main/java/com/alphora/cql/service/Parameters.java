@@ -18,5 +18,7 @@ public class Parameters {
     public String libraryName;
     public String libraryVersion;
     public List<String> libraries;
+
     public Boolean verbose;
+
 }

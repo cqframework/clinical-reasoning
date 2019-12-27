@@ -1,4 +1,4 @@
-package com.alphora.cql.service.evaluation;
+package com.alphora.cql.measure.common;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.opencds.cqf.cql.data.DataProvider;

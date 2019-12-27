@@ -25,6 +25,11 @@
             <version>${revision}</version>
         </dependency>
         <dependency>
+            <groupId>com.alphora.cql</groupId>
+            <artifactId>measure</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>
             <version>${jopt-version}</version>

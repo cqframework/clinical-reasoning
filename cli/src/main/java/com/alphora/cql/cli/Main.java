@@ -31,6 +31,12 @@ public class Main {
             System.exit(1);
         }
 
+        // Huh. How to best hook on a measure front-end
+        if (params.measureName != null) {
+            
+
+        }
+
         try {
             Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
             Response response  = service.evaluate(params);

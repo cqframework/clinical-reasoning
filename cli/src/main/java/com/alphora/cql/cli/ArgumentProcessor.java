@@ -51,7 +51,7 @@ public class ArgumentProcessor {
         OptionSpecBuilder expressionBuilder = parser.acceptsAll(asList(EXPRESSION_OPTIONS), "Use the form libraryName.expressionName. (e.g. Common.\"Numerator\") Use multiple times to specify multiple expressions. If omitted all the expressions of the primary library will be evaluated.");
 
         OptionSpecBuilder measurePathBuilder = parser.acceptsAll(asList(MEASURE_PATH_OPTIONS), "FHIR .json files expected.");
-        OptionSpecBuilder measureNameBuilder = parser.acceptsAll(asList(MEASURE_PATH_OPTIONS), "Required if measure-path specified. Mutually exclusive with library-name.");
+        OptionSpecBuilder measureNameBuilder = parser.acceptsAll(asList(MEASURE_NAME_OPTIONS), "Required if measure-path specified. Mutually exclusive with library-name.");
         OptionSpecBuilder measureVersionBuilder = parser.acceptsAll(asList(LIBRARY_VERSION_OPTIONS), "If omitted most recent version of the measure will be used");  
         
         // Set up inter-depedencies.

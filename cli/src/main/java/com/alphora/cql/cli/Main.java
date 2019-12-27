@@ -8,9 +8,8 @@ import java.util.Map.Entry;
 import com.alphora.cql.service.Parameters;
 import com.alphora.cql.service.Response;
 import com.alphora.cql.service.Service;
-import com.serialization.DefaultEvaluationResultsSerializer;
-import com.serialization.EvaluationResultsSerializer;
-import com.serialization.VerboseEvaluationResultsSerializer;
+import com.alphora.cql.service.serialization.DefaultEvaluationResultsSerializer;
+import com.alphora.cql.service.serialization.EvaluationResultsSerializer;
 
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.execution.LibraryResult;
@@ -29,12 +28,6 @@ public class Main {
         catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
-        }
-
-        // Huh. How to best hook on a measure front-end
-        if (params.measureName != null) {
-            
-
         }
 
         try {

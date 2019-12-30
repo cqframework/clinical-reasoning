@@ -28,7 +28,7 @@
                 "-t", 
                 "http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir", 
                 "-c", 
-                "Patient=denom-EXM123-FHIR3"
+                "Patient=denom-EXM124-FHIR3"
             ]
         },
         {

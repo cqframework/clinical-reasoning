@@ -28,7 +28,7 @@
                 "-t", 
                 "http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir", 
                 "-c", 
-                "Patient=denom-cms124-stu3"
+                "Patient=denom-EXM123-FHIR3"
             ]
         },
         {
@@ -39,7 +39,7 @@
             "projectName": "cli",
             "args": [
                 "--lp", 
-                "../connectathon/cql/FHIR-3.0.0", 
+                "../connectathon/fhir3/cql", 
                 "--ln", 
                 "EXM130_FHIR3", 
                 "-m", 
@@ -47,7 +47,45 @@
                 "-t", 
                 "../connectathon/fhir3/resources/valuesets", 
                 "-c", 
-                "Patient=numer-cms130-stu3"
+                "Patient=numer-EXM130-FHIR3"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 130 R4)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp", 
+                "../connectathon/fhir4/cql", 
+                "--ln", 
+                "EXM130_FHIR4", 
+                "-m", 
+                "FHIR=../connectathon/fhir4/tests/EXM130_FHIR4-7.2.000", 
+                "-t", 
+                "../connectathon/fhir4/resources/valuesets", 
+                "-c", 
+                "Patient=numer-EXM130-FHIR4"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 105 R4)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp", 
+                "../connectathon/fhir4/cql", 
+                "--ln", 
+                "EXM105_FHIR4", 
+                "-m", 
+                "FHIR=../connectathon/fhir4/tests/EXM105_FHIR4-8.1.000", 
+                "-t", 
+                "../connectathon/fhir4/resources/valuesets", 
+                "-c", 
+                "Patient=denom-EXM105-FHIR4"
             ]
         },
         {

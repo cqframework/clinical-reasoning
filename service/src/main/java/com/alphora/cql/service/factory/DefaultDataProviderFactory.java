@@ -91,16 +91,8 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
         if (Helpers.isFileUri(uri)) {
             retrieveProvider = new FileBasedFhirRetrieveProvider(uri, terminologyProvider, context, modelResolver);
         } else {    
-            // Have to do some trickery here due to the fact we're not running in a Spring context,
-            // which the HAPI classes assume
             IGenericClient client = context.newRestfulGenericClient(uri);
-            FhirClientSearchParamProvider searchParamProvider = new FhirClientSearchParamProvider(client);
-            searchParamRegistry.setSearchParamProviderForUnitTest(searchParamProvider);
-            setSuperPrivateField(searchParamRegistry, "myFhirContext", context);
-            setSuperPrivateField(searchParamRegistry, "myModelConfig", new ModelConfig());
-            searchParamRegistry.postConstruct();
-
-            RestFhirRetrieveProvider fhirRetrieveProvider = new RestFhirRetrieveProvider(new SearchParameterResolver(searchParamRegistry), context.newRestfulGenericClient(uri));
+            RestFhirRetrieveProvider fhirRetrieveProvider = new RestFhirRetrieveProvider(new SearchParameterResolver(context), context.newRestfulGenericClient(uri));
             fhirRetrieveProvider.setTerminologyProvider(terminologyProvider);
             fhirRetrieveProvider.setExpandValueSets(true);
             retrieveProvider = fhirRetrieveProvider;        
@@ -112,16 +104,4 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
     private DataProvider getQdmProvider(String version, String uri, TerminologyProvider terminologyProvider) {
         throw new NotImplementedException("QDM data providers are not yet implemented");
     }
-
-    public static void setSuperPrivateField(Object target, String fieldName, Object value){
-        try{
-            Field privateField = target.getClass().getSuperclass().getDeclaredField(fieldName);
-            privateField.setAccessible(true);
-            privateField.set(target, value);
-        }catch(Exception e){
-            throw new RuntimeException(e);
-        }
-    }
-
-   
 }

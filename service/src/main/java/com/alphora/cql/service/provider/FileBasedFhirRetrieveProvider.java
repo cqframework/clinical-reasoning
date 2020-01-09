@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.alphora.cql.service.util.CodeUtil;
 
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.exception.DataProviderException;
 import org.opencds.cqf.cql.exception.UnknownPath;
 import org.opencds.cqf.cql.model.ModelResolver;
@@ -19,8 +20,11 @@ import org.opencds.cqf.cql.runtime.Code;
 import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.terminology.ValueSetInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 
 /*
 What the heck does this thing do?
@@ -51,10 +55,13 @@ How do I use it?
 
 public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 
+	private static final Logger logger = LoggerFactory.getLogger(FileBasedFhirRetrieveProvider.class);
+
 	private Path path;
 	protected FhirContext fhirContext;
 	protected ModelResolver modelResolver;
 	protected TerminologyProvider terminologyProvider;
+	protected IParser parser;
 
 	public FileBasedFhirRetrieveProvider(String path, TerminologyProvider terminologyProvider, FhirContext fhirContext, ModelResolver modelResolver) {
 		this.fhirContext = fhirContext;
@@ -64,6 +71,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 		}
 		this.path = Paths.get(path);
 		this.terminologyProvider = terminologyProvider;
+		this.parser = this.fhirContext.newJsonParser();
 	}
 
 	@Override
@@ -108,7 +116,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 		if (dateRange == null && codePath == null) {
 			patientFiles = getPatientFiles(toResults, context);
 			for (String resource : patientFiles) {
-				results.add(fhirContext.newJsonParser().parseResource(resource));
+				results.add(this.parser.parseResource(resource));
 			}
 			return results;
 		}
@@ -120,7 +128,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 		// so even though I may include a record if it is within the date range,
 		// that record may be excluded later during the code filtering stage
 		for (String resource : patientFiles) {
-			Object res = fhirContext.newJsonParser().parseResource(resource);
+			Object res = this.parser.parseResource(resource);
 
 			// since retrieves can include both date and code filtering, I need this flag
 			// to determine inclusion of codes -- if date is no good -- don't test code
@@ -204,6 +212,32 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 			// }
 			// }
 			// }
+
+
+			// Check to make sure the resource matches the context if applicable.
+			if (contextPath != null && contextValue != null && context != null) {
+				try {
+					Object resContextValue = this.modelResolver.resolvePath(res, contextPath);
+					IPrimitiveType<?> referenceValue = (IPrimitiveType<?>)this.modelResolver.resolvePath(resContextValue, "reference");
+					if (referenceValue == null) {
+						logger.warn("Found {} resource for unrelated to context. Check the resource.", dataType);
+						continue;
+					} 
+
+					String referenceString = referenceValue.getValueAsString();
+					if (referenceString.contains("/")) {
+						referenceString = referenceString.substring(referenceString.indexOf("/") + 1, referenceString.length());
+					}
+
+					if (!referenceString.equals((String)contextValue)) {
+						logger.warn("Found {} resource for context value: {} when expecting: {}. Check the resource.", dataType, referenceString, (String)contextValue);
+						continue;
+					}
+				}
+				catch (Exception e ) {
+					continue;
+				}
+			}
 
 			// codePath specifies which property/path of the model contains the Code or
 			// Codes for the clinical statement

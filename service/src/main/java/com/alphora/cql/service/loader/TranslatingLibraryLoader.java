@@ -11,8 +11,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -34,7 +36,7 @@ public class TranslatingLibraryLoader implements LibraryLoader {
     public Library load(VersionedIdentifier libraryIdentifier) {
         try {
             List<CqlTranslatorException> errors = new ArrayList<>();
-            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), errors);
+            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), CqlTranslatorException.ErrorSeverity.Error, SignatureLevel.All, new CqlTranslator.Options[0], errors);
             return this.readXml(this.toXml(library.getLibrary()));
         }
         catch (Exception e) {

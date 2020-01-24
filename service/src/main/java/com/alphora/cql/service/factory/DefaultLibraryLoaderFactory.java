@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import com.alphora.cql.service.loader.TranslatingLibraryLoader;
 import com.alphora.cql.service.manager.CacheAwareModelManager;
-import com.alphora.cql.service.manager.TranslatorOptionAwareLibraryManager;
 import com.alphora.cql.service.provider.InMemoryLibrarySourceProvider;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -71,7 +70,7 @@ public class DefaultLibraryLoaderFactory implements LibraryLoaderFactory {
     }
 
     private LibraryManager createLibraryManager(ModelManager modelManager, List<String> libraries, EnumSet<CqlTranslator.Options> translatorOptions) {
-        LibraryManager libraryManager = new TranslatorOptionAwareLibraryManager(modelManager, translatorOptions);
+        LibraryManager libraryManager = new LibraryManager(modelManager);
         libraryManager.getLibrarySourceLoader().registerProvider(new InMemoryLibrarySourceProvider(libraries));
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         return libraryManager;

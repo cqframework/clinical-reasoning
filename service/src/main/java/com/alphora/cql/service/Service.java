@@ -197,8 +197,10 @@ public class Service {
             }
 
             if (version == null) {
-                throw new IllegalArgumentException(
-                        String.format("A uri was specified for %s but is not used.", modelUri.getKey()));
+                // throw new IllegalArgumentException(
+                //         String.format("A uri was specified for %s but is not used.", modelUri.getKey()));
+
+                continue;
             }
 
             if (versions.containsKey(uri)) {

@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.alphora.cql.service.util.CodeUtil;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.exception.DataProviderException;
 import org.opencds.cqf.cql.exception.UnknownPath;
@@ -246,7 +247,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 					// now we need to get the codes in the resource and check for membership in the
 					// valueset
 					Object resCodes = this.modelResolver.resolvePath(res, codePath);
-					List<Code> resVersionIndependentCodes = CodeUtil.getElmCodesFromObject(resCodes, fhirContext);
+					List<Code> resVersionIndependentCodes = CodeUtil.getElmCodesFromObject((IBase)resCodes, fhirContext);
 					if(resVersionIndependentCodes != null) {
 						for (Code code : resVersionIndependentCodes) {
 							boolean inValSet = checkCodeMembership(code, valueSet);
@@ -261,7 +262,7 @@ public class FileBasedFhirRetrieveProvider implements RetrieveProvider {
 							break;
 
 						Object resCodes = this.modelResolver.resolvePath(res, codePath);
-						List<Code> resVersionIndependentCodes = CodeUtil.getElmCodesFromObject(resCodes, fhirContext);
+						List<Code> resVersionIndependentCodes = CodeUtil.getElmCodesFromObject((IBase)resCodes, fhirContext);
 						if(resVersionIndependentCodes != null && isCodeMatch(code, resVersionIndependentCodes)) {
 							codeMatch = true;
 							break;

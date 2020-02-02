@@ -96,15 +96,19 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
             } 
         };
 
-        Path path = Paths.get(this.uri);
-        File parent = new File(path.toAbsolutePath().toString());
-
-        File[] files = parent.listFiles(filter);
-
-        for (File f : files) {
-            this.loadAsValueSet(f.getAbsolutePath());
+        // TODO: We probably want more intelligent handling in the event
+        // We're not given a path. It's possible that this will result in a run-time
+        // error if terminology can not be resolved.
+        if (this.uri != null) {
+            Path path = Paths.get(this.uri);
+            File parent = new File(path.toAbsolutePath().toString());
+    
+            File[] files = parent.listFiles(filter);
+    
+            for (File f : files) {
+                this.loadAsValueSet(f.getAbsolutePath());
+            }
         }
-
 
         this.initialized = true;
     }

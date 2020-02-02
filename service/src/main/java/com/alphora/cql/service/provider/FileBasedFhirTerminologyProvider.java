@@ -104,9 +104,12 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
             File parent = new File(path.toAbsolutePath().toString());
     
             File[] files = parent.listFiles(filter);
-    
-            for (File f : files) {
-                this.loadAsValueSet(f.getAbsolutePath());
+
+        
+            if (files != null && files.length > 0) {
+                for (File f : files) {
+                    this.loadAsValueSet(f.getAbsolutePath());
+                }
             }
         }
 

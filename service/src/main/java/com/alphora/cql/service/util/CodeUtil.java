@@ -15,11 +15,11 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 
 public class CodeUtil {
 
-    public static List<Code> getElmCodesFromObject(IBase object, FhirContext fhirContext) {
+    public static List<Code> getElmCodesFromObject(Object object, FhirContext fhirContext) {
         return tryIterableThenConcept(fhirContext, object);
     }
 
-    private static List<Code> tryIterableThenConcept(FhirContext fhirContext, IBase object) {
+    private static List<Code> tryIterableThenConcept(FhirContext fhirContext, Object object) {
         List<Code> codes = new ArrayList<Code>();
         if(object instanceof Iterable) {
             for (Object concept : (Iterable)object) {
@@ -27,7 +27,7 @@ public class CodeUtil {
             }
         }
         else {
-            codes.addAll(tryConceptThenCoding(fhirContext, object));
+            codes.addAll(tryConceptThenCoding(fhirContext, (IBase)object));
         }
         return codes;
     }

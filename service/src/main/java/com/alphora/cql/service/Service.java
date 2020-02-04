@@ -269,7 +269,9 @@ public class Service {
           if (!this.options.contains(Options.EnableFileUri)) {
             ensureNotFileUri(parameters.libraryPath);
             ensureNotFileUri(parameters.terminologyUri);
-            ensureNotFileUri(parameters.modelUris.values());
+            if (parameters.modelUris != null) {
+                ensureNotFileUri(parameters.modelUris.values());
+            }            
         }
 
         if (parameters.libraryName == null && (parameters.expressions == null || parameters.expressions.isEmpty())) {

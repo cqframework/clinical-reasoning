@@ -43,6 +43,10 @@ public class Service {
     private LibraryLoaderFactory libraryLoaderFactory;
     private ParameterResolver parameterResolver;
 
+    public Service() {
+        this(null, null, null, null, null, null, null);
+    }
+
     // Use this as a quick way to enable file uris.
     public Service(EnumSet<Options> options) {
         this(null, null, null, null, options, null, null);
@@ -109,7 +113,7 @@ public class Service {
         }
 
         Map<VersionedIdentifier, Set<String>> expressions = this.toExpressionMap(parameters.expressions);
-        Map<VersionedIdentifier, Map<String, String>> evaluationParameters = this.toParameterMap(parameters.parameters);
+        Map<VersionedIdentifier, Map<String, Object>> evaluationParameters = this.toParameterMap(parameters.parameters);
 
         // TOOD: Recursive resolve ALL libraries, not just those that are used by parameters, expressions, and library name.
         // Either that or have the library manager just give them all to us.
@@ -167,7 +171,39 @@ public class Service {
 
     private Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
         Map<String, String> modelUris) {
-        final Map<String, String> shorthandMap = new HashMap<String, String>() {
+
+        modelUris = this.expandAliasToUri(modelUris);
+        Map<String, Pair<String, String>> versions = new HashMap<>();
+        for (Library library : libraries.values()) {
+            if (library.getUsings() != null && library.getUsings().getDef() != null) {
+                for (UsingDef u : library.getUsings().getDef()) {
+                    String uri = u.getUri();
+                    // Skip the system URI
+                    if (uri.equals("urn:hl7-org:elm-types:r1")) {
+                        continue;
+                    }
+                    String version = u.getVersion();
+                    if (versions.containsKey(uri)) {
+                        Pair<String,String> existing = versions.get(uri);
+                        if (!existing.getLeft().equals(version)) {
+                            throw new IllegalArgumentException(String.format(
+                                "Libraries are using multiple versions of %s. Only one version is supported at a time.",
+                                uri));
+                        }
+                    }
+                    else {
+                        String url = modelUris.get(uri);
+                        versions.put(uri, Pair.of(version, url));
+                    }
+                }
+            }
+        }
+
+        return versions;
+    }
+
+    private Map<String, String> expandAliasToUri(Map<String, String> modelUris) {
+        final Map<String, String> aliasMap = new HashMap<String, String>() {
             {
                 put("FHIR", "http://hl7.org/fhir");
                 put("QUICK", "http://hl7.org/fhir");
@@ -175,49 +211,24 @@ public class Service {
             }
         };
 
-        Map<String, Pair<String, String>> versions = new HashMap<>();
-        for (Map.Entry<String, String> modelUri : modelUris.entrySet()) {
-            String uri = shorthandMap.containsKey(modelUri.getKey()) ? shorthandMap.get(modelUri.getKey())
-                    : modelUri.getKey();
-
-            String version = null;
-            for (Library library : libraries.values()) {
-                if (version != null) {
-                    break;
-                }
-
-                if (library.getUsings() != null && library.getUsings().getDef() != null) {
-                    for (UsingDef u : library.getUsings().getDef()) {
-                        if (u.getUri().equals(uri)) {
-                            version = u.getVersion();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (version == null) {
-                // throw new IllegalArgumentException(
-                //         String.format("A uri was specified for %s but is not used.", modelUri.getKey()));
-
-                continue;
-            }
-
-            if (versions.containsKey(uri)) {
-                if (!versions.get(uri).getKey().equals(version)) {
-                    throw new IllegalArgumentException(String.format(
-                            "Libraries are using multiple versions of %s. Only one version is supported at a time.",
-                            modelUri.getKey()));
-                }
-
-            } else {
-                versions.put(uri, Pair.of(version, modelUri.getValue()));
-            }
-
+        Map<String, String> expanded = new HashMap<>();
+        if (modelUris == null || modelUris.isEmpty()) {
+            return expanded;
         }
 
-        return versions;
+        for (Map.Entry<String, String> entry : modelUris.entrySet()){
+            if (aliasMap.containsKey(entry.getKey())) {
+                expanded.put(aliasMap.get(entry.getKey()), entry.getValue());
+            }
+            else {
+                expanded.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return expanded;
     }
+
+
 
     public VersionedIdentifier toExecutionIdentifier(String name, String version) {
         return new VersionedIdentifier().withId(name).withVersion(version);
@@ -238,9 +249,9 @@ public class Service {
         return map;
     }
 
-    private Map<VersionedIdentifier, Map<String, String>> toParameterMap(Map<Pair<String, String>,String> parameters) {
-        Map<VersionedIdentifier, Map<String, String>> map = new HashMap<>();
-        for (Map.Entry<Pair<String, String>, String> p : parameters.entrySet()) {
+    private Map<VersionedIdentifier, Map<String, Object>> toParameterMap(Map<Pair<String, String>, Object> parameters) {
+        Map<VersionedIdentifier, Map<String, Object>> map = new HashMap<>();
+        for (Map.Entry<Pair<String, String>, Object> p : parameters.entrySet()) {
             VersionedIdentifier vi = toExecutionIdentifier(p.getKey().getLeft(), null);
             if (!map.containsKey(vi)) {
                 map.put(vi, new HashMap<>());

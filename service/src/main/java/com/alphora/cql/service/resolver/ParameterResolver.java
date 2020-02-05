@@ -7,5 +7,5 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 
 public interface ParameterResolver {
     Map<String, Object>  resolvecontextParameters(Map<String, String> parameters);
-    Map<VersionedIdentifier, Map<String, Object>> resolveParameters(Map<VersionedIdentifier, Library> libraries, Map<VersionedIdentifier, Map<String, String>> parameters);
+    Map<VersionedIdentifier, Map<String, Object>> resolveParameters(Map<VersionedIdentifier, Library> libraries, Map<VersionedIdentifier, Map<String, Object>> parameters);
 }

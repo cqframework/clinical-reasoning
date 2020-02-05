@@ -191,8 +191,8 @@ public class ArgumentProcessor {
     }
 
     // Converts parameters from the CLI format of [libraryName.]parameterName=value to a map. Library name is optional.
-    private Map<Pair<String,String>, String> toParameterMap(List<KeyValuePair> keyValuePairs) {
-        HashMap<Pair<String,String>, String> map = new HashMap<>();
+    private Map<Pair<String,String>, Object> toParameterMap(List<KeyValuePair> keyValuePairs) {
+        HashMap<Pair<String,String>, Object> map = new HashMap<>();
 
         for (KeyValuePair kvp : keyValuePairs) {
             String[] parts = kvp.key.split(".");

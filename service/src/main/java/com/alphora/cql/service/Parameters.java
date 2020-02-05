@@ -12,7 +12,7 @@ public class Parameters {
     public String terminologyUri;
     // LibraryName, ParameterName, Value
     // LibraryName may be null.
-    public Map<Pair<String, String>,String> parameters;
+    public Map<Pair<String, String>, Object> parameters;
     public Map<String,String> contextParameters;
     public String libraryPath;
     public String libraryName;

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.alphora.cql.service.Helpers;
 import com.alphora.cql.service.provider.FileBasedFhirRetrieveProvider;
+import com.alphora.cql.service.provider.NoOpRetrieveProvider;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -79,9 +80,12 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
                 break;
             default:
                 throw new IllegalArgumentException(String.format("Unknown FHIR data provider version: %s", version));
-        }    
-
-        if (Helpers.isFileUri(uri)) {
+        }
+        
+        if (uri == null) {
+            retrieveProvider = new NoOpRetrieveProvider();
+        }
+        else if (Helpers.isFileUri(uri)) {
             retrieveProvider = new FileBasedFhirRetrieveProvider(uri, terminologyProvider, context, modelResolver);
         } else {    
             IGenericClient client = context.newRestfulGenericClient(uri);

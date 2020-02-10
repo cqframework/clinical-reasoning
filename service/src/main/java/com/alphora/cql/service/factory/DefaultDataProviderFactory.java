@@ -70,6 +70,8 @@ public class DefaultDataProviderFactory implements DataProviderFactory {
                 context = FhirContext.forDstu2_1();
                 modelResolver = new Dstu2FhirModelResolver();
                 break;
+            case "3.0.1":
+            case "3.0.2":
             case "3.0.0":
                 context = FhirContext.forDstu3();
                 modelResolver = new Dstu3FhirModelResolver();

@@ -20,7 +20,7 @@
 	
 	<dependencies>
 	    <dependency>
-            <groupId>com.alphora.cql</groupId>
+            <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>service</artifactId>
             <version>${revision}</version>
         </dependency>

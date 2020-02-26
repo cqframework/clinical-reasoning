@@ -3,13 +3,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.alphora.cql</groupId>
+    <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>cli</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>com.alphora.cql</groupId>
+        <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>base</artifactId>
         <version>${revision}</version>
     </parent>
@@ -20,12 +20,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alphora.cql</groupId>
+            <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>service</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.alphora.cql</groupId>
+            <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>measure</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -54,7 +54,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.alphora.cql.cli.Main</mainClass>
+                    <mainClass>org.opencds.cqf.cql.cli.Main</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -71,7 +71,7 @@
                             <transformers>
                                 <transformer implementation=
                                 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.alphora.cql.cli.Main</mainClass>
+                                    <mainClass>org.opencds.cqf.cql.cli.Main</mainClass>
                             </transformer>
                         </transformers>
                     </configuration>

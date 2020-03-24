@@ -4,3 +4,11 @@ target
 .classpath
 .project
 .settings
+.flattened-pom.xml
+
+*.log*
+
+Snap.*
+core.*
+heapdump.*
+javacore.*

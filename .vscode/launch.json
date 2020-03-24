@@ -1,0 +1,143 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "java",
+            "name": "Debug (Attach)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5051
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 124)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp",
+                "../connectathon/fhir3/cql",
+                "--ln",
+                "EXM124_FHIR3",
+                "-m",
+                "FHIR=../connectathon/fhir3/tests/EXM124_FHIR3-7.2.000",
+                "-t",
+                "http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir",
+                "-c",
+                "Patient=denom-EXM124-FHIR3"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 130)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp",
+                "../connectathon/fhir3/cql",
+                "--ln",
+                "EXM130_FHIR3",
+                "-m",
+                "FHIR=../connectathon/fhir3/tests/EXM130_FHIR3-7.2.000",
+                "-t",
+                "../connectathon/fhir3/resources/valuesets",
+                "-c",
+                "Patient=numer-EXM130-FHIR3"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 130 R4)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp",
+                "../connectathon/fhir4/cql",
+                "--ln",
+                "EXM130_FHIR4",
+                "-m",
+                "FHIR=../connectathon/fhir4/tests/EXM130_FHIR4-7.2.000",
+                "-t",
+                "../connectathon/fhir4/resources/valuesets",
+                "-c",
+                "Patient=numer-EXM130-FHIR4"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 105 R4)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp",
+                "../connectathon/fhir4/cql",
+                "--ln",
+                "EXM105_FHIR4",
+                "-m",
+                "FHIR=../connectathon/fhir4/tests/EXM105_FHIR4-8.1.000",
+                "-t",
+                "../connectathon/fhir4/resources/valuesets",
+                "-c",
+                "Patient=denom-EXM105-FHIR4"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 104)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp",
+                "../connectathon/fhir3/cql",
+                "--ln",
+                "EXM104_FHIR3",
+                "-m",
+                "FHIR=http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir",
+                "-t",
+                "../connectathon/fhir3/resources/valuesets",
+                "-c",
+                "Patient=numer-EXM104-FHIR3"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 104 R4)",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp",
+                "../connectathon/fhir4/cql",
+                "--ln",
+                "EXM104_FHIR4",
+                "-m",
+                "FHIR=../connectathon/fhir4/tests/EXM104_FHIR4-8.1.000",
+                "-t",
+                "../connectathon/fhir4/resources/valuesets",
+                "-c",
+                "Patient=numer-EXM104-FHIR4"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<rest>",
+            "request": "launch",
+            "mainClass": "com.alphora.cql.rest.Main",
+            "projectName": "rest"
+        }
+    ]
+}

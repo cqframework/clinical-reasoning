@@ -5,14 +5,11 @@ import java.lang.reflect.Method;
 import java.util.EnumSet;
 import java.util.Map.Entry;
 
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.service.Parameters;
-import org.opencds.cqf.cql.service.Response;
-import org.opencds.cqf.cql.service.Service;
-import org.opencds.cqf.cql.service.serialization.DefaultEvaluationResultsSerializer;
-// import org.opencds.cqf.cql.service.serialization.DefaultEvaluationResultsSerializer;
-// import org.opencds.cqf.cql.service.serialization.EvaluationResultsSerializer;
-import org.opencds.cqf.cql.service.serialization.EvaluationResultsSerializer;
+import org.opencds.cqf.cql.evaluator.Evaluator;
+import org.opencds.cqf.cql.evaluator.Parameters;
+import org.opencds.cqf.cql.evaluator.Response;
+import org.opencds.cqf.cql.evaluator.serialization.DefaultEvaluationResultsSerializer;
+import org.opencds.cqf.cql.evaluator.serialization.EvaluationResultsSerializer;
 
 public class Main {
 
@@ -26,8 +23,8 @@ public class Main {
         }
 
         try {
-            Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
-            Response response = service.evaluate(params);
+            Evaluator evaluator = new Evaluator(EnumSet.of(Evaluator.Options.EnableFileUri));
+            Response response  = evaluator.evaluate(params);
             EvaluationResultsSerializer serializer;
 
             serializer = new DefaultEvaluationResultsSerializer();

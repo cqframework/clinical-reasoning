@@ -23,15 +23,19 @@
         <spring-boot.version>2.1.9.RELEASE</spring-boot.version>
     </properties>
     <modules>
-        <module>service</module>
+        <module>evaluator</module>
+
+        <!-- Processes for the Evaluator -->
         <module>cli</module>
         <module>rest</module>
+
+        <!-- Modules that use the evaluator -->
         <module>measure</module>
     </modules>
 
 
     <name>base</name>
-    <description>Base project for CQL modules</description>
+    <description>CQL Evaluator</description>
     <url>https://github.com/DBCG/org-opencds-cqf-cql/tree/master</url>
 
     <licenses>

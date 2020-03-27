@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: uk.co.datumedge:hamcrest-json:0.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/uk/co/datumedge/hamcrest-json/0.2/hamcrest-json-0.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/uk/co/datumedge/hamcrest-json/0.2/hamcrest-json-0.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/uk/co/datumedge/hamcrest-json/0.2/hamcrest-json-0.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

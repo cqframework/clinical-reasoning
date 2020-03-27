@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.12.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/jaxb2_commons/jaxb2-basics-runtime/0.12.0/jaxb2-basics-runtime-0.12.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/jaxb2_commons/jaxb2-basics-runtime/0.12.0/jaxb2-basics-runtime-0.12.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/jaxb2_commons/jaxb2-basics-runtime/0.12.0/jaxb2-basics-runtime-0.12.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

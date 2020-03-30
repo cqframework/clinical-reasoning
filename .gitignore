@@ -5,6 +5,9 @@ target
 .project
 .settings
 .flattened-pom.xml
+.idea
+
+*.iml
 
 *.log*
 

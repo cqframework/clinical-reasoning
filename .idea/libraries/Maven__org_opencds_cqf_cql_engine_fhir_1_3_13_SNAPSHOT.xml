@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.opencds.cqf:cql-engine-fhir:1.3.13-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/opencds/cqf/cql-engine-fhir/1.3.13-SNAPSHOT/cql-engine-fhir-1.3.13-20200330.212559-7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/opencds/cqf/cql-engine-fhir/1.3.13-SNAPSHOT/cql-engine-fhir-1.3.13-20200330.212559-7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/opencds/cqf/cql-engine-fhir/1.3.13-SNAPSHOT/cql-engine-fhir-1.3.13-20200330.212559-7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

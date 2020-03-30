@@ -1,10 +1,10 @@
 package org.opencds.cqf.cql.evaluator.factory.implementation;
 
-import org.opencds.cqf.cql.evaluator.Helpers;
+import org.opencds.cqf.cql.Helpers;
 import org.opencds.cqf.cql.evaluator.factory.ClientFactory;
 import org.opencds.cqf.cql.evaluator.factory.TerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.provider.FileBasedFhirTerminologyProvider;
 
+import org.opencds.cqf.cql.retrieve.FileBasedFhirTerminologyProvider;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.terminology.fhir.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.terminology.fhir.R4FhirTerminologyProvider;

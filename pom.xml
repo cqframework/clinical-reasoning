@@ -3,10 +3,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>base</artifactId>
+    <!-- This pom contains shared build settings. It's flattened and removed at build time-->
+    <groupId>org.opencds.cqf.cql.evaluator</groupId>
+    <artifactId>shared</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
+
+    <description>CQL Evaluator Project</description>
 
     <properties>
         <version.major>1</version.major>
@@ -24,19 +27,12 @@
     </properties>
     <modules>
         <module>evaluator</module>
-
         <!-- Processes for the Evaluator -->
         <module>cli</module>
         <module>rest</module>
-
         <!-- Modules that use the evaluator -->
         <module>measure</module>
     </modules>
-
-
-    <name>base</name>
-    <description>CQL Evaluator</description>
-    <url>https://github.com/DBCG/org-opencds-cqf-cql/tree/master</url>
 
     <licenses>
         <license>
@@ -153,6 +149,7 @@
         </dependency>
     </dependencies>
     <build>
+        <defaultGoal>package</defaultGoal>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -296,8 +293,9 @@
                     <artifactId>flatten-maven-plugin</artifactId>
                     <version>1.1.0</version>
                     <configuration>
+                        <flattenDependencyMode>all</flattenDependencyMode>
                         <updatePomFile>true</updatePomFile>
-                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                        <flattenMode>ossrh</flattenMode>
                     </configuration>
                     <executions>
                         <execution>

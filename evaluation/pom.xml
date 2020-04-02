@@ -4,23 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.execution</artifactId>
+    <artifactId>service</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <description>CQL Evaluator Execution Extensions</description>
-
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
-        <artifactId>evaluator.shared</artifactId>
+        <artifactId>shared</artifactId>
         <version>${revision}</version>
     </parent>
 
     <dependencies>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql-to-elm</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine</artifactId>
@@ -30,8 +24,17 @@
             <artifactId>engine.fhir</artifactId>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-client</artifactId>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-to-elm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics</artifactId>
+            <version>0.12.0</version>
         </dependency>
     </dependencies>
 </project>

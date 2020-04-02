@@ -4,15 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.measure</artifactId>
+    <artifactId>measure</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <description>CQL-based Measure Evaluator</description>
-
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
-        <artifactId>evaluator.shared</artifactId>
+        <artifactId>shared</artifactId>
         <version>${revision}</version>
     </parent>
 

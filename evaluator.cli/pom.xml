@@ -4,48 +4,30 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.cli</artifactId>
+    <artifactId>cli</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
-    
     <parent>
-        <groupId>org.opencds.cqf.cql</groupId>
-        <artifactId>evaluator.shared</artifactId>
+        <groupId>org.opencds.cqf.cql.evaluator</groupId>
+        <artifactId>shared</artifactId>
         <version>${revision}</version>
     </parent>
-
-    <description>CQL Evaluator CLI</description>
 
     <properties>
         <jopt-version>5.0.4</jopt-version>
     </properties>
 
     <dependencies>
-    <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.serialization</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.builder</artifactId>
-            <version>${revision}</version>
-        </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>service</artifactId>
             <version>${revision}</version>
         </dependency>
-        <!-- <dependency>
+        <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>measure</artifactId>
             <version>${revision}</version>
-        </dependency> -->
+        </dependency>
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>

@@ -3,12 +3,12 @@ package org.opencds.cqf.cql.evaluator.evaluation;
 import java.util.Collections;
 
 import org.opencds.cqf.cql.evaluator.Response;
-import org.opencds.cqf.cql.evaluator.Evaluator;
+import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.ExpressionInfo;
 import org.opencds.cqf.cql.evaluator.ParameterInfo;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.evaluator.Parameters;
+import org.opencds.cqf.cql.evaluator.BuilderParameters;
 
 // This class is the start of something like "evaluate in context"
 public class ExpressionEvaluator {
@@ -40,13 +40,16 @@ public class ExpressionEvaluator {
     }
 
     private static Object evaluateLocalLibrary(IBaseResource resource, String libraryContent) {
-        Parameters parameters = new Parameters();
-        parameters.libraries = Collections.singletonList(libraryContent);
-        parameters.expressions = Collections.singletonList(new ExpressionInfo("LocalLibrary", "Expression"));
-        parameters.parameters = Collections.singletonList(new ParameterInfo(null, resource.fhirType(), resource));
-        Evaluator service = new Evaluator();
-        Response response = service.evaluate(parameters);
+        // BuilderParameters parameters = new BuilderParameters();
+        // parameters.libraries = Collections.singletonList(libraryContent);
+        // parameters.expressions = Collections.singletonList(new ExpressionInfo("LocalLibrary", "Expression"));
+        // parameters.parameters = Collections.singletonList(new ParameterInfo(null, resource.fhirType(), resource));
+        // CqlEvaluator service = new CqlEvaluator();
+        // Response response = service.evaluate(parameters);
 
-        return response.evaluationResult.forExpression("Expression");
+        // return response.evaluationResult.forLibrary(new VersionedIdentifier().withId("LocalLibrary"))
+        //         .forExpression("Expression");
+
+        return null;
     }
 }

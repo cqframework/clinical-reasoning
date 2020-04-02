@@ -1,10 +1,11 @@
-package org.opencds.cqf.cql.evaluator.resolver;
+package org.opencds.cqf.cql.evaluator.resolver.implementation;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.opencds.cqf.cql.evaluator.resolver.ParameterResolver;
 
 public class DefaultParameterResolver implements ParameterResolver {
     public Map<String, Object>  resolvecontextParameters(Map<String, String> parameters) {

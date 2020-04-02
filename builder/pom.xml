@@ -4,28 +4,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.cql.evaluator</groupId>
-    <artifactId>measure</artifactId>
+    <artifactId>builder</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <description>CQL-based Measure Evaluator</description>
+    <description>CQL Evaluator Builder</description>
 
     <parent>
-        <groupId>org.opencds.cqf.cql</groupId>
+        <groupId>org.opencds.cqf.cql.evaluator</groupId>
         <artifactId>shared</artifactId>
         <version>${revision}</version>
     </parent>
 
     <dependencies>
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine</artifactId>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-to-elm</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.fhir</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>

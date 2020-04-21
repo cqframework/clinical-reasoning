@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- This pom contains shared build settings. It's flattened and removed at build time-->
-    <groupId>org.opencds.cqf.cql.evaluator</groupId>
-    <artifactId>shared</artifactId>
+    <groupId>org.opencds.cqf.cql</groupId>
+    <artifactId>evaluator.shared</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
@@ -27,12 +27,13 @@
         <hapi.version>4.2.0</hapi.version>
     </properties>
     <modules>
-        <module>translation</module>
-        <!-- Processes for the Evaluator -->
-        <!-- <module>cli</module>
-        <module>rest</module>
+        <module>evaluator</module>
+        <!-- <module>evaluator.builder</module> -->
+        <module>evaluator.translation</module>
+        <!-- <module>evaluator.cli</module>
+        <module>evaluator.rest</module>
 
-        <module>measure</module> -->
+        <module>evaluator.measure</module> -->
     </modules>
 
     <licenses>

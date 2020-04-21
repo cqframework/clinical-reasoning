@@ -3,20 +3,28 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencds.cqf.cql.evaluator</groupId>
-    <artifactId>expression</artifactId>
+    <groupId>org.opencds.cqf.cql</groupId>
+    <artifactId>evaluator</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <description>CQL Evaluator Expression Evaluation</description>
+    <description>CQL Evaluator</description>
 
     <parent>
-        <groupId>org.opencds.cqf.cql.evaluator</groupId>
-        <artifactId>shared</artifactId>
+        <groupId>org.opencds.cqf.cql</groupId>
+        <artifactId>evaluator.shared</artifactId>
         <version>${revision}</version>
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
+        </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
@@ -24,6 +32,11 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics</artifactId>
+            <version>0.12.0</version>
         </dependency>
     </dependencies>
 </project>

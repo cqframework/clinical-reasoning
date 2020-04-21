@@ -3,16 +3,16 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencds.cqf.cql.evaluator</groupId>
-    <artifactId>execution</artifactId>
+    <groupId>org.opencds.cqf.cql</groupId>
+    <artifactId>evaluator.execution</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
     <description>CQL Evaluator Execution Extensions</description>
 
     <parent>
-        <groupId>org.opencds.cqf.cql.evaluator</groupId>
-        <artifactId>shared</artifactId>
+        <groupId>org.opencds.cqf.cql</groupId>
+        <artifactId>evaluator.shared</artifactId>
         <version>${revision}</version>
     </parent>
 

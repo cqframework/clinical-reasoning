@@ -3,8 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencds.cqf.cql.evaluator</groupId>
-    <artifactId>measure</artifactId>
+    <groupId>org.opencds.cqf.cql</groupId>
+    <artifactId>evaluator.measure</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
@@ -12,7 +12,7 @@
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
-        <artifactId>shared</artifactId>
+        <artifactId>evaluator.shared</artifactId>
         <version>${revision}</version>
     </parent>
 

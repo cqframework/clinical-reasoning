@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.util;
+package org.opencds.cqf.cql.evaluator.execution.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -247,7 +247,7 @@ public class ValueSetUtil {
 			throw new IllegalArgumentException("Non-primitive value encountered while trying to access primitive value.");
 		}
 		else {
-			return ((IPrimitiveType)baseValue).getValueAsString();
+			return ((IPrimitiveType<?>)baseValue).getValueAsString();
 		}
 	}
 

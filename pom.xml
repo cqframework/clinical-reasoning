@@ -28,11 +28,12 @@
     </properties>
     <modules>
         <module>evaluator</module>
-        <!-- <module>evaluator.builder</module> -->
-        <module>evaluator.translation</module>
-        <!-- <module>evaluator.cli</module>
-        <module>evaluator.rest</module>
 
+        <module>evaluator.translation</module>
+        <module>evaluator.execution</module>
+        <!-- <module>evaluator.builder</module> -->
+        <!-- <module>evaluator.cli</module> -->
+        <!-- <module>evaluator.rest</module>
         <module>evaluator.measure</module> -->
     </modules>
 
@@ -331,7 +332,6 @@
                     <artifactId>flatten-maven-plugin</artifactId>
                     <version>1.1.0</version>
                     <configuration>
-                        <flattenDependencyMode>all</flattenDependencyMode>
                         <updatePomFile>true</updatePomFile>
                         <flattenMode>ossrh</flattenMode>
                     </configuration>

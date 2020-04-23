@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.evaluator.resolver.ParameterResolver;
-import org.opencds.cqf.cql.execution.LibraryLoader;
 
 public class DefaultParameterResolver implements ParameterResolver {
 

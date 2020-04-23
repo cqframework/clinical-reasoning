@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.util;
+package org.opencds.cqf.cql.evaluator.execution.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.Code;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;

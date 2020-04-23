@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.loader;
+package org.opencds.cqf.cql.evaluator.execution.loader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -11,16 +11,15 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.elm.r1.ObjectFactory;
-import org.opencds.cqf.cql.execution.CqlLibraryReader;
-import org.opencds.cqf.cql.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 
 public class TranslatingLibraryLoader implements LibraryLoader {
 
@@ -28,15 +27,17 @@ public class TranslatingLibraryLoader implements LibraryLoader {
     private LibraryManager libraryManager;
     private static JAXBContext jaxbContext;
     private static Marshaller marshaller;
+    private CqlTranslatorOptions translatorOptions;
 
-    public TranslatingLibraryLoader(LibraryManager libraryManager) {
+    public TranslatingLibraryLoader(LibraryManager libraryManager, CqlTranslatorOptions translatorOptions) {
         this.libraryManager = libraryManager;
+        this.translatorOptions = translatorOptions != null ? translatorOptions : CqlTranslatorOptions.defaultOptions();
     }
 
     public Library load(VersionedIdentifier libraryIdentifier) {
         try {
             List<CqlTranslatorException> errors = new ArrayList<>();
-            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), CqlTranslatorException.ErrorSeverity.Error, SignatureLevel.All, new CqlTranslator.Options[0], errors);
+            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), this.translatorOptions, errors);
             return this.readXml(this.toXml(library.getLibrary()));
         }
         catch (Exception e) {

@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.util;
+package org.opencds.cqf.cql.evaluator.execution.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.Code;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -247,7 +247,7 @@ public class ValueSetUtil {
 			throw new IllegalArgumentException("Non-primitive value encountered while trying to access primitive value.");
 		}
 		else {
-			return ((IPrimitiveType)baseValue).getValueAsString();
+			return ((IPrimitiveType<?>)baseValue).getValueAsString();
 		}
 	}
 

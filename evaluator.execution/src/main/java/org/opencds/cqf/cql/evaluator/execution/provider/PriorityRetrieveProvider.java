@@ -1,9 +1,11 @@
 
-package org.opencds.cqf.cql.evaluator.provider;
+package org.opencds.cqf.cql.evaluator.execution.provider;
 
-import org.opencds.cqf.cql.retrieve.RetrieveProvider;
-import org.opencds.cqf.cql.runtime.Code;
-import org.opencds.cqf.cql.runtime.Interval;
+import java.util.List;
+
+import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
+import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class PriorityRetrieveProvider implements RetrieveProvider {
 

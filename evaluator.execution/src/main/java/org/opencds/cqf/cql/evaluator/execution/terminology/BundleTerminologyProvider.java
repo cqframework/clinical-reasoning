@@ -4,7 +4,6 @@ package org.opencds.cqf.cql.evaluator.execution.terminology;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,9 +29,6 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     private boolean initialized = false;
 
     public BundleTerminologyProvider(FhirContext fhirContext, IBaseBundle bundle) {
-        Objects.requireNonNull(fhirContext, "fhirContext can not be null.");
-        Objects.requireNonNull(bundle, "bundle can not be null.");
-
         this.fhirContext = fhirContext;
         this.valueSets = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle, this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
     }
@@ -40,7 +36,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     @Override
     public boolean in(Code code, ValueSetInfo valueSet) {
         if (code == null || valueSet == null) {
-            throw new IllegalArgumentException("code and valueSet must not be null when testing 'in'.");
+            throw new IllegalArgumentException("code and valueset must not be null when testing 'in'.");
         }
 
         Iterable<Code> codes = this.expand(valueSet);
@@ -62,7 +58,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         this.initialize();
 
         if (valueSet == null) {
-            throw new IllegalArgumentException("valueSet must not be null when attempting to expand");
+            throw new IllegalArgumentException("valueset must not be null when attempting to expand");
         }
 
         if (!this.valueSetIndex.containsKey(valueSet.getId())) {
@@ -76,7 +72,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     // TODO: One possible option here is to generate codes systems
     // based on the valuesets we have loaded.
 	public Code lookup(Code code, CodeSystemInfo codeSystem) {
-        logger.warn("Unsupported CodeSystem lookup: %s in %s", code.toString(), codeSystem.getId());
+        logger.warn("Unsupported codesystem lookup: %s in %s", code.toString(), codeSystem.getId());
         return null;
     }
 
@@ -90,7 +86,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
 
             if (codes == null) {
-                logger.warn("ValueSet %s is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
+                logger.warn("valueset %s is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
                 codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
             }
 

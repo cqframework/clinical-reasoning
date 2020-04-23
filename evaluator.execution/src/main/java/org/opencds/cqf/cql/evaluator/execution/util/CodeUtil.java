@@ -1,8 +1,4 @@
-<<<<<<< HEAD:evaluator.execution/src/main/java/org/opencds/cqf/cql/evaluator/execution/util/CodeUtil.java
 package org.opencds.cqf.cql.evaluator.execution.util;
-=======
-package org.opencds.cqf.cql.evaluator.util;
->>>>>>> 69178e5... Updates to evaluator:evaluator/src/main/java/org/opencds/cqf/cql/evaluator/util/CodeUtil.java
 
 import java.util.ArrayList;
 import java.util.List;

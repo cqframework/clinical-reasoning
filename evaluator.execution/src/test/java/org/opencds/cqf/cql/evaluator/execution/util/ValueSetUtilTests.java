@@ -1,8 +1,4 @@
-<<<<<<< HEAD:evaluator.execution/src/test/java/org/opencds/cqf/cql/evaluator/execution/util/ValueSetUtilTests.java
 package org.opencds.cqf.cql.evaluator.execution.util;
-=======
-package org.opencds.cqf.cql.evaluator.util;
->>>>>>> 69178e5... Updates to evaluator:evaluator/src/test/java/org/opencds/cqf/cql/evaluator/util/ValueSetUtilTests.java
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

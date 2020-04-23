@@ -6,14 +6,14 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.data.DataProvider;
+import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.evaluator.resolver.ParameterResolver;
 import org.opencds.cqf.cql.evaluator.resolver.implementation.DefaultParameterResolver;
-import org.opencds.cqf.cql.execution.CqlEngine;
-import org.opencds.cqf.cql.execution.CqlEngine.Options;
-import org.opencds.cqf.cql.execution.EvaluationResult;
-import org.opencds.cqf.cql.execution.LibraryLoader;
-import org.opencds.cqf.cql.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.CqlEngine.Options;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
 // TODO: Add debug options
 public class CqlEvaluator {

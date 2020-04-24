@@ -8,16 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opencds.cqf.cql.service.factory.DataProviderFactory;
-import org.opencds.cqf.cql.service.factory.DefaultDataProviderFactory;
-import org.opencds.cqf.cql.service.factory.DefaultLibraryLoaderFactory;
-import org.opencds.cqf.cql.service.factory.DefaultTerminologyProviderFactory;
-import org.opencds.cqf.cql.service.factory.LibraryLoaderFactory;
-import org.opencds.cqf.cql.service.factory.TerminologyProviderFactory;
-import org.opencds.cqf.cql.service.resolver.DefaultParameterResolver;
-import org.opencds.cqf.cql.service.resolver.ParameterResolver;
-import org.opencds.cqf.cql.service.serialization.EvaluationResultsSerializer;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.elm.execution.Library;
@@ -27,6 +17,15 @@ import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.execution.CqlEngine;
 import org.opencds.cqf.cql.execution.EvaluationResult;
 import org.opencds.cqf.cql.execution.LibraryLoader;
+import org.opencds.cqf.cql.service.factory.DataProviderFactory;
+import org.opencds.cqf.cql.service.factory.DefaultDataProviderFactory;
+import org.opencds.cqf.cql.service.factory.DefaultLibraryLoaderFactory;
+import org.opencds.cqf.cql.service.factory.DefaultTerminologyProviderFactory;
+import org.opencds.cqf.cql.service.factory.LibraryLoaderFactory;
+import org.opencds.cqf.cql.service.factory.TerminologyProviderFactory;
+import org.opencds.cqf.cql.service.resolver.DefaultParameterResolver;
+import org.opencds.cqf.cql.service.resolver.ParameterResolver;
+import org.opencds.cqf.cql.service.serialization.EvaluationResultsSerializer;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 
 public class Service {

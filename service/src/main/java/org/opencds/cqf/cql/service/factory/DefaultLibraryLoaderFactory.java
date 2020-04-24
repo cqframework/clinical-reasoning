@@ -13,10 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.opencds.cqf.cql.service.loader.TranslatingLibraryLoader;
-import org.opencds.cqf.cql.service.manager.CacheAwareModelManager;
-import org.opencds.cqf.cql.service.provider.InMemoryLibrarySourceProvider;
-
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -24,6 +20,9 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.execution.LibraryLoader;
+import org.opencds.cqf.cql.service.loader.TranslatingLibraryLoader;
+import org.opencds.cqf.cql.service.manager.CacheAwareModelManager;
+import org.opencds.cqf.cql.service.provider.InMemoryLibrarySourceProvider;
 
 // This is intended to be general-purpose factory but there are specific cases where we probably want to change the behavior.
 // For example, the global model cache will slow down (slightly) processing in the CLI mode, while it will speed up requests

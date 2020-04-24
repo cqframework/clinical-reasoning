@@ -11,7 +11,7 @@
     <properties>
         <version.major>1</version.major>
         <version.minor>1</version.minor>
-        <version.patch>0</version.patch>
+        <version.patch>1</version.patch>
         <!-- NOTE: Building under the release profile automatically drops the -SNAPSHOT extension -->
         <revision>${version.major}.${version.minor}.${version.patch}-SNAPSHOT</revision>
 
@@ -116,6 +116,7 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>1.7.29</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
@@ -136,6 +137,17 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+    </dependencies>
     <build>
         <pluginManagement>
             <plugins>

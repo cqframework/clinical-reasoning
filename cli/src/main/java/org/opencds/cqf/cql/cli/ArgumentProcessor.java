@@ -7,9 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opencds.cqf.cql.service.Parameters;
-
 import org.apache.commons.lang3.tuple.Pair;
+import org.opencds.cqf.cql.service.Parameters;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;

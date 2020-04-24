@@ -2,10 +2,9 @@ package org.opencds.cqf.cql.service.factory;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.cql.service.Helpers;
 import org.opencds.cqf.cql.service.provider.FileBasedFhirTerminologyProvider;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.terminology.fhir.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.terminology.fhir.R4FhirTerminologyProvider;

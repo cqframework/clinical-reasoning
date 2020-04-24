@@ -1,14 +1,14 @@
 package org.opencds.cqf.cql.service.manager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.cqframework.cql.cql2elm.ModelInfoLoader;
 import org.cqframework.cql.cql2elm.ModelInfoProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.model.SystemModel;
 import org.hl7.elm.r1.VersionedIdentifier;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Bryn on 12/29/2016.

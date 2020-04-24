@@ -9,11 +9,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.runtime.Code;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 
 public class ValueSetUtil {
 

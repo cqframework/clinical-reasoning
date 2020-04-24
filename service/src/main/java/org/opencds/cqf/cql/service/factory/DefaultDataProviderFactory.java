@@ -3,10 +3,6 @@ package org.opencds.cqf.cql.service.factory;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opencds.cqf.cql.service.Helpers;
-import org.opencds.cqf.cql.service.provider.FileBasedFhirRetrieveProvider;
-import org.opencds.cqf.cql.service.provider.NoOpRetrieveProvider;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.cql.data.CompositeDataProvider;
@@ -18,6 +14,9 @@ import org.opencds.cqf.cql.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.searchparam.SearchParameterResolver;
+import org.opencds.cqf.cql.service.Helpers;
+import org.opencds.cqf.cql.service.provider.FileBasedFhirRetrieveProvider;
+import org.opencds.cqf.cql.service.provider.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 
 import ca.uhn.fhir.context.FhirContext;

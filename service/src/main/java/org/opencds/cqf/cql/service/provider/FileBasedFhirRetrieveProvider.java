@@ -9,8 +9,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opencds.cqf.cql.service.util.CodeUtil;
-
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.exception.DataProviderException;
 import org.opencds.cqf.cql.exception.UnknownPath;
@@ -18,6 +16,7 @@ import org.opencds.cqf.cql.model.ModelResolver;
 import org.opencds.cqf.cql.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.runtime.Code;
 import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.service.util.CodeUtil;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.terminology.ValueSetInfo;
 import org.slf4j.Logger;

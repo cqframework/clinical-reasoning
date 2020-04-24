@@ -2,13 +2,12 @@ package org.opencds.cqf.cql.service.evaluation;
 
 import java.util.Collections;
 
-import org.opencds.cqf.cql.service.Response;
-import org.opencds.cqf.cql.service.Service;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.service.Parameters;
+import org.opencds.cqf.cql.service.Response;
+import org.opencds.cqf.cql.service.Service;
 
 // This class is the start of something like "evaluate in context"
 public class ExpressionEvaluator {

@@ -1,5 +1,12 @@
 package org.opencds.cqf.cql.measure.common;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.function.Function;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.execution.Context;
@@ -7,10 +14,6 @@ import org.opencds.cqf.cql.runtime.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.function.Function;
-
-@SuppressWarnings("unchecked")
 public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupComponentT extends IBase, MeasureGroupPopulationComponentT extends IBase, MeasureReportT extends IBase, MeasureReportGroupComponentT extends IBase, MeasureReportGroupPopulationComponentT extends IBase, ResourceT, SubjectT extends ResourceT> {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
@@ -139,7 +142,7 @@ public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupCom
             }
         }
 
-        return (Iterable<ResourceT>)result;
+        return (Iterable)result;
     }
 
     private boolean evaluatePopulationCriteria(SubjectT subject,
@@ -289,7 +292,6 @@ public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupCom
                             }
                             break;
                         case MEASUREOBSERVATION:
-                            measureObservation = new HashMap<>();
                             break;
                     }
                 }
@@ -383,7 +385,7 @@ public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupCom
                     // For each patient in the PatientType list
                     for (SubjectT patient : patients) {
                         // Are they in the initial population?
-                        evaluatePopulationCriteria(patient, initialPopulationCriteria,
+                        boolean inInitialPopulation = evaluatePopulationCriteria(patient, initialPopulationCriteria,
                                 initialPopulation, initialPopulationPatients, null, null, null);
                         populateResourceMap(MeasurePopulationType.INITIALPOPULATION, resources, codeToResourceMap);
                     }

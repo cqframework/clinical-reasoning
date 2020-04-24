@@ -1,4 +1,7 @@
-package org.opencds.cqf.cql.evaluator.translation.manager;
+package org.opencds.cqf.cql.service.manager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.cqframework.cql.cql2elm.ModelInfoLoader;
 import org.cqframework.cql.cql2elm.ModelInfoProvider;
@@ -7,14 +10,8 @@ import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.model.SystemModel;
 import org.hl7.elm.r1.VersionedIdentifier;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 /**
- * This class extends the CQL translator {@link org.cqframework.cql.cql2elm.ModelManager} class to be aware of a global cache of {@link org.cqframework.cql.cql2elm.model.Model}s
- * The global cache is by @{org.hl7.elm.r1.VersionedIdentifier}, while the local cache is by name. This is because the translator expects the ModelManager to only permit loading
- * of a single version version of a given Model in a single translation context, while the global cache is for all versions of Models
+ * Created by Bryn on 12/29/2016.
  */
 public class CacheAwareModelManager extends ModelManager {
 
@@ -22,12 +19,7 @@ public class CacheAwareModelManager extends ModelManager {
 
     private final Map<String, Model> localCache;
 
-    /**
-     * @param globalCache cache for Models by VersionedIdentifier. Expected to be thread-safe.
-     */
     public CacheAwareModelManager(Map<VersionedIdentifier, Model> globalCache) {
-        Objects.requireNonNull(globalCache, "globalCache can not be null.");
-
         this.globalCache = globalCache;
         this.localCache = new HashMap<>();
     }
@@ -49,12 +41,6 @@ public class CacheAwareModelManager extends ModelManager {
 
         return model;
     }
-
-    /**
-     * @param modelIdentifier the identifer of the model to resolve
-     * @return the model
-     * @throws IllegalArgumentException if an attempt to resolve multiple versions of the same model is made
-     */
 
     @Override
     public Model resolveModel(VersionedIdentifier modelIdentifier) {

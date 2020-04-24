@@ -1,11 +1,11 @@
 package org.opencds.cqf.cql.evaluator.evaluation;
 
-import org.hl7.fhir.r4.model.*;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Observation;
+import org.junit.Test;
 
 
 public class ExpressionEvaluatorTest {

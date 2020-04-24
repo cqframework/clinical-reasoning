@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.execution.loader;
+package org.opencds.cqf.cql.service.loader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,8 +18,8 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.elm.r1.ObjectFactory;
-import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import org.opencds.cqf.cql.execution.CqlLibraryReader;
+import org.opencds.cqf.cql.execution.LibraryLoader;
 
 public class TranslatingLibraryLoader implements LibraryLoader {
 
@@ -27,17 +27,15 @@ public class TranslatingLibraryLoader implements LibraryLoader {
     private LibraryManager libraryManager;
     private static JAXBContext jaxbContext;
     private static Marshaller marshaller;
-    private CqlTranslatorOptions translatorOptions;
 
-    public TranslatingLibraryLoader(LibraryManager libraryManager, CqlTranslatorOptions translatorOptions) {
+    public TranslatingLibraryLoader(LibraryManager libraryManager) {
         this.libraryManager = libraryManager;
-        this.translatorOptions = translatorOptions != null ? translatorOptions : CqlTranslatorOptions.defaultOptions();
     }
 
     public Library load(VersionedIdentifier libraryIdentifier) {
         try {
             List<CqlTranslatorException> errors = new ArrayList<>();
-            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), this.translatorOptions, errors);
+            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier.getId(), libraryIdentifier.getVersion()), CqlTranslatorOptions.defaultOptions(), errors);
             return this.readXml(this.toXml(library.getLibrary()));
         }
         catch (Exception e) {

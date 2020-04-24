@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.execution.terminology;
+package org.opencds.cqf.cql.service.provider;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -11,11 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
-import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.cql.evaluator.execution.util.ValueSetUtil;
+import org.opencds.cqf.cql.runtime.Code;
+import org.opencds.cqf.cql.service.Helpers;
+import org.opencds.cqf.cql.service.util.ValueSetUtil;
+import org.opencds.cqf.cql.terminology.CodeSystemInfo;
+import org.opencds.cqf.cql.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.terminology.ValueSetInfo;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -29,9 +30,9 @@ public class FileBasedFhirTerminologyProvider implements TerminologyProvider {
     private Map<String, Iterable<Code>> valueSetIndex = new HashMap<>();
 
     public FileBasedFhirTerminologyProvider(FhirContext fhirContext, String uri) {
-        // if (uri == null || uri.isEmpty() || !Helpers.isFileUri(uri)) {
-        //     throw new IllegalArgumentException("File Terminology provider requires a valid path to Terminology resources");
-        // }
+        if (uri == null || uri.isEmpty() || !Helpers.isFileUri(uri)) {
+            throw new IllegalArgumentException("File Terminology provider requires a valid path to Terminology resources");
+        }
 
         this.fhirContext = fhirContext;
         this.uri = uri;

@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.cli;
+package org.opencds.cqf.cql.cli;
 
 import static java.util.Arrays.asList;
 
@@ -6,12 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-//import org.opencds.cqf.cql.evaluator.ExpressionInfo;
-import org.hl7.elm_modelinfo.r1.ModelInfo;
-//import org.opencds.cqf.cql.evaluator.ParameterInfo;
-import org.opencds.cqf.cql.evaluator.builder.BuilderParameters;
+import org.apache.commons.lang3.tuple.Pair;
+import org.opencds.cqf.cql.service.Parameters;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -122,7 +119,7 @@ public class ArgumentProcessor {
         return options;
     }
 
-    public BuilderParameters parseAndConvert(String[] args) {
+    public Parameters parseAndConvert(String[] args) {
         OptionSet options = this.parse(args);
 
         List<String> libraries = (List<String>)options.valuesOf(LIBRARY_OPTIONS[0]);
@@ -147,32 +144,20 @@ public class ArgumentProcessor {
         List<KeyValuePair> parameters = (List<KeyValuePair>)options.valuesOf(PARAMETER_OPTIONS[0]);
         List<KeyValuePair> contextParameters = (List<KeyValuePair>)options.valuesOf(CONTEXT_PARAMETER_OPTIONS[0]);
 
-        BuilderParameters ip = new BuilderParameters();
+        Parameters ip = new Parameters();
         ip.libraries = libraries;
-        ip.library = libraryPath;
+        ip.libraryPath = libraryPath;
         ip.libraryName = libraryName;
         ip.libraryVersion = libraryVersion;
-        //ip.expressions = toListOfExpressions(expressions);
-        ip.terminology = terminologyUri;
-        ip.models = toModelInfoList(models);
-        //ip.parameters = toParameterInfoList(parameters);
+        ip.expressions = toListOfExpressions(expressions);
+        ip.terminologyUri = terminologyUri;
+        ip.modelUris = toMap("Model parameters", models);
+        ip.parameters = toParameterMap(parameters);
         ip.contextParameters = toMap("Context Parameters", contextParameters);
         ip.verbose = verbose;
 
         return ip;
 
-    }
-
-    private List<ModelInfo> toModelInfoList(List<KeyValuePair> keyValuePairs) {
-        HashMap<String, String> map = new HashMap<>();
-        for (KeyValuePair kvp : keyValuePairs) {
-            if (map.containsKey(kvp.key)) {
-                throw new IllegalArgumentException(String.format("%s contain multiple definitions for %s.", "Model parameters", kvp.key));
-            }
-
-            map.put(kvp.key, kvp.value);
-        }
-        return map.entrySet().stream().map(x -> new ModelInfo().withName(x.getKey()).withUrl(x.getValue())).collect(Collectors.toList());
     }
 
     private Map<String, String> toMap(String typeOfKeyValuePair, List<KeyValuePair> keyValuePairs) {
@@ -189,30 +174,30 @@ public class ArgumentProcessor {
         return map;
     }
 
-    // private List<ExpressionInfo> toListOfExpressions(List<String> strings) {
-    //     List<ExpressionInfo> listOfExpressions = new  ArrayList<ExpressionInfo>();
+    private List<Pair<String, String>> toListOfExpressions(List<String> strings) {
+        List<Pair<String, String>> listOfExpressions = new ArrayList<Pair<String, String>>();
 
-    //     for (String s : strings) {
-    //         String[] parts = s.split("\\.");
-    //         if (parts == null || parts.length < 2) {
-    //             new IllegalArgumentException(String.format("%s is not a valid expression. Use the format libraryName.expressionName.", s));
-    //         }
+        for (String s : strings) {
+            String[] parts = s.split("\\.");
+            if (parts == null || parts.length < 2) {
+                new IllegalArgumentException(String.format("%s is not a valid expression. Use the format libraryName.expressionName.", s));
+            }
 
-    //         listOfExpressions.add(new ExpressionInfo(parts[0], parts[1]));
-    //     }
+            listOfExpressions.add(Pair.of(parts[0], parts[1]));
+        }
 
-    //     return listOfExpressions;
-    // }
+        return listOfExpressions;
+    }
 
     // Converts parameters from the CLI format of [libraryName.]parameterName=value to a map. Library name is optional.
-    // private List<ParameterInfo> toParameterInfoList(List<KeyValuePair> keyValuePairs) {
-    //     List<ParameterInfo> list = new ArrayList<>();
+    private Map<Pair<String,String>, Object> toParameterMap(List<KeyValuePair> keyValuePairs) {
+        HashMap<Pair<String,String>, Object> map = new HashMap<>();
 
-    //     for (KeyValuePair kvp : keyValuePairs) {
-    //         String[] parts = kvp.key.split(".");
-    //         list.add(new ParameterInfo(parts.length > 1 ? parts[0] : null, parts.length > 1 ? parts[1] : parts[0], kvp.value));
-    //     }
+        for (KeyValuePair kvp : keyValuePairs) {
+            String[] parts = kvp.key.split(".");
+            map.put(Pair.of(parts.length > 1 ? parts[0] : null, parts.length > 1 ? parts[1] : parts[0]), kvp.value);
+        }
 
-    //     return list;
-    // }
+        return map;
+    }
 }

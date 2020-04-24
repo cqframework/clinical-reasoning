@@ -1,23 +1,17 @@
-package org.opencds.cqf.cql.evaluator.cli;
+package org.opencds.cqf.cql.cli;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
-import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.Response;
-import org.opencds.cqf.cql.evaluator.builder.BuilderParameters;
-import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
-import org.opencds.cqf.cql.evaluator.builder.context.BuilderLibraryContext;
-import org.opencds.cqf.cql.evaluator.serialization.DefaultEvaluationResultsSerializer;
-import org.opencds.cqf.cql.evaluator.serialization.EvaluationResultsSerializer;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.opencds.cqf.cql.execution.LibraryResult;
+import org.opencds.cqf.cql.service.Parameters;
+import org.opencds.cqf.cql.service.Response;
+import org.opencds.cqf.cql.service.Service;
+import org.opencds.cqf.cql.service.serialization.DefaultEvaluationResultsSerializer;
+import org.opencds.cqf.cql.service.serialization.EvaluationResultsSerializer;
 
 public class Main {
 
@@ -26,7 +20,7 @@ public class Main {
         // TODO: Update cql engine dependencies
         disableAccessWarnings();
 
-        BuilderParameters params = null;
+        Parameters params = null;
         try {
             params = new ArgumentProcessor().parseAndConvert(args);
         }
@@ -36,12 +30,8 @@ public class Main {
         }
 
         try {
-            CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
-            Map<Pair<String, String>, String> modelVersionFileUriMap = new HashMap<Pair<String, String>, String>();
-            cqlEvaluatorBuilder.withLibraryLoader(params.library)
-                .withTerminologyProvider(params.models.get(0).getName(), params.models.get(0).getVersion(), params.terminology)
-                .withFileDataProvider(modelVersionFileUriMap)
-            Response response  = evaluator.evaluate(params);
+            Service service = new Service(EnumSet.of(Service.Options.EnableFileUri));
+            Response response  = service.evaluate(params);
             EvaluationResultsSerializer serializer;
 
             serializer = new DefaultEvaluationResultsSerializer();
@@ -76,6 +66,5 @@ public class Main {
         } catch (Exception ignored) {
         }
     }
-    // 
 
 }

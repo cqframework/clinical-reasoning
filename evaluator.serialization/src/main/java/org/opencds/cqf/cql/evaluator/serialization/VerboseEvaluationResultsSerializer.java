@@ -1,18 +1,19 @@
 package org.opencds.cqf.cql.evaluator.serialization;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import com.google.gson.*;
+import java.util.Map.Entry;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.execution.LibraryResult;
 import org.opencds.cqf.cql.retrieve.FhirBundleCursor;
 
 import ca.uhn.fhir.parser.IParser;
-
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import java.util.Map.Entry;
 
 public class VerboseEvaluationResultsSerializer extends EvaluationResultsSerializer{
 

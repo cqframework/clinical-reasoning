@@ -25,6 +25,8 @@ import ca.uhn.fhir.util.BundleUtil;
  */
 public class DirectoryBundler {
 
+    private static final Logger logger = LoggerFactory.getLogger(DirectoryBundler.class);
+
     private FhirContext fhirContext;
     private IParser xml = null;
     private IParser json = null;;
@@ -35,8 +37,14 @@ public class DirectoryBundler {
         this.fhirContext = fhirContext;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(DirectoryBundler.class);
-
+    /**
+     * Recursively searches all files and sub-directory and parses all xml and json
+     * FHIR resources. Adds all resources to a collection-type Bundle (recursively
+     * flattening Bundle resources).
+     * 
+     * @param pathToDirectory The root directory to bundle.
+     * @return A Bundle of all the resources in the root directory
+     */
     public IBaseBundle bundle(String pathToDirectory) {
         Objects.requireNonNull(pathToDirectory, "pathToDirectory must not be null.");
 

@@ -25,16 +25,16 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(BundleRetrieveProvider.class);
 
-	private FhirContext fhirContext;
 	private IBaseBundle bundle;
 	private ModelResolver modelResolver;
 	private TerminologyProvider terminologyProvider;
+	private FhirContext fhirContext;
 
-	public BundleRetrieveProvider(FhirContext fhirContext, IBaseBundle bundle, ModelResolver modelResolver) {
-		this(fhirContext, bundle, modelResolver, null);
+	public BundleRetrieveProvider(FhirContext fhirContext, ModelResolver modelResolver, IBaseBundle bundle) {
+		this(fhirContext, modelResolver, bundle, null);
 	}
 
-	public BundleRetrieveProvider(FhirContext fhirContext, IBaseBundle bundle, ModelResolver modelResolver,
+	public BundleRetrieveProvider(FhirContext fhirContext, ModelResolver modelResolver, IBaseBundle bundle,
 			TerminologyProvider terminologyProvider) {
 		Objects.requireNonNull(fhirContext, "fhirContext can not be null.");
 		Objects.requireNonNull(bundle, "bundle can not be null.");
@@ -51,19 +51,45 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 			String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
 			String dateLowPath, String dateHighPath, Interval dateRange) {
 
-		List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(this.fhirContext, this.bundle,
-				this.fhirContext.getResourceDefinition(dataType).getImplementingClass());
+		List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(
+				fhirContext, this.bundle,
+				fhirContext.getResourceDefinition(dataType).getImplementingClass());
 
 		resources = this.filterToContext(dataType, context, contextPath, contextValue, resources);
-
-		resources = this.filterToTerminology(codePath, codes, valueSet, resources);
+		resources = this.filterToTerminology(dataType, codePath, codes, valueSet, resources);
 
 		return resources.stream().map(x -> (Object) x).collect(Collectors.toList());
 	}
 
-	private boolean isCodeMatch(Code code, Iterable<Code> codes) {
-		for (Code otherCode : codes) {
-			if (code.getCode().equals(otherCode.getCode()) && code.getSystem().equals(otherCode.getSystem())) {
+	private boolean anyCodeMatch(Iterable<Code> left, Iterable<Code> right) {
+		if (left == null || right == null) {
+			return false;
+		}
+
+		for (Code code : left) {
+			for (Code otherCode : right) {
+				if (code.getCode().equals(otherCode.getCode()) && code.getSystem().equals(otherCode.getSystem())) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public boolean anyCodeInValueSet(Iterable<Code> codes, String valueSet) {
+		if (codes == null || valueSet == null) {
+			return false;
+		}
+
+		if (this.terminologyProvider == null) {
+			throw new IllegalStateException(String.format(
+					"Unable to check code membership for in ValueSet %s. terminologyProvider is null.", valueSet));
+		}
+
+		ValueSetInfo valueSetInfo = new ValueSetInfo().withId(valueSet);
+		for (Code code : codes) {
+			if (this.terminologyProvider.in(code, valueSetInfo)) {
 				return true;
 			}
 		}
@@ -71,17 +97,28 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 		return false;
 	}
 
-	public boolean isInValueSet(Code code, ValueSetInfo valueSetInfo) {
-		if (this.terminologyProvider == null) {
-			throw new IllegalStateException(String.format(
-					"Unable to check code membership for code %s in valueset %s. terminologyProvider is null.",
-					code.toString(), valueSetInfo.getId()));
+	// Special case filtering to handle "codes" that are actually ids. This is a
+	// workaround to handle filtering by Id.
+	private boolean isPrimitiveMatch(String dataType, IPrimitiveType<?> code, Iterable<Code> codes) {
+			if (code == null || codes == null) {
+				return false;
+			}
+
+			// This handles the case that the value is a reference such as "Medication/med-id"
+			var primitiveString = code.getValueAsString().replace(dataType + "/", "");
+			for (Object c : codes) {
+				if (c instanceof String) {
+					var s = (String)c;
+					if (s.equals(primitiveString)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
-		return this.terminologyProvider.in(code, valueSetInfo);
-	}
-
-	private List<? extends IBaseResource> filterToTerminology(String codePath, Iterable<Code> codes, String valueSet,
+	private List<? extends IBaseResource> filterToTerminology(String dataType, String codePath, Iterable<Code> codes, String valueSet,
 			List<? extends IBaseResource> resources) {
 		if (codes == null && valueSet == null) {
 			return resources;
@@ -94,29 +131,28 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 		List<IBaseResource> filtered = new ArrayList<>();
 
 		for (IBaseResource res : resources) {
-			Object resCodes = this.modelResolver.resolvePath(res, codePath);
-			List<Code> elmCodes = CodeUtil.getElmCodesFromObject(resCodes, fhirContext);
-			if (elmCodes == null) {
+			Object value = this.modelResolver.resolvePath(res, codePath);
+
+			if (value instanceof IPrimitiveType) {
+				if (isPrimitiveMatch(dataType, (IPrimitiveType<?>)value, codes)) {
+					filtered.add(res);
+				}
 				continue;
 			}
 
-			if (valueSet != null) {
-				ValueSetInfo valueSetInfo = new ValueSetInfo().withId(valueSet);
-				for (Code code : elmCodes) {
-					if (isInValueSet(code, valueSetInfo)) {
-						filtered.add(res);
-						break;
-					}
-				}
+			List<Code> resourceCodes = CodeUtil.getElmCodesFromObject(value, fhirContext);
+			if (resourceCodes == null) {
+				continue;
 			}
 
-			if (codes != null) {
-				for (Code code : codes) {
-					if (isCodeMatch(code, elmCodes)) {
-						filtered.add(res);
-						break;
-					}
-				}
+			if (anyCodeMatch(resourceCodes, codes)) {
+				filtered.add(res);
+				continue;
+			}
+
+			if (anyCodeInValueSet(resourceCodes, valueSet)) {
+				filtered.add(res);
+				continue;
 			}
 		}
 
@@ -126,7 +162,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 	private List<? extends IBaseResource> filterToContext(String dataType, String context, String contextPath,
 			Object contextValue, List<? extends IBaseResource> resources) {
 		if (context == null || contextValue == null || contextPath == null) {
-			logger.warn(
+			logger.info(
 					"Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning all resources.",
 					dataType, context, contextPath, contextValue);
 			return resources;
@@ -135,31 +171,27 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 		List<IBaseResource> filtered = new ArrayList<>();
 
 		for (IBaseResource res : resources) {
-			try {
-				Object resContextValue = this.modelResolver.resolvePath(res, contextPath);
-				IPrimitiveType<?> referenceValue = (IPrimitiveType<?>) this.modelResolver.resolvePath(resContextValue,
-						"reference");
-				if (referenceValue == null) {
-					logger.info("Found {} resource unrelated to context. Skipping.", dataType);
-					continue;
-				}
-
-				String referenceString = referenceValue.getValueAsString();
-				if (referenceString.contains("/")) {
-					referenceString = referenceString.substring(referenceString.indexOf("/") + 1,
-							referenceString.length());
-				}
-
-				if (!referenceString.equals((String) contextValue)) {
-					logger.info("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
-							referenceString, (String) contextValue);
-					continue;
-				}
-
-				filtered.add(res);
-			} catch (Exception e) {
+			Object resContextValue = this.modelResolver.resolvePath(res, contextPath);
+			IPrimitiveType<?> referenceValue = (IPrimitiveType<?>) this.modelResolver
+					.resolvePath(resContextValue, "reference");
+			if (referenceValue == null) {
+				logger.info("Found {} resource unrelated to context. Skipping.", dataType);
 				continue;
 			}
+
+			String referenceString = referenceValue.getValueAsString();
+			if (referenceString.contains("/")) {
+				referenceString = referenceString.substring(referenceString.indexOf("/") + 1,
+						referenceString.length());
+			}
+
+			if (!referenceString.equals((String) contextValue)) {
+				logger.info("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
+						referenceString, (String) contextValue);
+				continue;
+			}
+
+			filtered.add(res);
 		}
 
 		return filtered;

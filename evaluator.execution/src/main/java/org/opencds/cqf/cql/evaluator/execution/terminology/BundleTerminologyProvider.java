@@ -1,6 +1,7 @@
 
 package org.opencds.cqf.cql.evaluator.execution.terminology;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,17 +38,19 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         this.valueSets = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle, this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
     }
 
+    
+    /** 
+     * This method checks for membership of a Code in a ValueSet
+     * @param code The Code to check.
+     * @param valueSet The ValueSetInfo for the ValueSet to check membership of. Can not be null.
+     * @return True if code is in the ValueSet.
+     */
     @Override
     public boolean in(Code code, ValueSetInfo valueSet) {
-        if (code == null || valueSet == null) {
-            throw new IllegalArgumentException("code and valueSet must not be null when testing 'in'.");
-        }
+        Objects.requireNonNull(code, "code can not be null when using 'expand'");
+        Objects.requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
         Iterable<Code> codes = this.expand(valueSet);
-        if (codes == null) {
-            return false;
-        }
-
         for (Code c : codes) {
             if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
                 return true;
@@ -57,26 +60,38 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         return false;
     }
 
+    
+    /** 
+     * This method expands a ValueSet into a list of Codes. It will use the "expansion" element of the ValueSet if present.
+     * It will fall back the to "compose" element if not present. <b>NOTE:</b> This provider does not provide a full expansion
+     * of the "compose" element. If only lists the codes present in the "compose". 
+     * @param valueSet The ValueSetInfo of the ValueSet to expand
+     * @return The Codes in the ValueSet. <b>NOTE:</b> This method never returns null.
+     */
     @Override
+    
     public Iterable<Code> expand(ValueSetInfo valueSet) {
+        Objects.requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
+
         this.initialize();
 
-        if (valueSet == null) {
-            throw new IllegalArgumentException("valueSet must not be null when attempting to expand");
-        }
-
         if (!this.valueSetIndex.containsKey(valueSet.getId())) {
-            throw new IllegalArgumentException(String.format("Unable to locate valueset %s", valueSet.getId()));
+            throw new IllegalArgumentException(String.format("Unable to locate ValueSet %s", valueSet.getId()));
         }
 
         return this.valueSetIndex.get(valueSet.getId());
     }
 
+    
+    /** 
+     * Lookup is not implemented for this TerminologyProvider. That requires the ability to access the full CodeSystem.
+     * @param code The Code to lookup
+     * @param codeSystem The CodeSystemInfo of the CodeSystem to check.
+     * @return Always null
+     */
     @Override
-    // TODO: One possible option here is to generate codes systems
-    // based on the valuesets we have loaded.
 	public Code lookup(Code code, CodeSystemInfo codeSystem) {
-        logger.warn("Unsupported CodeSystem lookup: %s in %s", code.toString(), codeSystem.getId());
+        logger.warn("Unsupported CodeSystem lookup: {} in {}", code.toString(), codeSystem.getId());
         return null;
     }
 
@@ -90,8 +105,12 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
 
             if (codes == null) {
-                logger.warn("ValueSet %s is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
+                logger.warn("ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
                 codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
+            }
+
+            if (codes == null) {
+                codes = Collections.emptySet();
             }
 
             this.valueSetIndex.put(url, codes);

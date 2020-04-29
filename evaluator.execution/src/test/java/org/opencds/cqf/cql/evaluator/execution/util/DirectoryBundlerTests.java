@@ -18,7 +18,7 @@ public class DirectoryBundlerTests {
         FhirContext fhirContext = FhirContext.forR4();
         var directoryBundler = new DirectoryBundler(fhirContext);
 
-        var file = new File("evaluator.execution/src/test/resources/r4/bundleDirectory").getAbsolutePath();
+        var file = new File("src/test/resources/r4/bundleDirectory").getAbsolutePath();
 
         IBaseBundle bundle = directoryBundler.bundle(file);
 

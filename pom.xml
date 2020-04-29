@@ -54,9 +54,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/DBCG/org-opencds-cqf-cql.git</connection>
-        <developerConnection>scm:git:ssh://github.com:DBCG/org-opencds-cqf-cql.git</developerConnection>
-        <url>http://github.com/DBCG/org-opencds-cqf-cql.git/tree/master</url>
+        <connection>scm:git:git://github.com/DBCG/cql-evaluator.git</connection>
+        <developerConnection>scm:git:ssh://github.com:DBCG/cql-evaluator.git</developerConnection>
+        <url>http://github.com/DBCG/cql-evaluator.git/tree/master</url>
     </scm>
 
     <repositories>

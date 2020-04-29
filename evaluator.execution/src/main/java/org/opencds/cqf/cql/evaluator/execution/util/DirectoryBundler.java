@@ -43,7 +43,8 @@ public class DirectoryBundler {
      * flattening Bundle resources).
      * 
      * @param pathToDirectory The root directory to bundle.
-     * @return A Bundle of all the resources in the root directory
+     * @return A Bundle of all the resources in the root directory and
+     *         subdirectories
      */
     public IBaseBundle bundle(String pathToDirectory) {
         Objects.requireNonNull(pathToDirectory, "pathToDirectory must not be null.");

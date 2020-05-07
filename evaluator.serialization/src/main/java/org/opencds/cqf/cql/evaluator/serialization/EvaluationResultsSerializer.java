@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.execution.LibraryResult;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -22,11 +22,11 @@ public abstract class EvaluationResultsSerializer {
         return new Bundle();
     }
 
-    public void printResults(Boolean verbose, Entry<VersionedIdentifier, LibraryResult> libraryEntry) {
-        for (Entry<String, Object> expressionEntry : libraryEntry.getValue().expressionResults.entrySet()) {
+    public void printResults(Boolean verbose, EvaluationResult evaluationResult) {
+        for (Entry<String, Object> expressionEntry : evaluationResult.expressionResults.entrySet()) {
             this.expressionEntry = expressionEntry;
-            System.out.println(String.format("%s.%s = %s", libraryEntry.getKey().getId(), expressionEntry.getKey(),
-                    serializeResult()));
+            System.out.println(
+                    String.format("%s = %s", expressionEntry.getKey(), expressionEntry.getKey(), serializeResult()));
         }
     }
 
@@ -48,8 +48,8 @@ public abstract class EvaluationResultsSerializer {
 
     public static void setFhirContext(String version) {
         switch (version) {
-        case "2.0.0":
-            fhirContext = FhirContext.forDstu2_1();
+            case "2.0.0":
+                fhirContext = FhirContext.forDstu2_1();
                 break;
             case "3.0.0":
                 fhirContext = FhirContext.forDstu3();

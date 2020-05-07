@@ -18,14 +18,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opencds.cqf</groupId>
-            <artifactId>cql-engine</artifactId>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opencds.cqf</groupId>
-            <artifactId>cql-engine-fhir</artifactId>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>

@@ -30,7 +30,7 @@ public class ExpressionEvaluator {
     private static String constructLocalLibrary(IBaseResource resource, String expression) {
         String resourceType = resource.fhirType();
         String fhirVersion = resource.getStructureFhirVersionEnum().getFhirVersionString();
-        fhirVersion = fhirVersion.equals("3.0.2") || fhirVersion.equals("3.0.1")  ? fhirVersion = "3.0.0" : fhirVersion;
+        fhirVersion = fhirVersion.equals("3.0.2") || fhirVersion.equals("3.0.1") ? fhirVersion = "3.0.0" : fhirVersion;
         String source = String.format(
                 "library LocalLibrary using FHIR version '%s' include FHIRHelpers version '%s' called FHIRHelpers parameter %s %s define Expression: %s",
                 fhirVersion, fhirVersion, resourceType, resourceType, expression);
@@ -46,7 +46,6 @@ public class ExpressionEvaluator {
         Service service = new Service();
         Response response = service.evaluate(parameters);
 
-        return response.evaluationResult.forLibrary(new VersionedIdentifier().withId("LocalLibrary"))
-                .forExpression("Expression");
+        return response.evaluationResult.forExpression("Expression");
     }
 }

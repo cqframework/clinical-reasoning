@@ -19,7 +19,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.opencds.cqf.cql.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.service.loader.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.service.manager.CacheAwareModelManager;
 import org.opencds.cqf.cql.service.provider.InMemoryLibrarySourceProvider;

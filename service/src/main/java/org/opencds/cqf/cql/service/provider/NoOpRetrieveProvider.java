@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.service.provider;
 
-import org.opencds.cqf.cql.retrieve.RetrieveProvider;
-import org.opencds.cqf.cql.runtime.Code;
-import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
+import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class NoOpRetrieveProvider implements RetrieveProvider {
 

@@ -18,8 +18,8 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.elm.r1.ObjectFactory;
-import org.opencds.cqf.cql.execution.CqlLibraryReader;
-import org.opencds.cqf.cql.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 
 public class TranslatingLibraryLoader implements LibraryLoader {
 

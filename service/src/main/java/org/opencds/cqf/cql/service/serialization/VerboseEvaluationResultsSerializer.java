@@ -8,31 +8,27 @@ import java.util.Map.Entry;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.execution.LibraryResult;
-import org.opencds.cqf.cql.retrieve.FhirBundleCursor;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.fhir.retrieve.FhirBundleCursor;
 
 import ca.uhn.fhir.parser.IParser;
 
-public class VerboseEvaluationResultsSerializer extends EvaluationResultsSerializer{
+public class VerboseEvaluationResultsSerializer extends EvaluationResultsSerializer {
 
-    private final char[] unwantedCharacters = { '\\',  '\"' };
+    private final char[] unwantedCharacters = { '\\', '\"' };
     private boolean verbose;
     private String libraryEntryKeyId;
     private Entry<String, Object> expressionEntry;
     private Object expressionEntryObject;
 
-    @Override
-    public void printResults(Boolean verbose, Entry<VersionedIdentifier, LibraryResult> libraryEntry) {
+    public void printResults(Boolean verbose, EvaluationResult evaluationResult) {
 
         this.verbose = verbose != null && verbose;
-        
-        for (Entry<String, Object> expressionEntry : libraryEntry.getValue().expressionResults.entrySet()) {
 
+        for (Entry<String, Object> expressionEntry : evaluationResult.expressionResults.entrySet()) {
             this.expressionEntry = expressionEntry;
             this.expressionEntryObject = expressionEntry.getValue();
-            this.libraryEntryKeyId = libraryEntry.getKey().getId();
 
             String serializedExpressionEntryObject = this.serializeResult();
             System.out.println(formatResults(serializedExpressionEntryObject));
@@ -41,8 +37,10 @@ public class VerboseEvaluationResultsSerializer extends EvaluationResultsSeriali
 
     @Override
     protected String serializeResult() {
-        if (verbose) { return serializeResultVerbose(); }
-        else return serializeResultNonVerbose();
+        if (verbose) {
+            return serializeResultVerbose();
+        } else
+            return serializeResultNonVerbose();
 
     }
 
@@ -50,32 +48,21 @@ public class VerboseEvaluationResultsSerializer extends EvaluationResultsSeriali
         JsonObject result = new JsonObject();
         if (expressionEntryObject == null) {
             result.add("result", new JsonPrimitive("Null"));
-        } 
-        else if (expressionEntryObject instanceof FhirBundleCursor) 
-        {
+        } else if (expressionEntryObject instanceof FhirBundleCursor) {
             performRetrieve((Iterable) expressionEntryObject, result);
-        }
-        else if (expressionEntryObject instanceof List)
-        {
-            if (((List) expressionEntryObject).size() > 0 && ((List) expressionEntryObject).get(0) instanceof IBaseResource)
-            {
+        } else if (expressionEntryObject instanceof List) {
+            if (((List) expressionEntryObject).size() > 0
+                    && ((List) expressionEntryObject).get(0) instanceof IBaseResource) {
                 performRetrieve((Iterable) expressionEntryObject, result);
-            }
-            else
-            {
+            } else {
                 result.add("result", new JsonPrimitive(expressionEntryObject.toString()));
             }
-        }
-        else if (expressionEntryObject instanceof IBaseResource)
-        {
-            result.add("result", new JsonPrimitive(this.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString((IBaseResource) expressionEntryObject)));
-        }
-        else if (expressionEntryObject instanceof org.cqframework.cql.elm.execution.FunctionDef) 
-        {
+        } else if (expressionEntryObject instanceof IBaseResource) {
+            result.add("result", new JsonPrimitive(this.getFhirContext().newJsonParser().setPrettyPrint(true)
+                    .encodeResourceToString((IBaseResource) expressionEntryObject)));
+        } else if (expressionEntryObject instanceof org.cqframework.cql.elm.execution.FunctionDef) {
             result.add("result", new JsonPrimitive("Definition successfully validated"));
-        }
-        else
-        {
+        } else {
             result.add("result", new JsonPrimitive(expressionEntryObject.toString()));
         }
         result.add("resultType", new JsonPrimitive(resolveType(expressionEntryObject)));
@@ -95,24 +82,25 @@ public class VerboseEvaluationResultsSerializer extends EvaluationResultsSeriali
 
         if (idStartingIndex != -1 && idEndingIndex != -1) {
             int objectStringIdIndex = (objectString == null) ? -1 : objectString.indexOf("@");
-            if(objectStringIdIndex != -1) {
-                objectString = objectString.substring(0, objectStringIdIndex) + "_"; 
+            if (objectStringIdIndex != -1) {
+                objectString = objectString.substring(0, objectStringIdIndex) + "_";
             }
             return objectString + serializedExpressionEntry.substring(idStartingIndex, idEndingIndex);
-        }
-        else return objectString;
+        } else
+            return objectString;
     }
 
     @Override
     protected String formatResults(String serializedResultString) {
-        if(verbose) {
+        if (verbose) {
             String lineSeperator = System.getProperty("line.separator");
-            String cleanedUpResult = removeUnwantedCharacters(serializedResultString.replace("\\n", lineSeperator), unwantedCharacters);
-            return String.format("%s.%s = %s", libraryEntryKeyId, expressionEntry.getKey(), cleanedUpResult);
-        }
-        else {
-            String cleanedUpResult = removeUnwantedCharacters(addIdOfObjectToResult(serializedResultString), unwantedCharacters);
-            return String.format("%s.%s = %s", libraryEntryKeyId, expressionEntry.getKey(), cleanedUpResult);
+            String cleanedUpResult = removeUnwantedCharacters(serializedResultString.replace("\\n", lineSeperator),
+                    unwantedCharacters);
+            return String.format("%s = %s", expressionEntry.getKey(), cleanedUpResult);
+        } else {
+            String cleanedUpResult = removeUnwantedCharacters(addIdOfObjectToResult(serializedResultString),
+                    unwantedCharacters);
+            return String.format("%s = %s", expressionEntry.getKey(), cleanedUpResult);
         }
     }
 
@@ -134,7 +122,7 @@ public class VerboseEvaluationResultsSerializer extends EvaluationResultsSeriali
             // returning full JSON retrieve response
             Object next = it.next();
             if (next != null) {
-                findings.add(parser.encodeResourceToString((org.hl7.fhir.instance.model.api.IBaseResource)next));
+                findings.add(parser.encodeResourceToString((org.hl7.fhir.instance.model.api.IBaseResource) next));
             }
         }
 
@@ -144,9 +132,12 @@ public class VerboseEvaluationResultsSerializer extends EvaluationResultsSeriali
     private String resolveType(Object result) {
         String type = result == null ? "Null" : result.getClass().getSimpleName();
         switch (type) {
-            case "BigDecimal": return "Decimal";
-            case "ArrayList": return "List";
-            case "FhirBundleCursor": return "Retrieve";
+            case "BigDecimal":
+                return "Decimal";
+            case "ArrayList":
+                return "List";
+            case "FhirBundleCursor":
+                return "Retrieve";
         }
         return type;
     }

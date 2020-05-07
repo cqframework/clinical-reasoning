@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.opencds.cqf.cql.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 
 public interface LibraryLoaderFactory {
     LibraryLoader create(List<String> libraries, EnumSet<CqlTranslator.Options> translatorOptions);

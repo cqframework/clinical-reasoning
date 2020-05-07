@@ -13,10 +13,11 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.UsingDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.data.DataProvider;
-import org.opencds.cqf.cql.execution.CqlEngine;
-import org.opencds.cqf.cql.execution.EvaluationResult;
-import org.opencds.cqf.cql.execution.LibraryLoader;
+import org.junit.internal.runners.statements.ExpectException;
+import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.service.factory.DataProviderFactory;
 import org.opencds.cqf.cql.service.factory.DefaultDataProviderFactory;
 import org.opencds.cqf.cql.service.factory.DefaultLibraryLoaderFactory;
@@ -25,8 +26,8 @@ import org.opencds.cqf.cql.service.factory.LibraryLoaderFactory;
 import org.opencds.cqf.cql.service.factory.TerminologyProviderFactory;
 import org.opencds.cqf.cql.service.resolver.DefaultParameterResolver;
 import org.opencds.cqf.cql.service.resolver.ParameterResolver;
-import org.opencds.cqf.cql.service.serialization.EvaluationResultsSerializer;
-import org.opencds.cqf.cql.terminology.TerminologyProvider;
+// import org.opencds.cqf.cql.service.serialization.EvaluationResultsSerializer;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
 public class Service {
 
@@ -35,7 +36,7 @@ public class Service {
     }
 
     private EnumSet<Options> options;
-    private EnumSet<org.opencds.cqf.cql.execution.CqlEngine.Options> engineOptions;
+    private EnumSet<org.opencds.cqf.cql.engine.execution.CqlEngine.Options> engineOptions;
     private EnumSet<CqlTranslator.Options> translatorOptions;
     private TerminologyProviderFactory terminologyProviderFactory;
     private DataProviderFactory dataProviderFactory;
@@ -53,8 +54,7 @@ public class Service {
 
     public Service(LibraryLoaderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
             TerminologyProviderFactory terminologyProviderFactory, ParameterResolver parameterResolver,
-            EnumSet<Options> options,
-            EnumSet<org.opencds.cqf.cql.execution.CqlEngine.Options> engineOptions,
+            EnumSet<Options> options, EnumSet<org.opencds.cqf.cql.engine.execution.CqlEngine.Options> engineOptions,
             EnumSet<CqlTranslator.Options> translatorOptions) {
 
         if (libraryLoaderFactory == null) {
@@ -70,11 +70,11 @@ public class Service {
         }
 
         if (parameterResolver == null) {
-           parameterResolver = new DefaultParameterResolver();
+            parameterResolver = new DefaultParameterResolver();
         }
 
         if (engineOptions == null) {
-            engineOptions = EnumSet.of(org.opencds.cqf.cql.execution.CqlEngine.Options.EnableExpressionCaching);
+            engineOptions = EnumSet.of(org.opencds.cqf.cql.engine.execution.CqlEngine.Options.EnableExpressionCaching);
         }
 
         if (options == null) {
@@ -83,12 +83,9 @@ public class Service {
 
         if (translatorOptions == null) {
             // Default for measure eval
-            translatorOptions =  EnumSet.of(
-                CqlTranslator.Options.EnableAnnotations,
-                CqlTranslator.Options.EnableLocators,
-                CqlTranslator.Options.DisableListDemotion,
-                CqlTranslator.Options.DisableListPromotion,
-                CqlTranslator.Options.DisableMethodInvocation);
+            translatorOptions = EnumSet.of(CqlTranslator.Options.EnableAnnotations,
+                    CqlTranslator.Options.EnableLocators, CqlTranslator.Options.DisableListDemotion,
+                    CqlTranslator.Options.DisableListPromotion, CqlTranslator.Options.DisableMethodInvocation);
         }
 
         this.libraryLoaderFactory = libraryLoaderFactory;
@@ -106,15 +103,15 @@ public class Service {
         LibraryLoader libraryLoader = null;
         if (parameters.libraryPath != null && !parameters.libraryPath.isEmpty()) {
             libraryLoader = this.libraryLoaderFactory.create(parameters.libraryPath, this.translatorOptions);
-        }
-        else {
+        } else {
             libraryLoader = this.libraryLoaderFactory.create(parameters.libraries, this.translatorOptions);
         }
 
         Map<VersionedIdentifier, Set<String>> expressions = this.toExpressionMap(parameters.expressions);
         Map<VersionedIdentifier, Map<String, Object>> evaluationParameters = this.toParameterMap(parameters.parameters);
 
-        // TOOD: Recursive resolve ALL libraries, not just those that are used by parameters, expressions, and library name.
+        // TOOD: Recursive resolve ALL libraries, not just those that are used by
+        // parameters, expressions, and library name.
         // Either that or have the library manager just give them all to us.
 
         Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
@@ -140,20 +137,40 @@ public class Service {
         }
 
         Map<String, Pair<String, String>> modelVersionAndUrls = getModelVersionAndUrls(libraries, parameters.modelUris);
-        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create(modelVersionAndUrls, parameters.terminologyUri);
-        Map<String, DataProvider> dataProviders = this.dataProviderFactory.create(modelVersionAndUrls, terminologyProvider);
+        TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create(modelVersionAndUrls,
+                parameters.terminologyUri);
+        Map<String, DataProvider> dataProviders = this.dataProviderFactory.create(modelVersionAndUrls,
+                terminologyProvider);
 
-        Map<String, Object> resolvedContextParameters = this.parameterResolver.resolvecontextParameters(parameters.contextParameters);
-        Map<VersionedIdentifier, Map<String, Object>> resolvedEvaluationParameters = this.parameterResolver.resolveParameters(libraries, evaluationParameters);
+        Map<String, Object> resolvedContextParameters = this.parameterResolver
+                .resolvecontextParameters(parameters.contextParameters);
+
+        // TODO: Fix context parameters API
+        var entry = resolvedContextParameters.entrySet().stream().findFirst();
+        Pair<String, Object> contextParams = null;
+        if (entry.isPresent()) {
+            contextParams = Pair.of(entry.get().getKey(), entry.get().getValue());
+        }
+        Map<VersionedIdentifier, Map<String, Object>> resolvedEvaluationParameters = this.parameterResolver
+                .resolveParameters(libraries, evaluationParameters);
+        var forReallyRealResolvedEvaluationParameters = resolvedEvaluationParameters.entrySet().stream()
+                .map(x -> Pair.of(x.getKey().getId(), x.getValue()))
+                .filter(x -> x.getLeft().equals(parameters.libraryName)).findFirst();
 
         CqlEngine engine = new CqlEngine(libraryLoader, dataProviders, terminologyProvider, this.engineOptions);
 
         EvaluationResult result = null;
-        if (parameters.libraryName != null) {
-            result = engine.evaluate(resolvedContextParameters, resolvedEvaluationParameters,
-                    this.toExecutionIdentifier(parameters.libraryName, null));
+        if (parameters.expressions == null) {
+            result = engine.evaluate(parameters.libraryName, contextParams,
+                    forReallyRealResolvedEvaluationParameters.isPresent()
+                            ? forReallyRealResolvedEvaluationParameters.get().getValue()
+                            : null);
         } else {
-            result = engine.evaluate(resolvedContextParameters, resolvedEvaluationParameters, expressions);
+            result = engine.evaluate(parameters.libraryName,
+                    expressions.entrySet().stream().findFirst().get().getValue(), contextParams,
+                    forReallyRealResolvedEvaluationParameters.isPresent()
+                            ? forReallyRealResolvedEvaluationParameters.get().getValue()
+                            : null);
         }
 
         Response response = new Response();
@@ -162,14 +179,14 @@ public class Service {
         // TODO: Non-static serializers for different models.
         Pair<String, String> versionAndUrl = modelVersionAndUrls.get("FHIR");
         if (versionAndUrl != null) {
-            EvaluationResultsSerializer.setFhirContext(versionAndUrl.getLeft());
+            // EvaluationResultsSerializer.setFhirContext(versionAndUrl.getLeft());
         }
 
         return response;
     }
 
     private Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
-        Map<String, String> modelUris) {
+            Map<String, String> modelUris) {
 
         modelUris = this.expandAliasToUri(modelUris);
         Map<String, Pair<String, String>> versions = new HashMap<>();
@@ -183,14 +200,13 @@ public class Service {
                     }
                     String version = u.getVersion();
                     if (versions.containsKey(uri)) {
-                        Pair<String,String> existing = versions.get(uri);
+                        Pair<String, String> existing = versions.get(uri);
                         if (!existing.getLeft().equals(version)) {
                             throw new IllegalArgumentException(String.format(
-                                "Libraries are using multiple versions of %s. Only one version is supported at a time.",
-                                uri));
+                                    "Libraries are using multiple versions of %s. Only one version is supported at a time.",
+                                    uri));
                         }
-                    }
-                    else {
+                    } else {
                         String url = modelUris.get(uri);
                         versions.put(uri, Pair.of(version, url));
                     }
@@ -215,11 +231,10 @@ public class Service {
             return expanded;
         }
 
-        for (Map.Entry<String, String> entry : modelUris.entrySet()){
+        for (Map.Entry<String, String> entry : modelUris.entrySet()) {
             if (aliasMap.containsKey(entry.getKey())) {
                 expanded.put(aliasMap.get(entry.getKey()), entry.getValue());
-            }
-            else {
+            } else {
                 expanded.put(entry.getKey(), entry.getValue());
             }
         }
@@ -227,12 +242,9 @@ public class Service {
         return expanded;
     }
 
-
-
     public VersionedIdentifier toExecutionIdentifier(String name, String version) {
         return new VersionedIdentifier().withId(name).withVersion(version);
     }
-
 
     private Map<VersionedIdentifier, Set<String>> toExpressionMap(List<Pair<String, String>> expressions) {
         Map<VersionedIdentifier, Set<String>> map = new HashMap<>();
@@ -275,13 +287,14 @@ public class Service {
     }
 
     private void validateParameters(Parameters parameters) {
-          // Ensure EnableFileURI option is respected. This is a potential security risk on a public server, so this must remain implemented.
-          if (!this.options.contains(Options.EnableFileUri)) {
+        // Ensure EnableFileURI option is respected. This is a potential security risk
+        // on a public server, so this must remain implemented.
+        if (!this.options.contains(Options.EnableFileUri)) {
             ensureNotFileUri(parameters.libraryPath);
             ensureNotFileUri(parameters.terminologyUri);
             if (parameters.modelUris != null) {
                 ensureNotFileUri(parameters.modelUris.values());
-            }            
+            }
         }
 
         if (parameters.libraryName == null && (parameters.expressions == null || parameters.expressions.isEmpty())) {
@@ -292,7 +305,8 @@ public class Service {
             throw new IllegalArgumentException("libraryName and expressions are mutually exclusive. Only specify one.");
         }
 
-        if ((parameters.libraries != null && !parameters.libraries.isEmpty()) && (parameters.libraryPath != null && !parameters.libraryPath.isEmpty())) {
+        if ((parameters.libraries != null && !parameters.libraries.isEmpty())
+                && (parameters.libraryPath != null && !parameters.libraryPath.isEmpty())) {
             throw new IllegalArgumentException("libraries and library path are mutually exclusive. Only specify one.");
         }
     }

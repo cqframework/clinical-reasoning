@@ -14,12 +14,12 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.opencds.cqf.cql.execution.Context;
+import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.measure.common.MeasureEvaluation;
 import org.opencds.cqf.cql.measure.common.MeasurePopulationType;
 import org.opencds.cqf.cql.measure.common.MeasureReportType;
 import org.opencds.cqf.cql.measure.common.MeasureScoring;
-import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class R4MeasureEvaluation<RT, ST extends RT> extends
         MeasureEvaluation<Measure, MeasureGroupComponent, MeasureGroupPopulationComponent, MeasureReport, MeasureReportGroupComponent, MeasureReport.MeasureReportGroupPopulationComponent, RT, ST> {

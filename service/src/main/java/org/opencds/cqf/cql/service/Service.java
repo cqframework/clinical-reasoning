@@ -160,7 +160,7 @@ public class Service {
         CqlEngine engine = new CqlEngine(libraryLoader, dataProviders, terminologyProvider, this.engineOptions);
 
         EvaluationResult result = null;
-        if (parameters.expressions == null) {
+        if (parameters.expressions == null || parameters.expressions.isEmpty()) {
             result = engine.evaluate(parameters.libraryName, contextParams,
                     forReallyRealResolvedEvaluationParameters.isPresent()
                             ? forReallyRealResolvedEvaluationParameters.get().getValue()

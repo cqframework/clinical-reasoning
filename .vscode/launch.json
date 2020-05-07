@@ -22,7 +22,7 @@
             "type": "java",
             "name": "Debug (EXM 124)",
             "request": "launch",
-            "mainClass": "com.alphora.cql.cli.Main",
+            "mainClass": "org.opencds.cqf.cql.cli.Main",
             "projectName": "cli",
             "args": [
                 "--lp",

@@ -55,6 +55,7 @@ public abstract class EvaluationResultsSerializer {
                 fhirContext = FhirContext.forDstu3();
                 break;
             case "4.0.0":
+            case "4.0.1":
                 fhirContext = FhirContext.forR4();
                 break;
             default:

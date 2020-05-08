@@ -48,6 +48,7 @@ public class DefaultTerminologyProviderFactory implements TerminologyProviderFac
                     return new Dstu3FhirTerminologyProvider(context.newRestfulGenericClient(terminologyUri));
                 }
             case "4.0.0":
+            case "4.0.1":
                 context = FhirContext.forR4();
                 if (isFileUri) {
                     return new FileBasedFhirTerminologyProvider(context, terminologyUri);

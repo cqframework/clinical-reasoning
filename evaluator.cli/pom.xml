@@ -54,6 +54,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -89,9 +90,9 @@
                                 <transformer implementation=
                                 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.opencds.cqf.cql.cli.Main</mainClass>
-                            </transformer>
-                        </transformers>
-                    </configuration>
+                                </transformer>
+                            </transformers>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

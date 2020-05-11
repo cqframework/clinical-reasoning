@@ -26,7 +26,7 @@ public abstract class EvaluationResultsSerializer {
         for (Entry<String, Object> expressionEntry : evaluationResult.expressionResults.entrySet()) {
             this.expressionEntry = expressionEntry;
             System.out.println(
-                    String.format("%s = %s", expressionEntry.getKey(), expressionEntry.getKey(), serializeResult()));
+                    String.format("%s = %s", expressionEntry.getKey(), serializeResult()));
         }
     }
 

@@ -4,7 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "type": "java",
             "name": "Debug (Attach)",
@@ -130,6 +129,25 @@
                 "../connectathon/fhir4/resources/valuesets",
                 "-c",
                 "Patient=numer-EXM104-FHIR4"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (EXM 104 R401)",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.cql.cli.Main",
+            "projectName": "cli",
+            "args": [
+                "--lp",
+                "../connectathon/fhir401/input/pagecontent/cql",
+                "--ln",
+                "EXM104",
+                "-m",
+                "FHIR=../connectathon/fhir401/input/tests/EXM104-9.1.000",
+                "-t",
+                "../connectathon/fhir401/input/vocabulary/valueset",
+                "-c",
+                "Patient=numer-EXM104"
             ]
         },
         {

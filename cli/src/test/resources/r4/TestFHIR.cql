@@ -1,5 +1,10 @@
 library TestFHIR
 
+/*
+Every expression in this library should return non-null or a list with at least one element,
+with the exception of TestPatientDeceasedDateTime, which should return null
+ */
+
 using FHIR version '4.0.1'
 
 codesystem "LOINC": 'http://loinc.org'
@@ -31,6 +36,7 @@ define TestDevice: ["Device"]
 define TestDeviceRequest: ["DeviceRequest"]
 define TestDeviceUseStatement: ["DeviceUseStatement"]
 define TestDiagnosticReport: ["DiagnosticReport"]
+define TestDocumentReference: ["DocumentReference"]
 define TestEncounter: ["Encounter"]
 define TestFamilyMemberHistory: ["FamilyMemberHistory"]
 define TestFlag: ["Flag"]
@@ -57,18 +63,33 @@ define TestSpecimen: ["Specimen"]
 define TestSubstsance: ["Substance"]
 define TestTask: ["Task"]
 
-define TestPrimitives:
+define TestPatientGender:
   Patient P
     where P.gender.value = 'male'
-      and P.active.value is true
-      and P.birthDate.value before Today()
-      and ToConcept(P.maritalStatus) in "Marital Status"
-      and ToConcept(P.maritalStatus) ~ "Marital Status - Married"
 
-define TestChoice:
+define TestPatientActive:
+  Patient P
+    where P.active.value is true
+
+define TestPatientBirthDate:
+  Patient P
+    where P.birthDate.value before Today()
+
+define TestPatientMaritalStatusMembership:
+  Patient P
+    where ToConcept(P.maritalStatus) in "Marital Status"
+
+define TestPatientMartialStatusComparison:
+  Patient P
+    where ToConcept(P.maritalStatus) ~ "Marital Status - Married"
+
+define TestPatientDeceasedAsBoolean:
   Patient P
     where (P.deceased as FHIR.boolean).value is false
-      or (P.deceased as FHIR.dateTime).value before Today()
+
+define TestPatientDeceasedAsDateTime:
+  Patient P
+    where (P.deceased as FHIR.dateTime).value before Today()
 
 define TestSlices:
   [Observation: "Blood pressure"] BP
@@ -89,8 +110,8 @@ define TestComplexExtensions:
       race: singleton from (P.extension E where E.url.value = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'),
       ombCategory: race.extension E where E.url.value = 'ombCategory',
       detailed: race.extension E where E.url.value = 'detailed'
-    where (ombCategory O return ToConcept(O.value as FHIR.CodeableConcept)) contains "American Indian or Alaska Native"
-      and (detailed O return ToConcept(O.value as FHIR.CodeableConcept)) contains "Alaska Native"
+    where exists (ombCategory O where ToCode(O.value as FHIR.Coding) ~ "American Indian or Alaska Native")
+      and exists (detailed O where ToCode(O.value as FHIR.Coding) ~ "Alaska Native")
 
 define function ToInterval(period FHIR.Period):
     if period is null then

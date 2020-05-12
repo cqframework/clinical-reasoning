@@ -1,5 +1,10 @@
 library TestFHIRWithHelpers
 
+/*
+Every expression in this library should return non-null or a list with at least one element,
+with the exception of TestPatientDeceasedDateTime, which should return null
+ */
+
 using FHIR version '4.0.1'
 
 include FHIRHelpers version '4.0.1'
@@ -33,6 +38,7 @@ define TestDevice: ["Device"]
 define TestDeviceRequest: ["DeviceRequest"]
 define TestDeviceUseStatement: ["DeviceUseStatement"]
 define TestDiagnosticReport: ["DiagnosticReport"]
+define TestDocumentReference: ["DocumentReference"]
 define TestEncounter: ["Encounter"]
 define TestFamilyMemberHistory: ["FamilyMemberHistory"]
 define TestFlag: ["Flag"]
@@ -59,18 +65,33 @@ define TestSpecimen: ["Specimen"]
 define TestSubstsance: ["Substance"]
 define TestTask: ["Task"]
 
-define TestPrimitives:
+define TestPatientGender:
   Patient P
-    where P.gender = 'male'
-      and P.active is true
-      and P.birthDate before Today()
-      and FHIRHelpers.ToConcept(P.maritalStatus) in "Marital Status"
-      and FHIRHelpers.ToConcept(P.maritalStatus) ~ "Marital Status - Married"
+    where P.gender = 'female'
 
-define TestChoice:
+define TestPatientActive:
+  Patient P
+    where P.active is true
+
+define TestPatientBirthDate:
+  Patient P
+    where P.birthDate before Today()
+
+define TestPatientMaritalStatusMembership:
+  Patient P
+    where FHIRHelpers.ToConcept(P.maritalStatus) in "Marital Status"
+
+define TestPatientMartialStatusComparison:
+  Patient P
+    where FHIRHelpers.ToConcept(P.maritalStatus) ~ "Marital Status - Married"
+
+define TestPatientDeceasedAsBoolean:
   Patient P
     where P.deceased is false
-      or P.deceased before Today()
+
+define TestPatientDeceasedAsDateTime:
+  Patient P
+    where P.deceased before Today()
 
 define TestSlices:
   [Observation: "Blood pressure"] BP
@@ -91,6 +112,6 @@ define TestComplexExtensions:
       race: singleton from (P.extension E where E.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'),
       ombCategory: race.extension E where E.url = 'ombCategory',
       detailed: race.extension E where E.url = 'detailed'
-    where (ombCategory O return FHIRHelpers.ToConcept(O.value)) contains "American Indian or Alaska Native"
-      and (detailed O return FHIRHelpers.ToConcept(O.value)) contains "Alaska Native"
+    where exists (ombCategory O where FHIRHelpers.ToCode(O.value) ~ "American Indian or Alaska Native")
+      and exists (detailed O where FHIRHelpers.ToCode(O.value) ~ "Alaska Native")
 

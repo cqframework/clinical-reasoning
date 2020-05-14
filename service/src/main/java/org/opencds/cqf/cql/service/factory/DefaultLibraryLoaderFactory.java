@@ -11,6 +11,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -29,7 +30,7 @@ import org.opencds.cqf.cql.service.provider.InMemoryLibrarySourceProvider;
 // overall in service mode due to not needing to reload models on every request.
 public class DefaultLibraryLoaderFactory implements LibraryLoaderFactory {
 
-    private static final Map<VersionedIdentifier, Model> globalCache = new HashMap<>();
+    private static final Map<VersionedIdentifier, Model> globalCache = new ConcurrentHashMap<>();
 
 
     public LibraryLoader create(List<String> libraries,

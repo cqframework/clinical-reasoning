@@ -39,15 +39,16 @@ public class TranslatingLibraryLoader implements LibraryLoader {
             return this.readXml(this.toXml(library.getLibrary()));
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
 
-    private Library readXml(String xml) throws IOException, JAXBException {
+    private synchronized Library readXml(String xml) throws IOException, JAXBException {
         return CqlLibraryReader.read(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
     }
 
-    private String toXml(org.hl7.elm.r1.Library library) {
+    private synchronized String toXml(org.hl7.elm.r1.Library library) {
         try {
             return convertToXml(library);
         }
@@ -56,13 +57,13 @@ public class TranslatingLibraryLoader implements LibraryLoader {
         }
     }
 
-    public String convertToXml(org.hl7.elm.r1.Library library) throws JAXBException {
+    public synchronized String convertToXml(org.hl7.elm.r1.Library library) throws JAXBException {
         StringWriter writer = new StringWriter();
         this.getMarshaller().marshal(new ObjectFactory().createLibrary(library), writer);
         return writer.getBuffer().toString();
     }
 
-    private Marshaller getMarshaller() throws JAXBException {
+    private synchronized Marshaller getMarshaller() throws JAXBException {
         if (marshaller == null) {
             marshaller = this.getJaxbContext().createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -71,7 +72,7 @@ public class TranslatingLibraryLoader implements LibraryLoader {
         return marshaller;
     }
 
-    private JAXBContext getJaxbContext() throws JAXBException {
+    private synchronized JAXBContext getJaxbContext() throws JAXBException {
         if (jaxbContext == null) {
             jaxbContext = JAXBContext.newInstance(org.hl7.elm.r1.Library.class, org.hl7.cql_annotations.r1.Annotation.class);
         }

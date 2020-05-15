@@ -31,9 +31,10 @@
 
         <module>evaluator.translation</module>
         <module>evaluator.execution</module>
-        <!-- <module>evaluator.builder</module> -->
-        <!-- <module>evaluator.cli</module> -->
-        <!-- <module>evaluator.rest</module>
+        <module>evaluator.builder</module>
+        <!-- <module>evaluator.cli</module>
+        <module>evaluator.serialization</module> -->
+        <!-- <module>evaluator.rest</module> 
         <module>evaluator.measure</module> -->
     </modules>
 
@@ -198,7 +199,7 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.2</version>
                 </plugin>
-                <plugin>
+                <!-- <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.1.1</version>
@@ -213,7 +214,7 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin> -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
@@ -352,10 +353,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>

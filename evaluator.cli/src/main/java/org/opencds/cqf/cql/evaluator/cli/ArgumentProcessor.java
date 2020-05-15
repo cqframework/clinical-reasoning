@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.opencds.cqf.cql.evaluator.ExpressionInfo;
-import org.opencds.cqf.cql.evaluator.ModelInfo;
-import org.opencds.cqf.cql.evaluator.ParameterInfo;
-import org.opencds.cqf.cql.evaluator.BuilderParameters;
+//import org.opencds.cqf.cql.evaluator.ExpressionInfo;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
+//import org.opencds.cqf.cql.evaluator.ParameterInfo;
+import org.opencds.cqf.cql.evaluator.builder.BuilderParameters;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -149,20 +149,19 @@ public class ArgumentProcessor {
 
         BuilderParameters ip = new BuilderParameters();
         ip.libraries = libraries;
-        ip.libraryPath = libraryPath;
+        ip.library = libraryPath;
         ip.libraryName = libraryName;
         ip.libraryVersion = libraryVersion;
-        ip.expressions = toListOfExpressions(expressions);
-        ip.terminologyUrl = terminologyUri;
+        //ip.expressions = toListOfExpressions(expressions);
+        ip.terminology = terminologyUri;
         ip.models = toModelInfoList(models);
-        ip.parameters = toParameterInfoList(parameters);
+        //ip.parameters = toParameterInfoList(parameters);
         ip.contextParameters = toMap("Context Parameters", contextParameters);
         ip.verbose = verbose;
 
         return ip;
 
     }
-
 
     private List<ModelInfo> toModelInfoList(List<KeyValuePair> keyValuePairs) {
         HashMap<String, String> map = new HashMap<>();
@@ -173,8 +172,7 @@ public class ArgumentProcessor {
 
             map.put(kvp.key, kvp.value);
         }
-
-        return map.entrySet().stream().map(x -> new ModelInfo(x.getKey(), x.getValue(), null)).collect(Collectors.toList());
+        return map.entrySet().stream().map(x -> new ModelInfo().withName(x.getKey()).withUrl(x.getValue())).collect(Collectors.toList());
     }
 
     private Map<String, String> toMap(String typeOfKeyValuePair, List<KeyValuePair> keyValuePairs) {
@@ -191,30 +189,30 @@ public class ArgumentProcessor {
         return map;
     }
 
-    private List<ExpressionInfo> toListOfExpressions(List<String> strings) {
-        List<ExpressionInfo> listOfExpressions = new  ArrayList<ExpressionInfo>();
+    // private List<ExpressionInfo> toListOfExpressions(List<String> strings) {
+    //     List<ExpressionInfo> listOfExpressions = new  ArrayList<ExpressionInfo>();
 
-        for (String s : strings) {
-            String[] parts = s.split("\\.");
-            if (parts == null || parts.length < 2) {
-                new IllegalArgumentException(String.format("%s is not a valid expression. Use the format libraryName.expressionName.", s));
-            }
+    //     for (String s : strings) {
+    //         String[] parts = s.split("\\.");
+    //         if (parts == null || parts.length < 2) {
+    //             new IllegalArgumentException(String.format("%s is not a valid expression. Use the format libraryName.expressionName.", s));
+    //         }
 
-            listOfExpressions.add(new ExpressionInfo(parts[0], parts[1]));
-        }
+    //         listOfExpressions.add(new ExpressionInfo(parts[0], parts[1]));
+    //     }
 
-        return listOfExpressions;
-    }
+    //     return listOfExpressions;
+    // }
 
     // Converts parameters from the CLI format of [libraryName.]parameterName=value to a map. Library name is optional.
-    private List<ParameterInfo> toParameterInfoList(List<KeyValuePair> keyValuePairs) {
-        List<ParameterInfo> list = new ArrayList<>();
+    // private List<ParameterInfo> toParameterInfoList(List<KeyValuePair> keyValuePairs) {
+    //     List<ParameterInfo> list = new ArrayList<>();
 
-        for (KeyValuePair kvp : keyValuePairs) {
-            String[] parts = kvp.key.split(".");
-            list.add(new ParameterInfo(parts.length > 1 ? parts[0] : null, parts.length > 1 ? parts[1] : parts[0], kvp.value));
-        }
+    //     for (KeyValuePair kvp : keyValuePairs) {
+    //         String[] parts = kvp.key.split(".");
+    //         list.add(new ParameterInfo(parts.length > 1 ? parts[0] : null, parts.length > 1 ? parts[1] : parts[0], kvp.value));
+    //     }
 
-        return list;
-    }
+    //     return list;
+    // }
 }

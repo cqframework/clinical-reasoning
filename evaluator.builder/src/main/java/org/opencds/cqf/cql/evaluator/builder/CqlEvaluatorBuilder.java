@@ -1,55 +1,44 @@
 package org.opencds.cqf.cql.evaluator.builder;
 
-import java.net.URL;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.data.DataProvider;
+import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.builder.context.BuilderContext;
-import org.opencds.cqf.cql.execution.LibraryLoader;
-import org.opencds.cqf.cql.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.evaluator.builder.context.BuilderLibraryContext;
 
-public class CqlEvaluatorBuilder {
-
-    private BuilderContext builderContext = new BuilderContext();
-
-    public CqlEvaluatorBuilder(String libraryContent) {
-        Objects.requireNonNull(libraryContent, "libraryContent can not be null");
+/**
+ * API for Building any Providers or Loaders needed for CQL Evaluation
+ */
+public class CqlEvaluatorBuilder extends BuilderLibraryContext {
+    public CqlEvaluator build(String primaryLibrary) {
+        validateBuilderContext();
+        LibraryLoader libraryLoader = this.getLibraryLoader();
+        TerminologyProvider terminologyProvider = this.getTerminologyProvider();
+        Map<String, DataProvider> dataProviders = this.getDataProvider();
+        return new CqlEvaluator(libraryLoader, primaryLibrary, dataProviders, terminologyProvider, this.getEngineOptions(), this.getPameterResolver());
+    }
+    
+    public CqlEvaluator build(VersionedIdentifier primaryLibrary) {
+        validateBuilderContext();
+        LibraryLoader libraryLoader = this.getLibraryLoader();
+        TerminologyProvider terminologyProvider = this.getTerminologyProvider();
+        Map<String, DataProvider> dataProviders = this.getDataProvider();
+        return new CqlEvaluator(libraryLoader, primaryLibrary, dataProviders, terminologyProvider, this.getEngineOptions(), this.getPameterResolver());
     }
 
-    public CqlEvaluatorBuilder(List<String> libraryContent, VersionedIdentifier libraryIdentifier) {
-        Objects.requireNonNull(libraryContent, "libraryContent can not be null");
-        if (libraryContent.isEmpty()) {
-            throw new IllegalArgumentException("libraryContent can not be empty");
-        }
-
-        Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
+    /**
+     * 
+     */
+    public void validateBuilderContext() {
 
     }
 
-    public CqlEvaluatorBuilder(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier) {
-        Objects.requireNonNull(libraryLoader, "libraryLoader can not be null");
-        Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
+    public void test() {
         
     }
-
-
-
-    public CqlEvaluatorBuilder(URL libraryUrl, VersionedIdentifier libraryIdentifier) {
-        Objects.requireNonNull(libraryUrl, "libraryUrl can not be null");
-        Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
-
-    }
-
-    public CqlEvaluatorBuilder(Bundle libraryBundle, VersionedIdentifier libraryIdentifier) {
-        Objects.requireNonNull(libraryUrl, "libraryUrl can not be null");
-        Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
-
-    }
-
     // private EnumSet<Options> evaluatorBuilderOptions;
     // public CqlEvaluatorBuilder withEvaluatorBuilderOptions(EnumSet<Options> evaluatorBuilderOptions) {
     //     Objects.requireNonNull(evaluatorBuilderOptions);
@@ -213,182 +202,11 @@ public class CqlEvaluatorBuilder {
     // withDataSources(List<ModelInfo>)
     // withDataProviders(Map<String, DataProvider>
 
-
-
-    public CqlEvaluator build() {
-        validateBuilderContext();
-
-        LibraryLoader libraryLoader = this.builderContext.getLibraryContext().buildLibraryLoader();
-        VersionedIdentifier primaryLibrary = null;
-
-        TerminologyProvider terminologyProvider = this.builderContext.getTerminologyContext().buildTerminologyProvider();
-
-        this.builderContext.getDataContext().setTerminologyProver(terminologyProvider);
-
-        Map<String, DataProvider> dataProviders = this.builderContext.getDataContext().buildDataProviders();
-
-        return new CqlEvaluator(libraryLoader, primaryLibrary, terminologyProvider, dataProviders, this.builderContext.getEngineOptions(), this.builderContext.getParameterResolver());
-    }
-
-    public void validateBuilderContext() {
-
-    }
-
     // private void ensureNotFileUri(String uri) {
     //     if (Helpers.isFileUri(uri)) {
     //         throw new IllegalArgumentException(String.format("%s is not a valid uri", uri));
     //     }
     // }
-
-    //     validateParameters(parameters);
-
-    //     LibraryLoader libraryLoader = null;
-    //     if (parameters.libraryPath != null && !parameters.libraryPath.isEmpty()) {
-    //         libraryLoader = this.libraryLoaderFactory.create(parameters.libraryPath, this.translatorOptions);
-    //     }
-    //     else {
-    //         libraryLoader = this.libraryLoaderFactory.create(parameters.libraries, this.translatorOptions);
-    //     }
-
-    //     Map<VersionedIdentifier, Set<String>> expressions = this.toExpressionMap(parameters.expressions);
-    //     Map<VersionedIdentifier, Map<String, Object>> evaluationParameters = this.toParameterMap(parameters.parameters);
-
-    //     // TOOD: Recursively resolve ALL libraries, not just those that are used by parameters, expressions, and library name.
-    //     // Either that or have the library manager just give them all to us.
-
-    //     Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
-    //     if (parameters.libraryName != null) {
-    //         Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, parameters.libraryVersion));
-    //         if (lib != null) {
-    //             libraries.put(lib.getIdentifier(), li
-    //         }
-    //     }
-
-    //     for (VersionedIdentifier v : expressions.keySet()) {
-    //         Library lib = libraryLoader.load(v);
-    //         if (lib != null && !libraries.containsKey(lib.getIdentifier())) {
-    //             libraries.put(lib.getIdentifier(), lib);
-    //         }
-    //     }
-
-    //     for (VersionedIdentifier v : evaluationParameters.keySet()) {
-    //         Library lib = libraryLoader.load(v);
-    //         if (lib != null && !libraries.containsKey(lib.getIdentifier())) {
-    //             libraries.put(lib.getIdentifier(), lib);
-    //         }
-    //     }
-
-    //     parameters.models = resolveModelVersions(libraries, parameters.models);
-
-    //     // HACK AROUND: The file-based fhir terminology provider doesn't yet know how to auto-detect
-    //     // Fhir version for json or xml resources, so we have to tell it explicitly what context to you.
-    //     FhirContext context = null;
-    //     Optional<ModelInfo> fhirInfo = parameters.models.stream().filter(x -> x.getName().equals("http://hl7.org/fhir")).findFirst();
-    //     if (fhirInfo.isPresent()) {
-    //         context = FhirVersionEnum.forVersionString(fhirInfo.get().getVersion()).newContext();
-    //     }
-    //     TerminologyProvider terminologyProvider = this.terminologyProviderFactory.create(context, parameters.terminologyUrl, parameters.clientFactory);
-    //     Map<String, DataProvider> dataProviders = this.dataProviderFactory.create(parameters.models, terminologyProvider, parameters.clientFactory);
-
-    //     Map<String, Object> resolvedContextParameters = this.parameterResolver.resolvecontextParameters(parameters.contextParameters);
-    //     Map<VersionedIdentifier, Map<String, Object>> resolvedEvaluationParameters = this.parameterResolver.resolveParameters(libraries, evaluationParameters);
-
-    //     CqlEngine engine = new CqlEngine(libraryLoader, dataProviders, terminologyProvider, this.engineOptions);
-
-    //     EvaluationResult result = null;
-    //     if (parameters.libraryName != null) {
-    //         result = engine.evaluate(resolvedContextParameters, resolvedEvaluationParameters,
-    //                 this.toExecutionIdentifier(parameters.libraryName, null));
-    //     } else {
-    //         result = engine.evaluate(resolvedContextParameters, resolvedEvaluationParameters, expressions);
-    //     }
-
-    //     Response response = new Response();
-    //     response.evaluationResult = result;
-
-    //     // TODO: Non-static serializers for different models.
-    //     // Pair<String, String> versionAndUrl = modelVersionAndUrls.get("FHIR");
-    //     // if (versionAndUrl != null) {
-    //     //     EvaluationResultsSerializer.setFhirContext(versionAndUrl.getLeft());
-    //     // }
-
-    //     return response;
-    // }
-
-    // private List<ModelInfo> resolveModelVersions(Map<VersionedIdentifier, Library> libraries, List<ModelInfo> models) {
-
-    //     models = this.expandAliasToUri(models);
-    //     Map<String, Pair<String, String>> versions = new HashMap<>();
-    //     for (Library library : libraries.values()) {
-    //         if (library.getUsings() != null && library.getUsings().getDef() != null) {
-    //             for (UsingDef u : library.getUsings().getDef()) {
-    //                 String uri = u.getUri();
-    //                 // Skip the system URI
-    //                 if (uri.equals("urn:hl7-org:elm-types:r1")) {
-    //                     continue;
-    //                 }
-    //                 String version = u.getVersion();
-    //                 if (versions.containsKey(uri)) {
-    //                     Pair<String, String> existing = versions.get(uri);
-    //                     if (!existing.getLeft().equals(version)) {
-    //                         throw new IllegalArgumentException(String.format(
-    //                                 "Libraries are using multiple versions of %s. Only one version is supported at a time.",
-    //                                 uri));
-    //                     }
-    //                 } else {
-    //                     String url = models.stream().filter(x -> x.getName().equals(uri)).findFirst().get().getUrl();
-    //                     versions.put(uri, Pair.of(version, url));
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return versions.entrySet().stream()
-    //             .map(x -> new ModelInfo(x.getKey(), x.getValue().getLeft(), x.getValue().getRight()))
-    //             .collect(Collectors.toList());
-    // }
-
-    // private List<ModelInfo> expandAliasToUri(List<ModelInfo> models) {
-    //     final Map<String, String> aliasMap = new HashMap<String, String>() {
-    //         {
-    //             put("FHIR", "http://hl7.org/fhir");
-    //             put("QUICK", "http://hl7.org/fhir");
-    //             put("QDM", "urn:healthit-gov:qdm:v5_4");
-    //         }
-    //     };
-
-    //     if (models == null) {
-    //         return null;
-    //     }
-
-    //     for (ModelInfo m : models) {
-    //         if (aliasMap.containsKey(m.getName())) {
-    //             m.setName(aliasMap.get(m.getName()));
-    //         }
-    //     }
-
-    //     return models;
-    // }
-
-    // public VersionedIdentifier toExecutionIdentifier(String name, String version) {
-    //     return new VersionedIdentifier().withId(name).withVersion(version);
-    // }
-
-    // private Map<VersionedIdentifier, Set<String>> toExpressionMap(List<ExpressionInfo> expressions) {
-    //     Map<VersionedIdentifier, Set<String>> map = new HashMap<>();
-    //     for (ExpressionInfo e : expressions) {
-    //         VersionedIdentifier vi = toExecutionIdentifier(e.getLibraryName(), null);
-    //         if (!map.containsKey(vi)) {
-    //             map.put(vi, new HashSet<>());
-    //         }
-
-    //         map.get(vi).add(e.getIdentifier());
-    //     }
-
-    //     return map;
-    // }
-
-
 
     // private void ensureNotFileUri(String uri) {
     //     if (Helpers.isFileUri(uri)) {

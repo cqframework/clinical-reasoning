@@ -21,6 +21,21 @@
     </properties>
 
     <dependencies>
+    <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.serialization</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.builder</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>service</artifactId>

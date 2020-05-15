@@ -3,14 +3,20 @@ package org.opencds.cqf.cql.evaluator.cli;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.Response;
+import org.opencds.cqf.cql.evaluator.builder.BuilderParameters;
+import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
+import org.opencds.cqf.cql.evaluator.builder.context.BuilderLibraryContext;
 import org.opencds.cqf.cql.evaluator.serialization.DefaultEvaluationResultsSerializer;
 import org.opencds.cqf.cql.evaluator.serialization.EvaluationResultsSerializer;
-
+import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.opencds.cqf.cql.execution.LibraryResult;
 
 public class Main {
@@ -30,7 +36,11 @@ public class Main {
         }
 
         try {
-            CqlEvaluator evaluator = new CqlEvaluator(EnumSet.of(CqlEvaluator.Options.EnableFileUri));
+            CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
+            Map<Pair<String, String>, String> modelVersionFileUriMap = new HashMap<Pair<String, String>, String>();
+            cqlEvaluatorBuilder.withLibraryLoader(params.library)
+                .withTerminologyProvider(params.models.get(0).getName(), params.models.get(0).getVersion(), params.terminology)
+                .withFileDataProvider(modelVersionFileUriMap)
             Response response  = evaluator.evaluate(params);
             EvaluationResultsSerializer serializer;
 
@@ -65,6 +75,7 @@ public class Main {
             putObjectVolatile.invoke(unsafe, loggerClass, offset, null);
         } catch (Exception ignored) {
         }
+    }
     // 
 
 }

@@ -2,13 +2,14 @@ package org.opencds.cqf.cql.evaluator;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.evaluator.resolver.ParameterResolver;
-import org.opencds.cqf.cql.evaluator.resolver.implementation.DefaultParameterResolver;
+import org.opencds.cqf.cql.evaluator.resolver.ParameterDeserializer;
+import org.opencds.cqf.cql.evaluator.resolver.implementation.DefaultParameterDeserializer;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.CqlEngine.Options;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -18,9 +19,9 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 // TODO: Add debug options
 public class CqlEvaluator {
 
-    private LibraryLoader libraryLoader; 
+    private LibraryLoader libraryLoader;
 
-    private ParameterResolver parameterResolver;
+    private ParameterDeserializer parameterDeserializer;
     private VersionedIdentifier libraryIdentifier;
 
     private CqlEngine cqlEngine;
@@ -33,11 +34,13 @@ public class CqlEvaluator {
         this(libraryLoader, libraryIdentifier, null, null, null, null);
     }
 
-    public CqlEvaluator(LibraryLoader libraryLoader, String libraryName, Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider) {
+    public CqlEvaluator(LibraryLoader libraryLoader, String libraryName, Map<String, DataProvider> dataProviders,
+            TerminologyProvider terminologyProvider) {
         this(libraryLoader, libraryName, dataProviders, terminologyProvider, null, null);
     }
 
-    public CqlEvaluator(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier, Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider) {
+    public CqlEvaluator(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier,
+            Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider) {
         this(libraryLoader, libraryIdentifier, dataProviders, terminologyProvider, null, null);
     }
 
@@ -45,33 +48,29 @@ public class CqlEvaluator {
         this(libraryLoader, libraryName, null, null, engineOptions, null);
     }
 
-    public CqlEvaluator(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier, EnumSet<Options> engineOptions) {
+    public CqlEvaluator(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier,
+            EnumSet<Options> engineOptions) {
         this(libraryLoader, libraryIdentifier, null, null, engineOptions, null);
     }
 
-    public CqlEvaluator(LibraryLoader libraryLoader, String libraryName, Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider, EnumSet<Options> engineOptions, ParameterResolver parameterResolver) {
-        this(libraryLoader, new VersionedIdentifier().withId(libraryName), dataProviders, terminologyProvider, engineOptions, parameterResolver);
-    }   
+    public CqlEvaluator(LibraryLoader libraryLoader, String libraryName, Map<String, DataProvider> dataProviders,
+            TerminologyProvider terminologyProvider, EnumSet<Options> engineOptions,
+            ParameterDeserializer parameterResolver) {
+        this(libraryLoader, new VersionedIdentifier().withId(libraryName), dataProviders, terminologyProvider,
+                engineOptions, parameterResolver);
+    }
 
-    public CqlEvaluator(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier, Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider, EnumSet<Options> engineOptions, ParameterResolver parameterResolver) {
-
-        if (libraryLoader == null) {
-            throw new IllegalArgumentException("libraryLoader can not be null.");
-        }
-
-        this.libraryLoader = libraryLoader;
-
-        if (libraryIdentifier == null) {
-            throw new IllegalArgumentException("libraryIdentifier can not be null.");
-        }
-
-        this.libraryIdentifier= libraryIdentifier;
+    public CqlEvaluator(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier,
+            Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider,
+            EnumSet<Options> engineOptions, ParameterDeserializer parameterResolver) {
+        this.libraryLoader = Objects.requireNonNull(libraryLoader, "libraryLoader can not be null.");
+        this.libraryIdentifier = Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null.");
 
         if (parameterResolver == null) {
-            parameterResolver = new DefaultParameterResolver(this.libraryLoader);
+            parameterResolver = new DefaultParameterDeserializer();
         }
 
-        this.cqlEngine = new CqlEngine(libraryLoader, dataProviders, terminologyProvider, engineOptions);
+        this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, engineOptions);
     }
 
     public EvaluationResult evaluate() {
@@ -106,11 +105,11 @@ public class CqlEvaluator {
         return this.cqlEngine.evaluate(this.libraryIdentifier, contextParameter, parameters);
     }
 
-    public Pair<String, Object> resolveContextParameter(Pair<String, String> unresolvedContextParameter) {
-        return this.parameterResolver.resolveContextParameters(this.libraryIdentifier, unresolvedContextParameter);
+    public Pair<String, Object> unmarshalContextParameter(Pair<String, String> contextParameter) {
+        return this.parameterDeserializer.deserializeContextParameter(contextParameter);
     }
 
-    public Map<String, Object> resolveParameters(Map<String, String> unresolvedParameters) {
-       return this.parameterResolver.resolveParameters(this.libraryIdentifier, unresolvedParameters);
+    public Map<String, Object> unmarshalParameters(Map<String, String> parameters) {
+       return this.parameterDeserializer.deserializeParameters(parameters);
     }
 }

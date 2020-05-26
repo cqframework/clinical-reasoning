@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.UsingDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -107,12 +108,12 @@ public class Main {
         }
 
         FhirContext fhirContext;
-        var version = FhirVersionEnum.forVersionString(versionAndUrl.getLeft());
-        if (version.isEqualOrNewerThan(FhirVersionEnum.R5)) {
+        var version = versionAndUrl.getLeft();
+        if (version.startsWith("5")) {
             throw new IllegalArgumentException("FHIR R5 not yet supported");
-        } else if (version.isEqualOrNewerThan(FhirVersionEnum.R4)) {
+        } else if (version.startsWith("4")) {
             fhirContext = FhirContext.forR4();
-        } else if (version.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+        } else if (version.startsWith("3")) {
             fhirContext = FhirContext.forDstu3();
         } else {
             throw new IllegalArgumentException("FHIR DSTU2 and below not supported");
@@ -213,12 +214,11 @@ public class Main {
     private static DataProvider getFhirProvider(String version, String url, TerminologyProvider terminologyProvider) {
         FhirModelResolver modelResolver;
         RetrieveProvider retrieveProvider;
-        var versionEnum = FhirVersionEnum.forVersionString(version);
-        if (versionEnum .isEqualOrNewerThan(FhirVersionEnum.R5)) {
+        if (version.startsWith("5")) {
             throw new IllegalArgumentException("FHIR R5 not yet supported");
-        } else if (versionEnum .isEqualOrNewerThan(FhirVersionEnum.R4)) {
+        } else if (version.startsWith("4")) {
             modelResolver = new R4FhirModelResolver();
-        } else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+        } else if (version.startsWith("3")) {
             modelResolver = new Dstu3FhirModelResolver();
         } else {
             throw new IllegalArgumentException("FHIR DSTU2 and below not supported");

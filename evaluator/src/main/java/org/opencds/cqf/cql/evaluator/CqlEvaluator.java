@@ -62,12 +62,12 @@ public class CqlEvaluator {
 
     public CqlEvaluator(LibraryLoader libraryLoader, VersionedIdentifier libraryIdentifier,
             Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider,
-            EnumSet<Options> engineOptions, ParameterDeserializer parameterResolver) {
+            EnumSet<Options> engineOptions, ParameterDeserializer parameterDeserializer) {
         this.libraryLoader = Objects.requireNonNull(libraryLoader, "libraryLoader can not be null.");
         this.libraryIdentifier = Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null.");
 
-        if (parameterResolver == null) {
-            parameterResolver = new DefaultParameterDeserializer();
+        if (parameterDeserializer == null) {
+            this.parameterDeserializer = new DefaultParameterDeserializer();
         }
 
         this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, engineOptions);

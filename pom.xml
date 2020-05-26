@@ -21,10 +21,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cqframework.version>1.4.9-SNAPSHOT</cqframework.version>
+        <cql-translator.version>1.4.9-SNAPSHOT</cql-translator.version>
         <cql-engine.version>1.4.0-SNAPSHOT</cql-engine.version>
         <spring-boot.version>2.1.9.RELEASE</spring-boot.version>
         <hapi.version>4.2.0</hapi.version>
+        <jopt-simple.version>5.0.4</jopt-simple.version>
+        <slf4j.version>1.7.30</slf4j.version>
     </properties>
     <modules>
         <module>evaluator</module>
@@ -32,7 +34,7 @@
         <module>evaluator.translation</module>
         <module>evaluator.execution</module>
         <!-- <module>evaluator.builder</module> -->
-        <!-- <module>evaluator.cli</module> -->
+        <module>evaluator.cli</module>
         <!-- <module>evaluator.rest</module>
         <module>evaluator.measure</module> -->
     </modules>
@@ -97,17 +99,21 @@
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql-engine.version}</version>
+<<<<<<< HEAD
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
+=======
+>>>>>>> WIP getting evaluator ready for Atom plugin
             </dependency>
             <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine.fhir</artifactId>
                 <version>${cql-engine.version}</version>
+<<<<<<< HEAD
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -120,11 +126,13 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>1.7.29</version>
                 <scope>test</scope>
+=======
+>>>>>>> WIP getting evaluator ready for Atom plugin
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql-translator.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -150,6 +158,13 @@
                 <version>${hapi.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>net.sf.jopt-simple</groupId>
+                <artifactId>jopt-simple</artifactId>
+                <version>${jopt-simple.version}</version>
+            </dependency>
+
+
             <!-- test dependencies -->
             <dependency>
                 <groupId>org.testng</groupId>
@@ -169,11 +184,21 @@
                 <version>3.3.3</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- Logging -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>1.7.29</version>
+                <version>${slf4j.version}</version>
+                <optional>true</optional>
                 <scope>test</scope>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -204,6 +229,18 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jmod-plugin</artifactId>
+                    <version>3.0.0-alpha-1</version>
+                    <extensions>true</extensions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jlink-plugin</artifactId>
+                    <version>3.0.0-alpha-1</version>
+                    <extensions>true</extensions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.0.0-M1</version>
                 </plugin>
@@ -220,6 +257,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.2</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

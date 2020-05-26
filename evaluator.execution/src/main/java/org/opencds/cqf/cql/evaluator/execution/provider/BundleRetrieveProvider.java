@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -26,21 +27,18 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 	private static final Logger logger = LoggerFactory.getLogger(BundleRetrieveProvider.class);
 
 	private IBaseBundle bundle;
-	private ModelResolver modelResolver;
+	private FhirModelResolver modelResolver;
 	private TerminologyProvider terminologyProvider;
-	private FhirContext fhirContext;
 
-	public BundleRetrieveProvider(FhirContext fhirContext, ModelResolver modelResolver, IBaseBundle bundle) {
-		this(fhirContext, modelResolver, bundle, null);
+	public BundleRetrieveProvider(FhirModelResolver modelResolver, IBaseBundle bundle) {
+		this(modelResolver, bundle, null);
 	}
 
-	public BundleRetrieveProvider(FhirContext fhirContext, ModelResolver modelResolver, IBaseBundle bundle,
+	public BundleRetrieveProvider(FhirModelResolver modelResolver, IBaseBundle bundle,
 			TerminologyProvider terminologyProvider) {
-		Objects.requireNonNull(fhirContext, "fhirContext can not be null.");
 		Objects.requireNonNull(bundle, "bundle can not be null.");
 		Objects.requireNonNull(modelResolver, "modelResolver can not be null.");
 
-		this.fhirContext = fhirContext;
 		this.modelResolver = modelResolver;
 		this.bundle = bundle;
 		this.terminologyProvider = terminologyProvider;
@@ -52,8 +50,8 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 			String dateLowPath, String dateHighPath, Interval dateRange) {
 
 		List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(
-				fhirContext, this.bundle,
-				fhirContext.getResourceDefinition(dataType).getImplementingClass());
+				this.modelResolver.getFhirContext(), this.bundle,
+				this.modelResolver.getFhirContext().getResourceDefinition(dataType).getImplementingClass());
 
 		resources = this.filterToContext(dataType, context, contextPath, contextValue, resources);
 		resources = this.filterToTerminology(dataType, codePath, codes, valueSet, resources);
@@ -140,7 +138,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 				continue;
 			}
 
-			List<Code> resourceCodes = CodeUtil.getElmCodesFromObject(value, fhirContext);
+			List<Code> resourceCodes = CodeUtil.getElmCodesFromObject(value, this.modelResolver.getFhirContext());
 			if (resourceCodes == null) {
 				continue;
 			}

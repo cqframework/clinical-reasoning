@@ -54,7 +54,7 @@ public class BundleRetrieveProviderTests {
     private RetrieveProvider getBundleRetrieveProvider(TerminologyProvider terminologyProvider) {
         var resolver = new R4FhirModelResolver();
         IBaseBundle bundle = this.loadBundle(resolver.getFhirContext(), "r4/TestBundleTwoPatients.json");
-        return new BundleRetrieveProvider(resolver.getFhirContext(), resolver, bundle, terminologyProvider);
+        return new BundleRetrieveProvider(resolver, bundle, terminologyProvider);
     }
 
     @Test

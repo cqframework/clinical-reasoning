@@ -7,7 +7,7 @@
     <artifactId>evaluator.cli</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
-    
+
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>
@@ -16,25 +16,35 @@
 
     <description>CQL Evaluator CLI</description>
 
-    <properties>
-        <jopt-version>5.0.4</jopt-version>
-    </properties>
+ 
 
     <dependencies>
+            <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-to-elm</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>service</artifactId>
+            <artifactId>engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator</artifactId>
             <version>${revision}</version>
         </dependency>
-        <!-- <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>measure</artifactId>
-            <version>${revision}</version>
-        </dependency> -->
         <dependency>
-            <groupId>net.sf.jopt-simple</groupId>
-            <artifactId>jopt-simple</artifactId>
-            <version>${jopt-version}</version>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.execution</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.translation</artifactId>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -57,7 +67,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>org.opencds.cqf.cql.cli.Main</mainClass>
+                    <mainClass>org.opencds.cqf.cql.evaluator.cli.Main</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -74,12 +84,20 @@
                             <transformers>
                                 <transformer implementation=
                                 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.opencds.cqf.cql.cli.Main</mainClass>
+                                    <mainClass>org.opencds.cqf.cql.evaluator.cli.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jmod-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jlink-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

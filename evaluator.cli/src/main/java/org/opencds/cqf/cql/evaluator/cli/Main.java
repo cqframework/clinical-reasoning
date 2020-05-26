@@ -1,72 +1,240 @@
 package org.opencds.cqf.cql.evaluator.cli;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.EnumSet;
-import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
-import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.Response;
-import org.opencds.cqf.cql.evaluator.serialization.DefaultEvaluationResultsSerializer;
-import org.opencds.cqf.cql.evaluator.serialization.EvaluationResultsSerializer;
-
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.UsingDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.execution.LibraryResult;
+import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
+import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.evaluator.CqlEvaluator;
+import org.opencds.cqf.cql.evaluator.Helpers;
+import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
+import org.opencds.cqf.cql.evaluator.cli.temporary.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.execution.provider.BundleRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.execution.provider.NoOpRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.execution.terminology.BundleTerminologyProvider;
+import org.opencds.cqf.cql.evaluator.execution.util.DirectoryBundler;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class Main {
 
     public static void main(String[] args) {
-
-        // TODO: Update cql engine dependencies
-        disableAccessWarnings();
-
-        BuilderParameters params = null;
+        EvaluationParameters parameters = null;
         try {
-            params = new ArgumentProcessor().parseAndConvert(args);
-        }
-        catch (Exception e) {
+            parameters = new ArgumentProcessor().parseAndConvert(args);
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
 
         try {
-            CqlEvaluator evaluator = new CqlEvaluator(EnumSet.of(CqlEvaluator.Options.EnableFileUri));
-            Response response  = evaluator.evaluate(params);
-            EvaluationResultsSerializer serializer;
-
-            serializer = new DefaultEvaluationResultsSerializer();
-
-        //     serializer.printResults(params.verbose, response.evaluationResult);
-        // } catch (
-
-            for (Entry<VersionedIdentifier, LibraryResult> libraryEntry : response.evaluationResult.libraryResults.entrySet()) {
-                serializer.printResults(params.verbose, libraryEntry);
+            // This is all temporary garbage to get running again.
+            Objects.requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
+            Objects.requireNonNull(parameters.libraryName, "Gotta have a libraryName");
+            Objects.requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
+            Objects.requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
+            Objects.requireNonNull(parameters.model, "Gotta have a model");
+            if (!Helpers.isFileUri(parameters.libraryUrl)) {
+                throw new IllegalArgumentException("libraryUrl must be a local directory for now. Sorry!");
             }
-        }
-        catch (Exception e) {
+
+            if (!Helpers.isFileUri(parameters.terminologyUrl)) {
+                throw new IllegalArgumentException("terminologyUrl must be a local directory for now. Sorry!");
+            }
+
+            if (!Helpers.isFileUri(parameters.model.getValue())) {
+                throw new IllegalArgumentException("model Urls must be a local directory for now. Sorry!");
+            }
+
+            LibraryLoader libraryLoader = new LibraryLoaderFactory().create(parameters.libraryUrl);
+
+            Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
+            if (parameters.libraryName != null) {
+                Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, null));
+                if (lib != null) {
+                    libraries.put(lib.getIdentifier(), lib);
+                }
+            }
+
+            Map<String, Pair<String, String>> modelVersionAndUrls = getModelVersionAndUrls(libraries, parameters.model);
+            TerminologyProvider terminologyProvider = create(modelVersionAndUrls, parameters.terminologyUrl);
+            Map<String, DataProvider> dataProviders = create(modelVersionAndUrls, terminologyProvider);
+
+            CqlEvaluator evaluator = new CqlEvaluator(libraryLoader, parameters.libraryName, dataProviders,
+                    terminologyProvider);
+            var contextParameter = evaluator.unmarshalContextParameter(parameters.contextParameter);
+            EvaluationResult result = evaluator.evaluate(contextParameter);
+
+            for (var libraryEntry : result.expressionResults.entrySet()) {
+                System.out.println(libraryEntry.getKey() + "=" + libraryEntry.getValue().toString());
+            }
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static void disableAccessWarnings() {
-        try {
-            Class unsafeClass = Class.forName("sun.misc.Unsafe");
-            Field field = unsafeClass.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
-            Object unsafe = field.get(null);
-
-            Method putObjectVolatile = unsafeClass.getDeclaredMethod("putObjectVolatile", Object.class, long.class, Object.class);
-            Method staticFieldOffset = unsafeClass.getDeclaredMethod("staticFieldOffset", Field.class);
-
-            Class loggerClass = Class.forName("jdk.internal.module.IllegalAccessLogger");
-            Field loggerField = loggerClass.getDeclaredField("logger");
-            Long offset = (Long) staticFieldOffset.invoke(unsafe, loggerField);
-            putObjectVolatile.invoke(unsafe, loggerClass, offset, null);
-        } catch (Exception ignored) {
+    // TODO: Remove this once builder is complete:
+    private static TerminologyProvider create(Map<String, Pair<String, String>> modelVersionsAndUrls,
+            String terminologyUri) {
+        if (terminologyUri == null || terminologyUri.isEmpty()) {
+            return null;
         }
-    // 
+
+        // We currently only support FHIR-based terminology
+        // We assume that the terminology version is the same
+        // As the data version
+        Pair<String, String> versionAndUrl = modelVersionsAndUrls.get("http://hl7.org/fhir");
+        if (versionAndUrl == null) {
+            // Assume FHIR 3.0.0
+            versionAndUrl = Pair.of("3.0.0", null);
+        }
+
+        FhirContext fhirContext;
+        var version = FhirVersionEnum.forVersionString(versionAndUrl.getLeft());
+        if (version.isEqualOrNewerThan(FhirVersionEnum.R5)) {
+            throw new IllegalArgumentException("FHIR R5 not yet supported");
+        } else if (version.isEqualOrNewerThan(FhirVersionEnum.R4)) {
+            fhirContext = FhirContext.forR4();
+        } else if (version.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+            fhirContext = FhirContext.forDstu3();
+        } else {
+            throw new IllegalArgumentException("FHIR DSTU2 and below not supported");
+        }
+
+        return new BundleTerminologyProvider(fhirContext, new DirectoryBundler(fhirContext).bundle(terminologyUri));
+    }
+
+    // TODO: More stuff to remove once builder is ready.
+    private static Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
+            Pair<String, String> modelUrl) {
+
+        modelUrl = expandAliasToUri(modelUrl);
+        Map<String, Pair<String, String>> versions = new HashMap<>();
+        for (Library library : libraries.values()) {
+            if (library.getUsings() != null && library.getUsings().getDef() != null) {
+                for (UsingDef u : library.getUsings().getDef()) {
+                    String uri = u.getUri();
+                    // Skip the system URI
+                    if (uri.equals("urn:hl7-org:elm-types:r1")) {
+                        continue;
+                    }
+                    String version = u.getVersion();
+                    if (versions.containsKey(uri)) {
+                        Pair<String, String> existing = versions.get(uri);
+                        if (!existing.getLeft().equals(version)) {
+                            throw new IllegalArgumentException(String.format(
+                                    "Libraries are using multiple versions of %s. Only one version is supported at a time.",
+                                    uri));
+                        }
+                    } else if (uri.equals(modelUrl.getLeft())) {
+                        versions.put(uri, Pair.of(version, modelUrl.getRight()));
+                    }
+                    else {
+                        versions.put(uri, Pair.of(version, null));
+                    }
+                }
+            }
+        }
+
+        return versions;
+    }
+
+    private static Pair<String, String> expandAliasToUri(Pair<String, String> modelUrl) {
+        final Map<String, String> aliasMap = new HashMap<String, String>() {
+            {
+                put("FHIR", "http://hl7.org/fhir");
+                put("QUICK", "http://hl7.org/fhir");
+                put("QDM", "urn:healthit-gov:qdm:v5_4");
+            }
+        };
+
+        if (modelUrl == null) {
+            return null;
+        }
+
+        if (aliasMap.containsKey(modelUrl.getLeft())) {
+            return Pair.of(aliasMap.get(modelUrl.getLeft()), modelUrl.getRight());
+        }
+
+        return modelUrl;
+    }
+
+    public static VersionedIdentifier toExecutionIdentifier(String name, String version) {
+        return new VersionedIdentifier().withId(name).withVersion(version);
+    }
+
+    public static Map<String, DataProvider> create(Map<String, Pair<String, String>> modelVersionsAndUrls,
+            TerminologyProvider terminologyProvider) {
+        return getProviders(modelVersionsAndUrls, terminologyProvider);
+    }
+
+    private static Map<String, DataProvider> getProviders(Map<String, Pair<String, String>> versions,
+            TerminologyProvider terminologyProvider) {
+        Map<String, DataProvider> providers = new HashMap<>();
+        for (Map.Entry<String, Pair<String, String>> m : versions.entrySet()) {
+            providers.put(m.getKey(),
+                    getProvider(m.getKey(), m.getValue().getLeft(), m.getValue().getRight(), terminologyProvider));
+        }
+
+        return providers;
+    }
+
+    private static DataProvider getProvider(String model, String version, String url,
+            TerminologyProvider terminologyProvider) {
+        switch (model) {
+            case "http://hl7.org/fhir":
+                return getFhirProvider(version, url, terminologyProvider);
+
+            case "urn:healthit-gov:qdm:v5_4":
+                return getQdmProvider(version, url, terminologyProvider);
+
+            default:
+                throw new IllegalArgumentException(String.format("Unknown data provider uri: %s", model));
+        }
+    }
+
+    private static DataProvider getFhirProvider(String version, String url, TerminologyProvider terminologyProvider) {
+        FhirModelResolver modelResolver;
+        RetrieveProvider retrieveProvider;
+        var versionEnum = FhirVersionEnum.forVersionString(version);
+        if (versionEnum .isEqualOrNewerThan(FhirVersionEnum.R5)) {
+            throw new IllegalArgumentException("FHIR R5 not yet supported");
+        } else if (versionEnum .isEqualOrNewerThan(FhirVersionEnum.R4)) {
+            modelResolver = new R4FhirModelResolver();
+        } else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+            modelResolver = new Dstu3FhirModelResolver();
+        } else {
+            throw new IllegalArgumentException("FHIR DSTU2 and below not supported");
+        }
+
+        if (url == null) {
+            retrieveProvider = new NoOpRetrieveProvider();
+        } else {
+            retrieveProvider = new BundleRetrieveProvider(modelResolver, new DirectoryBundler(modelResolver.getFhirContext()).bundle(url), terminologyProvider);
+        }
+
+        return new CompositeDataProvider(modelResolver, retrieveProvider);
+    }
+
+    private static DataProvider getQdmProvider(String version, String uri, TerminologyProvider terminologyProvider) {
+        throw new NotImplementedException("QDM data providers are not yet implemented");
+    }
 
 }

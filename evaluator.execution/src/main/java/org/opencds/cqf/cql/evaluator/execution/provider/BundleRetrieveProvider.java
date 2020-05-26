@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -98,26 +99,27 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 	// Special case filtering to handle "codes" that are actually ids. This is a
 	// workaround to handle filtering by Id.
 	private boolean isPrimitiveMatch(String dataType, IPrimitiveType<?> code, Iterable<Code> codes) {
-			if (code == null || codes == null) {
-				return false;
-			}
-
-			// This handles the case that the value is a reference such as "Medication/med-id"
-			var primitiveString = code.getValueAsString().replace(dataType + "/", "");
-			for (Object c : codes) {
-				if (c instanceof String) {
-					var s = (String)c;
-					if (s.equals(primitiveString)) {
-						return true;
-					}
-				}
-			}
-
+		if (code == null || codes == null) {
 			return false;
 		}
 
-	private List<? extends IBaseResource> filterToTerminology(String dataType, String codePath, Iterable<Code> codes, String valueSet,
-			List<? extends IBaseResource> resources) {
+		// This handles the case that the value is a reference such as
+		// "Medication/med-id"
+		var primitiveString = code.getValueAsString().replace(dataType + "/", "");
+		for (Object c : codes) {
+			if (c instanceof String) {
+				var s = (String) c;
+				if (s.equals(primitiveString)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private List<? extends IBaseResource> filterToTerminology(String dataType, String codePath, Iterable<Code> codes,
+			String valueSet, List<? extends IBaseResource> resources) {
 		if (codes == null && valueSet == null) {
 			return resources;
 		}
@@ -132,7 +134,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 			Object value = this.modelResolver.resolvePath(res, codePath);
 
 			if (value instanceof IPrimitiveType) {
-				if (isPrimitiveMatch(dataType, (IPrimitiveType<?>)value, codes)) {
+				if (isPrimitiveMatch(dataType, (IPrimitiveType<?>) value, codes)) {
 					filtered.add(res);
 				}
 				continue;
@@ -170,23 +172,40 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 
 		for (IBaseResource res : resources) {
 			Object resContextValue = this.modelResolver.resolvePath(res, contextPath);
-			IPrimitiveType<?> referenceValue = (IPrimitiveType<?>) this.modelResolver
-					.resolvePath(resContextValue, "reference");
-			if (referenceValue == null) {
-				logger.info("Found {} resource unrelated to context. Skipping.", dataType);
-				continue;
-			}
+			if (resContextValue instanceof IIdType) {
+				String id = ((IPrimitiveType<String>) resContextValue).getValue();
+				if (id == null) {
+					logger.info("Found null id for {} resource. Skipping.", dataType);
+					continue;
+				}
 
-			String referenceString = referenceValue.getValueAsString();
-			if (referenceString.contains("/")) {
-				referenceString = referenceString.substring(referenceString.indexOf("/") + 1,
-						referenceString.length());
-			}
+				if (id.contains("/")) {
+					id = id.split("/")[1];
+				}
+				
+				if (!id.equals(contextValue)) {
+					logger.info("Found {} with id  {}. Skipping.", dataType, id);
+					continue;
+				}
+			} else {
+				IPrimitiveType<?> referenceValue = (IPrimitiveType<?>) this.modelResolver.resolvePath(resContextValue,
+						"reference");
+				if (referenceValue == null) {
+					logger.info("Found {} resource unrelated to context. Skipping.", dataType);
+					continue;
+				}
 
-			if (!referenceString.equals((String) contextValue)) {
-				logger.info("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
-						referenceString, (String) contextValue);
-				continue;
+				String referenceString = referenceValue.getValueAsString();
+				if (referenceString.contains("/")) {
+					referenceString = referenceString.substring(referenceString.indexOf("/") + 1,
+							referenceString.length());
+				}
+
+				if (!referenceString.equals((String) contextValue)) {
+					logger.info("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
+							referenceString, (String) contextValue);
+					continue;
+				}
 			}
 
 			filtered.add(res);

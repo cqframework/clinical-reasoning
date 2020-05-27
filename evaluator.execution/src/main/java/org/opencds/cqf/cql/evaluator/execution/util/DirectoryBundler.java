@@ -117,9 +117,9 @@ public class DirectoryBundler {
     private List<IBaseResource> flatten(FhirContext fhirContext, IBaseBundle bundle) {
         List<IBaseResource> resources = new ArrayList<>();
 
-        // Don't load transaction bundles
+        // Only load collection-type bundles
         // TODO: discuss this with Bryn
-        if (BundleUtil.getBundleType(fhirContext, bundle).equals("transaction")) {
+        if (!BundleUtil.getBundleType(fhirContext, bundle).equals("collection")) {
             return resources;
         }
 

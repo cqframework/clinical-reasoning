@@ -9,7 +9,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.UsingDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.hl7.fhir.r4.model.Enumerations.FHIRVersion;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -17,7 +16,6 @@ import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
@@ -30,7 +28,6 @@ import org.opencds.cqf.cql.evaluator.execution.terminology.BundleTerminologyProv
 import org.opencds.cqf.cql.evaluator.execution.util.DirectoryBundler;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class Main {
 
@@ -159,6 +156,8 @@ public class Main {
 
     private static Pair<String, String> expandAliasToUri(Pair<String, String> modelUrl) {
         final Map<String, String> aliasMap = new HashMap<String, String>() {
+            private static final long serialVersionUID = 1L;
+
             {
                 put("FHIR", "http://hl7.org/fhir");
                 put("QUICK", "http://hl7.org/fhir");
@@ -211,6 +210,7 @@ public class Main {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static DataProvider getFhirProvider(String version, String url, TerminologyProvider terminologyProvider) {
         FhirModelResolver modelResolver;
         RetrieveProvider retrieveProvider;

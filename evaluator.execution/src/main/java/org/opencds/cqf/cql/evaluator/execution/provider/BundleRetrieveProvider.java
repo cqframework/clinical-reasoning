@@ -10,7 +10,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -20,9 +19,9 @@ import org.opencds.cqf.cql.evaluator.execution.util.CodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleUtil;
 
+@SuppressWarnings("rawtypes")
 public class BundleRetrieveProvider implements RetrieveProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(BundleRetrieveProvider.class);
@@ -173,7 +172,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 		for (IBaseResource res : resources) {
 			Object resContextValue = this.modelResolver.resolvePath(res, contextPath);
 			if (resContextValue instanceof IIdType) {
-				String id = ((IPrimitiveType<String>) resContextValue).getValue();
+				String id = ((IIdType)resContextValue).getValue();
 				if (id == null) {
 					logger.info("Found null id for {} resource. Skipping.", dataType);
 					continue;

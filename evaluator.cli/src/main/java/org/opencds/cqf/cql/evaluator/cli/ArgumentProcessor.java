@@ -14,7 +14,7 @@ import joptsimple.util.KeyValuePair;
 
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
 
-
+@SuppressWarnings({ "unchecked", "unused"})
 public class ArgumentProcessor {
     public static final String[] LIBRARY_OPTIONS = {"l", "library"};
 

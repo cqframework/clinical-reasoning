@@ -105,7 +105,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
 
             if (codes == null) {
-                logger.warn("ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
+                logger.info("ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
                 codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
             }
 

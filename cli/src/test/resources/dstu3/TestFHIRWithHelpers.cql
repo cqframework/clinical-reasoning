@@ -94,3 +94,5 @@ define TestComplexExtensions:
     where exists (ombCategory O where FHIRHelpers.ToCode(O.value) ~ "American Indian or Alaska Native")
       and exists (detailed O where FHIRHelpers.ToCode(O.value) ~ "Shoshone")
 
+define TestCql:
+  Message(TestSimpleExtensions, TestSimpleExtensions is not null, 'Error', 'TestSimpleExtensions is not null')

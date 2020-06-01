@@ -85,6 +85,7 @@ define TestSlices:
     where BP.SystolicBP.value < 140 'mm[Hg]'
       and BP.DiastolicBP.value < 90 'mm[Hg]'
 
+/*
 define TestSimpleExtensions:
   Patient P
     where P.birthsex = 'M'
@@ -93,3 +94,4 @@ define TestComplexExtensions:
   Patient P
     where exists (P.race.ombCategory C where C ~ "American Indian or Alaska Native")
       and exists (P.race.detailed C where C ~ "Shoshone")
+*/

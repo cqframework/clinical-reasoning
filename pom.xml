@@ -3,14 +3,17 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- This pom contains shared build settings. It's flattened and removed at build time-->
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>base</artifactId>
+    <artifactId>evaluator.shared</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
+    <description>CQL Evaluator Project</description>
+
     <properties>
         <version.major>1</version.major>
-        <version.minor>2</version.minor>
+        <version.minor>0</version.minor>
         <version.patch>0</version.patch>
         <!-- NOTE: Building under the release profile automatically drops the -SNAPSHOT extension -->
         <revision>${version.major}.${version.minor}.${version.patch}-SNAPSHOT</revision>
@@ -18,21 +21,23 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cqframework.version>1.4.9-SNAPSHOT</cqframework.version>
+        <cql-translator.version>1.4.9-SNAPSHOT</cql-translator.version>
         <cql-engine.version>1.4.0-SNAPSHOT</cql-engine.version>
         <spring-boot.version>2.1.9.RELEASE</spring-boot.version>
+        <hapi.version>4.2.0</hapi.version>
+        <jopt-simple.version>5.0.4</jopt-simple.version>
+        <slf4j.version>1.7.30</slf4j.version>
     </properties>
     <modules>
-        <module>service</module>
-        <module>cli</module>
-        <module>rest</module>
-        <module>measure</module>
+        <module>evaluator</module>
+
+        <module>evaluator.translation</module>
+        <module>evaluator.execution</module>
+        <!-- <module>evaluator.builder</module> -->
+        <module>evaluator.cli</module>
+        <!-- <module>evaluator.rest</module>
+        <module>evaluator.measure</module> -->
     </modules>
-
-
-    <name>base</name>
-    <description>Base project for CQL modules</description>
-    <url>https://github.com/DBCG/org-opencds-cqf-cql/tree/master</url>
 
     <licenses>
         <license>
@@ -51,9 +56,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/DBCG/org-opencds-cqf-cql.git</connection>
-        <developerConnection>scm:git:ssh://github.com:DBCG/org-opencds-cqf-cql.git</developerConnection>
-        <url>http://github.com/DBCG/org-opencds-cqf-cql.git/tree/master</url>
+        <connection>scm:git:git://github.com/DBCG/cql-evaluator.git</connection>
+        <developerConnection>scm:git:ssh://github.com:DBCG/cql-evaluator.git</developerConnection>
+        <url>http://github.com/DBCG/cql-evaluator.git/tree/master</url>
     </scm>
 
     <repositories>
@@ -113,15 +118,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>1.7.29</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql-translator.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -129,28 +128,111 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <!-- HAPI depedencies -->
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-client</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-dstu3</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-r4</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.sf.jopt-simple</groupId>
+                <artifactId>jopt-simple</artifactId>
+                <version>${jopt-simple.version}</version>
+            </dependency>
+
+
+            <!-- test dependencies -->
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.8.8</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-all</artifactId>
+                <version>1.3</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>3.3.3</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Logging -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+                <optional>true</optional>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+                <optional>true</optional>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <!-- Dependencies shared by all projects -->
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
     </dependencies>
+
     <build>
+        <defaultGoal>package</defaultGoal>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jmod-plugin</artifactId>
+                    <version>3.0.0-alpha-1</version>
+                    <extensions>true</extensions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jlink-plugin</artifactId>
+                    <version>3.0.0-alpha-1</version>
+                    <extensions>true</extensions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -164,6 +246,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.2</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -293,7 +382,7 @@
                     <version>1.1.0</version>
                     <configuration>
                         <updatePomFile>true</updatePomFile>
-                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                        <flattenMode>ossrh</flattenMode>
                     </configuration>
                     <executions>
                         <execution>
@@ -308,6 +397,25 @@
                             <phase>clean</phase>
                             <goals>
                                 <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.2</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>report</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -334,6 +442,18 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <inherited>false</inherited>
             </plugin>
         </plugins>
     </build>

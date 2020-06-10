@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.resolver.implementation;
+package org.opencds.cqf.cql.evaluator.resolver.implementation.implementation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,9 +6,8 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.cql.evaluator.resolver.ParameterResolver;
 
-public class DefaultParameterResolver implements ParameterResolver {
+public class DefaultParameterResolver {
 
     LibraryLoader libraryLoader;
 
@@ -18,7 +17,6 @@ public class DefaultParameterResolver implements ParameterResolver {
         }
     }
 
-    @Override
     public Pair<String, Object>  resolveContextParameters(VersionedIdentifier libraryIdentifier, Pair<String, String> contextParameter) {
         if (contextParameter == null) {
             return null;
@@ -33,7 +31,6 @@ public class DefaultParameterResolver implements ParameterResolver {
         return Pair.of(contextParameter.getLeft(), contextParameter.getRight());
     }
 
-    @Override
     public Map<String, Object> resolveParameters(VersionedIdentifier libraryIdentifier, Map<String, String> parameters) {
         if (parameters == null) {
             return null;

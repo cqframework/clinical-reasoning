@@ -16,6 +16,10 @@
         <version>${revision}</version>
     </parent>
 
+    <properties>
+        <hapi.version>4.2.0</hapi.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>info.cqframework</groupId>
@@ -24,6 +28,52 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-to-elm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.execution</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.translation</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.json/javax.json-api -->
+        <dependency>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+            <version>1.1.4</version>
+        </dependency>
+        <!-- This dependency includes the JPA server itself, which is packaged separately from the rest of HAPI FHIR -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-jpaserver-base</artifactId>
+            <version>${hapi.version}</version>
+        </dependency>
+        <!-- HAPI-FHIR uses Logback for logging support. The logback library is included automatically by Maven as a part of the hapi-fhir-base dependency, but you also need to include a logging library. Logback
+            is used here, but log4j would also be fine. -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
         </dependency>
     </dependencies>
 </project>

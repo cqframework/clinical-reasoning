@@ -1,5 +1,9 @@
 package org.opencds.cqf.cql.evaluator.builder.factory;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 /**
@@ -10,6 +14,9 @@ public interface ClientFactory {
      * create a HAPI Client using a URL
      * @param url url to Client
      * @return HAPI Generic Client
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws URISyntaxException
      */
-    public IGenericClient create(String url);
+    public IGenericClient create(URL url) throws IOException, InterruptedException, URISyntaxException;
 }

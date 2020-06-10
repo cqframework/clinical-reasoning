@@ -1,16 +1,20 @@
 package org.opencds.cqf.cql.evaluator.builder.context;
 
 import java.util.EnumSet;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.builder.Options;
-import org.opencds.cqf.cql.evaluator.resolver.ParameterResolver;
+import org.opencds.cqf.cql.evaluator.builder.factory.ClientFactory;
+import org.opencds.cqf.cql.evaluator.builder.factory.DefaultClientFactory;
+import org.opencds.cqf.cql.evaluator.resolver.ParameterDeserializer;
+import org.opencds.cqf.cql.evaluator.resolver.implementation.DefaultParameterDeserializer;
 
 /**
  * Provides any Context needed for CQL Evaluation
@@ -20,9 +24,13 @@ public abstract class BuilderContext {
     protected TerminologyProvider terminologyProvider;
     protected LibraryLoader libraryLoader;
     protected Map<String, DataProvider> dataProviderMap;
-    protected List<ModelInfo> models;
+    protected Map<String, Pair<String, String>> models = new HashMap<String, Pair<String, String>>();
+    protected ClientFactory clientFactory = new DefaultClientFactory();
+    protected ParameterDeserializer parameterDeserializer;
 
-    private EnumSet<Options> options = EnumSet.noneOf(Options.class);
+    private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
+    // for the future provide some defaultOptions for the Engine
+    EnumSet<org.opencds.cqf.cql.engine.execution.CqlEngine.Options> engineOptions = null;
 
     /**
      * Default BuilderContext
@@ -40,37 +48,61 @@ public abstract class BuilderContext {
     }
 
     /**
-     * get Options
-     * @return Options
+     * set Translator Options
+     * @param cqlTranslatorOptions to be used
      */
-    public EnumSet<Options> getOptions() {
-        return this.options;
+    public void setTranslatorOptions(CqlTranslatorOptions cqlTranslatorOptions) {
+        Objects.requireNonNull(cqlTranslatorOptions, "cqlTranslatorOptions can not be null.");
+        this.cqlTranslatorOptions = cqlTranslatorOptions;
     }
 
     /**
-     * Set Options
-     * @param options options to be used
+     * get Translator Options
+     * @return Translator Options
      */
-    public void setOptions(EnumSet<Options> options) {
-        Objects.requireNonNull(options, "options can not be null.");
-        this.options = options;
+	public CqlTranslatorOptions getTranslatorOptions() {
+        return this.cqlTranslatorOptions;
     }
-
+    
+    /**
+     * set Engine Options
+     * @param engineOptions Engine Options to be used
+     */
+    public void setEngineOptions(EnumSet<CqlEngine.Options> engineOptions) {
+        // Objects.requireNonNull(engineOptions, "engineOptions can not be null."); Need to move default engine options in first
+        this.engineOptions = engineOptions;
+    }
+    
     /**
      * get Engine Options
      * @return Engine Options
      */
 	public EnumSet<org.opencds.cqf.cql.engine.execution.CqlEngine.Options> getEngineOptions() {
-        //todo engine options
-		return null;
+        return this.engineOptions;
 	}
 
     /**
-     * 
+     *
+     * @return default resolved parameters resolved parameters
+     */
+	public ParameterDeserializer getDefaultParameterDeserializer() {
+		return new DefaultParameterDeserializer();
+    }
+
+    /**
+     *
      * @return resolved parameters
      */
-	public ParameterResolver getPameterResolver() {
-		return null;
+	public ParameterDeserializer getParameterDeserializer() {
+		return this.parameterDeserializer;
+    }
+
+    /**
+     *
+     * @param parameterDeserializer to be used
+     */
+	public void setParameterDeserializer(ParameterDeserializer parameterDeserializer) {
+		this.parameterDeserializer = parameterDeserializer;
     }
 
     /**
@@ -95,5 +127,13 @@ public abstract class BuilderContext {
      */
 	public LibraryLoader getLibraryLoader() {
 		return this.libraryLoader;
+    }
+
+    public ClientFactory getClientFactory() {
+        return clientFactory;
+    }
+
+    public void setClientFactory(ClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
     }
 }

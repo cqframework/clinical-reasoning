@@ -64,13 +64,22 @@ public class ModelVersionHelper {
 
         if (usingStatementIndex >= 0) {
             String[] includedDefsAndBelow = libraryContent.substring(usingStatementIndex).split("\\n");
+            
+            for (String string : includedDefsAndBelow) {
+                if (string.contains("\\n")) {
+                    includedDefsAndBelow = string.split("\\\\n");
+                }
+            }
 
             while (includedDefsAndBelow[index].startsWith("using")) {
                 String alias = includedDefsAndBelow[index].replace("using ", "").split(" version ")[0];
                 String version = includedDefsAndBelow[index].replace("using ", "").split(" version ")[1]
                         .replaceAll("\'", "").split(" called")[0];
+                // if (version.contains("\\\\n")) {
+                //     version = version.split("\\\\n")[0];
+                // }
                 Pair<String, String> modelUrlPair = expandAliasToUri(Pair.of(alias, null));
-                models.put(modelUrlPair.getLeft(), Pair.of(version, null));
+                models.putIfAbsent(modelUrlPair.getLeft(), Pair.of(version, null));
                 index++;
             }
         }

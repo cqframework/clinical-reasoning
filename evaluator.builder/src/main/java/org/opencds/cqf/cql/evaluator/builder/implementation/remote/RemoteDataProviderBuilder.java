@@ -53,7 +53,6 @@ public class RemoteDataProviderBuilder {
     private Pair<String, DataProvider> forFhirProviderClients(IGenericClient client) {
         FhirModelResolver modelResolver;
         RetrieveProvider retrieveProvider;
-        //Should I add a check to compare data fhir context to Library fhir context?
         FhirContext fhirContext = client.getFhirContext();
         FhirVersionEnum versionEnum = fhirContext.getVersion().getVersion();
         if (versionEnum.isOlderThan(FhirVersionEnum.DSTU2)) {
@@ -75,7 +74,7 @@ public class RemoteDataProviderBuilder {
             throw new NotImplementedException("Sorry there is no implementation for anything newer than or equal to R5 as of now.");
         }
         else {
-            throw new UnknownElement("Unknown Fhir Version Enum");
+            throw new UnknownElement("Unknown Fhir Version Enum.");
         }
         return Pair.of("http://hl7.org/fhir", new CompositeDataProvider(modelResolver, retrieveProvider));
     }

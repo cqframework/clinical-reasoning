@@ -18,25 +18,18 @@ public class BundleTerminologyProviderBuilder {
 	private FhirContext fhirContext;
 
 	public TerminologyProvider build(Map<String, Pair<String, String>> models, IBaseBundle bundle) {
-		Pair<String, String> modelVersionPair = models.get("http://hl7.org/fhir");
-        if (modelVersionPair == null) {
-            // Assume FHIR 3.0.0 Not sure if this is desired in production
-            modelVersionPair = Pair.of("http://hl7.org/fhir", "3.0.0");
-		}
-		//Could also use compare to bundle versionEnum? to validate bundle is the same as the library model
-		setFhirContext(modelVersionPair.getLeft(), modelVersionPair.getRight());
-
+        if (models.containsKey("http://hl7.org/fhir")) {
+            Pair<String, String> modelVersionPair = Pair.of("http://hl7.org/fhir", models.get("http://hl7.org/fhir").getLeft());
+            if (modelVersionPair.getRight() == null) {
+                // Assume FHIR 3.0.0 Not sure if this is desired in production
+                modelVersionPair = Pair.of("http://hl7.org/fhir", "3.0.0");
+            }
+            setFhirContext(modelVersionPair.getRight());
+        } else {
+            throw new IllegalArgumentException(String.format("We currently only support FHIR-based terminology, Unknown Model: %s", models.keySet().toString()));
+        }
         return new BundleTerminologyProvider(fhirContext, bundle);
 	}
-
-	private void setFhirContext(String model, String version) {
-        if(model.equals("http://hl7.org/fhir") || model == null) {
-            setFhirContext(version);
-        }
-        else {
-            throw new IllegalArgumentException(String.format("We currently only support FHIR-based terminology, Unknown Model: %s", model));
-        }
-    }
 
     private void setFhirContext(String version) {
         FhirVersionEnum versionEnum = ModelVersionHelper.forVersionString(version);

@@ -28,7 +28,7 @@ public class BundleDataProviderBuilder {
     //Should this compare to the Library Models and is there any chance of multiple bundles for different Model versions?
 	public Map<String, DataProvider> build(IBaseBundle bundle) {
         Map<String, DataProvider> providers = new HashMap<>();
-        providers.put(bundle.getStructureFhirVersionEnum().getFhirVersionString(), getFhirProvider(bundle));
+        providers.put("http://hl7.org/fhir", getFhirProvider(bundle));
         return providers;
     }
 

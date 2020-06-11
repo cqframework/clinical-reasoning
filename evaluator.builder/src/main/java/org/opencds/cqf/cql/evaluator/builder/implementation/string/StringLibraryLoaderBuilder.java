@@ -20,7 +20,7 @@ public class StringLibraryLoaderBuilder {
 		ModelManager modelManager = new ModelManager();
         LibraryManager libraryManager = new LibraryManager(modelManager);
         libraryManager.getLibrarySourceLoader().registerProvider(new InMemoryLibrarySourceProvider(libraries));
-        LibraryLoader libraryLoader = new TranslatingLibraryLoader(libraryManager, CqlTranslatorOptions.defaultOptions());
+        LibraryLoader libraryLoader = new TranslatingLibraryLoader(libraryManager, cqlTranslatorOptions);
         return libraryLoader;
 	}
 }

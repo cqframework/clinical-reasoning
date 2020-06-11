@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.opencds.cqf.cql.engine.fhir.terminology.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.factory.ClientFactory;
@@ -40,13 +41,17 @@ public class RemoteTerminologyProviderBuilderTests {
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
+
     @Test
     public void test_R5RemoteTerminologyProvider() throws IOException, InterruptedException, URISyntaxException {
         String model = "http://hl7.org/fhir";
         String version = "4.2.0";
         URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-r5/fhir/");
-        TerminologyProvider r4TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
-        assertThat(r4TerminologyProvider, instanceOf(R4FhirTerminologyProvider.class));
+        exceptionRule.expect(NotImplementedException.class);
+        exceptionRule
+                .expectMessage("Sorry there is no implementation for anything newer than or equal to R5 as of now.");
+        TerminologyProvider r5TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
+
     }
 
     @Test
@@ -54,9 +59,8 @@ public class RemoteTerminologyProviderBuilderTests {
         String model = "http://hl7.org/fhir";
         String version = "4.0.1";
         URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-r4/fhir/");
-        exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no implementation for anything newer than or equal to R5 as of now.");
         TerminologyProvider r4TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
+        assertThat(r4TerminologyProvider, instanceOf(R4FhirTerminologyProvider.class));
     }
 
     @Test
@@ -65,7 +69,7 @@ public class RemoteTerminologyProviderBuilderTests {
         String version = "3.0.2";
         URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-dstu3/fhir/");
         TerminologyProvider r4TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
-        assertThat(r4TerminologyProvider, instanceOf(R4FhirTerminologyProvider.class));
+        assertThat(r4TerminologyProvider, instanceOf(Dstu3FhirTerminologyProvider.class));
     }
 
     @Test
@@ -75,6 +79,6 @@ public class RemoteTerminologyProviderBuilderTests {
         URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-dstu2/fhir/");
         exceptionRule.expect(NotImplementedException.class);
         exceptionRule.expectMessage("Sorry there is no implementation for anything older than DSTU3 as of now.");
-        TerminologyProvider r4TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
+        TerminologyProvider dstu2TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
     }
 }

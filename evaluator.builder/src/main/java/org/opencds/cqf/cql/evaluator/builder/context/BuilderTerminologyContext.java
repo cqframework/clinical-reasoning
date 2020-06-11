@@ -14,25 +14,46 @@ import org.opencds.cqf.cql.evaluator.builder.implementation.string.StringTermino
 
 /**
  * Provides TerminologyContext needed for CQL Evaluation
+ *    1. A pre-constructed TerminologyProvider
+ *    2. String representations of Terminology Resources
+ *    3. A remote terminology repository
+ *    4. A filesystem with terminology content
+ *    5. A Bundle containing FHIR Terminology
  */
 public class BuilderTerminologyContext extends BuilderContext implements TerminologyContext {
 
+    /**
+     * set TerminologyProvider with Preconfigured TerminologyProvider used to execute
+     * 
+     * @param terminologyProvider preconfigured TerminologyProvider
+     * @return BuilderDataContext a new instance with the appropriate context filled out.
+     */
     @Override
     public BuilderDataContext withTerminologyProvider(TerminologyProvider terminologyProvider) {
         this.terminologyProvider = terminologyProvider;
         return asDataContext(this);
     }
 
+    /**
+     * set TerminologyProvider using a list of String representations of any Terminology required for execution
+     * 
+     * @param terminologyBundles String representations of Terminology
+     * @return BuilderDataContext a new instance with the appropriate context filled out.
+     */
     @Override
-    public BuilderDataContext withTerminologyProvider(List<String> terminologyBundles) {
+    public BuilderDataContext withStringTerminologyProvider(List<String> terminologyBundles) {
         StringTerminologyProviderBuilder stringTerminologyProviderBuilder = new StringTerminologyProviderBuilder();
         this.terminologyProvider = stringTerminologyProviderBuilder.build(this.models, terminologyBundles);
         return asDataContext(this);
     }
 
+    /**
+     * set TerminologyProvider using a FHIR Bundle containing any Terminology required for execution
+     * 
+     * @param bundle Bundle containing Terminology
+     * @return BuilderDataContext a new instance with the appropriate context filled out.
+     */
     @Override
-    // public BuilderDataContext withBundleTerminologyProvider(ModelInfo modelInfo,
-    // IBaseBundle bundle) {
     public BuilderDataContext withBundleTerminologyProvider(IBaseBundle bundle) {
         if (models.get("http://hl7.org/fhir") != null) {
             BundleTerminologyProviderBuilder bundleTerminologyProviderBuilder = new BundleTerminologyProviderBuilder();
@@ -43,6 +64,12 @@ public class BuilderTerminologyContext extends BuilderContext implements Termino
                     "In order to use terminology Library must use the FHIR model, Cannot find Model Info for http://hl7.org/fhir");
     }
 
+    /**
+     * set TerminologyProvider using a URI for any Terminology required for execution
+     * 
+     * @param terminologyUri containing Terminology
+     * @return BuilderDataContext a new instance with the appropriate context filled out.
+     */
     @Override
     public BuilderDataContext withFileTerminologyProvider(String terminologyUri) {
         if (models.get("http://hl7.org/fhir") != null) {
@@ -54,6 +81,14 @@ public class BuilderTerminologyContext extends BuilderContext implements Termino
                     "In order to use terminology Library must use the FHIR model, Cannot find Model Info for http://hl7.org/fhir");
     }
 
+    /**
+     * set TerminologyProvider using a URL pointing to Remote repository containing Terminology needed for execution
+     * If now ClientFactory is provided a DefaultClientFactory will be used.
+     * Must be a URL of a HAPI FHIR Client as of now.
+     * 
+     * @param terminologyUrl needed for execution
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
     @Override
     public BuilderDataContext withRemoteTerminologyProvider(URL terminologyUrl)
             throws IOException, InterruptedException, URISyntaxException {

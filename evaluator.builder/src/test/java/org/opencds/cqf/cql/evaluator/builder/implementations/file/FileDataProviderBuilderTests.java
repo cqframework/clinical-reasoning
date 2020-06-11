@@ -26,7 +26,7 @@ public class FileDataProviderBuilderTests {
         Map<String, Pair<String, String>> models = new HashMap<String, Pair<String, String>>();
         models.put("http://hl7.org/fhir", Pair.of("4.0.1", null));
         Map<String, String> modelUrlMap = new HashMap<String, String>();
-        String dataPath = this.getClass().getClassLoader().getResource("dataresources/R4").getPath().replaceFirst("/", "");
+        String dataPath = this.getClass().getClassLoader().getResource("dataresources/r4").getPath().replaceFirst("/", "");
         modelUrlMap.put("http://hl7.org/fhir", dataPath);
         Map<String, DataProvider> r4DataProviderMap = fileDataProviderBuilder.build(models, modelUrlMap);
         assertThat(r4DataProviderMap.get("http://hl7.org/fhir"), instanceOf(CompositeDataProvider.class));
@@ -38,7 +38,7 @@ public class FileDataProviderBuilderTests {
         Map<String, Pair<String, String>> models = new HashMap<String, Pair<String, String>>();
         models.put("http://hl7.org/fhir", Pair.of("3.0.2", null));
         Map<String, String> modelUrlMap = new HashMap<String, String>();
-        String dataPath = this.getClass().getClassLoader().getResource("dataresources/DSTU3").getPath().replaceFirst("/", "");
+        String dataPath = this.getClass().getClassLoader().getResource("dataresources/dstu3").getPath().replaceFirst("/", "");
         modelUrlMap.put("http://hl7.org/fhir", dataPath);
         Map<String, DataProvider> dstu3DataProviderMap = fileDataProviderBuilder.build(models, modelUrlMap);
         assertThat(dstu3DataProviderMap.get("http://hl7.org/fhir"), instanceOf(CompositeDataProvider.class));
@@ -72,7 +72,7 @@ public class FileDataProviderBuilderTests {
         Map<String, Pair<String, String>> models = new HashMap<String, Pair<String, String>>();
         models.put("urn:healthit-gov:qdm:v5_4", Pair.of("5.0.4", null));
         Map<String, String> modelUrlMap = new HashMap<String, String>();
-        String dataPath = this.getClass().getClassLoader().getResource("dataresources/DSTU3").getPath().replaceFirst("/", "");
+        String dataPath = this.getClass().getClassLoader().getResource("dataresources/dstu3").getPath().replaceFirst("/", "");
         modelUrlMap.put("urn:healthit-gov:qdm:v5_4", dataPath);
         exceptionRule.expect(NotImplementedException.class);
         exceptionRule.expectMessage("QDM data providers are not yet implemented");
@@ -85,7 +85,7 @@ public class FileDataProviderBuilderTests {
         Map<String, Pair<String, String>> models = new HashMap<String, Pair<String, String>>();
         models.put("Unknown", Pair.of("5.0.4", null));
         Map<String, String> modelUrlMap = new HashMap<String, String>();
-        String dataPath = this.getClass().getClassLoader().getResource("dataresources/DSTU3").getPath().replaceFirst("/", "");
+        String dataPath = this.getClass().getClassLoader().getResource("dataresources/dstu3").getPath().replaceFirst("/", "");
         modelUrlMap.put("Unknown", dataPath);
         exceptionRule.expect(IllegalArgumentException.class);
         exceptionRule.expectMessage("Unknown data provider uri: Unknown");

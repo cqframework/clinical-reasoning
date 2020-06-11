@@ -18,6 +18,15 @@ import org.opencds.cqf.cql.evaluator.resolver.implementation.DefaultParameterDes
 
 /**
  * Provides any Context needed for CQL Evaluation
+ * 1. build a LibraryLoader (required)
+ * 2. build a TerminologyProvider (optional)
+ * 3. build a DataProvider Map (optional)
+ * 
+ * Additional Options
+ * Provide your own CqlTranslatorOptions
+ * Provide your own ParameterDeserializer
+ * Provide your own Engine Options
+ * Provide your own ClientFactory 
  */
 public abstract class BuilderContext {
 
@@ -49,7 +58,7 @@ public abstract class BuilderContext {
 
     /**
      * set Translator Options
-     * @param cqlTranslatorOptions to be used
+     * @param cqlTranslatorOptions to be used, will default if not specified
      */
     public void setTranslatorOptions(CqlTranslatorOptions cqlTranslatorOptions) {
         Objects.requireNonNull(cqlTranslatorOptions, "cqlTranslatorOptions can not be null.");
@@ -66,7 +75,7 @@ public abstract class BuilderContext {
     
     /**
      * set Engine Options
-     * @param engineOptions Engine Options to be used
+     * @param engineOptions Engine Options to be used, null is acceptable
      */
     public void setEngineOptions(EnumSet<CqlEngine.Options> engineOptions) {
         // Objects.requireNonNull(engineOptions, "engineOptions can not be null."); Need to move default engine options in first
@@ -129,11 +138,27 @@ public abstract class BuilderContext {
 		return this.libraryLoader;
     }
 
+    /**
+     * ClientFactory needed for execution
+     * @return Client Factory
+     */
     public ClientFactory getClientFactory() {
         return clientFactory;
     }
 
+    /**
+     *
+     * @param clientFactory to be used
+     */
     public void setClientFactory(ClientFactory clientFactory) {
         this.clientFactory = clientFactory;
+    }
+
+    /**
+     * models needed for execution
+     * @return models populated by investigating the libraries provided.
+     */
+    public Map<String, Pair<String, String>> getModels() {
+        return models;
     }
 }

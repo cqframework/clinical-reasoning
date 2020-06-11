@@ -20,16 +20,32 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 /**
  * Provides LibraryContext needed for CQL Evaluation
+ *    1. A pre-constructed library loader
+ *    2. String representations of Library Resources
+ *    3. A remote library repository
+ *    4. A filesystem with library content
+ *    5. A Bundle with FHIR Libraries
  */
 public class BuilderLibraryContext extends BuilderContext implements LibraryContext {
-    // All the different ways we can load libraries:
-    // 1. A pre-constructed library loader, and a reference to the primary library
-    // 2. Strings of CQL content (and if there's more than one library, a reference
-    // to the primary library)
-    // 3. A remote library repository, and reference to the primary library
-    // 4. A filesystem with library content, and a reference to the primary library
-    // 5. A Bundle with FHIR Libraries
-    // Figure out Version of libraries
+    /**
+     * set LibraryLoader with Preconfigured LibraryLoader used to execute
+     * 
+     * @param libraryLoader preconfigured LibraryLoader
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
+    @Override
+    public BuilderTerminologyContext withLibraryLoader(LibraryLoader libraryLoader) {
+        Objects.requireNonNull(libraryLoader, "libraryLoader can not be null");
+        this.libraryLoader = libraryLoader;
+        return asTerminologyContext(this);
+    }
+
+    /**
+     * set LibraryLoader using either a URI of a single Library or a String representation of a single Library
+     * 
+     * @param library either a File URI with Library Content, or String Representation of a Library
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
     @Override
     public BuilderTerminologyContext withLibraryLoader(String library) {
         Objects.requireNonNull(library, "libraryContent can not be null");
@@ -45,6 +61,13 @@ public class BuilderLibraryContext extends BuilderContext implements LibraryCont
         return asTerminologyContext(this);
     }
 
+    /**
+     * set LibraryLoader using either a list of URIs needed for any Libraries required for execution
+     * or set LibraryLoader using either a list of String representations needed for any Libraries required for execution
+     * 
+     * @param libraries needed for execution
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
     @Override
     public BuilderTerminologyContext withLibraryLoader(List<String> libraries) {
         Objects.requireNonNull(libraries, "libraries can not be null");
@@ -54,6 +77,9 @@ public class BuilderLibraryContext extends BuilderContext implements LibraryCont
 
         // This allows String representations to be passed in, but will not evaluate
         // them... Is this a bug?
+        for (String library : libraries) {
+            Helpers.isFileUri(library);
+        }
         List<String> fileUriLibraries = libraries.stream().filter(library -> Helpers.isFileUri(library))
                 .collect(Collectors.toList());
         if (!fileUriLibraries.isEmpty()) {
@@ -66,6 +92,14 @@ public class BuilderLibraryContext extends BuilderContext implements LibraryCont
         return asTerminologyContext(this);
     }
 
+    /**
+     * set LibraryLoader using a URL pointing to Remote repository containing Libraries needed for execution
+     * If now ClientFactory is provided a DefaultClientFactory will be used.
+     * Must be a URL of a HAPI FHIR Client as of now.
+     * 
+     * @param libraryUrl needed for execution
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
     @Override
     public BuilderTerminologyContext withRemoteLibraryLoader(URL libraryUrl)
             throws IOException, InterruptedException, URISyntaxException {
@@ -76,20 +110,19 @@ public class BuilderLibraryContext extends BuilderContext implements LibraryCont
         return asTerminologyContext(this);
     }
 
+    /**
+     * set LibraryLoader using a FHIR Bundle containing the libraries needed for execution
+     * 
+     * @param bundle of libraries needed for execution
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
     @Override
     public BuilderTerminologyContext withBundleLibraryLoader(IBaseBundle bundle) {
         Objects.requireNonNull(bundle, "libraryBundle can not be null");
         BundleLibraryLoaderBuilder bundleLibraryLoaderBuilder = new BundleLibraryLoaderBuilder();
         libraryLoader = bundleLibraryLoaderBuilder.build(bundle, this.models, this.getTranslatorOptions());
         return asTerminologyContext(this);
-    }
-
-    @Override
-    public BuilderTerminologyContext withLibraryLoader(LibraryLoader libraryLoader) {
-        Objects.requireNonNull(libraryLoader, "libraryLoader can not be null");
-        this.libraryLoader = libraryLoader;
-        return asTerminologyContext(this);
-    }
+    }    
     
     private BuilderTerminologyContext asTerminologyContext(BuilderContext thisBuilderContext) {
         BuilderTerminologyContext terminologyContext = new BuilderTerminologyContext();

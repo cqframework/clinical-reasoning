@@ -14,9 +14,9 @@ public interface ClientFactory {
      * create a HAPI Client using a URL
      * @param url url to Client
      * @return HAPI Generic Client
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws URISyntaxException
+     * @throws IOException will throw an exception if there are any issues with the client request
+     * @throws InterruptedException will throw an exception if there are any issues with the client request
+     * @throws URISyntaxException will throw an exception if there are any issues with the URL
      */
     public IGenericClient create(URL url) throws IOException, InterruptedException, URISyntaxException;
 }

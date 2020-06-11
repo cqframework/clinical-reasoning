@@ -43,28 +43,28 @@ public class RemoteLibraryLoaderBuilderTests {
     public void test_R5RemoteLibraryLoader() throws IOException, InterruptedException, URISyntaxException {
         String model = "http://hl7.org/fhir";
         String version = "4.2.0";
-        URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-r5/fhir/");
+        URL libraryURL = new URL("http://localhost:8080/cqf-ruler-r5/fhir/");
         exceptionRule.expect(NotImplementedException.class);
         exceptionRule.expectMessage("Sorry there is no implementation for anything newer than or equal to R4 as of now.");
-        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, terminologyURL);
+        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
     }
 
     @Test
     public void test_R4RemoteLibraryLoader() throws IOException, InterruptedException, URISyntaxException {
         String model = "http://hl7.org/fhir";
         String version = "4.0.1";
-        URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-r4/fhir/");
+        URL libraryURL = new URL("http://localhost:8080/cqf-ruler-r4/fhir/");
         exceptionRule.expect(NotImplementedException.class);
         exceptionRule.expectMessage("Sorry there is no implementation for anything newer than or equal to R4 as of now.");
-        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, terminologyURL);
+        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
     }
 
     @Test
     public void test_DSTU3RemoteLibraryLoader() throws IOException, InterruptedException, URISyntaxException {
         String model = "http://hl7.org/fhir";
         String version = "3.0.2";
-        URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-dstu3/fhir/");
-        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, terminologyURL);
+        URL libraryURL = new URL("http://localhost:8080/cqf-ruler-dstu3/fhir/");
+        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
         assertThat(r4LibraryLoader, instanceOf(TranslatingLibraryLoader.class));
     }
 
@@ -72,9 +72,9 @@ public class RemoteLibraryLoaderBuilderTests {
     public void test_DSTU2RemoteLibraryLoader() throws IOException, InterruptedException, URISyntaxException {
         String model = "http://hl7.org/fhir";
         String version = "1.0.2";
-        URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-dstu2/fhir/");
+        URL libraryURL = new URL("http://localhost:8080/cqf-ruler-dstu2/fhir/");
         exceptionRule.expect(NotImplementedException.class);
         exceptionRule.expectMessage("Sorry there is no implementation for anything older than DSTU3 as of now.");
-        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, terminologyURL);
+        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
     }
 }

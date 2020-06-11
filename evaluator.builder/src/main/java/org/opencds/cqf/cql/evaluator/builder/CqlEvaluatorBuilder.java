@@ -75,25 +75,10 @@ public class CqlEvaluatorBuilder extends BuilderLibraryContext {
         modelUriMap.put("http://hl7.org/fhir",
                 "C:\\src\\GitHub\\connectathon\\fhir4\\input\\tests\\EXM104_FHIR4-8.1.000");
         Pair<String, Object> contextParameter = Pair.of("Patient", "denom-EXM104-FHIR4");
-        // Map<Pair<String, String>, Object> parametersMap = new HashMap<Pair<String,
-        // String>, Object>();
-        // Interval measurementPeriod = new
-        // Interval(DateHelper.resolveRequestDate(periodStart, true), true,
-        // DateHelper.resolveRequestDate(periodEnd, false), true);
-
-        // parametersMap.put(Pair.of(null, "Measurement Period"),
-        // new Interval(DateTime.fromJavaDate((Date) measurementPeriod.getStart()),
-        // true,
-        // DateTime.fromJavaDate((Date) measurementPeriod.getEnd()), true));
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
         EvaluationResult evaluationResult = cqlEvaluatorBuilder.withLibraryLoader(libraries)
                 .withFileTerminologyProvider(terminologyUri).withFileDataProvider(modelUriMap).build(primaryLibrary)
                 .evaluate(contextParameter);
-        evaluationResult.expressionResults.entrySet().forEach(entry -> {
-            System.out.println(entry.getKey() + ":\n");
-            System.out.println(entry.getValue().getClass().getName());
-        });
-        System.out.println();
     }
 
     // "http://localhost:8080/cqf-ruler-r4/fhir/"
@@ -126,7 +111,6 @@ public class CqlEvaluatorBuilder extends BuilderLibraryContext {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
-        System.out.println("WHoa");
     }
 
     public static void main(String[] args) {

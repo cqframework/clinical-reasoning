@@ -43,7 +43,7 @@ public class DSTU3APIFileIntegrationTests {
         modelUriMap.put("http://hl7.org/fhir", dataPath);
         Pair<String, Object> contextParameter = Pair.of("Patient", "denom-EXM104-FHIR3");
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
-        cqlEvaluatorBuilder = cqlEvaluatorBuilder.withLibraryLoader(libraryUris)
+        cqlEvaluatorBuilder = cqlEvaluatorBuilder.withFileLibraryLoader(libraryUris)
                 .withFileTerminologyProvider(terminologyUri).withFileDataProvider(modelUriMap);
         CqlEvaluator cqlEvaluator = cqlEvaluatorBuilder.build(versionedIdentifier);
         assertThat(cqlEvaluatorBuilder.getTerminologyProvider(), instanceOf(BundleTerminologyProvider.class));

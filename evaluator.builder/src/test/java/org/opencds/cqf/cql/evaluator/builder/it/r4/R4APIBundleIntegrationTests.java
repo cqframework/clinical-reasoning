@@ -69,7 +69,7 @@ public class R4APIBundleIntegrationTests {
         // models.put(model, Pair.of(version, null));
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no bundle implementation for anything newer or equal to R4 as of now.");
+        exceptionRule.expectMessage("Sorry there is no Bundle Library Loader implementation for anything newer or equal to R4 as of now.");
         BuilderTerminologyContext builderTerminologyContext = cqlEvaluatorBuilder.withBundleLibraryLoader(libraries);
         // BuilderDataContext builderDataContext = builderTerminologyContext.withBundleTerminologyProvider(terminologyBundle);
         // cqlEvaluatorBuilder = builderDataContext.withFileDataProvider(modelUriMap);

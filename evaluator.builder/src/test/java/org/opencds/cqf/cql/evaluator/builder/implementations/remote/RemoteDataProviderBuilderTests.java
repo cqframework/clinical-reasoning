@@ -46,7 +46,7 @@ public class RemoteDataProviderBuilderTests {
         String version = "4.2.0";
         URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-r5/fhir/");
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no implementation for anything newer than or equal to R5 as of now.");
+        exceptionRule.expectMessage("Sorry there is no Remote Data Provider implementation for anything newer than or equal to R5 as of now.");
         Map<String, DataProvider> r4DataProviderMap = getRemoteDataProvider(model, version, terminologyURL);
     }
 

@@ -11,9 +11,11 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public interface LibraryContext {
-    public BuilderContext withLibraryLoader(List<String> libraryContent);
+    public BuilderContext withStringLibraryLoader(List<String> libraryContent);
+    public BuilderContext withFileLibraryLoader(List<String> libraryContent);
     public BuilderContext withBundleLibraryLoader(IBaseBundle bundle);
-    public BuilderContext withLibraryLoader(String library);
+    public BuilderContext withSingleStringLibraryLoader(String library);
+    public BuilderContext withSingleFileLibraryLoader(String library);
     public BuilderContext withRemoteLibraryLoader(URL libraryUrl) throws IOException, InterruptedException, URISyntaxException;
-    public BuilderContext withLibraryLoader(LibraryLoader libraryLoader);
+    public BuilderContext withPreConfiguredLibraryLoader(LibraryLoader libraryLoader);
 }

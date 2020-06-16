@@ -38,7 +38,7 @@ public class BundleDataProviderBuilder {
         RetrieveProvider retrieveProvider;
         FhirVersionEnum versionEnum = bundle.getStructureFhirVersionEnum();
         if (versionEnum.isOlderThan(FhirVersionEnum.DSTU2)) {
-            throw new NotImplementedException("Sorry there is no implementation for anything older than DSTU2 as of now.");
+            throw new NotImplementedException("Sorry there is no Bundle Data Provider implementation for anything older than DSTU2 as of now.");
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.DSTU2) && versionEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
             modelResolver = new Dstu2FhirModelResolver();
@@ -53,7 +53,7 @@ public class BundleDataProviderBuilder {
             retrieveProvider = buildRetrieveProvider(bundle, modelResolver);        
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.R5)) {
-            throw new NotImplementedException("Sorry there is no implementation for anything newer than or equal to R5 as of now.");
+            throw new NotImplementedException("Sorry there is no Bundle Data Provider implementation for anything newer than or equal to R5 as of now.");
         }
         else {
             throw new UnknownElement("Unknown Fhir Version Enum");

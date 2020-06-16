@@ -41,6 +41,9 @@ public class FileLibraryLoaderBuilder {
         // Using InMemoryLibrarySourceProvider
         List<String> libraries = new LinkedList<String>();
         libraryUris.forEach(uri -> libraries.addAll(ModelVersionHelper.getLibrariesFromPath(uri)));
+        // get content text/cql base64 decoding fine for now,
+        // TranslatingLibraryLoader is a hack because it always translates 
+        // libraries when the optimal behaviour is only when it needs to
         libraryManager.getLibrarySourceLoader().registerProvider(new InMemoryLibrarySourceProvider(libraries));
         LibraryLoader libraryLoader = new TranslatingLibraryLoader(libraryManager, CqlTranslatorOptions.defaultOptions());
         return libraryLoader;
@@ -59,19 +62,19 @@ public class FileLibraryLoaderBuilder {
         FhirVersionEnum versionEnum = ModelVersionHelper.forVersionString(version);
 
         if (versionEnum.isOlderThan(FhirVersionEnum.DSTU2)) {
-            throw new NotImplementedException("Sorry there is no bundle implementation for anything older than DSTU2 as of now.");
+            throw new NotImplementedException("Sorry there is no File Library Loader implementation for anything older than DSTU2 as of now.");
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.DSTU2) && versionEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
-            throw new NotImplementedException("Sorry there is no bundle implementation for anything older than Dstu3 as of now.");        
+            throw new NotImplementedException("Sorry there is no File Library Loader implementation for anything older than Dstu3 as of now.");        
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.DSTU3) && versionEnum.isOlderThan(FhirVersionEnum.R4)) {
             this.fhirContext = FhirContext.forDstu3();
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.R4) && versionEnum.isOlderThan(FhirVersionEnum.R5)) {
-            throw new NotImplementedException("Sorry there is no bundle implementation for anything newer or equal to R4 as of now."); 
+            throw new NotImplementedException("Sorry there is no File Library Loader implementation for anything newer or equal to R4 as of now."); 
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.R5)) {
-            throw new NotImplementedException("Sorry there is no bundle implementation for anything newer or equal to R4 as of now.");
+            throw new NotImplementedException("Sorry there is no File Library Loader implementation for anything newer or equal to R4 as of now.");
         }
         else {
             throw new UnknownElement("Unknown Fhir Version Enum");

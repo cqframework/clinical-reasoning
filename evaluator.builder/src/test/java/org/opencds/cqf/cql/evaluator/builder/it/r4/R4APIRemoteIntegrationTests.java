@@ -80,7 +80,7 @@ public class R4APIRemoteIntegrationTests {
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
         URL url = new URL("http://localhost:8080/cqf-ruler-r4/fhir/");
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no implementation for anything newer than or equal to R4 as of now.");
+        exceptionRule.expectMessage("Sorry there is no Remote Library Loader implementation for anything newer than or equal to R4 as of now.");
         cqlEvaluatorBuilder.setClientFactory(getClientFactory(url, "4.0.1"));
         BuilderTerminologyContext builderTerminologyContext = cqlEvaluatorBuilder.withRemoteLibraryLoader(url);
         // exceptionRule.expect(NotImplementedException.class);

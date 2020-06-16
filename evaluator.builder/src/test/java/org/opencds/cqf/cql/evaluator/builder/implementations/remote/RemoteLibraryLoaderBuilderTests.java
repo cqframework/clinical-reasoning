@@ -45,8 +45,8 @@ public class RemoteLibraryLoaderBuilderTests {
         String version = "4.2.0";
         URL libraryURL = new URL("http://localhost:8080/cqf-ruler-r5/fhir/");
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no implementation for anything newer than or equal to R4 as of now.");
-        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
+        exceptionRule.expectMessage("Sorry there is no Remote Library Loader implementation for anything newer than or equal to R4 as of now.");
+        LibraryLoader r5LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class RemoteLibraryLoaderBuilderTests {
         String version = "4.0.1";
         URL libraryURL = new URL("http://localhost:8080/cqf-ruler-r4/fhir/");
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no implementation for anything newer than or equal to R4 as of now.");
+        exceptionRule.expectMessage("Sorry there is no Remote Library Loader implementation for anything newer than or equal to R4 as of now.");
         LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
     }
 
@@ -64,8 +64,8 @@ public class RemoteLibraryLoaderBuilderTests {
         String model = "http://hl7.org/fhir";
         String version = "3.0.2";
         URL libraryURL = new URL("http://localhost:8080/cqf-ruler-dstu3/fhir/");
-        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
-        assertThat(r4LibraryLoader, instanceOf(TranslatingLibraryLoader.class));
+        LibraryLoader dstu3LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
+        assertThat(dstu3LibraryLoader, instanceOf(TranslatingLibraryLoader.class));
     }
 
     @Test
@@ -74,7 +74,7 @@ public class RemoteLibraryLoaderBuilderTests {
         String version = "1.0.2";
         URL libraryURL = new URL("http://localhost:8080/cqf-ruler-dstu2/fhir/");
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no implementation for anything older than DSTU3 as of now.");
-        LibraryLoader r4LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
+        exceptionRule.expectMessage("Sorry there is no Remote Library Loader implementation for anything older than DSTU3 as of now.");
+        LibraryLoader dstu2LibraryLoader = getRemoteLibraryLoader(model, version, libraryURL);
     }
 }

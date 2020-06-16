@@ -56,7 +56,7 @@ public class RemoteDataProviderBuilder {
         FhirContext fhirContext = client.getFhirContext();
         FhirVersionEnum versionEnum = fhirContext.getVersion().getVersion();
         if (versionEnum.isOlderThan(FhirVersionEnum.DSTU2)) {
-            throw new NotImplementedException("Sorry there is no implementation for anything older than DSTU2 as of now.");
+            throw new NotImplementedException("Sorry there is no Remote Data Provider implementation for anything older than DSTU2 as of now.");
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.DSTU2) && versionEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
             modelResolver = new Dstu2FhirModelResolver();
@@ -71,7 +71,7 @@ public class RemoteDataProviderBuilder {
             retrieveProvider = buildRetrieveProvider(client, fhirContext);        
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.R5)) {
-            throw new NotImplementedException("Sorry there is no implementation for anything newer than or equal to R5 as of now.");
+            throw new NotImplementedException("Sorry there is no Remote Data Provider implementation for anything newer than or equal to R5 as of now.");
         }
         else {
             throw new UnknownElement("Unknown Fhir Version Enum.");

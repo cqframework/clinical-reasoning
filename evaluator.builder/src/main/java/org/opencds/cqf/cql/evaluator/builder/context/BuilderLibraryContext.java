@@ -14,7 +14,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
@@ -34,61 +33,83 @@ public class BuilderLibraryContext extends BuilderContext implements LibraryCont
      * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
      */
     @Override
-    public BuilderTerminologyContext withLibraryLoader(LibraryLoader libraryLoader) {
+    public BuilderTerminologyContext withPreConfiguredLibraryLoader(LibraryLoader libraryLoader) {
         Objects.requireNonNull(libraryLoader, "libraryLoader can not be null");
         this.libraryLoader = libraryLoader;
         return asTerminologyContext(this);
     }
 
     /**
-     * set LibraryLoader using either a URI of a single Library or a String representation of a single Library
+     * set LibraryLoader using a URI of a single Library
      * 
-     * @param library either a File URI with Library Content, or String Representation of a Library
+     * @param library a File URI with Library Content
      * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
      */
     @Override
-    public BuilderTerminologyContext withLibraryLoader(String library) {
+    public BuilderTerminologyContext withSingleFileLibraryLoader(String library) {
         Objects.requireNonNull(library, "libraryContent can not be null");
         List<String> libraryList = new ArrayList<String>();
         libraryList.add(library);
-        if (Helpers.isFileUri(library)) {
-            FileLibraryLoaderBuilder fileLibraryLoaderBuilder = new FileLibraryLoaderBuilder();
-            fileLibraryLoaderBuilder.build(libraryList, this.models, this.getTranslatorOptions());
-        } else {
-            StringLibraryLoaderBuilder stringLibraryLoaderBuilder = new StringLibraryLoaderBuilder();
-            stringLibraryLoaderBuilder.build(libraryList, this.models, this.getTranslatorOptions());
-        }
+        if (!Helpers.isFileUri(library)) {
+            throw new IllegalArgumentException("Library: " + library + " is not a File URI");
+        } 
+        FileLibraryLoaderBuilder fileLibraryLoaderBuilder = new FileLibraryLoaderBuilder();
+        fileLibraryLoaderBuilder.build(libraryList, this.models, this.getTranslatorOptions());
         return asTerminologyContext(this);
     }
 
     /**
-     * set LibraryLoader using either a list of URIs needed for any Libraries required for execution
-     * or set LibraryLoader using either a list of String representations needed for any Libraries required for execution
+     * set LibraryLoader using a String representation of a single Library
+     * 
+     * @param library String Representation of a Library
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
+    @Override
+    public BuilderTerminologyContext withSingleStringLibraryLoader(String library) {
+        Objects.requireNonNull(library, "libraryContent can not be null");
+        List<String> libraryList = new ArrayList<String>();
+        libraryList.add(library);
+        StringLibraryLoaderBuilder stringLibraryLoaderBuilder = new StringLibraryLoaderBuilder();
+        stringLibraryLoaderBuilder.build(libraryList, this.models, this.getTranslatorOptions());
+        return asTerminologyContext(this);
+    }
+
+    /**
+     * set LibraryLoader using a list of URIs needed for any Libraries required for execution
      * 
      * @param libraries needed for execution
      * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
      */
     @Override
-    public BuilderTerminologyContext withLibraryLoader(List<String> libraries) {
+    public BuilderTerminologyContext withFileLibraryLoader(List<String> libraries) {
         Objects.requireNonNull(libraries, "libraries can not be null");
         if (libraries.isEmpty()) {
             throw new IllegalArgumentException("libraries can not be empty");
         }
-
-        // This allows String representations to be passed in, but will not evaluate
-        // them... Is this a bug?
         for (String library : libraries) {
-            Helpers.isFileUri(library);
+            if (!Helpers.isFileUri(library)) {
+                throw new IllegalArgumentException("Library: " + library + " is not a File URI");
+            }
         }
-        List<String> fileUriLibraries = libraries.stream().filter(library -> Helpers.isFileUri(library))
-                .collect(Collectors.toList());
-        if (!fileUriLibraries.isEmpty()) {
-            FileLibraryLoaderBuilder fileLibraryLoaderBuilder = new FileLibraryLoaderBuilder();
-            libraryLoader = fileLibraryLoaderBuilder.build(fileUriLibraries, this.models, this.getTranslatorOptions());
-        } else {
-            StringLibraryLoaderBuilder stringLibraryLoaderBuilder = new StringLibraryLoaderBuilder();
-            libraryLoader = stringLibraryLoaderBuilder.build(libraries, this.models, this.getTranslatorOptions());
+        FileLibraryLoaderBuilder fileLibraryLoaderBuilder = new FileLibraryLoaderBuilder();
+        libraryLoader = fileLibraryLoaderBuilder.build(libraries, this.models, this.getTranslatorOptions());
+        return asTerminologyContext(this);
+    }
+
+    /**
+     * set LibraryLoader using either a list of String representations needed for any Libraries required for execution
+     * 
+     * @param libraries needed for execution
+     * @return BuilderTerminologyContext a new instance with the appropriate context filled out.
+     */
+    @Override
+    public BuilderTerminologyContext withStringLibraryLoader(List<String> libraries) {
+        Objects.requireNonNull(libraries, "libraries can not be null");
+        if (libraries.isEmpty()) {
+            throw new IllegalArgumentException("libraries can not be empty");
         }
+        StringLibraryLoaderBuilder stringLibraryLoaderBuilder = new StringLibraryLoaderBuilder();
+        libraryLoader = stringLibraryLoaderBuilder.build(libraries, this.models, this.getTranslatorOptions());
         return asTerminologyContext(this);
     }
 

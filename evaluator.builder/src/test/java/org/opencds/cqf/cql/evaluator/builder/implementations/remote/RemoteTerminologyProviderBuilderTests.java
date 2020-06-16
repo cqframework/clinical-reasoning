@@ -49,7 +49,7 @@ public class RemoteTerminologyProviderBuilderTests {
         URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-r5/fhir/");
         exceptionRule.expect(NotImplementedException.class);
         exceptionRule
-                .expectMessage("Sorry there is no implementation for anything newer than or equal to R5 as of now.");
+                .expectMessage("Sorry there is no Remote Terminology Provider implementation for anything newer than or equal to R5 as of now.");
         TerminologyProvider r5TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
 
     }
@@ -78,7 +78,7 @@ public class RemoteTerminologyProviderBuilderTests {
         String version = "1.0.2";
         URL terminologyURL = new URL("http://localhost:8080/cqf-ruler-dstu2/fhir/");
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no implementation for anything older than DSTU3 as of now.");
+        exceptionRule.expectMessage("Sorry there is no Remote Terminology Provider implementation for anything older than DSTU3 as of now.");
         TerminologyProvider dstu2TerminologyProvider = getRemoteTerminologyProvider(model, version, terminologyURL);
     }
 }

@@ -52,16 +52,16 @@ public class BundleLibraryLoaderBuilderTests {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
     @Test
-    public void test_R4StringLibraryLoader() throws IOException, URISyntaxException {
+    public void test_R4BundleLibraryLoader() throws IOException, URISyntaxException {
         FhirContext fhirContext = FhirContext.forR4();
         IBaseBundle libraries = loadBundleLibraries(fhirContext, "libraryresources/R4AllNecessaryLibraries.json");
         exceptionRule.expect(NotImplementedException.class);
-        exceptionRule.expectMessage("Sorry there is no bundle implementation for anything newer or equal to R4 as of now.");
+        exceptionRule.expectMessage("Sorry there is no Bundle Library Loader implementation for anything newer or equal to R4 as of now.");
         LibraryLoader libraryLoader = getBundleLibraryLoader(libraries);
     }
 
     @Test
-    public void test_DSTU3StringLibraryLoader() throws IOException, URISyntaxException {
+    public void test_DSTU3BundleLibraryLoader() throws IOException, URISyntaxException {
         FhirContext fhirContext = FhirContext.forDstu3();
         IBaseBundle libraries = loadBundleLibraries(fhirContext, "libraryresources/DSTU3AllNecessaryLibraries.json");
         LibraryLoader libraryLoader = getBundleLibraryLoader(libraries);

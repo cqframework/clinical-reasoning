@@ -35,7 +35,7 @@ public class BuilderDataContext extends BuilderContext implements DataContext {
     }
 
     /**
-     * set DataProviders with Preconfigured DataProvider Map, the maps a given Model url to the DataProvider used to execute
+     * set DataProviders with Preconfigured DataProvider Map, the maps a given Model uri to the DataProvider used to execute
      * 
      * @param dataProviderMap preconfigured DataProviders map
      * @return CqlEvaluatorBuilder a new instance with the appropriate context filled out.

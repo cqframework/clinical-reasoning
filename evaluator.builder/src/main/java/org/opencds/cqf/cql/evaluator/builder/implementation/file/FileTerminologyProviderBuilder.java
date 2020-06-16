@@ -42,7 +42,7 @@ public class FileTerminologyProviderBuilder {
         FhirVersionEnum versionEnum = ModelVersionHelper.forVersionString(version);
 
         if (versionEnum.isOlderThan(FhirVersionEnum.DSTU2)) {
-            throw new NotImplementedException("Sorry there is no bundle implementation for anything older than DSTU2 as of now.");
+            throw new NotImplementedException("Sorry there is no File Terminology Provider implementation for anything older than DSTU2 as of now.");
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.DSTU2) && versionEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
             this.fhirContext = FhirContext.forDstu2();
@@ -54,7 +54,7 @@ public class FileTerminologyProviderBuilder {
             this.fhirContext = FhirContext.forR4();
         }
         else if (versionEnum.isEqualOrNewerThan(FhirVersionEnum.R5)) {
-            throw new NotImplementedException("Sorry there is no bundle implementation for anything newer or equal to R4 as of now.");
+            throw new NotImplementedException("Sorry there is no File Terminology Provider implementation for anything newer or equal to R4 as of now.");
         }
         else {
             throw new UnknownElement("Unknown Fhir Version Enum");

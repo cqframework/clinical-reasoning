@@ -43,12 +43,14 @@ public class R4APIFileIntegrationTests {
         modelUriMap.put("http://hl7.org/fhir", dataPath);
         Pair<String, Object> contextParameter = Pair.of("Patient", "denom-EXM104-FHIR4");
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
-        cqlEvaluatorBuilder = cqlEvaluatorBuilder.withLibraryLoader(libraryUris)
+        cqlEvaluatorBuilder = cqlEvaluatorBuilder.withFileLibraryLoader(libraryUris)
                 .withFileTerminologyProvider(terminologyUri).withFileDataProvider(modelUriMap);
         CqlEvaluator cqlEvaluator = cqlEvaluatorBuilder.build(versionedIdentifier);
         assertThat(cqlEvaluatorBuilder.getTerminologyProvider(), instanceOf(BundleTerminologyProvider.class));
         assertThat(cqlEvaluatorBuilder.getLibraryLoader(), instanceOf(TranslatingLibraryLoader.class));
         assertThat(cqlEvaluatorBuilder.getDataProvider().get("http://hl7.org/fhir"), instanceOf(CompositeDataProvider.class));
+
+        // cqlEvaluator.evaluate(contextParameter);
 
         String model = "http://hl7.org/fhir";
         String version = "4.0.1";

@@ -47,6 +47,7 @@ public class R4APIStringIntegrationTests {
         FhirContext fhirContext = FhirContext.forR4();
         List<String> libraries = new ArrayList<String>();
         String primaryLibraryResource = testUtils.loadString("libraryresources/PrimaryLibrary.json");
+        libraries.add(primaryLibraryResource);
         IBaseResource resource = testUtils.loadBundle(fhirContext, "libraryresources/LibraryDepsBundle.json");
         if (resource == null) {
             throw new IllegalArgumentException(String.format("Unable to read a resource from %s.", "libraryresources/LibraryDepsBundle.json"));
@@ -71,11 +72,11 @@ public class R4APIStringIntegrationTests {
         dataBundles.add(dataBundle);
         Pair<String, Object> contextParameter = Pair.of("Patient", "denom-EXM104-FHIR4");
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
-        BuilderTerminologyContext builderTerminologyContext = cqlEvaluatorBuilder.withLibraryLoader(libraries);
+        BuilderTerminologyContext builderTerminologyContext = cqlEvaluatorBuilder.withStringLibraryLoader(libraries);
         assertThat(cqlEvaluatorBuilder.getLibraryLoader(), instanceOf(TranslatingLibraryLoader.class));
         exceptionRule.expect(NotImplementedException.class);
         exceptionRule.expectMessage("String Representations of Terminology Bundles is not yet supported.");
-        // cqlEvaluatorBuilder = builderTerminologyContext.withStringTerminologyProvider(terminologyBundles).withStringDataProvider(dataBundles);
+        cqlEvaluatorBuilder = builderTerminologyContext.withStringTerminologyProvider(terminologyBundles).withStringDataProvider(dataBundles);
         // CqlEvaluator cqlEvaluator = cqlEvaluatorBuilder.build(versionedIdentifier);
         // assertThat(cqlEvaluatorBuilder.getTerminologyProvider(), instanceOf(BundleTerminologyProvider.class));
         // assertThat(cqlEvaluatorBuilder.getDataProvider().get("http://hl7.org/fhir"), instanceOf(CompositeDataProvider.class));

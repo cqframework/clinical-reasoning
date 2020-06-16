@@ -27,14 +27,14 @@ public class PriorityRetrieveProvider implements RetrieveProvider {
             String dateLowPath, String dateHighPath, Interval dateRange) {
 
         for (RetrieveProvider rp : retrieveProviders){
-            var result = rp.retrieve(context, contextPath, contextValue, dataType, templateId, codePath, codes, 
+            Iterable<Object> result = rp.retrieve(context, contextPath, contextValue, dataType, templateId, codePath, codes, 
                 valueSet, datePath, dateLowPath, dateHighPath, dateRange);
 
             if (result == null) {
                 throw new IllegalStateException("retrieveProvider unexpectedly returned null. Should be an empty set.");
             }
 
-            var asList = Lists.newArrayList(result);
+            List<Object> asList = Lists.newArrayList(result);
             if (asList.size() > 0) {
                 return asList;
             }

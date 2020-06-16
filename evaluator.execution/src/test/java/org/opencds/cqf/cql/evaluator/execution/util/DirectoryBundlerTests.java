@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -16,15 +18,15 @@ public class DirectoryBundlerTests {
     @Test
     public void test_directoryBundler() {
         FhirContext fhirContext = FhirContext.forR4();
-        var directoryBundler = new DirectoryBundler(fhirContext);
+        DirectoryBundler directoryBundler = new DirectoryBundler(fhirContext);
 
-        var file = new File("src/test/resources/r4/bundleDirectory").getAbsolutePath();
+        String file = new File("src/test/resources/r4/bundleDirectory").getAbsolutePath();
 
         IBaseBundle bundle = directoryBundler.bundle(file);
 
         assertNotNull(bundle);
 
-        var resources = BundleUtil.toListOfResourcesOfType(fhirContext, bundle,
+        List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(fhirContext, bundle,
                 fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
 
         assertNotNull(resources);

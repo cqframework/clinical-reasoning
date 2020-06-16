@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 
 import com.google.common.collect.Lists;
 
@@ -16,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Patient;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -51,29 +53,30 @@ public class BundleRetrieveProviderTests {
         return this.getBundleRetrieveProvider(null);
     }
 
+    @SuppressWarnings("rawtypes")
     private RetrieveProvider getBundleRetrieveProvider(TerminologyProvider terminologyProvider) {
-        var resolver = new R4FhirModelResolver();
+        FhirModelResolver resolver = new R4FhirModelResolver();
         IBaseBundle bundle = this.loadBundle(resolver.getFhirContext(), "r4/TestBundleTwoPatients.json");
         return new BundleRetrieveProvider(resolver, bundle, terminologyProvider);
     }
 
     @Test
     public void test_noResults_returnsEmptySet() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        var results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
         assertNotNull(results);
-        var resultList = Lists.newArrayList(results);
+        List<Object> resultList = Lists.newArrayList(results);
         assertEquals(0, resultList.size());
     }
 
 
     @Test
     public void test_filterToDataType() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        var results = retrieve.retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null);
-        var resultList = Lists.newArrayList(results);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null);
+        List<Object> resultList = Lists.newArrayList(results);
         
         assertEquals(2, resultList.size());
         assertThat(resultList.get(0), instanceOf(Patient.class));
@@ -81,20 +84,20 @@ public class BundleRetrieveProviderTests {
 
     @Test
     public void test_filterToDataType_dataTypeNotPresent() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        var results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
-        var resultList = Lists.newArrayList(results);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
+        List<Object> resultList = Lists.newArrayList(results);
         
         assertEquals(0, resultList.size());
     }
 
     @Test
     public void test_filterToContext() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        var results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, null, null, null, null, null, null, null);
-        var resultList = Lists.newArrayList(results);
+        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, null, null, null, null, null, null, null);
+        List<Object> resultList = Lists.newArrayList(results);
         
         assertEquals(2, resultList.size());
         assertThat(resultList.get(0), instanceOf(Condition.class));
@@ -103,10 +106,10 @@ public class BundleRetrieveProviderTests {
 
     @Test
     public void test_filterToContext_noContextRelation() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        var results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, null, null, null, null, null, null, null);
-        var resultList = Lists.newArrayList(results);
+        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, null, null, null, null, null, null, null);
+        List<Object> resultList = Lists.newArrayList(results);
         
         assertEquals(1, resultList.size());
         assertThat(resultList.get(0), instanceOf(Medication.class));
@@ -117,12 +120,12 @@ public class BundleRetrieveProviderTests {
     @Test
     @SuppressWarnings("unchecked")
     public void test_filterById() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         // Id does exist
-        var codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med");
-        var results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
-        var resultList = Lists.newArrayList(results);
+        Iterable<Code> codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med");
+        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
+        List<Object> resultList = Lists.newArrayList(results);
         assertEquals(1, resultList.size());
         assertThat(resultList.get(0), instanceOf(Medication.class));
 
@@ -135,13 +138,13 @@ public class BundleRetrieveProviderTests {
 
     @Test
     public void test_filterToCodes() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         // Code doesn't match
-        var code = new Code().withCode("not-a-code").withSystem("not-a-system");
-        var results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
+        Code code = new Code().withCode("not-a-code").withSystem("not-a-system");
+        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results); 
-        var resultList = Lists.newArrayList(results);
+        List<Object> resultList = Lists.newArrayList(results);
         assertEquals(0, resultList.size());
 
         // Codes does match
@@ -157,7 +160,7 @@ public class BundleRetrieveProviderTests {
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void test_filterToValueSet_noTerminologyProvider() {
-        var retrieve = this.getBundleRetrieveProvider();
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
             "value-set-url", null, null, null, null);
@@ -165,17 +168,17 @@ public class BundleRetrieveProviderTests {
 
     @Test
     public void test_filterToValueSet() {
-        var fhirContext = FhirContext.forR4();
-        var bundle = this.loadBundle(fhirContext, "r4/TestBundleValueSets.json");
-        var terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
+        FhirContext fhirContext = FhirContext.forR4();
+        IBaseBundle bundle = this.loadBundle(fhirContext, "r4/TestBundleValueSets.json");
+        TerminologyProvider terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
 
-        var retrieve = this.getBundleRetrieveProvider(terminologyProvider);
+        RetrieveProvider retrieve = this.getBundleRetrieveProvider(terminologyProvider);
 
         // Not in the value set
-        var results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
+        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
         "http://localhost/fhir/ValueSet/value-set-three", null, null, null, null);
         assertNotNull(results); 
-        var resultList = Lists.newArrayList(results);
+        List<Object> resultList = Lists.newArrayList(results);
         assertEquals(0, resultList.size());
 
 

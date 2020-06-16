@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Collections;
+import java.util.List;
 
 import com.google.common.collect.Lists;
 
@@ -23,17 +24,17 @@ public class PriorityRetrieveProviderTests {
 
     @Test
     public void test_noProviders_returnsEmptySet() {
-        var retrieve = new PriorityRetrieveProvider(Collections.emptyList());
-        var result = retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
+        RetrieveProvider retrieve = new PriorityRetrieveProvider(Collections.emptyList());
+        Iterable<Object> result= retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
         assertNotNull(result);
-        var resultList = Lists.newArrayList(result);
+        List<Object> resultList = Lists.newArrayList(result);
         assertEquals(0, resultList.size());
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void test_badProvider_throwsException() {
 
-        var badProvider = new RetrieveProvider(){
+        RetrieveProvider badProvider = new RetrieveProvider(){
             @Override
             public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
                     String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
@@ -43,13 +44,13 @@ public class PriorityRetrieveProviderTests {
                 return null;
             }
         };
-        var retrieve = new PriorityRetrieveProvider(Collections.singletonList(badProvider));
+        RetrieveProvider retrieve = new PriorityRetrieveProvider(Collections.singletonList(badProvider));
         retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test
     public void test_retrieve_returnsFirstNonEmpty() {
-        var providerOne = new RetrieveProvider(){
+        RetrieveProvider providerOne = new RetrieveProvider(){
             @Override
             public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
                     String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
@@ -58,7 +59,7 @@ public class PriorityRetrieveProviderTests {
             }
         };
 
-        var providerTwo = new RetrieveProvider(){
+        RetrieveProvider providerTwo = new RetrieveProvider(){
             @Override
             public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
                     String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
@@ -67,7 +68,7 @@ public class PriorityRetrieveProviderTests {
             }
         };
 
-        var providerThree = new RetrieveProvider(){
+        RetrieveProvider providerThree = new RetrieveProvider(){
             @Override
             public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
                     String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
@@ -76,10 +77,10 @@ public class PriorityRetrieveProviderTests {
             }
         };
 
-        var retrieve = new PriorityRetrieveProvider(Lists.newArrayList(providerOne, providerTwo, providerThree));
-        var results = retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
+        RetrieveProvider retrieve = new PriorityRetrieveProvider(Lists.newArrayList(providerOne, providerTwo, providerThree));
+        Iterable<Object> results = retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
         assertNotNull(results);
-        var resultList = Lists.newArrayList(results);
+        List<Object> resultList = Lists.newArrayList(results);
         assertEquals(3, resultList.size());
     }
 }

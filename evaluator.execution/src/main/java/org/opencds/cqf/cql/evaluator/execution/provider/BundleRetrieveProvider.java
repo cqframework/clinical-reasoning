@@ -104,10 +104,10 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 
 		// This handles the case that the value is a reference such as
 		// "Medication/med-id"
-		var primitiveString = code.getValueAsString().replace(dataType + "/", "");
+		String primitiveString = code.getValueAsString().replace(dataType + "/", "");
 		for (Object c : codes) {
 			if (c instanceof String) {
-				var s = (String) c;
+				String s = (String) c;
 				if (s.equals(primitiveString)) {
 					return true;
 				}

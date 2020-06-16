@@ -17,6 +17,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.BundleUtil;
 
 /**
@@ -58,7 +59,7 @@ public class DirectoryBundler {
             throw new IllegalArgumentException("The specified path to resource files is not a directory.");
         }
 
-        var files = FileUtils.listFiles(resourceDirectory, new String[] { "xml", "json" }, true);
+        Collection<File> files = FileUtils.listFiles(resourceDirectory, new String[] { "xml", "json" }, true);
 
         return bundleFiles(files);
     }
@@ -81,7 +82,7 @@ public class DirectoryBundler {
             }
         }
 
-        var bundleFactory = this.fhirContext.newBundleFactory();
+        IVersionSpecificBundleFactory bundleFactory = this.fhirContext.newBundleFactory();
 
         bundleFactory.addRootPropertiesToBundle("bundled-directory", null, null, null, null, resources.size(),
                 BundleTypeEnum.COLLECTION, null);
@@ -123,10 +124,10 @@ public class DirectoryBundler {
             return resources;
         }
 
-        var bundleResources = BundleUtil.toListOfResources(fhirContext, bundle);
-        for (var r : bundleResources) {
+        List<IBaseResource> bundleResources = BundleUtil.toListOfResources(fhirContext, bundle);
+        for (IBaseResource r : bundleResources) {
             if (r instanceof IBaseBundle) {
-                var innerResources = flatten(fhirContext, (IBaseBundle) r);
+                List<IBaseResource> innerResources = flatten(fhirContext, (IBaseBundle) r);
                 resources.addAll(innerResources);
             } else {
                 resources.add(r);

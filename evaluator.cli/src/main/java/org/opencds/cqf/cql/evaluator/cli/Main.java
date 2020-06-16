@@ -75,10 +75,10 @@ public class Main {
 
             CqlEvaluator evaluator = new CqlEvaluator(libraryLoader, parameters.libraryName, dataProviders,
                     terminologyProvider);
-            var contextParameter = evaluator.unmarshalContextParameter(parameters.contextParameter);
+            Pair<String, Object> contextParameter = evaluator.unmarshalContextParameter(parameters.contextParameter);
             EvaluationResult result = evaluator.evaluate(contextParameter);
 
-            for (var libraryEntry : result.expressionResults.entrySet()) {
+            for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
                 System.out.println(libraryEntry.getKey() + "=" + libraryEntry.getValue().toString());
             }
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public class Main {
         }
 
         FhirContext fhirContext;
-        var version = versionAndUrl.getLeft();
+        String version = versionAndUrl.getLeft();
         if (version.startsWith("5")) {
             throw new IllegalArgumentException("FHIR R5 not yet supported");
         } else if (version.startsWith("4")) {

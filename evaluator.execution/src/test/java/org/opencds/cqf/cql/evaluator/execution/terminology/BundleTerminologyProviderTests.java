@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.util.List;
 
 import com.google.common.collect.Lists;
 
@@ -45,7 +46,7 @@ public class BundleTerminologyProviderTests {
 
 
     private TerminologyProvider getTerminologyProvider() {
-        var context = FhirContext.forR4();
+        FhirContext context = FhirContext.forR4();
         IBaseBundle bundle = this.loadBundle(context, "r4/TestBundleValueSets.json");
         return new BundleTerminologyProvider(context, bundle);
     }
@@ -53,57 +54,57 @@ public class BundleTerminologyProviderTests {
 
     @Test
     public void test_expandFromExpansion() {
-        var terminology = this.getTerminologyProvider();
-        var codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-three"));
+        TerminologyProvider terminology = this.getTerminologyProvider();
+        Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-three"));
         assertNotNull(codes);
-        var codesList = Lists.newArrayList(codes);
+        List<Code> codesList = Lists.newArrayList(codes);
         assertEquals(3, codesList.size());
     }
 
     @Test
     public void test_expandFromCompose() {
-        var terminology = this.getTerminologyProvider();
-        var codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-two"));
+        TerminologyProvider terminology = this.getTerminologyProvider();
+        Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-two"));
         assertNotNull(codes);
-        var codesList = Lists.newArrayList(codes);
+        List<Code> codesList = Lists.newArrayList(codes);
         assertEquals(3, codesList.size());
     }
 
     @Test
     public void test_expand_expansionOverridesCompose() {
-        var terminology = this.getTerminologyProvider();
-        var codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));
+        TerminologyProvider terminology = this.getTerminologyProvider();
+        Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));
         assertNotNull(codes);
-        var codesList = Lists.newArrayList(codes);
+        List<Code> codesList = Lists.newArrayList(codes);
         assertEquals(3, codesList.size());
     }
 
 
     @Test
     public void test_expand_noCodes_returnsEmptySet() {
-        var terminology = this.getTerminologyProvider();
-        var codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-four"));
+        TerminologyProvider terminology = this.getTerminologyProvider();
+        Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-four"));
         assertNotNull(codes);
-        var codesList = Lists.newArrayList(codes);
+        List<Code> codesList = Lists.newArrayList(codes);
         assertEquals(0, codesList.size());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void test_expand_invalidValueSet() {
-        var terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.expand(new ValueSetInfo().withId("http://not-value-set"));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void test_expand_nullValueSet() {
-        var terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.expand(null);
     }
 
     @Test
     public void test_inValueSet() {
-        var terminology = this.getTerminologyProvider();
-        var inValueSet = terminology.in(
+        TerminologyProvider terminology = this.getTerminologyProvider();
+        boolean inValueSet = terminology.in(
             new Code().withSystem("http://localhost/unit-test").withCode("000"),
             new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));
         assertTrue(inValueSet);
@@ -116,13 +117,13 @@ public class BundleTerminologyProviderTests {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void test_inValueSet_nullValueSet() {
-        var terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.in(new Code().withSystem("http://localhost/not-a-system").withCode("XXX"), null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void test_inValueSet_nullCode() {
-        var terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.in(null, new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));
     }
 
@@ -130,8 +131,8 @@ public class BundleTerminologyProviderTests {
     // for Bundles (the assumption is that the full code-system is not available)
     @Test
     public void test_lookupReturnsNull() {
-        var terminology = this.getTerminologyProvider();
-        var result = terminology.lookup(new Code().withCode("000"), new CodeSystemInfo().withId("http://localhost/unit-test"));
+        TerminologyProvider terminology = this.getTerminologyProvider();
+        Code result = terminology.lookup(new Code().withCode("000"), new CodeSystemInfo().withId("http://localhost/unit-test"));
         assertNull(result);
     }
 }

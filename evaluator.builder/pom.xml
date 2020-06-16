@@ -22,24 +22,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql-to-elm</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.fhir</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql-to-elm</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>

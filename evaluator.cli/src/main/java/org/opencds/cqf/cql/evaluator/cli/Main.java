@@ -79,7 +79,7 @@ public class Main {
             EvaluationResult result = evaluator.evaluate(contextParameter);
 
             for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
-                System.out.println(libraryEntry.getKey() + "=" + libraryEntry.getValue().toString());
+                System.out.println(libraryEntry.getKey() + "=" + (libraryEntry.getValue() != null ? libraryEntry.getValue().toString() : null);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());

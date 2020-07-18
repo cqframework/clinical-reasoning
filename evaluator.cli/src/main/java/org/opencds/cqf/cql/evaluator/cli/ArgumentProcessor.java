@@ -167,8 +167,8 @@ public class ArgumentProcessor {
         EvaluationParameters ep = new EvaluationParameters();
         ep.libraryUrl = libraryUrl;
         ep.libraryName = libraryName;
-        ep.contextParameter = Pair.of(contextParameter.key, contextParameter.value);
-        ep.model = Pair.of(model.key, model.value);
+        ep.contextParameter = contextParameter != null ? Pair.of(contextParameter.key, contextParameter.value) : null;
+        ep.model = model != null ? Pair.of(model.key, model.value) : null;
         ep.terminologyUrl = terminologyUrl;
         return ep;
     }

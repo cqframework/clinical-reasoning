@@ -17,7 +17,9 @@ import org.opencds.cqf.cql.evaluator.resolver.ParameterDeserializer;
 public class DefaultParameterDeserializer implements ParameterDeserializer {
     @Override
     public Pair<String, Object> deserializeContextParameter(Pair<String, String> contextParameter) {
-        Objects.requireNonNull(contextParameter);
+        if (contextParameter == null) {
+            return null;
+        }
 
         return Pair.of(contextParameter.getLeft(), 
             this.deserializeContextParameter(contextParameter.getLeft(), contextParameter.getRight()));
@@ -25,7 +27,9 @@ public class DefaultParameterDeserializer implements ParameterDeserializer {
 
     @Override
     public Map<String, Object> deserializeParameters(Map<String, String> parameters) {
-        Objects.requireNonNull(parameters);
+        if (parameters == null) {
+            return null;
+        }
 
         Map<String, Object> deseralized = new HashMap<>();
         for (Map.Entry<String, String> entry : parameters.entrySet()) {

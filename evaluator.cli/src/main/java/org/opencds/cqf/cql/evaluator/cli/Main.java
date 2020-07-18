@@ -42,20 +42,20 @@ public class Main {
 
         try {
             // This is all temporary garbage to get running again.
-            Objects.requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
+            //Objects.requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
             Objects.requireNonNull(parameters.libraryName, "Gotta have a libraryName");
             Objects.requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
-            Objects.requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
-            Objects.requireNonNull(parameters.model, "Gotta have a model");
+            // Objects.requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
+            // Objects.requireNonNull(parameters.model, "Gotta have a model");
             if (!Helpers.isFileUri(parameters.libraryUrl)) {
                 throw new IllegalArgumentException("libraryUrl must be a local directory for now. Sorry!");
             }
 
-            if (!Helpers.isFileUri(parameters.terminologyUrl)) {
+            if (parameters.terminologyUrl != null && !Helpers.isFileUri(parameters.terminologyUrl)) {
                 throw new IllegalArgumentException("terminologyUrl must be a local directory for now. Sorry!");
             }
 
-            if (!Helpers.isFileUri(parameters.model.getValue())) {
+            if (parameters.model != null && !Helpers.isFileUri(parameters.model.getValue())) {
                 throw new IllegalArgumentException("model Urls must be a local directory for now. Sorry!");
             }
 
@@ -123,8 +123,8 @@ public class Main {
     private static Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
             Pair<String, String> modelUrl) {
 
-        modelUrl = expandAliasToUri(modelUrl);
         Map<String, Pair<String, String>> versions = new HashMap<>();
+        modelUrl = expandAliasToUri(modelUrl);
         for (Library library : libraries.values()) {
             if (library.getUsings() != null && library.getUsings().getDef() != null) {
                 for (UsingDef u : library.getUsings().getDef()) {
@@ -141,11 +141,11 @@ public class Main {
                                     "Libraries are using multiple versions of %s. Only one version is supported at a time.",
                                     uri));
                         }
-                    } else if (uri.equals(modelUrl.getLeft())) {
-                        versions.put(uri, Pair.of(version, modelUrl.getRight()));
-                    }
-                    else {
+                    }  else  if (modelUrl == null || !uri.equals(modelUrl.getLeft())) {
                         versions.put(uri, Pair.of(version, null));
+                    }
+                    else  {
+                        versions.put(uri, Pair.of(version, modelUrl.getRight()));
                     }
                 }
             }

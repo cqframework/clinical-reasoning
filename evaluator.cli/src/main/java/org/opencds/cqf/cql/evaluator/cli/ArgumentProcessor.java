@@ -116,7 +116,7 @@ public class ArgumentProcessor {
 
             }
 
-            System.exit(0);
+            return null;
         }
 
         if (options.has(CLI_VERSION_OPTIONS[0])) {
@@ -127,7 +127,7 @@ public class ArgumentProcessor {
 
             }
 
-            System.exit(0);
+            return null;
         }
 
         return options;
@@ -144,6 +144,9 @@ public class ArgumentProcessor {
 
     public EvaluationParameters parseAndConvert(String[] args) {
         OptionSet options = this.parse(args);
+        if (options == null) {
+            return null;
+        }
 
         List<String> libraries = (List<String>)options.valuesOf(LIBRARY_OPTIONS[0]);
         String libraryUrl = (String)options.valueOf(LIBRARY_URL_OPTIONS[0]);

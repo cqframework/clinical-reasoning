@@ -66,7 +66,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 
 		for (Code code : left) {
 			for (Code otherCode : right) {
-				if (code.getCode().equals(otherCode.getCode()) && code.getSystem().equals(otherCode.getSystem())) {
+				if (code.getCode() != null && code.getCode().equals(otherCode.getCode()) && code.getSystem() != null && code.getSystem().equals(otherCode.getSystem())) {
 					return true;
 				}
 			}

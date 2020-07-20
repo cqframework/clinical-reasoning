@@ -32,55 +32,10 @@ import ca.uhn.fhir.context.FhirContext;
 public class Main {
 
     public static void main(String[] args) {
-        EvaluationParameters parameters = null;
         try {
-            parameters = new ArgumentProcessor().parseAndConvert(args);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
-
-        try {
-            // This is all temporary garbage to get running again.
-            //Objects.requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
-            Objects.requireNonNull(parameters.libraryName, "Gotta have a libraryName");
-            Objects.requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
-            // Objects.requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
-            // Objects.requireNonNull(parameters.model, "Gotta have a model");
-            if (!Helpers.isFileUri(parameters.libraryUrl)) {
-                throw new IllegalArgumentException("libraryUrl must be a local directory for now. Sorry!");
-            }
-
-            if (parameters.terminologyUrl != null && !Helpers.isFileUri(parameters.terminologyUrl)) {
-                throw new IllegalArgumentException("terminologyUrl must be a local directory for now. Sorry!");
-            }
-
-            if (parameters.model != null && !Helpers.isFileUri(parameters.model.getValue())) {
-                throw new IllegalArgumentException("model Urls must be a local directory for now. Sorry!");
-            }
-
-            LibraryLoader libraryLoader = new LibraryLoaderFactory().create(parameters.libraryUrl);
-
-            Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
-            if (parameters.libraryName != null) {
-                Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, null));
-                if (lib != null) {
-                    libraries.put(lib.getIdentifier(), lib);
-                }
-            }
-
-            Map<String, Pair<String, String>> modelVersionAndUrls = getModelVersionAndUrls(libraries, parameters.model);
-            TerminologyProvider terminologyProvider = create(modelVersionAndUrls, parameters.terminologyUrl);
-            Map<String, DataProvider> dataProviders = create(modelVersionAndUrls, terminologyProvider);
-
-            CqlEvaluator evaluator = new CqlEvaluator(libraryLoader, parameters.libraryName, dataProviders,
-                    terminologyProvider);
-            Pair<String, Object> contextParameter = evaluator.unmarshalContextParameter(parameters.contextParameter);
-            EvaluationResult result = evaluator.evaluate(contextParameter);
-
-            for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
-                System.out.println(libraryEntry.getKey() + "=" + (libraryEntry.getValue() != null ? libraryEntry.getValue().toString() : null));
-            }
+            Main main = new Main();
+            main.parseAndExecute(args);
+           
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -88,8 +43,64 @@ public class Main {
         }
     }
 
+    public void parseAndExecute(String[] args) {
+        EvaluationParameters parameters = this.parse(args);
+        if (parameters == null) {
+            return;
+        }
+
+        this.execute(parameters);
+    }
+
+    public EvaluationParameters parse(String[] args) {
+        return new ArgumentProcessor().parseAndConvert(args);
+    }
+
+    public void execute(EvaluationParameters parameters){
+        // This is all temporary garbage to get running again.
+        //Objects.requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
+        Objects.requireNonNull(parameters.libraryName, "Gotta have a libraryName");
+        Objects.requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
+        // Objects.requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
+        // Objects.requireNonNull(parameters.model, "Gotta have a model");
+        if (!Helpers.isFileUri(parameters.libraryUrl)) {
+            throw new IllegalArgumentException("libraryUrl must be a local directory for now. Sorry!");
+        }
+
+        if (parameters.terminologyUrl != null && !Helpers.isFileUri(parameters.terminologyUrl)) {
+            throw new IllegalArgumentException("terminologyUrl must be a local directory for now. Sorry!");
+        }
+
+        if (parameters.model != null && !Helpers.isFileUri(parameters.model.getValue())) {
+            throw new IllegalArgumentException("model Urls must be a local directory for now. Sorry!");
+        }
+
+        LibraryLoader libraryLoader = new LibraryLoaderFactory().create(parameters.libraryUrl);
+
+        Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
+        if (parameters.libraryName != null) {
+            Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, null));
+            if (lib != null) {
+                libraries.put(lib.getIdentifier(), lib);
+            }
+        }
+
+        Map<String, Pair<String, String>> modelVersionAndUrls = getModelVersionAndUrls(libraries, parameters.model);
+        TerminologyProvider terminologyProvider = create(modelVersionAndUrls, parameters.terminologyUrl);
+        Map<String, DataProvider> dataProviders = create(modelVersionAndUrls, terminologyProvider);
+
+        CqlEvaluator evaluator = new CqlEvaluator(libraryLoader, parameters.libraryName, dataProviders,
+                terminologyProvider);
+        Pair<String, Object> contextParameter = evaluator.unmarshalContextParameter(parameters.contextParameter);
+        EvaluationResult result = evaluator.evaluate(contextParameter);
+
+        for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
+            System.out.println(libraryEntry.getKey() + "=" + (libraryEntry.getValue() != null ? libraryEntry.getValue().toString() : null));
+        }
+    }
+
     // TODO: Remove this once builder is complete:
-    private static TerminologyProvider create(Map<String, Pair<String, String>> modelVersionsAndUrls,
+    private TerminologyProvider create(Map<String, Pair<String, String>> modelVersionsAndUrls,
             String terminologyUri) {
         if (terminologyUri == null || terminologyUri.isEmpty()) {
             return null;
@@ -120,7 +131,7 @@ public class Main {
     }
 
     // TODO: More stuff to remove once builder is ready.
-    private static Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
+    private Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
             Pair<String, String> modelUrl) {
 
         Map<String, Pair<String, String>> versions = new HashMap<>();
@@ -154,7 +165,7 @@ public class Main {
         return versions;
     }
 
-    private static Pair<String, String> expandAliasToUri(Pair<String, String> modelUrl) {
+    private Pair<String, String> expandAliasToUri(Pair<String, String> modelUrl) {
         final Map<String, String> aliasMap = new HashMap<String, String>() {
             private static final long serialVersionUID = 1L;
 
@@ -176,16 +187,16 @@ public class Main {
         return modelUrl;
     }
 
-    public static VersionedIdentifier toExecutionIdentifier(String name, String version) {
+    private VersionedIdentifier toExecutionIdentifier(String name, String version) {
         return new VersionedIdentifier().withId(name).withVersion(version);
     }
 
-    public static Map<String, DataProvider> create(Map<String, Pair<String, String>> modelVersionsAndUrls,
+    private Map<String, DataProvider> create(Map<String, Pair<String, String>> modelVersionsAndUrls,
             TerminologyProvider terminologyProvider) {
         return getProviders(modelVersionsAndUrls, terminologyProvider);
     }
 
-    private static Map<String, DataProvider> getProviders(Map<String, Pair<String, String>> versions,
+    private Map<String, DataProvider> getProviders(Map<String, Pair<String, String>> versions,
             TerminologyProvider terminologyProvider) {
         Map<String, DataProvider> providers = new HashMap<>();
         for (Map.Entry<String, Pair<String, String>> m : versions.entrySet()) {
@@ -196,7 +207,7 @@ public class Main {
         return providers;
     }
 
-    private static DataProvider getProvider(String model, String version, String url,
+    private DataProvider getProvider(String model, String version, String url,
             TerminologyProvider terminologyProvider) {
         switch (model) {
             case "http://hl7.org/fhir":
@@ -211,7 +222,7 @@ public class Main {
     }
 
     @SuppressWarnings("rawtypes")
-    private static DataProvider getFhirProvider(String version, String url, TerminologyProvider terminologyProvider) {
+    private DataProvider getFhirProvider(String version, String url, TerminologyProvider terminologyProvider) {
         FhirModelResolver modelResolver;
         RetrieveProvider retrieveProvider;
         if (version.startsWith("5")) {
@@ -233,7 +244,7 @@ public class Main {
         return new CompositeDataProvider(modelResolver, retrieveProvider);
     }
 
-    private static DataProvider getQdmProvider(String version, String uri, TerminologyProvider terminologyProvider) {
+    private DataProvider getQdmProvider(String version, String uri, TerminologyProvider terminologyProvider) {
         throw new NotImplementedException("QDM data providers are not yet implemented");
     }
 

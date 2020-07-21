@@ -16,8 +16,6 @@
 
     <description>CQL Evaluator CLI</description>
 
-
-
     <dependencies>
         <dependency>
             <groupId>info.cqframework</groupId>

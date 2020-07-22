@@ -14,7 +14,7 @@ code "American Indian or Alaska Native": '1002-5' from "CDC Race and Ethnicity C
 code "Shoshone": '1586-7' from "CDC Race and Ethnicity Codes"
 
 context Patient
-/*
+
 define TestPatient: ["PatientProfile"]
 define TestAllergyIntolerance: ["AllergyIntolerance"]
 define TestCarePlan: ["CarePlanProfile"]
@@ -78,14 +78,12 @@ define TestPatientDeceasedAsBoolean:
 define TestPatientDeceasedAsDateTime:
   Patient P
     where P.deceased before Today()
-*/
 
 define TestSlices:
   ["observation-bp"] BP
     where BP.SystolicBP.value < 140 'mm[Hg]'
       and BP.DiastolicBP.value < 90 'mm[Hg]'
 
-/*
 define TestSimpleExtensions:
   Patient P
     where P.birthsex = 'M'
@@ -94,4 +92,3 @@ define TestComplexExtensions:
   Patient P
     where exists (P.race.ombCategory C where C ~ "American Indian or Alaska Native")
       and exists (P.race.detailed C where C ~ "Shoshone")
-*/

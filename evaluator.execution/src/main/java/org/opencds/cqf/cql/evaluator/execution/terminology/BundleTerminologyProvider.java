@@ -84,14 +84,24 @@ public class BundleTerminologyProvider implements TerminologyProvider {
 
     
     /** 
-     * Lookup is not implemented for this TerminologyProvider. That requires the ability to access the full CodeSystem.
+     * Lookup is only partially implemented for this TerminologyProvider. Full implementation requires the ability to
+     * access the full CodeSystem. This implementation only checks the code system of the code matches the CodeSystemInfo
+     * url, and verifies the version if present.
      * @param code The Code to lookup
      * @param codeSystem The CodeSystemInfo of the CodeSystem to check.
-     * @return Always null
+     * @return The Code if the system of the Code (and version if specified) matches the CodeSystemInfo url (and version)
      */
     @Override
 	public Code lookup(Code code, CodeSystemInfo codeSystem) {
-        logger.warn("Unsupported CodeSystem lookup: {} in {}", code.toString(), codeSystem.getId());
+        if (code.getSystem() == null) {
+            return null;
+        }
+
+        if (code.getSystem().equals(codeSystem.getId()) && (code.getVersion() == null || code.getVersion().equals(codeSystem.getVersion()))) {
+            logger.warn("Unvalidated CodeSystem lookup: {} in {}", code.toString(), codeSystem.getId());
+            return code;
+        }
+
         return null;
     }
 

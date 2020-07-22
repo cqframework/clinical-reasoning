@@ -110,7 +110,7 @@ public class DirectoryBundler {
                 return this.xml.parseResource(resource);
             }
         } catch (Exception e) {
-            logger.warn("Error parsing resource {}", f.getAbsolutePath());
+            logger.warn("Error parsing resource {}: {}", f.getAbsolutePath(), e.getMessage());
             return null;
         }
     }

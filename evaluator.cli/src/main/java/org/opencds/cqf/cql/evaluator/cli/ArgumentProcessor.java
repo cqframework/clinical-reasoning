@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlTranslator;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -12,6 +13,7 @@ import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import joptsimple.util.KeyValuePair;
 
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
 
 @SuppressWarnings({ "unchecked", "unused"})
@@ -135,9 +137,13 @@ public class ArgumentProcessor {
 
     private void printVersion() {
         System.out.println(String.format("cql-evaluator cli version: %s", ArgumentProcessor.class.getPackage().getImplementationVersion()));
+        // System.out.println(String.format("cql-translator version: %s", CqlTranslator.class.getPackage().getImplementationVersion()));
+        System.out.println(String.format("cql-engine version: %s", CqlEngine.class.getPackage().getImplementationVersion()));
+        System.out.println();
     }
 
     private void printExamples() {
+        System.out.println();
         System.out.println("Examples:");
         System.out.println("cli --ln \"CMS146\" --lu /ig/cql --m FHIR=/ig/tests --t /ig/valuesets -c Patient=123");
     }

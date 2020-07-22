@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.gen.cqlParser.LongNumberLiteralContext;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -57,27 +58,34 @@ public class ArgumentProcessor {
         OptionSpecBuilder measureNameBuilder = parser.acceptsAll(asList(MEASURE_NAME_OPTIONS), "Required if measure-url specified.");
         OptionSpecBuilder measureVersionBuilder = parser.acceptsAll(asList(MEASURE_VERSION_OPTIONS), "If omitted most recent version of the measure will be used.");  
         
+
+        OptionSpecBuilder helpBuilder = parser.acceptsAll(asList(HELP_OPTIONS), "Show this help page");
+        OptionSpec<Void> help = helpBuilder.forHelp();
+
         // Set up inter-dependencies.
+         // Can't define libraries and measures
+        parser.mutuallyExclusive(measureUrlBuilder, libraryUrlBuilder);
+        parser.mutuallyExclusive(measureUrlBuilder, libraryBuilder);
+
         // Can't define libraries inline and in a directory
         parser.mutuallyExclusive(libraryBuilder, libraryUrlBuilder);
         
-         // Can't define libraries and measures
-        parser.mutuallyExclusive(measureNameBuilder, libraryNameBuilder);
-        parser.mutuallyExclusive(measureNameBuilder, libraryBuilder);
-        parser.mutuallyExclusive(measureUrlBuilder, libraryNameBuilder);
-        parser.mutuallyExclusive(measureUrlBuilder, libraryBuilder);
+        // Cant use version with other options.
+        parser.mutuallyExclusive(versionBuilder, measureUrlBuilder);
+        parser.mutuallyExclusive(versionBuilder, libraryUrlBuilder);
+        parser.mutuallyExclusive(versionBuilder, libraryBuilder);
 
-        OptionSpec<Void> version = versionBuilder.availableUnless("l", "mu", "mn", "lu", "ln");
 
         OptionSpec<String> library = libraryBuilder.withRequiredArg().describedAs("library content");
-        OptionSpec<String> libraryUrl = libraryUrlBuilder.requiredUnless("l", "mu", "mn", "v").withRequiredArg().describedAs("location of libraries");
-        OptionSpec<String> libraryName = libraryNameBuilder.withRequiredArg().describedAs("name of primary library");
+        OptionSpec<String> libraryUrl = libraryUrlBuilder.withRequiredArg().describedAs("location of libraries");
+        OptionSpec<String> libraryName = libraryNameBuilder.requiredIf(libraryUrl).withRequiredArg().describedAs("name of primary library");
         OptionSpec<String> libraryVersion = libraryVersionBuilder.availableIf(libraryName).withRequiredArg().describedAs("version of primary library");
-        OptionSpec<String> expressionName = expressionNameBuilder.withRequiredArg().describedAs("expression name in primary library to evaluate");
+        OptionSpec<String> expressionName = expressionNameBuilder.availableIf(library, libraryName).withRequiredArg().describedAs("expression name in primary library to evaluate");
 
-        OptionSpec<String> measureName = measureNameBuilder.withRequiredArg().describedAs("name of measure");
+        OptionSpec<String> measureUrl = measureUrlBuilder.withRequiredArg().describedAs("location of measure");
+        OptionSpec<String> measureName = measureNameBuilder.requiredIf(measureUrl).withRequiredArg().describedAs("name of measure");
         OptionSpec<String> measureVersion = measureVersionBuilder.availableIf(measureName).withRequiredArg().describedAs("version of measure");
-        OptionSpec<String> measureUrl = measureUrlBuilder.requiredUnless("l", "lu", "ln", "v").withRequiredArg().describedAs("location of measure");
+        
 
 
         // TODO: Terminology user / password (and other auth options)
@@ -100,50 +108,51 @@ public class ArgumentProcessor {
         // OptionSpec<Boolean> verbose = parser.acceptsAll(asList(OUTPUT_FORMAT_OPTIONS), "Show simplified results")
         // .withOptionalArg().ofType(Boolean.class).describedAs("String representation of a boolean value");
 
-        OptionSpec<Void> help = parser.acceptsAll(asList(HELP_OPTIONS), "Show this help page").forHelp();
-
         return parser;
     }
 
     public OptionSet parse(String[] args) {
         OptionParser parser = build();
+
+        if (args == null) {
+            this.printHelp(parser);
+            return null;
+        }
+
         OptionSet options = parser.parse(args);
-        if (options.has(HELP_OPTIONS[0])) {
-            try {
-                this.printVersion();
-                parser.printHelpOn(System.out);
-                this.printExamples();
-            }
-            catch (Exception e) {
-
-            }
-
+        if (!options.hasOptions() || options.has(HELP_OPTIONS[0])) {
+            this.printHelp(parser);
             return null;
         }
 
         if (options.has(CLI_VERSION_OPTIONS[0])) {
-            try {
-                this.printVersion();
-            }
-            catch (Exception e) {
-
-            }
-
+            this.printVersion();
             return null;
         }
 
         return options;
     }
 
+    private void printHelp(OptionParser parser) {
+        try {
+            this.printVersion();
+            System.out.println();
+            parser.printHelpOn(System.out);
+            System.out.println();
+            this.printExamples();
+        }
+        catch (Exception e) {
+
+        }
+    }
+
     private void printVersion() {
         System.out.println(String.format("cql-evaluator cli version: %s", ArgumentProcessor.class.getPackage().getImplementationVersion()));
         // System.out.println(String.format("cql-translator version: %s", CqlTranslator.class.getPackage().getImplementationVersion()));
-        System.out.println(String.format("cql-engine version: %s", CqlEngine.class.getPackage().getImplementationVersion()));
-        System.out.println();
+        // System.out.println(String.format("cql-engine version: %s", CqlEngine.class.getPackage().getImplementationVersion()));
     }
 
     private void printExamples() {
-        System.out.println();
         System.out.println("Examples:");
         System.out.println("cli --ln \"CMS146\" --lu /ig/cql --m FHIR=/ig/tests --t /ig/valuesets -c Patient=123");
     }

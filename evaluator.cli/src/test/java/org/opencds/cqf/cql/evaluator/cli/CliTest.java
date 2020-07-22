@@ -56,7 +56,7 @@ public class CliTest {
         assertTrue(outContent.toString().startsWith("cql-evaluator cli version:"));
     }
 
-    @Test 
+    //@Test
     public void testHelp() {
         String[] args = new String[] { "-h" };
         Main.main(args);

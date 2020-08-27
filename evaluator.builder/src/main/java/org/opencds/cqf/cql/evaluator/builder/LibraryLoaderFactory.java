@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.evaluator.builder;
 
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
-import static org.opencds.cqf.cql.evaluator.fhir.common.ClientFactory.createClient;
-import static org.opencds.cqf.cql.evaluator.fhir.common.DirectoryBundler.bundle;
+import static org.opencds.cqf.cql.evaluator.fhir.ClientFactory.createClient;
+import static org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler.bundle;
 
 import java.io.File;
 import java.io.IOException;

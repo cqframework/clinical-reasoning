@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.fhir.common;
+package org.opencds.cqf.cql.evaluator.fhir;
 
 import java.io.File;
 import java.nio.charset.Charset;

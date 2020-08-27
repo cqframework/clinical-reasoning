@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.library.common;
+package org.opencds.cqf.cql.evaluator.library;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +21,8 @@ import org.opencds.cqf.cql.evaluator.fhir.api.ParametersParameterComponentAdapte
 
 import ca.uhn.fhir.context.FhirContext;
 
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.parametersAdapterFor;
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.parametersParametersComponentAdapterFor;
+import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.parametersAdapterFor;
+import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.parametersParametersComponentAdapterFor;
 
 public class LibraryProcessor implements org.opencds.cqf.cql.evaluator.library.api.LibraryProcessor {
 

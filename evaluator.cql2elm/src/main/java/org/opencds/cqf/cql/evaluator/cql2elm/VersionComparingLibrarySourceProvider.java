@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.attachmentAdapterFor;
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.libraryAdapterFor;
+import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.attachmentAdapterFor;
+import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.libraryAdapterFor;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

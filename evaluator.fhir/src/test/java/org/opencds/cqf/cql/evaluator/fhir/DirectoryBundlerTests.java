@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.fhir.common;
+package org.opencds.cqf.cql.evaluator.fhir;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

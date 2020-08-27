@@ -7,7 +7,7 @@ import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.api.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.common.VersionUtilities;
+import org.opencds.cqf.cql.evaluator.fhir.VersionUtilities;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 

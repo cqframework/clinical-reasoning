@@ -8,7 +8,7 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <description>CQL-based Measure Evaluator</description>
+    <description>CQL Evaluator - Measure Evaluation</description>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
@@ -24,11 +24,6 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine.fhir</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
         </dependency>
     </dependencies>
 </project>

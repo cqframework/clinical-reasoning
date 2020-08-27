@@ -14,9 +14,9 @@ import org.junit.Test;
 public class CliTest {
 
     private ByteArrayOutputStream outContent;
-    private ByteArrayOutputStream errContent;
+    //private ByteArrayOutputStream errContent;
     private final PrintStream originalOut = System.out;
-    private final PrintStream originalErr = System.err;
+    // private final PrintStream originalErr = System.err;
 
     private static final String testResourceRelativePath = "src/test/resources";
     private static String testResourcePath = null;
@@ -91,6 +91,8 @@ public class CliTest {
     @Test
     public void testR4() {
         String[] args = new String[]{
+                "-fv",
+                "R4",
                 "-lu",
                 testResourcePath + "/r4",
                 "-ln",

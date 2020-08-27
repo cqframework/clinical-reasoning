@@ -14,12 +14,17 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.api.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.builder.EvaluatorModule;
-import org.opencds.cqf.cql.evaluator.builder.FhirContextModule;
-import org.opencds.cqf.cql.evaluator.builder.api.*;
+import org.opencds.cqf.cql.evaluator.api.ParameterParser;
+import org.opencds.cqf.cql.evaluator.builder.api.DataProviderConfigurer;
+import org.opencds.cqf.cql.evaluator.builder.api.DataProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.api.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.api.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.api.model.DataProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
+import org.opencds.cqf.cql.evaluator.builder.di.EvaluatorModule;
+import org.opencds.cqf.cql.evaluator.builder.di.FhirContextModule;
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class Main {
@@ -91,7 +96,9 @@ public class Main {
 
         VersionedIdentifier identifier = new VersionedIdentifier().withId(parameters.libraryName);
 
-        Pair<String, Object> contextParameter = evaluator.deserializeContextParameter(identifier, parameters.contextParameter);
+        ParameterParser parser = this.get(ParameterParser.class);
+
+        Pair<String, Object> contextParameter = parser.parseContextParameter(libraryLoader, identifier, parameters.contextParameter);
         EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
 
         for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {

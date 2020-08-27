@@ -6,25 +6,27 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ResourceAdapter {
 
-    public IBase setProperty(IBaseResource resource, String name, IBase value) throws FHIRException;
+    public IBaseResource get();
 
-    public IBase addChild(IBaseResource resource, String name) throws FHIRException;
+    public IBase setProperty(String name, IBase value) throws FHIRException;
 
-    public IBase getSingleProperty(IBaseResource resource, String name) throws FHIRException;
+    public IBase addChild(String name) throws FHIRException;
 
-    public IBase[] getProperty(IBaseResource resource, String name) throws FHIRException;
+    public IBase getSingleProperty(String name) throws FHIRException;
 
-	public IBase[] getProperty(IBaseResource resource, String name, boolean checkValid) throws FHIRException;
+    public IBase[] getProperty(String name) throws FHIRException;
 
-	public IBase makeProperty(IBaseResource resource, String name) throws FHIRException;
+	public IBase[] getProperty(String name, boolean checkValid) throws FHIRException;
 
-    public String[] getTypesForProperty(IBaseResource resource, String name) throws FHIRException;
+	public IBase makeProperty(String name) throws FHIRException;
 
-    public IBaseResource copy(IBaseResource resource);
+    public String[] getTypesForProperty(String name) throws FHIRException;
 
-    public void copyValues(IBaseResource resource, IBaseResource dst);
+    public IBaseResource copy();
 
-    public boolean equalsDeep(IBase resource, IBase other);
+    public void copyValues(IBaseResource destination);
 
-    public boolean equalsShallow(IBase resource, IBase other);
+    public boolean equalsDeep(IBase other);
+
+    public boolean equalsShallow(IBase other);
 }

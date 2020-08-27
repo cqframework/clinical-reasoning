@@ -13,8 +13,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.fhir.terminology.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.builder.api.model.ConnectionType;
+import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 
 import ca.uhn.fhir.context.FhirContext;

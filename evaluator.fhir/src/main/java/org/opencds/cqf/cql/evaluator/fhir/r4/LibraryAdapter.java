@@ -12,11 +12,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 
+public class LibraryAdapter implements org.opencds.cqf.cql.evaluator.fhir.api.LibraryAdapter {
 
-public class LibraryAdapter
-        implements org.opencds.cqf.cql.evaluator.fhir.api.LibraryAdapter {
+    private Library library;
 
-    protected Library castLibrary(IBaseResource library) {
+    public LibraryAdapter(IBaseResource library) {
         if (library == null) {
             throw new IllegalArgumentException("library can not be null");
         }
@@ -29,104 +29,76 @@ public class LibraryAdapter
             throw new IllegalArgumentException("library is incorrect fhir version for this adapter");
         }
 
-        return (Library)library;
+        this.library = (Library) library;
     }
 
-    protected Attachment castAttachment(ICompositeType attachment) {
-        if (attachment == null) {
-            throw new IllegalArgumentException("attachment can not be null");
-        }
-
-        if (!attachment.fhirType().equals("Attachment")) {
-            throw new IllegalArgumentException("resource passed as attachment argument is not an Attachment resource");
-        }
-
-        if (!(attachment instanceof Attachment)) {
-            throw new IllegalArgumentException("attachment is incorrect fhir version for this adapter");
-        }
-
-        return (Attachment)attachment;
+    protected Library getLibrary() {
+        return this.library;
     }
 
     @Override
-    public IIdType getId(IBaseResource library) {
-        return castLibrary(library).getIdElement();
+    public IBaseResource get() {
+        return this.library;
     }
 
     @Override
-    public void setId(IBaseResource library, IIdType id) {
-        castLibrary(library).setId(id);
+    public IIdType getId() {
+        return this.getLibrary().getIdElement();
     }
 
     @Override
-    public String getName(IBaseResource library) {
-        return castLibrary(library).getName();
+    public void setId(IIdType id) {
+        this.getLibrary().setId(id);
     }
 
     @Override
-    public void setName(IBaseResource library, String name) {
-        castLibrary(library).setName(name);
+    public String getName() {
+        return this.getLibrary().getName();
     }
 
     @Override
-    public String getUrl(IBaseResource library) {
-        return castLibrary(library).getUrl();
+    public void setName(String name) {
+        this.getLibrary().setName(name);
     }
 
     @Override
-    public void setUrl(IBaseResource library, String url) {
-        castLibrary(library).setUrl(url);
+    public String getUrl() {
+        return this.getLibrary().getUrl();
     }
 
     @Override
-    public String getVersion(IBaseResource library) {
-        return castLibrary(library).getVersion();
+    public void setUrl(String url) {
+        this.getLibrary().setUrl(url);
     }
 
     @Override
-    public void setVersion(IBaseResource library, String version) {
-        castLibrary(library).setVersion(version);
+    public String getVersion() {
+        return this.getLibrary().getVersion();
     }
 
     @Override
-    public Boolean hasContent(IBaseResource library) {
-        return castLibrary(library).hasContent();
+    public void setVersion(String version) {
+        this.getLibrary().setVersion(version);
     }
 
     @Override
-    public List<ICompositeType> getContent(IBaseResource library) {
-        return castLibrary(library)
-            .getContent().stream().map(x -> (ICompositeType)x).collect(Collectors.toList());
+    public Boolean hasContent() {
+        return this.getLibrary().hasContent();
     }
 
     @Override
-    public void setContent(IBaseResource library, List<ICompositeType> attachments) {
-        List<Attachment> castAttachments = attachments.stream().map(x -> castAttachment(x)).collect(Collectors.toList());
-        castLibrary(library).setContent(castAttachments);
+    public List<ICompositeType> getContent() {
+        return this.getLibrary().getContent().stream().collect(Collectors.toList());
     }
 
     @Override
-    public ICompositeType addContent(IBaseResource library) {
-        return castLibrary(library).addContent();
+    public void setContent(List<ICompositeType> attachments) {
+        List<Attachment> castAttachments = attachments.stream().map(x -> (Attachment) x).collect(Collectors.toList());
+        this.getLibrary().setContent(castAttachments);
     }
 
     @Override
-    public String getContentType(ICompositeType attachment) {
-        return castAttachment(attachment).getContentType();
-    }
-
-    @Override
-    public void setContentType(ICompositeType attachment, String contentType) {
-        castAttachment(attachment).setContentType(contentType);
-    }
-
-    @Override
-    public byte[] getData(ICompositeType attachment) {
-        return castAttachment(attachment).getData();
-    }
-
-    @Override
-    public void setData(ICompositeType attachment, byte[] data) {
-       castAttachment(attachment).setData(data);
+    public ICompositeType addContent() {
+        return this.getLibrary().addContent();
     }
 }

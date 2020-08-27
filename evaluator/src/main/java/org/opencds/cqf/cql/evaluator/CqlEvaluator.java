@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.evaluator.api.ParameterDeserializer;
+import org.opencds.cqf.cql.evaluator.api.ParameterParser;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.CqlEngine.Options;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -19,8 +19,6 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 public class CqlEvaluator implements org.opencds.cqf.cql.evaluator.api.CqlEvaluator {
 
     private LibraryLoader libraryLoader;
-
-    private ParameterDeserializer parameterDeserializer;
 
     private CqlEngine cqlEngine;
 
@@ -40,13 +38,8 @@ public class CqlEvaluator implements org.opencds.cqf.cql.evaluator.api.CqlEvalua
 
     public CqlEvaluator(LibraryLoader libraryLoader,
             Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider,
-            EnumSet<Options> engineOptions, ParameterDeserializer parameterDeserializer) {
+            EnumSet<Options> engineOptions, ParameterParser parameterDeserializer) {
         this.libraryLoader = Objects.requireNonNull(libraryLoader, "libraryLoader can not be null.");
-
-        if (parameterDeserializer == null) {
-            this.parameterDeserializer = new org.opencds.cqf.cql.evaluator.ParameterDeserializer();
-        }
-
         this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, engineOptions);
     }
 
@@ -81,13 +74,5 @@ public class CqlEvaluator implements org.opencds.cqf.cql.evaluator.api.CqlEvalua
     public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
     Set<String> expressions, Pair<String, Object> contextParameter, Map<String, Object> parameters) {
         return this.cqlEngine.evaluate(libraryIdentifier, contextParameter, parameters);
-    }
-
-    public Pair<String, Object> deserializeContextParameter(VersionedIdentifier libraryIdentifier, Pair<String, String> contextParameter) {
-        return this.parameterDeserializer.deserializeContextParameter(libraryIdentifier, contextParameter);
-    }
-
-    public Map<String, Object> deserializeParameters(VersionedIdentifier libraryIdentifier, Map<String, String> parameters) {
-       return this.parameterDeserializer.deserializeParameters(libraryIdentifier, parameters);
     }
 }

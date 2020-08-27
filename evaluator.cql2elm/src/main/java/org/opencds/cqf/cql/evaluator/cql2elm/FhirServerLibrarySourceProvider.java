@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
+import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.libraryAdapterFor;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,8 +13,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.util.BundleUtil;
-
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.libraryAdapterFor;
 
 /**
  * This class implements the cql-translator LibrarySourceProvider API, using a FHIR
@@ -59,7 +59,7 @@ public class FhirServerLibrarySourceProvider extends
 
         // This is a subsetted resource, so we get the full version here.
         if (library != null) {
-            return getLibrary(libraryAdapterFor(library).getUrl(library));
+            return getLibrary(libraryAdapterFor(library).getUrl());
         }
 
         return null;

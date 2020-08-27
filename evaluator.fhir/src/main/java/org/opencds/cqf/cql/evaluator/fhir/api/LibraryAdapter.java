@@ -7,39 +7,33 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
- * This interface exposes common functionality across all FHIR library versions.
+ * This interface exposes common functionality across all FHIR Library versions.
  */
 public interface LibraryAdapter {
 
-    IIdType getId(IBaseResource library);
+    IBaseResource get();
 
-    void setId(IBaseResource library, IIdType id);
+    IIdType getId();
 
-    String getName(IBaseResource library);
+    void setId( IIdType id);
 
-    void setName(IBaseResource library, String name);
+    String getName();
 
-    String getUrl(IBaseResource library);
+    void setName(String name);
 
-    void setUrl(IBaseResource library, String url);
+    String getUrl();
 
-    String getVersion(IBaseResource library);
+    void setUrl(String url);
 
-    void setVersion(IBaseResource library, String version);
+    String getVersion();
 
-    Boolean hasContent(IBaseResource library);
+    void setVersion(String version);
 
-    List<ICompositeType> getContent(IBaseResource library);
+    Boolean hasContent();
 
-    void setContent(IBaseResource library, List<ICompositeType> attachments);
+    List<ICompositeType> getContent();
 
-    ICompositeType addContent(IBaseResource library);
+    void setContent(List<ICompositeType> attachments);
 
-    String getContentType(ICompositeType attachment);
-
-    void setContentType(ICompositeType attachment, String contentType);
-
-    byte[] getData(ICompositeType attachment);
-
-    void setData(ICompositeType attachment, byte[] data);
+    ICompositeType addContent();
 }

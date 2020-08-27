@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.builder;
+package org.opencds.cqf.cql.evaluator.builder.di;
 
 import java.util.Objects;
 

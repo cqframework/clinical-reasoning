@@ -1,17 +1,21 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
+import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.attachmentAdapterFor;
+import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.libraryAdapterFor;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.opencds.cqf.cql.evaluator.fhir.api.AttachmentAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.api.LibraryAdapter;
-
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.libraryAdapterFor;
 
 public abstract class VersionComparingLibrarySourceProvider
         implements LibrarySourceProvider {
@@ -32,10 +36,11 @@ public abstract class VersionComparingLibrarySourceProvider
 
         LibraryAdapter libraryAdapter = libraryAdapterFor(library);
         
-        if (libraryAdapter.hasContent(library)) {
-            for (ICompositeType attachment : libraryAdapter.getContent(library)) {
-                if (libraryAdapter.getContentType(attachment).equals("text/cql")) {
-                    return new ByteArrayInputStream(libraryAdapter.getData(attachment));
+        if (libraryAdapter.hasContent()) {
+            for (ICompositeType attachment : libraryAdapter.getContent()) {
+                AttachmentAdapter attachmentAdapter = attachmentAdapterFor(attachment);
+                if (attachmentAdapter.getContentType().equals("text/cql")) {
+                    return new ByteArrayInputStream(attachmentAdapter.getData());
                 }
             }
         }
@@ -51,20 +56,20 @@ public abstract class VersionComparingLibrarySourceProvider
 
         String targetVersion = libraryIdentifier.getVersion();
 
-        IBaseResource library = null;
-        IBaseResource maxLibrary = null;
+        List<LibraryAdapter> adapters = libraries.stream().map(x -> libraryAdapterFor(x)).collect(Collectors.toList());
 
-        for (IBaseResource l : libraries) {
+        LibraryAdapter library = null;
+        LibraryAdapter maxLibrary = null;
 
-            LibraryAdapter libraryAdapter = libraryAdapterFor(library);
+        for (LibraryAdapter l : adapters) {
 
-            String currentVersion = libraryAdapter.getVersion(l);
+            String currentVersion = l.getVersion();
             if ((targetVersion != null && currentVersion != null && currentVersion.equals(targetVersion)) || 
                 (targetVersion == null && currentVersion == null)) {
                 library = l;
             }
 
-            if (maxLibrary == null || compareVersions(libraryAdapter.getVersion(maxLibrary), currentVersion) < 0) {
+            if (maxLibrary == null || compareVersions(maxLibrary.getVersion(), currentVersion) < 0) {
                 maxLibrary = l;
             }
         }
@@ -73,7 +78,7 @@ public abstract class VersionComparingLibrarySourceProvider
             library = maxLibrary;
         }
 
-        return library;
+        return library.get();
     }
 
     public static int compareVersions(String version1, String version2) {

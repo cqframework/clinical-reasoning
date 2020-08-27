@@ -12,7 +12,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ParametersAdapter implements org.opencds.cqf.cql.evaluator.fhir.api.ParametersAdapter {
 
-    protected Parameters castParameters(IBaseResource parameters) {
+    public ParametersAdapter(IBaseResource parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters can not be null");
         }
@@ -25,33 +25,35 @@ public class ParametersAdapter implements org.opencds.cqf.cql.evaluator.fhir.api
             throw new IllegalArgumentException("parameters is incorrect fhir version for this adapter");
         }
 
-        return (Parameters)parameters;
+        this.parameters = (Parameters)parameters;
+    }
+
+
+    private Parameters parameters;
+
+    protected Parameters getParameters() {
+        return this.parameters;
+    }
+
+    @Override 
+    public IBaseResource get() {
+        return this.parameters;
     }
 
     @Override
-    public String getId(IBaseResource parameters) {
-        return parameters.getIdElement().getValue();
+    public List<IBaseBackboneElement> getParameter() {
+        return this.getParameters().getParameter().stream().collect(Collectors.toList());
     }
 
     @Override
-    public void setId(IBaseResource parameters, String id) {
-        parameters.setId(id);
-    }
-
-    @Override
-    public List<IBaseBackboneElement> getParameter(IBaseResource parameters) {
-        return castParameters(parameters).getParameter().stream().map(x -> (IBaseBackboneElement)x).collect(Collectors.toList());
-    }
-
-    @Override
-    public void setParameter(IBaseResource parameters, List<IBaseBackboneElement> parametersParameterComponents) {
-        castParameters(parameters)
+    public void setParameter(List<IBaseBackboneElement> parametersParameterComponents) {
+        this.getParameters()
             .setParameter(parametersParameterComponents.stream().map(x -> (ParametersParameterComponent)x).collect(Collectors.toList()));
     }
 
     @Override
-    public IBaseBackboneElement addParameter(IBaseResource parameters) {
-        return castParameters(parameters).addParameter();
+    public IBaseBackboneElement addParameter() {
+        return this.getParameters().addParameter();
     }
 
 

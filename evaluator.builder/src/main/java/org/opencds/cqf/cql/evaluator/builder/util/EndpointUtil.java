@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.builder.util;
 
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.resourceAdapterFor;
+import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.resourceAdapterFor;
 
 import java.util.ArrayList;
 import java.util.List;

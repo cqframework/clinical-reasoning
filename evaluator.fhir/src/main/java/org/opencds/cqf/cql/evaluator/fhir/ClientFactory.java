@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.fhir.common;
+package org.opencds.cqf.cql.evaluator.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;

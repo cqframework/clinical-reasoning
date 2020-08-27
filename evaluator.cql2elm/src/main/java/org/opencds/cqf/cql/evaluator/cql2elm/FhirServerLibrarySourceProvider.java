@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
-import static org.opencds.cqf.cql.evaluator.fhir.common.AdapterFactory.libraryAdapterFor;
+import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.libraryAdapterFor;
 
 import java.util.Collection;
 import java.util.List;

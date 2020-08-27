@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.opencds.cqf.cql.evaluator.fhir.api.AttachmentAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.api.LibraryAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.api.ParametersAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.api.ParametersParameterComponentAdapter;
@@ -22,11 +24,11 @@ public class AdapterFactory {
 
         switch (resource.getStructureFhirVersionEnum()) {
             case DSTU3:
-                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.ResourceAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.ResourceAdapter(resource);
             case R4:
-                return new org.opencds.cqf.cql.evaluator.fhir.r4.ResourceAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r4.ResourceAdapter(resource);
             case R5:
-                return new org.opencds.cqf.cql.evaluator.fhir.r5.ResourceAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r5.ResourceAdapter(resource);
             default:
                 throw new IllegalArgumentException(String.format("unsupported FHIR version: %s",
                         resource.getStructureFhirVersionEnum().toString()));
@@ -48,14 +50,40 @@ public class AdapterFactory {
 
         switch (library.getStructureFhirVersionEnum()) {
             case DSTU3:
-                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.LibraryAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.LibraryAdapter(library);
             case R4:
-                return new org.opencds.cqf.cql.evaluator.fhir.r4.LibraryAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r4.LibraryAdapter(library);
             case R5:
-                return new org.opencds.cqf.cql.evaluator.fhir.r5.LibraryAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r5.LibraryAdapter(library);
             default:
                 throw new IllegalArgumentException(String.format("unsupported FHIR version: %s",
                         library.getStructureFhirVersionEnum().toString()));
+        }
+    }
+
+        /**
+     * This function creates an adapter that exposes common Attachment operations
+     * across multiple versions of FHIR
+     * 
+     * @param attachment a FHIR Attachment
+     * @return an adapter exposing common api calls
+     */
+    public static AttachmentAdapter attachmentAdapterFor(ICompositeType attachment) {
+        Objects.requireNonNull(attachment, "attachment can not be null");
+        if (!attachment.fhirType().equals("Attachment")) {
+            throw new IllegalArgumentException("attachment is not a FHIR Library type");
+        }
+
+        switch (attachment.getClass().getPackage().getName()) {
+            case "org.hl7.fhir.dstu3.model":
+                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.AttachmentAdapter(attachment);
+            case "org.hl7.fhir.r4.model":
+                return new org.opencds.cqf.cql.evaluator.fhir.r4.AttachmentAdapter(attachment);
+            case "org.hl7.fhir.r5.model":
+                return new org.opencds.cqf.cql.evaluator.fhir.r5.AttachmentAdapter(attachment);
+            default:
+                throw new IllegalArgumentException(
+                        String.format("unsupported FHIR package: %s", attachment.getClass().getPackage().getName()));
         }
     }
 
@@ -74,11 +102,11 @@ public class AdapterFactory {
 
         switch (parameters.getStructureFhirVersionEnum()) {
             case DSTU3:
-                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.ParametersAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.ParametersAdapter(parameters);
             case R4:
-                return new org.opencds.cqf.cql.evaluator.fhir.r4.ParametersAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r4.ParametersAdapter(parameters);
             case R5:
-                return new org.opencds.cqf.cql.evaluator.fhir.r5.ParametersAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r5.ParametersAdapter(parameters);
             default:
                 throw new IllegalArgumentException(String.format("unsupported FHIR version: %s",
                         parameters.getStructureFhirVersionEnum().toString()));
@@ -101,11 +129,11 @@ public class AdapterFactory {
 
         switch (ppc.getClass().getPackage().getName()) {
             case "org.hl7.fhir.dstu3.model":
-                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.ParametersParameterComponentAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.dstu3.ParametersParameterComponentAdapter(ppc);
             case "org.hl7.fhir.r4.model":
-                return new org.opencds.cqf.cql.evaluator.fhir.r4.ParametersParameterComponentAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r4.ParametersParameterComponentAdapter(ppc);
             case "org.hl7.fhir.r5.model":
-                return new org.opencds.cqf.cql.evaluator.fhir.r5.ParametersParameterComponentAdapter();
+                return new org.opencds.cqf.cql.evaluator.fhir.r5.ParametersParameterComponentAdapter(ppc);
             default:
                 throw new IllegalArgumentException(
                         String.format("unsupported FHIR package: %s", ppc.getClass().getPackage().getName()));

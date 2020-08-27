@@ -12,43 +12,41 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ResourceAdapter implements org.opencds.cqf.cql.evaluator.fhir.api.ResourceAdapter {
 
-    protected Resource castResource(IBaseResource resource) {
+    public ResourceAdapter(IBaseResource resource) {
         if (resource == null) {
             throw new IllegalArgumentException("resource can not be null");
         }
 
-        if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.DSTU3)) {
+        if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R5)) {
             throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
         }
 
-        return (Resource) resource;
+        this.resource = (Resource) resource;
     }
 
-    protected Base castBase(IBase base) {
-        if (base == null) {
-            throw new IllegalArgumentException("base can not be null");
-        }
+    private Resource resource;
 
-        if (!(base instanceof Base)) {
-            throw new IllegalArgumentException("base is incorrect fhir version for this adapter");
-        }
-
-        return (Base) base;
+    protected Resource getResource() {
+        return this.resource;
     }
 
-    @Override
-    public IBase setProperty(IBaseResource resource, String name, IBase value) throws FHIRException {
-        return castResource(resource).setProperty(name, castBase(value));
+    public IBaseResource get() {
+        return this.resource;
     }
 
     @Override
-    public IBase addChild(IBaseResource resource, String name) throws FHIRException {
-        return castResource(resource).addChild(name);
+    public IBase setProperty(String name, IBase value) throws FHIRException {
+        return this.getResource().setProperty(name, (Base) value);
     }
 
     @Override
-    public IBase getSingleProperty(IBaseResource resource, String name) throws FHIRException {
-        IBase[] values = this.getProperty(resource, name, true);
+    public IBase addChild(String name) throws FHIRException {
+        return this.getResource().addChild(name);
+    }
+
+    @Override
+    public IBase getSingleProperty(String name) throws FHIRException {
+        IBase[] values = this.getProperty(name, true);
 
         if (values == null || values.length == 0) {
             return null;
@@ -62,42 +60,42 @@ public class ResourceAdapter implements org.opencds.cqf.cql.evaluator.fhir.api.R
     }
 
     @Override
-    public IBase[] getProperty(IBaseResource resource, String name) throws FHIRException {
-        return this.getProperty(resource, name, true);
+    public IBase[] getProperty(String name) throws FHIRException {
+        return this.getProperty(name, true);
     }
 
     @Override
-    public IBase[] getProperty(IBaseResource resource, String name, boolean checkValid) throws FHIRException {
-        return castResource(resource).getProperty(name.hashCode(), name, checkValid);
+    public IBase[] getProperty(String name, boolean checkValid) throws FHIRException {
+        return this.getResource().getProperty(name.hashCode(), name, checkValid);
     }
 
     @Override
-    public IBase makeProperty(IBaseResource resource, String name) throws FHIRException {
-        return castResource(resource).makeProperty(name.hashCode(), name);
+    public IBase makeProperty(String name) throws FHIRException {
+        return this.getResource().makeProperty(name.hashCode(), name);
     }
 
     @Override
-    public String[] getTypesForProperty(IBaseResource resource, String name) throws FHIRException {
-        return castResource(resource).getTypesForProperty(name.hashCode(), name);
+    public String[] getTypesForProperty(String name) throws FHIRException {
+        return this.getResource().getTypesForProperty(name.hashCode(), name);
     }
 
     @Override
-    public IBaseResource copy(IBaseResource resource) {
-        return castResource(resource).copy();
+    public IBaseResource copy() {
+        return this.getResource().copy();
     }
 
     @Override
-    public void copyValues(IBaseResource resource, IBaseResource dst) {
-        castResource(resource).copyValues(castResource(dst));
+    public void copyValues(IBaseResource dst) {
+        this.getResource().copyValues((Resource) dst);
     }
 
     @Override
-    public boolean equalsDeep(IBase resource, IBase other) {
-        return castBase(resource).equalsDeep(castBase(other));
+    public boolean equalsDeep(IBase other) {
+        return this.getResource().equalsDeep((Base) other);
     }
 
     @Override
-    public boolean equalsShallow(IBase resource, IBase other) {
-        return castBase(resource).equalsShallow(castBase(other));
+    public boolean equalsShallow(IBase other) {
+        return this.getResource().equalsShallow((Base) other);
     }
 }

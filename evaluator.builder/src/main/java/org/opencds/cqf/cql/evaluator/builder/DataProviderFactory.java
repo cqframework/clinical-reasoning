@@ -16,12 +16,13 @@ import org.opencds.cqf.cql.engine.fhir.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
+import org.opencds.cqf.cql.evaluator.builder.api.Constants;
+import org.opencds.cqf.cql.evaluator.builder.api.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.api.model.ConnectionType;
 import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.builder.api.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.engine.data.ExtensibleDataProvider;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;

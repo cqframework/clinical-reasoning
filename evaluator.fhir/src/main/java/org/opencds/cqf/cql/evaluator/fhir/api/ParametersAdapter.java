@@ -7,14 +7,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ParametersAdapter {
 
-    public String getId(IBaseResource parameters);
+    public IBaseResource get();
 
-    public void setId(IBaseResource parameters, String id);
+    public List<IBaseBackboneElement> getParameter();
 
-    public List<IBaseBackboneElement> getParameter(IBaseResource parameters);
+    public void setParameter(List<IBaseBackboneElement> parametersParameterComponents);
 
-    public void setParameter(IBaseResource parameters, List<IBaseBackboneElement> parametersParameterComponents);
-
-    public IBaseBackboneElement addParameter(IBaseResource parameters);
+    public IBaseBackboneElement addParameter();
     
 }

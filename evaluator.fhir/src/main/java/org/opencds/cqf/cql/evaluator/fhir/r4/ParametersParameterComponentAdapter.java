@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.fhir.r4;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -13,92 +14,94 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public class ParametersParameterComponentAdapter
         implements org.opencds.cqf.cql.evaluator.fhir.api.ParametersParameterComponentAdapter {
 
-    protected ParametersParameterComponent castPpc(IBaseBackboneElement ppc) {
-        if (ppc == null) {
-            throw new IllegalArgumentException("ppc can not be null");
+    private Parameters.ParametersParameterComponent parametersParametersComponent;
+
+    protected Parameters.ParametersParameterComponent getParametersParameterComponent() {
+        return this.parametersParametersComponent;
+    }
+
+    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent){
+        if (parametersParametersComponent == null) {
+            throw new IllegalArgumentException("parametersParametersComponent can not be null");
         }
 
-        if (!ppc.fhirType().equals("ParametersParameterComponent")) {
-            throw new IllegalArgumentException("resource passed as ppc argument is not a Ppc resource");
+        if (!parametersParametersComponent.fhirType().equals("ParametersParameterComponent")) {
+            throw new IllegalArgumentException("element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
         }
 
-        return (ParametersParameterComponent) ppc;
+        this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
+
     }
 
     @Override
-    public String getId(IBaseBackboneElement ppc) {
-        return castPpc(ppc).getId();
+    public IBaseBackboneElement get() {
+        return this.parametersParametersComponent;
     }
 
     @Override
-    public void setId(IBaseBackboneElement ppc, String id) {
-        castPpc(ppc).setId(id);
+    public String getName() {
+        return this.getParametersParameterComponent().getName();
     }
 
     @Override
-    public String getName(IBaseBackboneElement ppc) {
-        return castPpc(ppc).getName();
+    public void setName(String name) {
+        this.getParametersParameterComponent().setName(name);
     }
 
     @Override
-    public void setName(IBaseBackboneElement ppc, String name) {
-        castPpc(ppc).setName(name);
+    public List<IBaseBackboneElement> getPart() {
+        return this.getParametersParameterComponent().getPart().stream().collect(Collectors.toList());
     }
 
     @Override
-    public List<IBaseBackboneElement> getPart(IBaseBackboneElement ppc) {
-        return castPpc(ppc).getPart().stream().map(x -> (IBaseBackboneElement) x).collect(Collectors.toList());
-    }
-
-    @Override
-    public void setPart(IBaseBackboneElement ppc, List<IBaseBackboneElement> parametersParameterComponents) {
-        castPpc(ppc).setPart(parametersParameterComponents.stream().map(x -> (ParametersParameterComponent) x)
+    public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
+        this.getParametersParameterComponent().setPart(parametersParameterComponents.stream().map(x -> (ParametersParameterComponent) x)
                 .collect(Collectors.toList()));
     }
 
     @Override
-    public IBaseBackboneElement addPart(IBaseBackboneElement ppc) {
-        return castPpc(ppc).addPart();
+    public IBaseBackboneElement addPart() {
+        return this.getParametersParameterComponent().addPart();
     }
 
     @Override
-    public boolean hasPart(IBaseBackboneElement ppc) {
-        return castPpc(ppc).hasPart();
+    public boolean hasPart() {
+        return this.getParametersParameterComponent().hasPart();
     }
 
     @Override
-    public boolean hasResource(IBaseBackboneElement ppc) {
-        return castPpc(ppc).hasResource();
+    public boolean hasResource() {
+        return this.getParametersParameterComponent().hasResource();
     }
 
     @Override
-    public IBaseResource getResource(IBaseBackboneElement ppc) {
-        return castPpc(ppc).getResource();
+    public IBaseResource getResource() {
+        return this.getParametersParameterComponent().getResource();
     }
 
     @Override
-    public void setResource(IBaseBackboneElement ppc, IBaseResource resource) {
-        castPpc(ppc).setResource((Resource) resource);
+    public void setResource(IBaseResource resource) {
+        this.getParametersParameterComponent().setResource((Resource) resource);
     }
 
     @Override
-    public boolean hasValue(IBaseBackboneElement ppc) {
-        return castPpc(ppc).hasValue();
+    public boolean hasValue() {
+        return this.getParametersParameterComponent().hasValue();
     }
 
     @Override
-    public boolean hasPrimitiveValue(IBaseBackboneElement ppc) {
-        return castPpc(ppc).hasPrimitiveValue();
+    public boolean hasPrimitiveValue() {
+        return this.getParametersParameterComponent().hasPrimitiveValue();
     }
 
     @Override
-    public void setValue(IBaseBackboneElement ppc, IBaseDatatype value) {
-        castPpc(ppc).setValue((Type) value);
+    public void setValue(IBaseDatatype value) {
+        this.getParametersParameterComponent().setValue((Type) value);
     }
 
     @Override
-    public IBaseDatatype getValue(IBaseBackboneElement ppc) {
-        return castPpc(ppc).getValue();
+    public IBaseDatatype getValue() {
+        return this.getParametersParameterComponent().getValue();
     }
 
 }

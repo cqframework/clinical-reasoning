@@ -24,12 +24,12 @@
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.execution</artifactId>
+            <artifactId>evaluator.engine</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.translation</artifactId>
+            <artifactId>evaluator.cql2elm</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>

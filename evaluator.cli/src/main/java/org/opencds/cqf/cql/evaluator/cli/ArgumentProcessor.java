@@ -5,19 +5,14 @@ import static java.util.Arrays.asList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.gen.cqlParser.LongNumberLiteralContext;
+import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import joptsimple.util.KeyValuePair;
-
-import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 @SuppressWarnings({ "unchecked", "unused"})
 public class ArgumentProcessor {

@@ -8,33 +8,31 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ParametersParameterComponentAdapter {
 
-    public String getId(IBaseBackboneElement ppc);
+    public IBaseBackboneElement get();
 
-    public void setId(IBaseBackboneElement ppc, String id);
+    public String getName();
 
-    public String getName(IBaseBackboneElement ppc);
+    public void setName(String name);
 
-    public void setName(IBaseBackboneElement ppc, String name);
+    public List<IBaseBackboneElement> getPart();
 
-    public List<IBaseBackboneElement> getPart(IBaseBackboneElement ppc);
+    public void setPart(List<IBaseBackboneElement> parametersParameterComponents);
 
-    public void setPart(IBaseBackboneElement ppc, List<IBaseBackboneElement> parametersParameterComponents);
-
-    public IBaseBackboneElement addPart(IBaseBackboneElement ppc); 
+    public IBaseBackboneElement addPart(); 
     
-    public boolean hasPart(IBaseBackboneElement ppc);
+    public boolean hasPart();
 
-    public boolean hasResource(IBaseBackboneElement ppc);
+    public boolean hasResource();
 
-    public IBaseResource getResource(IBaseBackboneElement ppc);
+    public IBaseResource getResource();
 
-    public void setResource(IBaseBackboneElement ppc, IBaseResource resource);
+    public void setResource(IBaseResource resource);
 
-    public boolean hasValue(IBaseBackboneElement ppc);
+    public boolean hasValue();
 
-    public boolean hasPrimitiveValue(IBaseBackboneElement ppc);
+    public boolean hasPrimitiveValue();
 
-    public void setValue(IBaseBackboneElement ppc, IBaseDatatype value);
+    public void setValue(IBaseDatatype value);
 
-    public IBaseDatatype getValue(IBaseBackboneElement ppc);
+    public IBaseDatatype getValue();
 }

@@ -24,9 +24,5 @@ public interface CqlEvaluator {
     public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Map<String, Object> parameters);
 
     public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
-    Set<String> expressions, Pair<String, Object> contextParameter, Map<String, Object> parameters) ;
-
-    public Pair<String, Object> deserializeContextParameter(VersionedIdentifier libraryIdentifier, Pair<String, String> contextParameter);
-
-    public Map<String, Object> deserializeParameters(VersionedIdentifier libraryIdentifier, Map<String, String> parameters);  
+    Set<String> expressions, Pair<String, Object> contextParameter, Map<String, Object> parameters) ; 
 }

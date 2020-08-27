@@ -1,8 +1,9 @@
-package org.opencds.cqf.cql.evaluator.builder;
+package org.opencds.cqf.cql.evaluator.builder.di;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
+import org.opencds.cqf.cql.evaluator.api.ParameterParser;
 import org.opencds.cqf.cql.evaluator.builder.api.DataProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.builder.api.DataProviderExtender;
 import org.opencds.cqf.cql.evaluator.builder.api.DataProviderFactory;
@@ -24,6 +25,9 @@ public class EvaluatorModule extends AbstractModule {
             .to(org.opencds.cqf.cql.evaluator.builder.DataProviderExtender.class);
         this.bind(DataProviderConfigurer.class)
             .to(org.opencds.cqf.cql.evaluator.builder.DataProviderConfigurer.class);
+
+        this.bind(ParameterParser.class)
+            .to(org.opencds.cqf.cql.evaluator.ParameterParser.class);
 
         Multibinder<ModelResolverFactory> modelFactoryBinder = 
             Multibinder.newSetBinder(binder(), ModelResolverFactory.class);

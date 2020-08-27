@@ -19,7 +19,7 @@
         <version>${revision}</version>
     </parent>
 
-    <description>CQL Evaluator CLI</description>
+    <description>CQL Evaluator - CLI</description>
 
     <dependencies>
         <dependency>
@@ -41,12 +41,17 @@
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.execution</artifactId>
+            <artifactId>evaluator.engine</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.translation</artifactId>
+            <artifactId>evaluator.cql2elm</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.builder</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
@@ -95,14 +100,14 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jmod-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jlink-plugin</artifactId>
-            </plugin>
+            </plugin> -->
         </plugins>
     </build>
 </project>

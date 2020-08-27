@@ -33,10 +33,11 @@
     </properties>
     <modules>
         <module>evaluator</module>
-
-        <module>evaluator.translation</module>
-        <module>evaluator.execution</module>
-        <!-- <module>evaluator.builder</module> -->
+        <module>evaluator.fhir</module>
+        <module>evaluator.cql2elm</module>
+        <module>evaluator.engine</module>
+        <module>evaluator.library</module>
+        <module>evaluator.builder</module>
         <module>evaluator.cli</module>
         <!-- <module>evaluator.rest</module>
         <module>evaluator.measure</module> -->
@@ -92,13 +93,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql-engine.version}</version>
@@ -148,11 +142,23 @@
                 <artifactId>hapi-fhir-structures-r4</artifactId>
                 <version>${hapi.version}</version>
             </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-r5</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>net.sf.jopt-simple</groupId>
                 <artifactId>jopt-simple</artifactId>
                 <version>${jopt-simple.version}</version>
+            </dependency>
+
+            <!-- DI -->
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>4.2.3</version>
             </dependency>
 
 
@@ -219,7 +225,7 @@
         <defaultGoal>package</defaultGoal>
         <pluginManagement>
             <plugins>
-                <plugin>
+                <!-- <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jmod-plugin</artifactId>
                     <version>3.0.0-alpha-1</version>
@@ -230,7 +236,26 @@
                     <artifactId>maven-jlink-plugin</artifactId>
                     <version>3.0.0-alpha-1</version>
                     <extensions>true</extensions>
-                </plugin>
+                </plugin> -->
+                <!-- <plugin>
+                    <groupId>org.fugerit.java</groupId>
+                    <artifactId>freemarker-maven-plugin</artifactId>
+                    <version>1.0.4</version>
+                </plugin> -->
+                <!-- <plugin>
+                    <groupId>com.googlecode.fmpp-maven-plugin</groupId>
+                    <artifactId>fmpp-maven-plugin</artifactId>
+                    <version>1.0</version>
+                    <executions>
+                        <execution>
+                            <id>generate-fmpp-sources</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin> -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>

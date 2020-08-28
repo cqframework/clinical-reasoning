@@ -5,7 +5,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface ParametersAdapter {
+public interface ParametersAdapter extends Adapter<IBaseResource> {
 
     public IBaseResource get();
 

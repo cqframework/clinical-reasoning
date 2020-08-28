@@ -4,7 +4,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface ResourceAdapter {
+public interface ResourceAdapter extends Adapter<IBaseResource> {
 
     public IBaseResource get();
 

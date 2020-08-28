@@ -4,7 +4,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 /**
  * This interface exposes common functionality across all FHIR Attachment versions.
  */
-public interface AttachmentAdapter {
+public interface AttachmentAdapter extends Adapter<ICompositeType> {
 
     ICompositeType get();
 

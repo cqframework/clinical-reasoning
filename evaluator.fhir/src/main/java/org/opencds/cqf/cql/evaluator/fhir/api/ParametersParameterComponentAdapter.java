@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface ParametersParameterComponentAdapter {
+public interface ParametersParameterComponentAdapter extends Adapter<IBaseBackboneElement> {
 
     public IBaseBackboneElement get();
 

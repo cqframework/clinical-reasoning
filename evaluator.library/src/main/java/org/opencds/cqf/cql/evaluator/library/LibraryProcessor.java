@@ -70,9 +70,12 @@ public class LibraryProcessor implements org.opencds.cqf.cql.evaluator.library.a
                             .getImplementingClass().getConstructor(String.class).newInstance(value.toString()));
                     continue;
                 }
+
+                ppca.setValue((IBaseDatatype) this.fhirContext.getResourceDefinition("StringType")
+                .getImplementingClass().getConstructor(String.class).newInstance(value.toString()));
             }
         } catch (Exception e) {
-            
+
         }
 
         return params;

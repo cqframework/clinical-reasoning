@@ -9,7 +9,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 /**
  * This interface exposes common functionality across all FHIR Library versions.
  */
-public interface LibraryAdapter {
+public interface LibraryAdapter extends Adapter<IBaseResource> {
 
     IBaseResource get();
 

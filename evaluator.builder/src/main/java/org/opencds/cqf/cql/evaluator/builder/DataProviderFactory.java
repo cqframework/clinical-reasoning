@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.fhir.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
@@ -18,7 +19,6 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.evaluator.builder.api.Constants;
 import org.opencds.cqf.cql.evaluator.builder.api.ModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.builder.api.model.ConnectionType;
 import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.engine.data.ExtensibleDataProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
@@ -44,31 +44,31 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
         Objects.requireNonNull(endpointInfo, "endpointInfo can not be null");
 
         if (endpointInfo.getType() == null) {
-            endpointInfo.setType(detectType(endpointInfo.getUrl()));
+            endpointInfo.setType(detectType(endpointInfo.getAddress()));
         }
 
-        String modelUri = detectModel(endpointInfo.getUrl(), endpointInfo.getType());
-        DataProvider dp = create(modelUri, endpointInfo.getUrl(), endpointInfo.getType(), endpointInfo.getHeaders());
+        String modelUri = detectModel(endpointInfo.getAddress(), endpointInfo.getType());
+        DataProvider dp = create(modelUri, endpointInfo.getAddress(), endpointInfo.getType(), endpointInfo.getHeaders());
 
         return Pair.of(modelUri, dp);
     }
 
-    public ConnectionType detectType(String url) {
+    public IBaseCoding detectType(String url) {
         if (url == null) {
             return null;
         }
 
         if (isFileUri(url)) {
-            return ConnectionType.HL7_FHIR_FILES;
+            return Constants.HL7_FHIR_FILES_CODE;
         } else {
-            return ConnectionType.HL7_FHIR_REST;
+            return Constants.HL7_FHIR_REST_CODE;
         }
     }
 
-    public String detectModel(String url, ConnectionType connectionType) {
-        switch (connectionType) {
-            case HL7_FHIR_FILES:
-            case HL7_FHIR_REST:
+    public String detectModel(String url, IBaseCoding connectionType) {
+        switch (connectionType.getCode()) {
+            case Constants.HL7_FHIR_FILES:
+            case Constants.HL7_FHIR_REST:
                 return Constants.FHIR_MODEL_URI;
             default:
                 return null;
@@ -85,7 +85,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
         throw new IllegalArgumentException(String.format("no registered ModelResolverFactory for modelUri: %s", modelUri));
     }
 
-    protected ExtensibleDataProvider create(String modelUri, String url, ConnectionType connectionType, List<String> headers) {
+    protected ExtensibleDataProvider create(String modelUri, String url, IBaseCoding connectionType, List<String> headers) {
         ModelResolver modelResolver = this.getFactory(modelUri)
             .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
 
@@ -93,13 +93,13 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
         if (url == null || connectionType == null) {
             retrieveProvider = new NoOpRetrieveProvider();
         } else {
-            switch (connectionType) {
-                case HL7_FHIR_REST:
+            switch (connectionType.getCode()) {
+                case Constants.HL7_FHIR_REST:
                     IGenericClient client = createClient(this.fhirContext, url, headers);
                     retrieveProvider = new RestFhirRetrieveProvider(
                             new SearchParameterResolver(this.fhirContext), client);
                     break;
-                case HL7_FHIR_FILES:
+                case Constants.HL7_FHIR_FILES:
                     retrieveProvider = new BundleRetrieveProvider(this.fhirContext, modelResolver,
                             bundle(this.fhirContext, url));
                     break;

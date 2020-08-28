@@ -97,7 +97,7 @@ public class AdapterFactory {
     public static ParametersAdapter parametersAdapterFor(IBaseResource parameters) {
         Objects.requireNonNull(parameters, "parameters can not be null");
         if (!parameters.fhirType().equals("Parameters")) {
-            throw new IllegalArgumentException("library is not a FHIR Library type");
+            throw new IllegalArgumentException("parameters is not a FHIR Parameters type");
         }
 
         switch (parameters.getStructureFhirVersionEnum()) {
@@ -123,8 +123,8 @@ public class AdapterFactory {
     public static ParametersParameterComponentAdapter parametersParametersComponentAdapterFor(
             IBaseBackboneElement ppc) {
         Objects.requireNonNull(ppc, "ppc can not be null");
-        if (!ppc.fhirType().equals("ParametersParameterComponent")) {
-            throw new IllegalArgumentException("library is not a FHIR Library type");
+        if (!ppc.fhirType().equals("Parameters.parameter")) {
+            throw new IllegalArgumentException("ppc is not a FHIR Parameters.parameter type");
         }
 
         switch (ppc.getClass().getPackage().getName()) {

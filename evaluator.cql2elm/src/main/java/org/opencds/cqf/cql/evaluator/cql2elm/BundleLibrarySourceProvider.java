@@ -50,6 +50,6 @@ public class BundleLibrarySourceProvider
 
         Collection<IBaseResource> libraries = resources.stream().map(x -> (IBaseResource)x).collect(Collectors.toList());
 
-        return this.select(libraries, libraryIdentifier);
+        return this.select(libraryIdentifier, libraries);
     }
 }

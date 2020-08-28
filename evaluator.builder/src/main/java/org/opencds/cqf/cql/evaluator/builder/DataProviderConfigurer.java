@@ -36,11 +36,11 @@ public class DataProviderConfigurer implements org.opencds.cqf.cql.evaluator.bui
     // TODO: Consider making an interface for a "Configurable" DataProvider
     // Or if justified pushing that up to the base class
     public void configure(DataProvider dataProvider, DataProviderConfig dataProviderConfig) {
-        if (dataProvider instanceof CompositeDataProvider) {
-            configure(((CompositeDataProvider)dataProvider), dataProviderConfig);
-        }
-        else if (dataProvider instanceof ExtensibleDataProvider) {
+        if (dataProvider instanceof ExtensibleDataProvider) {
             configure(((ExtensibleDataProvider)dataProvider), dataProviderConfig);
+        }
+        else if (dataProvider instanceof CompositeDataProvider) {
+            configure(((CompositeDataProvider)dataProvider), dataProviderConfig);
         }
     }
 

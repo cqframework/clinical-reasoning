@@ -24,8 +24,9 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.cql.evaluator.builder.api.model.ConnectionType;
+import org.opencds.cqf.cql.evaluator.builder.api.Constants;
 import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.BundleLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.FhirServerLibrarySourceProvider;
@@ -70,19 +71,19 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
     @Override
     public LibraryLoader create(EndpointInfo endpointInfo, CqlTranslatorOptions translatorOptions) {
         Objects.requireNonNull(endpointInfo, "endpointInfo can not be null");
-        if (endpointInfo.getUrl() == null) {
+        if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
 
         if (endpointInfo.getType() == null)
         {
-            endpointInfo.setType(autoDetectTypeFromUrl(endpointInfo.getUrl()));
+            endpointInfo.setType(detectType(endpointInfo.getAddress()));
         }
 
-        return create(endpointInfo.getUrl(), endpointInfo.getType(), endpointInfo.getHeaders(), translatorOptions);
+        return create(endpointInfo.getAddress(), endpointInfo.getType(), endpointInfo.getHeaders(), translatorOptions);
     }
 
-    protected ConnectionType autoDetectTypeFromUrl(String url) {
+    protected IBaseCoding detectType(String url) {
         if (isFileUri(url)) {
              // Attempt to auto-detect the type of files.
              Path directoryPath = Paths.get(url);
@@ -90,24 +91,24 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
              File[] files = directory.listFiles((d, name) -> name.endsWith(".cql"));
  
              if (files != null && files.length > 0) {
-                 return ConnectionType.HL7_CQL_FILES;
+                 return Constants.HL7_CQL_FILES_CODE;
              }
              else {
-                 return ConnectionType.HL7_FHIR_FILES;
+                 return Constants.HL7_FHIR_FILES_CODE;
              }
         }
         else {
-            return ConnectionType.HL7_FHIR_REST;
+            return Constants.HL7_FHIR_REST_CODE;
         }
     }
 
-    protected LibraryLoader create(String url, ConnectionType type, List<String> headers, CqlTranslatorOptions translatorOptions) {
-        switch (type) {
-            case HL7_FHIR_REST:
+    protected LibraryLoader create(String url, IBaseCoding connectionType, List<String> headers, CqlTranslatorOptions translatorOptions) {
+        switch (connectionType.getCode()) {
+            case Constants.HL7_FHIR_REST:
             return createForUrl(url, headers, translatorOptions);
-            case HL7_FHIR_FILES:
+            case Constants.HL7_FHIR_FILES:
             return createForFhirFiles(url, translatorOptions);
-            case HL7_CQL_FILES:
+            case Constants.HL7_CQL_FILES:
                 return createForCqlFiles(url, translatorOptions);
             default:
                 throw new IllegalArgumentException("invalid connectionType for loading CQL libraries");

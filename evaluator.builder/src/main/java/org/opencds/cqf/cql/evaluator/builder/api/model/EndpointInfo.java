@@ -2,25 +2,27 @@ package org.opencds.cqf.cql.evaluator.builder.api.model;
 
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+
 public class EndpointInfo {
-    private String url;
-    private ConnectionType type;
+    private String address;
+    private IBaseCoding type;
     private List<String> headers;
 
-    public String getUrl() {
-        return this.url;
+    public String getAddress() {
+        return this.address;
     }
 
-    public EndpointInfo setUrl(String url) {
-        this.url = url;
+    public EndpointInfo setAddress(String address) {
+        this.address = address;
         return this;
     }
 
-    public ConnectionType getType() {
+    public IBaseCoding getType() {
         return this.type;
     }
 
-    public EndpointInfo setType(ConnectionType type) {
+    public EndpointInfo setType(IBaseCoding type) {
         this.type = type;
         return this;
     }

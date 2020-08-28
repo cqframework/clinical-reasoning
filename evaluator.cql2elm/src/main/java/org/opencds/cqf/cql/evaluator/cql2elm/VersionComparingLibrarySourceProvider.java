@@ -50,7 +50,7 @@ public abstract class VersionComparingLibrarySourceProvider
 
     protected abstract IBaseResource getLibrary(VersionedIdentifier libraryIdentifier);
 
-    protected IBaseResource select(Collection<IBaseResource> libraries, VersionedIdentifier libraryIdentifier) {
+    protected IBaseResource select(VersionedIdentifier libraryIdentifier, Collection<IBaseResource> libraries) {
         Objects.requireNonNull(libraries, "libraries can not be null");
         Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
 
@@ -62,6 +62,10 @@ public abstract class VersionComparingLibrarySourceProvider
         LibraryAdapter maxLibrary = null;
 
         for (LibraryAdapter l : adapters) {
+
+            if (!l.getName().equals(libraryIdentifier.getId())) {
+                continue;
+            }
 
             String currentVersion = l.getVersion();
             if ((targetVersion != null && currentVersion != null && currentVersion.equals(targetVersion)) || 

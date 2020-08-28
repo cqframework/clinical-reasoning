@@ -38,8 +38,8 @@ public class ExtensibleDataProvider extends CompositeDataProvider {
 
     public List<RetrieveProvider> getRetrieveProviders() {
         List<RetrieveProvider> temp = new ArrayList<>();
-        temp.add(this.retrieveProvider);
         temp.addAll(this.additionalRetrieveProviders);
+        temp.add(this.retrieveProvider);
         return temp;
     }
 

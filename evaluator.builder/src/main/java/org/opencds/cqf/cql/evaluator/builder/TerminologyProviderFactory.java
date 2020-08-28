@@ -10,10 +10,11 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.fhir.terminology.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.builder.api.model.ConnectionType;
+import org.opencds.cqf.cql.evaluator.builder.api.Constants;
 import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 
@@ -31,35 +32,35 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
 
     public TerminologyProvider create(EndpointInfo endpointInfo) {
         Objects.requireNonNull(endpointInfo, "endpointInfo can not be null");
-        if (endpointInfo.getUrl() == null) {
+        if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
 
         if (endpointInfo.getType() == null)
         {
-            endpointInfo.setType(detectTypeFromUrl(endpointInfo.getUrl()));
+            endpointInfo.setType(detectType(endpointInfo.getAddress()));
         }
 
-        return create(endpointInfo.getUrl(), endpointInfo.getType(), endpointInfo.getHeaders());
+        return create(endpointInfo.getAddress(), endpointInfo.getType(), endpointInfo.getHeaders());
     }
 
-    protected ConnectionType detectTypeFromUrl(String url) {
+    protected IBaseCoding detectType(String url) {
         if (isFileUri(url)) {
-            return ConnectionType.HL7_FHIR_FILES;
+            return Constants.HL7_FHIR_FILES_CODE;
         }
         else {
-            return ConnectionType.HL7_FHIR_REST;
+            return Constants.HL7_FHIR_REST_CODE;
         }
     }
 
-    protected TerminologyProvider create(String url, ConnectionType type, List<String> headers) {
+    protected TerminologyProvider create(String url, IBaseCoding connectionType, List<String> headers) {
         Objects.requireNonNull(url, "url can not be null");
-        Objects.requireNonNull(type, "type can not be null");
+        Objects.requireNonNull(connectionType, "connectionType can not be null");
 
-        switch (type) {
-            case HL7_FHIR_REST:
+        switch (connectionType.getCode()) {
+            case Constants.HL7_FHIR_REST:
                 return createForUrl(url, headers);
-            case HL7_FHIR_FILES:
+            case Constants.HL7_FHIR_FILES:
                 return createForPath(url);
             default:
                 throw new IllegalArgumentException("invalid connectionType for loading FHIR terminology");

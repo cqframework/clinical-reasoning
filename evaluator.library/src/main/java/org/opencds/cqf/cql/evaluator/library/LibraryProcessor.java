@@ -72,7 +72,7 @@ public class LibraryProcessor implements org.opencds.cqf.cql.evaluator.library.a
                 }
             }
         } catch (Exception e) {
-
+            
         }
 
         return params;

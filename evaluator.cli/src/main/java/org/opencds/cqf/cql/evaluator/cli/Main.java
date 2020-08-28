@@ -77,13 +77,13 @@ public class Main {
         this.initialize(parameters.fhirVersion);
 
         LibraryLoader libraryLoader = this.get(LibraryLoaderFactory.class)
-                .create(new EndpointInfo().setUrl(parameters.libraryUrl), null);
+                .create(new EndpointInfo().setAddress(parameters.libraryUrl), null);
 
         TerminologyProvider terminologyProvider = this.get(TerminologyProviderFactory.class)
-                .create(new EndpointInfo().setUrl(parameters.terminologyUrl));
+                .create(new EndpointInfo().setAddress(parameters.terminologyUrl));
 
         Pair<String, DataProvider> dataProvider = this.get(DataProviderFactory.class)
-                .create(new EndpointInfo().setUrl(parameters.model != null ? parameters.model.getRight() : null));
+                .create(new EndpointInfo().setAddress(parameters.model != null ? parameters.model.getRight() : null));
 
         this.get(DataProviderConfigurer.class)
                 .configure(dataProvider.getRight(), new DataProviderConfig().setTerminologyProvider(terminologyProvider));

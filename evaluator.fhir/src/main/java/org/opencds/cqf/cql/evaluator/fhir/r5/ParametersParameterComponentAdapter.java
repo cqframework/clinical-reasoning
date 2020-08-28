@@ -25,7 +25,7 @@ public class ParametersParameterComponentAdapter
             throw new IllegalArgumentException("parametersParametersComponent can not be null");
         }
 
-        if (!parametersParametersComponent.fhirType().equals("ParametersParameterComponent")) {
+        if (!parametersParametersComponent.fhirType().equals("Parameters.parameter")) {
             throw new IllegalArgumentException("element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
         }
 

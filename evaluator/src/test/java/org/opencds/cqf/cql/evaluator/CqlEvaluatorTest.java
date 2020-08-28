@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.evaluation;
+package org.opencds.cqf.cql.evaluator;
 
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;

@@ -55,7 +55,7 @@ public class FhirServerLibrarySourceProvider extends
 
         Collection<IBaseResource> libraries = resources.stream().map(x -> (IBaseResource)x).collect(Collectors.toList());
 
-        IBaseResource library = this.select(libraries, libraryIdentifier);
+        IBaseResource library = this.select(libraryIdentifier, libraries);
 
         // This is a subsetted resource, so we get the full version here.
         if (library != null) {

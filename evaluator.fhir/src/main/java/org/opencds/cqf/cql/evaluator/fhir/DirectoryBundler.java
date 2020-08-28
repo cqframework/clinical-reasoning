@@ -117,12 +117,6 @@ public class DirectoryBundler {
     private List<IBaseResource> flatten(FhirContext fhirContext, IBaseBundle bundle) {
         List<IBaseResource> resources = new ArrayList<>();
 
-        // Only load collection-type bundles
-        // TODO: discuss this with Bryn
-        if (!BundleUtil.getBundleType(fhirContext, bundle).equals("collection")) {
-            return resources;
-        }
-
         List<IBaseResource> bundleResources = BundleUtil.toListOfResources(fhirContext, bundle);
         for (IBaseResource r : bundleResources) {
             if (r instanceof IBaseBundle) {

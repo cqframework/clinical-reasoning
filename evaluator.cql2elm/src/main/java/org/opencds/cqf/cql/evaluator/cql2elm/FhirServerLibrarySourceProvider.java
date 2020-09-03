@@ -1,7 +1,5 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
-import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.libraryAdapterFor;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +7,7 @@ import java.util.stream.Collectors;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -22,12 +21,15 @@ public class FhirServerLibrarySourceProvider extends
     VersionComparingLibrarySourceProvider {
 
     private IGenericClient client;
-
+    private AdapterFactory adapterFactory;
     /**
      * @param client pre-configured and authorized FHIR server client
+     * @param adapterFactory factory for HL7 Structure adapters
      */
-    public FhirServerLibrarySourceProvider(IGenericClient client) {
+    public FhirServerLibrarySourceProvider(IGenericClient client, AdapterFactory adapterFactory) {
+        super(adapterFactory);
         this.client = client;
+        this.adapterFactory = adapterFactory;
     }
 
     protected IBaseResource getLibrary(String url) {
@@ -59,7 +61,7 @@ public class FhirServerLibrarySourceProvider extends
 
         // This is a subsetted resource, so we get the full version here.
         if (library != null) {
-            return getLibrary(libraryAdapterFor(library).getUrl());
+            return getLibrary(this.adapterFactory.createLibrary(library).getUrl());
         }
 
         return null;

@@ -13,17 +13,17 @@ import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.api.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.api.ParameterParser;
-import org.opencds.cqf.cql.evaluator.builder.api.DataProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.builder.api.DataProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.api.LibraryLoaderFactory;
-import org.opencds.cqf.cql.evaluator.builder.api.TerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.api.model.DataProviderConfig;
-import org.opencds.cqf.cql.evaluator.builder.api.model.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.builder.di.EvaluatorModule;
-import org.opencds.cqf.cql.evaluator.builder.di.FhirContextModule;
+import org.opencds.cqf.cql.evaluator.CqlEvaluator;
+import org.opencds.cqf.cql.evaluator.ParameterParser;
+import org.opencds.cqf.cql.evaluator.builder.DataProviderConfigurer;
+import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.BuilderModule;
+import org.opencds.cqf.cql.evaluator.builder.DataProviderConfig;
+import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
+import org.opencds.cqf.cql.evaluator.fhir.FhirModule;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 
@@ -58,8 +58,8 @@ public class Main {
 
     protected void initialize(FhirVersionEnum fhirVersionEnum) {
         this.injector = Guice.createInjector(
-            new FhirContextModule(fhirVersionEnum),
-            new EvaluatorModule());
+            new FhirModule(fhirVersionEnum),
+            new BuilderModule());
     }
 
     protected <T> T get(Class<T> clazz) {

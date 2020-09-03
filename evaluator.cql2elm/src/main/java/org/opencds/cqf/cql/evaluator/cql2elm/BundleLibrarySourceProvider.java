@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleUtil;
@@ -22,8 +23,8 @@ public class BundleLibrarySourceProvider
     private IBaseBundle bundle;
     private FhirContext fhirContext;
 
-    public BundleLibrarySourceProvider(FhirContext fhirContext, IBaseBundle bundle) 
-    {
+    public BundleLibrarySourceProvider(FhirContext fhirContext, IBaseBundle bundle, AdapterFactory adapterFactory) {
+        super(adapterFactory);
         this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
         this.bundle = Objects.requireNonNull(bundle, "bundle can not be null");
 

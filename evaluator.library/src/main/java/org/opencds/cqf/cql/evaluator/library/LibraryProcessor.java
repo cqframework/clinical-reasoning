@@ -15,28 +15,28 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.api.ParameterParser;
-import org.opencds.cqf.cql.evaluator.fhir.api.ParametersAdapter;
-import org.opencds.cqf.cql.evaluator.fhir.api.ParametersParameterComponentAdapter;
+import org.opencds.cqf.cql.evaluator.ParameterParser;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersAdapter;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAdapter;
 
 import ca.uhn.fhir.context.FhirContext;
 
-import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.parametersAdapterFor;
-import static org.opencds.cqf.cql.evaluator.fhir.AdapterFactory.parametersParametersComponentAdapterFor;
-
-public class LibraryProcessor implements org.opencds.cqf.cql.evaluator.library.api.LibraryProcessor {
+class LibraryProcessor {
 
     private CqlEvaluator cqlEvaluator;
     private FhirContext fhirContext;
     private LibraryLoader libraryLoader;
     private ParameterParser parameterParser;
+    private AdapterFactory adapterFactory;
 
-    public LibraryProcessor(FhirContext fhirContext, CqlEvaluator cqlEvaluator, LibraryLoader libraryLoader,
+    LibraryProcessor(FhirContext fhirContext, AdapterFactory adapterFactory, CqlEvaluator cqlEvaluator, LibraryLoader libraryLoader,
             ParameterParser parameterParser) {
         this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
         this.cqlEvaluator = Objects.requireNonNull(cqlEvaluator, "cqlEvaluator can not be null");
         this.libraryLoader = Objects.requireNonNull(libraryLoader, "libraryLoader can not be null");
         this.parameterParser = Objects.requireNonNull(parameterParser, "parameterParser can not be null");
+        this.adapterFactory = Objects.requireNonNull(adapterFactory, "adapterFactory can not be null");
     }
 
     protected IBaseParameters toParameters(EvaluationResult result) {
@@ -44,34 +44,34 @@ public class LibraryProcessor implements org.opencds.cqf.cql.evaluator.library.a
         try {
             params = (IBaseParameters) this.fhirContext.getResourceDefinition("Parameters").getImplementingClass()
                     .getConstructor().newInstance();
-            ParametersAdapter pa = parametersAdapterFor(params);
+            ParametersAdapter pa = this.adapterFactory.createParameters(params);
 
             for (Map.Entry<String, Object> entry : result.expressionResults.entrySet()) {
                 IBaseBackboneElement ppc = pa.addParameter();
 
-                ParametersParameterComponentAdapter ppca = parametersParametersComponentAdapterFor(ppc);
+                ParametersParameterComponentAdapter parametersComponent = this.adapterFactory.createParametersParameters(ppc);
 
-                ppca.setName(entry.getKey());
+                parametersComponent.setName(entry.getKey());
 
                 Object value = entry.getValue();
 
                 if (value instanceof IBaseResource) {
-                    ppca.setResource((IBaseResource) value);
+                    parametersComponent.setResource((IBaseResource) value);
                     continue;
                 }
 
                 if (value instanceof IBaseDatatype) {
-                    ppca.setValue((IBaseDatatype) value);
+                    parametersComponent.setValue((IBaseDatatype) value);
                     continue;
                 }
 
                 if (value instanceof CqlType) {
-                    ppca.setValue((IBaseDatatype) this.fhirContext.getResourceDefinition("StringType")
+                    parametersComponent.setValue((IBaseDatatype) this.fhirContext.getResourceDefinition("StringType")
                             .getImplementingClass().getConstructor(String.class).newInstance(value.toString()));
                     continue;
                 }
 
-                ppca.setValue((IBaseDatatype) this.fhirContext.getResourceDefinition("StringType")
+                parametersComponent.setValue((IBaseDatatype) this.fhirContext.getResourceDefinition("StringType")
                 .getImplementingClass().getConstructor(String.class).newInstance(value.toString()));
             }
         } catch (Exception e) {
@@ -84,26 +84,25 @@ public class LibraryProcessor implements org.opencds.cqf.cql.evaluator.library.a
     protected Map<String, Object> toParametersMap(VersionedIdentifier libraryIdentifier, IBaseParameters parameters) {
         Map<String, Object> parameterMap = new HashMap<>();
 
-        ParametersAdapter parametersAdapter = parametersAdapterFor(parameters);
+        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         if (parametersAdapter.getParameter() == null) {
             return parameterMap;
         }
 
         for (IBaseBackboneElement ppc : parametersAdapter.getParameter()) {
-            ParametersParameterComponentAdapter ppca = parametersParametersComponentAdapterFor(ppc);
-            String name = ppca.getName();
-            if (ppca.hasResource()) {
-                parameterMap.put(name, ppca.getResource());
-            } else if (ppca.hasValue()) {
+            ParametersParameterComponentAdapter parametersComponent = this.adapterFactory.createParametersParameters(ppc);
+            String name = parametersComponent.getName();
+            if (parametersComponent.hasResource()) {
+                parameterMap.put(name, parametersComponent.getResource());
+            } else if (parametersComponent.hasValue()) {
                 parameterMap.put(name, this.parameterParser.parseParameter(this.libraryLoader, libraryIdentifier, name,
-                        ppca.getValue().toString()));
+                        parametersComponent.getValue().toString()));
             }
         }
 
         return parameterMap;
     }
 
-    @Override
     public IBaseParameters evaluate(VersionedIdentifier libraryIdentifier, Pair<String, Object> contextParameter,
             IBaseParameters parameters, Set<String> expressions) {
         Map<String, Object> evaluationParameters = null;

@@ -9,16 +9,13 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
-import org.opencds.cqf.cql.evaluator.builder.api.Constants;
-import org.opencds.cqf.cql.evaluator.builder.di.EvaluatorModule;
-import org.opencds.cqf.cql.evaluator.builder.di.FhirContextModule;
-import org.opencds.cqf.cql.evaluator.library.di.LibraryModule;
+import org.opencds.cqf.cql.evaluator.builder.Constants;
+import org.opencds.cqf.cql.evaluator.builder.BuilderModule;
+import org.opencds.cqf.cql.evaluator.fhir.FhirModule;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 public class LibraryEvaluatorTests {
 
     private static Injector injector;
@@ -26,15 +23,15 @@ public class LibraryEvaluatorTests {
     @BeforeClass
     public void SetupDI() {
         injector = Guice.createInjector(
-            new FhirContextModule(FhirVersionEnum.R4),
-            new EvaluatorModule(),
+            new FhirModule(FhirContext.forR4()),
+            new BuilderModule(),
             new LibraryModule());
     }
 
     @Test
     public void TestEndToEnd() {
 
-        org.opencds.cqf.cql.evaluator.library.api.LibraryEvaluator evaluator = 
+        LibraryEvaluator evaluator = 
             injector.getInstance(LibraryEvaluator.class);
             
         FhirContext context = injector.getInstance(FhirContext.class);

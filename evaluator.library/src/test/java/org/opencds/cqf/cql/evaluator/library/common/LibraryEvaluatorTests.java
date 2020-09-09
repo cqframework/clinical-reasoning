@@ -1,7 +1,10 @@
 package org.opencds.cqf.cql.evaluator.library.common;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +12,8 @@ import java.util.Set;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
@@ -131,6 +136,84 @@ public class LibraryEvaluatorTests {
                 parameterParser, endpointConverter);
     }
 
+    
+
+    private Parameters loadParameters(FhirContext fhirContext, String path) {
+        InputStream stream = this.getClass().getClassLoader().getResourceAsStream(path);
+        IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
+        IBaseResource resource = parser.parseResource(stream);
+
+        if (resource == null) {
+            throw new IllegalArgumentException(String.format("Unable to read a resource from %s.", path));
+        }
+
+        Class<?> parametersClass = fhirContext.getResourceDefinition("Parameters").getImplementingClass();
+        if (!parametersClass.equals(resource.getClass())) {
+            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s Parameters", path,
+                    fhirContext.getVersion().getVersion().getFhirVersionString()));
+        }
+
+        return (Parameters) resource;
+    }
+
+    private boolean compareOutputParameters(Parameters expectedOutputParameters, Parameters actualOutputParameters) {
+        boolean parametersMatch = true;
+        for (ParametersParameterComponent part : expectedOutputParameters.getParameter()) {
+            for (ParametersParameterComponent expectedPart : actualOutputParameters.getParameter()) {
+                if (part.getName().equals(expectedPart.getName())) {
+                    boolean innerParameterMatch = false;
+                    for (ParametersParameterComponent innerPart : part.getPart()) {
+                        for (ParametersParameterComponent innerExpectedPart : expectedPart.getPart()) {
+                            if (innerPart.getName().equals(innerExpectedPart.getName())) {
+                                if (innerPart.hasValue() && innerExpectedPart.hasValue()) {
+                                    if (innerPart.getValue().equalsDeep(innerExpectedPart.getValue())) {
+                                        innerParameterMatch = true;
+                                    }
+                                }
+                                else if (innerPart.hasValue() || innerExpectedPart.hasValue()) {
+                                    System.out.println("One Inner Parameter value of either the expected or actual exists and the other does not");
+                                }
+                                if (innerPart.hasResource() && innerExpectedPart.hasResource()) {
+                                    if (innerPart.getResource().equalsDeep(innerExpectedPart.getResource())) {
+                                        innerParameterMatch = true;
+                                    }
+                                }
+                                else if (innerPart.hasResource() || innerExpectedPart.hasResource()) {
+                                    System.out.println("One Inner Parameter resource of either the expected or actual exists and the other does not");
+                                }
+                            }
+                        }
+                    }
+                    if (innerParameterMatch == false) {
+                        parametersMatch = false;
+                    }
+                    if (part.hasValue() && expectedPart.hasValue()) {
+                        if (!part.getValue().equalsDeep(expectedPart.getValue())) {
+                            parametersMatch = false;
+                        }
+                        if (!part.getResource().equalsDeep(expectedPart.getResource())) {
+                            parametersMatch = false;
+                        }
+                    }
+                    else if (part.hasValue() || expectedPart.hasValue()) {
+                        parametersMatch = false;
+                        System.out.println("One Parameter value of either the expected or actual exists and the other does not");
+                    }
+                    if (part.hasResource() && expectedPart.hasResource()) {
+                        if (!part.getResource().equalsDeep(expectedPart.getResource())) {
+                            parametersMatch = false;
+                        }
+                    }
+                    else if (part.hasResource() || expectedPart.hasResource()) {
+                        parametersMatch = false;
+                        System.out.println("One Parameter resource of either the expected or actual exists and the other does not");
+                    }
+                }
+            }
+        }
+        return parametersMatch;
+    }
+
     @Test
     public void TestEXM125() {
         Endpoint endpoint = new Endpoint().setAddress("r4/EXM125-8.0.000-bundle.json")
@@ -158,6 +241,39 @@ public class LibraryEvaluatorTests {
         IParser parser = this.fhirContext.newJsonParser();
         parser.setPrettyPrint(true);
         System.out.println(parser.encodeResourceToString(actual));
+    }
+
+    @Test
+    public void TestRuleFilters() {
+        Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Set<String> expressions = new HashSet<String>();
+        expressions.add("IsReportable");
+
+        // Parameters expected = loadParameters(this.fhirContext, "r4/ReportableTestParameter.json");
+        Parameters expected = new Parameters();
+        List<ParametersParameterComponent> parameters = new ArrayList<ParametersParameterComponent>();
+        ParametersParameterComponent parameterComponent = new ParametersParameterComponent();
+        parameterComponent.setName("IsReportable");
+        List<ParametersParameterComponent> parts = new ArrayList<ParametersParameterComponent>();
+        ParametersParameterComponent partComponent = new ParametersParameterComponent();
+        partComponent.setName("value");
+        partComponent.setValue(new BooleanType(true));
+        parts.add(partComponent);
+        parameterComponent.setPart(parts);
+        parameters.add(parameterComponent);
+        expected.setParameter(parameters);
+
+        Parameters actual = (Parameters)libraryEvaluator.evaluate(
+                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Patient", "Reportable", null,
+                null, null, endpoint, endpoint, endpoint, null, null, expressions);
+        
+        assertTrue(compareOutputParameters(expected, actual));
+
+        // IParser parser = this.fhirContext.newJsonParser();
+        // parser.setPrettyPrint(true);
+        // System.out.println(parser.encodeResourceToString(actual));
     }
 
 }

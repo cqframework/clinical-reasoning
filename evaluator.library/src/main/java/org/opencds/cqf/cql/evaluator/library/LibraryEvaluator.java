@@ -50,7 +50,7 @@ public interface LibraryEvaluator {
      * The function evaluates a CQL / FHIR library by VersionedIdentifier and
      * returns a Parameters resource that contains the evaluation result
      * 
-     * @param id                  the VersionedIdentifier of the Library to evaluate
+     * @param identifier                  the VersionedIdentifier of the Library to evaluate
      * @param context             the context of the evaluation (e.g. "Patient",
      *                            "Unspecified")
      * @param patientId           the patient Id to use for evaluation, if

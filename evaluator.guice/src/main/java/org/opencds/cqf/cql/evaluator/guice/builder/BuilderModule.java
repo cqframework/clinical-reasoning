@@ -14,6 +14,8 @@ import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProvide
 import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.FhirRestLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.terminology.BundleTerminologyProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.terminology.FhirRestTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory;
 
 public class BuilderModule extends AbstractModule {
@@ -51,7 +53,12 @@ public class BuilderModule extends AbstractModule {
         librarySourceProviderFactoryBinder.addBinding().to(CqlFileLibrarySourceProviderFactory.class);
         librarySourceProviderFactoryBinder.addBinding().to(FhirFileLibrarySourceProviderFactory.class);
         librarySourceProviderFactoryBinder.addBinding().to(FhirRestLibrarySourceProviderFactory.class);
+
+        Multibinder<org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory> terminologyProviderFactoryBinder =
+            Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory.class);
         
+        terminologyProviderFactoryBinder.addBinding().to(FhirRestTerminologyProviderFactory.class);
+        terminologyProviderFactoryBinder.addBinding().to(BundleTerminologyProviderFactory.class);
     }
     
 }

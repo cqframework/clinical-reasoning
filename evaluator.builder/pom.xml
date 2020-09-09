@@ -44,14 +44,15 @@
             <artifactId>evaluator.cql2elm</artifactId>
             <version>${revision}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.fhir</artifactId>
             <version>${revision}</version>
         </dependency>
+
         <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
         </dependency>
     </dependencies>
 </project>

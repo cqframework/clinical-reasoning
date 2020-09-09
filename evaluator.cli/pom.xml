@@ -55,6 +55,16 @@
             <version>${revision}</version>
         </dependency>
         <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.guice</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <optional>true</optional>

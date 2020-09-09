@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -22,7 +22,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.BundleUtil;
 
-class DirectoryBundler implements org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler {
+public class DirectoryBundler implements org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler {
 
 
     private static final Logger logger = LoggerFactory.getLogger(DirectoryBundler.class);
@@ -32,7 +32,7 @@ class DirectoryBundler implements org.opencds.cqf.cql.evaluator.fhir.DirectoryBu
     private IParser json = null;
 
     @Inject
-    DirectoryBundler(FhirContext fhirContext) {
+    public DirectoryBundler(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
     }
     /**
@@ -58,7 +58,7 @@ class DirectoryBundler implements org.opencds.cqf.cql.evaluator.fhir.DirectoryBu
 
         Collection<File> files = FileUtils.listFiles(resourceDirectory, new String[] { "xml", "json" }, true);
 
-        return new DirectoryBundler(fhirContext).bundleFiles(files);
+        return this.bundleFiles(files);
     }
 
     private IBaseBundle bundleFiles(Collection<File> files) {
@@ -93,23 +93,30 @@ class DirectoryBundler implements org.opencds.cqf.cql.evaluator.fhir.DirectoryBu
     private IBaseResource parseFile(File f) {
         try {
             String resource = FileUtils.readFileToString(f, Charset.forName("UTF-8"));
-            if (f.getName().endsWith("json")) {
-                if (this.json == null) {
-                    this.json = this.fhirContext.newJsonParser();
-                }
 
-                return this.json.parseResource(resource);
-            } else {
-                if (this.xml == null) {
-                    this.xml = this.fhirContext.newXmlParser();
-                }
-
-                return this.xml.parseResource(resource);
-            }
+            IParser selectedParser = this.selectParser(f.getName());
+            return selectedParser.parseResource(resource);
         } catch (Exception e) {
             logger.warn("Error parsing resource {}: {}", f.getAbsolutePath(), e.getMessage());
             return null;
         }
+    }
+
+    private IParser selectParser(String filename) {
+        if (filename.endsWith("json")) {
+            if (this.json == null) {
+                this.json = this.fhirContext.newJsonParser();
+            }
+            
+            return this.json;
+        } else {
+            if (this.xml == null) {
+                this.xml = this.fhirContext.newXmlParser();
+            }
+
+            return this.xml;
+        }
+    
     }
 
     private List<IBaseResource> flatten(FhirContext fhirContext, IBaseBundle bundle) {

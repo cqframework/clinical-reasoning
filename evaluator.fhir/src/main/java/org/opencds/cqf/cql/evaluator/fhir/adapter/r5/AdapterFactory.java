@@ -1,10 +1,13 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter.r5;
 
+import javax.inject.Named;
+
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
+@Named("R5")
 public class AdapterFactory implements org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory {
 
 	@Override

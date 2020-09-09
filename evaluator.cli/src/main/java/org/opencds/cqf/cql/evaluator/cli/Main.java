@@ -19,11 +19,13 @@ import org.opencds.cqf.cql.evaluator.builder.DataProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.BuilderModule;
+
 import org.opencds.cqf.cql.evaluator.builder.DataProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
-import org.opencds.cqf.cql.evaluator.fhir.FhirModule;
+import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
+import org.opencds.cqf.cql.evaluator.guice.EvaluatorModule;
+import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 
@@ -59,7 +61,8 @@ public class Main {
     protected void initialize(FhirVersionEnum fhirVersionEnum) {
         this.injector = Guice.createInjector(
             new FhirModule(fhirVersionEnum),
-            new BuilderModule());
+            new BuilderModule(),
+            new EvaluatorModule());
     }
 
     protected <T> T get(Class<T> clazz) {

@@ -5,6 +5,4 @@ import org.opencds.cqf.cql.engine.data.DataProvider;
 
 public interface DataProviderFactory {
     public Pair<String, DataProvider> create(EndpointInfo endpointInfo);
-
-    // public Pair<String, DataProvider> create(IBaseBundle bundle);
 }

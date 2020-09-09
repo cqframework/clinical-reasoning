@@ -10,16 +10,16 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-
 /**
- * This class creates a FHIR Rest API IGenericClient for a given fhirContext an url.
+ * This class creates a FHIR Rest API IGenericClient for a given fhirContext an
+ * url.
  */
-class ClientFactory implements org.opencds.cqf.cql.evaluator.fhir.ClientFactory {
+public class ClientFactory implements org.opencds.cqf.cql.evaluator.fhir.ClientFactory {
 
     protected FhirContext fhirContext;
-    
+
     @Inject
-    ClientFactory(FhirContext fhirContext) {
+	public ClientFactory(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
     }
 

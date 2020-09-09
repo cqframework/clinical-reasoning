@@ -1,11 +1,10 @@
 package org.opencds.cqf.cql.evaluator.builder.common;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;

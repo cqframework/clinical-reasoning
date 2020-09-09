@@ -1,10 +1,13 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3;
 
+import javax.inject.Named;
+
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
+@Named("DSTU3")
 public class AdapterFactory implements org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory {
 
 	@Override

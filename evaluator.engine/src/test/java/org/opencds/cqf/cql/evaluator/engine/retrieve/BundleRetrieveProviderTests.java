@@ -17,12 +17,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Patient;
-import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -30,6 +29,13 @@ import ca.uhn.fhir.parser.IParser;
 
 
 public class BundleRetrieveProviderTests {
+
+    private FhirContext fhirContext;
+
+    @BeforeClass
+    void setup() {
+        this.fhirContext = FhirContext.forR4();
+    }
 
     private IBaseBundle loadBundle(FhirContext fhirContext, String path) {
         InputStream stream = this.getClass().getClassLoader().getResourceAsStream(path);
@@ -53,11 +59,9 @@ public class BundleRetrieveProviderTests {
         return this.getBundleRetrieveProvider(null);
     }
 
-    @SuppressWarnings("rawtypes")
     private RetrieveProvider getBundleRetrieveProvider(TerminologyProvider terminologyProvider) {
-        FhirModelResolver resolver = new R4FhirModelResolver();
-        IBaseBundle bundle = this.loadBundle(resolver.getFhirContext(), "r4/TestBundleTwoPatients.json");
-        BundleRetrieveProvider brp = new BundleRetrieveProvider(resolver.getFhirContext(), resolver, bundle);
+        IBaseBundle bundle = this.loadBundle(this.fhirContext, "r4/TestBundleTwoPatients.json");
+        BundleRetrieveProvider brp = new BundleRetrieveProvider(this.fhirContext, bundle);
         brp.setTerminologyProvider(terminologyProvider);
 
         return brp;

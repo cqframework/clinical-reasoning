@@ -3,13 +3,15 @@ package org.opencds.cqf.cql.evaluator.engine.retrieve;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -19,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.BundleUtil;
 
 public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
@@ -26,14 +29,14 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 	private static final Logger logger = LoggerFactory.getLogger(BundleRetrieveProvider.class);
 
 	private final IBaseBundle bundle;
-	private final ModelResolver modelResolver;
 	private final FhirContext fhirContext;
+	private final IFhirPath fhirPath;
 
-	public BundleRetrieveProvider(final FhirContext fhirContext, final ModelResolver modelResolver, final IBaseBundle bundle) {
+	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle bundle) {
 		
 		this.fhirContext = Objects.requireNonNull(fhirContext, "bundle can not be null.");
 		this.bundle = Objects.requireNonNull(bundle, "bundle can not be null.");
-		this.modelResolver = Objects.requireNonNull(modelResolver, "modelResolver can not be null.");
+		this.fhirPath = fhirContext.newFhirPath();
 	}
 
 	@Override
@@ -122,16 +125,16 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		final List<IBaseResource> filtered = new ArrayList<>();
 
 		for (final IBaseResource res : resources) {
-			final Object value = this.modelResolver.resolvePath(res, codePath);
+			final List<IBase> values = this.fhirPath.evaluate(res, codePath, IBase.class);
 
-			if (value instanceof IPrimitiveType) {
-				if (isPrimitiveMatch(dataType, (IPrimitiveType<?>) value, codes)) {
+			if (values != null && values.size() == 1 && values.get(0) instanceof IPrimitiveType) {
+				if (isPrimitiveMatch(dataType, (IPrimitiveType<?>) values.get(0), codes)) {
 					filtered.add(res);
 				}
 				continue;
 			}
 
-			final List<Code> resourceCodes = CodeUtil.getElmCodesFromObject(value, this.fhirContext);
+			final List<Code> resourceCodes = CodeUtil.getElmCodesFromObject(values, this.fhirContext);
 			if (resourceCodes == null) {
 				continue;
 			}
@@ -162,9 +165,9 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		final List<IBaseResource> filtered = new ArrayList<>();
 
 		for (final IBaseResource res : resources) {
-			final Object resContextValue = this.modelResolver.resolvePath(res, contextPath);
-			if (resContextValue instanceof IIdType) {
-				String id = ((IIdType)resContextValue).getValue();
+			final Optional<IBase> resContextValue = this.fhirPath.evaluateFirst(res, contextPath, IBase.class);
+			if (resContextValue.isPresent() && resContextValue.get() instanceof IIdType) {
+				String id = ((IIdType)resContextValue.get()).getValue();
 				if (id == null) {
 					logger.info("Found null id for {} resource. Skipping.", dataType);
 					continue;
@@ -178,15 +181,31 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 					logger.info("Found {} with id  {}. Skipping.", dataType, id);
 					continue;
 				}
-			} else {
-				final IPrimitiveType<?> referenceValue = (IPrimitiveType<?>) this.modelResolver.resolvePath(resContextValue,
-						"reference");
-				if (referenceValue == null) {
+			}
+			else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
+					String id = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
+					if (id == null) {
+						logger.info("Found null id for {} resource. Skipping.", dataType);
+						continue;
+					}
+	
+					if (id.contains("/")) {
+						id = id.split("/")[1];
+					}
+					
+					if (!id.equals(contextValue)) {
+						logger.info("Found {} with id  {}. Skipping.", dataType, id);
+						continue;
+					}
+				}
+			else {
+				final Optional<IBase> reference = this.fhirPath.evaluateFirst(res, "reference", IBase.class);
+				if (!reference.isPresent()) {
 					logger.info("Found {} resource unrelated to context. Skipping.", dataType);
 					continue;
 				}
 
-				String referenceString = referenceValue.getValueAsString();
+				String referenceString = ((IPrimitiveType<?>)reference.get()).getValueAsString();
 				if (referenceString.contains("/")) {
 					referenceString = referenceString.substring(referenceString.indexOf("/") + 1,
 							referenceString.length());

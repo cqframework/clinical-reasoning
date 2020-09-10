@@ -23,11 +23,21 @@ public class CodeUtil {
         List<Code> codes = new ArrayList<Code>();
         if(object instanceof Iterable) {
             for (Object concept : (Iterable<?>)object) {
-                codes.addAll(tryConceptThenCoding(fhirContext, (IBase)concept));
+                if (concept instanceof IBase) {
+                    codes.addAll(tryConceptThenCoding(fhirContext, (IBase)concept));
+                }
+                else if (concept instanceof Code) {
+                    codes.add((Code)concept);
+                }
             }
         }
         else {
-            codes.addAll(tryConceptThenCoding(fhirContext, (IBase)object));
+            if (object instanceof IBase) {
+                codes.addAll(tryConceptThenCoding(fhirContext, (IBase)object));
+            }
+            else if (object instanceof Code){
+                codes.add((Code)object);
+            }
         }
         return codes;
     }

@@ -244,9 +244,12 @@ public class LibraryEvaluatorTests {
     }
 
     @Test
-    public void TestRuleFilters() {
+    public void TestRuleFiltersReportable() {
         Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-Reportable-bundle.json")
+            .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Set<String> expressions = new HashSet<String>();
         expressions.add("IsReportable");
@@ -267,7 +270,43 @@ public class LibraryEvaluatorTests {
 
         Parameters actual = (Parameters)libraryEvaluator.evaluate(
                 new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Patient", "Reportable", null,
-                null, null, endpoint, endpoint, endpoint, null, null, expressions);
+                null, null, endpoint, endpoint, dataEndpoint, null, null, expressions);
+        
+        assertTrue(compareOutputParameters(expected, actual));
+
+        // IParser parser = this.fhirContext.newJsonParser();
+        // parser.setPrettyPrint(true);
+        // System.out.println(parser.encodeResourceToString(actual));
+    }
+
+    @Test
+    public void TestRuleFiltersNotReportable() {
+        Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-NotReportable-bundle.json")
+            .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Set<String> expressions = new HashSet<String>();
+        expressions.add("IsReportable");
+
+        // Parameters expected = loadParameters(this.fhirContext, "r4/ReportableTestParameter.json");
+        Parameters expected = new Parameters();
+        List<ParametersParameterComponent> parameters = new ArrayList<ParametersParameterComponent>();
+        ParametersParameterComponent parameterComponent = new ParametersParameterComponent();
+        parameterComponent.setName("IsReportable");
+        List<ParametersParameterComponent> parts = new ArrayList<ParametersParameterComponent>();
+        ParametersParameterComponent partComponent = new ParametersParameterComponent();
+        partComponent.setName("value");
+        partComponent.setValue(new BooleanType(false));
+        parts.add(partComponent);
+        parameterComponent.setPart(parts);
+        parameters.add(parameterComponent);
+        expected.setParameter(parameters);
+
+        Parameters actual = (Parameters)libraryEvaluator.evaluate(
+                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Patient", "NotReportable", null,
+                null, null, endpoint, endpoint, dataEndpoint, null, null, expressions);
         
         assertTrue(compareOutputParameters(expected, actual));
 

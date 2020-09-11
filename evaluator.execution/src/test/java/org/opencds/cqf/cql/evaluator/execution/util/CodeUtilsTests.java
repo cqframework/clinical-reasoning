@@ -40,5 +40,12 @@ public class CodeUtilsTests {
         assertEquals(expected.size(), actual.size());
         assertEquals(expected.get(0), actual.get(0));
     }
-    
+
+    @Test
+    public void TestGetCodesFromNull() {
+
+        List<Code> actual = CodeUtil.getElmCodesFromObject(null, this.dummyContext);
+
+        assertEquals(0, actual.size());
+    }  
 }

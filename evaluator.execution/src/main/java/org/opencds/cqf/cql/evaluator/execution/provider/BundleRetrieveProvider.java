@@ -29,6 +29,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 	private IBaseBundle bundle;
 	private FhirModelResolver modelResolver;
 	private TerminologyProvider terminologyProvider;
+	private CodeUtil codeUtil;
 
 	public BundleRetrieveProvider(FhirModelResolver modelResolver, IBaseBundle bundle) {
 		this(modelResolver, bundle, null);
@@ -42,6 +43,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 		this.modelResolver = modelResolver;
 		this.bundle = bundle;
 		this.terminologyProvider = terminologyProvider;
+		this.codeUtil = new CodeUtil(modelResolver.getFhirContext());
 	}
 
 	@Override
@@ -139,7 +141,7 @@ public class BundleRetrieveProvider implements RetrieveProvider {
 				continue;
 			}
 
-			List<Code> resourceCodes = CodeUtil.getElmCodesFromObject(value, this.modelResolver.getFhirContext());
+			List<Code> resourceCodes = this.codeUtil.getElmCodesFromObject(value);
 			if (resourceCodes == null) {
 				continue;
 			}

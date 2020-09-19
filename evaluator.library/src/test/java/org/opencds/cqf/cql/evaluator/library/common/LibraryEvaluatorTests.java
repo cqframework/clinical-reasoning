@@ -242,7 +242,7 @@ public class LibraryEvaluatorTests {
         System.out.println(parser.encodeResourceToString(actual));
     }
 
-    // @Test
+    @Test
     public void TestRuleFiltersReportable() {
         Parameters expected = new Parameters();
         expected.addParameter().setName("IsReportable").addPart().setName("value").setValue(new BooleanType(true));

@@ -72,6 +72,6 @@ public class CqlEvaluator {
 
     public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
     Set<String> expressions, Pair<String, Object> contextParameter, Map<String, Object> parameters) {
-        return this.cqlEngine.evaluate(libraryIdentifier, contextParameter, parameters);
+        return this.cqlEngine.evaluate(libraryIdentifier, expressions, contextParameter, parameters, null);
     }
 }

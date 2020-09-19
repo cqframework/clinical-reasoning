@@ -7,8 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
@@ -17,15 +19,20 @@ import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.model.Model;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
+import org.opencds.cqf.cql.evaluator.cql2elm.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 
 public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory {
 
     protected Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories;
+
+    protected Map<VersionedIdentifier, Model> globalCache = new ConcurrentHashMap<>();
         
     @Inject
     public LibraryLoaderFactory(Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories) {
@@ -108,7 +115,7 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
    
 
     protected LibraryManager createLibraryManager() {
-        ModelManager modelManager = new ModelManager();
+        ModelManager modelManager = new CacheAwareModelManager(this.globalCache);
         return new LibraryManager(modelManager);
     }
 }

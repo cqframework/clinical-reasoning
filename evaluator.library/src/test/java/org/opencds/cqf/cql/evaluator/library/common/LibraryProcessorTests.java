@@ -118,7 +118,7 @@ public class LibraryProcessorTests {
             }
         };
 
-        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(typedTerminologyProviderFactories);
+        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(fhirContext, typedTerminologyProviderFactories);
 
         RetrieveProviderConfigurer retrieveProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer(new RetrieveProviderConfig());
 

@@ -20,8 +20,10 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
+import org.opencds.cqf.cql.evaluator.engine.execution.CachingLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.PriorityLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.engine.terminology.CachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,14 +227,18 @@ public class CqlEvaluatorBuilder {
      * Builds a CqlEvaluator that uses all content, data, terminology sources
      * supplied, and has the appropriate configuration applied.
      * 
+     * NOTE: this CqlEvaluator is meant to be short-lived (e.g. for the duration of a request)
      * @return a CqlEvaluator
      */
     public CqlEvaluator build() {
         Collections.reverse(this.libraryLoaders);
-        PriorityLibraryLoader libraryLoader = new PriorityLibraryLoader(libraryLoaders);
+        
+
+        // TODO: Provide some mechanism for injecting decorators
+        LibraryLoader libraryLoader = new CachingLibraryLoaderDecorator(new PriorityLibraryLoader(libraryLoaders));
 
         Collections.reverse(this.terminologyProviders);
-        PriorityTerminologyProvider terminologyProvider = new PriorityTerminologyProvider(terminologyProviders);
+        TerminologyProvider terminologyProvider = new CachingTerminologyProviderDecorator(new PriorityTerminologyProvider(terminologyProviders));
 
         Map<String, DataProvider> dataProviders = this.buildDataProviders(terminologyProvider);
 

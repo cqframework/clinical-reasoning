@@ -12,7 +12,7 @@ public class CachingLibraryLoaderDecorator implements LibraryLoader {
     
     private final LibraryLoader innerLoader;
 
-    private static Map<VersionedIdentifier, Library> libraries = new HashMap<>();
+    private Map<VersionedIdentifier, Library> libraries = new HashMap<>();
 
     public CachingLibraryLoaderDecorator( final LibraryLoader libraryLoader) {
         this.innerLoader = libraryLoader;

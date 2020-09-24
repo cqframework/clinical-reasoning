@@ -13,14 +13,19 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
+import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory {
 
     private Set<TypedTerminologyProviderFactory> terminologyProviderFactories;
+    private FhirContext fhirContext;
 
     @Inject
-    public TerminologyProviderFactory(Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
+    public TerminologyProviderFactory(FhirContext fhirContent, Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
         this.terminologyProviderFactories = terminologyProviderFactories;
+        this.fhirContext = fhirContent;
     }
 
     public TerminologyProvider create(EndpointInfo endpointInfo) {
@@ -59,7 +64,6 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
 
     @Override
     public TerminologyProvider create(IBaseBundle terminologyBundle) {
-        // TODO Auto-generated method stub
-        return null;
+        return new BundleTerminologyProvider(this.fhirContext, terminologyBundle);
     }
 }

@@ -10,7 +10,7 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 
 public class CachingTerminologyProviderDecorator implements TerminologyProvider {
 
-    private static Map<String, Iterable<Code>> valueSetIndexById = new HashMap<>();
+    private Map<String, Iterable<Code>> valueSetIndexById = new HashMap<>();
 
     private TerminologyProvider innerProvider;
 

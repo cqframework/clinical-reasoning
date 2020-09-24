@@ -9,14 +9,15 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.engine.data.ExtensibleDataProvider;
+import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -25,11 +26,11 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
 
     private FhirContext fhirContext;
     private Set<ModelResolverFactory> modelResolverFactories;
-    private Set<TypedRetrieveProviderFactory> retrieveProviderFactories;
+    private Set<RetrieveProviderFactory> retrieveProviderFactories;
 
     @Inject
     public DataProviderFactory(FhirContext fhirContext, Set<ModelResolverFactory> modelResolverFactories,
-            Set<TypedRetrieveProviderFactory> retrieveProviderFactories) {
+            Set<RetrieveProviderFactory> retrieveProviderFactories) {
         this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
         this.modelResolverFactories = Objects.requireNonNull(modelResolverFactories,
                 "modelResolverFactory can not be null");
@@ -39,7 +40,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
     }
 
     @Override
-    public Pair<String, DataProvider> create(EndpointInfo endpointInfo) {
+    public Triple<String, ModelResolver, RetrieveProvider> create(EndpointInfo endpointInfo) {
         Objects.requireNonNull(endpointInfo, "endpointInfo can not be null");
 
         if (endpointInfo.getType() == null) {
@@ -47,10 +48,10 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
         }
 
         String modelUri = detectModel(endpointInfo.getAddress(), endpointInfo.getType());
-        DataProvider dp = create(modelUri, endpointInfo.getType(), endpointInfo.getAddress(),
+        Pair<ModelResolver, RetrieveProvider> dp = create(modelUri, endpointInfo.getType(), endpointInfo.getAddress(),
                 endpointInfo.getHeaders());
 
-        return Pair.of(modelUri, dp);
+        return Triple.of(modelUri, dp.getLeft(), dp.getRight());
     }
 
     public IBaseCoding detectType(String url) {
@@ -86,8 +87,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
                 String.format("no registered ModelResolverFactory for modelUri: %s", modelUri));
     }
 
-    protected ExtensibleDataProvider create(String modelUri, IBaseCoding connectionType, String url,
-            List<String> headers) {
+    protected Pair<ModelResolver, RetrieveProvider> create(String modelUri, IBaseCoding connectionType, String url, List<String> headers) {
         ModelResolver modelResolver = this.getFactory(modelUri)
                 .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
 
@@ -96,7 +96,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
             retrieveProvider = new NoOpRetrieveProvider();
         } else {
 
-            for (TypedRetrieveProviderFactory factory : this.retrieveProviderFactories) {
+            for (RetrieveProviderFactory factory : this.retrieveProviderFactories) {
                 if (connectionType.getCode().equals(factory.getType())) {
                     retrieveProvider = factory.create(url, headers);
                     break;
@@ -109,6 +109,20 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
             }
         }
 
-        return new ExtensibleDataProvider(modelResolver, retrieveProvider);
+        return Pair.of(modelResolver, retrieveProvider);
+    }
+
+    @Override
+    public Triple<String, ModelResolver, RetrieveProvider> create(IBaseBundle dataBundle) {
+        Objects.requireNonNull(dataBundle, "dataBundle can not be null");
+
+        if (!dataBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
+            throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");
+        }
+
+        ModelResolver modelResolver = this.getFactory(Constants.FHIR_MODEL_URI)
+                .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
+
+        return Triple.of(Constants.FHIR_MODEL_URI, modelResolver, new BundleRetrieveProvider(fhirContext, dataBundle));
     }
 }

@@ -8,7 +8,7 @@ public class LibraryModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        this.bind(LibraryEvaluator.class).to(LibraryEvaluator.class);
+        this.bind(LibraryProcessor.class).to(LibraryProcessor.class);
     }
 
 }

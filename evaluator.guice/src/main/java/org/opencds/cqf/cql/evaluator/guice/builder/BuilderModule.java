@@ -1,14 +1,11 @@
 package org.opencds.cqf.cql.evaluator.guice.builder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Scope;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
 import org.opencds.cqf.cql.evaluator.builder.common.*;
 import org.opencds.cqf.cql.evaluator.builder.data.BundleRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.data.DataProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.builder.data.DataProviderExtender;
 import org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirRestRetrieveProviderFactory;
@@ -30,12 +27,10 @@ public class BuilderModule extends AbstractModule {
             .to(LibraryLoaderFactory.class).in(Singleton.class);
         this.bind(org.opencds.cqf.cql.evaluator.builder.DataProviderFactory.class)
             .to(DataProviderFactory.class).in(Singleton.class);
-        this.bind(org.opencds.cqf.cql.evaluator.builder.DataProviderExtender.class)
-            .to(DataProviderExtender.class);
-        this.bind(org.opencds.cqf.cql.evaluator.builder.DataProviderConfigurer.class)
-            .to(DataProviderConfigurer.class);
         this.bind(org.opencds.cqf.cql.evaluator.builder.EndpointConverter.class)
             .to(EndpointConverter.class).in(Singleton.class);
+        this.bind(org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer.class)
+            .to(org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer.class);
 
         Multibinder<org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory> modelFactoryBinder = 
             Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory.class);
@@ -43,8 +38,8 @@ public class BuilderModule extends AbstractModule {
         modelFactoryBinder.addBinding()
             .to(FhirModelResolverFactory.class).in(Singleton.class);
 
-        Multibinder<org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory> retrieveFactoryBinder =
-            Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory.class);
+        Multibinder<org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderFactory> retrieveFactoryBinder =
+            Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderFactory.class);
 
         retrieveFactoryBinder.addBinding().to(BundleRetrieveProviderFactory.class).in(Singleton.class);
         retrieveFactoryBinder.addBinding().to(FhirRestRetrieveProviderFactory.class).in(Singleton.class);

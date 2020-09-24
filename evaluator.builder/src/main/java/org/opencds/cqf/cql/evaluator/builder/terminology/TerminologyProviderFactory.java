@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
@@ -28,8 +29,7 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
 
-        if (endpointInfo.getType() == null)
-        {
+        if (endpointInfo.getType() == null) {
             endpointInfo.setType(detectType(endpointInfo.getAddress()));
         }
 
@@ -39,13 +39,12 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
     protected IBaseCoding detectType(String url) {
         if (isFileUri(url)) {
             return Constants.HL7_FHIR_FILES_CODE;
-        }
-        else {
+        } else {
             return Constants.HL7_FHIR_REST_CODE;
         }
     }
 
-    protected TerminologyProvider create(IBaseCoding connectionType, String url,  List<String> headers) {
+    protected TerminologyProvider create(IBaseCoding connectionType, String url, List<String> headers) {
         Objects.requireNonNull(url, "url can not be null");
         Objects.requireNonNull(connectionType, "connectionType can not be null");
 
@@ -54,7 +53,13 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
                 return factory.create(url, headers);
             }
         }
-                
+
         throw new IllegalArgumentException("invalid connectionType for loading FHIR terminology");
+    }
+
+    @Override
+    public TerminologyProvider create(IBaseBundle terminologyBundle) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

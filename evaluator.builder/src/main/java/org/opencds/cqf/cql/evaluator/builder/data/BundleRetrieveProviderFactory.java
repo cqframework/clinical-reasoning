@@ -12,7 +12,7 @@ import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BundleRetrieveProviderFactory implements TypedRetrieveProviderFactory {
+public class BundleRetrieveProviderFactory implements RetrieveProviderFactory {
 
     FhirContext fhirContext;
     DirectoryBundler directoryBundler;

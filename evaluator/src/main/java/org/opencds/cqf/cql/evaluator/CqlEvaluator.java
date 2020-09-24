@@ -18,26 +18,39 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 public class CqlEvaluator {
 
     private LibraryLoader libraryLoader;
-
+    private Map<String, DataProvider> dataProviders;
+    private TerminologyProvider terminologyProvider;
     private CqlEngine cqlEngine;
 
     public CqlEvaluator(LibraryLoader libraryLoader) {
-        this(libraryLoader, null, null, null, null);
+        this(libraryLoader, null, null, null);
     }
 
     public CqlEvaluator(LibraryLoader libraryLoader,  Map<String, DataProvider> dataProviders,
             TerminologyProvider terminologyProvider) {
-        this(libraryLoader, dataProviders, terminologyProvider, null, null);
+        this(libraryLoader, dataProviders, terminologyProvider, null);
     }
 
     public CqlEvaluator(LibraryLoader libraryLoader,
             EnumSet<Options> engineOptions) {
-        this(libraryLoader, null, null, engineOptions, null);
+        this(libraryLoader, null, null, engineOptions);
+    }
+
+    public LibraryLoader getLibraryLoader() {
+        return this.libraryLoader;
+    }
+
+    public Map<String, DataProvider> getDataProviders() {
+        return this.dataProviders;
+    }
+
+    public TerminologyProvider getTerminologyProvider() {
+        return this.terminologyProvider;
     }
 
     public CqlEvaluator(LibraryLoader libraryLoader,
             Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider,
-            EnumSet<Options> engineOptions, ParameterParser parameterDeserializer) {
+            EnumSet<Options> engineOptions) {
         this.libraryLoader = Objects.requireNonNull(libraryLoader, "libraryLoader can not be null.");
         this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, engineOptions);
     }

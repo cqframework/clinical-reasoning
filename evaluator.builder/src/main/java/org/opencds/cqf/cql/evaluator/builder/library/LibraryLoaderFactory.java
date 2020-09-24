@@ -21,37 +21,48 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
+import org.opencds.cqf.cql.evaluator.cql2elm.BundleLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory {
 
     protected Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories;
+    protected FhirContext fhirContext;
+    protected AdapterFactory adapterFactory;
 
-    protected Map<VersionedIdentifier, Model> globalCache = new ConcurrentHashMap<>();
-        
+    protected Map<VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
+
     @Inject
-    public LibraryLoaderFactory(Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories) {
-        this.librarySourceProviderFactories = Objects.requireNonNull(librarySourceProviderFactories, "librarySourceProviderFactories can not be null");
+    public LibraryLoaderFactory(FhirContext fhirContext, AdapterFactory adapterFactory, Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories) {
+        this.librarySourceProviderFactories = Objects.requireNonNull(librarySourceProviderFactories,
+                "librarySourceProviderFactories can not be null");
+        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
+        this.adapterFactory = Objects.requireNonNull(adapterFactory, "adapterFactory can not be null");
     }
 
     protected LibraryLoader create(LibraryManager libraryManager, CqlTranslatorOptions translatorOptions) {
         Objects.requireNonNull(libraryManager, "libraryManager can not be null");
-        LibraryLoader libraryLoader = new TranslatingLibraryLoader(libraryManager, 
-            translatorOptions == null ? CqlTranslatorOptions.defaultOptions(): translatorOptions);
+        LibraryLoader libraryLoader = new TranslatingLibraryLoader(libraryManager,
+                translatorOptions == null ? CqlTranslatorOptions.defaultOptions() : translatorOptions);
 
         return libraryLoader;
     }
 
-    protected LibraryLoader create(List<LibrarySourceProvider> librarySourceProviders, CqlTranslatorOptions translatorOptions) {
+    protected LibraryLoader create(List<LibrarySourceProvider> librarySourceProviders,
+            CqlTranslatorOptions translatorOptions) {
         Objects.requireNonNull(librarySourceProviders, "librarySourceProviders can not be null");
 
         LibraryManager libraryManager = this.createLibraryManager();
-        for (LibrarySourceProvider provider : librarySourceProviders){
+        for (LibrarySourceProvider provider : librarySourceProviders) {
             libraryManager.getLibrarySourceLoader().registerProvider(provider);
         }
 
@@ -67,38 +78,34 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
 
-        if (endpointInfo.getType() == null)
-        {
+        if (endpointInfo.getType() == null) {
             endpointInfo.setType(detectType(endpointInfo.getAddress()));
         }
 
-        LibrarySourceProvider sourceProvider = this.getProvider(endpointInfo.getType(), endpointInfo.getAddress(), endpointInfo.getHeaders());
+        LibrarySourceProvider sourceProvider = this.getProvider(endpointInfo.getType(), endpointInfo.getAddress(),
+                endpointInfo.getHeaders());
 
         return create(Collections.singletonList(sourceProvider), translatorOptions);
     }
 
     protected IBaseCoding detectType(String url) {
         if (isFileUri(url)) {
-             // Attempt to auto-detect the type of files.
-             try {
+            // Attempt to auto-detect the type of files.
+            try {
                 Path directoryPath = Paths.get(url);
                 File directory = new File(directoryPath.toAbsolutePath().toString());
-   
-   
+
                 File[] files = directory.listFiles((d, name) -> name.endsWith(".cql"));
-    
+
                 if (files != null && files.length > 0) {
                     return Constants.HL7_CQL_FILES_CODE;
-                }
-                else {
+                } else {
                     return Constants.HL7_FHIR_FILES_CODE;
                 }
-             }
-             catch (Exception e) {
-                 return Constants.HL7_FHIR_FILES_CODE;
-             }
-        }
-        else {
+            } catch (Exception e) {
+                return Constants.HL7_FHIR_FILES_CODE;
+            }
+        } else {
             return Constants.HL7_FHIR_REST_CODE;
         }
     }
@@ -112,10 +119,20 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
 
         throw new IllegalArgumentException("invalid connectionType for loading Libraries");
     }
-   
 
     protected LibraryManager createLibraryManager() {
-        ModelManager modelManager = new CacheAwareModelManager(this.globalCache);
+        ModelManager modelManager = new CacheAwareModelManager(this.globalModelCache);
         return new LibraryManager(modelManager);
+    }
+
+    @Override
+    public LibraryLoader create(IBaseBundle contentBundle, CqlTranslatorOptions translatorOptions) {
+        Objects.requireNonNull(contentBundle, "contentBundle can not be null");
+
+        if (!contentBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
+            throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");
+        }
+
+        return this.create(Collections.singletonList(new BundleLibrarySourceProvider(this.fhirContext, contentBundle, this.adapterFactory)), translatorOptions);
     }
 }

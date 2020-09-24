@@ -18,18 +18,18 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.ParameterParser;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
-import org.opencds.cqf.cql.evaluator.builder.DataProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.builder.DataProviderExtender;
+import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
+import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
+import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.cql2elm.BundleLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
@@ -41,9 +41,9 @@ import org.testng.annotations.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-public class LibraryEvaluatorTests {
+public class LibraryProcessorTests {
 
-    LibraryEvaluator libraryEvaluator = null;
+    LibraryProcessor libraryProcessor = null;
     FhirContext fhirContext = null;
 
     @BeforeClass
@@ -65,7 +65,7 @@ public class LibraryEvaluatorTests {
                     public LibrarySourceProvider create(String url, List<String> headers) {
                         return new BundleLibrarySourceProvider(fhirContext,
                                 (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(LibraryEvaluatorTests.class.getResourceAsStream(url)),
+                                        .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)),
                                 adapterFactory);
                     }
                 });
@@ -78,10 +78,10 @@ public class LibraryEvaluatorTests {
             }
         };
 
-        LibraryLoaderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory(librarySourceProviderFactories);
-        Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
+        LibraryLoaderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory(fhirContext, adapterFactory, librarySourceProviderFactories);
+        Set<RetrieveProviderFactory> retrieveProviderFactories = new HashSet<RetrieveProviderFactory>() {
             {
-                add(new TypedRetrieveProviderFactory() {
+                add(new RetrieveProviderFactory() {
                     @Override
                     public String getType() {
                         return Constants.HL7_FHIR_FILES;
@@ -91,7 +91,7 @@ public class LibraryEvaluatorTests {
                     public RetrieveProvider create(String url, List<String> headers) {
 
                         return new BundleRetrieveProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(LibraryEvaluatorTests.class.getResourceAsStream(url)));
+                                .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)));
                     }
                 });
             }
@@ -112,7 +112,7 @@ public class LibraryEvaluatorTests {
                     @Override
                     public TerminologyProvider create(String url, List<String> headers) {
                         return new BundleTerminologyProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(LibraryEvaluatorTests.class.getResourceAsStream(url)));
+                                .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)));
                     }
                 });
             }
@@ -120,18 +120,16 @@ public class LibraryEvaluatorTests {
 
         TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(typedTerminologyProviderFactories);
 
-        DataProviderConfigurer dataProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.DataProviderConfigurer();
+        RetrieveProviderConfigurer retrieveProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer(new RetrieveProviderConfig());
 
-        DataProviderExtender dataProviderExtender = new org.opencds.cqf.cql.evaluator.builder.data.DataProviderExtender();
-
-        ParameterParser parameterParser = new org.opencds.cqf.cql.evaluator.common.ParameterParser();
 
         EndpointConverter endpointConverter = new org.opencds.cqf.cql.evaluator.builder.common.EndpointConverter(
                 adapterFactory);
 
-        libraryEvaluator = new LibraryEvaluator(fhirContext, adapterFactory, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, dataProviderConfigurer, dataProviderExtender,
-                parameterParser, endpointConverter);
+        CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder(retrieveProviderConfigurer);
+
+        libraryProcessor = new LibraryProcessor(fhirContext, adapterFactory, libraryLoaderFactory,
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, cqlEvaluatorBuilder);
     }
 
     
@@ -218,7 +216,7 @@ public class LibraryEvaluatorTests {
         Endpoint endpoint = new Endpoint().setAddress("r4/EXM125-8.0.000-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Parameters actual = (Parameters)libraryEvaluator.evaluate(
+        Parameters actual = (Parameters)libraryProcessor.evaluate(
                 new VersionedIdentifier().withId("EXM125").withVersion("8.0.000"), "Patient", "numer-EXM125", null,
                 null, null, endpoint, endpoint, endpoint, null, null, null);
         
@@ -256,7 +254,7 @@ public class LibraryEvaluatorTests {
         Set<String> expressions = new HashSet<String>();
         expressions.add("IsReportable");
 
-        Parameters actual = (Parameters)libraryEvaluator.evaluate(
+        Parameters actual = (Parameters)libraryProcessor.evaluate(
                 new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Patient", "Reportable", null,
                 null, null, endpoint, endpoint, dataEndpoint, null, null, expressions);
         
@@ -277,7 +275,7 @@ public class LibraryEvaluatorTests {
         Set<String> expressions = new HashSet<String>();
         expressions.add("IsReportable");
 
-        Parameters actual = (Parameters)libraryEvaluator.evaluate(
+        Parameters actual = (Parameters)libraryProcessor.evaluate(
                 new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Patient", "NotReportable", null,
                 null, null, endpoint, endpoint, dataEndpoint, null, null, expressions);
         

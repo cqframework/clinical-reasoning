@@ -8,6 +8,7 @@ public class VersionUtilities {
      * Returns a FhirVersionEnum for the supplied version string.
      * Supports partial versions (e.g. "3.0") and named versions (e.g. "R4")
      * @param fhirVersion the FHIR version to get an enum for.
+     * @return the FhirVersionEnum
      */
     public static FhirVersionEnum enumForVersion(String fhirVersion) {
         if (fhirVersion == null || fhirVersion.isEmpty()) {

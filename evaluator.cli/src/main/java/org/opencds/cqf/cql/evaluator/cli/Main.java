@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.cli;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -8,24 +7,22 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.ParameterParser;
-import org.opencds.cqf.cql.evaluator.builder.DataProviderConfigurer;
+import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
-
-import org.opencds.cqf.cql.evaluator.builder.DataProviderConfig;
-import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
-import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
-import org.opencds.cqf.cql.evaluator.guice.EvaluatorModule;
 import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
+import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 
@@ -61,8 +58,7 @@ public class Main {
     protected void initialize(FhirVersionEnum fhirVersionEnum) {
         this.injector = Guice.createInjector(
             new FhirModule(fhirVersionEnum),
-            new BuilderModule(),
-            new EvaluatorModule());
+            new BuilderModule());
     }
 
     protected <T> T get(Class<T> clazz) {
@@ -85,23 +81,21 @@ public class Main {
         TerminologyProvider terminologyProvider = this.get(TerminologyProviderFactory.class)
                 .create(new EndpointInfo().setAddress(parameters.terminologyUrl));
 
-        Pair<String, DataProvider> dataProvider = this.get(DataProviderFactory.class)
+        Triple<String, ModelResolver, RetrieveProvider> dataProvider = this.get(DataProviderFactory.class)
                 .create(new EndpointInfo().setAddress(parameters.model != null ? parameters.model.getRight() : null));
 
-        this.get(DataProviderConfigurer.class)
-                .configure(dataProvider.getRight(), new DataProviderConfig().setTerminologyProvider(terminologyProvider));
+        CqlEvaluatorBuilder cqlEvaluatorBuilder = this.get(CqlEvaluatorBuilder.class);
 
-        Map<String,DataProvider> dataProviders = new HashMap<String,DataProvider>();
-        dataProviders.put(dataProvider.getLeft(), dataProvider.getRight());
+        cqlEvaluatorBuilder.withLibraryLoader(libraryLoader)
+            .withTerminologyProvider(terminologyProvider)
+            .withModelResolverAndRetrieveProvider(dataProvider.getLeft(), dataProvider.getMiddle(), dataProvider.getRight());
 
-        CqlEvaluator evaluator = new org.opencds.cqf.cql.evaluator.CqlEvaluator(libraryLoader, dataProviders,
-                terminologyProvider);
+        CqlEvaluator evaluator = cqlEvaluatorBuilder.build();
 
         VersionedIdentifier identifier = new VersionedIdentifier().withId(parameters.libraryName);
 
-        ParameterParser parser = this.get(ParameterParser.class);
+        Pair<String, Object> contextParameter = Pair.of(parameters.contextParameter.getLeft(), parameters.contextParameter.getRight());
 
-        Pair<String, Object> contextParameter = parser.parseContextParameter(libraryLoader, identifier, parameters.contextParameter);
         EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
 
         for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {

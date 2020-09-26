@@ -1,10 +1,11 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -21,12 +22,12 @@ public abstract class VersionComparingLibrarySourceProvider
     private AdapterFactory adapterFactory;
 
     public VersionComparingLibrarySourceProvider(AdapterFactory adapterFactory) {
-        this.adapterFactory = Objects.requireNonNull(adapterFactory, "adapterFactory can not be null");
+        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
     }
 
     @Override
     public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
-        Objects.requireNonNull(versionedIdentifier, "versionedIdentifier can not be null.");
+        requireNonNull(versionedIdentifier, "versionedIdentifier can not be null.");
 
         IBaseResource library = this.getLibrary(versionedIdentifier);
         if (library == null) {
@@ -55,8 +56,8 @@ public abstract class VersionComparingLibrarySourceProvider
     protected abstract IBaseResource getLibrary(VersionedIdentifier libraryIdentifier);
 
     protected IBaseResource select(VersionedIdentifier libraryIdentifier, Collection<IBaseResource> libraries) {
-        Objects.requireNonNull(libraries, "libraries can not be null");
-        Objects.requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
+        requireNonNull(libraries, "libraries can not be null");
+        requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
 
         String targetVersion = libraryIdentifier.getVersion();
 

@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.builder.library;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -22,9 +23,9 @@ public class FhirFileLibrarySourceProviderFactory implements TypedLibrarySourceP
 
     @Inject
     public FhirFileLibrarySourceProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler, AdapterFactory adapterFactory) {
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
-        this.directoryBundler = Objects.requireNonNull(directoryBundler, "directoryBundler can not be null");
-        this.adapterFactory = Objects.requireNonNull(adapterFactory, "adapterFactory can not be null");
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+        this.directoryBundler = requireNonNull(directoryBundler, "directoryBundler can not be null");
+        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
     }
 
     @Override

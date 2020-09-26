@@ -1,11 +1,12 @@
 package org.opencds.cqf.cql.evaluator.fhir.common;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -45,7 +46,7 @@ public class DirectoryBundler implements org.opencds.cqf.cql.evaluator.fhir.Dire
      */
     @Override
     public IBaseBundle bundle(String path) {
-        Objects.requireNonNull(path, "path must not be null.");
+        requireNonNull(path, "path must not be null.");
 
         File resourceDirectory = new File(path);
         if (!resourceDirectory.exists()) {

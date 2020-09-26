@@ -12,13 +12,13 @@ import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BundleRetrieveProviderFactory implements RetrieveProviderFactory {
+public class FhirFileRetrieveProviderFactory implements TypedRetrieveProviderFactory {
 
     FhirContext fhirContext;
     DirectoryBundler directoryBundler;
 
     @Inject
-    public BundleRetrieveProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler){
+    public FhirFileRetrieveProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler){
         this.fhirContext = fhirContext;
         this.directoryBundler = directoryBundler;
     }

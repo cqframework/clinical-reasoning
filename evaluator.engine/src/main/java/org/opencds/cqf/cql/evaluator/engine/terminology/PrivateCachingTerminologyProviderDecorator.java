@@ -8,13 +8,13 @@ import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 
-public class CachingTerminologyProviderDecorator implements TerminologyProvider {
+public class PrivateCachingTerminologyProviderDecorator implements TerminologyProvider {
 
     private Map<String, Iterable<Code>> valueSetIndexById = new HashMap<>();
 
     private TerminologyProvider innerProvider;
 
-    public CachingTerminologyProviderDecorator(TerminologyProvider terminologyProvider) {
+    public PrivateCachingTerminologyProviderDecorator(TerminologyProvider terminologyProvider) {
         this.innerProvider = terminologyProvider;
     }
 

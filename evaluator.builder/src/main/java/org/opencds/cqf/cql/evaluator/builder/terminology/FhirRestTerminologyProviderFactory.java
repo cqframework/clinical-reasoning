@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.builder.terminology;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -21,8 +22,8 @@ public class FhirRestTerminologyProviderFactory implements TypedTerminologyProvi
 
     @Inject
     public FhirRestTerminologyProviderFactory(FhirContext fhirContent, ClientFactory clientFactory) {
-        this.fhirContext = Objects.requireNonNull(fhirContent, "fhirContext can not be null");
-        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory can not be null");
+        this.fhirContext = requireNonNull(fhirContent, "fhirContext can not be null");
+        this.clientFactory = requireNonNull(clientFactory, "clientFactory can not be null");
     }
 
     @Override

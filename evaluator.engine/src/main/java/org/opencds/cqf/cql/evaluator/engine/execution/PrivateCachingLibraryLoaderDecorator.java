@@ -7,14 +7,14 @@ import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 
-public class CachingLibraryLoaderDecorator implements LibraryLoader {
+public class PrivateCachingLibraryLoaderDecorator implements LibraryLoader {
 
     
     private final LibraryLoader innerLoader;
 
     private Map<VersionedIdentifier, Library> libraries = new HashMap<>();
 
-    public CachingLibraryLoaderDecorator( final LibraryLoader libraryLoader) {
+    public PrivateCachingLibraryLoaderDecorator( final LibraryLoader libraryLoader) {
         this.innerLoader = libraryLoader;
     }
 

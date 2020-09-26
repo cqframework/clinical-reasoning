@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.engine.terminology;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
@@ -17,7 +18,7 @@ public class PriorityTerminologyProvider implements TerminologyProvider {
     List<TerminologyProvider> terminologyProviders;
 
     public PriorityTerminologyProvider(List<TerminologyProvider> terminologyProviders) {
-        this.terminologyProviders = Objects.requireNonNull(terminologyProviders, "terminologyProviders can not be null");
+        this.terminologyProviders = requireNonNull(terminologyProviders, "terminologyProviders can not be null");
     }
 
     @Override

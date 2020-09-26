@@ -13,7 +13,7 @@ import org.opencds.cqf.cql.evaluator.fhir.ClientFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
-public class FhirRestRetrieveProviderFactory implements RetrieveProviderFactory {
+public class FhirRestRetrieveProviderFactory implements TypedRetrieveProviderFactory {
 
     FhirContext fhirContext;
     ClientFactory clientFactory;

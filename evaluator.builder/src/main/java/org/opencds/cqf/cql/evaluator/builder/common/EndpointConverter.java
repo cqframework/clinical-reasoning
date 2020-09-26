@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator.builder.common;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -24,7 +25,7 @@ public class EndpointConverter implements org.opencds.cqf.cql.evaluator.builder.
     }
 
     public EndpointInfo getEndpointInfo(IBaseResource endpoint) {
-        Objects.requireNonNull(endpoint, "endpoint can not be null");
+        requireNonNull(endpoint, "endpoint can not be null");
 
         if (endpoint.fhirType() == null || !endpoint.fhirType().equals("Endpoint")) {
             throw new IllegalArgumentException("endpoint is not a FHIR Endpoint resource.");

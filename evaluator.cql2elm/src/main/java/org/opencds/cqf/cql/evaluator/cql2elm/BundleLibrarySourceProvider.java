@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -25,8 +26,8 @@ public class BundleLibrarySourceProvider
 
     public BundleLibrarySourceProvider(FhirContext fhirContext, IBaseBundle bundle, AdapterFactory adapterFactory) {
         super(adapterFactory);
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
-        this.bundle = Objects.requireNonNull(bundle, "bundle can not be null");
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+        this.bundle = requireNonNull(bundle, "bundle can not be null");
 
         if (!this.bundle.getStructureFhirVersionEnum().equals(fhirContext.getVersion().getVersion())) {
             throw new IllegalArgumentException("the FHIR versions of bundle and fhirContext must match");

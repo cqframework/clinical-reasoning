@@ -2,13 +2,14 @@ package org.opencds.cqf.cql.evaluator.builder.library;
 
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,14 +44,14 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
 
     @Inject
     public LibraryLoaderFactory(FhirContext fhirContext, AdapterFactory adapterFactory, Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories) {
-        this.librarySourceProviderFactories = Objects.requireNonNull(librarySourceProviderFactories,
+        this.librarySourceProviderFactories = requireNonNull(librarySourceProviderFactories,
                 "librarySourceProviderFactories can not be null");
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
-        this.adapterFactory = Objects.requireNonNull(adapterFactory, "adapterFactory can not be null");
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
     }
 
     protected LibraryLoader create(LibraryManager libraryManager, CqlTranslatorOptions translatorOptions) {
-        Objects.requireNonNull(libraryManager, "libraryManager can not be null");
+        requireNonNull(libraryManager, "libraryManager can not be null");
         LibraryLoader libraryLoader = new TranslatingLibraryLoader(libraryManager,
                 translatorOptions == null ? CqlTranslatorOptions.defaultOptions() : translatorOptions);
 
@@ -59,7 +60,7 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
 
     protected LibraryLoader create(List<LibrarySourceProvider> librarySourceProviders,
             CqlTranslatorOptions translatorOptions) {
-        Objects.requireNonNull(librarySourceProviders, "librarySourceProviders can not be null");
+        requireNonNull(librarySourceProviders, "librarySourceProviders can not be null");
 
         LibraryManager libraryManager = this.createLibraryManager();
         for (LibrarySourceProvider provider : librarySourceProviders) {
@@ -73,7 +74,7 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
 
     @Override
     public LibraryLoader create(EndpointInfo endpointInfo, CqlTranslatorOptions translatorOptions) {
-        Objects.requireNonNull(endpointInfo, "endpointInfo can not be null");
+        requireNonNull(endpointInfo, "endpointInfo can not be null");
         if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
@@ -127,7 +128,7 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
 
     @Override
     public LibraryLoader create(IBaseBundle contentBundle, CqlTranslatorOptions translatorOptions) {
-        Objects.requireNonNull(contentBundle, "contentBundle can not be null");
+        requireNonNull(contentBundle, "contentBundle can not be null");
 
         if (!contentBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
             throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");

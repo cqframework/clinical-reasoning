@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
 import org.opencds.cqf.cql.evaluator.builder.common.*;
-import org.opencds.cqf.cql.evaluator.builder.data.BundleRetrieveProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirRestRetrieveProviderFactory;
@@ -13,7 +13,7 @@ import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProvide
 import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.FhirRestLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory;
-import org.opencds.cqf.cql.evaluator.builder.terminology.BundleTerminologyProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.terminology.FhirFileTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.FhirRestTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory;
 
@@ -38,10 +38,10 @@ public class BuilderModule extends AbstractModule {
         modelFactoryBinder.addBinding()
             .to(FhirModelResolverFactory.class).in(Singleton.class);
 
-        Multibinder<org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderFactory> retrieveFactoryBinder =
-            Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderFactory.class);
+        Multibinder<org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory> retrieveFactoryBinder =
+            Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory.class);
 
-        retrieveFactoryBinder.addBinding().to(BundleRetrieveProviderFactory.class).in(Singleton.class);
+        retrieveFactoryBinder.addBinding().to(FhirFileRetrieveProviderFactory.class).in(Singleton.class);
         retrieveFactoryBinder.addBinding().to(FhirRestRetrieveProviderFactory.class).in(Singleton.class);
 
         Multibinder<org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory> librarySourceProviderFactoryBinder =
@@ -55,7 +55,7 @@ public class BuilderModule extends AbstractModule {
             Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory.class);
         
         terminologyProviderFactoryBinder.addBinding().to(FhirRestTerminologyProviderFactory.class);
-        terminologyProviderFactoryBinder.addBinding().to(BundleTerminologyProviderFactory.class);
+        terminologyProviderFactoryBinder.addBinding().to(FhirFileTerminologyProviderFactory.class);
     }
     
 }

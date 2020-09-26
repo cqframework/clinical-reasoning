@@ -1,12 +1,13 @@
 package org.opencds.cqf.cql.evaluator.engine.execution;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -31,7 +32,7 @@ public class TranslatingLibraryLoader implements LibraryLoader {
     private CqlTranslatorOptions translatorOptions;
 
     public TranslatingLibraryLoader(LibraryManager libraryManager, CqlTranslatorOptions translatorOptions) {
-        this.libraryManager = Objects.requireNonNull(libraryManager, "libraryManager can not be null");
+        this.libraryManager = requireNonNull(libraryManager, "libraryManager can not be null");
         this.translatorOptions = translatorOptions != null ? translatorOptions : CqlTranslatorOptions.defaultOptions();
     }
 

@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.engine.execution;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -12,7 +13,7 @@ public class PriorityLibraryLoader implements LibraryLoader {
     private List<LibraryLoader> libraryLoaders;
 
     public PriorityLibraryLoader(List<LibraryLoader> libraryLoaders) {
-        this.libraryLoaders = Objects.requireNonNull(libraryLoaders, "libraryLoaders can not be null");
+        this.libraryLoaders = requireNonNull(libraryLoaders, "libraryLoaders can not be null");
     }
 
     public Library load(VersionedIdentifier libraryIdentifier) {

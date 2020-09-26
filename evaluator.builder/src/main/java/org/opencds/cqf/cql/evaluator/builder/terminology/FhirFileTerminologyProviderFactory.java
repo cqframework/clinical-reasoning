@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.builder.terminology;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -13,15 +14,15 @@ import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class BundleTerminologyProviderFactory implements TypedTerminologyProviderFactory {
+public class FhirFileTerminologyProviderFactory implements TypedTerminologyProviderFactory {
 
     private FhirContext fhirContext;
     private DirectoryBundler directoryBundler;
 
     @Inject
-    public BundleTerminologyProviderFactory(FhirContext fhirContent, DirectoryBundler directoryBundler) {
-        this.fhirContext = Objects.requireNonNull(fhirContent, "fhirContext can not be null");
-        this.directoryBundler = Objects.requireNonNull(directoryBundler, "directoryBundler can not be null");
+    public FhirFileTerminologyProviderFactory(FhirContext fhirContent, DirectoryBundler directoryBundler) {
+        this.fhirContext = requireNonNull(fhirContent, "fhirContext can not be null");
+        this.directoryBundler = requireNonNull(directoryBundler, "directoryBundler can not be null");
     }
 
     @Override

@@ -33,11 +33,16 @@
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-structures-r5</artifactId>
         </dependency>
-    
-      <dependency>
-        <groupId>javax</groupId>
-        <artifactId>javaee-api</artifactId>
-      </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.auto.factory</groupId>
+            <artifactId>auto-factory</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

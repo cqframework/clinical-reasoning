@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.cli;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Map;
-import java.util.Objects;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -67,11 +68,11 @@ public class Main {
 
     public void execute(EvaluationParameters parameters){
         // This is all temporary garbage to get running again.
-        //Objects.requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
-        Objects.requireNonNull(parameters.libraryName, "Gotta have a libraryName");
-        Objects.requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
-        // Objects.requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
-        // Objects.requireNonNull(parameters.model, "Gotta have a model");
+        //requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
+        requireNonNull(parameters.libraryName, "Gotta have a libraryName");
+        requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
+        // requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
+        // requireNonNull(parameters.model, "Gotta have a model");
 
         this.initialize(parameters.fhirVersion);
 

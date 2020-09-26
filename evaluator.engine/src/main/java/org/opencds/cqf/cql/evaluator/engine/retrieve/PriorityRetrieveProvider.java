@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -13,7 +14,7 @@ public class PriorityRetrieveProvider implements RetrieveProvider {
     private List<RetrieveProvider> retrieveProviders;
 ;
     public PriorityRetrieveProvider(List<RetrieveProvider> retrieveProviders) {
-        Objects.requireNonNull(retrieveProviders, "retrieveProviders can not be null.");
+        requireNonNull(retrieveProviders, "retrieveProviders can not be null.");
 
         this.retrieveProviders = retrieveProviders;
     }

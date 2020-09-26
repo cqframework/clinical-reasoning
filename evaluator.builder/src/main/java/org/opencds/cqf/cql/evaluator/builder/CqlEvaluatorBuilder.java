@@ -1,12 +1,13 @@
 package org.opencds.cqf.cql.evaluator.builder;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -20,10 +21,10 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.engine.execution.CachingLibraryLoaderDecorator;
+import org.opencds.cqf.cql.evaluator.engine.execution.PrivateCachingLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.PriorityLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
-import org.opencds.cqf.cql.evaluator.engine.terminology.CachingTerminologyProviderDecorator;
+import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +95,7 @@ public class CqlEvaluatorBuilder {
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withLibraryLoader(LibraryLoader libraryLoader) {
-        Objects.requireNonNull(libraryLoader, "libraryLoader can not be null");
+        requireNonNull(libraryLoader, "libraryLoader can not be null");
 
         this.libraryLoaders.add(libraryLoader);
         return this;
@@ -110,7 +111,7 @@ public class CqlEvaluatorBuilder {
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withTerminologyProvider(TerminologyProvider terminologyProvider) {
-        Objects.requireNonNull(terminologyProvider, "terminologyProvider can not be null");
+        requireNonNull(terminologyProvider, "terminologyProvider can not be null");
 
         this.terminologyProviders.add(terminologyProvider);
         return this;
@@ -125,8 +126,8 @@ public class CqlEvaluatorBuilder {
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withModelResolver(String model, ModelResolver modelResolver) {
-        Objects.requireNonNull(model, "model can not be null");
-        Objects.requireNonNull(modelResolver, "modelResolver can not be null");
+        requireNonNull(model, "model can not be null");
+        requireNonNull(modelResolver, "modelResolver can not be null");
 
         if (!this.dataProviderParts.containsKey(model)) {
             this.dataProviderParts.put(model, Pair.of(modelResolver, new ArrayList<>()));
@@ -151,8 +152,8 @@ public class CqlEvaluatorBuilder {
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withRetrieveProvider(String model, RetrieveProvider retrieveProvider) {
-        Objects.requireNonNull(model, "model can not be null");
-        Objects.requireNonNull(retrieveProvider, "retrieveProvider can not be null");
+        requireNonNull(model, "model can not be null");
+        requireNonNull(retrieveProvider, "retrieveProvider can not be null");
 
         if (!this.dataProviderParts.containsKey(model)) {
             ArrayList<RetrieveProvider> retrieveProviders = new ArrayList<>();
@@ -167,7 +168,9 @@ public class CqlEvaluatorBuilder {
 
     /**
      * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation
-     * context. There may only be one ModelResolver for a given model.
+     * context. There may only be one ModelResolver for a given model. This function
+     * uses FILO semantics. The first RetrieveProvider added is the last to be used
+     * for retrieves.
      * 
      * @param model            the modelUri
      * @param modelResolver    the resolver to use
@@ -176,9 +179,9 @@ public class CqlEvaluatorBuilder {
      */
     public CqlEvaluatorBuilder withModelResolverAndRetrieveProvider(String model, ModelResolver modelResolver,
             RetrieveProvider retrieveProvider) {
-        Objects.requireNonNull(model, "model can not be null");
-        Objects.requireNonNull(modelResolver, "modelResolver can not be null");
-        Objects.requireNonNull(retrieveProvider, "retrieveProvider can not be null");
+        requireNonNull(model, "model can not be null");
+        requireNonNull(modelResolver, "modelResolver can not be null");
+        requireNonNull(retrieveProvider, "retrieveProvider can not be null");
 
         this.withModelResolver(model, modelResolver);
         this.withRetrieveProvider(model, retrieveProvider);
@@ -187,14 +190,18 @@ public class CqlEvaluatorBuilder {
 
     /**
      * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation
-     * context. There may only be one ModelResolver for a given model.
+     * context. There may only be one ModelResolver for a given model. This function
+     * uses FILO semantics. The first RetrieveProvider added is the last to be used
+     * for retrieves.
      * 
-     * @param modelTriple            the model with a uri, modelResolver, and RetrieveProvider
+     * @param modelTriple the model with a uri, modelResolver, and RetrieveProvider
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withModelResolverAndRetrieveProvider(Triple<String, ModelResolver, RetrieveProvider> modelTriple) {
-        Objects.requireNonNull(modelTriple, "modelTriple can not be null");
-        this.withModelResolverAndRetrieveProvider(modelTriple.getLeft(), modelTriple.getMiddle(), modelTriple.getRight());
+    public CqlEvaluatorBuilder withModelResolverAndRetrieveProvider(
+            Triple<String, ModelResolver, RetrieveProvider> modelTriple) {
+        requireNonNull(modelTriple, "modelTriple can not be null");
+        this.withModelResolverAndRetrieveProvider(modelTriple.getLeft(), modelTriple.getMiddle(),
+                modelTriple.getRight());
         return this;
     }
 
@@ -204,7 +211,9 @@ public class CqlEvaluatorBuilder {
         for (Map.Entry<String, Pair<ModelResolver, List<RetrieveProvider>>> entry : this.dataProviderParts.entrySet()) {
             ModelResolver modelResolver = entry.getValue().getLeft();
             if (modelResolver == null) {
-                throw new IllegalArgumentException(String.format("No ModelResolver specified for model %s while constructing CqlEvaluator. Supply a ModelResolver prior to calling build().", entry.getKey()));
+                throw new IllegalArgumentException(String.format(
+                        "No ModelResolver specified for model %s while constructing CqlEvaluator. Supply a ModelResolver prior to calling build().",
+                        entry.getKey()));
             }
 
             List<RetrieveProvider> providers = entry.getValue().getRight();
@@ -216,29 +225,40 @@ public class CqlEvaluatorBuilder {
                 }
             }
 
-
-            dataProviders.put(entry.getKey(), new CompositeDataProvider(modelResolver, new PriorityRetrieveProvider(providers)));
+            dataProviders.put(entry.getKey(),
+                    this.decorate(new CompositeDataProvider(modelResolver, new PriorityRetrieveProvider(providers))));
         }
 
         return dataProviders;
+    }
+
+    protected DataProvider decorate(DataProvider dataProvider) {
+        return dataProvider;
+    }
+
+    protected TerminologyProvider decorate(TerminologyProvider terminologyProvider) {
+        return new PrivateCachingTerminologyProviderDecorator(terminologyProvider);
+    }
+
+    protected LibraryLoader decorate(LibraryLoader libraryLoader) {
+        return new PrivateCachingLibraryLoaderDecorator(libraryLoader);
     }
 
     /**
      * Builds a CqlEvaluator that uses all content, data, terminology sources
      * supplied, and has the appropriate configuration applied.
      * 
-     * NOTE: this CqlEvaluator is meant to be short-lived (e.g. for the duration of a request)
+     * NOTE: this CqlEvaluator is meant to be short-lived (e.g. for the duration of
+     * a request)
+     * 
      * @return a CqlEvaluator
      */
     public CqlEvaluator build() {
         Collections.reverse(this.libraryLoaders);
-        
-
-        // TODO: Provide some mechanism for injecting decorators
-        LibraryLoader libraryLoader = new CachingLibraryLoaderDecorator(new PriorityLibraryLoader(libraryLoaders));
+        LibraryLoader libraryLoader = this.decorate(new PriorityLibraryLoader(libraryLoaders));
 
         Collections.reverse(this.terminologyProviders);
-        TerminologyProvider terminologyProvider = new CachingTerminologyProviderDecorator(new PriorityTerminologyProvider(terminologyProviders));
+        TerminologyProvider terminologyProvider = this.decorate(new PriorityTerminologyProvider(terminologyProviders));
 
         Map<String, DataProvider> dataProviders = this.buildDataProviders(terminologyProvider);
 

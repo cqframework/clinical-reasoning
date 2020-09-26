@@ -2,8 +2,9 @@ package org.opencds.cqf.cql.evaluator.builder.terminology;
 
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
     }
 
     public TerminologyProvider create(EndpointInfo endpointInfo) {
-        Objects.requireNonNull(endpointInfo, "endpointInfo can not be null");
+        requireNonNull(endpointInfo, "endpointInfo can not be null");
         if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
@@ -50,8 +51,8 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
     }
 
     protected TerminologyProvider create(IBaseCoding connectionType, String url, List<String> headers) {
-        Objects.requireNonNull(url, "url can not be null");
-        Objects.requireNonNull(connectionType, "connectionType can not be null");
+        requireNonNull(url, "url can not be null");
+        requireNonNull(connectionType, "connectionType can not be null");
 
         for (TypedTerminologyProviderFactory factory : this.terminologyProviderFactories) {
             if (factory.getType().equals(connectionType.getCode())) {

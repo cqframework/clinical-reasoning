@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.cql2elm;
 
+import static java.util.Objects.requireNonNull;
+
 import org.cqframework.cql.cql2elm.ModelInfoLoader;
 import org.cqframework.cql.cql2elm.ModelInfoProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -9,7 +11,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * This class extends the CQL translator {@link org.cqframework.cql.cql2elm.ModelManager} class to be aware of a global cache of {@link org.cqframework.cql.cql2elm.model.Model}s
@@ -26,7 +27,7 @@ public class CacheAwareModelManager extends ModelManager {
      * @param globalCache cache for Models by VersionedIdentifier. Expected to be thread-safe.
      */
     public CacheAwareModelManager(Map<VersionedIdentifier, Model> globalCache) {
-        Objects.requireNonNull(globalCache, "globalCache can not be null.");
+        requireNonNull(globalCache, "globalCache can not be null.");
 
         this.globalCache = globalCache;
         this.localCache = new HashMap<>();

@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,8 +36,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 
 	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle bundle) {
 		
-		this.fhirContext = Objects.requireNonNull(fhirContext, "bundle can not be null.");
-		this.bundle = Objects.requireNonNull(bundle, "bundle can not be null.");
+		this.fhirContext = requireNonNull(fhirContext, "bundle can not be null.");
+		this.bundle = requireNonNull(bundle, "bundle can not be null.");
 		this.codeUtil = new CodeUtil(fhirContext);
 		this.fhirPath = fhirContext.newFhirPath();
 	}

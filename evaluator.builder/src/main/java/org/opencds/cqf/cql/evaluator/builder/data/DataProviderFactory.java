@@ -2,8 +2,9 @@ package org.opencds.cqf.cql.evaluator.builder.data;
 
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -26,22 +27,21 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
 
     private FhirContext fhirContext;
     private Set<ModelResolverFactory> modelResolverFactories;
-    private Set<RetrieveProviderFactory> retrieveProviderFactories;
+    private Set<TypedRetrieveProviderFactory> retrieveProviderFactories;
 
     @Inject
     public DataProviderFactory(FhirContext fhirContext, Set<ModelResolverFactory> modelResolverFactories,
-            Set<RetrieveProviderFactory> retrieveProviderFactories) {
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null");
-        this.modelResolverFactories = Objects.requireNonNull(modelResolverFactories,
-                "modelResolverFactory can not be null");
-        this.retrieveProviderFactories = Objects.requireNonNull(retrieveProviderFactories,
+            Set<TypedRetrieveProviderFactory> retrieveProviderFactories) {
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+        this.modelResolverFactories = requireNonNull(modelResolverFactories, "modelResolverFactory can not be null");
+        this.retrieveProviderFactories = requireNonNull(retrieveProviderFactories,
                 "retrieveResolverFactory can not be null");
 
     }
 
     @Override
     public Triple<String, ModelResolver, RetrieveProvider> create(EndpointInfo endpointInfo) {
-        Objects.requireNonNull(endpointInfo, "endpointInfo can not be null");
+        requireNonNull(endpointInfo, "endpointInfo can not be null");
 
         if (endpointInfo.getType() == null) {
             endpointInfo.setType(detectType(endpointInfo.getAddress()));
@@ -87,7 +87,8 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
                 String.format("no registered ModelResolverFactory for modelUri: %s", modelUri));
     }
 
-    protected Pair<ModelResolver, RetrieveProvider> create(String modelUri, IBaseCoding connectionType, String url, List<String> headers) {
+    protected Pair<ModelResolver, RetrieveProvider> create(String modelUri, IBaseCoding connectionType, String url,
+            List<String> headers) {
         ModelResolver modelResolver = this.getFactory(modelUri)
                 .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
 
@@ -96,7 +97,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
             retrieveProvider = new NoOpRetrieveProvider();
         } else {
 
-            for (RetrieveProviderFactory factory : this.retrieveProviderFactories) {
+            for (TypedRetrieveProviderFactory factory : this.retrieveProviderFactories) {
                 if (connectionType.getCode().equals(factory.getType())) {
                     retrieveProvider = factory.create(url, headers);
                     break;
@@ -114,7 +115,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
 
     @Override
     public Triple<String, ModelResolver, RetrieveProvider> create(IBaseBundle dataBundle) {
-        Objects.requireNonNull(dataBundle, "dataBundle can not be null");
+        requireNonNull(dataBundle, "dataBundle can not be null");
 
         if (!dataBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
             throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");

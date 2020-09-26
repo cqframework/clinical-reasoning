@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.evaluator.builder.library;
 
-import java.util.List;
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
+import java.util.List;
 import javax.inject.Inject;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -20,8 +20,8 @@ public class FhirRestLibrarySourceProviderFactory implements TypedLibrarySourceP
 
     @Inject
     public FhirRestLibrarySourceProviderFactory(ClientFactory clientFactory, AdapterFactory adapterFactory) {
-        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory can not be null");
-        this.adapterFactory = Objects.requireNonNull(adapterFactory, "adapterFactory can not be null");
+        this.clientFactory = requireNonNull(clientFactory, "clientFactory can not be null");
+        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
     }
 
     @Override

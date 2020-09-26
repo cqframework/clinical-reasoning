@@ -1,11 +1,12 @@
 
 package org.opencds.cqf.cql.evaluator.engine.terminology;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,8 +32,8 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     private boolean initialized = false;
 
     public BundleTerminologyProvider(FhirContext fhirContext, IBaseBundle bundle) {
-        Objects.requireNonNull(fhirContext, "fhirContext can not be null.");
-        Objects.requireNonNull(bundle, "bundle can not be null.");
+        requireNonNull(fhirContext, "fhirContext can not be null.");
+        requireNonNull(bundle, "bundle can not be null.");
 
         this.fhirContext = fhirContext;
         this.valueSets = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle, this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
@@ -47,8 +48,8 @@ public class BundleTerminologyProvider implements TerminologyProvider {
      */
     @Override
     public boolean in(Code code, ValueSetInfo valueSet) {
-        Objects.requireNonNull(code, "code can not be null when using 'expand'");
-        Objects.requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
+        requireNonNull(code, "code can not be null when using 'expand'");
+        requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
         Iterable<Code> codes = this.expand(valueSet);
         for (Code c : codes) {
@@ -71,7 +72,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     @Override
     
     public Iterable<Code> expand(ValueSetInfo valueSet) {
-        Objects.requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
+        requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
         this.initialize();
 

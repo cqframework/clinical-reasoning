@@ -54,5 +54,10 @@
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.auto.factory</groupId>
+            <artifactId>auto-factory</artifactId>
+        </dependency>
     </dependencies>
 </project>

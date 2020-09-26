@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.guice.fhir;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Map;
-import java.util.Objects;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -22,7 +23,7 @@ public class FhirModule extends AbstractModule {
     }
 
     public FhirModule(FhirContext fhirContext)  {
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null.");
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null.");
     }
 
     @Override

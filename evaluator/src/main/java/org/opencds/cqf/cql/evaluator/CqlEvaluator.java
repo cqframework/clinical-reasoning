@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -51,7 +52,7 @@ public class CqlEvaluator {
     public CqlEvaluator(LibraryLoader libraryLoader,
             Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider,
             EnumSet<Options> engineOptions) {
-        this.libraryLoader = Objects.requireNonNull(libraryLoader, "libraryLoader can not be null.");
+        this.libraryLoader = requireNonNull(libraryLoader, "libraryLoader can not be null.");
         this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, engineOptions);
     }
 

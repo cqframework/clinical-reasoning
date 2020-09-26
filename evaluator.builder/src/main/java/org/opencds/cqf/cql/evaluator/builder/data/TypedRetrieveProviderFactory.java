@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 
-public interface RetrieveProviderFactory {
+public interface TypedRetrieveProviderFactory {
 
     public String getType();
 

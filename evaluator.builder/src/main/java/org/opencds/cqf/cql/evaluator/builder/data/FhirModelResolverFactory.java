@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator.builder.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
@@ -20,14 +21,14 @@ public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.b
 
     @Override
     public ModelResolver create(String version) {
-       Objects.requireNonNull(version, "version can not be null");
+       requireNonNull(version, "version can not be null");
 
        FhirVersionEnum fhirVersionEnum = VersionUtilities.enumForVersion(version);
        return this.fhirModelResolverForVersion(fhirVersionEnum);
     }
 
     protected ModelResolver fhirModelResolverForVersion(FhirVersionEnum fhirVersionEnum) {
-        Objects.requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
+        requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
 
         if (!cache.containsKey(fhirVersionEnum)) {
             ModelResolver resolver = null;

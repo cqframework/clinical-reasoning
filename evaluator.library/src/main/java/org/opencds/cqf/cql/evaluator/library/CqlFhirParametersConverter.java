@@ -3,9 +3,13 @@ package org.opencds.cqf.cql.evaluator.library;
 import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.ParameterDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -29,11 +33,12 @@ public class CqlFhirParametersConverter {
     protected FhirTypeConverter fhirTypeConverter;
     protected FhirContext fhirContext;
 
-    public CqlFhirParametersConverter(FhirContext fhirContext, AdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
+    public CqlFhirParametersConverter(FhirContext fhirContext, AdapterFactory adapterFactory,
+            FhirTypeConverter fhirTypeConverter) {
         this.fhirContext = requireNonNull(fhirContext);
         this.adapterFactory = requireNonNull(adapterFactory);
         this.fhirTypeConverter = requireNonNull(fhirTypeConverter);
-    } 
+    }
 
     @SuppressWarnings("unchecked")
     public IBaseParameters toFhirParameters(EvaluationResult evaluationResult) {
@@ -41,8 +46,7 @@ public class CqlFhirParametersConverter {
         try {
             params = (IBaseParameters) this.fhirContext.getResourceDefinition("Parameters").getImplementingClass()
                     .getConstructor().newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Error trying to create Parameters resource", e);
             throw new RuntimeException(e);
         }
@@ -52,30 +56,28 @@ public class CqlFhirParametersConverter {
         for (Map.Entry<String, Object> entry : evaluationResult.expressionResults.entrySet()) {
             String name = entry.getKey();
             Object value = entry.getValue();
-            
+
             if (value == null) {
                 this.addPart(pa, name);
                 continue;
             }
 
             if (value instanceof Iterable) {
-                Iterable<Object> values = (Iterable<Object>)value;
+                Iterable<Object> values = (Iterable<Object>) value;
                 for (Object o : values) {
                     this.addPart(pa, name, o);
                 }
-            }
-            else  {
+            } else {
                 this.addPart(pa, name, value);
             }
         }
-        
+
         return params;
     }
 
     protected ParametersParameterComponentAdapter addPart(ParametersAdapter pa, String name) {
         IBaseBackboneElement ppc = pa.addParameter();
-        ParametersParameterComponentAdapter ppca = this.adapterFactory
-                .createParametersParameters(ppc);
+        ParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
         ppca.setName(name);
 
         return ppca;
@@ -90,7 +92,7 @@ public class CqlFhirParametersConverter {
         }
 
         if (value instanceof Iterable) {
-            Iterable<Object> values = (Iterable<Object>)value;
+            Iterable<Object> values = (Iterable<Object>) value;
             for (Object o : values) {
                 this.addSubPart(ppca, "element", o);
             }
@@ -103,20 +105,19 @@ public class CqlFhirParametersConverter {
         }
 
         if (value instanceof IBaseDatatype) {
-            ppca.setValue((IBaseDatatype)value);
-        }
-        else if (value instanceof IBaseResource) {
-            ppca.setResource((IBaseResource)value);
-        }
-        else {
-            throw new IllegalArgumentException(String.format("unknown type when trying to convert to parameters: %s", value.getClass().getSimpleName()));
+            ppca.setValue((IBaseDatatype) value);
+        } else if (value instanceof IBaseResource) {
+            ppca.setResource((IBaseResource) value);
+        } else {
+            throw new IllegalArgumentException(String.format("unknown type when trying to convert to parameters: %s",
+                    value.getClass().getSimpleName()));
         }
     }
 
-    protected ParametersParameterComponentAdapter addSubPart(ParametersParameterComponentAdapter ppcAdapter, String name) {
+    protected ParametersParameterComponentAdapter addSubPart(ParametersParameterComponentAdapter ppcAdapter,
+            String name) {
         IBaseBackboneElement ppc = ppcAdapter.addPart();
-        ParametersParameterComponentAdapter ppca = this.adapterFactory
-                .createParametersParameters(ppc);
+        ParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
         ppca.setName(name);
 
         return ppca;
@@ -131,7 +132,7 @@ public class CqlFhirParametersConverter {
         }
 
         if (value instanceof Iterable) {
-            Iterable<Object> values = (Iterable<Object>)value;
+            Iterable<Object> values = (Iterable<Object>) value;
             for (Object o : values) {
                 this.addSubPart(ppca, "element", o);
             }
@@ -144,43 +145,60 @@ public class CqlFhirParametersConverter {
         }
 
         if (value instanceof IBaseDatatype) {
-            ppca.setValue((IBaseDatatype)value);
-        }
-        else if (value instanceof IBaseResource) {
-            ppca.setResource((IBaseResource)value);
-        }
-        else {
-            throw new IllegalArgumentException(String.format("unknown type when trying to convert to parameters: %s", value.getClass().getSimpleName()));
+            ppca.setValue((IBaseDatatype) value);
+        } else if (value instanceof IBaseResource) {
+            ppca.setResource((IBaseResource) value);
+        } else {
+            throw new IllegalArgumentException(String.format("unknown type when trying to convert to parameters: %s",
+                    value.getClass().getSimpleName()));
         }
     }
 
-    public Map<String, Object> toCqlParameters(VersionedIdentifier libraryIdentifier, LibraryLoader libraryLoader, IBaseParameters parameters) {
+    public Map<String, Object> toCqlParameters(VersionedIdentifier libraryIdentifier, LibraryLoader libraryLoader,
+            IBaseParameters parameters) {
         Map<String, Object> parameterMap = new HashMap<>();
 
+        // No parameters passed in
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         if (parametersAdapter.getParameter() == null) {
             return parameterMap;
         }
 
+        // TODO: This only inspects and sets up the parameters for the top level
+        // library. This really should work recursively
         Library library = libraryLoader.load(libraryIdentifier);
-        library.getParameters();
 
-        for (IBaseBackboneElement ppc : parametersAdapter.getParameter()) {
-            ParametersParameterComponentAdapter parametersComponent = this.adapterFactory
-                    .createParametersParameters(ppc);
-            String name = parametersComponent.getName();
-            if (parametersComponent.hasResource()) {
-                parameterMap.put(name, parametersComponent.getResource());
+        // No parameters on the library
+        if (library.getParameters() == null || library.getParameters().getDef() == null) {
+            return parameterMap;
+        }
+
+        List<ParametersParameterComponentAdapter> children = parametersAdapter.getParameter().stream()
+                .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+
+        for (ParameterDef def : library.getParameters().getDef()) {
+            ParametersParameterComponentAdapter ppca = children.stream().filter(x -> x.getName().equals(def.getName()))
+                    .findFirst().orElse(null);
+
+            if (ppca == null) {
+                continue;
             }
-            // } else if (parametersComponent.hasValue()) {
-            // parameterMap.put(name,
-            // this.parameterParser.parseParameter(this.libraryLoader, libraryIdentifier,
-            // name,
-            // parametersComponent.getValue().toString()));
-            // }
+
+            // Only know how to convert values
+            if (ppca.hasValue()) {
+                parameterMap.put(def.getName(), this.fhirTypeConverter.toCqlType(ppca.getValue()));
+            }
+            else if (ppca.hasResource()) {
+                parameterMap.put(def.getName(), ppca.getResource());
+            }
+            else if (ppca.hasPart()) {
+                throw new NotImplementedException("Iterables not yet implemented");
+            }
+            else {
+                parameterMap.put(def.getName(), null);
+            }
         }
 
         return parameterMap;
-      
     }
 }

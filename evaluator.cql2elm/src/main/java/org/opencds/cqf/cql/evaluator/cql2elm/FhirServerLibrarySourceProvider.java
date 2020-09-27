@@ -8,6 +8,8 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -19,6 +21,8 @@ import ca.uhn.fhir.util.BundleUtil;
  */
 public class FhirServerLibrarySourceProvider extends
     VersionComparingLibrarySourceProvider {
+
+    Logger logger = LoggerFactory.getLogger(FhirServerLibrarySourceProvider.class);
 
     private IGenericClient client;
     private AdapterFactory adapterFactory;
@@ -37,7 +41,7 @@ public class FhirServerLibrarySourceProvider extends
             return (IBaseResource)this.client.read().resource("Library").withUrl(url).elementsSubset("name", "version", "content", "type").encodedJson().execute();
         }
         catch (Exception e) {
-            // TODO: Logging
+            logger.error(String.format("error while getting library with url %s", url), e);
         }
 
         return null;

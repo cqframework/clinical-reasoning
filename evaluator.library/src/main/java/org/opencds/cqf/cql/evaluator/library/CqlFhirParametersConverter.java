@@ -8,15 +8,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.cqframework.cql.elm.execution.Library;
-import org.cqframework.cql.elm.execution.ParameterDef;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersAdapter;
@@ -154,48 +150,31 @@ public class CqlFhirParametersConverter {
         }
     }
 
-    public Map<String, Object> toCqlParameters(VersionedIdentifier libraryIdentifier, LibraryLoader libraryLoader,
-            IBaseParameters parameters) {
+    public Map<String, Object> toCqlParameters(IBaseParameters parameters) {
         Map<String, Object> parameterMap = new HashMap<>();
 
-        // No parameters passed in
+        if (parameters == null) {
+            return parameterMap;
+        }
+
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        if (parametersAdapter.getParameter() == null) {
-            return parameterMap;
-        }
-
-        // TODO: This only inspects and sets up the parameters for the top level
-        // library. This really should work recursively
-        Library library = libraryLoader.load(libraryIdentifier);
-
-        // No parameters on the library
-        if (library.getParameters() == null || library.getParameters().getDef() == null) {
-            return parameterMap;
-        }
 
         List<ParametersParameterComponentAdapter> children = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-        for (ParameterDef def : library.getParameters().getDef()) {
-            ParametersParameterComponentAdapter ppca = children.stream().filter(x -> x.getName().equals(def.getName()))
-                    .findFirst().orElse(null);
-
-            if (ppca == null) {
-                continue;
-            }
-
+        for (ParametersParameterComponentAdapter ppca : children) {
             // Only know how to convert values
             if (ppca.hasValue()) {
-                parameterMap.put(def.getName(), this.fhirTypeConverter.toCqlType(ppca.getValue()));
+                parameterMap.put(ppca.getName(), this.fhirTypeConverter.toCqlType(ppca.getValue()));
             }
             else if (ppca.hasResource()) {
-                parameterMap.put(def.getName(), ppca.getResource());
+                parameterMap.put(ppca.getName(), ppca.getResource());
             }
             else if (ppca.hasPart()) {
                 throw new NotImplementedException("Iterables not yet implemented");
             }
             else {
-                parameterMap.put(def.getName(), null);
+                parameterMap.put(ppca.getName(), null);
             }
         }
 

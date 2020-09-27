@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.library.common;
+package org.opencds.cqf.cql.evaluator.library;
 
 import static org.junit.Assert.assertTrue;
 
@@ -34,8 +34,6 @@ import org.opencds.cqf.cql.evaluator.cql2elm.BundleLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
-import org.opencds.cqf.cql.evaluator.library.OperationParametersParser;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -123,7 +121,7 @@ public class LibraryProcessorTests {
         RetrieveProviderConfigurer retrieveProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer(new RetrieveProviderConfig());
 
 
-        EndpointConverter endpointConverter = new org.opencds.cqf.cql.evaluator.builder.common.EndpointConverter(
+        EndpointConverter endpointConverter = new EndpointConverter(
                 adapterFactory);
 
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder(retrieveProviderConfigurer);

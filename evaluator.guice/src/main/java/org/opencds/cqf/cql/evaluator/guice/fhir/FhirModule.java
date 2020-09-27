@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.guice.fhir.adapter.AdapterModule;
-import org.opencds.cqf.cql.evaluator.guice.fhir.common.CommonModule;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -29,7 +28,6 @@ public class FhirModule extends AbstractModule {
     @Override
     protected void configure() {
         this.bind(FhirContext.class).toInstance(this.fhirContext);
-        this.install(new CommonModule());
         this.install(new AdapterModule());
     }
 

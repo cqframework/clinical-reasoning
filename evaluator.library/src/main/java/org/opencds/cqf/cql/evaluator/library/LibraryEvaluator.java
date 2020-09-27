@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.library.common;
+package org.opencds.cqf.cql.evaluator.library;
 
 import static java.util.Objects.requireNonNull;
 
@@ -12,13 +12,10 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class LibraryEvaluator {
 
-    Logger logger = LoggerFactory.getLogger(LibraryEvaluator.class);
+    // private static Logger logger = LoggerFactory.getLogger(LibraryEvaluator.class);
 
     private CqlEvaluator cqlEvaluator;
 
@@ -33,7 +30,7 @@ class LibraryEvaluator {
     public IBaseParameters evaluate(VersionedIdentifier libraryIdentifier, Pair<String, Object> contextParameter,
             IBaseParameters parameters, Set<String> expressions) {
 
-        Map<String, Object> evaluationParameters = this.cqlFhirParametersConverter.toCqlParameters(libraryIdentifier, this.cqlEvaluator.getLibraryLoader(), parameters);
+        Map<String, Object> evaluationParameters = this.cqlFhirParametersConverter.toCqlParameters(parameters);
 
         EvaluationResult result = this.cqlEvaluator.evaluate(libraryIdentifier, expressions, contextParameter,
                 evaluationParameters);

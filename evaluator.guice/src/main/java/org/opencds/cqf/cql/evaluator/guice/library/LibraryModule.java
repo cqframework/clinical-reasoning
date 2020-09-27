@@ -1,14 +1,20 @@
 package org.opencds.cqf.cql.evaluator.guice.library;
 
-import com.google.inject.AbstractModule;
+import javax.inject.Singleton;
 
-import org.opencds.cqf.cql.evaluator.library.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+
+import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
+import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
-        this.bind(LibraryProcessor.class).to(LibraryProcessor.class);
+    @Provides
+    @Singleton
+    protected  FhirTypeConverter providesFhirTypeConverter(FhirContext fhirContext) {
+        return new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
     }
-
 }

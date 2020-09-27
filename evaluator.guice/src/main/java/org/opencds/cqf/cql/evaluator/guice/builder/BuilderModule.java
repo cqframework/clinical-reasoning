@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
-import org.opencds.cqf.cql.evaluator.builder.common.*;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
@@ -27,8 +26,7 @@ public class BuilderModule extends AbstractModule {
             .to(LibraryLoaderFactory.class).in(Singleton.class);
         this.bind(org.opencds.cqf.cql.evaluator.builder.DataProviderFactory.class)
             .to(DataProviderFactory.class).in(Singleton.class);
-        this.bind(org.opencds.cqf.cql.evaluator.builder.EndpointConverter.class)
-            .to(EndpointConverter.class).in(Singleton.class);
+        this.bind(org.opencds.cqf.cql.evaluator.builder.EndpointConverter.class).in(Singleton.class);
         this.bind(org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer.class)
             .to(org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer.class);
 

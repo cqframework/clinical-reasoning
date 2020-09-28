@@ -67,6 +67,10 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
     }
 
     public String detectModel(String url, IBaseCoding connectionType) {
+        if (connectionType == null) {
+            return null;
+        }
+        
         switch (connectionType.getCode()) {
             case Constants.HL7_FHIR_FILES:
             case Constants.HL7_FHIR_REST:

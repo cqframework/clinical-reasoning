@@ -187,7 +187,7 @@ public class ArgumentProcessor {
 
         FhirVersionEnum fhirVersion = (FhirVersionEnum)options.valueOf(FHIR_VERSION_OPTIONS[0]);
 
-        if (model.key != null && (model.key.equals("FHIR") || model.key.equals("QUICK") || model.key.equals("http://hl7.org/fhir")) && fhirVersion == null) {
+        if (model != null && model.key != null && (model.key.equals("FHIR") || model.key.equals("QUICK") || model.key.equals("http://hl7.org/fhir")) && fhirVersion == null) {
             throw new IllegalArgumentException("fhir-version must be specified if a FHIR model is used.");
         }
 

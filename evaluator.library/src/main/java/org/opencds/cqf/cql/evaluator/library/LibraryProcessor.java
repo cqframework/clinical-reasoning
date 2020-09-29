@@ -25,9 +25,11 @@ import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+
 public class LibraryProcessor {
 
-    // private static Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
+    // private static Logger logger =
+    // LoggerFactory.getLogger(LibraryProcessor.class);
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
@@ -38,9 +40,10 @@ public class LibraryProcessor {
     protected CqlEvaluatorBuilder cqlEvaluatorBuilder;
 
     @Inject
-    public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter, LibraryLoaderFactory libraryLoaderFactory,
-            DataProviderFactory dataProviderFactory, TerminologyProviderFactory terminologyProviderFactory,
-            EndpointConverter endpointConverter, CqlEvaluatorBuilder cqlEvaluatorBuilder) {
+    public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
+            LibraryLoaderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
+            TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
+            CqlEvaluatorBuilder cqlEvaluatorBuilder) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
@@ -67,15 +70,16 @@ public class LibraryProcessor {
      *                            applicable
      * @param dataEndpoint        the Endpoint to use for data, if applicable
      * @param additionalData      additional data to use during evaluation
-     * @param expressions         names of Expressions in the Library to evaluate
+     * @param expressions         names of expressions in the Library to evaluate.
+     *                            if omitted all expressions are evaluated.
      * @return IBaseParameters
      */
-    public IBaseParameters evaluate(String url, String patientId, IBaseParameters parameters, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
-            IBaseResource dataEndpoint,  IBaseBundle additionalData,
-            Set<String> expressions) {
+    public IBaseParameters evaluate(String url, String patientId, IBaseParameters parameters,
+            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
+            IBaseBundle additionalData, Set<String> expressions) {
 
-        return this.evaluate(this.getVersionedIdentifer(url, libraryEndpoint, additionalData), patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint, 
-                additionalData, expressions);
+        return this.evaluate(this.getVersionedIdentifer(url, libraryEndpoint, additionalData), patientId, parameters,
+                libraryEndpoint, terminologyEndpoint, dataEndpoint, additionalData, expressions);
     }
 
     /**
@@ -92,15 +96,16 @@ public class LibraryProcessor {
      *                            applicable
      * @param dataEndpoint        the Endpoint to use for data, if applicable
      * @param additionalData      additional data to use during evaluation
-     * @param expressions         names of Expressions in the Library to evaluate
+     * @param expressions         names of expressions in the Library to evaluate.
+     *                            if omitted all expressions are evaluated.
      * @return IBaseParameters
      */
-    public IBaseParameters evaluate(IIdType id, String patientId, IBaseParameters parameters, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
-            IBaseResource dataEndpoint,  IBaseBundle additionalData,
-            Set<String> expressions) {
+    public IBaseParameters evaluate(IIdType id, String patientId, IBaseParameters parameters,
+            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
+            IBaseBundle additionalData, Set<String> expressions) {
 
-        return this.evaluate(this.getVersionedIdentifer(id, libraryEndpoint, additionalData), patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint, 
-                additionalData, expressions);
+        return this.evaluate(this.getVersionedIdentifer(id, libraryEndpoint, additionalData), patientId, parameters,
+                libraryEndpoint, terminologyEndpoint, dataEndpoint, additionalData, expressions);
     }
 
     /**
@@ -117,12 +122,13 @@ public class LibraryProcessor {
      *                            applicable
      * @param dataEndpoint        the Endpoint to use for data, if applicable
      * @param additionalData      additional data to use during evaluation
-     * @param expressions         names of Expressions in the Library to evaluate
+     * @param expressions         names of expressions in the Library to evaluate.
+     *                            if omitted all expressions are evaluated.
      * @return IBaseParameters
      */
-    public IBaseParameters evaluate(VersionedIdentifier id, String patientId, IBaseParameters parameters, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
-            IBaseResource dataEndpoint, IBaseBundle additionalData,
-            Set<String> expressions) {
+    public IBaseParameters evaluate(VersionedIdentifier id, String patientId, IBaseParameters parameters,
+            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
+            IBaseBundle additionalData, Set<String> expressions) {
 
         this.addLibraryLoaders(libraryEndpoint, additionalData);
         this.addTerminologyProviders(terminologyEndpoint, additionalData);
@@ -133,7 +139,7 @@ public class LibraryProcessor {
 
         Pair<String, Object> contextParameter = null;
         if (patientId != null) {
-            contextParameter = Pair.of("Patient", (Object)patientId);
+            contextParameter = Pair.of("Patient", (Object) patientId);
         }
 
         return libraryEvaluator.evaluate(id, contextParameter, parameters, expressions);

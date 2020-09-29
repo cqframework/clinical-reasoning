@@ -76,7 +76,8 @@ public class LibraryProcessorTests {
             }
         };
 
-        LibraryLoaderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory(fhirContext, adapterFactory, librarySourceProviderFactories);
+        LibraryLoaderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory(
+                fhirContext, adapterFactory, librarySourceProviderFactories);
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
             {
                 add(new TypedRetrieveProviderFactory() {
@@ -98,7 +99,6 @@ public class LibraryProcessorTests {
         DataProviderFactory dataProviderFactory = new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(
                 fhirContext, modelResolverFactories, retrieveProviderFactories);
 
-
         Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = new HashSet<TypedTerminologyProviderFactory>() {
             {
                 add(new TypedTerminologyProviderFactory() {
@@ -116,26 +116,25 @@ public class LibraryProcessorTests {
             }
         };
 
-        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(fhirContext, typedTerminologyProviderFactories);
+        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+                fhirContext, typedTerminologyProviderFactories);
 
-        RetrieveProviderConfigurer retrieveProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer(new RetrieveProviderConfig());
+        RetrieveProviderConfigurer retrieveProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer(
+                new RetrieveProviderConfig());
 
-
-        EndpointConverter endpointConverter = new EndpointConverter(
-                adapterFactory);
+        EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
         CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder(retrieveProviderConfigurer);
 
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory()
+                .create(fhirContext.getVersion().getVersion());
 
-        OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
+        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext,
+                adapterFactory, fhirTypeConverter);
 
-        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
-
-        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, operationParametersParser, libraryLoaderFactory,
+        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
                 dataProviderFactory, terminologyProviderFactory, endpointConverter, cqlEvaluatorBuilder);
     }
-
 
     @Test
     public void TestEXM125() {
@@ -148,11 +147,10 @@ public class LibraryProcessorTests {
         Set<String> expressions = new HashSet<String>();
         expressions.add("Numerator");
 
-        Parameters actual = (Parameters)libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("EXM125").withVersion("8.0.000"), "Patient", "numer-EXM125", null,
-                null, null, endpoint, endpoint, endpoint, null, null, expressions);
-        
-    
+        Parameters actual = (Parameters) libraryProcessor.evaluate(
+                new VersionedIdentifier().withId("EXM125").withVersion("8.0.000"), "numer-EXM125", null, endpoint,
+                endpoint, endpoint, null, expressions);
+
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -162,18 +160,18 @@ public class LibraryProcessorTests {
         expected.addParameter().setName("IsReportable").setValue(new BooleanType(true));
 
         Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
-        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-Reportable-bundle.json")
-            .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Set<String> expressions = new HashSet<String>();
         expressions.add("IsReportable");
 
-        Parameters actual = (Parameters)libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Patient", "Reportable", null,
-                null, null, endpoint, endpoint, dataEndpoint, null, null, expressions);
-        
+        Parameters actual = (Parameters) libraryProcessor.evaluate(
+                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Reportable", null, endpoint,
+                endpoint, dataEndpoint, null, expressions);
+
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -183,18 +181,18 @@ public class LibraryProcessorTests {
         expected.addParameter().setName("IsReportable").setValue(new BooleanType(false));
 
         Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
-        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-NotReportable-bundle.json")
-            .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Set<String> expressions = new HashSet<String>();
         expressions.add("IsReportable");
 
-        Parameters actual = (Parameters)libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Patient", "NotReportable", null,
-                null, null, endpoint, endpoint, dataEndpoint, null, null, expressions);
-        
+        Parameters actual = (Parameters) libraryProcessor.evaluate(
+                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "NotReportable", null, endpoint,
+                endpoint, dataEndpoint, null, expressions);
+
         assertTrue(expected.equalsDeep(actual));
     }
 }

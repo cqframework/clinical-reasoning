@@ -23,19 +23,14 @@ import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
-
 public class LibraryProcessor {
 
-    private static Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
+    // private static Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
-    protected OperationParametersParser operationParametersParser;
     protected LibraryLoaderFactory libraryLoaderFactory;
     protected DataProviderFactory dataProviderFactory;
     protected TerminologyProviderFactory terminologyProviderFactory;
@@ -43,15 +38,12 @@ public class LibraryProcessor {
     protected CqlEvaluatorBuilder cqlEvaluatorBuilder;
 
     @Inject
-    public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
-            OperationParametersParser operationParametersParser, LibraryLoaderFactory libraryLoaderFactory,
+    public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter, LibraryLoaderFactory libraryLoaderFactory,
             DataProviderFactory dataProviderFactory, TerminologyProviderFactory terminologyProviderFactory,
             EndpointConverter endpointConverter, CqlEvaluatorBuilder cqlEvaluatorBuilder) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
-        this.operationParametersParser = requireNonNull(operationParametersParser,
-                "operationParameterParser can not be null");
         this.libraryLoaderFactory = requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
         this.dataProviderFactory = requireNonNull(dataProviderFactory, "dataProviderFactory can not be null");
         this.terminologyProviderFactory = requireNonNull(terminologyProviderFactory,
@@ -66,30 +58,23 @@ public class LibraryProcessor {
      * Parameters resource that contains the evaluation result
      * 
      * @param url                 the url of the Library to evaluate
-     * @param context             the context of the evaluation (e.g. "Patient",
-     *                            "Unspecified")
      * @param patientId           the patient Id to use for evaluation, if
      *                            applicable
-     * @param periodStart         the "Measurement Period" start date, if applicable
-     * @param periodEnd           the "Measurement Period" end date, if applicable
-     * @param productLine         the "Product Line", if applicable
+     * @param parameters          additional Parameters to set for the Library
      * @param libraryEndpoint     the Endpoint to use for loading Library resources,
      *                            if applicable
      * @param terminologyEndpoint the Endpoint to use for Terminology operations, if
      *                            applicable
      * @param dataEndpoint        the Endpoint to use for data, if applicable
-     * @param parameters          additional Parameters to set for the Library
      * @param additionalData      additional data to use during evaluation
      * @param expressions         names of Expressions in the Library to evaluate
      * @return IBaseParameters
      */
-    public IBaseParameters evaluate(String url, String context, String patientId, String periodStart, String periodEnd,
-            String productLine, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
-            IBaseResource dataEndpoint, IBaseParameters parameters, IBaseBundle additionalData,
+    public IBaseParameters evaluate(String url, String patientId, IBaseParameters parameters, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
+            IBaseResource dataEndpoint,  IBaseBundle additionalData,
             Set<String> expressions) {
 
-        return this.evaluate(this.getVersionedIdentifer(url, libraryEndpoint, additionalData), context, patientId,
-                periodStart, periodEnd, productLine, libraryEndpoint, terminologyEndpoint, dataEndpoint, parameters,
+        return this.evaluate(this.getVersionedIdentifer(url, libraryEndpoint, additionalData), patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint, 
                 additionalData, expressions);
     }
 
@@ -98,30 +83,23 @@ public class LibraryProcessor {
      * that contains the evaluation result
      * 
      * @param id                  the Id of the Library to evaluate
-     * @param context             the context of the evaluation (e.g. "Patient",
-     *                            "Unspecified")
      * @param patientId           the patient Id to use for evaluation, if
      *                            applicable
-     * @param periodStart         the "Measurement Period" start date, if applicable
-     * @param periodEnd           the "Measurement Period" end date, if applicable
-     * @param productLine         the "Product Line", if applicable
+     * @param parameters          additional Parameters to set for the Library
      * @param libraryEndpoint     the Endpoint to use for loading Library resources,
      *                            if applicable
      * @param terminologyEndpoint the Endpoint to use for Terminology operations, if
      *                            applicable
      * @param dataEndpoint        the Endpoint to use for data, if applicable
-     * @param parameters          additional Parameters to set for the Library
      * @param additionalData      additional data to use during evaluation
      * @param expressions         names of Expressions in the Library to evaluate
      * @return IBaseParameters
      */
-    public IBaseParameters evaluate(IIdType id, String context, String patientId, String periodStart, String periodEnd,
-            String productLine, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
-            IBaseResource dataEndpoint, IBaseParameters parameters, IBaseBundle additionalData,
+    public IBaseParameters evaluate(IIdType id, String patientId, IBaseParameters parameters, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
+            IBaseResource dataEndpoint,  IBaseBundle additionalData,
             Set<String> expressions) {
 
-        return this.evaluate(this.getVersionedIdentifer(id, libraryEndpoint, additionalData), context, patientId,
-                periodStart, periodEnd, productLine, libraryEndpoint, terminologyEndpoint, dataEndpoint, parameters,
+        return this.evaluate(this.getVersionedIdentifer(id, libraryEndpoint, additionalData), patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint, 
                 additionalData, expressions);
     }
 
@@ -130,29 +108,22 @@ public class LibraryProcessor {
      * returns a Parameters resource that contains the evaluation result
      * 
      * @param id                  the VersionedIdentifier of the Library to evaluate
-     * @param context             the context of the evaluation (e.g. "Patient",
-     *                            "Unspecified")
      * @param patientId           the patient Id to use for evaluation, if
      *                            applicable
-     * @param periodStart         the "Measurement Period" start date, if applicable
-     * @param periodEnd           the "Measurement Period" end date, if applicable
-     * @param productLine         the "Product Line", if applicable
+     * @param parameters          additional Parameters to set for the Library
      * @param libraryEndpoint     the Endpoint to use for loading Library resources,
      *                            if applicable
      * @param terminologyEndpoint the Endpoint to use for Terminology operations, if
      *                            applicable
      * @param dataEndpoint        the Endpoint to use for data, if applicable
-     * @param parameters          additional Parameters to set for the Library
      * @param additionalData      additional data to use during evaluation
      * @param expressions         names of Expressions in the Library to evaluate
      * @return IBaseParameters
      */
-    public IBaseParameters evaluate(VersionedIdentifier id, String context, String patientId, String periodStart,
-            String periodEnd, String productLine, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
-            IBaseResource dataEndpoint, IBaseParameters parameters, IBaseBundle additionalData,
+    public IBaseParameters evaluate(VersionedIdentifier id, String patientId, IBaseParameters parameters, IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
+            IBaseResource dataEndpoint, IBaseBundle additionalData,
             Set<String> expressions) {
 
-        parameters = this.mergeParameters(parameters, periodStart, periodEnd, productLine);
         this.addLibraryLoaders(libraryEndpoint, additionalData);
         this.addTerminologyProviders(terminologyEndpoint, additionalData);
         this.addDataProviders(dataEndpoint, additionalData);
@@ -160,7 +131,11 @@ public class LibraryProcessor {
         LibraryEvaluator libraryEvaluator = new LibraryEvaluator(this.cqlFhirParametersConverter,
                 cqlEvaluatorBuilder.build());
 
-        Pair<String, Object> contextParameter = Pair.of(context, (Object) patientId);
+        Pair<String, Object> contextParameter = null;
+        if (patientId != null) {
+            contextParameter = Pair.of("Patient", (Object)patientId);
+        }
+
         return libraryEvaluator.evaluate(id, contextParameter, parameters, expressions);
     }
 
@@ -201,25 +176,6 @@ public class LibraryProcessor {
                     .create(additionalData);
             this.cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider);
         }
-    }
-
-    protected IBaseParameters mergeParameters(IBaseParameters parameters, String periodStart, String periodEnd,
-            String productLine) {
-
-        if (parameters == null) {
-            try {
-                parameters = (IBaseParameters) this.fhirContext.getResourceDefinition("Parameters")
-                        .getImplementingClass().newInstance();
-            } catch (InstantiationException | IllegalAccessException | DataFormatException e) {
-                logger.error("error creating parameters", e);
-                throw new RuntimeException(e);
-            }
-        }
-
-        this.operationParametersParser.addMeasurementPeriod(parameters, periodStart, periodEnd);
-        this.operationParametersParser.addProductLine(parameters, productLine);
-
-        return parameters;
     }
 
     protected VersionedIdentifier getVersionedIdentifer(IIdType id, IBaseResource libraryEndpoint,

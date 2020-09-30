@@ -1,41 +1,44 @@
 package org.opencds.cqf.cql.evaluator.cli;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
-import org.apache.commons.lang3.NotImplementedException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.elm.execution.Library;
-import org.cqframework.cql.elm.execution.UsingDef;
+import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
-import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.Helpers;
+import org.opencds.cqf.cql.evaluator.builder.Constants;
+import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
+import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
+import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
-import org.opencds.cqf.cql.evaluator.cli.temporary.LibraryLoaderFactory;
-import org.opencds.cqf.cql.evaluator.execution.provider.BundleRetrieveProvider;
-import org.opencds.cqf.cql.evaluator.execution.provider.NoOpRetrieveProvider;
-import org.opencds.cqf.cql.evaluator.execution.terminology.BundleTerminologyProvider;
-import org.opencds.cqf.cql.evaluator.execution.util.DirectoryBundler;
+import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
+import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class Main {
 
     public static void main(String[] args) {
+        disableAccessWarnings();
+
         try {
             Main main = new Main();
             main.parseAndExecute(args);
-           
+
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -56,196 +59,94 @@ public class Main {
         return new ArgumentProcessor().parseAndConvert(args);
     }
 
-    public void execute(EvaluationParameters parameters){
+    protected Injector injector = null;
+
+    protected void initialize(FhirVersionEnum fhirVersionEnum) {
+        this.injector = Guice.createInjector(new FhirModule(fhirVersionEnum), new BuilderModule());
+    }
+
+    protected <T> T get(Class<T> clazz) {
+        return this.injector.getInstance(clazz);
+    }
+
+    public void execute(EvaluationParameters parameters) {
         // This is all temporary garbage to get running again.
-        //Objects.requireNonNull(parameters.contextParameter, "Gotta have a contextParameter.");
-        Objects.requireNonNull(parameters.libraryName, "Gotta have a libraryName");
-        Objects.requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
-        // Objects.requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
-        // Objects.requireNonNull(parameters.model, "Gotta have a model");
-        if (!Helpers.isFileUri(parameters.libraryUrl)) {
-            throw new IllegalArgumentException("libraryUrl must be a local directory for now. Sorry!");
+        // requireNonNull(parameters.contextParameter, "Gotta have a
+        // contextParameter.");
+        requireNonNull(parameters.libraryName, "Gotta have a libraryName");
+        requireNonNull(parameters.libraryUrl, "Gotta have a libraryUrl");
+        // requireNonNull(parameters.terminologyUrl, "Gotta have a terminologyUrl");
+        // requireNonNull(parameters.model, "Gotta have a model");
+
+        this.initialize(parameters.fhirVersion);
+
+
+        CqlEvaluatorBuilder cqlEvaluatorBuilder = this.get(CqlEvaluatorBuilder.class);
+
+        LibraryLoader libraryLoader = this.get(LibraryLoaderFactory.class)
+                .create(new EndpointInfo().setAddress(parameters.libraryUrl), null);
+
+        cqlEvaluatorBuilder.withLibraryLoader(libraryLoader);
+
+        if (parameters.terminologyUrl != null) {
+            TerminologyProvider terminologyProvider = this.get(TerminologyProviderFactory.class)
+                .create(new EndpointInfo().setAddress(parameters.terminologyUrl));
+
+                cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
         }
 
-        if (parameters.terminologyUrl != null && !Helpers.isFileUri(parameters.terminologyUrl)) {
-            throw new IllegalArgumentException("terminologyUrl must be a local directory for now. Sorry!");
+        Triple<String, ModelResolver, RetrieveProvider> dataProvider = null;
+        if (parameters.model != null) {
+            dataProvider = this.get(DataProviderFactory.class)
+                .create(new EndpointInfo().setAddress(parameters.model.getRight()));
+        }
+        // default to FHIR
+        else {
+            dataProvider = this.get(DataProviderFactory.class)
+            .create(new EndpointInfo().setType(Constants.HL7_FHIR_FILES_CODE));
         }
 
-        if (parameters.model != null && !Helpers.isFileUri(parameters.model.getValue())) {
-            throw new IllegalArgumentException("model Urls must be a local directory for now. Sorry!");
+        cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider.getLeft(), dataProvider.getMiddle(),
+        dataProvider.getRight());
+
+
+        CqlEvaluator evaluator = cqlEvaluatorBuilder.build();
+
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(parameters.libraryName);
+
+        Pair<String, Object> contextParameter = null;
+        
+        if (parameters.contextParameter != null)
+        {
+            contextParameter = Pair.of(parameters.contextParameter.getLeft(),
+            parameters.contextParameter.getRight());
         }
 
-        LibraryLoader libraryLoader = new LibraryLoaderFactory().create(parameters.libraryUrl);
-
-        Map<VersionedIdentifier, Library> libraries = new HashMap<VersionedIdentifier, Library>();
-        if (parameters.libraryName != null) {
-            Library lib = libraryLoader.load(toExecutionIdentifier(parameters.libraryName, null));
-            if (lib != null) {
-                libraries.put(lib.getIdentifier(), lib);
-            }
-        }
-
-        Map<String, Pair<String, String>> modelVersionAndUrls = getModelVersionAndUrls(libraries, parameters.model);
-        TerminologyProvider terminologyProvider = create(modelVersionAndUrls, parameters.terminologyUrl);
-        Map<String, DataProvider> dataProviders = create(modelVersionAndUrls, terminologyProvider);
-
-        CqlEvaluator evaluator = new CqlEvaluator(libraryLoader, parameters.libraryName, dataProviders,
-                terminologyProvider);
-        Pair<String, Object> contextParameter = evaluator.unmarshalContextParameter(parameters.contextParameter);
-        EvaluationResult result = evaluator.evaluate(contextParameter);
+        EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
 
         for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
-            System.out.println(libraryEntry.getKey() + "=" + (libraryEntry.getValue() != null ? libraryEntry.getValue().toString() : null));
+            System.out.println(libraryEntry.getKey() + "="
+                    + (libraryEntry.getValue() != null ? libraryEntry.getValue().toString() : null));
         }
     }
 
-    // TODO: Remove this once builder is complete:
-    private TerminologyProvider create(Map<String, Pair<String, String>> modelVersionsAndUrls,
-            String terminologyUri) {
-        if (terminologyUri == null || terminologyUri.isEmpty()) {
-            return null;
-        }
-
-        // We currently only support FHIR-based terminology
-        // We assume that the terminology version is the same
-        // As the data version
-        Pair<String, String> versionAndUrl = modelVersionsAndUrls.get("http://hl7.org/fhir");
-        if (versionAndUrl == null) {
-            // Assume FHIR 3.0.0
-            versionAndUrl = Pair.of("3.0.0", null);
-        }
-
-        FhirContext fhirContext;
-        String version = versionAndUrl.getLeft();
-        if (version.startsWith("5")) {
-            throw new IllegalArgumentException("FHIR R5 not yet supported");
-        } else if (version.startsWith("4")) {
-            fhirContext = FhirContext.forR4();
-        } else if (version.startsWith("3")) {
-            fhirContext = FhirContext.forDstu3();
-        } else {
-            throw new IllegalArgumentException("FHIR DSTU2 and below not supported");
-        }
-
-        return new BundleTerminologyProvider(fhirContext, new DirectoryBundler(fhirContext).bundle(terminologyUri));
-    }
-
-    // TODO: More stuff to remove once builder is ready.
-    private Map<String, Pair<String, String>> getModelVersionAndUrls(Map<VersionedIdentifier, Library> libraries,
-            Pair<String, String> modelUrl) {
-
-        Map<String, Pair<String, String>> versions = new HashMap<>();
-        modelUrl = expandAliasToUri(modelUrl);
-        for (Library library : libraries.values()) {
-            if (library.getUsings() != null && library.getUsings().getDef() != null) {
-                for (UsingDef u : library.getUsings().getDef()) {
-                    String uri = u.getUri();
-                    // Skip the system URI
-                    if (uri.equals("urn:hl7-org:elm-types:r1")) {
-                        continue;
-                    }
-                    String version = u.getVersion();
-                    if (versions.containsKey(uri)) {
-                        Pair<String, String> existing = versions.get(uri);
-                        if (!existing.getLeft().equals(version)) {
-                            throw new IllegalArgumentException(String.format(
-                                    "Libraries are using multiple versions of %s. Only one version is supported at a time.",
-                                    uri));
-                        }
-                    }  else  if (modelUrl == null || !uri.equals(modelUrl.getLeft())) {
-                        versions.put(uri, Pair.of(version, null));
-                    }
-                    else  {
-                        versions.put(uri, Pair.of(version, modelUrl.getRight()));
-                    }
-                }
-            }
-        }
-
-        return versions;
-    }
-
-    private Pair<String, String> expandAliasToUri(Pair<String, String> modelUrl) {
-        final Map<String, String> aliasMap = new HashMap<String, String>() {
-            private static final long serialVersionUID = 1L;
-
-            {
-                put("FHIR", "http://hl7.org/fhir");
-                put("QUICK", "http://hl7.org/fhir");
-                put("QDM", "urn:healthit-gov:qdm:v5_4");
-            }
-        };
-
-        if (modelUrl == null) {
-            return null;
-        }
-
-        if (aliasMap.containsKey(modelUrl.getLeft())) {
-            return Pair.of(aliasMap.get(modelUrl.getLeft()), modelUrl.getRight());
-        }
-
-        return modelUrl;
-    }
-
-    private VersionedIdentifier toExecutionIdentifier(String name, String version) {
-        return new VersionedIdentifier().withId(name).withVersion(version);
-    }
-
-    private Map<String, DataProvider> create(Map<String, Pair<String, String>> modelVersionsAndUrls,
-            TerminologyProvider terminologyProvider) {
-        return getProviders(modelVersionsAndUrls, terminologyProvider);
-    }
-
-    private Map<String, DataProvider> getProviders(Map<String, Pair<String, String>> versions,
-            TerminologyProvider terminologyProvider) {
-        Map<String, DataProvider> providers = new HashMap<>();
-        for (Map.Entry<String, Pair<String, String>> m : versions.entrySet()) {
-            providers.put(m.getKey(),
-                    getProvider(m.getKey(), m.getValue().getLeft(), m.getValue().getRight(), terminologyProvider));
-        }
-
-        return providers;
-    }
-
-    private DataProvider getProvider(String model, String version, String url,
-            TerminologyProvider terminologyProvider) {
-        switch (model) {
-            case "http://hl7.org/fhir":
-                return getFhirProvider(version, url, terminologyProvider);
-
-            case "urn:healthit-gov:qdm:v5_4":
-                return getQdmProvider(version, url, terminologyProvider);
-
-            default:
-                throw new IllegalArgumentException(String.format("Unknown data provider uri: %s", model));
+    // TODO: Fix when next version of guice is released.
+    // Or use Spring instead
+    public static void disableAccessWarnings() {
+        try {
+           Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+           Field field = unsafeClass.getDeclaredField("theUnsafe");
+           field.setAccessible(true);
+           Object unsafe = field.get(null);
+  
+           Method putObjectVolatile = unsafeClass.getDeclaredMethod("putObjectVolatile", Object.class, long.class, Object.class);
+           Method staticFieldOffset = unsafeClass.getDeclaredMethod("staticFieldOffset", Field.class);
+  
+           Class<?> loggerClass = Class.forName("jdk.internal.module.IllegalAccessLogger");
+           Field loggerField = loggerClass.getDeclaredField("logger");
+           Long offset = (Long) staticFieldOffset.invoke(unsafe, loggerField);
+           putObjectVolatile.invoke(unsafe, loggerClass, offset, null);
+        } catch (Exception ignored) {
         }
     }
-
-    @SuppressWarnings("rawtypes")
-    private DataProvider getFhirProvider(String version, String url, TerminologyProvider terminologyProvider) {
-        FhirModelResolver modelResolver;
-        RetrieveProvider retrieveProvider;
-        if (version.startsWith("5")) {
-            throw new IllegalArgumentException("FHIR R5 not yet supported");
-        } else if (version.startsWith("4")) {
-            modelResolver = new R4FhirModelResolver();
-        } else if (version.startsWith("3")) {
-            modelResolver = new Dstu3FhirModelResolver();
-        } else {
-            throw new IllegalArgumentException("FHIR DSTU2 and below not supported");
-        }
-
-        if (url == null) {
-            retrieveProvider = new NoOpRetrieveProvider();
-        } else {
-            retrieveProvider = new BundleRetrieveProvider(modelResolver, new DirectoryBundler(modelResolver.getFhirContext()).bundle(url), terminologyProvider);
-        }
-
-        return new CompositeDataProvider(modelResolver, retrieveProvider);
-    }
-
-    private DataProvider getQdmProvider(String version, String uri, TerminologyProvider terminologyProvider) {
-        throw new NotImplementedException("QDM data providers are not yet implemented");
-    }
-
 }

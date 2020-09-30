@@ -5,6 +5,7 @@ target
 .project
 .settings
 .flattened-pom.xml
+.factorypath
 
 *.log*
 

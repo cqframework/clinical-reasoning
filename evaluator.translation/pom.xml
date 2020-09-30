@@ -8,7 +8,9 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <description>CQL Evaluator Translation Extensions</description>
+    <name>evaluator.translation</name>
+    <description>CQL Evaluator Project</description>
+    <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>

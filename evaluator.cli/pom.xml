@@ -8,6 +8,11 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
+    <name>evaluator.cli</name>
+    <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
+
+
+
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>

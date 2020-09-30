@@ -8,6 +8,9 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
+    <name>evaluator.execution</name>
+    <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
+
     <description>CQL Evaluator Execution Extensions</description>
 
     <parent>

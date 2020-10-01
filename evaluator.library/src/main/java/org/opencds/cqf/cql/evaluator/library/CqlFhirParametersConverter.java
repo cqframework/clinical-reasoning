@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -29,6 +31,7 @@ public class CqlFhirParametersConverter {
     protected FhirTypeConverter fhirTypeConverter;
     protected FhirContext fhirContext;
 
+    @Inject
     public CqlFhirParametersConverter(FhirContext fhirContext, AdapterFactory adapterFactory,
             FhirTypeConverter fhirTypeConverter) {
         this.fhirContext = requireNonNull(fhirContext);

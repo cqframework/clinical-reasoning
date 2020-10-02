@@ -1,0 +1,6 @@
+{
+  "resourceType": "Patient",
+  "id": "patient-mme-greater-than-fifty",
+  "gender": "female",
+  "birthDate": "1982-01-07"
+}

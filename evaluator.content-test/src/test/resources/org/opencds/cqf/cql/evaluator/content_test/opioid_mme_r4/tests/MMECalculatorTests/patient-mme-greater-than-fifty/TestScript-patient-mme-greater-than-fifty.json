@@ -1,0 +1,65 @@
+{
+  "resourceType": "TestScript",
+  "id": "patient-mme-greater-than-fifty",
+  "url": "http://fhir.org/guides/cdc/opioid-mme-r4/TestScript/patient-mme-greater-than-fifty",
+  "version": "3.0.0",
+  "name": "PatientMMEGreaterThanFifty",
+  "title": "Patient MME > 50",
+  "status": "draft",
+  "experimental": false,
+  "fixture": [
+    {
+      "autoCreate": true,
+      "autoDelete": true,
+      "resource": {
+        "reference": "Patient/patient-mme-greater-than-fifty"
+      }
+    },
+    {
+      "autoCreate": true,
+      "autoDelete": true,
+      "resource": {
+        "reference": "MedicationRequest/example-rec-05-mme-greater-than-fifty"
+      }
+    },
+    {
+      "id": "input-parameters",
+      "autoCreate": false,
+      "autoDelete": false,
+      "resource": {
+        "reference": "Parameters/example-rec-05-mme-greater-than-fifty-input"
+      }
+    },
+    {
+      "id": "output-parameters",
+      "autoCreate": false,
+      "autoDelete": false,
+      "resource": {
+        "reference": "Parameters/example-rec-05-mme-greater-than-fifty-output"
+      }
+    }
+  ],
+  "test": [
+    {
+      "action": [
+        {
+          "operation": {
+            "type": {
+              "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+              "code": "evaluate"
+            },
+            "resource": "Library",
+            "method": "post",
+            "sourceId": "Parameters/input-parameters"
+          }
+        },
+        {
+          "assert": {
+            "minimumId": "output-parameters",
+            "warningOnly": false
+          }
+        }
+      ]
+    }
+  ]
+}

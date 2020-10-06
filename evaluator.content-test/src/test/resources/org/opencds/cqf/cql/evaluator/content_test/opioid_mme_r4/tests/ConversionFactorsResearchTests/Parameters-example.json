@@ -1,0 +1,10 @@
+{
+  "resourceType": "Parameters",
+  "id": "example",
+  "parameter": [
+    {
+      "name": "subject",
+      "valueString": "Patient/example"
+    }
+  ]
+}

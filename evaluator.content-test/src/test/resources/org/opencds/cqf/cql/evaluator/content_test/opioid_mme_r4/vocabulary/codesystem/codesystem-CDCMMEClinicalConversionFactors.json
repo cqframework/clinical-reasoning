@@ -1,0 +1,162 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "CDCMMEClinicalConversionFactors",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablecodesystem",
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablecodesystem"
+    ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "shareable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "publishable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "structured"
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/codesystem-sourceReference",
+    "valueUri": "https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf"
+  } ],
+  "version": "3.0.0",
+  "name": "CDCMMEClinicalConversionFactors",
+  "title": "CDC MME Clinical Conversion Factors",
+  "status": "active",
+  "experimental": "false",
+  "description": "This Code System Supplement defines clinical conversion factors for calculating Morphine Milligram Equivalence (MME), as described in the CDC Opioid Prescribing Guideline. The supplement defines conversions factors for ingredients in one of 3 ways: 1, as a direct conversion factor for the ingredient, 2, as a dose-form-specific conversion factor for the ingredient, and 3, as a dose-quantity-ranged conversion factor for the ingredient. See the descriptions for each property for information on how the values are represented for the different conversion factors. For a given ingredient, only one of 'dose-form' or 'dose-range' will be present, with or without an ingredient-specific conversion factor. The properties together will enable a unique conversion factor to be determined if the input is within the expected range. If the input is outside the expected range, and there is no ingredient-specific conversion-factor specified, implementations should indicate a conversion factor could not be determined from the supplied information. All conversion factors supplied in this supplement are in 'mg/d'.",
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "focus",
+      "display": "Clinical Focus"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://snomed.info/sct",
+        "code": "182888003",
+        "display": "Medication requested (situation)"
+      } ]
+    }
+  }, {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "focus",
+      "display": "Clinical Focus"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://snomed.info/sct",
+        "code": "82423001",
+        "display": "Chronic pain (finding)"
+      } ]
+    }
+  } ],
+  "caseSensitive": false,
+  "content": "supplement",
+  "supplements": "http://www.nlm.nih.gov/research/umls/rxnorm",
+  "property": [
+    {
+      "code": "conversion-factor",
+      "description": "Defines the conversion factor for a specific ingredient, when the conversion factor is the same for all dose forms and dose amounts for the ingredient. The value of this property will be the decimal representation of the conversion factor.",
+      "type": "decimal"
+    },
+    {
+      "code": "dose-form-conversion-factor",
+      "description": "Defines the conversion factor for an ingredient when the conversion factor varies by the dose form of the medication. The value of this property will be a string of the form <dose-form-code>:<conversion-factor>, e.g. 970789:130, where '970789' is the RxNorm dose form code, and '130' is the decimal representation of the conversion factor.",
+      "type": "string"
+    },
+    {
+      "code": "dose-range-conversion-factor",
+      "description": "Defines the conversion factor for an ingredient when the conversion factor varies by the overall dose of the medication. The value of this property will be a string of the form <low-value>-<high-value>:<conversion-factor>, e.g. 1-20:4. Note that the low-value or high-value may be a wildcard '*' to indicate the range continues (e.g. '61-*:12' indicates the range is 61 or greater). ",
+      "type": "string"
+    }
+  ],
+  "concept": [
+    {
+      "code": "2670",
+      "display": "Codeine",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 0.15
+      }]
+    },
+    {
+      "code": "4337",
+      "display": "Fentanyl",
+      "property": [{
+        "code": "dose-form-conversion-factor",
+        "valueString": "316987:7200"
+      }]
+    },
+    {
+      "code": "5489",
+      "display": "Hydrocodone",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 1
+      }]
+    },
+    {
+      "code": "3423",
+      "display": "Hydromorphone",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 4
+      }]
+    },
+    {
+      "code": "6813",
+      "display": "Methadone",
+      "property": [
+        {
+          "code": "dose-range-conversion-factor",
+          "valueString": "1-20:4"
+        },
+        {
+          "code": "dose-range-conversion-factor",
+          "valueString": "21-40:8"
+        },
+        {
+          "code": "dose-range-conversion-factor",
+          "valueString": "41-60:10"
+        },
+        {
+          "code": "dose-range-conversion-factor",
+          "valueString": "61-*:12"
+        }
+      ]
+    },
+    {
+      "code": "7052",
+      "display": "Morphine",
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 1
+        }
+      ]
+    },
+    {
+      "code": "7804",
+      "display": "Oxycodone",
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 1.5
+        }
+      ]
+    },
+    {
+      "code": "7814",
+      "display": "Oxymorphone",
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 3
+        }
+      ]
+    }
+  ]
+}

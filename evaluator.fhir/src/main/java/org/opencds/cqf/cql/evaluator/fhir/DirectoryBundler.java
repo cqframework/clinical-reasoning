@@ -3,10 +3,19 @@ package org.opencds.cqf.cql.evaluator.fhir;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -51,18 +60,57 @@ public class DirectoryBundler {
     public IBaseBundle bundle(String path) {
         requireNonNull(path, "path must not be null.");
 
-        File resourceDirectory = new File(path);
-        if (!resourceDirectory.exists()) {
-            throw new IllegalArgumentException("The specified path to resource files does not exist.");
+        URI uri;
+        try{
+            uri = new URI(path);
+        }
+        catch(Exception e) {
+            logger.error(String.format("error parsing uri from path: %s", path), e);
+            throw new RuntimeException(e);
         }
 
-        if (!resourceDirectory.isDirectory()) {
-            throw new IllegalArgumentException("The specified path to resource files is not a directory.");
-        }
 
-        Collection<File> files = FileUtils.listFiles(resourceDirectory, new String[] { "xml", "json" }, true);
+        Collection<File> files;
+        if (uri.getScheme() != null && uri.getScheme().startsWith("jar")) {
+            files = this.listJar(uri, path);
+        }
+        else {
+            files = this.listDirectory(uri.getPath());
+        }
 
         return this.bundleFiles(files);
+    }
+
+    private Collection<File> listJar(URI uri, String path) {
+        try {
+            FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+            Path jarPath = fileSystem.getPath(path);
+            try(Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
+                return walk.map(x -> x.toFile()).filter(x -> x.isFile()).filter(
+                    x -> x.getName().endsWith("json") || x.getName().endsWith("xml")).collect(Collectors.toList());
+            }
+        }
+        catch (Exception e) {
+            logger.error(String.format("error attempting to list jar: %s", uri.toString()));
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Collection<File> listDirectory(String path) {
+        File resourceDirectory = new File(path);
+        if (!resourceDirectory.getAbsoluteFile().exists()) {
+            throw new IllegalArgumentException(String.format("The specified path to resource files does not exist: %s", path));
+        }
+
+        if (resourceDirectory.getAbsoluteFile().isDirectory()) {
+            return FileUtils.listFiles(resourceDirectory, new String[] { "xml", "json" }, true);
+        }
+        else if (path.toLowerCase().endsWith("xml") || path.toLowerCase().endsWith("json")) {
+            return Collections.singletonList(resourceDirectory);
+        }
+        else {
+            throw new IllegalArgumentException(String.format("path was not a directory or a recognized FHIR file format (XML, JSON) : %s", path));
+        }
     }
 
     private IBaseBundle bundleFiles(Collection<File> files) {
@@ -107,7 +155,7 @@ public class DirectoryBundler {
     }
 
     private IParser selectParser(String filename) {
-        if (filename.endsWith("json")) {
+        if (filename.toLowerCase().endsWith("json")) {
             if (this.json == null) {
                 this.json = this.fhirContext.newJsonParser();
             }

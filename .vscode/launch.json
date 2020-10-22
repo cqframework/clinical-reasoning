@@ -135,10 +135,12 @@
             "type": "java",
             "name": "Debug (EXM 104 R401)",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.cql.cli.Main",
-            "projectName": "cli",
+            "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+            "projectName": "evaluator.cli",
             "args": [
-                "--lp",
+                "--fv",
+                "R4",
+                "--lu",
                 "../connectathon/fhir401/input/pagecontent/cql",
                 "--ln",
                 "EXM104",
@@ -148,6 +150,27 @@
                 "../connectathon/fhir401/input/vocabulary/valueset",
                 "-c",
                 "Patient=numer-EXM104"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (APHL - Reportable)",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+            "projectName": "evaluator.cli",
+            "args": [
+                "--fv",
+                "R4",
+                "--lu",
+                "../aphl-ig/input/pagecontent/cql",
+                "--ln",
+                "RuleFilters",
+                "-m",
+                "FHIR=../aphl-ig/input/tests/RuleFilters-1.0.0/Reportable",
+                "-t",
+                "../aphl-ig/input/vocabulary/valueset",
+                "-c",
+                "Patient=Reportable"
             ]
         },
         {

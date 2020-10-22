@@ -5,6 +5,7 @@ import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -43,7 +44,8 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
     protected Map<VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
     @Inject
-    public LibraryLoaderFactory(FhirContext fhirContext, AdapterFactory adapterFactory, Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories) {
+    public LibraryLoaderFactory(FhirContext fhirContext, AdapterFactory adapterFactory,
+            Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories) {
         this.librarySourceProviderFactories = requireNonNull(librarySourceProviderFactories,
                 "librarySourceProviderFactories can not be null");
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
@@ -93,7 +95,14 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
         if (isFileUri(url)) {
             // Attempt to auto-detect the type of files.
             try {
-                Path directoryPath = Paths.get(url);
+                Path directoryPath = null;
+                try {
+                    directoryPath = Paths.get(new URL(url).toURI());
+                }
+                catch (Exception e) {
+                    directoryPath = Paths.get(url);
+                }
+                
                 File directory = new File(directoryPath.toAbsolutePath().toString());
 
                 File[] files = directory.listFiles((d, name) -> name.endsWith(".cql"));

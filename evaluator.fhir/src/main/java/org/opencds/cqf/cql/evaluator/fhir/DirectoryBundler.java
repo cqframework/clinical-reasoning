@@ -62,13 +62,19 @@ public class DirectoryBundler {
 
         URI uri;
         try{
-            uri = new URI(path);
+            // TODO: Should use builder.UriUtil.isUri
+            if (!path.startsWith("file:/") && !path.matches("\\w+?://.*")) {
+                File file = new File(path);
+                uri = file.toURI();
+            }
+            else {
+                uri = new URI(path);
+            }
         }
         catch(Exception e) {
             logger.error(String.format("error parsing uri from path: %s", path), e);
             throw new RuntimeException(e);
         }
-
 
         Collection<File> files;
         if (uri.getScheme() != null && uri.getScheme().startsWith("jar")) {

@@ -22,6 +22,9 @@ import org.opencds.cqf.cql.evaluator.cql2elm.InMemoryLibrarySourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
+import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
+
 public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {
 
     private Logger logger = LoggerFactory.getLogger(CqlFileLibrarySourceProviderFactory.class);
@@ -40,7 +43,13 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
     protected List<String> getLibrariesFromPath(String path) {
         URI uri;
         try{
-            uri = new URI(path);
+            if (!isUri(path)) {
+                File file = new File(path);
+                uri = file.toURI();
+            }
+            else {
+                uri = new URI(path);
+            }
         }
         catch(Exception e) {
             logger.error(String.format("error attempting to bundle path: %s", path), e);

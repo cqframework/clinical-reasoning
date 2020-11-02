@@ -164,11 +164,7 @@ public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupCom
             }
         }
 
-<<<<<<< HEAD
-        return (Iterable) result;
-=======
         return (Iterable<ResourceT>)result;
->>>>>>> Updates to evaluator
     }
 
     private boolean evaluatePopulationCriteria(SubjectT subject, MeasureGroupPopulationComponentT criteria,

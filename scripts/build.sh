@@ -14,7 +14,7 @@ eval $CMD
 
 
 # Run Deploy
-CMD="mvn deploy"
+CMD="mvn deploy -DskipTests=true"
 
 # Import maven settings
 cp .travis.settings.xml $HOME/.m2/settings.xml

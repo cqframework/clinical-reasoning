@@ -22,7 +22,6 @@ import org.opencds.cqf.cql.evaluator.cql2elm.InMemoryLibrarySourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
 
 public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {

@@ -8,9 +8,9 @@ import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactor
 import org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirRestRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.FhirRestLibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.FhirRestLibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.FhirFileTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.FhirRestTerminologyProviderFactory;
@@ -42,12 +42,12 @@ public class BuilderModule extends AbstractModule {
         retrieveFactoryBinder.addBinding().to(FhirFileRetrieveProviderFactory.class).in(Singleton.class);
         retrieveFactoryBinder.addBinding().to(FhirRestRetrieveProviderFactory.class).in(Singleton.class);
 
-        Multibinder<org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory> librarySourceProviderFactoryBinder =
-        Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory.class);
+        Multibinder<org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory> libraryContentProviderFactoryBinder =
+        Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory.class);
 
-        librarySourceProviderFactoryBinder.addBinding().to(CqlFileLibrarySourceProviderFactory.class);
-        librarySourceProviderFactoryBinder.addBinding().to(FhirFileLibrarySourceProviderFactory.class);
-        librarySourceProviderFactoryBinder.addBinding().to(FhirRestLibrarySourceProviderFactory.class);
+        libraryContentProviderFactoryBinder.addBinding().to(CqlFileLibraryContentProviderFactory.class);
+        libraryContentProviderFactoryBinder.addBinding().to(FhirFileLibraryContentProviderFactory.class);
+        libraryContentProviderFactoryBinder.addBinding().to(FhirRestLibraryContentProviderFactory.class);
 
         Multibinder<org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory> terminologyProviderFactoryBinder =
             Multibinder.newSetBinder(binder(), org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory.class);

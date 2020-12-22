@@ -16,7 +16,7 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAdapter;
 
-// TODO: Move this to the Measure evaluation module sine that's where it's actually needed.
+// TODO: Move this to the Measure evaluation module since that's where it's actually needed.
 
 /**
  * This class maps the standard input parameters of the Measure evaluate operation to FHIR parameters

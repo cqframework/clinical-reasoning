@@ -18,7 +18,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -27,7 +27,7 @@ import ca.uhn.fhir.parser.IParser;
 public class BundleTerminologyProviderTests {
 
     private IBaseBundle loadBundle(FhirContext fhirContext, String path) {
-        InputStream stream = this.getClass().getClassLoader().getResourceAsStream(path);
+        InputStream stream = BundleTerminologyProviderTests.class.getResourceAsStream(path);
         IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
 
@@ -47,7 +47,7 @@ public class BundleTerminologyProviderTests {
 
     private TerminologyProvider getTerminologyProvider() {
         FhirContext context = FhirContext.forR4();
-        IBaseBundle bundle = this.loadBundle(context, "r4/TestBundleValueSets.json");
+        IBaseBundle bundle = this.loadBundle(context, "../util/r4/TestBundleValueSets.json");
         return new BundleTerminologyProvider(context, bundle);
     }
 
@@ -89,13 +89,13 @@ public class BundleTerminologyProviderTests {
         assertEquals(0, codesList.size());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expected= IllegalArgumentException.class)
     public void test_expand_invalidValueSet() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.expand(new ValueSetInfo().withId("http://not-value-set"));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void test_expand_nullValueSet() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.expand(null);
@@ -115,13 +115,13 @@ public class BundleTerminologyProviderTests {
         assertFalse(inValueSet);
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void test_inValueSet_nullValueSet() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.in(new Code().withSystem("http://localhost/not-a-system").withCode("XXX"), null);
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void test_inValueSet_nullCode() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.in(null, new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));

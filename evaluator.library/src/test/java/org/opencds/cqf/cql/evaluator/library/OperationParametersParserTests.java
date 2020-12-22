@@ -9,8 +9,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
@@ -19,15 +19,15 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class OperationParametersParserTests {
 
-    protected OperationParametersParser operationParametersParser;
+    static OperationParametersParser operationParametersParser;
     
     @BeforeClass
-    public void setup() {
+    public static void setup() {
         FhirContext fhirContext = FhirContext.forR4();
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
-        this.operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
+        operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
 
     }
 
@@ -36,7 +36,7 @@ public class OperationParametersParserTests {
     public void testAddProductLine() {
         Parameters parameters = new Parameters();
 
-        this.operationParametersParser.addProductLine(parameters, "Medicare");
+        operationParametersParser.addProductLine(parameters, "Medicare");
 
         ParametersParameterComponent ppc = parameters.getParameter().stream().filter(x -> x.getName().equals("Product Line")).findFirst().get();
         assertNotNull(ppc);
@@ -51,7 +51,7 @@ public class OperationParametersParserTests {
     public void testNullProductLine() {
         Parameters parameters = new Parameters();
 
-        this.operationParametersParser.addProductLine(parameters, null);
+        operationParametersParser.addProductLine(parameters, null);
 
         long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Product Line")).count();
         assertEquals(0, actualCount);
@@ -63,7 +63,7 @@ public class OperationParametersParserTests {
         Parameters parameters = new Parameters();
         parameters.addParameter("Product Line", "Bubba");
 
-        this.operationParametersParser.addProductLine(parameters, "Medicare");
+        operationParametersParser.addProductLine(parameters, "Medicare");
 
         long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Product Line")).count();
         assertEquals(1, actualCount);
@@ -85,7 +85,7 @@ public class OperationParametersParserTests {
         expected.setStartElement(new DateTimeType("2019-01-01"));
         expected.setEndElement(new DateTimeType("2020-01-01"));
 
-        this.operationParametersParser.addMeasurementPeriod(parameters, "2019-01-01", "2020-01-01");
+        operationParametersParser.addMeasurementPeriod(parameters, "2019-01-01", "2020-01-01");
 
         ParametersParameterComponent ppc = parameters.getParameter().stream().filter(x -> x.getName().equals("Measurement Period")).findFirst().get();
         assertNotNull(ppc);
@@ -111,7 +111,7 @@ public class OperationParametersParserTests {
         expected.setStartElement(new DateTimeType("2019-01-01"));
         expected.setEndElement(new DateTimeType("2020-01-01"));
 
-        this.operationParametersParser.addMeasurementPeriod(parameters, "2019-01-01", "2020-01-01");
+        operationParametersParser.addMeasurementPeriod(parameters, "2019-01-01", "2020-01-01");
 
         long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Measurement Period")).count();
         assertEquals(1, actualCount);
@@ -131,7 +131,7 @@ public class OperationParametersParserTests {
 
         Parameters parameters = new Parameters();
 
-        this.operationParametersParser.addMeasurementPeriod(parameters, null, null);
+        operationParametersParser.addMeasurementPeriod(parameters, null, null);
 
         long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Measurement Period")).count();
         assertEquals(0, actualCount);

@@ -2,7 +2,7 @@ package org.opencds.cqf.cql.evaluator.fhir.util;
 
 import static org.junit.Assert.assertEquals;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 
@@ -35,17 +35,17 @@ public class VersionUtilitiesTests {
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("5.0.1"));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void TestNull() {
         VersionUtilities.enumForVersion(null);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void TestMalformed() {
         VersionUtilities.enumForVersion("bubba");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void TestUnsupported() {
         VersionUtilities.enumForVersion("R6");
     }

@@ -19,23 +19,23 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 public class CqlFhirParametersConverterTests {
     
 
-    protected CqlFhirParametersConverter cqlFhirParametersConverter;
+    protected static CqlFhirParametersConverter cqlFhirParametersConverter;
     
     @BeforeClass
-    public void setup() {
+    public static void setup() {
         FhirContext fhirContext = FhirContext.forR4();
 
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
-        this.cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+        cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
 
     }
 
@@ -49,7 +49,7 @@ public class CqlFhirParametersConverterTests {
         testData.expressionResults.put("Patient", new Patient());
         testData.expressionResults.put("Numerator", true);
 
-        Parameters actual = (Parameters)this.cqlFhirParametersConverter.toFhirParameters(testData);
+        Parameters actual = (Parameters)cqlFhirParametersConverter.toFhirParameters(testData);
 
         assertTrue(expected.equalsDeep(actual));
     }
@@ -69,7 +69,7 @@ public class CqlFhirParametersConverterTests {
 
         testData.addParameter().setName("Measurement Period").setValue(testPeriod);
 
-        Map<String, Object> actual = this.cqlFhirParametersConverter.toCqlParameters(testData);
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
         assertNotNull(actual);
         assertEquals(expected.size(), actual.size());

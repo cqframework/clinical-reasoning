@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -28,43 +27,47 @@ import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.BundleLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessorTests {
 
-    LibraryProcessor libraryProcessor = null;
-    FhirContext fhirContext = null;
+    static LibraryProcessor libraryProcessor = null;
+    static FhirContext fhirContext = null;
 
     @BeforeClass
     @SuppressWarnings("serial")
-    public void setup() {
+    public static void setup() {
         fhirContext = FhirContext.forR4();
 
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
 
-        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<TypedLibrarySourceProviderFactory>() {
+        LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
+
+        Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories = new HashSet<TypedLibraryContentProviderFactory>() {
             {
-                add(new TypedLibrarySourceProviderFactory() {
+                add(new TypedLibraryContentProviderFactory() {
                     @Override
                     public String getType() {
                         return Constants.HL7_FHIR_FILES;
                     }
 
                     @Override
-                    public LibrarySourceProvider create(String url, List<String> headers) {
-                        return new BundleLibrarySourceProvider(fhirContext,
+                    public LibraryContentProvider create(String url, List<String> headers) {
+                        return new BundleFhirLibraryContentProvider(fhirContext,
                                 (IBaseBundle) fhirContext.newJsonParser()
                                         .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)),
-                                adapterFactory);
+                                adapterFactory, libraryVersionSelector);
                     }
                 });
             }
@@ -77,7 +80,7 @@ public class LibraryProcessorTests {
         };
 
         LibraryLoaderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory(
-                fhirContext, adapterFactory, librarySourceProviderFactories);
+                fhirContext, adapterFactory, libraryContentProviderFactories, libraryVersionSelector);
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
             {
                 add(new TypedRetrieveProviderFactory() {

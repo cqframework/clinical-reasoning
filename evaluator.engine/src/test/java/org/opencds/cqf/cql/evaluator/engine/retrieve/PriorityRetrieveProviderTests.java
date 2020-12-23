@@ -12,12 +12,12 @@ import com.google.common.collect.Lists;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 
 public class PriorityRetrieveProviderTests {
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void test_nullConstructorParameterThrowsException() {
         new PriorityRetrieveProvider(null);
     }
@@ -31,7 +31,7 @@ public class PriorityRetrieveProviderTests {
         assertEquals(0, resultList.size());
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void test_badProvider_throwsException() {
 
         RetrieveProvider badProvider = new RetrieveProvider(){

@@ -21,8 +21,8 @@ import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -30,15 +30,15 @@ import ca.uhn.fhir.parser.IParser;
 
 public class BundleRetrieveProviderTests {
 
-    private FhirContext fhirContext;
+    private static FhirContext fhirContext;
 
     @BeforeClass
-    void setup() {
-        this.fhirContext = FhirContext.forR4();
+    public static void setup() {
+        fhirContext = FhirContext.forR4();
     }
 
     private IBaseBundle loadBundle(FhirContext fhirContext, String path) {
-        InputStream stream = this.getClass().getClassLoader().getResourceAsStream(path);
+        InputStream stream = BundleRetrieveProviderTests.class.getResourceAsStream(path);
         IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
 
@@ -60,8 +60,8 @@ public class BundleRetrieveProviderTests {
     }
 
     private RetrieveProvider getBundleRetrieveProvider(TerminologyProvider terminologyProvider) {
-        IBaseBundle bundle = this.loadBundle(this.fhirContext, "r4/TestBundleTwoPatients.json");
-        BundleRetrieveProvider brp = new BundleRetrieveProvider(this.fhirContext, bundle);
+        IBaseBundle bundle = this.loadBundle(fhirContext, "../util/r4/TestBundleTwoPatients.json");
+        BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
         brp.setTerminologyProvider(terminologyProvider);
 
         return brp;
@@ -165,7 +165,7 @@ public class BundleRetrieveProviderTests {
     }
 
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void test_filterToValueSet_noTerminologyProvider() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
@@ -176,7 +176,7 @@ public class BundleRetrieveProviderTests {
     @Test
     public void test_filterToValueSet() {
         FhirContext fhirContext = FhirContext.forR4();
-        IBaseBundle bundle = this.loadBundle(fhirContext, "r4/TestBundleValueSets.json");
+        IBaseBundle bundle = this.loadBundle(fhirContext, "../util/r4/TestBundleValueSets.json");
         TerminologyProvider terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
 
         RetrieveProvider retrieve = this.getBundleRetrieveProvider(terminologyProvider);

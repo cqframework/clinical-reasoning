@@ -16,17 +16,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
-import org.opencds.cqf.cql.evaluator.cql2elm.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
 
-public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {
+public class CqlFileLibraryContentProviderFactory implements TypedLibraryContentProviderFactory {
 
-    private Logger logger = LoggerFactory.getLogger(CqlFileLibrarySourceProviderFactory.class);
+    private Logger logger = LoggerFactory.getLogger(CqlFileLibraryContentProviderFactory.class);
 
     @Override
     public String getType() {
@@ -34,9 +34,9 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
     }
 
     @Override
-    public LibrarySourceProvider create(String url, List<String> headers) {
+    public LibraryContentProvider create(String url, List<String> headers) {
         List<String> libraries = this.getLibrariesFromPath(url);
-        return new InMemoryLibrarySourceProvider(libraries);
+        return new InMemoryLibraryContentProvider(libraries);
     }
 
     protected List<String> getLibrariesFromPath(String path) {

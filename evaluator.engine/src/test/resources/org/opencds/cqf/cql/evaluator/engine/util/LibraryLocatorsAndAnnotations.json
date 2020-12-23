@@ -1,0 +1,61 @@
+{
+    "library" : {
+      "type" : "Library",
+      "identifier" : {
+        "type" : "VersionedIdentifier",
+        "id" : "LibraryNonDefaultOptions",
+        "version" : "1"
+      },
+      "schemaIdentifier" : {
+        "type" : "VersionedIdentifier",
+        "id" : "urn:hl7-org:elm",
+        "version" : "r1"
+      },
+      "usings" : {
+        "type" : "Library$Usings",
+        "def" : [ {
+          "type" : "UsingDef",
+          "localIdentifier" : "System",
+          "uri" : "urn:hl7-org:elm-types:r1"
+        } ]
+      },
+      "statements" : {
+        "type" : "Library$Statements",
+        "def" : [ {
+          "type" : "ExpressionDef",
+          "expression" : {
+            "type" : "Literal",
+            "localId" : "1",
+            "locator" : "4:2",
+            "valueType" : "{urn:hl7-org:elm-types:r1}Integer",
+            "value" : "1"
+          },
+          "annotation" : [ {
+            "s" : {
+              "s" : [ {
+                "name" : "{urn:hl7-org:cql-annotations:r1}s",
+                "declaredType" : "org.hl7.cql_annotations.r1.Narrative",
+                "scope" : "javax.xml.bind.JAXBElement$GlobalScope",
+                "value" : {
+                  "s" : [ "define ", "\"Result\"", ":\n ", "1" ],
+                  "r" : "1"
+                },
+                "globalScope" : true
+              } ],
+              "r" : "2"
+            }
+          } ],
+          "localId" : "2",
+          "locator" : "3:1-4:2",
+          "name" : "Result",
+          "context" : "Patient",
+          "accessLevel" : "Public"
+        } ]
+      },
+      "annotation" : [ {
+        "translatorOptions" : "EnableAnnotations,EnableLocators"
+      } ]
+    }
+  }
+  
+  

@@ -248,8 +248,9 @@ public class CqlEvaluatorBuilder {
      * Builds a CqlEvaluator that uses all content, data, terminology sources
      * supplied, and has the appropriate configuration applied.
      * 
-     * NOTE: this CqlEvaluator is meant to be short-lived (e.g. for the duration of
-     * a request)
+     * NOTE: The CqlEvaluator created by this default implementation
+     * is meant to be short-lived (e.g. for the duration of a request).
+     * It won't pick up changes to underlying content.
      * 
      * @return a CqlEvaluator
      */

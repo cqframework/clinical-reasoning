@@ -21,6 +21,11 @@
     <dependencies>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.fhir</artifactId>
             <version>${revision}</version>
         </dependency>

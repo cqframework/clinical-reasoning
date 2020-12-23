@@ -6,26 +6,30 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
-import org.opencds.cqf.cql.evaluator.cql2elm.BundleLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class FhirFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {
+public class FhirFileLibraryContentProviderFactory implements TypedLibraryContentProviderFactory {
 
     FhirContext fhirContext;
     DirectoryBundler directoryBundler;
     AdapterFactory adapterFactory;
+    LibraryVersionSelector libraryVersionSelector;
 
     @Inject
-    public FhirFileLibrarySourceProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler, AdapterFactory adapterFactory) {
+    public FhirFileLibraryContentProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler,
+            AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.directoryBundler = requireNonNull(directoryBundler, "directoryBundler can not be null");
         this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
+        this.libraryVersionSelector = requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
     }
 
     @Override
@@ -34,8 +38,8 @@ public class FhirFileLibrarySourceProviderFactory implements TypedLibrarySourceP
     }
 
     @Override
-    public LibrarySourceProvider create(String url, List<String> headers) {
+    public LibraryContentProvider create(String url, List<String> headers) {
         IBaseBundle bundle = this.directoryBundler.bundle(url);
-        return new BundleLibrarySourceProvider(fhirContext, bundle, adapterFactory);
+        return new BundleFhirLibraryContentProvider(fhirContext, bundle, adapterFactory, this.libraryVersionSelector);
     }
 }

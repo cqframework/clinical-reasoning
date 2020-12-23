@@ -10,7 +10,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -24,7 +24,7 @@ public class ValueSetUtilTests {
     private static final FhirContext R4_CONTEXT = FhirContext.forR4();
 
     private IBaseResource loadValueSet(FhirContext fhirContext, String path) {
-        InputStream stream = this.getClass().getClassLoader().getResourceAsStream(path);
+        InputStream stream = ValueSetUtilTests.class.getResourceAsStream(path);
         IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
 

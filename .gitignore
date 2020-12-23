@@ -1,6 +1,5 @@
 target
 
-.vscode
 .classpath
 .project
 .settings
@@ -11,5 +10,7 @@ target
 
 Snap.*
 core.*
+dump.*
 heapdump.*
 javacore.*
+jitdump.*

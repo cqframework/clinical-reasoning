@@ -1,0 +1,18 @@
+{
+    "resourceType": "Library",
+    "id": "AllContent",
+    "content": [
+        {
+            "contentType": "text/cql",
+            "data": "Q1FM"
+        },
+        {
+            "contentType": "application/elm+xml",
+            "data": "WE1M"
+        },
+        {
+            "contentType": "application/elm+json",
+            "data": "SlNPTg=="
+        }
+    ]
+}

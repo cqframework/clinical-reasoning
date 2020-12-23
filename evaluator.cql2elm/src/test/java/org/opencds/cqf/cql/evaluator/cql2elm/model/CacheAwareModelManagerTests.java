@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.cql2elm;
+package org.opencds.cqf.cql.evaluator.cql2elm.model;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

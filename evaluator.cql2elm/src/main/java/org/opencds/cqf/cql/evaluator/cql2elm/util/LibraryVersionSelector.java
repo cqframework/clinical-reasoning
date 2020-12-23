@@ -1,61 +1,25 @@
-package org.opencds.cqf.cql.evaluator.cql2elm;
+package org.opencds.cqf.cql.evaluator.cql2elm.util;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AttachmentAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
 
-public abstract class VersionComparingLibrarySourceProvider
-        implements LibrarySourceProvider {
+public class LibraryVersionSelector {
 
     private AdapterFactory adapterFactory;
 
-    public VersionComparingLibrarySourceProvider(AdapterFactory adapterFactory) {
-        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
+    public LibraryVersionSelector(AdapterFactory adapterFactory) {
+        this.adapterFactory = adapterFactory;
     }
 
-    @Override
-    public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
-        requireNonNull(versionedIdentifier, "versionedIdentifier can not be null.");
-
-        IBaseResource library = this.getLibrary(versionedIdentifier);
-        if (library == null) {
-            return null;
-        }
-
-        return this.getCqlStream(library);
-    }
-
-    private InputStream getCqlStream(IBaseResource library) {
-
-        LibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
-        
-        if (libraryAdapter.hasContent()) {
-            for (ICompositeType attachment : libraryAdapter.getContent()) {
-                AttachmentAdapter attachmentAdapter = this.adapterFactory.createAttachment(attachment);
-                if (attachmentAdapter.getContentType().equals("text/cql")) {
-                    return new ByteArrayInputStream(attachmentAdapter.getData());
-                }
-            }
-        }
-
-        return null;
-    }
-
-    protected abstract IBaseResource getLibrary(VersionedIdentifier libraryIdentifier);
-
-    protected IBaseResource select(VersionedIdentifier libraryIdentifier, Collection<IBaseResource> libraries) {
+    public IBaseResource select(VersionedIdentifier libraryIdentifier, Collection<IBaseResource> libraries) {
         requireNonNull(libraries, "libraries can not be null");
         requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
 
@@ -126,4 +90,5 @@ public abstract class VersionComparingLibrarySourceProvider
         // Both are equal
         return 0;
     }
+    
 }

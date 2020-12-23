@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 public class EndpointConverterTests {
 

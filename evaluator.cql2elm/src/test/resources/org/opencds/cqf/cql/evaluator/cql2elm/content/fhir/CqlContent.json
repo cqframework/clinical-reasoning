@@ -1,0 +1,10 @@
+{
+    "resourceType": "Library",
+    "id": "CqlContent",
+    "content": [
+        {
+            "contentType": "text/cql",
+            "data": "Q1FM"
+        }
+    ]
+}

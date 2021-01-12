@@ -1,14 +1,14 @@
 package org.opencds.cqf.cql.evaluator.fhir;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleUtil;

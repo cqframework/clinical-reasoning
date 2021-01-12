@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.content_test.opioid_mme_r4;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,8 +20,7 @@ import org.opencds.cqf.cql.evaluator.guice.cql2elm.Cql2ElmModule;
 import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
 import org.opencds.cqf.cql.evaluator.guice.library.LibraryModule;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -36,7 +35,7 @@ public class OpioidMmeR4Tests {
     
     private static VersionedIdentifier id;
 
-    @BeforeClass
+    @org.testng.annotations.BeforeClass
     public static void setup() {
         fhirContext = FhirContext.forR4();
         Injector injector = Guice.createInjector(

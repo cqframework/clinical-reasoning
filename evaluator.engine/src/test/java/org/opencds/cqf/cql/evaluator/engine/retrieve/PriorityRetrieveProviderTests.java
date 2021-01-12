@@ -1,8 +1,8 @@
 
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,12 +12,12 @@ import com.google.common.collect.Lists;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 
 public class PriorityRetrieveProviderTests {
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void test_nullConstructorParameterThrowsException() {
         new PriorityRetrieveProvider(null);
     }
@@ -31,7 +31,7 @@ public class PriorityRetrieveProviderTests {
         assertEquals(0, resultList.size());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expectedExceptions = IllegalStateException.class)
     public void test_badProvider_throwsException() {
 
         RetrieveProvider badProvider = new RetrieveProvider(){

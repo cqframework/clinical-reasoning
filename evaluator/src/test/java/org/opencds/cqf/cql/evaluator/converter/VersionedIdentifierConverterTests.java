@@ -1,12 +1,12 @@
 package org.opencds.cqf.cql.evaluator.converter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toEngineIdentifier;
 
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class VersionedIdentifierConverterTests {
 

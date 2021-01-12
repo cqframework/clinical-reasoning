@@ -2,9 +2,10 @@
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -21,8 +22,8 @@ import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -165,7 +166,7 @@ public class BundleRetrieveProviderTests {
     }
 
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expectedExceptions = IllegalStateException.class)
     public void test_filterToValueSet_noTerminologyProvider() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 

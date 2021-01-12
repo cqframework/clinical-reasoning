@@ -1,10 +1,10 @@
 package org.opencds.cqf.cql.evaluator.builder;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class EndpointConverterTests {
 

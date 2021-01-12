@@ -1,11 +1,11 @@
 
 package org.opencds.cqf.cql.evaluator.engine.terminology;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.List;
@@ -18,7 +18,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -89,13 +89,13 @@ public class BundleTerminologyProviderTests {
         assertEquals(0, codesList.size());
     }
 
-    @Test(expected= IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void test_expand_invalidValueSet() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.expand(new ValueSetInfo().withId("http://not-value-set"));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void test_expand_nullValueSet() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.expand(null);
@@ -115,13 +115,13 @@ public class BundleTerminologyProviderTests {
         assertFalse(inValueSet);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void test_inValueSet_nullValueSet() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.in(new Code().withSystem("http://localhost/not-a-system").withCode("XXX"), null);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void test_inValueSet_nullCode() {
         TerminologyProvider terminology = this.getTerminologyProvider();
         terminology.in(null, new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));

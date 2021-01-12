@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.library;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
@@ -35,8 +35,8 @@ import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 

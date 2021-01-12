@@ -1,16 +1,16 @@
 package org.opencds.cqf.cql.evaluator.library;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
@@ -59,7 +59,7 @@ public class OperationParametersParserTests {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testOverideProductLine() {
+    public void testOverrideProductLine() {
         Parameters parameters = new Parameters();
         parameters.addParameter("Product Line", "Bubba");
 
@@ -98,7 +98,7 @@ public class OperationParametersParserTests {
     }
 
     @Test
-    public void testOverideMeasurementPeriod() {
+    public void testOverrideMeasurementPeriod() {
         Parameters parameters = new Parameters();
 
         Period initial = new Period();

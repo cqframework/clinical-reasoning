@@ -24,10 +24,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cql-translator.version>1.5.0</cql-translator.version>
+        <cql-translator.version>1.5.1</cql-translator.version>
         <cql-engine.version>1.5.1-SNAPSHOT</cql-engine.version>
-        <spring-boot.version>2.1.9.RELEASE</spring-boot.version>
-        <hapi.version>5.0.2</hapi.version>
+        <spring.version>5.3.2</spring.version>
+        <hapi.version>5.2.0</hapi.version>
         <jopt-simple.version>5.0.4</jopt-simple.version>
         <slf4j.version>1.7.30</slf4j.version>
     </properties>
@@ -39,10 +39,10 @@
         <module>evaluator.library</module>
         <module>evaluator.builder</module>
         <module>evaluator.guice</module>
+        <!-- <module>evaluator.spring</module> -->
         <module>evaluator.cli</module>
         <module>evaluator.content-test</module>
-        <!-- <module>evaluator.rest</module>
-        <module>evaluator.measure</module> -->
+        <!-- <module>evaluator.measure</module> -->
     </modules>
 
     <licenses>
@@ -162,16 +162,11 @@
                 <version>${jopt-simple.version}</version>
             </dependency>
 
-            <!-- DI -->
+            <!-- DI APIs -->
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
                 <version>8.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.inject</groupId>
-                <artifactId>guice</artifactId>
-                <version>4.2.3</version>
             </dependency>
 
             <dependency>
@@ -181,7 +176,27 @@
             </dependency>
 
 
+            <!-- Guice -->
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>4.2.3</version>
+            </dependency>
+
+            <!-- Spring -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
             <!-- test dependencies -->
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>6.8.8</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-all</artifactId>
@@ -194,6 +209,14 @@
                 <version>3.3.3</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+                <scope>test</scope>
+            </dependency>
+
 
             <!-- Logging -->
             <dependency>
@@ -216,6 +239,10 @@
 
     <!-- Dependencies shared by all projects -->
     <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
@@ -344,14 +371,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.2.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
-                    <configuration>
-                        <skip>true</skip>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>

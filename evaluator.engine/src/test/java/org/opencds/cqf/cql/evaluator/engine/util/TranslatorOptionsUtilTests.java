@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.engine.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,7 +10,7 @@ import java.util.EnumSet;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.elm.execution.Library;
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.cql.engine.execution.JsonCqlLibraryReader;
 
 public class TranslatorOptionsUtilTests {

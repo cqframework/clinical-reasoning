@@ -1,22 +1,18 @@
 package org.opencds.cqf.cql.evaluator.cql2elm.model;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.testng.annotations.Test;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
 
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertNotNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import org.mockito.junit.MockitoJUnitRunner;
-
 import java.util.HashMap;
 import java.util.Map;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CacheAwareModelManagerTests {
 
     @Test

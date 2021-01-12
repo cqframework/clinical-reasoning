@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.evaluator.library;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +19,8 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 public class CqlFhirParametersConverterTests {

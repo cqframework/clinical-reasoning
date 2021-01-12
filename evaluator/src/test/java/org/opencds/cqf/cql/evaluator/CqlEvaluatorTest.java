@@ -2,7 +2,7 @@ package org.opencds.cqf.cql.evaluator;
 
 // import org.hl7.fhir.r4.model.IntegerType;
 // import org.hl7.fhir.r4.model.Observation;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 
 

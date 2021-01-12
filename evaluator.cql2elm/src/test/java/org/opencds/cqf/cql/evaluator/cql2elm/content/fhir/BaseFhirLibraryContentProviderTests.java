@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.cql2elm.content.fhir;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Test;
-import org.junit.BeforeClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 
@@ -74,7 +74,7 @@ public class BaseFhirLibraryContentProviderTests {
         assertEquals("XML", actual);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void coffeeContentThrowsException() {
         String libraryName = "AllContent";
         this.getContent(libraryName, LibraryContentType.COFFEE);

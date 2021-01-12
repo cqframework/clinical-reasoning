@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.guice.library;
 
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertNotNull;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -9,7 +9,7 @@ import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
 import org.opencds.cqf.cql.evaluator.guice.cql2elm.Cql2ElmModule;
 import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 

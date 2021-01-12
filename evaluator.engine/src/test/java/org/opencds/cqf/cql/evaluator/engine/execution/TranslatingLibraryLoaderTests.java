@@ -1,8 +1,8 @@
 
 package org.opencds.cqf.cql.evaluator.engine.execution;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.mockito.Mockito.times;
 
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
@@ -17,12 +17,10 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
@@ -31,7 +29,6 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class TranslatingLibraryLoaderTests {
 
     private static FhirContext fhirContext;
@@ -47,7 +44,7 @@ public class TranslatingLibraryLoaderTests {
         parser = fhirContext.newJsonParser();
     }
 
-    @Before
+    @BeforeMethod
     public void initialize() {
         this.testFhirLibraryContentProvider = Mockito.spy(new BaseFhirLibraryContentProvider(new AdapterFactory()) {
             @Override

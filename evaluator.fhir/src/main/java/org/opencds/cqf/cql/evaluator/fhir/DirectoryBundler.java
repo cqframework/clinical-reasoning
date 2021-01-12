@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.util.BundleUtil;
  * This class takes a directory and bundles all FHIR resources found in it
  * recursively.
  */
+@Named
 public class DirectoryBundler {
 
 

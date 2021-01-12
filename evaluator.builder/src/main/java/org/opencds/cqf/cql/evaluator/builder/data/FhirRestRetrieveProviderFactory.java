@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.builder.data;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.opencds.cqf.cql.engine.fhir.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
@@ -13,6 +14,7 @@ import org.opencds.cqf.cql.evaluator.fhir.ClientFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
+@Named
 public class FhirRestRetrieveProviderFactory implements TypedRetrieveProviderFactory {
 
     FhirContext fhirContext;

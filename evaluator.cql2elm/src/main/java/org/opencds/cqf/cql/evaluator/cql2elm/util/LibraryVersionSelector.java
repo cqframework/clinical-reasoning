@@ -6,15 +6,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
 
+@Named
 public class LibraryVersionSelector {
 
     private AdapterFactory adapterFactory;
 
+    @Inject
     public LibraryVersionSelector(AdapterFactory adapterFactory) {
         this.adapterFactory = adapterFactory;
     }

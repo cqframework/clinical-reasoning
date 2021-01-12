@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.FhirClientFhirLibraryContentProvider;
@@ -14,6 +15,7 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
+@Named
 public class FhirRestLibraryContentProviderFactory implements TypedLibraryContentProviderFactory {
 
     private ClientFactory clientFactory;

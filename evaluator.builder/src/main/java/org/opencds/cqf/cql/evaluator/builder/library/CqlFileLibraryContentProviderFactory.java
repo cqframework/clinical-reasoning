@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.inject.Named;
+
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvider;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
 
+@Named
 public class CqlFileLibraryContentProviderFactory implements TypedLibraryContentProviderFactory {
 
     private Logger logger = LoggerFactory.getLogger(CqlFileLibraryContentProviderFactory.class);

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -23,6 +24,7 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 
 import ca.uhn.fhir.context.FhirContext;
 
+@Named
 public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builder.DataProviderFactory {
 
     private FhirContext fhirContext;

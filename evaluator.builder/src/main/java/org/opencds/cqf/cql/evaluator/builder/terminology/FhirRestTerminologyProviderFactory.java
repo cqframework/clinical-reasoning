@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.opencds.cqf.cql.engine.fhir.terminology.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
@@ -15,6 +16,8 @@ import org.opencds.cqf.cql.evaluator.fhir.ClientFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
+
+@Named
 public class FhirRestTerminologyProviderFactory implements TypedTerminologyProviderFactory {
 
     private FhirContext fhirContext;

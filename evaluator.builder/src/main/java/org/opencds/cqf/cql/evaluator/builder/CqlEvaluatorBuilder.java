@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * wish the RetrieveProviders to be configured to use the constructed
  * multi-source TerminologyProvider
  */
+@Named
 public class CqlEvaluatorBuilder {
 
     private static Logger logger = LoggerFactory.getLogger(CqlEvaluatorBuilder.class);

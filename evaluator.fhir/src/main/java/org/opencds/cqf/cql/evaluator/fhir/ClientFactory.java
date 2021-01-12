@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * This class creates a FHIR Rest API IGenericClient for a given fhirContext an
  * url.
  */
+@Named
 public class ClientFactory {
 
     protected FhirContext fhirContext;

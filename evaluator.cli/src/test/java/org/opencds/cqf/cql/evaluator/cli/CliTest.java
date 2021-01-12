@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.PrintStream;
 
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,7 +21,7 @@ public class CliTest {
     private static final String testResourceRelativePath = "src/test/resources";
     private static String testResourcePath = null;
 
-    @org.testng.annotations.BeforeClass
+    @BeforeClass
     public static void setup(){
         File file = new File(testResourceRelativePath);
         testResourcePath = file.getAbsolutePath();

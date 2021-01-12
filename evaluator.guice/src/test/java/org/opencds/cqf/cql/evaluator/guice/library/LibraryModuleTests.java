@@ -6,7 +6,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
-import org.opencds.cqf.cql.evaluator.guice.cql2elm.Cql2ElmModule;
 import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.testng.annotations.Test;
@@ -19,7 +18,6 @@ public class LibraryModuleTests {
     public void canInstantiateDstu3() {
         Injector injector = Guice.createInjector(
             new FhirModule(FhirVersionEnum.DSTU3), 
-            new Cql2ElmModule(),
             new BuilderModule(),
             new LibraryModule());
 
@@ -32,7 +30,6 @@ public class LibraryModuleTests {
     public void canInstantiateR4() {
         Injector injector = Guice.createInjector(
             new FhirModule(FhirVersionEnum.R4), 
-            new Cql2ElmModule(),
             new BuilderModule(),
             new LibraryModule());
 

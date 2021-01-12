@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -18,6 +19,7 @@ import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvide
 
 import ca.uhn.fhir.context.FhirContext;
 
+@Named
 public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory {
 
     private Set<TypedTerminologyProviderFactory> terminologyProviderFactories;

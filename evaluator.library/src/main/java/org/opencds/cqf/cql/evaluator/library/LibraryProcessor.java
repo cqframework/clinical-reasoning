@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +27,7 @@ import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
+@Named
 public class LibraryProcessor {
 
     // private static Logger logger =

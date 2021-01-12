@@ -26,7 +26,6 @@ import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
 import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
-import org.opencds.cqf.cql.evaluator.guice.cql2elm.Cql2ElmModule;
 import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -65,7 +64,6 @@ public class Main {
     protected void initialize(FhirVersionEnum fhirVersionEnum) {
         this.injector = Guice.createInjector(
             new FhirModule(fhirVersionEnum), 
-            new Cql2ElmModule(),
             new BuilderModule());
     }
 

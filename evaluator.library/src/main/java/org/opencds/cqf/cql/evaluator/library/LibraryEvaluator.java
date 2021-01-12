@@ -5,8 +5,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -22,7 +20,6 @@ class LibraryEvaluator {
 
     private CqlFhirParametersConverter cqlFhirParametersConverter;
 
-    @Inject
     LibraryEvaluator(CqlFhirParametersConverter cqlFhirParametersConverter, CqlEvaluator cqlEvaluator) {
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter,
                 "cqlFhirParametersConverter can not be null");

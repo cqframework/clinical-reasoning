@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.builder.data;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.opencds.cqf.cql.engine.fhir.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.retrieve.SearchParamFhirRetrieveProvider;
@@ -12,6 +13,7 @@ import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 /**
  * This class is used to apply configuration to a RetrieveProvider
  */
+@Named
 public class RetrieveProviderConfigurer implements org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer {
 
     RetrieveProviderConfig retrieveProviderConfig;

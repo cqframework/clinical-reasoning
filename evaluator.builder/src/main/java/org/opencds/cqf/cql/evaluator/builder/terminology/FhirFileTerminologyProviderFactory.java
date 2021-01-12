@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -14,6 +15,7 @@ import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
 
 import ca.uhn.fhir.context.FhirContext;
 
+@Named
 public class FhirFileTerminologyProviderFactory implements TypedTerminologyProviderFactory {
 
     private FhirContext fhirContext;

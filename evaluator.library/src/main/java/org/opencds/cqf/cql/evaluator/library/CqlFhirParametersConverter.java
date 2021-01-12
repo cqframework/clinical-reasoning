@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
+@Named
 public class CqlFhirParametersConverter {
 
     org.slf4j.Logger logger = LoggerFactory.getLogger(CqlFhirParametersConverter.class);

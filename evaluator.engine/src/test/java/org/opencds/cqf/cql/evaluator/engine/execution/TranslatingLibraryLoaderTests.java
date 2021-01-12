@@ -73,7 +73,7 @@ public class TranslatingLibraryLoaderTests {
     // @Test
     public void returnsNullIfContentMismatch() {
         throw new NotImplementedException(
-                "TranslatingLibraryLoaders needs to implementation so that it can detect if the content (CQL or ELM) loaded does not match the library requested");
+                "TranslatingLibraryLoaders needs implementation so that it can detect if the content (CQL or ELM) loaded does not match the library requested");
     }
 
     @Test
@@ -123,14 +123,14 @@ public class TranslatingLibraryLoaderTests {
     }
 
     @Test()
-    public void ReturnsNullIfNoContent() {
+    public void returnsNullIfNoContent() {
         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
         Library library = this.libraryLoader.load(libraryIdentifier);
         assertNull(library);
     }
 
     @Test()
-    public void ReturnsNullIfBadElmAndNoCql() {
+    public void returnsNullIfBadElmAndNoCql() {
         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
         Library library = this.libraryLoader.load(libraryIdentifier);
 

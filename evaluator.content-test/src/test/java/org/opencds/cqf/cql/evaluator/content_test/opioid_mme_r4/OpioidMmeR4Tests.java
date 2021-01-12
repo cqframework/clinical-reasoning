@@ -16,10 +16,10 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Coding;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
-import org.opencds.cqf.cql.evaluator.guice.cql2elm.Cql2ElmModule;
 import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
 import org.opencds.cqf.cql.evaluator.guice.library.LibraryModule;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -27,31 +27,30 @@ import ca.uhn.fhir.parser.IParser;
 
 public class OpioidMmeR4Tests {
 
-    private static LibraryProcessor libraryProcessor;
-    private static FhirContext fhirContext;
+    private LibraryProcessor libraryProcessor;
+    private FhirContext fhirContext;
 
-    private static Endpoint libraryEndpoint;
-    private static Endpoint terminologyEndpoint;
+    private Endpoint libraryEndpoint;
+    private Endpoint terminologyEndpoint;
     
-    private static VersionedIdentifier id;
+    private VersionedIdentifier id;
 
-    @org.testng.annotations.BeforeClass
-    public static void setup() {
-        fhirContext = FhirContext.forR4();
+    @BeforeClass
+    public void setup() {
+        this.fhirContext = FhirContext.forR4();
         Injector injector = Guice.createInjector(
             new FhirModule(fhirContext),
-            new Cql2ElmModule(), 
             new BuilderModule(), 
             new LibraryModule());
 
-        libraryProcessor = injector.getInstance(LibraryProcessor.class);
-        terminologyEndpoint = createEndpoint("vocabulary/valueset", Constants.HL7_FHIR_FILES);
-        libraryEndpoint = createEndpoint("cql", Constants.HL7_CQL_FILES);
+        this.libraryProcessor = injector.getInstance(LibraryProcessor.class);
+        this.terminologyEndpoint = createEndpoint("vocabulary/valueset", Constants.HL7_FHIR_FILES);
+        this.libraryEndpoint = createEndpoint("cql", Constants.HL7_CQL_FILES);
 
-        id = new VersionedIdentifier().withId("MMECalculatorTests").withVersion("3.0.0");
+        this.id = new VersionedIdentifier().withId("MMECalculatorTests").withVersion("3.0.0");
     }
 
-    private static Endpoint createEndpoint(String url, String type) {
+    private Endpoint createEndpoint(String url, String type) {
         return new Endpoint().setAddress(getJarPath(url)).setConnectionType(new Coding().setCode(type));
     }
 
@@ -68,7 +67,7 @@ public class OpioidMmeR4Tests {
         return subject.getValue().replace("Patient/", "");
     }
 
-    private static String getJarPath(String resourcePath) {
+    private String getJarPath(String resourcePath) {
         try {
             return OpioidMmeR4Tests.class.getResource(resourcePath).toURI().toString();
         }

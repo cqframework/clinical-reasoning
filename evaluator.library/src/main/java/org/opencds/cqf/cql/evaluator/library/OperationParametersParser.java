@@ -5,6 +5,9 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -21,11 +24,13 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAd
 /**
  * This class maps the standard input parameters of the Measure evaluate operation to FHIR parameters
  */
+@Named
 public class OperationParametersParser {
 
     protected AdapterFactory adapterFactory;
     protected FhirTypeConverter fhirTypeConverter;
 
+    @Inject
     public OperationParametersParser(AdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
         this.adapterFactory = adapterFactory;
         this.fhirTypeConverter = fhirTypeConverter;

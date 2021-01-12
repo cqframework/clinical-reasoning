@@ -39,7 +39,7 @@
         <module>evaluator.library</module>
         <module>evaluator.builder</module>
         <module>evaluator.guice</module>
-        <!-- <module>evaluator.spring</module> -->
+        <module>evaluator.spring</module>
         <module>evaluator.cli</module>
         <module>evaluator.content-test</module>
         <!-- <module>evaluator.measure</module> -->
@@ -94,6 +94,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.fhir</groupId>
+                <artifactId>ucum</artifactId>
+                <version>1.0.3</version>
+            </dependency>
             <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine</artifactId>

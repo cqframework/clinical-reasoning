@@ -1,22 +1,22 @@
 package org.opencds.cqf.cql.evaluator.cli;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class CliTest {
 
     private ByteArrayOutputStream outContent;
-    private ByteArrayOutputStream errContent;
+    //private ByteArrayOutputStream errContent;
     private final PrintStream originalOut = System.out;
-    private final PrintStream originalErr = System.err;
+    // private final PrintStream originalErr = System.err;
 
     private static final String testResourceRelativePath = "src/test/resources";
     private static String testResourcePath = null;
@@ -28,7 +28,7 @@ public class CliTest {
         System.out.println(String.format("Test resource directory: %s", testResourcePath));
     }
 
-    @Before
+    @BeforeMethod
     public void setUpStreams() {
         outContent = new ByteArrayOutputStream();
         // errContent = new ByteArrayOutputStream();
@@ -37,7 +37,7 @@ public class CliTest {
         // System.setErr(new PrintStream(errContent));
     }
 
-    @After
+    @AfterMethod
     public void restoreStreams() {
         String sysOut = outContent.toString();
         // String sysError = errContent.toString();
@@ -91,6 +91,8 @@ public class CliTest {
     @Test
     public void testR4() {
         String[] args = new String[]{
+                "-fv",
+                "R4",
                 "-lu",
                 testResourcePath + "/r4",
                 "-ln",

@@ -8,7 +8,7 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
-    <description>CQL Evaluator Serialization Extensions</description>
+    <description>CQL Evaluator - Serialization Extensions</description>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
@@ -20,10 +20,6 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
         </dependency>
     </dependencies>
 </project>

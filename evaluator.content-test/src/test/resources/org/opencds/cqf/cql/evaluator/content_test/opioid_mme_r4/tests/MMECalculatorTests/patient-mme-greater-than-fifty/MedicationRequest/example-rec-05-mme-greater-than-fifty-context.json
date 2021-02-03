@@ -1,0 +1,85 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "example-rec-05-mme-greater-than-fifty-context",
+  "status": "active",
+  "intent": "order",
+  "category": [{
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+        "code": "community"
+      }
+    ]
+  }],
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "197696",
+        "display": "72 HR Fentanyl 0.075 MG/HR Transdermal System"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/patient-mme-greater-than-fifty"
+  },
+  "encounter": {
+    "reference": "Encounter/example-rec-05-mme-greater-than-fifty-context"
+  },
+  "authoredOn": "2020-06-26",
+  "_authoredOn": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+        "valueExpression": {
+          "language": "text/cql",
+          "expression": "Today()"
+        }
+      }
+    ]
+  },
+  "dosageInstruction": [
+    {
+      "timing": {
+        "repeat": {
+          "frequency": 1,
+          "period": 3.0,
+          "periodUnit": "d"
+        }
+      },
+      "asNeededBoolean": false,
+      "doseAndRate": [{
+        "doseQuantity": {
+          "value": 1.0,
+          "unit": "patch",
+          "system": "http://unitsofmeasure.org",
+          "code": "{patch}"
+        }
+      }]
+    }
+  ],
+  "dispenseRequest": {
+    "validityPeriod": {
+      "start": "2020-06-25",
+      "end": "2020-12-25"
+    },
+    "_validityPeriod": {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+          "valueExpression": {
+            "language": "text/cql",
+            "expression": "FHIR.Period { start: FHIR.dateTime { value: Today() }, end: FHIR.dateTime { value: Today() + 6 months } }"
+          }
+        }
+      ]
+    },
+    "numberOfRepeatsAllowed": 3,
+    "expectedSupplyDuration": {
+      "value": 30,
+      "unit": "days",
+      "system": "http://unitsofmeasure.org",
+      "code": "d"
+    }
+  }
+}

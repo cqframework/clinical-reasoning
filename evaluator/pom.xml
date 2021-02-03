@@ -25,10 +25,6 @@
             <artifactId>engine</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.fhir</artifactId>
-        </dependency>
-        <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
         </dependency>

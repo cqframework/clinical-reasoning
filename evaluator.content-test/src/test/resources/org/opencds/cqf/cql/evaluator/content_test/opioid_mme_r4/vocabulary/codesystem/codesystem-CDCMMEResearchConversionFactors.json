@@ -1,0 +1,281 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "CDCMMEResearchConversionFactors",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablecodesystem",
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablecodesystem"
+    ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "shareable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "publishable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "structured"
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/codesystem-sourceReference",
+    "valueUri": "https://www.cdc.gov/drugoverdose/modules/data-files.html"
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/codesystem-warning",
+    "valueMarkdown": "The MME conversion factor is intended only for analytic purposes where prescription data is used to retrospectively calculate daily MME to inform analyses of risks associated with opioid prescribing. This value does not constitute clinical guidance or recommendations for converting patients from one form of opioid analgesic to another. Please consult the manufacturer’s full prescribing information for such guidance. Use of this file for the purposes of any clinical decision-making warrants caution. This is particularly true with regard to methadone. Calculating MME for methadone in clinical practice often involves a sliding-scale approach whereby the conversion factor increases with increasing dose. The conversion factor of 3 for methadone presented in this file would underestimate MME for a given patient. Please see clinical guidance provided here: https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf."
+  } ],
+  "version": "3.0.0",
+  "name": "CDCMMEResearchConversionFactors",
+  "title": "CDC MME Research Conversion Factors",
+  "status": "active",
+  "experimental": "false",
+  "description": "This Code System Supplement defines research conversion factors for calculating Morphine Milligram Equivalence (MME), as described in the data files supplement available from the CDC. The supplement defines conversions factors for ingredients in one of 3 ways: 1, as a direct conversion factor for the ingredient, 2, as a dose-form-specific conversion factor for the ingredient, and 3, as a dose-ranged conversion factor for the ingredient. See the descriptions for each property for information on how the values are represented for the different conversion factors. For a given ingredient, only one type of property will be present, and the properties will enable a unique conversion factor to be determined if the input is within the expected range. If the input is outside the expected range, implementations should indicate a conversion factor could not be determined from the supplied information. All conversion factors supplied in this supplement are in 'mg/d'.",
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "focus",
+      "display": "Clinical Focus"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://snomed.info/sct",
+        "code": "182888003",
+        "display": "Medication requested (situation)"
+      } ]
+    }
+  }, {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "focus",
+      "display": "Clinical Focus"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://snomed.info/sct",
+        "code": "82423001",
+        "display": "Chronic pain (finding)"
+      } ]
+    }
+  } ],
+  "caseSensitive": false,
+  "content": "supplement",
+  "supplements": "http://www.nlm.nih.gov/research/umls/rxnorm",
+  "property": [
+    {
+      "code": "conversion-factor",
+      "description": "Defines the conversion factor for a specific ingredient, when the conversion factor is the same for all dose forms and dose amounts for the ingredient. The value of this property will be the decimal representation of the conversion factor.",
+      "type": "decimal"
+    },
+    {
+      "code": "dose-form-conversion-factor",
+      "description": "Defines the conversion factor for an ingredient when the conversion factor varies by the dose form of the medication. The value of this property will be a string of the form <dose-form-code>:<conversion-factor>, e.g. 970789:130, where '970789' is the RxNorm dose form code, and '130' is the decimal representation of the conversion factor.",
+      "type": "string"
+    },
+    {
+      "code": "dose-range-conversion-factor",
+      "description": "Defines the conversion factor for an ingredient when the conversion factor varies by the overall dose of the medication. The value of this property will be a string of the form <low-value>-<high-value>:<conversion-factor>, e.g. 1-20:4. Note that the low-value or high-value may be a wildcard '*' to indicate the range continues (e.g. '61-*:12' indicates the range is 61 or greater). ",
+      "type": "string"
+    }
+  ],
+  "concept": [
+    {
+      "code": "1819",
+      "display": "Buprenorphine",
+      "property": [
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "316987:12600"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "970789:30"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "317007:30"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "316992:30"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "858080:30"
+        }
+      ]
+    },
+    {
+      "code": "1841",
+      "display": "Butorphanol",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 7
+      }]
+    },
+    {
+      "code": "2670",
+      "display": "Codeine",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 0.15
+      }]
+    },
+    {
+      "code": "23088",
+      "display": "Dihydrocodeine",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 0.25
+      }]
+    },
+    {
+      "code": "4337",
+      "display": "Fentanyl",
+      "property": [
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "316987:7200"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "970789:130"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "317007:130"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "316992:130"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "858080:180"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "126542:160"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "346163:160"
+        },
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "1797831:160"
+        }
+      ]
+    },
+    {
+      "code": "5489",
+      "display": "Hydrocodone",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 1
+      }]
+    },
+    {
+      "code": "3423",
+      "display": "Hydromorphone",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 4
+      }]
+    },
+    {
+      "code": "237005",
+      "display": "Levomethadyl acetate",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 8
+      }]
+    },
+    {
+      "code": "6378",
+      "display": "Loverphanol tartrate",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 11
+      }]
+    },
+    {
+      "code": "6754",
+      "display": "Meperidine",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 0.1
+      }]
+    },
+    {
+      "code": "6813",
+      "display": "Methadone",
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 3
+        }
+      ]
+    },
+    {
+      "code": "7052",
+      "display": "Morphine",
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 1
+        }
+      ]
+    },
+    {
+      "code": "7676",
+      "display": "Opium",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 1
+      }]
+    },
+    {
+      "code": "7804",
+      "display": "Oxycodone",
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 1.5
+        }
+      ]
+    },
+    {
+      "code": "7814",
+      "display": "Oxymorphone",
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 3
+        }
+      ]
+    },
+    {
+      "code": "8001",
+      "display": "Pentazocine",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 0.37
+      }]
+    },
+    {
+      "code": "787390",
+      "display": "Tapentadol",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 0.4
+      }]
+    },
+    {
+      "code": "10689",
+      "display": "Tramadol",
+      "property": [{
+        "code": "conversion-factor",
+        "valueDecimal": 0.1
+      }]
+    }
+  ]
+}

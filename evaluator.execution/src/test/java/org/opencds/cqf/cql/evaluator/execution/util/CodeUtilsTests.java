@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.execution.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.testng.annotations.BeforeClass;
+import org.testng.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;

@@ -5,17 +5,14 @@ import static java.util.Arrays.asList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.gen.cqlParser.LongNumberLiteralContext;
+import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import joptsimple.util.KeyValuePair;
-
-import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.evaluator.cli.temporary.EvaluationParameters;
 
 @SuppressWarnings({ "unchecked", "unused"})
 public class ArgumentProcessor {
@@ -36,6 +33,7 @@ public class ArgumentProcessor {
     public static final String[] CONTEXT_PARAMETER_OPTIONS = {"c", "context"};
 
 
+    public static final String[] FHIR_VERSION_OPTIONS = {"fv", "fhir-version"};
 
     public static final String[] HELP_OPTIONS = {"h", "help", "?"};
     public static final String[] CLI_VERSION_OPTIONS = {"v", "version"};
@@ -58,6 +56,7 @@ public class ArgumentProcessor {
         OptionSpecBuilder measureNameBuilder = parser.acceptsAll(asList(MEASURE_NAME_OPTIONS), "Required if measure-url specified.");
         OptionSpecBuilder measureVersionBuilder = parser.acceptsAll(asList(MEASURE_VERSION_OPTIONS), "If omitted most recent version of the measure will be used.");  
         
+        OptionSpecBuilder fhirVersionBuilder = parser.acceptsAll(asList(FHIR_VERSION_OPTIONS), "Required if terminology or a FHIR model is specified. Use DSTU3, R4, R5, etc.");  
 
         OptionSpecBuilder helpBuilder = parser.acceptsAll(asList(HELP_OPTIONS), "Show this help page");
         OptionSpec<Void> help = helpBuilder.forHelp();
@@ -85,6 +84,7 @@ public class ArgumentProcessor {
         OptionSpec<String> measureUrl = measureUrlBuilder.withRequiredArg().describedAs("location of measure");
         OptionSpec<String> measureName = measureNameBuilder.requiredIf(measureUrl).withRequiredArg().describedAs("name of measure");
         OptionSpec<String> measureVersion = measureVersionBuilder.availableIf(measureName).withRequiredArg().describedAs("version of measure");
+
         
 
 
@@ -104,6 +104,9 @@ public class ArgumentProcessor {
         OptionSpec<KeyValuePair> context = parser.acceptsAll(asList(CONTEXT_PARAMETER_OPTIONS), 
             "Use the form contextParameter=value (e.g. Patient=123).")
             .withRequiredArg().ofType(KeyValuePair.class).describedAs("name and value of context parameter");
+
+        
+        OptionSpec<FhirVersionEnum> fhirVersion = fhirVersionBuilder.requiredIf(terminologyUrl).withRequiredArg().ofType(FhirVersionEnum.class).describedAs("version of FHIR");
 
         // OptionSpec<Boolean> verbose = parser.acceptsAll(asList(OUTPUT_FORMAT_OPTIONS), "Show simplified results")
         // .withOptionalArg().ofType(Boolean.class).describedAs("String representation of a boolean value");
@@ -154,7 +157,7 @@ public class ArgumentProcessor {
 
     private void printExamples() {
         System.out.println("Examples:");
-        System.out.println("cli --ln \"CMS146\" --lu /ig/cql --m FHIR=/ig/tests --t /ig/valuesets -c Patient=123");
+        System.out.println("cli --ln \"CMS146\" --lu /ig/cql --m FHIR=/ig/tests --t /ig/valuesets -c Patient=123 --fv R4");
     }
 
     public EvaluationParameters parseAndConvert(String[] args) {
@@ -182,12 +185,19 @@ public class ArgumentProcessor {
         List<KeyValuePair> parameters = (List<KeyValuePair>)options.valuesOf(PARAMETER_OPTIONS[0]);
         KeyValuePair contextParameter = (KeyValuePair)options.valueOf(CONTEXT_PARAMETER_OPTIONS[0]);
 
+        FhirVersionEnum fhirVersion = (FhirVersionEnum)options.valueOf(FHIR_VERSION_OPTIONS[0]);
+
+        if (model != null && model.key != null && (model.key.equals("FHIR") || model.key.equals("QUICK") || model.key.equals("http://hl7.org/fhir")) && fhirVersion == null) {
+            throw new IllegalArgumentException("fhir-version must be specified if a FHIR model is used.");
+        }
+
         EvaluationParameters ep = new EvaluationParameters();
         ep.libraryUrl = libraryUrl;
         ep.libraryName = libraryName;
         ep.contextParameter = contextParameter != null ? Pair.of(contextParameter.key, contextParameter.value) : null;
         ep.model = model != null ? Pair.of(model.key, model.value) : null;
         ep.terminologyUrl = terminologyUrl;
+        ep.fhirVersion = fhirVersion;
         return ep;
     }
 }

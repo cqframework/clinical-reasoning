@@ -1,0 +1,40 @@
+{
+    "library" : {
+      "type" : "Library",
+      "identifier" : {
+        "type" : "VersionedIdentifier",
+        "id" : "LibraryNoOptions",
+        "version" : "1"
+      },
+      "schemaIdentifier" : {
+        "type" : "VersionedIdentifier",
+        "id" : "urn:hl7-org:elm",
+        "version" : "r1"
+      },
+      "usings" : {
+        "type" : "Library$Usings",
+        "def" : [ {
+          "type" : "UsingDef",
+          "localIdentifier" : "System",
+          "uri" : "urn:hl7-org:elm-types:r1"
+        } ]
+      },
+      "statements" : {
+        "type" : "Library$Statements",
+        "def" : [ {
+          "type" : "ExpressionDef",
+          "expression" : {
+            "type" : "Literal",
+            "valueType" : "{urn:hl7-org:elm-types:r1}Integer",
+            "value" : "1"
+          },
+          "name" : "Result",
+          "context" : "Patient",
+          "accessLevel" : "Public"
+        } ]
+      },
+      "annotation" : [ { } ]
+    }
+  }
+  
+  

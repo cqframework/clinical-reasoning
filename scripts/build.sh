@@ -9,6 +9,8 @@ CMD="mvn test -T 4 -B"
 if [[ "$TRAVIS_BRANCH" =~ master* ]]; then CMD="$CMD -P release"; fi
 eval $CMD
 
+# If it's not develop or master, exit
+if ! [[ "$TRAVIS_BRANCH" =~ master || "$TRAVIS_BRANCH" =~ develop ]]; then exit 0; fi
 
 # Run Deploy
 CMD="mvn deploy -DskipTests=true -T 4 -B"
@@ -19,7 +21,7 @@ cp .travis.settings.xml $HOME/.m2/settings.xml
 # Import signing key
 if [[ "$TRAVIS_BRANCH" =~ master* ]]; then
     echo $GPG_SECRET_KEYS | base64 --decode| $GPG_EXECUTABLE --import;
-    echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust;
+    echo $GPG_OWNER_TRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust;
     CMD="$CMD -P release"
 fi 
 

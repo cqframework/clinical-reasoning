@@ -8,6 +8,7 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
+    <name>evaluator.guice</name>
     <description>CQL Evaluator - Guice Modules</description>
 
     <parent>

@@ -8,6 +8,7 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
+   <name>evaluator.content-test</name>
     <description>CQL Evaluator - Content Test Suite</description>
 
     <parent>

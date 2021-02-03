@@ -8,6 +8,7 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
+    <name>evaluator.builder</name>
     <description>CQL Evaluator - Builder</description>
 
     <parent>

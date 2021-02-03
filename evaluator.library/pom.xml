@@ -8,6 +8,7 @@
     <version>${revision}</version>
     <packaging>jar</packaging>
 
+    <name>evaluator.library</name>
     <description>CQL Evaluator - Library Evaluation</description>
 
     <parent>

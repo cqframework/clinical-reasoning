@@ -21,10 +21,10 @@
 
         <cql-translator.version>1.5.1</cql-translator.version>
         <cql-engine.version>1.5.1</cql-engine.version>
-        <spring.version>5.3.2</spring.version>
-        <hapi.version>5.2.0</hapi.version>
-        <jopt-simple.version>5.0.4</jopt-simple.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <spring.version>5.3.4</spring.version>
+        <hapi.version>5.3.0</hapi.version>
+        <jopt-simple.version>6.0-alpha-3</jopt-simple.version>
+        <slf4j.version>2.0.0-alpha1</slf4j.version>
     </properties>
     <modules>
         <module>evaluator</module>
@@ -144,7 +144,7 @@
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
-                <version>2.8.5</version>
+                <version>2.9.0</version>
             </dependency>
 
             <!-- CLI -->
@@ -172,7 +172,7 @@
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>4.2.3</version>
+                <version>5.0.0-BETA-1</version>
             </dependency>
 
             <!-- Spring -->
@@ -186,7 +186,7 @@
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.8.8</version>
+                <version>7.3.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -198,7 +198,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>3.3.3</version>
+                <version>3.7.7</version>
                 <scope>test</scope>
             </dependency>
 
@@ -266,6 +266,16 @@
                         <source>1.8</source>
                         <target>1.8</target>
                         <release>8</release>
+                        <failOnWarning>true</failOnWarning>
+                        <showWarnings>true</showWarnings>
+                        <compilerArgs>
+                            <arg>-Xlint:all</arg>
+                            <!-- This fixes a boostrapclass path warning which the "release" property fixes on Java 9+ -->
+                            <arg>-Xlint:-options</arg>
+                            <!-- This bypasses annotation processing for Inject -->
+                            <arg>-Xlint:-processing</arg>
+                            <arg>-Werror</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -466,7 +476,6 @@
             <id>ci</id>
             <build>
                 <plugins>
-
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -485,25 +494,25 @@
                     </plugin>
                 </plugins>
             </build>
-            </profile>
-            <profile>
-                <id>release</id>
-                <build>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-enforcer-plugin</artifactId>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-gpg-plugin</artifactId>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.sonatype.plugins</groupId>
-                            <artifactId>nexus-staging-maven-plugin</artifactId>
-                        </plugin>
-                    </plugins>
-                </build>
-            </profile>
-        </profiles>
-    </project>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

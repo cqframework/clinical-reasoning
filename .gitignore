@@ -6,6 +6,8 @@ target
 .flattened-pom.xml
 .factorypath
 
+pom.xml.versionsBackup
+
 *.log*
 
 Snap.*

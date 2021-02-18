@@ -51,7 +51,7 @@ public class FhirClientFhirLibraryContentProvider extends
 
     protected IBaseResource getLibrary(String url) {
         try {
-            return (IBaseResource)this.client.read().resource("Library").withUrl(url).elementsSubset("name", "version", "content", "type").encodedJson().execute();
+            return this.client.read().resource("Library").withUrl(url).elementsSubset("name", "version", "content", "type").encodedJson().execute();
         }
         catch (Exception e) {
             logger.error(String.format("error while getting library with url %s", url), e);

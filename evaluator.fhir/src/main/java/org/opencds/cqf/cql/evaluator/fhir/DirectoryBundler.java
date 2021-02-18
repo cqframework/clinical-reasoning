@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.BundleUtil;
 
@@ -86,7 +87,7 @@ public class DirectoryBundler {
             files = this.listDirectory(uri.getPath());
         }
 
-        return this.bundleFiles(files);
+        return this.bundleFiles(path, files);
     }
 
     private Collection<File> listJar(URI uri, String path) {
@@ -121,7 +122,7 @@ public class DirectoryBundler {
         }
     }
 
-    private IBaseBundle bundleFiles(Collection<File> files) {
+    private IBaseBundle bundleFiles(String rootPath, Collection<File> files) {
         List<IBaseResource> resources = new ArrayList<>();
 
         for (File f : files) {
@@ -141,8 +142,9 @@ public class DirectoryBundler {
 
         IVersionSpecificBundleFactory bundleFactory = this.fhirContext.newBundleFactory();
 
-        bundleFactory.addRootPropertiesToBundle("bundled-directory", null, null, null, null, resources.size(),
-                BundleTypeEnum.COLLECTION, null);
+        BundleLinks bundleLinks = new BundleLinks(rootPath, null, true, BundleTypeEnum.COLLECTION);
+
+        bundleFactory.addRootPropertiesToBundle("bundled-directory", bundleLinks, resources.size(), null);
 
         bundleFactory.addResourcesToBundle(resources, BundleTypeEnum.COLLECTION, "",
                 BundleInclusionRule.BASED_ON_INCLUDES, null);

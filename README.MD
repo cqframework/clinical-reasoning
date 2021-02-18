@@ -82,7 +82,7 @@ java -jar ./evaluator.cli/target/evaluator.cli-1.1.0-SNAPSHOT-shaded.jar \
 
 ## Getting Help
 
-Bugs and feature requests can be filed with [Github Issues](https://github.com/DBCG/cql_engine/issues).
+Bugs and feature requests can be filed with [Github Issues](https://github.com/DBCG/cql-evaluator/issues).
 
 The implementers are active on the official FHIR [Zulip chat for CQL](https://chat.fhir.org/#narrow/stream/179220-cql).
 

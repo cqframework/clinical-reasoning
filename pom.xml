@@ -59,7 +59,7 @@
     <scm>
         <connection>scm:git:git://github.com/DBCG/cql-evaluator.git</connection>
         <developerConnection>scm:git:ssh://github.com:DBCG/cql-evaluator.git</developerConnection>
-        <url>https://github.com/DBCG/cql-evaluator.git/tree/master</url>
+        <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
     </scm>
 
     <repositories>

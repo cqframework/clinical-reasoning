@@ -1,6 +1,8 @@
 # CQL Evaluator
 
-This project provides a Java-based [CQL](https://cql.hl7.org/) evaluation service and related components.
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf.cql/evaluator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf.cql/evaluator) [![Build Status](https://www.travis-ci.com/DBCG/cql-evaluator.svg?branch=master)](https://www.travis-ci.com/DBCG/cql-evaluator) [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
+
+This project provides a Java-based [CQL](https://cql.hl7.org/) evaluation environment and related components.
 
 The front-end of the evaluator is the [cql-to-elm translator](https://github.com/cqframework/clinical_quality_language/tree/master/Src/java) (which provides translation of CQL to [ELM](https://cql.hl7.org/elm.html)) and the backend is the [cql-engine](https://github.com/DBCG/cql_engine) (which provides ELM execution). The evaluator glues those two components together and provides DataProvider and TerminologyProvider implementations that allow execution of CQL against a filesystem, FHIR server, and in-process FHIR resources.
 
@@ -78,12 +80,36 @@ java -jar ./evaluator.cli/target/evaluator.cli-1.1.0-SNAPSHOT-shaded.jar \
         `-- test
 ```
 
+## Getting Help
+
+Bugs and feature requests can be filed with [Github Issues](https://github.com/DBCG/cql_engine/issues).
+
+The implementers are active on the official FHIR [Zulip chat for CQL](https://chat.fhir.org/#narrow/stream/179220-cql).
+
+Inquires for commercial support can be directed to [info@alphora.com](info@alphora.com).
+
+## Related Projects
+
+[Clinical Quality Language](https://github.com/cqframework/clinical_quality_language) - Tooling in support of the CQL specification, including the CQL verifier/translator used in this project.
+
+[CQL Engine](https://github.com/DBCG/cql_engine) - The open source Java-based ELM evaluation engine used in this project.
+
+[CQL Support for Atom](https://atom.io/packages/language-cql) - Open source CQL IDE with syntax highlighting, linting, and local CQL evaluation provided by this project.
+
+[CQF Ruler](https://github.com/DBCG/cqf-ruler) - Integrates this project into the HAPI FHIR server, providing CQL Library evaluation among other functionality.
+
 ## License
 
-Copyright 2020 Dynamic Content Group
+Copyright 2019+ Dynamic Content Group, LLC (dba Alphora)
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
 [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

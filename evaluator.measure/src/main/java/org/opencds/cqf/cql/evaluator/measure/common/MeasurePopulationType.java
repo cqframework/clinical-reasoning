@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.measure.common;
+package org.opencds.cqf.cql.evaluator.measure.common;
 
 import java.util.HashMap;
 import java.util.Map;

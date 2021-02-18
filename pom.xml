@@ -15,7 +15,7 @@
 
 
     <properties>
-        <revision>1.1.1-SNAPSHOT</revision>
+        <revision>1.2.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -37,7 +37,7 @@
         <module>evaluator.spring</module>
         <module>evaluator.cli</module>
         <module>evaluator.content-test</module>
-        <!-- <module>evaluator.measure</module> -->
+        <module>evaluator.measure</module>
     </modules>
 
     <licenses>
@@ -59,7 +59,7 @@
     <scm>
         <connection>scm:git:git://github.com/DBCG/cql-evaluator.git</connection>
         <developerConnection>scm:git:ssh://github.com:DBCG/cql-evaluator.git</developerConnection>
-        <url>http://github.com/DBCG/cql-evaluator.git/tree/master</url>
+        <url>https://github.com/DBCG/cql-evaluator.git/tree/master</url>
     </scm>
 
     <repositories>
@@ -98,34 +98,16 @@
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql-engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine.fhir</artifactId>
                 <version>${cql-engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
                 <version>${cql-translator.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- HAPI depedencies -->
@@ -271,37 +253,6 @@
         <defaultGoal>package</defaultGoal>
         <pluginManagement>
             <plugins>
-                <!-- <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jmod-plugin</artifactId>
-                    <version>3.0.0-alpha-1</version>
-                    <extensions>true</extensions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jlink-plugin</artifactId>
-                    <version>3.0.0-alpha-1</version>
-                    <extensions>true</extensions>
-                </plugin> -->
-                <!-- <plugin>
-                    <groupId>org.fugerit.java</groupId>
-                    <artifactId>freemarker-maven-plugin</artifactId>
-                    <version>1.0.4</version>
-                </plugin> -->
-                <!-- <plugin>
-                    <groupId>com.googlecode.fmpp-maven-plugin</groupId>
-                    <artifactId>fmpp-maven-plugin</artifactId>
-                    <version>1.0</version>
-                    <executions>
-                        <execution>
-                            <id>generate-fmpp-sources</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>generate</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin> -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
@@ -325,6 +276,7 @@
                         <archive>
                             <manifest>
                                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             </manifest>
                         </archive>
                     </configuration>
@@ -493,27 +445,11 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -527,23 +463,47 @@
     </build>
     <profiles>
         <profile>
-            <id>release</id>
+            <id>ci</id>
             <build>
                 <plugins>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <artifactId>maven-source-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-    </profiles>
-</project>
+            </profile>
+            <profile>
+                <id>release</id>
+                <build>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-enforcer-plugin</artifactId>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-gpg-plugin</artifactId>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.sonatype.plugins</groupId>
+                            <artifactId>nexus-staging-maven-plugin</artifactId>
+                        </plugin>
+                    </plugins>
+                </build>
+            </profile>
+        </profiles>
+    </project>

@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.measure.common;
+package org.opencds.cqf.cql.evaluator.measure.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,9 +13,6 @@ import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupComponentT extends IBase, MeasureGroupPopulationComponentT extends IBase, MeasureReportT extends IBase, MeasureReportGroupComponentT extends IBase, MeasureReportGroupPopulationComponentT extends IBase, ResourceT, SubjectT extends ResourceT> {
@@ -70,7 +67,7 @@ public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupCom
         this.subjectOrPractitionerId = patientOrPractitionerId;
         this.measurementPeriod = measurementPeriod;
         this.getId = getId;
-        this.packageName = packageName;
+        this.packageName = packageName;        
     }
 
     public MeasureReportT evaluate(MeasureReportType type) {

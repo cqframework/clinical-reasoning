@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.measure.stu3;
+package org.opencds.cqf.cql.evaluator.measure.stu3;
 
 import java.util.Date;
 import java.util.List;
@@ -14,10 +14,10 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.opencds.cqf.cql.engine.execution.Context;
-import org.opencds.cqf.cql.measure.common.MeasureEvaluation;
-import org.opencds.cqf.cql.measure.common.MeasurePopulationType;
-import org.opencds.cqf.cql.measure.common.MeasureReportType;
-import org.opencds.cqf.cql.measure.common.MeasureScoring;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvaluation;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureScoring;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class Stu3MeasureEvaluation<RT, ST extends RT> extends

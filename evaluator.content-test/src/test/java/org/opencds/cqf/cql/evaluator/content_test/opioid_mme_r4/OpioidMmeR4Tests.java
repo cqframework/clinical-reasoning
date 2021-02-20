@@ -6,18 +6,13 @@ import static org.testng.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.hl7.fhir.r4.model.Coding;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
-import org.opencds.cqf.cql.evaluator.guice.builder.BuilderModule;
-import org.opencds.cqf.cql.evaluator.guice.fhir.FhirModule;
-import org.opencds.cqf.cql.evaluator.guice.library.LibraryModule;
+import org.opencds.cqf.cql.evaluator.dagger.DaggerCqlEvaluatorComponent;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,12 +33,8 @@ public class OpioidMmeR4Tests {
     @BeforeClass
     public void setup() {
         this.fhirContext = FhirContext.forR4();
-        Injector injector = Guice.createInjector(
-            new FhirModule(fhirContext),
-            new BuilderModule(), 
-            new LibraryModule());
 
-        this.libraryProcessor = injector.getInstance(LibraryProcessor.class);
+        this.libraryProcessor = DaggerCqlEvaluatorComponent.builder().fhirContext(fhirContext).build().createLibraryProcessor();
         this.terminologyEndpoint = createEndpoint("vocabulary/valueset", Constants.HL7_FHIR_FILES);
         this.libraryEndpoint = createEndpoint("cql", Constants.HL7_CQL_FILES);
 

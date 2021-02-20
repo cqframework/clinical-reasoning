@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
@@ -19,6 +20,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 @Named
 public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory {
+
+    @Inject
+    public FhirModelResolverFactory() {}
 
     private Map<FhirVersionEnum, ModelResolver> cache = new HashMap<>();
 

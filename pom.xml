@@ -22,6 +22,7 @@
         <cql-translator.version>1.5.1</cql-translator.version>
         <cql-engine.version>1.5.1</cql-engine.version>
         <spring.version>5.3.4</spring.version>
+        <dagger.version>2.32</dagger.version>
         <hapi.version>5.3.0</hapi.version>
         <jopt-simple.version>6.0-alpha-3</jopt-simple.version>
         <slf4j.version>2.0.0-alpha1</slf4j.version>
@@ -33,7 +34,7 @@
         <module>evaluator.engine</module>
         <module>evaluator.library</module>
         <module>evaluator.builder</module>
-        <module>evaluator.guice</module>
+        <module>evaluator.dagger</module>
         <module>evaluator.spring</module>
         <module>evaluator.cli</module>
         <module>evaluator.content-test</module>
@@ -168,11 +169,11 @@
             </dependency>
 
 
-            <!-- Guice -->
+            <!-- Dagger -->
             <dependency>
-                <groupId>com.google.inject</groupId>
-                <artifactId>guice</artifactId>
-                <version>5.0.0-BETA-1</version>
+                <groupId>com.google.dagger</groupId>
+                <artifactId>dagger</artifactId>
+                <version>${dagger.version}</version>
             </dependency>
 
             <!-- Spring -->

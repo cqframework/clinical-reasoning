@@ -1,16 +1,16 @@
-package org.opencds.cqf.cql.evaluator.guice.fhir.adapter;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
+package org.opencds.cqf.cql.evaluator.dagger.fhir.adapter;
 
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-public class AdapterModule extends AbstractModule {
+
+import dagger.Module;
+import dagger.Provides;
+
+@Module
+public class AdapterModule {
 
   @Provides
-  @Singleton
   protected AdapterFactory providesAdapterFactory(FhirContext fhirContext) {
     switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
@@ -28,8 +29,10 @@ import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
 
 @Named
 public class CqlFileLibraryContentProviderFactory implements TypedLibraryContentProviderFactory {
-
     private Logger logger = LoggerFactory.getLogger(CqlFileLibraryContentProviderFactory.class);
+
+    @Inject
+    CqlFileLibraryContentProviderFactory(){}
 
     @Override
     public String getType() {

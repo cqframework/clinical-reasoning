@@ -14,9 +14,9 @@ import org.testng.annotations.Test;
 public class CliTest {
 
     private ByteArrayOutputStream outContent;
-    //private ByteArrayOutputStream errContent;
+    private ByteArrayOutputStream errContent;
     private final PrintStream originalOut = System.out;
-    // private final PrintStream originalErr = System.err;
+    private final PrintStream originalErr = System.err;
 
     private static final String testResourceRelativePath = "src/test/resources";
     private static String testResourcePath = null;
@@ -31,55 +31,52 @@ public class CliTest {
     @BeforeMethod
     public void setUpStreams() {
         outContent = new ByteArrayOutputStream();
-        // errContent = new ByteArrayOutputStream();
+        errContent = new ByteArrayOutputStream();
 
         System.setOut(new PrintStream(outContent));
-        // System.setErr(new PrintStream(errContent));
+        System.setErr(new PrintStream(errContent));
     }
 
     @AfterMethod
     public void restoreStreams() {
         String sysOut = outContent.toString();
-        // String sysError = errContent.toString();
+        String sysError = errContent.toString();
 
         System.setOut(originalOut);
-        // System.setErr(originalErr);
+        System.setErr(originalErr);
 
         System.out.println(sysOut);
-        // System.err.println(sysError);
+        System.err.println(sysError);
     }
 
     @Test 
     public void testVersion() {
-        String[] args = new String[] { "-v" };
-        Main.main(args);
+        String[] args = new String[] { "-V" };
+        Main.run(args);
         assertTrue(outContent.toString().startsWith("cql-evaluator cli version:"));
     }
 
-    //@Test
+    @Test
     public void testHelp() {
         String[] args = new String[] { "-h" };
-        Main.main(args);
+        Main.run(args);
         String output = outContent.toString();
-        assertTrue(output.startsWith("cql-evaluator cli version:"));
+        assertTrue(output.startsWith("Usage:"));
         // assertTrue(output.endsWith("Patient=123\n"));
     }
 
     @Test 
     public void testEmpty() {
         String[] args = new String[] { };
-        Main.main(args);
-        String output = outContent.toString();
-        assertTrue(output.startsWith("cql-evaluator cli version:"));
+        Main.run(args);
+        String output = errContent.toString();
+        assertTrue(output.startsWith("Missing required subcommand"));
         // assertTrue(output.endsWith("Patient=123\n"));
     }
 
-    @Test 
+    @Test(expectedExceptions = NullPointerException.class)
     public void testNull() {
-        Main.main(null);
-        String output = outContent.toString();
-        assertTrue(output.startsWith("cql-evaluator cli version:"));
-        // assertTrue(output.endsWith("Patient=123\n"));
+        Main.run(null);
     }
 
    
@@ -91,26 +88,30 @@ public class CliTest {
     @Test
     public void testR4() {
         String[] args = new String[]{
-                "-fv",
-                "R4",
-                "-lu",
-                testResourcePath + "/r4",
-                "-ln",
-                "TestFHIR",
-                "-m",
-                "FHIR="+ testResourcePath + "/r4",
-                "-t",
-                testResourcePath + "/r4/vocabulary/ValueSet",
-                "-c",
-                "Patient=example"
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/r4",
+                "-ln=TestFHIR",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/r4",
+                "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example",
+                "-lu="+ testResourcePath + "/r4",
+                "-ln=TestFHIR",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/r4",
+                "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
             };
     
-        Main.main(args);
+        Main.run(args);
 
         String output = outContent.toString();
 
-        assertTrue(output.contains("Patient="));
-        assertTrue(output.contains("TestAdverseEvent="));
+        assertTrue(output.contains("Patient=org.hl7.fhir.r4.model.Patient"));
+        assertTrue(output.contains("TestAdverseEvent=[org.hl7.fhir.r4.model.AdverseEvent"));
     }
 
     @Test

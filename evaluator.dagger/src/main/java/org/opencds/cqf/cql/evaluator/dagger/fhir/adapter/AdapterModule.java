@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.dagger.fhir.adapter;
 
+import javax.inject.Singleton;
+
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -11,6 +13,7 @@ import dagger.Provides;
 public class AdapterModule {
 
   @Provides
+  @Singleton
   protected AdapterFactory providesAdapterFactory(FhirContext fhirContext) {
     switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:

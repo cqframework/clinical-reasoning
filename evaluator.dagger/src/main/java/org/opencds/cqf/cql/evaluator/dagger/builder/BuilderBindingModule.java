@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.dagger.builder;
 
+import javax.inject.Singleton;
+
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer;
@@ -12,15 +14,19 @@ import dagger.Module;
 public abstract class BuilderBindingModule {
 
     @Binds
+    @Singleton
     abstract LibraryLoaderFactory libraryLoaderFactory(org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory libraryLoaderFactory);
 
 
     @Binds
+    @Singleton
     abstract DataProviderFactory dataProviderFactory(org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory dataProviderFactory);
 
     @Binds
+    @Singleton
     abstract TerminologyProviderFactory terminologyProviderFactory(org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory terminologyProviderFactory);
 
     @Binds
+    @Singleton
     abstract RetrieveProviderConfigurer retrieveProviderConfigurer(org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer retrieveProviderConfigurer);
 }

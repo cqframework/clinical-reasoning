@@ -23,6 +23,7 @@
         <dagger.version>2.32</dagger.version>
         <hapi.version>5.3.0</hapi.version>
         <jopt-simple.version>6.0-alpha-3</jopt-simple.version>
+        <picocli.version>4.6.1</picocli.version>
         <slf4j.version>2.0.0-alpha1</slf4j.version>
     </properties>
     <modules>
@@ -127,7 +128,17 @@
             </dependency>
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-structures-dstu3</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
                 <version>${hapi.version}</version>
             </dependency>
             <dependency>
@@ -137,7 +148,17 @@
             </dependency>
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-structures-r5</artifactId>
+                <version>${hapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-r5</artifactId>
                 <version>${hapi.version}</version>
             </dependency>
             <dependency>
@@ -152,6 +173,11 @@
                 <artifactId>jopt-simple</artifactId>
                 <version>${jopt-simple.version}</version>
             </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>${picocli.version}</version>
+            </dependency>
 
             <!-- DI APIs -->
             <dependency>
@@ -159,13 +185,6 @@
                 <artifactId>javaee-api</artifactId>
                 <version>8.0.1</version>
             </dependency>
-
-            <dependency>
-                <groupId>com.google.auto.factory</groupId>
-                <artifactId>auto-factory</artifactId>
-                <version>1.0-beta8</version>
-            </dependency>
-
 
             <!-- Dagger -->
             <dependency>

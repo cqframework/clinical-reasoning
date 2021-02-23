@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.dagger;
 
+import javax.inject.Singleton;
+
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
@@ -12,6 +14,7 @@ import dagger.BindsInstance;
 import dagger.Component;
 
 @Component(modules = { LibraryModule.class })
+@Singleton
 public interface CqlEvaluatorComponent {
     LibraryProcessor createLibraryProcessor();
     CqlEvaluatorBuilder createBuilder();

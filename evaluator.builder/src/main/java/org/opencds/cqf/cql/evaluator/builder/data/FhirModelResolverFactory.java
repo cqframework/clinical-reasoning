@@ -36,7 +36,6 @@ public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.b
 
     protected ModelResolver fhirModelResolverForVersion(FhirVersionEnum fhirVersionEnum) {
         requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
-
         if (!cache.containsKey(fhirVersionEnum)) {
             ModelResolver resolver = null;
             switch (fhirVersionEnum) {

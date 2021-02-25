@@ -1,0 +1,16 @@
+cql
+-fv=R4
+-lu=src/test/resources/r4
+-ln=TestFHIR
+-m=FHIR
+-mu=src/test/resources/r4
+-t=src/test/resources/r4/vocabulary/ValueSet
+-c=Patient
+-cv=example
+-lu=src/test/resources/r4
+-ln=TestFHIR
+-m=FHIR
+-mu=src/test/resources/r4
+-t=src/test/resources/r4/vocabulary/ValueSet
+-c=Patient
+-cv=example

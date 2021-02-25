@@ -86,6 +86,21 @@ public class CliTest {
     }
 
     @Test
+    public void testArgFile() {
+        String [] args = new String[] {
+            "argfile",
+            testResourcePath + "/argfile/args.txt"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Patient=org.hl7.fhir.r4.model.Patient"));
+        assertTrue(output.contains("TestAdverseEvent=[org.hl7.fhir.r4.model.AdverseEvent"));
+    }
+
+    @Test
     public void testR4() {
         String[] args = new String[]{
                 "cql",

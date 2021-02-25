@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -148,8 +149,7 @@ public class CqlCommand implements Callable<Integer> {
             EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
 
             for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
-                System.out.println(libraryEntry.getKey() + "="
-                        + this.tempComvert(libraryEntry.getValue()));
+                System.out.println(libraryEntry.getKey() + "=" + this.tempComvert(libraryEntry.getValue()));
             }
 
             System.out.println();
@@ -172,16 +172,20 @@ public class CqlCommand implements Callable<Integer> {
                 result += (tempComvert(o) + ", ");
             }
 
-            result = result.substring(0, result.length() - 2);
+            if (result.length() > 1) {
+                result = result.substring(0, result.length() - 2);
+            }
 
             result += "]";
-        } else if (value instanceof IBaseDatatype) {
-            result = ((IBaseDatatype) value).toString();
         } else if (value instanceof IBaseResource) {
             IBaseResource resource = (IBaseResource) value;
             result = resource.fhirType() + (resource.getIdElement() != null && resource.getIdElement().hasIdPart()
                     ? "(id=" + resource.getIdElement().getIdPart() + ")"
                     : "");
+        } else if (value instanceof IBase) {
+            result = ((IBase) value).fhirType();
+        } else if (value instanceof IBaseDatatype) {
+            result = ((IBaseDatatype) value).fhirType();
         } else {
             result = value.toString();
         }

@@ -96,8 +96,8 @@ public class CliTest {
 
         String output = outContent.toString();
 
-        assertTrue(output.contains("Patient=org.hl7.fhir.r4.model.Patient"));
-        assertTrue(output.contains("TestAdverseEvent=[org.hl7.fhir.r4.model.AdverseEvent"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));
     }
 
     @Test
@@ -125,8 +125,8 @@ public class CliTest {
 
         String output = outContent.toString();
 
-        assertTrue(output.contains("Patient=org.hl7.fhir.r4.model.Patient"));
-        assertTrue(output.contains("TestAdverseEvent=[org.hl7.fhir.r4.model.AdverseEvent"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));
     }
 
     @Test

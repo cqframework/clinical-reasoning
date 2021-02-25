@@ -8,6 +8,8 @@ import java.util.concurrent.Callable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -60,26 +62,26 @@ public class CqlCommand implements Callable<Integer> {
         public ContextParameter context;
 
         static class ContextParameter {
-            @Option(names = {"-c", "--context"})
+            @Option(names = { "-c", "--context" })
             public String contextName;
 
-            @Option(names = { "-cv", "--context-value"})
+            @Option(names = { "-cv", "--context-value" })
             public String contextValue;
         }
 
         static class ModelParameter {
-            @Option(names = {"-m", "--model"})
+            @Option(names = { "-m", "--model" })
             public String modelName;
 
-            @Option(names = { "-mu", "--model-url"})
+            @Option(names = { "-mu", "--model-url" })
             public String modelUrl;
         }
 
         static class ParameterParameter {
-            @Option(names = {"-p", "--parameter"})
+            @Option(names = { "-p", "--parameter" })
             public String parameterName;
 
-            @Option(names = {"-pv", "--parameter-value"})
+            @Option(names = { "-pv", "--parameter-value" })
             public String parameterValue;
         }
     }
@@ -103,7 +105,7 @@ public class CqlCommand implements Callable<Integer> {
 
             if (libraryLoader == null) {
                 libraryLoader = cqlEvaluatorComponent.createLibraryLoaderFactory()
-                .create(new EndpointInfo().setAddress(library.libraryUrl), null);
+                        .create(new EndpointInfo().setAddress(library.libraryUrl), null);
                 this.libraryLoaderIndex.put(library.libraryUrl, libraryLoader);
             }
 
@@ -113,10 +115,10 @@ public class CqlCommand implements Callable<Integer> {
                 TerminologyProvider terminologyProvider = this.terminologyProviderIndex.get(library.terminologyUrl);
                 if (terminologyProvider == null) {
                     terminologyProvider = cqlEvaluatorComponent.createTerminologyProviderFactory()
-                    .create(new EndpointInfo().setAddress(library.terminologyUrl));
+                            .create(new EndpointInfo().setAddress(library.terminologyUrl));
                     this.terminologyProviderIndex.put(library.terminologyUrl, terminologyProvider);
                 }
-                
+
                 cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
             }
 
@@ -147,13 +149,44 @@ public class CqlCommand implements Callable<Integer> {
 
             for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
                 System.out.println(libraryEntry.getKey() + "="
-                        + (libraryEntry.getValue() != null ? libraryEntry.getValue().toString() : null));
+                        + this.tempComvert(libraryEntry.getValue()));
             }
 
             System.out.println();
         }
 
         return 0;
+    }
+
+    private String tempComvert(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        String result = "";
+        if (value instanceof Iterable) {
+            result += "[";
+            Iterable<?> values = (Iterable<?>) value;
+            for (Object o : values) {
+
+                result += (tempComvert(o) + ", ");
+            }
+
+            result = result.substring(0, result.length() - 2);
+
+            result += "]";
+        } else if (value instanceof IBaseDatatype) {
+            result = ((IBaseDatatype) value).toString();
+        } else if (value instanceof IBaseResource) {
+            IBaseResource resource = (IBaseResource) value;
+            result = resource.fhirType() + (resource.getIdElement() != null && resource.getIdElement().hasIdPart()
+                    ? "(id=" + resource.getIdElement().getIdPart() + ")"
+                    : "");
+        } else {
+            result = value.toString();
+        }
+
+        return result;
     }
 
 }

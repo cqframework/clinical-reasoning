@@ -160,7 +160,7 @@ public class CqlCommand implements Callable<Integer> {
 
     private String tempComvert(Object value) {
         if (value == null) {
-            return null;
+            return "null";
         }
 
         String result = "";

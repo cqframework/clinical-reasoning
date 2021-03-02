@@ -1,11 +1,10 @@
 package org.opencds.cqf.cql.evaluator.dagger.library;
 
-import static org.junit.Assert.assertNotNull;
-
 import org.opencds.cqf.cql.evaluator.dagger.DaggerCqlEvaluatorComponent;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 
 import org.testng.annotations.Test;
+import static org.testng.Assert.assertNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 

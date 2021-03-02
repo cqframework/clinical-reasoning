@@ -7,13 +7,14 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class LibraryModuleTests {
 
     @Test
     public void canInstantiateDstu3() {
         LibraryProcessor libraryProcessor = DaggerCqlEvaluatorComponent.builder()
-                .fhirContext(FhirContext.forDstu3())
+                .fhirContext(FhirContext.forCached(FhirVersionEnum.DSTU3))
                 .build()
                 .createLibraryProcessor();
 

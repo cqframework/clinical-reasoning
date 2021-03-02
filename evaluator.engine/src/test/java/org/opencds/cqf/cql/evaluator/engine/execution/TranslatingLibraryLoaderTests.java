@@ -27,6 +27,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class TranslatingLibraryLoaderTests {
@@ -38,8 +39,8 @@ public class TranslatingLibraryLoaderTests {
     private LibraryLoader libraryLoader;
 
     @BeforeClass
-    public static void setup() {
-        fhirContext = FhirContext.forR4();
+    public void setup() {
+        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         modelManger = new ModelManager();
         parser = fhirContext.newJsonParser();
     }

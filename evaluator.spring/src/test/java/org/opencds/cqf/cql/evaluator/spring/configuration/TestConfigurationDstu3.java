@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 @Configuration
 @Import(EvaluatorConfiguration.class)
@@ -13,7 +14,7 @@ public class TestConfigurationDstu3 {
 
     @Bean
     FhirContext fhirContext() {
-        return FhirContext.forDstu3();
+        return FhirContext.forCached(FhirVersionEnum.DSTU3);
     }
     
 }

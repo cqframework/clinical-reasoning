@@ -4,4 +4,5 @@
 set -euxo pipefail
 bash -n "$0"
 
-mvn versions:update-properties versions:use-releases versions:use-latest-releases
+# caffeine 3+ requires Java 11
+mvn versions:update-properties versions:use-releases versions:use-latest-releases -Dexcludes=com.github.ben-manes.caffeine:caffeine:jar:2.9.0

@@ -18,6 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class OpioidMmeR4Tests {
@@ -32,7 +33,7 @@ public class OpioidMmeR4Tests {
 
     @BeforeClass
     public void setup() {
-        this.fhirContext = FhirContext.forR4();
+        this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
         this.libraryProcessor = DaggerCqlEvaluatorComponent.builder().fhirContext(fhirContext).build().createLibraryProcessor();
         this.terminologyEndpoint = createEndpoint("vocabulary/valueset", Constants.HL7_FHIR_FILES);

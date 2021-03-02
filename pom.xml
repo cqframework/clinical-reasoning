@@ -25,6 +25,7 @@
         <jopt-simple.version>6.0-alpha-3</jopt-simple.version>
         <picocli.version>4.6.1</picocli.version>
         <slf4j.version>2.0.0-alpha1</slf4j.version>
+        <caffeine.version>2.9.0</caffeine.version>
     </properties>
     <modules>
         <module>evaluator</module>
@@ -164,15 +165,10 @@
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
-                <version>3.0.0</version>
+                <version>${caffeine.version}</version>
             </dependency>
 
             <!-- CLI -->
-            <dependency>
-                <groupId>net.sf.jopt-simple</groupId>
-                <artifactId>jopt-simple</artifactId>
-                <version>${jopt-simple.version}</version>
-            </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>

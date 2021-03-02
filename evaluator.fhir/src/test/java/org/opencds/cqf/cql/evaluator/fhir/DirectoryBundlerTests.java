@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.BundleUtil;
 
 public class DirectoryBundlerTests {
@@ -18,7 +19,7 @@ public class DirectoryBundlerTests {
     @Test
     public void test_directoryBundler() {
 
-        FhirContext fhirContext = FhirContext.forR4();
+        FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         DirectoryBundler bundler = new DirectoryBundler(fhirContext);
 
         String file = new File("src/test/resources/r4/bundleDirectory").getAbsolutePath();

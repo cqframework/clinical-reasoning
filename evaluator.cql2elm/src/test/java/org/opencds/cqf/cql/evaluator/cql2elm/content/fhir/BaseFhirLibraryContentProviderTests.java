@@ -17,6 +17,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class BaseFhirLibraryContentProviderTests {
@@ -26,8 +27,8 @@ public class BaseFhirLibraryContentProviderTests {
     private static IParser parser;
 
     @BeforeClass
-    public static void setup() {
-        fhirContext = FhirContext.forR4();
+    public void setup() {
+        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         parser = fhirContext.newJsonParser();
 
         testFhirLibraryContentProvider = new BaseFhirLibraryContentProvider(new AdapterFactory()) {

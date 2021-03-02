@@ -39,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class LibraryProcessorTests {
 
@@ -47,8 +48,8 @@ public class LibraryProcessorTests {
 
     @BeforeClass
     @SuppressWarnings("serial")
-    public static void setup() {
-        fhirContext = FhirContext.forR4();
+    public void setup() {
+        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
 

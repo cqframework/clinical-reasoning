@@ -54,7 +54,6 @@ public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupCom
 
     protected abstract void addReportGroup(MeasureReportT report, MeasureReportGroupComponentT group);
 
-    // TODO: Get the intervat from the
     public MeasureEvaluation(Context context, MeasureT measure, Interval measurementPeriod, String packageName,
             Function<ResourceT, String> getId) {
         this(context, measure, measurementPeriod, packageName, getId, null);

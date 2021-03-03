@@ -16,14 +16,15 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class OperationParametersParserTests {
 
     static OperationParametersParser operationParametersParser;
     
     @BeforeClass
-    public static void setup() {
-        FhirContext fhirContext = FhirContext.forR4();
+    public void setup() {
+        FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 

@@ -6,7 +6,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 
@@ -34,11 +34,11 @@ public class BundleRetrieveProviderTests {
     private static FhirContext fhirContext;
 
     @BeforeClass
-    public static void setup() {
-        fhirContext = FhirContext.forR4();
+    public void setup() {
+        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     }
 
-    private IBaseBundle loadBundle(FhirContext fhirContext, String path) {
+    private IBaseBundle loadBundle(String path) {
         InputStream stream = BundleRetrieveProviderTests.class.getResourceAsStream(path);
         IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
@@ -61,7 +61,7 @@ public class BundleRetrieveProviderTests {
     }
 
     private RetrieveProvider getBundleRetrieveProvider(TerminologyProvider terminologyProvider) {
-        IBaseBundle bundle = this.loadBundle(fhirContext, "../util/r4/TestBundleTwoPatients.json");
+        IBaseBundle bundle = this.loadBundle("../util/r4/TestBundleTwoPatients.json");
         BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
         brp.setTerminologyProvider(terminologyProvider);
 
@@ -75,7 +75,7 @@ public class BundleRetrieveProviderTests {
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
         assertNotNull(results);
         List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(0, resultList.size());
+        assertEquals(resultList.size(), 0);
     }
 
 
@@ -86,7 +86,7 @@ public class BundleRetrieveProviderTests {
         Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
         
-        assertEquals(2, resultList.size());
+        assertEquals(resultList.size(), 2);
         assertThat(resultList.get(0), instanceOf(Patient.class));
     }
 
@@ -97,7 +97,7 @@ public class BundleRetrieveProviderTests {
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
         
-        assertEquals(0, resultList.size());
+        assertEquals(resultList.size(), 0);
     }
 
     @Test
@@ -107,7 +107,7 @@ public class BundleRetrieveProviderTests {
         Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, null, null, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
         
-        assertEquals(2, resultList.size());
+        assertEquals(resultList.size(),2);
         assertThat(resultList.get(0), instanceOf(Condition.class));
         assertEquals("test-one-r4", ((Condition)resultList.get(0)).getSubject().getReferenceElement().getIdPart());
     }
@@ -119,7 +119,7 @@ public class BundleRetrieveProviderTests {
         Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, null, null, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
         
-        assertEquals(1, resultList.size());
+        assertEquals(resultList.size(), 1);
         assertThat(resultList.get(0), instanceOf(Medication.class));
     }
 
@@ -134,14 +134,14 @@ public class BundleRetrieveProviderTests {
         Iterable<Code> codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med");
         Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(1, resultList.size());
+        assertEquals(resultList.size(), 1);
         assertThat(resultList.get(0), instanceOf(Medication.class));
 
         // Id does not exist
         codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med-does-exist");
         results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
         resultList = Lists.newArrayList(results);
-        assertEquals(0, resultList.size());
+        assertEquals(resultList.size(), 0);
     }
 
     @Test
@@ -153,14 +153,14 @@ public class BundleRetrieveProviderTests {
         Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results); 
         List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(0, resultList.size());
+        assertEquals(resultList.size(), 0);
 
         // Codes does match
         code = new Code().withCode("10327003").withSystem("http://snomed.info/sct");
         results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results);
         resultList = Lists.newArrayList(results);
-        assertEquals(1, resultList.size());
+        assertEquals(resultList.size(), 1);
         assertThat(resultList.get(0), instanceOf(Condition.class));
         assertEquals("test-one-r4", ((Condition)resultList.get(0)).getSubject().getReferenceElement().getIdPart());
     }
@@ -176,8 +176,7 @@ public class BundleRetrieveProviderTests {
 
     @Test
     public void test_filterToValueSet() {
-        FhirContext fhirContext = FhirContext.forR4();
-        IBaseBundle bundle = this.loadBundle(fhirContext, "../util/r4/TestBundleValueSets.json");
+        IBaseBundle bundle = this.loadBundle("../util/r4/TestBundleValueSets.json");
         TerminologyProvider terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
 
         RetrieveProvider retrieve = this.getBundleRetrieveProvider(terminologyProvider);
@@ -187,7 +186,7 @@ public class BundleRetrieveProviderTests {
         "http://localhost/fhir/ValueSet/value-set-three", null, null, null, null);
         assertNotNull(results); 
         List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(0, resultList.size());
+        assertEquals(resultList.size(), 0);
 
 
         // In the value set
@@ -195,6 +194,24 @@ public class BundleRetrieveProviderTests {
         "http://localhost/fhir/ValueSet/value-set-one", null, null, null, null);
         assertNotNull(results); 
         resultList = Lists.newArrayList(results);
-        assertEquals(1, resultList.size());
+        assertEquals(resultList.size(), 1);
+    }
+
+    @Test
+    public void test_retrieveByUrn() {
+        IBaseBundle bundle = this.loadBundle("TestBundleUrns.json");
+        BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
+
+        Iterable<Object> results = brp.retrieve("Patient", "id", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Patient", null, null, null, null, null, null, null, null);
+        assertNotNull(results);
+
+        List<Object> resultList = Lists.newArrayList(results);
+        assertEquals(resultList.size(), 1);
+        assertThat(resultList.get(0), instanceOf(Patient.class));
+
+        results = brp.retrieve("Patient", "subject", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Condition", null, null, null, null, null, null, null, null);
+        resultList = Lists.newArrayList(results);
+        assertEquals(resultList.size(), 1);
+        assertThat(resultList.get(0), instanceOf(Condition.class));
     }
 }

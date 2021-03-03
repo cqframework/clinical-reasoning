@@ -23,7 +23,7 @@ public class CodeUtilsTests {
 
     @BeforeClass
     public void initialize() {
-        this.fhirContext = FhirContext.forR4();
+        this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         this.codeUtil = new CodeUtil(fhirContext);
     }
 

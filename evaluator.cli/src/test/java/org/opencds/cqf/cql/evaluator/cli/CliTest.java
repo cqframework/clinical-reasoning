@@ -22,7 +22,7 @@ public class CliTest {
     private static String testResourcePath = null;
 
     @BeforeClass
-    public static void setup(){
+    public void setup(){
         File file = new File(testResourceRelativePath);
         testResourcePath = file.getAbsolutePath();
         System.out.println(String.format("Test resource directory: %s", testResourcePath));

@@ -1,7 +1,21 @@
 {
     "cSpell.words": [
+        "CONTINUOUSVARIABLE",
         "Configurer",
+        "DENOMINATOREXCEPTION",
+        "DENOMINATOREXCLUSION",
+        "INITIALPOPULATION",
         "JXSON",
+        "MEASUREOBSERVATION",
+        "MEASUREPOPULATION",
+        "MEASUREPOPULATIONEXCLUSION",
+        "NUMERATOREXCLUSION",
+        "PATIENTLIST",
+        "SUBJECTLIST",
+        "Unvalidated",
+        "argfile",
+        "mgpc",
+        "mrgc",
         "numer",
         "ppca"
     ],

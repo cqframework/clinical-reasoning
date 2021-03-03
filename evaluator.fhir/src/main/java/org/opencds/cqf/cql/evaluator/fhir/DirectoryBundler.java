@@ -181,18 +181,6 @@ public class DirectoryBundler {
     
     }
 
-    private String stripUrnScheme(String uri) {
-        if (uri.startsWith("urn:uuid:")) {
-            return uri.substring(9);
-        }
-        else if (uri.startsWith("urn:oid:")) {
-            return uri.substring(8);
-        }
-        else {
-            return uri;
-        }
-    }
-
     private List<IBaseResource> flatten(FhirContext fhirContext, IBaseBundle bundle) {
         List<IBaseResource> resources = new ArrayList<>();
 
@@ -202,9 +190,6 @@ public class DirectoryBundler {
                 List<IBaseResource> innerResources = flatten(fhirContext, (IBaseBundle) r);
                 resources.addAll(innerResources);
             } else {
-                if (r.getIdElement().getIdPart().startsWith("urn:")) {
-                    r.setId(stripUrnScheme(r.getIdElement().getIdPart()));
-                }
                 resources.add(r);
             }
         }

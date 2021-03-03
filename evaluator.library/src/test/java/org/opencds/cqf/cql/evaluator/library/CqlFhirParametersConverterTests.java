@@ -23,14 +23,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 public class CqlFhirParametersConverterTests {
     
 
     protected static CqlFhirParametersConverter cqlFhirParametersConverter;
     
     @BeforeClass
-    public static void setup() {
-        FhirContext fhirContext = FhirContext.forR4();
+    public void setup() {
+        FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());

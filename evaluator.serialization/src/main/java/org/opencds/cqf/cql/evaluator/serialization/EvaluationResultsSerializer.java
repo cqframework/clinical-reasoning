@@ -97,14 +97,14 @@ public abstract class EvaluationResultsSerializer {
     public static void setFhirContext(String version) {
         switch (version) {
             case "2.0.0":
-                fhirContext = FhirContext.forDstu2_1();
+                fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU2_1);
                 break;
             case "3.0.0":
-                fhirContext = FhirContext.forDstu3();
+                fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
                 break;
             case "4.0.0":
             case "4.0.1":
-                fhirContext = FhirContext.forR4();
+                fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
                 break;
             default:
                 throw new IllegalArgumentException(String.format("Unknown FHIR data provider version: %s", version));

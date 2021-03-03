@@ -21,6 +21,7 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 
@@ -46,7 +47,7 @@ public class BundleTerminologyProviderTests {
 
 
     private TerminologyProvider getTerminologyProvider() {
-        FhirContext context = FhirContext.forR4();
+        FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
         IBaseBundle bundle = this.loadBundle(context, "../util/r4/TestBundleValueSets.json");
         return new BundleTerminologyProvider(context, bundle);
     }

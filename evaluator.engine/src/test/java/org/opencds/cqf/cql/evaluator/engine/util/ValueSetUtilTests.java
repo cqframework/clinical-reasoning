@@ -13,6 +13,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class ValueSetUtilTests {
@@ -20,8 +21,8 @@ public class ValueSetUtilTests {
     private static final String R4_PATH = "r4/TestValueSet.json";
     private static final String DSTU3_PATH = "dstu3/TestValueSet.json";
 
-    private static final FhirContext DSTU3_CONTEXT  = FhirContext.forDstu3();
-    private static final FhirContext R4_CONTEXT = FhirContext.forR4();
+    private static final FhirContext DSTU3_CONTEXT  = FhirContext.forCached(FhirVersionEnum.DSTU3);
+    private static final FhirContext R4_CONTEXT = FhirContext.forCached(FhirVersionEnum.R4);
 
     private IBaseResource loadValueSet(FhirContext fhirContext, String path) {
         InputStream stream = ValueSetUtilTests.class.getResourceAsStream(path);

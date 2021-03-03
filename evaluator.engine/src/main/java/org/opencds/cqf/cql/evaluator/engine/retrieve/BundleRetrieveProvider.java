@@ -171,9 +171,15 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 			final Optional<IBase> resContextValue = this.fhirPath.evaluateFirst(res, contextPath, IBase.class);
 			if (resContextValue.isPresent() && resContextValue.get() instanceof IIdType) {
 				String id = ((IIdType)resContextValue.get()).getValue();
+
 				if (id == null) {
-					logger.info("Found null id for {} resource. Skipping.", dataType);
+					logger.debug("Found null id for {} resource. Skipping.", dataType);
 					continue;
+				}
+
+				if (id.startsWith("urn:")) {
+					logger.debug("Found {} with urn: prefix. Stripping.", dataType);
+					id = stripUrnScheme(id);
 				}
 
 				if (id.contains("/")) {
@@ -181,15 +187,20 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				}
 				
 				if (!id.equals(contextValue)) {
-					logger.info("Found {} with id  {}. Skipping.", dataType, id);
+					logger.debug("Found {} with id  {}. Skipping.", dataType, id);
 					continue;
 				}
 			}
 			else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
 					String id = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
 					if (id == null) {
-						logger.info("Found null id for {} resource. Skipping.", dataType);
+						logger.debug("Found null reference for {} resource. Skipping.", dataType);
 						continue;
+					}
+
+					if (id.startsWith("urn:")) {
+						logger.debug("Found reference with urn: prefix. Stripping.", dataType);
+						id = stripUrnScheme(id);
 					}
 	
 					if (id.contains("/")) {
@@ -209,6 +220,11 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				}
 
 				String referenceString = ((IPrimitiveType<?>)reference.get()).getValueAsString();
+				if (referenceString.startsWith("urn:")) {
+					logger.debug("Found reference with urn: prefix. Stripping.", dataType);
+					referenceString = stripUrnScheme(referenceString);
+				}
+
 				if (referenceString.contains("/")) {
 					referenceString = referenceString.substring(referenceString.indexOf("/") + 1,
 							referenceString.length());
@@ -226,4 +242,16 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 
 		return filtered;
 	}
+
+    private String stripUrnScheme(String uri) {
+        if (uri.startsWith("urn:uuid:")) {
+            return uri.substring(9);
+        }
+        else if (uri.startsWith("urn:oid:")) {
+            return uri.substring(8);
+        }
+        else {
+            return uri;
+        }
+    }
 }

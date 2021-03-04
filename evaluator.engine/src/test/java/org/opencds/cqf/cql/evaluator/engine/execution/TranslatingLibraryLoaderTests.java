@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.execution.Library;
@@ -68,13 +67,6 @@ public class TranslatingLibraryLoaderTests {
         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryXml");
         Library library = this.libraryLoader.load(libraryIdentifier);
         assertNotNull(library);
-    }
-
-    // TODO: Add detection of mismatched content.
-    // @Test
-    public void returnsNullIfContentMismatch() {
-        throw new NotImplementedException(
-                "TranslatingLibraryLoaders needs implementation so that it can detect if the content (CQL or ELM) loaded does not match the library requested");
     }
 
     @Test

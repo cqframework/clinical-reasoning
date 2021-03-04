@@ -22,7 +22,6 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.engine.execution.PrivateCachingLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.PriorityLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
@@ -242,10 +241,6 @@ public class CqlEvaluatorBuilder {
         return new PrivateCachingTerminologyProviderDecorator(terminologyProvider);
     }
 
-    protected LibraryLoader decorate(LibraryLoader libraryLoader) {
-        return new PrivateCachingLibraryLoaderDecorator(libraryLoader);
-    }
-
     /**
      * Builds a CqlEvaluator that uses all content, data, terminology sources
      * supplied, and has the appropriate configuration applied.
@@ -258,7 +253,7 @@ public class CqlEvaluatorBuilder {
      */
     public CqlEvaluator build() {
         Collections.reverse(this.libraryLoaders);
-        LibraryLoader libraryLoader = this.decorate(new PriorityLibraryLoader(libraryLoaders));
+        LibraryLoader libraryLoader = new PriorityLibraryLoader(libraryLoaders);
 
         Collections.reverse(this.terminologyProviders);
         TerminologyProvider terminologyProvider = this.decorate(new PriorityTerminologyProvider(terminologyProviders));

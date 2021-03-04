@@ -33,13 +33,12 @@ public class TranslatorOptionsUtil {
         return parseTranslatorOptions(translatorOptions);
     }
 
-    @SuppressWarnings("unchecked")
     private static String getTranslatorOptions(List<Object> annotations){
         for (Object o : annotations) {
-            LinkedHashMap<String, String> lhm;
-            if (o instanceof LinkedHashMap) {
+            if (o instanceof LinkedHashMap<?,?>) {
                 try {
-                    lhm = (LinkedHashMap<String, String>)o;
+                    @SuppressWarnings("unchecked")
+                    LinkedHashMap<String, String> lhm = (LinkedHashMap<String, String>)o;
                     String options = lhm.get("translatorOptions");
                     if (options != null) {
                         return options;

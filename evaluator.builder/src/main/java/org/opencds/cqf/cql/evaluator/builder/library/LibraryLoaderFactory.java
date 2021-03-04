@@ -31,6 +31,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryCon
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
@@ -59,7 +60,7 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
     protected LibraryLoader create(List<LibraryContentProvider> libraryContentProviders,
             CqlTranslatorOptions translatorOptions) {
         requireNonNull(libraryContentProviders, "libraryContentProviders can not be null");
-                return new TranslatingLibraryLoader(new CacheAwareModelManager(this.globalModelCache), libraryContentProviders, translatorOptions);
+                return new CacheAwareLibraryLoaderDecorator(new TranslatingLibraryLoader(new CacheAwareModelManager(this.globalModelCache), libraryContentProviders, translatorOptions));
     }
 
     @Override

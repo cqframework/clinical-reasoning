@@ -24,7 +24,7 @@ public class LibraryModuleTests {
     @Test
     public void canInstantiateR4() {
         LibraryProcessor libraryProcessor = DaggerCqlEvaluatorComponent.builder()
-        .fhirContext(FhirContext.forR4())
+        .fhirContext(FhirContext.forCached(FhirVersionEnum.R4))
         .build()
         .createLibraryProcessor();
 

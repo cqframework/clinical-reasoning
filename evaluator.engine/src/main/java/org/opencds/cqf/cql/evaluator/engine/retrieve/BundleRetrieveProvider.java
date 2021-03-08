@@ -18,6 +18,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.cql.evaluator.engine.util.CodeUtil;
+import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		this.fhirContext = requireNonNull(fhirContext, "bundle can not be null.");
 		this.bundle = requireNonNull(bundle, "bundle can not be null.");
 		this.codeUtil = new CodeUtil(fhirContext);
-		this.fhirPath = fhirContext.newFhirPath();
+		this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
 	}
 
 	@Override

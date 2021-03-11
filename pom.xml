@@ -26,6 +26,7 @@
         <picocli.version>4.6.1</picocli.version>
         <slf4j.version>2.0.0-alpha1</slf4j.version>
         <caffeine.version>2.9.0</caffeine.version>
+        <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     </properties>
     <modules>
         <module>evaluator</module>
@@ -233,12 +234,12 @@
                 <scope>test</scope>
             </dependency>
 
+
+            <!-- Library mapper code gen-->
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-                <optional>true</optional>
-                <scope>test</scope>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${org.mapstruct.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -289,6 +290,7 @@
                             <!-- This bypasses annotation processing for Inject -->
                             <arg>-Xlint:-processing</arg>
                             <arg>-Werror</arg>
+                            <arg>-implicit:none</arg>
                         </compilerArgs>
                     </configuration>
                 </plugin>

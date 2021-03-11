@@ -36,6 +36,7 @@ public class BuilderModule {
     }
 
     @Provides
+    @Singleton
     RetrieveProviderConfig retrieveProviderConfig() {
         return RetrieveProviderConfig.defaultConfig();
     }

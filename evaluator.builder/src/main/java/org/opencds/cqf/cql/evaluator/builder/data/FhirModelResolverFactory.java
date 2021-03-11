@@ -24,7 +24,7 @@ public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.b
     @Inject
     public FhirModelResolverFactory() {}
 
-    private Map<FhirVersionEnum, ModelResolver> cache = new HashMap<>();
+    private static Map<FhirVersionEnum, ModelResolver> cache = new HashMap<>();
 
     @Override
     public ModelResolver create(String version) {
@@ -52,10 +52,10 @@ public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.b
                     throw new IllegalArgumentException("unknown or unsupported FHIR version");
             }
 
-            this.cache.put(fhirVersionEnum, resolver);
+            cache.put(fhirVersionEnum, resolver);
         }
 
-        return this.cache.get(fhirVersionEnum);
+        return cache.get(fhirVersionEnum);
     }
 
     @Override

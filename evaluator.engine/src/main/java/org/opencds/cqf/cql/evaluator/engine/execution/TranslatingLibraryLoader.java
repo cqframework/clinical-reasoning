@@ -17,12 +17,19 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.serialization.LibraryWrapper;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.elm.r1.ObjectFactory;
@@ -30,19 +37,26 @@ import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.execution.JsonCqlLibraryReader;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
+import org.opencds.cqf.cql.evaluator.engine.elm.LibraryMapper;
 import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
 
 /**
- * The TranslatingLibraryLoader attempts to load a library from a set of LibraryContentProviders. If pre-existing ELM
- * is found for the requested library and the ELM was generated using the same set of translator options as is provided
- * to the TranslatingLibraryLoader, it will use that ELM. If the ELM is not found, or the ELM translation options do not
- * match, the TranslatingLibraryLoader will attempt to regenerate the ELM by translating CQL content with the requested
- * options. If neither matching ELM content nor CQL content is found for the requested Library, null is returned.
+ * The TranslatingLibraryLoader attempts to load a library from a set of
+ * LibraryContentProviders. If pre-existing ELM is found for the requested
+ * library and the ELM was generated using the same set of translator options as
+ * is provided to the TranslatingLibraryLoader, it will use that ELM. If the ELM
+ * is not found, or the ELM translation options do not match, the
+ * TranslatingLibraryLoader will attempt to regenerate the ELM by translating
+ * CQL content with the requested options. If neither matching ELM content nor
+ * CQL content is found for the requested Library, null is returned.
  */
 public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoader {
 
     protected static JAXBContext jaxbContext;
     protected static Marshaller marshaller;
+
+    protected static ObjectMapper objectMapper;
+
     protected CqlTranslatorOptions cqlTranslatorOptions;
     protected List<LibraryContentProvider> libraryContentProviders;
 
@@ -53,7 +67,8 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         this.libraryContentProviders = requireNonNull(libraryContentProviders,
                 "libraryContentProviders can not be null");
 
-        this.cqlTranslatorOptions = translatorOptions != null ? translatorOptions : CqlTranslatorOptions.defaultOptions();
+        this.cqlTranslatorOptions = translatorOptions != null ? translatorOptions
+                : CqlTranslatorOptions.defaultOptions();
 
         this.libraryManager = new LibraryManager(modelManager);
         for (LibraryContentProvider provider : libraryContentProviders) {
@@ -104,7 +119,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         if (options == null) {
             return false;
         }
-        
+
         return options.equals(this.cqlTranslatorOptions.getOptions());
     }
 
@@ -125,14 +140,15 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
             List<CqlTranslatorException> errors = new ArrayList<>();
             TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier),
                     this.cqlTranslatorOptions, errors);
-            // Here we are mapping from a cql-translator ELM library to a cql-engine ELM library.
-            // They use different object hierarchies so this serializes out to XML and then reads
-            // the library back in.
-            return this.readXml(this.toXml(library.getLibrary()));
+            return LibraryMapper.INSTANCE.map(library.getLibrary());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    protected synchronized Library readJxson(String json) throws IOException, JAXBException {
+        return this.readJxson(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
     }
 
     protected synchronized Library readJxson(InputStream inputStream) throws IOException {
@@ -152,6 +168,14 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
             return convertToXml(library);
         } catch (JAXBException e) {
             throw new IllegalArgumentException("Could not convert library to XML.", e);
+        }
+    }
+
+    protected synchronized String toJxson(org.hl7.elm.r1.Library library) {
+        try {
+            return convertToJxson(library);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Could not convert library to JXSON.", e);
         }
     }
 
@@ -178,4 +202,24 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
         return jaxbContext;
     }
+
+    protected synchronized ObjectMapper getJxsonMapper() {
+        if (objectMapper == null) {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_DEFAULT);
+            mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+            JaxbAnnotationModule annotationModule = new JaxbAnnotationModule();
+            mapper.registerModule(annotationModule);
+            objectMapper = mapper;
+        }
+
+        return objectMapper;
+    }
+
+    public String convertToJxson(org.hl7.elm.r1.Library library) throws JsonProcessingException {
+        LibraryWrapper wrapper = new LibraryWrapper();
+        wrapper.setLibrary(library);
+        return this.getJxsonMapper().writeValueAsString(wrapper);
+    }
+
 }

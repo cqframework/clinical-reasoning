@@ -42,7 +42,7 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
     @Override
     public Library load(VersionedIdentifier libraryIdentifier) {
         Library library = this.libraryCache.get(libraryIdentifier);
-        if (library != null && this.translatorOptionsMatch(library)) {
+        if (library != null && this.translatorOptionsMatch(library)) { // Bug on xml libraries not getting annotations
             return library;
         }
 

@@ -11,7 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 
-class LibraryEvaluator {
+public class LibraryEvaluator {
 
     // private static Logger logger =
     // LoggerFactory.getLogger(LibraryEvaluator.class);
@@ -20,7 +20,7 @@ class LibraryEvaluator {
 
     private CqlFhirParametersConverter cqlFhirParametersConverter;
 
-    LibraryEvaluator(CqlFhirParametersConverter cqlFhirParametersConverter, CqlEvaluator cqlEvaluator) {
+    public LibraryEvaluator(CqlFhirParametersConverter cqlFhirParametersConverter, CqlEvaluator cqlEvaluator) {
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter,
                 "cqlFhirParametersConverter can not be null");
         this.cqlEvaluator = requireNonNull(cqlEvaluator, "cqlEvaluator can not be null");

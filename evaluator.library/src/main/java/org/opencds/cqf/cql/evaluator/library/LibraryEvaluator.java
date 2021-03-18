@@ -36,7 +36,7 @@ public class LibraryEvaluator {
      * @param libraryIdentifier The Library to evaluate
      * @param contextParameter The context to use for evaluation (e.g. Patient=1234)
      * @param parameters The Library parameters (e.g. "Measurement Period", "Product Line", etc.)
-     * @param expressions The expression of the LIbrary to evaluate. If omitted all expressions are evaluated
+     * @param expressions The expression of the Library to evaluate. If omitted all expressions are evaluated
      * @return The result of evaluation as FHIR Parameters
      */
     public IBaseParameters evaluate(VersionedIdentifier libraryIdentifier, Pair<String, Object> contextParameter,

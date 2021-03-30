@@ -3,11 +3,11 @@ package org.opencds.cqf.cql.evaluator.cql2elm.model;
 import static java.util.Objects.requireNonNull;
 
 import org.cqframework.cql.cql2elm.ModelInfoLoader;
-import org.cqframework.cql.cql2elm.ModelInfoProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.model.SystemModel;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +23,8 @@ public class CacheAwareModelManager extends ModelManager {
 
     private final Map<String, Model> localCache;
 
+    private final ModelInfoLoader modelInfoLoader;
+
     /**
      * @param globalCache cache for Models by VersionedIdentifier. Expected to be thread-safe.
      */
@@ -31,17 +33,19 @@ public class CacheAwareModelManager extends ModelManager {
 
         this.globalCache = globalCache;
         this.localCache = new HashMap<>();
+        this.modelInfoLoader = new ModelInfoLoader();
     }
 
 	private Model buildModel(VersionedIdentifier identifier) {
         Model model = null;
         try {
-            ModelInfoProvider provider = ModelInfoLoader.getModelInfoProvider(identifier);
+
+            ModelInfo modelInfo = this.modelInfoLoader.getModelInfo(identifier);
             if (identifier.getId().equals("System")) {
-                model = new SystemModel(provider.load());
+                model = new SystemModel(modelInfo);
             }
             else {
-                model = new Model(provider.load(), resolveModel("System"));
+                model = new Model(modelInfo, this);
             }
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(String.format("Could not load model information for model %s, version %s.",

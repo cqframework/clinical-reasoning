@@ -171,7 +171,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		for (final IBaseResource res : resources) {
 			final Optional<IBase> resContextValue = this.fhirPath.evaluateFirst(res, contextPath, IBase.class);
 			if (resContextValue.isPresent() && resContextValue.get() instanceof IIdType) {
-				String id = ((IIdType)resContextValue.get()).getValue();
+				String id = ((IIdType)resContextValue.get()).getIdPart();
 
 				if (id == null) {
 					logger.debug("Found null id for {} resource. Skipping.", dataType);
@@ -181,10 +181,6 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				if (id.startsWith("urn:")) {
 					logger.debug("Found {} with urn: prefix. Stripping.", dataType);
 					id = stripUrnScheme(id);
-				}
-
-				if (id.contains("/")) {
-					id = id.split("/")[1];
 				}
 				
 				if (!id.equals(contextValue)) {

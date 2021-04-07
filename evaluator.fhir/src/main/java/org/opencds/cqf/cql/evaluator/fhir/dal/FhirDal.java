@@ -5,8 +5,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * This interface is a minimal Fhir CRUD API. It's based on the
- * FHIR Restful API {@link https://www.hl7.org/fhir/http.html}, but constrained to provide only the
+ * <a href="https://www.hl7.org/fhir/http.html">FHIR HTTP API</a>, but constrained to provide only the
  * operations necessary for the cql-evaluator modules to function.
+ * @see <a href="https://www.hl7.org/fhir/http.html">https://www.hl7.org/fhir/http.html</a>
  */
 public interface FhirDal {
     /**
@@ -60,7 +61,7 @@ public interface FhirDal {
      * @param resourceType the type of resources to return.
      * @param url the value of the url property
      * @return the resources
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code resourceType} is not a knowledge artifact
      */
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url);
 }

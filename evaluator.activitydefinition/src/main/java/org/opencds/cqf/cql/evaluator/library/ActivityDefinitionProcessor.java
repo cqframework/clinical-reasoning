@@ -127,7 +127,7 @@ public class ActivityDefinitionProcessor {
                     String language = dynamicValue.getExpression().getLanguage();
                     Object value = null;
                     switch (language) {
-                        //case "text/cql": 
+                        case "text/cql": logger.warn("CQL expression in PlanDefinition action not supported right now."); break;
                         case "text/cql.name": {
                             if (activityDefinition.getLibrary().size() != 1) {
                                 throw new RuntimeException("ActivityDefinition library must only include one primary library for evaluation.");
@@ -136,7 +136,7 @@ public class ActivityDefinitionProcessor {
                             Set<String> expressions = new HashSet<String>();
                             expressions.add(cql);
                             value = libraryProcessor.evaluate(libraryUrl, patientId, parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, null, expressions);
-                        }
+                        } break;
                         default:
                         logger.warn(
                             "An action language other than CQL was found: " + dynamicValue.getExpression().getLanguage());

@@ -113,8 +113,6 @@ public class ActivityDefinitionProcessor {
                 break;
         }
 
-        // TODO: Apply expression extensions on any element?
-
         for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition
                 .getDynamicValue()) {
                     
@@ -145,7 +143,6 @@ public class ActivityDefinitionProcessor {
                         break;
                     }
 
-                    // TODO need to verify type... yay
                     if (value instanceof Boolean) {
                         value = new BooleanType((Boolean) value);
                     }
@@ -276,7 +273,6 @@ public class ActivityDefinitionProcessor {
     private Procedure resolveProcedure(ActivityDefinition activityDefinition, String patientId) {
         Procedure procedure = new Procedure();
 
-        // TODO - set the appropriate status
         procedure.setStatus(Procedure.ProcedureStatus.UNKNOWN);
         procedure.setSubject(new Reference(patientId));
 
@@ -349,21 +345,18 @@ public class ActivityDefinitionProcessor {
                     communication.setPayload(Collections.singletonList(payload));
                 }
 
-                // TODO - other relatedArtifact types
             }
         }
 
         return communication;
     }
 
-    // TODO - extend this to be more complete
     private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition, String patientId) {
         CommunicationRequest communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.UNKNOWN);
         communicationRequest.setSubject(new Reference(patientId));
 
-        // Unsure if this is correct - this is the way Motive is doing it...
         if (activityDefinition.hasCode()) {
             if (activityDefinition.getCode().hasText()) {
                 communicationRequest.addPayload().setContent(new StringType(activityDefinition.getCode().getText()));

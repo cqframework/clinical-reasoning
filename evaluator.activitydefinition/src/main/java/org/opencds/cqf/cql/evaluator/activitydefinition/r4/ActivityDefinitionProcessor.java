@@ -1,12 +1,14 @@
-package org.opencds.cqf.cql.evaluator.library;
+package org.opencds.cqf.cql.evaluator.activitydefinition.r4;
 
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,6 +31,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +138,27 @@ public class ActivityDefinitionProcessor {
                             String libraryUrl = activityDefinition.getLibrary().get(0).getValue();
                             Set<String> expressions = new HashSet<String>();
                             expressions.add(cql);
-                            value = libraryProcessor.evaluate(libraryUrl, patientId, parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, null, expressions);
+                            IBaseParameters parametersResult = libraryProcessor.evaluate(libraryUrl, patientId, parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, null, expressions);
+                            if (parametersResult == null) {
+                                value = null; break;
+                            }
+
+                            Object parameter = modelResolver.resolvePath(parametersResult, "parameter");
+                            if (parameter == null) {
+                                value = null; break;
+                            }
+
+                            if (parameter instanceof Iterable<?>) {
+                                Iterator<?> iterator = ((Iterable<?>)parameter).iterator();
+                                if (iterator.hasNext()) {
+                                    Object element = iterator.next();
+                                    value = modelResolver.resolvePath(element, "value");
+                                } else {
+                                    value = null; break;
+                                }
+                            } else {
+                                throw new RuntimeException("Invalid Paramter Object, parameter element must be an instance of Iterable, " + parameter);
+                            }
                         } break;
                         default:
                         logger.warn(
@@ -146,7 +169,11 @@ public class ActivityDefinitionProcessor {
                     if (value instanceof Boolean) {
                         value = new BooleanType((Boolean) value);
                     }
-                    this.modelResolver.setValue(result, dynamicValue.getPath(), value);
+                    try {
+                        this.modelResolver.setValue(result, dynamicValue.getPath(), value);  
+                    } catch (Exception e) {
+                        throw new RuntimeException(String.format("Could not set path %s to value: %s", dynamicValue.getPath(), value));
+                    }
                 }
         }
 

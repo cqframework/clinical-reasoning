@@ -193,6 +193,26 @@ public class LibraryProcessor {
 
     protected VersionedIdentifier getVersionedIdentifer(String url, IBaseResource libraryEndpoint,
             IBaseBundle additionalData) {
-        throw new NotImplementedException();
+        if (!url.contains("/Library/")) {
+            throw new IllegalArgumentException("Invalid resource type for determining library version identifier: Library");
+        }
+        String [] urlsplit = url.split("/Library/");
+        if (urlsplit.length != 2) {
+            throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namepsace url>/Library/<CQL library name>");
+        }
+        String cqlNamespaceUrl = urlsplit[0];
+
+        String cqlName = urlsplit[1];
+        VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
+        if (cqlName.contains("|")) {
+            String[] nameVersion = cqlName.split("\\|");
+            String name = nameVersion[0];
+            String version = nameVersion[1];
+            versionedIdentifier.setId(name);
+            versionedIdentifier.setVersion(version);
+        } else {
+            versionedIdentifier.setId(cqlName);
+        }
+        return versionedIdentifier;
     }
 }

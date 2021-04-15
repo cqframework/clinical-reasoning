@@ -200,6 +200,7 @@ public class LibraryProcessor {
         if (urlsplit.length != 2) {
             throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namepsace url>/Library/<CQL library name>");
         }
+        @SuppressWarnings("unused") 
         String cqlNamespaceUrl = urlsplit[0];
 
         String cqlName = urlsplit[1];

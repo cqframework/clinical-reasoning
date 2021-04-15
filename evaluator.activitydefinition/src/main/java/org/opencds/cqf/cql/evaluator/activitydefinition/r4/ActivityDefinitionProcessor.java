@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -36,12 +37,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ActivityDefinitionProcessor {
     FhirContext fhirContext;
     FhirDal fhirDal;
     ModelResolver modelResolver;
     LibraryProcessor libraryProcessor;
+    IFhirPath fhirPath;
     private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
     public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor) {
@@ -49,6 +54,7 @@ public class ActivityDefinitionProcessor {
         requireNonNull(fhirDal, "fhirDal can not be null");
         requireNonNull(libraryProcessor, "LibraryProcessor can not be null");
         this.fhirContext = fhirContext;
+        this.fhirPath = fhirContext.newFhirPath();
         this.fhirDal = fhirDal;
         this.libraryProcessor = libraryProcessor;
         ModelResolverFactory modelResolverFactory = new FhirModelResolverFactory();
@@ -126,7 +132,7 @@ public class ActivityDefinitionProcessor {
 
                 if (dynamicValue.getExpression().hasLanguage()) {
                     logger.info("Evaluating action condition expression " + dynamicValue.getExpression());
-                    String cql = dynamicValue.getExpression().getExpression();
+                    String expression = dynamicValue.getExpression().getExpression();
                     String language = dynamicValue.getExpression().getLanguage();
                     Object value = null;
                     switch (language) {
@@ -137,7 +143,7 @@ public class ActivityDefinitionProcessor {
                             }
                             String libraryUrl = activityDefinition.getLibrary().get(0).getValue();
                             Set<String> expressions = new HashSet<String>();
-                            expressions.add(cql);
+                            expressions.add(expression);
                             IBaseParameters parametersResult = libraryProcessor.evaluate(libraryUrl, patientId, parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, null, expressions);
                             if (parametersResult == null) {
                                 value = null; break;
@@ -159,6 +165,20 @@ public class ActivityDefinitionProcessor {
                             } else {
                                 throw new RuntimeException("Invalid Paramter Object, parameter element must be an instance of Iterable, " + parameter);
                             }
+                        } break;
+                        case ("text/fhirpath") : {
+                            List<IBase> outputs;
+                            try {
+                                outputs = fhirPath.evaluate(null, expression, IBase.class);
+                            } catch (FhirPathExecutionException e) {
+                                throw new InvalidRequestException("Error parsing FHIRPath expression: " + e.getMessage());
+                            }
+                            if (outputs.size() == 1) {
+                                value = outputs.get(0);
+                            } else {
+                                value = outputs;
+                            }
+                            
                         } break;
                         default:
                         logger.warn(

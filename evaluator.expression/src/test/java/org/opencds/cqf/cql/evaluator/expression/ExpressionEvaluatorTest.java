@@ -2,14 +2,15 @@ package org.opencds.cqf.cql.evaluator.expression;
 
 import static org.testng.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.fhir.ucum.Canonical;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -44,10 +45,34 @@ import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
 
 public class ExpressionEvaluatorTest {
     FhirContext fhirContext;
     ExpressionEvaluator evaluator;
+
+    private IBaseBundle loadBundle(String path) {
+        InputStream stream = ExpressionEvaluatorTest.class.getResourceAsStream(path);
+        IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
+        IBaseResource resource = parser.parseResource(stream);
+
+        if (resource == null) {
+            throw new IllegalArgumentException(String.format("Unable to read a resource from %s.", path));
+        }
+
+        Class<?> bundleClass = fhirContext.getResourceDefinition("Bundle").getImplementingClass();
+        if (!bundleClass.equals(resource.getClass())) {
+            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s Bundle", path,
+                    fhirContext.getVersion().getVersion().getFhirVersionString()));
+        }
+
+        return (IBaseBundle) resource;
+    }
+    
+    public IBaseBundle readBundle(String path) {
+        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+        return loadBundle(path);
+    }
 
     @BeforeClass
     @SuppressWarnings("serial")
@@ -156,13 +181,14 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIncludedLibraryExpressionEvaluate() {
         Parameters expected = new Parameters();
-        expected.addParameter().setName("LocalExpression").setValue(new BooleanType(true));
+        expected.addParameter().setName("LocalExpression").setValue(new BooleanType(false));
 
         Endpoint endpoint = new Endpoint().setAddress("EXM125-8.0.000-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Pair<String, String> library = Pair.of("http://localhost/fhir/Library/EXM125|8.0.000", "EXM125");
-        Parameters actual = (Parameters) evaluator.evaluate(null, "not \"EXM125\".\"Numerator\"", null, Arrays.asList(library), null, null, null, null, endpoint, null);
+        IBaseBundle bundle = readBundle("EXM125-8.0.000-bundle.json");
+        Parameters actual = (Parameters) evaluator.evaluate(null, "not \"EXM125\".\"Numerator\"", null, Arrays.asList(library), null, bundle, null, null, endpoint, null);
         assertTrue(expected.equalsDeep(actual));
     }
 }

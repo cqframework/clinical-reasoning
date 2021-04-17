@@ -304,6 +304,8 @@ public class ExpressionEvaluator {
             logger.info("Adding LocalLibrary to additionalData Bundle");
             List<IBase> entries = fhirPath.evaluate(bundle, "entry", IBase.class);
             entries.add(entryComponent);
+            // Need a version independent approach
+            ((Bundle)bundle).addEntry(entryComponent);
         } else {
             logger.info("Adding LocalLibrary to Local additionalData Bundle");
             Bundle localBundle = new Bundle();

@@ -196,14 +196,15 @@ public class LibraryProcessor {
         if (!url.contains("/Library/")) {
             throw new IllegalArgumentException("Invalid resource type for determining library version identifier: Library");
         }
-        String [] urlsplit = url.split("/Library/");
-        if (urlsplit.length != 2) {
-            throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namepsace url>/Library/<CQL library name>");
+        String [] urlSplit = url.split("/Library/");
+        if (urlSplit.length != 2) {
+            throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
-        @SuppressWarnings("unused") 
-        String cqlNamespaceUrl = urlsplit[0];
 
-        String cqlName = urlsplit[1];
+        @SuppressWarnings("unused") 
+        String cqlNamespaceUrl = urlSplit[0];
+
+        String cqlName = urlSplit[1];
         VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
         if (cqlName.contains("|")) {
             String[] nameVersion = cqlName.split("\\|");

@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
 
     <name>evaluator.shared</name>
@@ -22,9 +22,8 @@
         <spring.version>5.3.6</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>5.3.2</hapi.version>
-        <jopt-simple.version>6.0-alpha-3</jopt-simple.version>
         <picocli.version>4.6.1</picocli.version>
-        <slf4j.version>2.0.0-alpha1</slf4j.version>
+        <slf4j.version>1.7.29</slf4j.version>
         <caffeine.version>2.9.0</caffeine.version>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     </properties>
@@ -229,12 +228,21 @@
             <!-- Logging -->
             <dependency>
                 <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
                 <optional>true</optional>
                 <scope>test</scope>
             </dependency>
-
 
             <!-- Library mapper code gen-->
             <dependency>
@@ -261,7 +269,15 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
     </dependencies>
 

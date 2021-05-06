@@ -49,7 +49,7 @@ public class ActivityDefinitionProcessor {
         requireNonNull(fhirDal, "fhirDal can not be null");
         requireNonNull(libraryProcessor, "LibraryProcessor can not be null");
         this.fhirContext = fhirContext;
-        this.fhirPath = fhirContext.newFhirPath();
+        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
         this.fhirDal = fhirDal;
         this.libraryProcessor = libraryProcessor;
     }

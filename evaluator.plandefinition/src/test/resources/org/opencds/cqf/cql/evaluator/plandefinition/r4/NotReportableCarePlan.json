@@ -1,0 +1,81 @@
+{
+    "resourceType": "CarePlan",
+    "contained": [
+        {
+            "resourceType": "Task",
+            "id": "54d68aca-c0c4-4b2f-9ca2-c981aec040c6"
+        },
+        {
+            "resourceType": "Task",
+            "id": "9638c5f7-51d6-4edb-8b56-be3ae64558d5"
+        },
+        {
+            "resourceType": "Task",
+            "id": "af7c046f-e8bf-4a6d-9a50-305002ec2d8a"
+        },
+        {
+            "resourceType": "Task",
+            "id": "1dfe464c-8653-4333-8e1e-d84aa565d913"
+        },
+        {
+            "resourceType": "Task",
+            "id": "524212c1-6a6e-4d71-a528-4993ff0e4c4a"
+        },
+        {
+            "resourceType": "Task",
+            "id": "061932be-6801-4091-b3b1-121667b5f550"
+        },
+        {
+            "resourceType": "RequestGroup",
+            "id": "fc9bcfb5-d71c-4a59-b55b-08fe9f636e17",
+            "status": "draft",
+            "intent": "proposal",
+            "action": [
+                {
+                    "resource": {
+                        "reference": "#54d68aca-c0c4-4b2f-9ca2-c981aec040c6"
+                    }
+                },
+                {
+                    "resource": {
+                        "reference": "#9638c5f7-51d6-4edb-8b56-be3ae64558d5"
+                    }
+                },
+                {
+                    "resource": {
+                        "reference": "#af7c046f-e8bf-4a6d-9a50-305002ec2d8a"
+                    }
+                },
+                {
+                    "resource": {
+                        "reference": "#1dfe464c-8653-4333-8e1e-d84aa565d913"
+                    }
+                },
+                {
+                    "resource": {
+                        "reference": "#524212c1-6a6e-4d71-a528-4993ff0e4c4a"
+                    }
+                },
+                {
+                    "resource": {
+                        "reference": "#061932be-6801-4091-b3b1-121667b5f550"
+                    }
+                }
+            ]
+        }
+    ],
+    "instantiatesCanonical": [
+        "plandefinition-RuleFilters-1.0.0"
+    ],
+    "status": "draft",
+    "subject": {
+        "reference": "NotReportable"
+    },
+    "activity": [
+        {
+            "reference": {
+                "reference": "#fc9bcfb5-d71c-4a59-b55b-08fe9f636e17"
+            }
+        }
+    ]
+}

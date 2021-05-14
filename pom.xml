@@ -40,6 +40,7 @@
         <module>evaluator.content-test</module>
         <module>evaluator.measure</module>
         <module>evaluator.activitydefinition</module>
+        <module>evaluator.plandefinition</module>
     </modules>
 
     <licenses>

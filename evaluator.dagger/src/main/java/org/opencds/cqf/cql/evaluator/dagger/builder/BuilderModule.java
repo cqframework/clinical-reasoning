@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
+import org.opencds.cqf.cql.evaluator.builder.dal.TypedFhirDalFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirRestRetrieveProviderFactory;
@@ -60,5 +61,12 @@ public class BuilderModule {
     @Singleton
     Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories(FhirFileTerminologyProviderFactory fhirFileTerminologyProviderFactory, FhirRestTerminologyProviderFactory fhirRestTerminologyProviderFactory) {
         return new HashSet<>(Arrays.asList(fhirFileTerminologyProviderFactory, fhirRestTerminologyProviderFactory));
+    }
+
+    @Provides
+    @ElementsIntoSet
+    @Singleton
+    Set<TypedFhirDalFactory> typedFhirDalFactories() {
+        return new HashSet<>();
     }
 }

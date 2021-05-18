@@ -19,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
@@ -149,9 +150,10 @@ public class LibraryProcessor {
 
     protected void addLibraryLoaders(IBaseResource libraryEndpoint, IBaseBundle additionalData) {
         CqlTranslatorOptions translatorOptions = CqlTranslatorOptions.defaultOptions();
-        if (libraryEndpoint != null) {
-            LibraryLoader libraryLoader = this.libraryLoaderFactory
-                    .create(endpointConverter.getEndpointInfo(libraryEndpoint), translatorOptions);
+        LibraryLoader libraryLoader = this.libraryLoaderFactory.create(
+                endpointConverter != null ? endpointConverter.getEndpointInfo(libraryEndpoint) : null,
+                translatorOptions);
+        if (libraryLoader != null) {
             this.cqlEvaluatorBuilder.withLibraryLoader(libraryLoader);
         }
 
@@ -162,9 +164,10 @@ public class LibraryProcessor {
     }
 
     protected void addTerminologyProviders(IBaseResource terminologyEndpoint, IBaseBundle additionalData) {
-        if (terminologyEndpoint != null) {
-            this.cqlEvaluatorBuilder.withTerminologyProvider(
-                    this.terminologyProviderFactory.create(endpointConverter.getEndpointInfo(terminologyEndpoint)));
+        TerminologyProvider terminologyProvider = this.terminologyProviderFactory
+                .create(endpointConverter != null ? endpointConverter.getEndpointInfo(terminologyEndpoint) : null);
+        if (terminologyProvider != null) {
+            this.cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
         }
 
         if (additionalData != null) {
@@ -173,16 +176,15 @@ public class LibraryProcessor {
     }
 
     protected void addDataProviders(IBaseResource dataEndpoint, IBaseBundle additionalData) {
-        if (dataEndpoint != null) {
-            Triple<String, ModelResolver, RetrieveProvider> dataProvider = this.dataProviderFactory
-                    .create(endpointConverter.getEndpointInfo(dataEndpoint));
+        Triple<String, ModelResolver, RetrieveProvider> dataProvider = this.dataProviderFactory
+                .create(endpointConverter != null ? endpointConverter.getEndpointInfo(dataEndpoint) : null);
+        if (dataProvider != null) {
             this.cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider);
         }
 
         if (additionalData != null) {
-            Triple<String, ModelResolver, RetrieveProvider> dataProvider = this.dataProviderFactory
-                    .create(additionalData);
-            this.cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider);
+            this.cqlEvaluatorBuilder
+                    .withModelResolverAndRetrieveProvider(this.dataProviderFactory.create(additionalData));
         }
     }
 
@@ -194,14 +196,16 @@ public class LibraryProcessor {
     protected VersionedIdentifier getVersionedIdentifer(String url, IBaseResource libraryEndpoint,
             IBaseBundle additionalData) {
         if (!url.contains("/Library/")) {
-            throw new IllegalArgumentException("Invalid resource type for determining library version identifier: Library");
+            throw new IllegalArgumentException(
+                    "Invalid resource type for determining library version identifier: Library");
         }
-        String [] urlSplit = url.split("/Library/");
+        String[] urlSplit = url.split("/Library/");
         if (urlSplit.length != 2) {
-            throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
+            throw new IllegalArgumentException(
+                    "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 
-        @SuppressWarnings("unused") 
+        @SuppressWarnings("unused")
         String cqlNamespaceUrl = urlSplit[0];
 
         String cqlName = urlSplit[1];

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.slf4j.Logger;
@@ -49,12 +50,12 @@ public class FhirClientFhirLibraryContentProvider extends
         this.cache = new HashMap<>();
     }
 
-    protected IBaseResource getLibrary(String url) {
+    protected IBaseResource getLibrary(IIdType id) {
         try {
-            return this.client.read().resource("Library").withUrl(url).elementsSubset("name", "version", "content", "type").encodedJson().execute();
+            return this.client.read().resource("Library").withId(id).elementsSubset("name", "version", "content", "type").encodedJson().execute();
         }
         catch (Exception e) {
-            logger.error(String.format("error while getting library with url %s", url), e);
+            logger.error(String.format("error while getting library with id %s", id), e);
         }
 
         return null;
@@ -67,7 +68,7 @@ public class FhirClientFhirLibraryContentProvider extends
             return library;
         }
 
-        IBaseBundle result = this.client.search().forResource("Library").elementsSubset("name", "version", "url")
+        IBaseBundle result = this.client.search().forResource("Library").elementsSubset("name", "version")
             .where(new TokenClientParam("name").exactly().code(libraryIdentifier.getId())).encodedJson().execute();
 
         List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(this.client.getFhirContext(),
@@ -83,7 +84,7 @@ public class FhirClientFhirLibraryContentProvider extends
 
         // This is a subsetted resource, so we get the full version here.
         if (library != null) {
-            library = getLibrary(this.adapterFactory.createLibrary(library).getUrl());
+            library = getLibrary(this.adapterFactory.createLibrary(library).getId());
             this.cache.put(libraryIdentifier, library);
         }
 

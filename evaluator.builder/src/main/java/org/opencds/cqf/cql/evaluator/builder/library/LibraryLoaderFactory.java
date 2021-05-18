@@ -65,7 +65,10 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
 
     @Override
     public LibraryLoader create(EndpointInfo endpointInfo, CqlTranslatorOptions translatorOptions) {
-        requireNonNull(endpointInfo, "endpointInfo can not be null");
+        if (endpointInfo == null) {
+            return null;
+        }
+
         if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
@@ -120,12 +123,14 @@ public class LibraryLoaderFactory implements org.opencds.cqf.cql.evaluator.build
             }
         }
 
-        throw new IllegalArgumentException("invalid connectionType for loading Libraries");
+        throw new IllegalArgumentException("unsupported or unknown connectionType for loading Libraries");
     }
 
     @Override
     public LibraryLoader create(IBaseBundle contentBundle, CqlTranslatorOptions translatorOptions) {
-        requireNonNull(contentBundle, "contentBundle can not be null");
+        if (contentBundle == null) {
+            return null;
+        }
 
         if (!contentBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
             throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");

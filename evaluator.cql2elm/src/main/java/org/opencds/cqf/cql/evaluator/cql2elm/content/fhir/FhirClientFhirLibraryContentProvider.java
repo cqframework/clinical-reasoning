@@ -67,7 +67,7 @@ public class FhirClientFhirLibraryContentProvider extends
             return library;
         }
 
-        IBaseBundle result = this.client.search().forResource("Library").elementsSubset("name", "version")
+        IBaseBundle result = this.client.search().forResource("Library").elementsSubset("name", "version", "url")
             .where(new TokenClientParam("name").exactly().code(libraryIdentifier.getId())).encodedJson().execute();
 
         List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(this.client.getFhirContext(),

@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -72,7 +72,9 @@ public class OperationParametersParser {
     }
 
     protected IBaseResource getResourceChild(IBaseParameters parameters, String name) {
-        requireNonNull(parameters, "parameters must not be null");
+        if (parameters == null) {
+            return null;
+        }
         requireNonNull(name, "name must not be null");
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
@@ -88,6 +90,9 @@ public class OperationParametersParser {
     }
 
     protected Map<String, IBaseResource> getResourceChildren(IBaseParameters parameters) {
+        if (parameters == null) {
+            return null;
+        }
         requireNonNull(parameters, "parameters must not be null");
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
@@ -100,6 +105,9 @@ public class OperationParametersParser {
     }
 
     protected IBaseDatatype getValueChild(IBaseParameters parameters, String name) {
+        if (parameters == null) {
+            return null;
+        }
         requireNonNull(parameters, "parameters must not be null");
         requireNonNull(name, "name must not be null");
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
@@ -116,6 +124,9 @@ public class OperationParametersParser {
     }
 
     protected Map<String, IBaseDatatype> getValueChildren(IBaseParameters parameters) {
+        if (parameters == null) {
+            return null;
+        }
         requireNonNull(parameters, "parameters must not be null");
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
@@ -127,12 +138,13 @@ public class OperationParametersParser {
         return values;
     }
 
-    @SuppressWarnings("unused")
+    // @SuppressWarnings("unused")
     protected Map<String, Object> getParameterParts(IBaseParameters parameters) {
-        requireNonNull(parameters, "parameters must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+        throw new NotImplementedException("OperationParametersParser.getParameterParts is not implemented yet");
+        // requireNonNull(parameters, "parameters must not be null");
+        // ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        // List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        //     .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
         // Map<String, Object> parameterParts = parts.stream()
         //     .collect(Collectors.toMap(x -> x.getName(), x -> {
@@ -147,7 +159,7 @@ public class OperationParametersParser {
         //     }));
             
         // return parameterParts;
-        return Collections.emptyMap();
+        // return Collections.emptyMap();
     }
 }
 

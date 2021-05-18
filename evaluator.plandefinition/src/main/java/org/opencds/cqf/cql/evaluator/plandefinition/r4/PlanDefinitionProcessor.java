@@ -122,7 +122,7 @@ public class PlanDefinitionProcessor {
     // Each Group of actions shares a RequestGroup
     RequestGroupBuilder requestGroupBuilder = new RequestGroupBuilder().buildStatus().buildIntent();
 
-    IBaseDatatype basePrefetchDataKey = operationParametersParser.getValueChild(parameters, "key");
+    IBaseDatatype basePrefetchDataKey = operationParametersParser.getValueChild(prefetchData, "key");
     String prefetchDataKey = null;
     if (basePrefetchDataKey != null) {
       if (!(basePrefetchDataKey instanceof StringType)) {
@@ -131,7 +131,7 @@ public class PlanDefinitionProcessor {
       prefetchDataKey = ((StringType) basePrefetchDataKey).asStringValue();
     }
 
-    IBaseResource basePrefetchDataDescription = operationParametersParser.getResourceChild(parameters, "descriptor");
+    IBaseResource basePrefetchDataDescription = operationParametersParser.getResourceChild(prefetchData, "descriptor");
     DataRequirement prefetchDataDescription = null;
     if (basePrefetchDataDescription != null) {
       if (!(basePrefetchDataDescription instanceof DataRequirement)) {
@@ -140,7 +140,7 @@ public class PlanDefinitionProcessor {
       prefetchDataDescription = ((DataRequirement) basePrefetchDataDescription);
     }
 
-    IBaseResource basePrefetchDataData = operationParametersParser.getResourceChild(parameters, "data");
+    IBaseResource basePrefetchDataData = operationParametersParser.getResourceChild(prefetchData, "data");
     IBaseBundle prefetchDataData = null;
     if (basePrefetchDataData != null) {
       if (!(basePrefetchDataData instanceof IBaseBundle)) {

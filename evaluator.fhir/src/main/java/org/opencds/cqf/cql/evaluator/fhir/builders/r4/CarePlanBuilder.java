@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.plandefinition.r4.builders;
+package org.opencds.cqf.cql.evaluator.fhir.builders.r4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,8 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.fhir.builders.BaseBuilder;
+
 
 public class CarePlanBuilder extends BaseBuilder<CarePlan> {
 

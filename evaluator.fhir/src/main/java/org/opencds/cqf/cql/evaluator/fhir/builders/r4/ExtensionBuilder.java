@@ -1,8 +1,9 @@
-package org.opencds.cqf.cql.evaluator.plandefinition.r4.builders;
+package org.opencds.cqf.cql.evaluator.fhir.builders.r4;
 
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.cql.evaluator.fhir.builders.BaseBuilder;
 
 public class ExtensionBuilder extends BaseBuilder<Extension> {
 

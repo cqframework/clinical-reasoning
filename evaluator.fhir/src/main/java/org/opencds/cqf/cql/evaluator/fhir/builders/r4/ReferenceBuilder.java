@@ -1,7 +1,8 @@
-package org.opencds.cqf.cql.evaluator.plandefinition.r4.builders;
+package org.opencds.cqf.cql.evaluator.fhir.builders.r4;
 
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
+import org.opencds.cqf.cql.evaluator.fhir.builders.BaseBuilder;
 
 public class ReferenceBuilder extends BaseBuilder<Reference> {
 

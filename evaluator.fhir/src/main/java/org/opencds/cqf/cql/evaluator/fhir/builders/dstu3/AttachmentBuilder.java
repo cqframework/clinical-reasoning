@@ -1,9 +1,10 @@
-package org.opencds.cqf.cql.evaluator.plandefinition.r4.builders;
+package org.opencds.cqf.cql.evaluator.fhir.builders.dstu3;
 
 import java.util.List;
 
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.opencds.cqf.cql.evaluator.fhir.builders.BaseBuilder;  
 
 public class AttachmentBuilder extends BaseBuilder<Attachment> {
 

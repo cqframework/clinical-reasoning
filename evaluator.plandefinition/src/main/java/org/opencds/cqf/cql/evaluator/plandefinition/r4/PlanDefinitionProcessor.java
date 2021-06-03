@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,19 +42,18 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.AttachmentBuilder;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.CarePlanActivityBuilder;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.CarePlanBuilder;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.ExtensionBuilder;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.ReferenceBuilder;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.RelatedArtifactBuilder;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.RequestGroupActionBuilder;
+import org.opencds.cqf.cql.evaluator.fhir.builders.r4.RequestGroupBuilder;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.cql.evaluator.fhir.helper.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.AttachmentBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.CarePlanActivityBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.CarePlanBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.ExtensionBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.JavaDateBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.ReferenceBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.RelatedArtifactBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.RequestGroupActionBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.builders.RequestGroupBuilder;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.helper.ContainedHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -294,7 +294,7 @@ public class PlanDefinitionProcessor {
 
           // TODO - likely need more date transformations
           if (result instanceof DateTime) {
-            result = new JavaDateBuilder().buildFromDateTime((DateTime) result).build();
+            result = Date.from(((DateTime)result).getDateTime().toInstant());
           }
 
           try {

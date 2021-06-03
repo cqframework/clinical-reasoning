@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.plandefinition.r4.builders;
+package org.opencds.cqf.cql.evaluator.fhir.builders.r4;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.fhir.builders.BaseBuilder;  
 
 public class RequestGroupBuilder extends BaseBuilder<RequestGroup> {
 

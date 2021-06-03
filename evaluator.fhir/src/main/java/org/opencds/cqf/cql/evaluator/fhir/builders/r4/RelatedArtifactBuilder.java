@@ -1,8 +1,9 @@
-package org.opencds.cqf.cql.evaluator.plandefinition.r4.builders;
+package org.opencds.cqf.cql.evaluator.fhir.builders.r4;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.opencds.cqf.cql.evaluator.fhir.builders.BaseBuilder;
 
 public class RelatedArtifactBuilder extends BaseBuilder<RelatedArtifact> {
 

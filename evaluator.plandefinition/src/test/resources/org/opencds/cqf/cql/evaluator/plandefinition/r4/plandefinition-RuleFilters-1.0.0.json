@@ -1,330 +1,454 @@
 {
-  "resourceType": "PlanDefinition",
-  "id": "plandefinition-RuleFilters-1.0.0",
-  "meta": {
+    "resourceType": "PlanDefinition",
+    "id": "plandefinition-RuleFilters-1.0.0",
+    "meta": {
+      "versionId": "18",
+      "lastUpdated": "2020-12-03T07:29:41.456+00:00",
+      "source": "#1Vdult52UApiUgPS",
       "profile": [
-        "http://hl7.org/fhir/us/ecr/StructureDefinition/plandefinition-ersd-instance"
+        "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"
       ]
     },
-  "extension": [
-      {
-          "url": "http://jamesagnew.github.io/hapi-fhir/StructureDefinition/ext-subscription-email-body",
-          "valueString": "eRSD Update - April 23rd 2020\n \nA new version of the electronic Reporting and Surveillance Distribution (eRSD) has been uploaded to the eRSD service and is now available for implementation. The eRSD distribution includes Reportable Condition Trigger Codes (RCTC) and other reporting guidance in support of electronic Case Reporting (eCR).\n \n***This is an emergency distribution and should be immediately implemented to address critical public health surveillance needs.*** \n \nThis version:\nThis release includes code updates for the existing conditions and adds codes for VPDs, non-fatal opioid overdose, SARS, MERS, and COVID-19.\t\t\n \nThis distribution should be implemented as soon as possible.\n \nQuestions can be directed to eCR-Info@aimsplatform.org.\n"
-      }
-  ],
-  "url": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0",
-  "version": "0.1",
-  "name": "PlanDefinition_RuleFilter_Instance",
-  "title": "PlanDefinition RuleFilter Instance",
-  "type": {
+    "text": {
+      "status": "generated",
+      "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n            <p>\n                <b>PlanDefinition eRSD Instance</b>\n            </p>\n            <p>\n                <b>url</b>:\n\n\n\n                \n                <a href=\"PlanDefinition-plandefinition-ersd-instance.html\">http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance</a>\n            </p>\n            <p>\n                <b>version</b>: 3.0.0\n\n\n\n            \n            </p>\n            <p>\n                <b>name</b>: PlanDefinition_eRSD_Instance\n\n\n\n            \n            </p>\n            <p>\n                <b>title</b>: eRSD PlanDefinition Instance\n\n\n\n            \n            </p>\n            <p>\n                <b>type</b>:\n\n\n\n                \n                <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/plan-definition-type workflow-definition}\">Workflow\n        Definition</span>\n            </p>\n            <p>\n                <b>status</b>: active\n\n\n\n            \n            </p>\n            <p>\n                <b>experimental</b>: true\n\n\n\n            \n            </p>\n            <p>\n                <b>date</b>: Jul 31, 2020, 5:32:29 PM\n\n\n\n            \n            </p>\n            <p>\n                <b>publisher</b>: HL7 Public Health Work Group (http://www.hl7.org/Special/committees/pher/index.cfm)\n\n\n\n            \n            </p>\n            <p>\n                <b>contact</b>: HL7 International - Public Health:\n\n\n\n                \n                <a href=\"http://www.hl7.org/Special/committees/pher\">http://www.hl7.org/Special/committees/pher</a>\n            </p>\n            <p>\n                <b>description</b>: An example ersd PlanDefinition\n\n\n\n            \n            </p>\n            <p>\n                <b>jurisdiction</b>:\n\n\n\n                \n                <span title=\"Codes: {urn:iso:std:iso:3166 US}\">United States of America</span>\n            </p>\n            <p>\n                <b>effectivePeriod</b>: 2020-12-01 --&gt; (ongoing)\n\n\n\n            \n            </p>\n        </div>"
+    },
+    "url": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0",
+    "version": "1.1.0",
+    "name": "PlanDefinition_eRSD_Instance",
+    "title": "eRSD PlanDefinition Instance",
+    "type": {
       "coding": [
-          {
-              "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
-              "code": "eca-rule",
-              "display": "ECA Rule"
-          }
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+          "code": "workflow-definition",
+          "display": "Workflow Definition"
+        }
       ]
-  },
-  "status": "active",
-  "date": "2020-04-23T17:14:05-04:00",
-  "effectivePeriod": {
-      "start": "2020-06-01"
-  },
-  "relatedArtifact": [
+    },
+    "status": "active",
+    "experimental": true,
+    "date": "2020-07-31T12:32:29.858-05:00",
+    "publisher": "HL7 Public Health Work Group (http://www.hl7.org/Special/committees/pher/index.cfm)",
+    "contact": [
       {
-          "type": "depends-on",
-          "label": "RCTC Value Set Library of Trigger Codes",
-          "resource": "http://hl7.org/fhir/us/ecr/Library/rctc"
+        "name": "HL7 International - Public Health",
+        "telecom": [
+          {
+            "system": "url",
+            "value": "http://www.hl7.org/Special/committees/pher"
+          }
+        ]
       }
-  ],
-  "library": [
-    "http://test.canonical/Library/RuleFilters|1.0.0"
-  ],
-  "action": [
+    ],
+    "description": "An example ersd PlanDefinition",
+    "jurisdiction": [
       {
-          "id": "match-trigger",
-          "description": "This action represents the matching of a trigger code to one of the values in the eRSD value sets.",
-          "textEquivalent": "Match of a code to one of the values in the eRSD value sets.",
-          "trigger": [
-              {
-                  "type": "data-changed",
-                  "data": [
-                      {
-                          "type": "CodeableConcept",
-                          "codeFilter": [
-                              {
-                                  "path": "Condition.code",
-                                  "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-dxtc-example"
-                              }
-                          ]
-                      }
-                  ]
-              },
-              {
-                  "type": "data-changed",
-                  "data": [
-                      {
-                          "type": "CodeableConcept",
-                          "codeFilter": [
-                              {
-                                  "path": "Immunization.vaccineCode",
-                                  "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-iztc-example"
-                              }
-                          ]
-                      }
-                  ]
-              },
-              {
-                  "type": "data-changed",
-                  "data": [
-                      {
-                          "type": "CodeableConcept",
-                          "codeFilter": [
-                              {
-                                  "path": "ServiceRequest.code",
-                                  "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-lotc-example"
-                              }
-                          ]
-                      }
-                  ]
-              },
-              {
-                  "type": "data-changed",
-                  "data": [
-                      {
-                          "type": "CodeableConcept",
-                          "codeFilter": [
-                              {
-                                  "path": "Observation.code",
-                                  "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-lrtc-example"
-                              }
-                          ]
-                      }
-                  ]
-              },
-              {
-                  "type": "data-changed",
-                  "data": [
-                      {
-                          "type": "CodeableConcept",
-                          "codeFilter": [
-                              {
-                                  "path": "MedicationAdministration.medicationCodeableConcept",
-                                  "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-mrtc-example"
-                              }
-                          ]
-                      }
-                  ]
-              },
-              {
-                  "type": "data-changed",
-                  "data": [
-                      {
-                          "type": "CodeableConcept",
-                          "codeFilter": [
-                              {
-                                  "path": "Observation.code",
-                                  "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-ostc-example"
-                              }
-                          ]
-                      }
-                  ]
-              }
-          ],
-          "condition": [
-            {
-              "kind": "applicability",
-              "expression": {
-                "description": "Filterable",
-                "language": "text/cql.name",
-                "expression": "IsReportable"
-              }
-            }
-          ],
-          "definitionCanonical": "ActivityDefinition/activitydefinition-rulefilter-report"
-        },
-      {
-          "id": "create-eicr",
-          "description": "This action represents the initial creation of the eICR.",
-          "textEquivalent": "eICR construction delay (x hours) - time after trigger event before an eICR should be created.",
-          "code": [
-              {
-                "coding": [
-                  {
-                      "code": "create-eicr",
-                      "system": "http://aphl.org/fhir/ecr/CodeSystem/executable-task-types",
-                      "display": "eICR construction delay (x hours) - time after trigger event before an eICR should be created."
-                  }
-                ]
-              }
-            ],
-          "relatedAction": [
-              {
-                  "actionId": "match-trigger",
-                  "relationship": "after",
-                  "offsetDuration": {
-                      "value": 3,
-                      "unit": "h"
-                  }
-              }
-          ],
-          "definitionCanonical": "ActivityDefinition/activitydefinition-create-eicr"
-      },
-      {
-          "id": "periodic-update-eicr",
-          "description": "This action represents the periodic update of the eICR.",
-          "textEquivalent": "eICR periodic update (y hours) - the time after an initial eICR creation to send a new eICR as an update during long encounters.",
-          "code": [
-              {
-                "coding": [
-                  {
-                      "code": "periodic-update-eicr",
-                      "system": "http://aphl.org/fhir/ecr/CodeSystem/executable-task-types",
-                      "display": "eICR periodic update (y hours) – the time after an initial eICR transmission to send a new eICR as an update during long encounters."
-                  }
-                ]
-              }
-            ],
-          "trigger": [
-              {
-                  "type": "periodic",
-                  "timingTiming": {
-                      "repeat": {
-                          "frequency": 1,
-                          "period": 24,
-                          "periodUnit": "h"
-                      }
-                  }
-              }
-          ],
-          "condition": [
-              {
-                  "kind": "start",
-                  "expression": {
-                      "description": "Encounter is active.",
-                      "language": "text/fhirpath",
-                      "expression": "Encounter.period.start.exists() and Encounter.period.end.empty()"
-                  }
-              },
-              {
-                  "kind": "stop",
-                  "expression": {
-                      "description": "Encounter is closed.",
-                      "language": "text/fhirpath",
-                      "expression": "Encounter.period.end.exists()"
-                  }
-              }
-          ],
-          "relatedAction": [
-              {
-                  "actionId": "create-eicr",
-                  "relationship": "after",
-                  "offsetDuration": {
-                      "value": 24,
-                      "unit": "h"
-                  }
-              }
-          ],
-          "definitionCanonical": "ActivityDefinition/activitydefinition-periodic-update-eicr"
-      },
-      {
-          "id": "close-out-eicr",
-          "description": "This action represents the close out of an eICR encounter.",
-          "textEquivalent": "eICR encounter close out (z hours) - the time after the end of the encounter to create the final eICR when there have been one or more trigger events.",
-          "code": [
-              {
-                "coding": [
-                  {
-                      "code": "close-out-eicr",
-                      "system": "http://aphl.org/fhir/ecr/CodeSystem/executable-task-types",
-                      "display": "eICR encounter close out (z hours) – the time after the end of the encounter to create the final eICR when there have been one or more trigger events."
-                  }
-                ]
-              }
-            ],
-          "trigger": [
-              {
-                  "type": "data-added",
-                  "data": [
-                      {
-                          "type": "Encounter",
-                          "profile": [
-                              "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-encounter"
-                          ],
-                          "dateFilter": [
-                              {
-                                  "path": "period.end"
-                              }
-                          ]
-                      }
-                  ]
-              }
-          ],
-          "relatedAction": [
-            {
-              "actionId": "create-eicr",
-              "relationship": "after",
-              "offsetDuration": {
-                "value": 90,
-                "unit": "s"
-              }
-            }
-          ],
-          "definitionCanonical": "ActivityDefinition/activitydefinition-close-out-eicr"
-      },
-      {
-          "id": "validate-eicr",
-          "description": "This action represents the validation of an eICR.",
-          "textEquivalent": "Validate eICR.",
-          "code": [
-              {
-                "coding": [
-                  {
-                      "code": "validate-eicr",
-                      "system": "http://aphl.org/fhir/ecr/CodeSystem/executable-task-types",
-                      "display": "Validate eICR."
-                  }
-                ]
-              }
-            ],
-          "trigger": [
-              {
-                  "type": "data-changed",
-                  "name": "eicr-created",
-                  "data": [
-                      {
-                          "type": "Composition",
-                          "profile": [
-                              "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-composition"
-                          ]
-                      }
-                  ]
-              }
-          ],
-          "definitionCanonical": "ActivityDefinition/activitydefinition-validate-eicr"
-      },
-      {
-          "id": "route-and-send-eicr",
-          "description": "This action represents the routing and sending of an eICR.",
-          "textEquivalent": "Route and send eICR",
-          "code": [
-              {
-                "coding": [
-                  {
-                      "code": "route-and-send-eicr",
-                      "system": "http://aphl.org/fhir/ecr/CodeSystem/executable-task-types-types",
-                      "display": "Route and send eICR"
-                  }
-                ]
-              }
-            ],
-          "relatedAction": [
-              {
-                  "actionId": "validate-eicr",
-                  "relationship": "after"
-              }
-          ],
-          "definitionCanonical": "ActivityDefinition/activitydefinition-route-and-send-eicr"
+        "coding": [
+          {
+            "system": "urn:iso:std:iso:3166",
+            "code": "US",
+            "display": "United States of America"
+          }
+        ],
+        "text": "United States of America"
       }
-  ]
-}
+    ],
+    "effectivePeriod": {
+      "start": "2020-12-01"
+    },
+    "relatedArtifact": [
+      {
+        "type": "depends-on",
+        "label": "RCTC Value Set Library of Trigger Codes",
+        "resource": "http://hl7.org/fhir/us/ecr/Library/library-rctc"
+      }
+    ],
+    "action": [
+      {
+        "id": "start",
+        "description": "This action represents the start of the reporting workflow in response to the encounter-start event",
+        "textEquivalent": "Start the reporting workflow in response to an encounter-start event",
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                "code": "start"
+              }
+            ]
+          }
+        ],
+        "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/start",
+        "trigger": [
+          {
+            "id": "encounter",
+            "type": "named-event",
+            "name": "encounter-start"
+          }
+        ],
+        "relatedAction": [
+          {
+            "actionId": "check-reportable",
+            "relationship": "before-start",
+            "offsetDuration": {
+              "value": 1,
+              "system": "http://unitsofmeasure.org",
+              "code": "h"
+            }
+          }
+        ]
+      },
+      {
+        "id": "check-reportable",
+        "description": "This action represents the check for suspected reportability of the eICR.",
+        "textEquivalent": "Check Reportable",
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                "code": "check-reportable"
+              }
+            ]
+          }
+        ],
+        "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-check-reportable",
+        "action": [
+          {
+            "id": "ckr-is-encounter-reportable",
+            "condition": [
+              {
+                "kind": "applicability",
+                "expression": {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "Is Reportable",
+                        "reference": "http://aphl.org/fhir/ecr/Library/RuleFilters|1.0.0"
+                      }
+                    }
+                  ],
+                  "language": "text/fhirpath",
+                  "expression": "%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists()"
+                }
+              }
+            ],
+            "input": [
+              {
+                "id": "conditions",
+                "type": "Condition",
+                "codeFilter": [
+                  {
+                    "path": "code",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-dxtc-example"
+                  }
+                ]
+              },
+              {
+                "id": "encounters",
+                "type": "Encounter",
+                "codeFilter": [
+                  {
+                    "path": "reasonCode",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-dxtc-example"
+                  }
+                ]
+              },
+              {
+                "id": "immunizations",
+                "type": "Immunization",
+                "codeFilter": [
+                  {
+                    "path": "vaccineCode",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-mrtc-example"
+                  }
+                ]
+              },
+              {
+                "id": "labOrders",
+                "type": "ServiceRequest",
+                "codeFilter": [
+                  {
+                    "path": "code",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-lotc-example"
+                  }
+                ]
+              },
+              {
+                "id": "labTests",
+                "type": "Observation",
+                "codeFilter": [
+                  {
+                    "path": "code",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-lotc-example"
+                  }
+                ]
+              },
+              {
+                "id": "procedureOrders",
+                "type": "ServiceRequest",
+                "codeFilter": [
+                  {
+                    "path": "code",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-pctc-example"
+                  }
+                ]
+              },
+              {
+                "id": "procedures",
+                "type": "Procedure",
+                "codeFilter": [
+                  {
+                    "path": "code",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-pctc-example"
+                  }
+                ]
+              },
+              {
+                "id": "medicationOrders",
+                "type": "MedicationRequest",
+                "codeFilter": [
+                  {
+                    "path": "medication",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-mrtc-example"
+                  }
+                ]
+              },
+              {
+                "id": "medicationDispenses",
+                "type": "MedicationDispense",
+                "codeFilter": [
+                  {
+                    "path": "medication",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-mrtc-example"
+                  }
+                ]
+              },
+              {
+                "id": "medicationAdministrations",
+                "type": "MedicationAdministration",
+                "codeFilter": [
+                  {
+                    "path": "medication",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-mrtc-example"
+                  }
+                ]
+              },
+              {
+                "id": "labResults",
+                "type": "Observation",
+                "codeFilter": [
+                  {
+                    "path": "value",
+                    "valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-ostc-example"
+                  }
+                ]
+              }
+            ],
+            "relatedAction": [
+              {
+                "actionId": "create-and-report-eicr",
+                "relationship": "before-start"
+              }
+            ]
+          },
+          {
+            "id": "ckr-is-encounter-in-progress",
+            "condition": [
+              {
+                "kind": "applicability",
+                "expression": {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "Is Encounter In Progress",
+                        "reference": "http://aphl.org/fhir/ecr/Library/RuleFilters|1.0.0"
+                      }
+                    }
+                  ],
+                  "language": "text/fhirpath",
+                  "expression": "%encounter.status = 'in-progress'"
+                }
+              }
+            ],
+            "relatedAction": [
+              {
+                "actionId": "check-reportable",
+                "relationship": "before-start",
+                "offsetDuration": {
+                  "value": 6,
+                  "system": "http://unitsofmeasure.org",
+                  "code": "h"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "create-and-report-eicr",
+        "description": "This action represents the creation and reporting of the eICR.",
+        "textEquivalent": "Create and Report eICR",
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                "code": "create-and-report-eicr"
+              }
+            ]
+          }
+        ],
+        "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-create-and-report-eicr",
+        "action": [
+          {
+            "id": "car-report-eicr",
+            "relatedAction": [
+              {
+                "actionId": "report-eicr",
+                "relationship": "before-start"
+              }
+            ]
+          },
+          {
+            "id": "car-is-encounter-complete",
+            "condition": [
+              {
+                "kind": "applicability",
+                "expression": {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "Is Encounter Complete",
+                        "reference": "http://aphl.org/fhir/ecr/Library/RuleFilters|1.0.0"
+                      }
+                    }
+                  ],
+                  "language": "text/fhirpath",
+                  "expression": "%encounter.status = 'finished'"
+                }
+              }
+            ],
+            "relatedAction": [
+              {
+                "actionId": "report-eicr",
+                "relationship": "before-start",
+                "offsetDuration": {
+                  "value": 24,
+                  "system": "http://unitsofmeasure.org",
+                  "code": "h"
+                }
+              }
+            ]
+          },
+          {
+            "id": "car-is-encounter-in-progress",
+            "condition": [
+              {
+                "kind": "applicability",
+                "expression": {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "Is Encounter In Progress",
+                        "reference": "http://aphl.org/fhir/ecr/Library/RuleFilters|1.0.0"
+                      }
+                    }
+                  ],
+                  "language": "text/fhirpath",
+                  "expression": "%encounter.status = 'in-progress'"
+                }
+              }
+            ],
+            "relatedAction": [
+              {
+                "actionId": "create-and-report-eicr",
+                "relationship": "before-start",
+                "offsetDuration": {
+                  "value": 24,
+                  "system": "http://unitsofmeasure.org",
+                  "code": "h"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "report-eicr",
+        "description": "This action represents the reporting of the eICR.",
+        "textEquivalent": "Report eICR",
+        "action": [
+          {
+            "id": "create-eicr",
+            "description": "This action represents the creation of the eICR.",
+            "textEquivalent": "Create eICR.",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "create-eicr"
+                  }
+                ]
+              }
+            ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-create-eicr",
+            "relatedAction": [
+              {
+                "actionId": "validate-eicr",
+                "relationship": "before-start"
+              }
+            ]
+          },
+          {
+            "id": "validate-eicr",
+            "description": "This action represents the validation of the eICR.",
+            "textEquivalent": "Validate eICR.",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "validate-eicr"
+                  }
+                ]
+              }
+            ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-validate-eicr",
+            "relatedAction": [
+              {
+                "actionId": "route-and-send-eicr",
+                "relationship": "before-start"
+              }
+            ]
+          },
+          {
+            "id": "route-and-send-eicr",
+            "description": "This action represents the routing and sending of the eICR.",
+            "textEquivalent": "Route and send eICR",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "route-and-send-eicr"
+                  }
+                ]
+              }
+            ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-route-and-send-eicr"
+          }
+        ]
+      }
+    ]
+  }

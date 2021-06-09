@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.SupplyRequest;
+import org.hl7.fhir.r4.model.Task;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
@@ -116,6 +117,10 @@ public class ActivityDefinitionProcessor {
         case "CommunicationRequest":
             result = resolveCommunicationRequest(activityDefinition, patientId);
             break;
+
+        case "Task":
+            result = resolveTask(activityDefinition, patientId, organizationId);
+            break;
         }
 
         for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition
@@ -193,6 +198,24 @@ public class ActivityDefinitionProcessor {
         }
 
         return result;
+    }
+
+    private Task resolveTask(ActivityDefinition activityDefinition, String patientId, String organizationId) throws RuntimeException {
+        Task task = new Task();
+        task.setStatus(Task.TaskStatus.DRAFT);
+
+        if (activityDefinition.hasCode()) {
+            task.setCode(activityDefinition.getCode());
+        }
+
+        if (activityDefinition.hasExtension()) {
+            task.setExtension(activityDefinition.getExtension());
+        }
+
+        if (activityDefinition.hasDescription()) {
+            task.setDescription(activityDefinition.getDescription());
+        }  
+        return task;
     }
 
     private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition, String patientId,

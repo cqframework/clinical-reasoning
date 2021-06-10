@@ -39,6 +39,7 @@
         <module>evaluator.cli</module>
         <module>evaluator.content-test</module>
         <module>evaluator.measure</module>
+        <module>evaluator.measure.hapi</module>
         <module>evaluator.activitydefinition</module>
     </modules>
 

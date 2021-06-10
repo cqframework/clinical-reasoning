@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 
-import org.hl7.fhir.instance.model.api.IBase;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -15,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
-public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupComponentT extends IBase, MeasureGroupPopulationComponentT extends IBase, MeasureReportT extends IBase, MeasureReportGroupComponentT extends IBase, MeasureReportGroupPopulationComponentT extends IBase, ResourceT, SubjectT extends ResourceT> {
+public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT,  MeasureGroupComponentT extends BaseT, MeasureGroupPopulationComponentT extends BaseT, MeasureReportT extends BaseT, MeasureReportGroupComponentT extends BaseT, MeasureReportGroupPopulationComponentT extends BaseT, ResourceT, SubjectT extends ResourceT> {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
 

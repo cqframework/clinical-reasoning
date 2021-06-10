@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
@@ -22,7 +23,7 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureScoring;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class R4MeasureEvaluation<RT, ST extends RT> extends
-        MeasureEvaluation<Measure, MeasureGroupComponent, MeasureGroupPopulationComponent, MeasureReport, MeasureReportGroupComponent, MeasureReport.MeasureReportGroupPopulationComponent, RT, ST> {
+        MeasureEvaluation<IBase, Measure, MeasureGroupComponent, MeasureGroupPopulationComponent, MeasureReport, MeasureReportGroupComponent, MeasureReport.MeasureReportGroupPopulationComponent, RT, ST> {
 
     public R4MeasureEvaluation(Context context, Measure measure, Interval measurementPeriod, String packageName,
             Function<RT, String> getId, String patientOrPractitionerId) {

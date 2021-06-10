@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.measure</artifactId>
+    <artifactId>evaluator.measure.hapi</artifactId>
     <version>1.2.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <description>CQL Evaluator - Measure Evaluation</description>
+    <description>CQL Evaluator - Measure Evaluation for HAPI FHIR</description>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
@@ -18,8 +18,17 @@
 
     <dependencies>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>evaluator.measure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
         </dependency>
     </dependencies>
 </project>

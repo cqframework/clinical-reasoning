@@ -430,6 +430,15 @@ public class PlanDefinitionProcessor {
   }
 
   private Boolean meetsConditions(Session session, PlanDefinition.PlanDefinitionActionComponent action) {
+    if (session.planDefinition.getType().hasCoding()) {
+      List<Coding> planDefinitionTypeCoding = session.planDefinition.getType().getCoding();
+      for (Coding coding : planDefinitionTypeCoding) {
+        if (coding.getCode().equals("workflow-definition")) {
+          logger.info(String.format("Found a workflow definition type for PlanDefinition % conditions should be evaluated at task execution time."), session.planDefinition.getUrl());
+          return true;
+        }
+      }
+    }
     if (action.hasAction()) {
       for (PlanDefinition.PlanDefinitionActionComponent containedAction : action.getAction()) {
         meetsConditions(session, containedAction);

@@ -33,23 +33,35 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.TriggerDefinition;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
+import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
@@ -335,31 +347,45 @@ public class PlanDefinitionProcessor {
       if (action.hasRelatedAction()) {
           List<PlanDefinitionActionRelatedActionComponent> relatedActions = action.getRelatedAction();
           for (PlanDefinitionActionRelatedActionComponent relatedAction : relatedActions) {
-              if (relatedAction.hasOffset()) {
-                  Extension offsetExtension = new Extension();
-                  offsetExtension.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/offset");
-                  offsetExtension.setValue(relatedAction.getOffset());
-                  task.addExtension(offsetExtension);
-                  
-              }
+            Extension next = new Extension();
+            next.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/next");
+            if (relatedAction.hasOffset()) {
+                Extension offsetExtension = new Extension();
+                offsetExtension.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/offset");
+                offsetExtension.setValue(relatedAction.getOffset());
+                task.addExtension(offsetExtension);
+                next.addExtension(offsetExtension);
+            }
+            Extension target = new Extension();
+            Reference targetRef = new Reference("#" + relatedAction.getActionId());
+            target.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/target");
+            target.setValue(targetRef);
+            next.addExtension(target);
+            task.addExtension(next);
           }
       }
-      if (action.hasTiming()) {
-          Extension timingExtension = new Extension();
-          timingExtension.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/timing");
-          timingExtension.setValue(action.getTiming());
-          task.addExtension(timingExtension);
-      }
-      if (action.hasTrigger()) {
-          List<TriggerDefinition> triggers = action.getTrigger();
-          for (TriggerDefinition trigger : triggers) {
-              if (trigger.hasTiming()) {
-                  Extension timingExtension = new Extension();
-                  timingExtension.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/timing");
-                  timingExtension.setValue(trigger.getTiming());
-                  task.addExtension(timingExtension);
-              }
+
+      if (action.hasCondition()) {
+        List<PlanDefinitionActionConditionComponent> conditionComponents = action.getCondition();
+        for (PlanDefinitionActionConditionComponent conditionComponent : conditionComponents) {
+          Extension condition = new Extension();
+          condition.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/condition");
+          condition.setValue(conditionComponent.getExpression());
+          if (conditionComponent.hasExtension(alternateExpressionExtension)) {
+            condition.addExtension(conditionComponent.getExtensionByUrl(alternateExpressionExtension));
           }
+          task.addExtension(condition);
+        }
+      }
+
+      if (action.hasInput()) {
+        List<DataRequirement> dataRequirements = action.getInput();
+        for (DataRequirement dataRequirement : dataRequirements) {
+          Extension input = new Extension();
+          input.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/input");
+          input.setValue(dataRequirement);
+          task.addExtension(input);
+        }
       }
       task.addBasedOn(new Reference(session.requestGroupBuilder.build()).setType(session.requestGroupBuilder.build().fhirType()));
       return task;
@@ -375,7 +401,7 @@ public class PlanDefinitionProcessor {
         
         String libraryToBeEvaluated = ensureLibrary(session, dynamicValue.getExpression());
         String language = dynamicValue.getExpression().getLanguage();
-        Object result = evaluateConditionOrDynamicValue(dynamicValue.getExpression().getExpression(), language, libraryToBeEvaluated, session);
+        Object result = evaluateConditionOrDynamicValue(dynamicValue.getExpression().getExpression(), language, libraryToBeEvaluated, session, action.getInput());
         if (result == null && dynamicValue.getExpression().hasExtension(alternateExpressionExtension)) {
           Type alternateExpressionValue = dynamicValue.getExpression().getExtensionByUrl(alternateExpressionExtension).getValue();
           if (!(alternateExpressionValue instanceof Expression)) {
@@ -385,7 +411,7 @@ public class PlanDefinitionProcessor {
           if (alternateExpression.hasLanguage()) {
             libraryToBeEvaluated = ensureLibrary(session, alternateExpression);
             language = alternateExpression.getLanguage();
-            result = evaluateConditionOrDynamicValue(alternateExpression.getExpression(), language, libraryToBeEvaluated, session);
+            result = evaluateConditionOrDynamicValue(alternateExpression.getExpression(), language, libraryToBeEvaluated, session, action.getInput());
           }
         }
         // TODO: Rename bundle
@@ -422,7 +448,7 @@ public class PlanDefinitionProcessor {
         String libraryToBeEvaluated = ensureLibrary(session, condition.getExpression());
         String language = condition.getExpression().getLanguage();
         IVersionSpecificBundleFactory bundleFactory = fhirContext.newBundleFactory();
-        Object result = evaluateConditionOrDynamicValue(condition.getExpression().getExpression(), language, libraryToBeEvaluated, session);
+        Object result = evaluateConditionOrDynamicValue(condition.getExpression().getExpression(), language, libraryToBeEvaluated, session, action.getInput());
         if (result == null && condition.getExpression().hasExtension(alternateExpressionExtension)) {
           Type alternateExpressionValue = condition.getExpression().getExtensionByUrl(alternateExpressionExtension).getValue();
           if (!(alternateExpressionValue instanceof Expression)) {
@@ -432,7 +458,7 @@ public class PlanDefinitionProcessor {
           if (alternateExpression.hasLanguage()) {
             libraryToBeEvaluated = ensureLibrary(session, alternateExpression);
             language = alternateExpression.getLanguage();
-            result = evaluateConditionOrDynamicValue(alternateExpression.getExpression(), language, libraryToBeEvaluated, session);
+            result = evaluateConditionOrDynamicValue(alternateExpression.getExpression(), language, libraryToBeEvaluated, session, action.getInput());
           }
         }
         if (result == null) {
@@ -499,7 +525,7 @@ public class PlanDefinitionProcessor {
     throw new RuntimeException("CanonicalType must have a value for resource name extraction");
   }
 
-  protected Object evaluateConditionOrDynamicValue(String expression, String language, String libraryToBeEvaluated, Session session) {
+  protected Object evaluateConditionOrDynamicValue(String expression, String language, String libraryToBeEvaluated, Session session, List<DataRequirement> dataRequirements) {
     Set<String> expressions = new HashSet<>();
     expressions.add(expression);
     Object result = null;
@@ -517,24 +543,23 @@ public class PlanDefinitionProcessor {
             session.dataEndpoint, session.bundle, expressions);
         break;
       case "text/fhirpath": {
-        if (session.bundle != null) {
-          // need to account for input data from action
-          Optional<IBase> optionalResult = fhirPath.evaluateFirst(session.bundle, expression, IBase.class);
-          if (optionalResult.isPresent()) {
-            result = optionalResult.get();
-          }
-        }
-        if (session.encounterId != null && result == null) {
-          IBaseResource encounter = fhirDal.read(new IdType("Encounter", session.encounterId));
-          if (encounter == null) {
-            throw new IllegalArgumentException(
-                String.format("Encounter with id: %s does not exists.", session.encounterId));
-          } else {
-            Optional<IBase> optionalResult = fhirPath.evaluateFirst(encounter, expression, IBase.class);
-            if (optionalResult.isPresent()) {
-              result = optionalResult.get();
-            }
-          }
+        for (DataRequirement req : dataRequirements) {
+          // String name = req.getId();
+          // String fhirType = req.getType();
+          // List<IBaseResource> resources = null;
+          // fhirDal.search(fhirType).forEach(resource -> {
+          //   for (DataRequirementCodeFilterComponent filter : req.getCodeFilter()) {
+          //     if (filter.hasPath()) {
+          //       Parameters params = new Parameters();
+          //       params.addParameter().setName("resource").setResource((Resource)resource);
+          //       Parameters resultParams = expressionEvaluator.evaluate(String.format("%resource.%s", filter.getPath()), params);
+          //       // if there is a result add the result to list
+          //     }
+          //   }
+          // });
+          // Parameters params = new Parameters();
+          // params.addParameter().setName(name).setValue(resources);
+          // Parameters resultParams = expressionEvaluator.evaluate(expression, params);
         }
       }
         break;

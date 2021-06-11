@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -199,7 +200,7 @@ public class PlanDefinitionProcessorTests {
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Parameters actual = (Parameters) planDefinitionProcessor.apply(
-                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", null, null, null, null, null, null, null, null, null, expected, null, null, null, dataEndpoint,
+                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", null, null, null, null, null, null, null, null, null, expected, null, new Bundle(), null, dataEndpoint,
                 endpoint, endpoint);
 
         assertTrue(expected.equalsShallow(actual));

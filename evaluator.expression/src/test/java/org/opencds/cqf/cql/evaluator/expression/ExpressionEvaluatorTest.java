@@ -177,9 +177,9 @@ public class ExpressionEvaluatorTest {
         Parameters actual = (Parameters) evaluator.evaluate(null, "1 + 3", null, null, null, null, null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
-    
+
     @Test
-    public void testIncludedLibraryExpressionEvaluate() {
+    public void testIncludedLibraryExpressionEvaluateWithBundle() {
         Parameters expected = new Parameters();
         expected.addParameter().setName("LocalExpression").setValue(new BooleanType(false));
 
@@ -188,7 +188,20 @@ public class ExpressionEvaluatorTest {
 
         Pair<String, String> library = Pair.of("http://localhost/fhir/Library/EXM125|8.0.000", "EXM125");
         IBaseBundle bundle = readBundle("EXM125-8.0.000-bundle.json");
-        Parameters actual = (Parameters) evaluator.evaluate(null, "not \"EXM125\".\"Numerator\"", null, Arrays.asList(library), null, bundle, null, null, endpoint, null);
+        Parameters actual = (Parameters) evaluator.evaluate(null, "not \"EXM125\".\"Numerator\"", null, Arrays.asList(library), null, bundle, null, endpoint, null, endpoint);
+        assertTrue(expected.equalsDeep(actual));
+    }
+    
+    @Test
+    public void testIncludedLibraryExpressionEvaluateWithoutBundle() {
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("LocalExpression").setValue(new BooleanType(false));
+
+        Endpoint endpoint = new Endpoint().setAddress("EXM125-8.0.000-bundle.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Pair<String, String> library = Pair.of("http://localhost/fhir/Library/EXM125|8.0.000", "EXM125");
+        Parameters actual = (Parameters) evaluator.evaluate(null, "not \"EXM125\".\"Numerator\"", null, Arrays.asList(library), null, null, null, endpoint, endpoint, endpoint);
         assertTrue(expected.equalsDeep(actual));
     }
 }

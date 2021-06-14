@@ -47,6 +47,9 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
         }
 
         library = this.innerLoader.load(libraryIdentifier);
+        if (library == null) {
+            return null;
+        }
         this.libraryCache.put(libraryIdentifier, library);
 
         return library;

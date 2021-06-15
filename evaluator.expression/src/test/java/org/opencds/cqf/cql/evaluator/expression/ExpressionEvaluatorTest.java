@@ -16,7 +16,11 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.ParameterDefinition.ParameterUse;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
@@ -217,7 +221,10 @@ public class ExpressionEvaluatorTest {
     // @Test
     public void testFhirPathConstant() {
         Parameters input = new Parameters();
-        input.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
+        ParametersParameterComponent ppc = input.addParameter();
+        ppc.setName("%encounters").setResource(new Encounter().setId("1"));
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters"));
+        
 
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new IntegerType(1));
@@ -227,12 +234,12 @@ public class ExpressionEvaluatorTest {
         assertTrue(expected.equalsDeep(actual));
     }
 
-    @Test
+    @Test(expectedExceptions = CqlException.class)
     public void testFhirPathConstantMissing() {
         Parameters input = new Parameters();
         input.addParameter().setName("%notUsed").setResource(new Encounter().setId("1"));
         input.addParameter().setName("%notUsed").setResource(new Encounter().setId("2"));
 
-        Parameters actual = (Parameters) evaluator.evaluate("%procedures.count()", null, null, null, null, null, null, null, null, null);
+        evaluator.evaluate("%procedures.count()", null, null, null, null, null, null, null, null, null);
     }
 }

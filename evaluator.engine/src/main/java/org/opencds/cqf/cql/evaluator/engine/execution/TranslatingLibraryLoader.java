@@ -28,11 +28,13 @@ import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.CqlTranslatorException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.cql2elm.model.serialization.LibraryWrapper;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.elm.r1.ObjectFactory;
+import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.execution.JsonCqlLibraryReader;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
@@ -136,14 +138,28 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     }
 
     protected Library translate(VersionedIdentifier libraryIdentifier) {
+        TranslatedLibrary library = null;
+        List<CqlTranslatorException> errors = new ArrayList<>();
         try {
-            List<CqlTranslatorException> errors = new ArrayList<>();
-            TranslatedLibrary library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier),
+            library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier),
                     this.cqlTranslatorOptions, errors);
-            return LibraryMapper.INSTANCE.map(library.getLibrary());
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new CqlException(String.format("Unable translate library %s", libraryIdentifier.getId(), e));
+        }
+
+        if (!errors.isEmpty()) {
+            for (CqlTranslatorException e : errors) {
+                if (e.getSeverity() == ErrorSeverity.Error) {
+                    throw new CqlException(String.format("Translation of library %s failed with the following message: %s", libraryIdentifier.getId(), e.getMessage()));
+                }
+            }
+        }
+
+        try {
+            return LibraryMapper.INSTANCE.map(library.getLibrary());
+        }
+        catch(Exception e) {
+            throw new CqlException(String.format("Mapping of library %s failed", libraryIdentifier.getId()), e);
         }
     }
 

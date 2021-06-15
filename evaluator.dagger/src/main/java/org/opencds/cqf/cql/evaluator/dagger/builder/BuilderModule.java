@@ -3,9 +3,11 @@ package org.opencds.cqf.cql.evaluator.dagger.builder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.inject.Singleton;
 
+import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactory;
@@ -60,5 +62,10 @@ public class BuilderModule {
     @Singleton
     Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories(FhirFileTerminologyProviderFactory fhirFileTerminologyProviderFactory, FhirRestTerminologyProviderFactory fhirRestTerminologyProviderFactory) {
         return new HashSet<>(Arrays.asList(fhirFileTerminologyProviderFactory, fhirRestTerminologyProviderFactory));
+    }
+
+    @Provides
+    Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier() {
+        return () -> new CqlEvaluatorBuilder();
     }
 }

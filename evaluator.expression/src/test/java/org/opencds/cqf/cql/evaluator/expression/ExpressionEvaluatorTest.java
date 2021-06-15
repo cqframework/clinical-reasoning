@@ -200,7 +200,7 @@ public class ExpressionEvaluatorTest {
     }
 
     @Test
-    public void testFhirPathConstant() {
+    public void testFhirPathConstantList() {
         Parameters input = new Parameters();
         input.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
         input.addParameter().setName("%encounters").setResource(new Encounter().setId("2"));
@@ -210,6 +210,29 @@ public class ExpressionEvaluatorTest {
         expected.addParameter().setName("return").setValue(new IntegerType(2));
 
         Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null, null, null, null, null, null, null, null);
+        
         assertTrue(expected.equalsDeep(actual));
+    }
+
+    // @Test
+    public void testFhirPathConstant() {
+        Parameters input = new Parameters();
+        input.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new IntegerType(1));
+
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null, null, null, null, null, null, null, null);
+        
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    public void testFhirPathConstantMissing() {
+        Parameters input = new Parameters();
+        input.addParameter().setName("%notUsed").setResource(new Encounter().setId("1"));
+        input.addParameter().setName("%notUsed").setResource(new Encounter().setId("2"));
+
+        Parameters actual = (Parameters) evaluator.evaluate("%procedures.count()", null, null, null, null, null, null, null, null, null);
     }
 }

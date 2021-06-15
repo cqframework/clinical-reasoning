@@ -5,10 +5,12 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
@@ -78,5 +80,27 @@ public class CqlFhirParametersConverterTests {
         assertEquals(expected.get("Product Line"), actual.get("Product Line"));
 
         assertTrue(((Interval)expected.get("Measurement Period")).equal(actual.get("Measurement Period")));
+    }
+
+    @Test
+    public void TestFhirParametersListToCqlParameters() {
+
+        Parameters testData = new Parameters();
+        testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
+        testData.addParameter().setName("%encounters").setResource(new Encounter().setId("2"));
+
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
+
+        assertEquals(actual.size(), 1);
+        assertTrue(actual.containsKey("%encounters"));
+        
+        Object value = actual.get("%encounters");
+
+        assertTrue(value instanceof List);
+
+        @SuppressWarnings("unchecked")
+        List<Encounter> encounters = (List<Encounter>)value;
+
+        assertEquals(encounters.size(), 2);
     }
 }

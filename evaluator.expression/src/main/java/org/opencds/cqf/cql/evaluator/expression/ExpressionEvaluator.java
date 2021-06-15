@@ -12,10 +12,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import com.google.common.collect.Lists;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -44,8 +47,11 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
-import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.slf4j.Logger;
@@ -62,7 +68,7 @@ public class ExpressionEvaluator {
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
-    protected LibraryLoaderFactory libraryLoaderFactory;
+    protected LibraryContentProviderFactory libraryContentProviderFactory;
     protected DataProviderFactory dataProviderFactory;
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected EndpointConverter endpointConverter;
@@ -70,26 +76,25 @@ public class ExpressionEvaluator {
     protected IFhirPath fhirPath;
     protected LibraryProcessor libraryProcessor;
     protected OperationParametersParser operationParametersParser;
+    protected Supplier<CqlEvaluatorBuilder> cqlEvaluatorSupplier;
 
     @Inject
     public ExpressionEvaluator(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
-            LibraryLoaderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
+            LibraryContentProviderFactory libraryContentProviderFactory, DataProviderFactory dataProviderFactory,
             TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
-            CqlEvaluatorBuilder cqlEvaluatorBuilder, OperationParametersParser operationParametersParser) {
+            Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier, OperationParametersParser operationParametersParser) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.fhirPath = fhirContext.newFhirPath();
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
-        this.libraryLoaderFactory = requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
+        this.libraryContentProviderFactory = requireNonNull(libraryContentProviderFactory, "libraryLoaderFactory can not be null");
         this.dataProviderFactory = requireNonNull(dataProviderFactory, "dataProviderFactory can not be null");
         this.terminologyProviderFactory = requireNonNull(terminologyProviderFactory,
                 "terminologyProviderFactory can not be null");
 
+        this.cqlEvaluatorSupplier = requireNonNull(cqlEvaluatorBuilderSupplier, "cqlEvaluatorBuilderSupplier can not be null");
         this.endpointConverter = requireNonNull(endpointConverter, "endpointConverter can not be null");
-        this.cqlEvaluatorBuilder = requireNonNull(cqlEvaluatorBuilder, "cqlEvaluatorBuilder can not be null");
         this.operationParametersParser = requireNonNull(operationParametersParser, "operationParametersParser can not be null");
-        
-        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory, dataProviderFactory, terminologyProviderFactory, endpointConverter, cqlEvaluatorBuilder);
     }
 
     /**
@@ -272,9 +277,9 @@ public class ExpressionEvaluator {
 
     /**
      * Evaluates a CQL expression and returns the results as a Parameters resource.
-     * @param subject Subject for which the expression will be evaluated. This corresponds to the context in which the expression will be evaluated and is represented as a relative FHIR id (e.g. Patient/123), which establishes both the context and context value for the evaluation
      * @param expression Expression to be evaluated. Note that this is an expression of CQL, not the text of a library with definition statements.
      * @param parameters Any input parameters for the expression. Parameters defined in this input will be made available by name to the CQL expression. Parameter types are mapped to CQL as specified in the Using CQL section of this implementation guide. If a parameter appears more than once in the input Parameters resource, it is represented with a List in the input CQL. If a parameter has parts, it is represented as a Tuple in the input CQL.
+     * @param subject Subject for which the expression will be evaluated. This corresponds to the context in which the expression will be evaluated and is represented as a relative FHIR id (e.g. Patient/123), which establishes both the context and context value for the evaluation
      * @param library A library to be included. The library is resolved by url and made available by name within the expression to be evaluated.
      * @param useServerData Whether to use data from the server performing the evaluation. If this parameter is true (the default), then the operation will use data first from any bundles provided as parameters (through the data and prefetch parameters), second data from the server performing the operation, and third, data from the dataEndpoint parameter (if provided). If this parameter is false, the operation will use data first from the bundles provided in the data or prefetch parameters, and second from the dataEndpoint parameter (if provided).
      * @param bundle Data to be made available to the library evaluation. This parameter is exclusive with the prefetchData parameter (i.e. either provide all data as a single bundle, or provide data using multiple bundles with prefetch descriptions).
@@ -285,49 +290,55 @@ public class ExpressionEvaluator {
      * @return IBaseParameters The result of evaluating the given expression, returned as a FHIR type, either a resource, or a FHIR-defined type corresponding to the CQL return type, as defined in the Using CQL section of this implementation guide. If the result is a List of resources, the result will be a Bundle. If the result is a CQL system-defined or FHIR-defined type, the result is returned as a Parameters resource
      */
     // Canonical is not a canonical data type.
-    public IBaseParameters evaluate(String subject, String expression, IBaseParameters parameters,
+    public IBaseParameters evaluate(String expression, IBaseParameters parameters, String subject,
             List<Pair<String, String>> libraries, Boolean useServerData, IBaseBundle bundle,
             List<Triple<String, DataRequirement, IBaseBundle>> prefetchData, IBaseResource dataEndpoint,
             IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
                 
-        Library localLibrary = new Library().setName("LocalLibrary").setVersion("1.0.0").setUrl("http://localhost/Library/LocalLibrary|1.0.0");
-        localLibrary.setId(new IdType("localLibrary-1"));
-        String cql = constructCqlLibrary(expression, libraries);
-        ensureCql(localLibrary, cql);
-        if (libraries == null || libraries.isEmpty()) {
-            CqlTranslator translator = getTranslator(cql);
-            ensureElm(localLibrary, translator);
-        }
-        BundleEntryComponent entryComponent = new BundleEntryComponent();
-        entryComponent.setResource(localLibrary);
-        if (bundle != null) {
-            logger.info("Adding LocalLibrary to additionalData Bundle");
-            List<IBase> entries = fhirPath.evaluate(bundle, "entry", IBase.class);
-            entries.add(entryComponent);
-            // Need a version independent approach
-            ((Bundle)bundle).addEntry(entryComponent);
-        } else {
-            logger.info("Adding LocalLibrary to Local additionalData Bundle");
-            Bundle localBundle = new Bundle();
-            localBundle.setId(new IdType("localBundle-1"));
-            localBundle.setType(BundleType.COLLECTION);
-            localBundle.setEntry(Arrays.asList(entryComponent));
-            bundle = localBundle;
-        }
-        Set<String> expressions = new HashSet<String>();
-        expressions.add("LocalExpression");
+        String cql = constructCqlLibrary(expression, libraries, parameters);
 
-        return libraryProcessor.evaluate(localLibrary.getUrl(), subject, parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, expressions);
+        LibraryContentProvider contentProvider = new InMemoryLibraryContentProvider(Lists.newArrayList(cql));
+        CqlEvaluatorBuilder builder = this.cqlEvaluatorSupplier.get();
+        builder.withLibraryContentProvider(contentProvider);
+
+
+        Set<String> expressions = new HashSet<String>();
+        expressions.add("return");
+
+        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory, dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> builder);
+
+        return libraryProcessor.evaluate(new VersionedIdentifier().withId("expression").withVersion("1.0.0"), subject, parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, expressions);
     }
 
-    private String constructCqlLibrary(String expression, List<Pair<String, String>> libraries) {
+    private String constructCqlLibrary(String expression, List<Pair<String, String>> libraries, IBaseParameters parameters) {
         String cql = null;
-        logger.info("Constructing LocalLibrary for local evaluation");
-        if (libraries == null || libraries.isEmpty()) {
-            cql = String.format("library LocalLibrary version \'1.0.0\'\n\ndefine \"LocalExpression\":\n       %s", expression);
-        } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("library LocalLibrary version \'1.0.0\'\n\n");
+        logger.debug("Constructing expression for local evaluation");
+
+        StringBuilder sb = new StringBuilder();
+
+        constructHeader(sb);
+        constructUsings(sb, parameters);
+        constructIncludes(sb, parameters, libraries);
+        constructParameters(sb, parameters);
+        constructExpression(sb, expression);
+
+        cql = sb.toString();
+
+        logger.debug(cql);
+        return cql;
+    }
+
+    private void constructExpression(StringBuilder sb, String expression) {
+        sb.append(String.format("\ndefine \"return\":\n       %s", expression));
+    }
+
+    private void constructIncludes(StringBuilder sb, IBaseParameters parameters, List<Pair<String, String>> libraries) {
+        String fhirVersion = getFhirVersion(parameters);
+        if (fhirVersion != null) {
+            sb.append(String.format("include FHIRHelpers version \'%s\' called FHIRHelpers\n", fhirVersion));
+        }
+
+        if (libraries != null) {
             for (Pair<String, String> library : libraries) {
                 VersionedIdentifier vi = getVersionedIdentifer(library.getLeft());
                 sb.append(String.format("include \"%s\"", vi.getId()));
@@ -339,24 +350,59 @@ public class ExpressionEvaluator {
                 }
                 sb.append("\n");
             }
-            sb.append(String.format("\ndefine \"LocalExpression\":\n       %s", expression));
-            cql = sb.toString();
         }
-        System.out.println(cql);
-        return cql;
+    }
+
+    private void constructParameters(StringBuilder sb, IBaseParameters parameters) {
+        if (parameters == null) {
+            return;
+        }
+
+        sb.append("parameter \"%encounters\" List<FHIR.Encounter>");
+    }
+
+    private void constructUsings(StringBuilder sb, IBaseParameters parameters) {
+        String fhirVersion = getFhirVersion(parameters);
+        if (fhirVersion != null) {
+            sb.append(String.format("using FHIR version \'%s\'\n", fhirVersion));
+        }
+    }
+
+    private void constructHeader(StringBuilder sb) {
+        sb.append("library expression version \'1.0.0\'\n\n");
+    }
+
+    private String getFhirVersion(IBaseParameters parameters) {
+        if (parameters == null) {
+            return null;
+        }
+
+        switch(parameters.getStructureFhirVersionEnum()) {
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
+                return "2.0.0";
+            case DSTU3:
+                return "3.0.2";
+            case R4:
+                return "4.0.1";
+            case R5:
+            default:
+                throw new IllegalArgumentException(String.format("Unsupported version of FHIR: %s", parameters.getStructureFhirVersionEnum().getFhirVersionString()));
+        }
     }
 
     protected VersionedIdentifier getVersionedIdentifer(String url) {
         if (!url.contains("/Library/")) {
             throw new IllegalArgumentException("Invalid resource type for determining library version identifier: Library");
         }
-        String [] urlsplit = url.split("/Library/");
-        if (urlsplit.length != 2) {
-            throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namepsace url>/Library/<CQL library name>");
+        String [] urlSplit = url.split("/Library/");
+        if (urlSplit.length != 2) {
+            throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
-        String cqlNamespaceUrl = urlsplit[0];
+        String cqlNamespaceUrl = urlSplit[0];
 
-        String cqlName = urlsplit[1];
+        String cqlName = urlSplit[1];
         VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
         if (cqlName.contains("|")) {
             String[] nameVersion = cqlName.split("\\|");
@@ -368,58 +414,5 @@ public class ExpressionEvaluator {
             versionedIdentifier.setId(cqlName);
         }
         return versionedIdentifier;
-    }
-
-    public void ensureCql(Library library, String cql) {
-        library.getContent().removeIf(a -> a.getContentType().equals("text/cql"));
-        Attachment elm = new Attachment();
-        elm.setContentType("text/cql");
-        elm.setData(cql.getBytes());
-        library.getContent().add(elm);
-    }
-
-    public void ensureElm(Library library, CqlTranslator translator) {
-        library.getContent().removeIf(a -> a.getContentType().equals("application/elm+xml"));
-        String xml = translator.toXml();
-        Attachment elm = new Attachment();
-        elm.setContentType("application/elm+xml");
-        elm.setData(xml.getBytes());
-        library.getContent().add(elm);
-    }
-
-    private CqlTranslator getTranslator(String cql) {
-        ModelManager modelManager = new ModelManager();
-        LibraryManager libraryManager = new LibraryManager(modelManager);
-        System.out.println(cql);
-        CqlTranslator translator = getTranslator(cql, libraryManager, modelManager);
-        if (translator.getErrors().size() > 0) {
-            throw new RuntimeException("Errors during library compilation.");
-        }
-        return translator;
-    }
-
-    public static CqlTranslator getTranslator(String cql, LibraryManager libraryManager, ModelManager modelManager) {
-        return getTranslator(new ByteArrayInputStream(cql.getBytes(StandardCharsets.UTF_8)), libraryManager,
-                modelManager);
-    }
-
-    public static CqlTranslator getTranslator(InputStream cqlStream, LibraryManager libraryManager,
-            ModelManager modelManager) {
-        ArrayList<CqlTranslator.Options> options = new ArrayList<>();
-        options.add(CqlTranslator.Options.EnableAnnotations);
-        options.add(CqlTranslator.Options.EnableLocators);
-        options.add(CqlTranslator.Options.DisableListDemotion);
-        options.add(CqlTranslator.Options.DisableListPromotion);
-        options.add(CqlTranslator.Options.DisableMethodInvocation);
-        CqlTranslator translator;
-        try {
-            translator = CqlTranslator.fromStream(cqlStream, modelManager, libraryManager,
-                    options.toArray(new CqlTranslator.Options[options.size()]));
-        } catch (IOException e) {
-            throw new IllegalArgumentException(
-                    String.format("Errors occurred translating library: %s", e.getMessage()));
-        }
-
-        return translator;
     }
 }

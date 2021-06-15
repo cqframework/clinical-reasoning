@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.library;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -164,25 +164,44 @@ public class CqlFhirParametersConverter {
 
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
 
-        List<ParametersParameterComponentAdapter> children = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+        Map<String,List<ParametersParameterComponentAdapter>> children = parametersAdapter.getParameter().stream()
+                .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.groupingBy(ParametersParameterComponentAdapter::getName));
 
-        for (ParametersParameterComponentAdapter ppca : children) {
+        
+
+        for (Map.Entry<String,List<ParametersParameterComponentAdapter>> entry : children.entrySet()) {
             // Only know how to convert values
-            if (ppca.hasValue()) {
-                parameterMap.put(ppca.getName(), this.fhirTypeConverter.toCqlType(ppca.getValue()));
+            if (entry.getValue() == null || entry.getValue().isEmpty()) {
+                parameterMap.put(entry.getKey(), null);
             }
-            else if (ppca.hasResource()) {
-                parameterMap.put(ppca.getName(), ppca.getResource());
-            }
-            else if (ppca.hasPart()) {
-                throw new NotImplementedException("Iterables not yet implemented");
+            else if (entry.getValue().size() == 1) {
+                ParametersParameterComponentAdapter ppca = entry.getValue().get(0);
+                parameterMap.put(entry.getKey(), convertToCql(ppca));
             }
             else {
-                parameterMap.put(ppca.getName(), null);
+                List<Object> values = new ArrayList<>();
+                for (ParametersParameterComponentAdapter ppca : entry.getValue()) {
+                    values.add(convertToCql(ppca));
+                }
+
+                parameterMap.put(entry.getKey(), values);
             }
         }
 
         return parameterMap;
+    }
+
+    private Object convertToCql(ParametersParameterComponentAdapter ppca) {
+        if (ppca.hasValue()) {
+            return this.fhirTypeConverter.toCqlType(ppca.getValue());
+        }
+        else if (ppca.hasResource()) {
+            return ppca.getResource();
+        }
+        else if (ppca.hasPart()) {
+            logger.debug("Ignored {} parameter sub-parts", ppca.getPart().size());
+        }
+
+        return null;
     }
 }

@@ -118,9 +118,7 @@ public class ExpressionEvaluator {
      *                            represented as a relative FHIR id (e.g.
      *                            Patient/123), which establishes both the context
      *                            and context value for the evaluation
-     * @param library             A library to be included. The library is resolved
-     *                            by url and made available by name within the
-     *                            expression to be evaluated.
+     * @param libraries           The list of libraries to be included in the evaluation context.
      * @param useServerData       Whether to use data from the server performing the
      *                            evaluation. If this parameter is true (the
      *                            default), then the operation will use data first
@@ -254,16 +252,24 @@ public class ExpressionEvaluator {
     private String getType(Object value) {
         if (value instanceof Iterable)
         {
-            Object firstValue = ((Iterable<?>)value).iterator().next();
-            return "List<" + getType(firstValue) + ">";
+            Iterable<?> iterable = (Iterable<?>)value;
+            if (iterable.iterator().hasNext()) {
+                Object firstValue = ((Iterable<?>)value).iterator().next();
+                return "List<" + getType(firstValue) + ">";
+            }
+            else {
+                return "List<System.Any>";
+            }
         }
 
         if (value instanceof IBase) {
             return "FHIR." + value.getClass().getSimpleName();
         }
-        else {
+        else if (value != null) {
             return "System." + value.getClass().getSimpleName(); 
         }
+
+        return "System.Any";
     }
 
     private void constructUsings(StringBuilder sb, IBaseParameters parameters) {

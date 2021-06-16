@@ -172,7 +172,7 @@ public class CqlFhirParametersConverter {
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
 
         Map<String, List<ParametersParameterComponentAdapter>> children = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameters(x)).filter(x -> x.getName() != null)
                 .collect(Collectors.groupingBy(ParametersParameterComponentAdapter::getName));
 
         for (Map.Entry<String, List<ParametersParameterComponentAdapter>> entry : children.entrySet()) {
@@ -194,14 +194,16 @@ public class CqlFhirParametersConverter {
             }
 
             if (isList != null && isList == false && entry.getValue().size() > 1) {
-                throw new IllegalArgumentException(String.format("The parameter %s was defined as a single value but multiple values were passed", entry.getKey()));
+                throw new IllegalArgumentException(
+                        String.format("The parameter %s was defined as a single value but multiple values were passed",
+                                entry.getKey()));
             }
 
             if ((isList != null && isList == true) || (isList == null && entry.getValue().size() > 1)) {
-                List<Object> values = entry.getValue().stream().map(x -> convertToCql(x)).collect(Collectors.toList());
+                List<Object> values = entry.getValue().stream().map(x -> convertToCql(x)).filter(x -> x != null)
+                        .collect(Collectors.toList());
                 parameterMap.put(entry.getKey(), values);
-            }
-            else {
+            } else {
                 parameterMap.put(entry.getKey(), convertToCql(entry.getValue().get(0)));
             }
 
@@ -212,17 +214,19 @@ public class CqlFhirParametersConverter {
 
     private Boolean isListType(IBaseExtension<?, ?> parameterDefinitionExtension) {
         @SuppressWarnings("rawtypes")
-        Optional<IPrimitiveType> max = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
+        Optional<IPrimitiveType> max = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "max",
+                IPrimitiveType.class);
         if (max.isPresent()) {
             String maxString = max.get().getValueAsString();
             if (maxString.equals("1")) {
                 return false;
             }
-            
+
             return true;
         }
 
-        Optional<IBaseIntegerDatatype> min = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "min", IBaseIntegerDatatype.class);
+        Optional<IBaseIntegerDatatype> min = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "min",
+                IBaseIntegerDatatype.class);
         if (min.isPresent()) {
             return min.get().getValue() > 1;
         }

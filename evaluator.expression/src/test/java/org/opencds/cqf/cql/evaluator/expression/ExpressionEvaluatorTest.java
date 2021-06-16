@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
-
+import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
@@ -239,5 +239,75 @@ public class ExpressionEvaluatorTest {
         input.addParameter().setName("%notUsed").setResource(new Encounter().setId("2"));
 
         evaluator.evaluate("%procedures.count()", null, null, null, null, null, null, null, null, null);
+    }
+
+    @Test
+    public void testEmptyListCount() {
+        Parameters input = new Parameters();
+        ParametersParameterComponent ppc = input.addParameter();
+        ppc.setName("%encounters");
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters"));
+        
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new IntegerType(0));
+
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null, null, null, null, null, null, null, null);
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    public void testEmptyListExists() {
+        Parameters input = new Parameters();
+        ParametersParameterComponent ppc = input.addParameter();
+        ppc.setName("%encounters");
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters"));
+        
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new BooleanType(false));
+
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.exists()", input, null, null, null, null, null, null, null, null);
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    public void testNullSingleValueConstant() {
+        Parameters input = new Parameters();
+        input.addParameter().setName("%encounter");
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new BooleanType(true));
+
+        Parameters actual = (Parameters) evaluator.evaluate("IsNull(%encounter)", input, null, null, null, null, null, null, null, null);
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    public void testNonNullSingleValueConstant() {
+        Parameters input = new Parameters();
+        ParametersParameterComponent ppc = input.addParameter();
+        ppc.setName("%encounter").setResource(new Encounter().setId("1"));
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new BooleanType(false));
+
+        Parameters actual = (Parameters) evaluator.evaluate("IsNull(%encounter)", input, null, null, null, null, null, null, null, null);
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    public void testMultipleParameters() {
+        Parameters input = new Parameters();
+        input.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
+        input.addParameter().setName("%encounters").setResource(new Encounter().setId("2"));
+
+        input.addParameter().setName("%procedure").setResource(new Procedure().setId("1"));
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new BooleanType(true));
+
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count() > 1 and not IsNull(%procedure)", input, null, null, null, null, null, null, null, null);
+        assertTrue(expected.equalsDeep(actual));
     }
 }

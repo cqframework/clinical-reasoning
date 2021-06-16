@@ -167,5 +167,27 @@ public class CqlFhirParametersConverterTests {
 
         cqlFhirParametersConverter.toCqlParameters(testData);
     }
+
+    @Test
+    public void TestParameterDefinitionCreatesList() {
+        Parameters testData = new Parameters();
+        ParametersParameterComponent ppc = testData.addParameter();
+        ppc.setName("%encounters");
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters"));
+
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
+
+        assertEquals(actual.size(), 1);
+        assertTrue(actual.containsKey("%encounters"));
+        
+        Object value = actual.get("%encounters");
+
+        assertTrue(value instanceof List);
+
+        @SuppressWarnings("unchecked")
+        List<Encounter> encounters = (List<Encounter>)value;
+
+        assertEquals(encounters.size(), 0);
+    }
 }
 

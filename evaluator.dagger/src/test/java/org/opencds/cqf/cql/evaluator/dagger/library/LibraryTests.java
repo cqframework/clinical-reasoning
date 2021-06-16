@@ -9,7 +9,7 @@ import static org.testng.Assert.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
-public class LibraryModuleTests {
+public class LibraryTests {
 
     @Test
     public void canInstantiateDstu3() {

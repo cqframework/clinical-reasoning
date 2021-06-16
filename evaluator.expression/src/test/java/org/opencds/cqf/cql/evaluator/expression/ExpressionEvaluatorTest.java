@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.ParameterDefinition.ParameterUse;
+
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
@@ -162,10 +162,8 @@ public class ExpressionEvaluatorTest {
         CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext,
                 adapterFactory, fhirTypeConverter);
 
-        OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
-        
         evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder(), operationParametersParser);
+            dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
     }
     @Test
     public void testSimpleExpressionEvaluate() {
@@ -218,7 +216,7 @@ public class ExpressionEvaluatorTest {
         assertTrue(expected.equalsDeep(actual));
     }
 
-    // @Test
+    @Test
     public void testFhirPathConstant() {
         Parameters input = new Parameters();
         ParametersParameterComponent ppc = input.addParameter();

@@ -310,4 +310,17 @@ public class ExpressionEvaluatorTest {
         Parameters actual = (Parameters) evaluator.evaluate("%encounters.count() > 1 and not IsNull(%procedure)", input, null, null, null, null, null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
+
+    @Test
+    public void testExpressionParametersOverload() {
+        Parameters input = new Parameters();
+        ParametersParameterComponent ppc = input.addParameter();
+        ppc.setName("%encounter").setResource(new Encounter().setId("1"));
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new BooleanType(false));
+
+        Parameters actual = (Parameters) evaluator.evaluate("IsNull(%encounter)", input);
+        assertTrue(expected.equalsDeep(actual));
+    }
 }

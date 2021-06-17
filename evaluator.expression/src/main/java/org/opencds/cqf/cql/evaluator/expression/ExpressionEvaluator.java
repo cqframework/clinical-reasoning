@@ -107,7 +107,34 @@ public class ExpressionEvaluator {
      *                            Parameters defined in this input will be made
      *                            available by name to the CQL expression. Parameter
      *                            types are mapped to CQL as specified in the Using
-     *                            CQL section of this implementation guide. If a
+     *                            CQL section of the cpg implementation guide. If a
+     *                            parameter appears more than once in the input
+     *                            Parameters resource, it is represented with a List
+     *                            in the input CQL. If a parameter has parts, it is
+     *                            represented as a Tuple in the input CQL.
+     * @return IBaseParameters The result of evaluating the given expression,
+     *         returned as a FHIR type, either a resource, or a FHIR-defined type
+     *         corresponding to the CQL return type, as defined in the Using CQL
+     *         section of the cpg implementation guide. If the result is a List of
+     *         resources, the result will be a Bundle. If the result is a CQL
+     *         system-defined or FHIR-defined type, the result is returned as a
+     *         Parameters resource
+     */
+    public IBaseParameters evaluate(String expression, IBaseParameters parameters) {
+        return this.evaluate(expression, parameters, null, null, null, null, null, null, null, null);
+    }
+
+    /**
+     * Evaluates a CQL expression and returns the results as a Parameters resource.
+     * 
+     * @param expression          Expression to be evaluated. Note that this is an
+     *                            expression of CQL, not the text of a library with
+     *                            definition statements.
+     * @param parameters          Any input parameters for the expression.
+     *                            Parameters defined in this input will be made
+     *                            available by name to the CQL expression. Parameter
+     *                            types are mapped to CQL as specified in the Using
+     *                            CQL section of the cpg implementation guide. If a
      *                            parameter appears more than once in the input
      *                            Parameters resource, it is represented with a List
      *                            in the input CQL. If a parameter has parts, it is
@@ -161,7 +188,7 @@ public class ExpressionEvaluator {
      * @return IBaseParameters The result of evaluating the given expression,
      *         returned as a FHIR type, either a resource, or a FHIR-defined type
      *         corresponding to the CQL return type, as defined in the Using CQL
-     *         section of this implementation guide. If the result is a List of
+     *         section of the cpg implementation guide. If the result is a List of
      *         resources, the result will be a Bundle. If the result is a CQL
      *         system-defined or FHIR-defined type, the result is returned as a
      *         Parameters resource

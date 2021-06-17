@@ -2,7 +2,6 @@
 package org.opencds.cqf.cql.evaluator.engine.execution;
 
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 import static org.mockito.Mockito.times;
 
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
@@ -20,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.mockito.Mockito;
+import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
@@ -115,24 +115,15 @@ public class TranslatingLibraryLoaderTests {
                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
     }
 
-    @Test()
-    public void returnsNullIfNoContent() {
+    @Test(expectedExceptions = CqlException.class)
+    public void throwsExceptionIfNoContent() {
         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
-        Library library = this.libraryLoader.load(libraryIdentifier);
-        assertNull(library);
+        this.libraryLoader.load(libraryIdentifier);
     }
 
-    @Test()
-    public void returnsNullIfBadElmAndNoCql() {
+    @Test(expectedExceptions = CqlException.class)
+    public void throwsExceptionIfBadElmAndNoCql() {
         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
-        Library library = this.libraryLoader.load(libraryIdentifier);
-
-        Mockito.verify(this.testFhirLibraryContentProvider, times(1))
-                .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
-
-        Mockito.verify(this.testFhirLibraryContentProvider, times(1))
-                .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
-
-        assertNull(library);
+        this.libraryLoader.load(libraryIdentifier);
     }
 }

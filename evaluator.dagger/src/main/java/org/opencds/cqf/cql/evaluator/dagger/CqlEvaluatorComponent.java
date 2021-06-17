@@ -7,6 +7,7 @@ import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.dagger.library.LibraryModule;
+import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -21,6 +22,7 @@ public interface CqlEvaluatorComponent {
     DataProviderFactory createDataProviderFactory();
     TerminologyProviderFactory createTerminologyProviderFactory();
     LibraryContentProviderFactory createLibraryContentProviderFactory();
+    ExpressionEvaluator createExpressionEvaluator();
 
 
   @Component.Builder

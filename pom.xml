@@ -40,6 +40,7 @@
         <module>evaluator.content-test</module>
         <module>evaluator.measure</module>
         <module>evaluator.activitydefinition</module>
+        <module>evaluator.expression</module>
     </modules>
 
     <licenses>
@@ -181,6 +182,13 @@
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>1</version>
+            </dependency>
+
+            <!-- Generated annotation -->
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3.2</version>
             </dependency>
 
             <!-- Dagger -->

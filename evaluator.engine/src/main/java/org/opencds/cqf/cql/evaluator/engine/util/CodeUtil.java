@@ -75,7 +75,9 @@ public class CodeUtil {
     }
 
     private List<Code> getCodesFromBase(IBase object) {
-        if (object.fhirType().equals("CodeableConcept")) {
+        if (object instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration) {
+            return this.getCodeFromEnumeration(object);
+        } else if (object.fhirType().equals("CodeableConcept")) {
             return this.getCodesInConcept(object);
         } else if (object.fhirType().equals("Coding")) {
             return this.generateCodes(Collections.singletonList(object));
@@ -83,6 +85,24 @@ public class CodeUtil {
 
         throw new IllegalArgumentException(
                 String.format("Unable to extract codes from fhirType %s", object.fhirType()));
+    }
+
+    private List<Code> getCodeFromEnumeration(IBase enumeration) {
+        List<Code> codes = new ArrayList<Code>();
+        if (enumeration == null) {
+            return codes;
+        }
+
+        String system = ((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).toSystem();
+        String codeAsString = ((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).castToCode((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).getValue();
+        if (system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()) {
+            Code code = new Code();
+            code.setCode(codeAsString);
+            code.setSystem(system);
+            codes.add(code);
+        }
+
+        return codes;
     }
 
     private List<Code> getCodesInConcept(IBase object) {

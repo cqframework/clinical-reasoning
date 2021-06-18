@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 
@@ -75,7 +77,11 @@ public class CodeUtil {
     }
 
     private List<Code> getCodesFromBase(IBase object) {
-        if (object.fhirType().equals("CodeableConcept")) {
+        if (object instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration<?>) {
+            @SuppressWarnings("unchecked")
+            IBaseEnumeration<Enum<?>> enumeration = ((IBaseEnumeration<Enum<?>>)object);
+            return this.getCodeFromEnumeration(enumeration);
+        } else if (object.fhirType().equals("CodeableConcept")) {
             return this.getCodesInConcept(object);
         } else if (object.fhirType().equals("Coding")) {
             return this.generateCodes(Collections.singletonList(object));
@@ -83,6 +89,26 @@ public class CodeUtil {
 
         throw new IllegalArgumentException(
                 String.format("Unable to extract codes from fhirType %s", object.fhirType()));
+    }
+
+    private List<Code> getCodeFromEnumeration(IBaseEnumeration<Enum<?>> enumeration) {
+        List<Code> codes = new ArrayList<Code>();
+        if (enumeration == null) {
+            return codes;
+        }
+
+        IBaseEnumFactory<Enum<?>> enumFactory = enumeration.getEnumFactory();
+
+        String system = enumFactory.toSystem(enumeration.getValue());
+        String codeAsString = enumFactory.toCode(enumeration.getValue());
+        if (system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()) {
+            Code code = new Code();
+            code.setCode(codeAsString);
+            code.setSystem(system);
+            codes.add(code);
+        }
+
+        return codes;
     }
 
     private List<Code> getCodesInConcept(IBase object) {

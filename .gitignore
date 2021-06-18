@@ -16,3 +16,6 @@ dump.*
 heapdump.*
 javacore.*
 jitdump.*
+
+.idea
+*.iml

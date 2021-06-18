@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 
@@ -87,14 +88,17 @@ public class CodeUtil {
                 String.format("Unable to extract codes from fhirType %s", object.fhirType()));
     }
 
+    @SuppressWarnings({"unchecked"})
     private List<Code> getCodeFromEnumeration(IBase enumeration) {
         List<Code> codes = new ArrayList<Code>();
         if (enumeration == null) {
             return codes;
         }
 
-        String system = ((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).toSystem();
-        String codeAsString = ((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).castToCode((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).getValue();
+        IBaseEnumFactory<Enum<?>> enumFactory = ((org.hl7.fhir.instance.model.api.IBaseEnumeration<Enum<?>>)enumeration).getEnumFactory();
+
+        String system = enumFactory.toSystem((Enum)((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).getValue());
+        String codeAsString = enumFactory.toCode((Enum)((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).getValue());
         if (system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()) {
             Code code = new Code();
             code.setCode(codeAsString);

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 
@@ -76,8 +77,10 @@ public class CodeUtil {
     }
 
     private List<Code> getCodesFromBase(IBase object) {
-        if (object instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration) {
-            return this.getCodeFromEnumeration(object);
+        if (object instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration<?>) {
+            @SuppressWarnings("unchecked")
+            IBaseEnumeration<Enum<?>> enumeration = ((IBaseEnumeration<Enum<?>>)object);
+            return this.getCodeFromEnumeration(enumeration);
         } else if (object.fhirType().equals("CodeableConcept")) {
             return this.getCodesInConcept(object);
         } else if (object.fhirType().equals("Coding")) {
@@ -88,17 +91,16 @@ public class CodeUtil {
                 String.format("Unable to extract codes from fhirType %s", object.fhirType()));
     }
 
-    @SuppressWarnings({"unchecked"})
-    private List<Code> getCodeFromEnumeration(IBase enumeration) {
+    private List<Code> getCodeFromEnumeration(IBaseEnumeration<Enum<?>> enumeration) {
         List<Code> codes = new ArrayList<Code>();
         if (enumeration == null) {
             return codes;
         }
 
-        IBaseEnumFactory<Enum<?>> enumFactory = ((org.hl7.fhir.instance.model.api.IBaseEnumeration<Enum<?>>)enumeration).getEnumFactory();
+        IBaseEnumFactory<Enum<?>> enumFactory = enumeration.getEnumFactory();
 
-        String system = enumFactory.toSystem((Enum)((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).getValue());
-        String codeAsString = enumFactory.toCode((Enum)((org.hl7.fhir.instance.model.api.IBaseEnumeration)enumeration).getValue());
+        String system = enumFactory.toSystem(enumeration.getValue());
+        String codeAsString = enumFactory.toCode(enumeration.getValue());
         if (system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()) {
             Code code = new Code();
             code.setCode(codeAsString);

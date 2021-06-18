@@ -7,9 +7,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.Patient;
-import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestStatus;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -17,7 +19,7 @@ import org.testng.annotations.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
-public class CodeUtilsTests {
+public class CodeUtilTests {
 
     FhirContext fhirContext;
     CodeUtil codeUtil;
@@ -123,5 +125,20 @@ public class CodeUtilsTests {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void TestGetCodesFromInvalidBase() {
         this.codeUtil.getElmCodesFromObject(new StringType("test"));
+    }
+
+    @Test
+    public void TestGetCodesFromEnumeration() {
+        Code expected = new Code().withCode("active").withSystem("http://hl7.org/fhir/CodeSystem/medicationrequest-status");
+
+        MedicationRequest mr = new MedicationRequest();
+        mr.setStatus(MedicationRequestStatus.ACTIVE);
+
+        List<Code> actualList = this.codeUtil.getElmCodesFromObject(mr.getStatusElement());
+        assertEquals(actualList.size(), 1);
+
+        Code actual = actualList.get(0);
+
+        assertTrue(expected.equivalent(actual));
     }
 }

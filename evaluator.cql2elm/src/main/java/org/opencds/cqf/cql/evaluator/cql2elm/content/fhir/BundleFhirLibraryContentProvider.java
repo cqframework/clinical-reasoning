@@ -53,7 +53,11 @@ public class BundleFhirLibraryContentProvider extends BaseFhirLibraryContentProv
         }
 
         Collection<IBaseResource> libraries = resources.stream().map(x -> (IBaseResource)x).collect(Collectors.toList());
-
+        
+        if (libraries == null || libraries.isEmpty()) {
+            return null;
+        }
+        
         return this.libraryVersionSelector.select(libraryIdentifier, libraries);
     }
 }

@@ -3,12 +3,13 @@ package org.opencds.cqf.cql.evaluator.dagger.builder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.inject.Singleton;
 
+import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
-import org.opencds.cqf.cql.evaluator.builder.dal.TypedFhirDalFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirRestRetrieveProviderFactory;
@@ -64,9 +65,7 @@ public class BuilderModule {
     }
 
     @Provides
-    @ElementsIntoSet
-    @Singleton
-    Set<TypedFhirDalFactory> typedFhirDalFactories() {
-        return new HashSet<>();
+    Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier() {
+        return () -> new CqlEvaluatorBuilder();
     }
 }

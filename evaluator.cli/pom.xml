@@ -78,6 +78,8 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>info.picocli</groupId>
@@ -85,6 +87,16 @@
                                 <version>${picocli.version}</version>
                             </path>
                         </annotationProcessorPaths>
+                        <failOnWarning>true</failOnWarning>
+                        <showWarnings>true</showWarnings>
+                        <compilerArgs>
+                            <arg>-Xlint:all</arg>
+                            <!-- This fixes a boostrapclass path warning which the "release" property fixes on Java 9+ -->
+                            <arg>-Xlint:-options</arg>
+                            <!-- This bypasses annotation processing for Inject -->
+                            <arg>-Xlint:-processing</arg>
+                            <arg>-Werror</arg>
+                        </compilerArgs>
                     </configuration>
                     <executions>
                         <execution>

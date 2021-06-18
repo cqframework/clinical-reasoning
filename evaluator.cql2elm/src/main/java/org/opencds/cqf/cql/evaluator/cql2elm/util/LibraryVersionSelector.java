@@ -56,6 +56,10 @@ public class LibraryVersionSelector {
             library = maxLibrary;
         }
 
+        if (library == null) {
+            return null;
+        }
+
         return library.get();
     }
 

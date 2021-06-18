@@ -4,9 +4,10 @@ import javax.inject.Singleton;
 
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.dagger.library.LibraryModule;
+import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -20,7 +21,8 @@ public interface CqlEvaluatorComponent {
     CqlEvaluatorBuilder createBuilder();
     DataProviderFactory createDataProviderFactory();
     TerminologyProviderFactory createTerminologyProviderFactory();
-    LibraryLoaderFactory createLibraryLoaderFactory();
+    LibraryContentProviderFactory createLibraryContentProviderFactory();
+    ExpressionEvaluator createExpressionEvaluator();
 
 
   @Component.Builder

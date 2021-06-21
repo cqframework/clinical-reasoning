@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -57,7 +58,7 @@ public class MockFhirDal implements FhirDal {
         return (Encounter) resource;
     }
 
-    private Iterable<IBaseResource> loadActivtyDefinitionFromBundle(String path, String url) {
+    private Iterable<IBaseResource> loadResourceWithURLFromBundle(String path, String url) {
         InputStream stream = PlanDefinitionProcessorTests.class.getResourceAsStream(path);
         IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
@@ -87,8 +88,54 @@ public class MockFhirDal implements FhirDal {
                 }
             }
         });
+        bundle.getEntry().forEach(entry -> {
+            if (entry.getResource() instanceof ValueSet) {
+                if (url.startsWith("ValueSet/")) {
+                    String id = url.substring(url.lastIndexOf("/") + 1, url.length());
+                    if (entry.getResource().getIdElement().getIdPart().equals(id)) {
+                        resources.add(entry.getResource());
+                    }
+                }
+                else if (((ValueSet)entry.getResource()).getUrl().equals(url)) {
+                    resources.add(entry.getResource());
+                }
+            }
+        });
 
         return resources;
+    }
+
+    private Iterable<IBaseResource> searchForResourcesInBundle(String path, String resourceType) {
+        InputStream stream = PlanDefinitionProcessorTests.class.getResourceAsStream(path);
+        IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
+        IBaseResource resource = parser.parseResource(stream);
+
+        if (resource == null) {
+            throw new IllegalArgumentException(String.format("Unable to read a resource from %s.", path));
+        }
+
+        Class<?> bundleClass = fhirContext.getResourceDefinition("Bundle").getImplementingClass();
+        if (!bundleClass.equals(resource.getClass())) {
+            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s Bundle", path,
+                    fhirContext.getVersion().getVersion().getFhirVersionString()));
+        }
+
+        Bundle bundle = (Bundle) resource;
+        List<IBaseResource> resources = new ArrayList<IBaseResource>();
+        getResourcesFromBundle(resourceType, bundle, resources);
+
+        return resources;
+    }
+
+    private void getResourcesFromBundle(String resourceType, Bundle bundle, List<IBaseResource> resources) {
+        bundle.getEntry().forEach(entry -> {
+            if (entry.getResource() instanceof Bundle) {
+                getResourcesFromBundle(resourceType, (Bundle) entry.getResource(), resources);
+            }
+            if (entry.getResource().getResourceType().toString().equals(resourceType)) {
+                resources.add(entry.getResource());
+            }
+        });
     }
     
     @Override
@@ -98,7 +145,7 @@ public class MockFhirDal implements FhirDal {
             return loadPlanDefinition("plandefinition-RuleFilters-1.0.0.json");
         }
         else if (id.hasResourceType() && id.getResourceType().equals("ActivityDefinition")) {
-            Iterator<IBaseResource> resources = loadActivtyDefinitionFromBundle("RuleFilters-1.0.0-bundle.json", "ActivityDefinition/" + id.getIdPart()).iterator();
+            Iterator<IBaseResource> resources = loadResourceWithURLFromBundle("RuleFilters-1.0.0-bundle.json", "ActivityDefinition/" + id.getIdPart()).iterator();
             IBaseResource resource = resources.next();
             return resource;
         } else if (id.hasResourceType() && id.getResourceType().equals("Encounter")) {
@@ -128,14 +175,13 @@ public class MockFhirDal implements FhirDal {
 
     @Override
     public Iterable<IBaseResource> search(String resourceType) {
-        // TODO Auto-generated method stub
-        return null;
+        return searchForResourcesInBundle("RuleFilters-1.0.0-bundle.json", resourceType);
     }
 
     @Override
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url) {
         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-        return loadActivtyDefinitionFromBundle("RuleFilters-1.0.0-bundle.json", url);
+        return loadResourceWithURLFromBundle("RuleFilters-1.0.0-bundle.json", url);
     }
     
 }

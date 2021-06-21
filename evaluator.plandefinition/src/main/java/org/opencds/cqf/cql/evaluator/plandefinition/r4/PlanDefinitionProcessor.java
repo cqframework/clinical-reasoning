@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.jms.IllegalStateRuntimeException;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -45,6 +43,7 @@ import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Procedure;
@@ -67,6 +66,7 @@ import org.hl7.fhir.r4.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestStatus;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.helper.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
@@ -82,6 +82,7 @@ import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 public class PlanDefinitionProcessor {
   protected ActivityDefinitionProcessor activityDefinitionProcessor;
   protected LibraryProcessor libraryProcessor;
+  protected ExpressionEvaluator expressionEvaluator;
   protected OperationParametersParser operationParametersParser;
   protected FhirContext fhirContext;
   protected FhirDal fhirDal;
@@ -90,7 +91,7 @@ public class PlanDefinitionProcessor {
   private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
   private static final String alternateExpressionExtension = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression";
 
-  public PlanDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor,
+  public PlanDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor, ExpressionEvaluator expressionEvaluator,
       ActivityDefinitionProcessor activityDefinitionProcessor, OperationParametersParser operationParametersParser) {
     requireNonNull(fhirContext, "fhirContext can not be null");
     requireNonNull(fhirDal, "fhirDal can not be null");
@@ -100,6 +101,7 @@ public class PlanDefinitionProcessor {
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     this.fhirDal = fhirDal;
     this.libraryProcessor = libraryProcessor;
+    this.expressionEvaluator = expressionEvaluator;
     this.activityDefinitionProcessor = activityDefinitionProcessor;
     this.operationParametersParser = operationParametersParser;
   }
@@ -430,15 +432,15 @@ public class PlanDefinitionProcessor {
   }
 
   private Boolean meetsConditions(Session session, PlanDefinition.PlanDefinitionActionComponent action) {
-    if (session.planDefinition.getType().hasCoding()) {
-      List<Coding> planDefinitionTypeCoding = session.planDefinition.getType().getCoding();
-      for (Coding coding : planDefinitionTypeCoding) {
-        if (coding.getCode().equals("workflow-definition")) {
-          logger.info(String.format("Found a workflow definition type for PlanDefinition % conditions should be evaluated at task execution time."), session.planDefinition.getUrl());
-          return true;
-        }
-      }
-    }
+    // if (session.planDefinition.getType().hasCoding()) {
+    //   List<Coding> planDefinitionTypeCoding = session.planDefinition.getType().getCoding();
+    //   for (Coding coding : planDefinitionTypeCoding) {
+    //     if (coding.getCode().equals("workflow-definition")) {
+    //       // logger.info(String.format("Found a workflow definition type for PlanDefinition % conditions should be evaluated at task execution time."), session.planDefinition.getUrl());
+    //       return true;
+    //     }
+    //   }
+    // }
     if (action.hasAction()) {
       for (PlanDefinition.PlanDefinitionActionComponent containedAction : action.getAction()) {
         meetsConditions(session, containedAction);
@@ -513,7 +515,7 @@ public class PlanDefinitionProcessor {
 
   private String ensureStringResult(Object result) {
     if (!(result instanceof StringType))
-      throw new IllegalStateRuntimeException("Result not instance of String");
+      throw new RuntimeException("Result not instance of String");
     return ((StringType) result).asStringValue();
   }
 
@@ -534,11 +536,9 @@ public class PlanDefinitionProcessor {
     Set<String> expressions = new HashSet<>();
     expressions.add(expression);
     Object result = null;
-    // Assumption that this will evolve to contain many cases
     switch (language) {
-      // case "text/cql":
-      // expressionEvaluator.evaluate(new Task(),
-      // dynamicValue.getExpression());
+      case "text/cql":
+      expressionEvaluator.evaluate(expression, session.parameters);
       case "text/cql-identifier":
       case "text/cql.identifier":
       case "text/cql.name":
@@ -547,23 +547,18 @@ public class PlanDefinitionProcessor {
             session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint, session.bundle, expressions);
         break;
       case "text/fhirpath": {
-        for (DataRequirement req : dataRequirements) {
-          // String name = req.getId();
-          // String fhirType = req.getType();
-          // List<IBaseResource> resources = null;
-          // fhirDal.search(fhirType).forEach(resource -> {
-          //   for (DataRequirementCodeFilterComponent filter : req.getCodeFilter()) {
-          //     if (filter.hasPath()) {
-          //       Parameters params = new Parameters();
-          //       params.addParameter().setName("resource").setResource((Resource)resource);
-          //       Parameters resultParams = expressionEvaluator.evaluate(String.format("%resource.%s", filter.getPath()), params);
-          //       // if there is a result add the result to list
-          //     }
-          //   }
-          // });
-          // Parameters params = new Parameters();
-          // params.addParameter().setName(name).setValue(resources);
-          // Parameters resultParams = expressionEvaluator.evaluate(expression, params);
+        Parameters params = resolveInputParameters(dataRequirements);
+        if (params != null) {
+          IBaseParameters resultParams = expressionEvaluator.evaluate(expression, params);
+          IBaseDatatype tempResult = operationParametersParser.getValueChild(((Parameters) resultParams), "return");
+          if (tempResult == null) {
+            IBaseResource tempResource = operationParametersParser.getResourceChild(((Parameters) resultParams), "return");
+            result = tempResource;
+          } else {
+            result = tempResult;
+          }
+        } else {
+          result = null;
         }
       }
         break;
@@ -582,6 +577,67 @@ public class PlanDefinitionProcessor {
       }
     }
     return result;
+  }
+
+  private Parameters resolveInputParameters(List<DataRequirement> dataRequirements) {
+    if (dataRequirements == null || dataRequirements.isEmpty()) {
+      return null;
+    }
+    Parameters params = new Parameters();
+    for (DataRequirement req : dataRequirements) {
+      String name = req.getId();
+      String fhirType = req.getType();
+      Iterator<IBaseResource> searchResult = fhirDal.search(fhirType).iterator();
+      if (searchResult != null && searchResult.hasNext()) {
+        int index = 0;
+        Boolean found = true;
+        while (searchResult.hasNext()) {
+          Resource resource = (Resource)searchResult.next();
+          ParametersParameterComponent parameter = new ParametersParameterComponent().setName("%" + String.format("%s", name));
+          if (req.hasCodeFilter()) {
+            for (DataRequirement.DataRequirementCodeFilterComponent filter : req.getCodeFilter()) {
+              Parameters codeFilterParam = new Parameters();
+              codeFilterParam.addParameter().setName("%resource").setResource(resource);
+              if (filter != null && filter.hasPath() && filter.hasValueSet()) {
+                Iterable<IBaseResource> valueset = fhirDal.searchByUrl("ValueSet", filter.getValueSet());
+                System.out.println(filter.getValueSet());
+                if (valueset != null && valueset.iterator().hasNext()) {
+                  codeFilterParam.addParameter().setName("%valueset").setResource((Resource)valueset.iterator().next());
+                  String codeFilterExpression = "%" + String.format("resource.%s.where(code.memberOf(\'%s\'))", filter.getPath(), "%" + "valueset");
+                  IBaseParameters codeFilterResult = expressionEvaluator.evaluate(codeFilterExpression, codeFilterParam);
+                  IBaseDatatype tempResult = operationParametersParser.getValueChild(((Parameters) codeFilterResult), "return");
+                  if (tempResult != null) {
+                    if (tempResult instanceof BooleanType) {
+                      found = ((BooleanType)tempResult).booleanValue();
+                    }
+                  }
+                }
+                logger.debug(String.format("Could not find ValueSet with url %s on the local server.", filter.getValueSet()));
+              }
+            }
+          }
+          if (!searchResult.hasNext() && index == 0) {
+            parameter.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%" + name));
+            if (found) {
+              parameter.setResource(resource);
+            }
+          } else {
+            if (!found) {
+              index++;
+              continue;
+            }
+            parameter.setResource(resource);
+          }
+          params.addParameter(parameter);
+          index++;
+        }
+      } else {
+        ParametersParameterComponent parameter = new ParametersParameterComponent().setName("%" + String.format("%s", name));
+        parameter.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%" + name));
+        params.addParameter(parameter);
+      }
+    }
+    return params;
   }
 
   protected Resource resolveContained(DomainResource resource, String id) {

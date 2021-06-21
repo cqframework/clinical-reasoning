@@ -38,10 +38,8 @@ import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
-import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
-import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
@@ -51,6 +49,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
+import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 
 public class PlanDefinitionProcessorTests {
     private static FhirContext fhirContext;
@@ -66,11 +65,6 @@ public class PlanDefinitionProcessorTests {
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
         CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
         Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories = new HashSet<TypedLibraryContentProviderFactory>() {
-            /**
-             *
-             */
-            private static final long serialVersionUID = 1L;
-
             {
                 add(new TypedLibraryContentProviderFactory() {
                     @Override
@@ -100,7 +94,7 @@ public class PlanDefinitionProcessorTests {
             }
         };
 
-        LibraryLoaderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory(
+        LibraryContentProviderFactory libraryContentProviderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryContentProviderFactory(
                 fhirContext, adapterFactory, libraryContentProviderFactories, libraryVersionSelector);
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
             /**
@@ -153,19 +147,17 @@ public class PlanDefinitionProcessorTests {
         TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
                 fhirContext, typedTerminologyProviderFactories);
 
-        RetrieveProviderConfigurer retrieveProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer(
-                new RetrieveProviderConfig());
-
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder(retrieveProviderConfigurer);
-
-        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, cqlEvaluatorBuilder);
+        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+            
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
+            dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
 
         ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
-        planDefinitionProcessor = new PlanDefinitionProcessor(fhirContext, fhirDal, libraryProcessor, activityDefinitionProcessor, operationParametersParser);
+        planDefinitionProcessor = new PlanDefinitionProcessor(fhirContext, fhirDal, libraryProcessor, evaluator, activityDefinitionProcessor, operationParametersParser);
     }
 
     @Test

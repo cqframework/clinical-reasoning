@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.expression</artifactId>
+            <version>1.2.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.engine</artifactId>
             <version>1.2.1-SNAPSHOT</version>
         </dependency>

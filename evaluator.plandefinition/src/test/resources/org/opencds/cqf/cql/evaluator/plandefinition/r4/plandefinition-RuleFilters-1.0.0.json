@@ -79,7 +79,7 @@
             ]
           }
         ],
-        "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/start",
+        "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-start",
         "trigger": [
           {
             "id": "encounter",
@@ -136,6 +136,7 @@
                 }
               }
             ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-ckr-is-encounter-reportable",
             "input": [
               {
                 "id": "conditions",
@@ -276,6 +277,7 @@
                 }
               }
             ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-ckr-is-encounter-in-progress",
             "relatedAction": [
               {
                 "actionId": "check-reportable",
@@ -313,7 +315,8 @@
                 "actionId": "report-eicr",
                 "relationship": "before-start"
               }
-            ]
+            ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-car-report-eicr"
           },
           {
             "id": "car-is-encounter-complete",
@@ -336,6 +339,7 @@
                 }
               }
             ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-car-is-encounter-complete",
             "relatedAction": [
               {
                 "actionId": "report-eicr",
@@ -369,6 +373,7 @@
                 }
               }
             ],
+            "definitionCanonical": "http://hl7.org/fhir/us/ecr/ActivityDefinition/activitydefinition-car-is-encounter-in-progress",
             "relatedAction": [
               {
                 "actionId": "create-and-report-eicr",

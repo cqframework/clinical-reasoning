@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
@@ -40,6 +41,10 @@ import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
 public class ActivityDefinitionProcessor {
+    /**
+     *
+     */
+    private static final String targetStatusExtension = "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus";
     FhirContext fhirContext;
     FhirDal fhirDal;
     LibraryProcessor libraryProcessor;
@@ -202,7 +207,16 @@ public class ActivityDefinitionProcessor {
 
     private Task resolveTask(ActivityDefinition activityDefinition, String patientId, String organizationId) throws RuntimeException {
         Task task = new Task();
-        task.setStatus(Task.TaskStatus.DRAFT);
+        if (activityDefinition.hasExtension(targetStatusExtension)) {
+            Type value = activityDefinition.getExtensionByUrl(targetStatusExtension).getValue();
+            if (value != null && value instanceof StringType) {
+                task.setStatus(Task.TaskStatus.valueOf(((StringType)value).asStringValue().toUpperCase()));
+            } else {
+                logger.debug(String.format("Extension %s should have a value of type %s", targetStatusExtension, StringType.class.getName()));
+            }
+        } else {
+            task.setStatus(Task.TaskStatus.DRAFT);
+        }
 
         if (activityDefinition.hasCode()) {
             task.setCode(activityDefinition.getCode());

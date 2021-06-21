@@ -2,9 +2,14 @@ package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
@@ -22,6 +27,7 @@ import ca.uhn.fhir.parser.IParser;
 
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -181,7 +187,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    public void TestRuleFiltersNotReportable() {
+    public void TestRuleFiltersNotReportable() throws JsonProcessingException {
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setResource(getExpectedCarePlan("NotReportableCarePlan.json"));
 
@@ -194,7 +200,12 @@ public class PlanDefinitionProcessorTests {
         Parameters actual = (Parameters) planDefinitionProcessor.apply(
                 new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", null, null, null, null, null, null, null, null, null, expected, null, new Bundle(), null, dataEndpoint,
                 endpoint, endpoint);
-
+        try {
+            Charset charset = null;
+            FileUtils.writeStringToFile(new File("C:\\Users\\jreys\\Documents\\src\\testParameters.json"), fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual), charset, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         assertTrue(expected.equalsShallow(actual));
     }
 

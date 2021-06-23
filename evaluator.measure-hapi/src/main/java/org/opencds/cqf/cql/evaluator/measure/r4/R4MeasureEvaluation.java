@@ -1,18 +1,20 @@
-package org.opencds.cqf.cql.evaluator.measure.stu3;
+package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
-import org.hl7.fhir.dstu3.model.ListResource;
-import org.hl7.fhir.dstu3.model.Measure;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
-import org.hl7.fhir.dstu3.model.MeasureReport;
-import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
+import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvaluation;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
@@ -20,15 +22,18 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureScoring;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
-public class Stu3MeasureEvaluation<RT, ST extends RT> extends
-        MeasureEvaluation<Measure, MeasureGroupComponent, MeasureGroupPopulationComponent, MeasureReport, MeasureReportGroupComponent, MeasureReport.MeasureReportGroupPopulationComponent, RT, ST> {
+/**
+ * Implementation of MeasureEvaluation on top of HAPI FHIR R4 structures.
+ */
+public class R4MeasureEvaluation<RT, ST extends RT> extends
+        MeasureEvaluation<IBase, Measure, MeasureGroupComponent, MeasureGroupPopulationComponent, MeasureReport, MeasureReportGroupComponent, MeasureReport.MeasureReportGroupPopulationComponent, RT, ST> {
 
-    public Stu3MeasureEvaluation(Context context, Measure measure, Interval measurementPeriod, String packageName,
+    public R4MeasureEvaluation(Context context, Measure measure, Interval measurementPeriod, String packageName,
             Function<RT, String> getId, String patientOrPractitionerId) {
         super(context, measure, measurementPeriod, packageName, getId, patientOrPractitionerId);
     }
 
-    public Stu3MeasureEvaluation(Context context, Measure measure, Interval measurementPeriod, String packageName,
+    public R4MeasureEvaluation(Context context, Measure measure, Interval measurementPeriod, String packageName,
     Function<RT, String> getId) {
         super(context, measure, measurementPeriod, packageName, getId);
     }
@@ -40,12 +45,12 @@ public class Stu3MeasureEvaluation<RT, ST extends RT> extends
 
     @Override
     protected String getCriteriaExpression(MeasureGroupPopulationComponent mgpc) {
-        return mgpc.getCriteria();
+        return mgpc.hasCriteria() ? mgpc.getCriteria().getExpression() : null;
     }
 
     @Override
     protected void setGroupScore(MeasureReportGroupComponent mrgc, Double score) {
-        mrgc.setMeasureScore(score);
+        mrgc.setMeasureScore(new Quantity(score));
     }
 
     @Override
@@ -73,7 +78,7 @@ public class Stu3MeasureEvaluation<RT, ST extends RT> extends
         if ((type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) && subjectPopulation != null) {
             ListResource SUBJECTLIST = new ListResource();
             SUBJECTLIST.setId(UUID.randomUUID().toString());
-            populationReport.setPatients(new Reference().setReference("#" + SUBJECTLIST.getId()));
+            populationReport.setSubjectResults(new Reference().setReference("#" + SUBJECTLIST.getId()));
             for (ST patient : subjectPopulation) {
                 ListResource.ListEntryComponent entry = new ListResource.ListEntryComponent()
                         .setItem(new Reference().setReference(
@@ -94,10 +99,10 @@ public class Stu3MeasureEvaluation<RT, ST extends RT> extends
     protected MeasureReport createMeasureReport(String status, MeasureReportType type, Interval measurementPeriod, List<ST> subjects) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
-        report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
-        report.setMeasure(new Reference(measure.getIdElement().getValue()));
+        report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
+        report.setMeasure(measure.getIdElement().getIdPart());
         if (type == MeasureReportType.INDIVIDUAL && !subjects.isEmpty()) {
-            report.setPatient(new Reference(this.getId.apply(subjects.get(0))));
+            report.setSubject(new Reference(this.getId.apply(subjects.get(0))));
         }
 
         report.setPeriod(
@@ -125,6 +130,4 @@ public class Stu3MeasureEvaluation<RT, ST extends RT> extends
     protected void addReportGroup(MeasureReport report, MeasureReportGroupComponent group) {
         report.addGroup(group);
     }
-
-
 }

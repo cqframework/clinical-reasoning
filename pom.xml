@@ -39,7 +39,7 @@
         <module>evaluator.cli</module>
         <module>evaluator.content-test</module>
         <module>evaluator.measure</module>
-        <module>evaluator.measure.hapi</module>
+        <module>evaluator.measure-hapi</module>
         <module>evaluator.activitydefinition</module>
     </modules>
 
@@ -331,6 +331,7 @@
                     <version>3.2.0</version>
                     <configuration>
                         <source>8</source>
+                        <show>private</show>
                     </configuration>
                     <executions>
                         <execution>

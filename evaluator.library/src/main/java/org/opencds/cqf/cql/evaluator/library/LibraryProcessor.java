@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.library;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -10,20 +11,19 @@ import javax.inject.Named;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
-import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -35,27 +35,28 @@ public class LibraryProcessor {
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
-    protected LibraryLoaderFactory libraryLoaderFactory;
+    protected LibraryContentProviderFactory libraryContentProviderFactory;
     protected DataProviderFactory dataProviderFactory;
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected EndpointConverter endpointConverter;
     protected CqlEvaluatorBuilder cqlEvaluatorBuilder;
+    protected Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier;
 
     @Inject
     public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
-            LibraryLoaderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
+            LibraryContentProviderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
             TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
-            CqlEvaluatorBuilder cqlEvaluatorBuilder) {
+            Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
-        this.libraryLoaderFactory = requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
+        this.libraryContentProviderFactory = requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
         this.dataProviderFactory = requireNonNull(dataProviderFactory, "dataProviderFactory can not be null");
         this.terminologyProviderFactory = requireNonNull(terminologyProviderFactory,
                 "terminologyProviderFactory can not be null");
 
         this.endpointConverter = requireNonNull(endpointConverter, "endpointConverter can not be null");
-        this.cqlEvaluatorBuilder = requireNonNull(cqlEvaluatorBuilder, "cqlEvaluatorBuilder can not be null");
+        this.cqlEvaluatorBuilderSupplier = requireNonNull(cqlEvaluatorBuilderSupplier, "cqlEvaluatorBuilder can not be null");
     }
 
     /**
@@ -132,7 +133,9 @@ public class LibraryProcessor {
             IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
             IBaseBundle additionalData, Set<String> expressions) {
 
-        this.addLibraryLoaders(libraryEndpoint, additionalData);
+        this.cqlEvaluatorBuilder = this.cqlEvaluatorBuilderSupplier.get();
+
+        this.addLibraryContentProviders(libraryEndpoint, additionalData);
         this.addTerminologyProviders(terminologyEndpoint, additionalData);
         this.addDataProviders(dataEndpoint, additionalData);
 
@@ -147,17 +150,16 @@ public class LibraryProcessor {
         return libraryEvaluator.evaluate(id, contextParameter, parameters, expressions);
     }
 
-    protected void addLibraryLoaders(IBaseResource libraryEndpoint, IBaseBundle additionalData) {
-        CqlTranslatorOptions translatorOptions = CqlTranslatorOptions.defaultOptions();
+    protected void addLibraryContentProviders(IBaseResource libraryEndpoint, IBaseBundle additionalData) {
         if (libraryEndpoint != null) {
-            LibraryLoader libraryLoader = this.libraryLoaderFactory
-                    .create(endpointConverter.getEndpointInfo(libraryEndpoint), translatorOptions);
-            this.cqlEvaluatorBuilder.withLibraryLoader(libraryLoader);
+            LibraryContentProvider libraryContentProvider = this.libraryContentProviderFactory
+                    .create(endpointConverter.getEndpointInfo(libraryEndpoint));
+            this.cqlEvaluatorBuilder.withLibraryContentProvider(libraryContentProvider);
         }
 
         if (additionalData != null) {
             this.cqlEvaluatorBuilder
-                    .withLibraryLoader(this.libraryLoaderFactory.create(additionalData, translatorOptions));
+                    .withLibraryContentProvider(this.libraryContentProviderFactory.create(additionalData));
         }
     }
 

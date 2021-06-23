@@ -42,16 +42,23 @@
             <artifactId>evaluator.builder</artifactId>
             <version>1.2.1-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.library</artifactId>
             <version>1.2.1-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.expression</artifactId>
+            <version>1.2.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.google.dagger</groupId>
             <artifactId>dagger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
         </dependency>
     </dependencies>
 

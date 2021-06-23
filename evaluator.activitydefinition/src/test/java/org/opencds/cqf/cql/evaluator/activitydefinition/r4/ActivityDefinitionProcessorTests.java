@@ -32,10 +32,8 @@ import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
-import org.opencds.cqf.cql.evaluator.builder.LibraryLoaderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
-import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
@@ -94,7 +92,7 @@ public class ActivityDefinitionProcessorTests {
             }
         };
 
-        LibraryLoaderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryLoaderFactory(
+        LibraryContentProviderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryContentProviderFactory(
                 fhirContext, adapterFactory, libraryContentProviderFactories, libraryVersionSelector);
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
             /**
@@ -147,15 +145,10 @@ public class ActivityDefinitionProcessorTests {
         TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
                 fhirContext, typedTerminologyProviderFactories);
 
-        RetrieveProviderConfigurer retrieveProviderConfigurer = new org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer(
-                new RetrieveProviderConfig());
-
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder(retrieveProviderConfigurer);
-
         LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, cqlEvaluatorBuilder);
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
 
         activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
     }

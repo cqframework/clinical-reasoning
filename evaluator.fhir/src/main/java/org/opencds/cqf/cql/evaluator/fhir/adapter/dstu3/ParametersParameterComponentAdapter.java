@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 class ParametersParameterComponentAdapter
@@ -98,6 +99,17 @@ class ParametersParameterComponentAdapter
     @Override
     public IBaseDatatype getValue() {
         return this.parametersParametersComponent.getValue();
+    }
+
+    @Override
+    public Boolean hasExtension() {
+        return this.parametersParametersComponent.hasExtension();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<IBaseExtension<?, ?>> getExtension() {
+        return (List<IBaseExtension<?, ?>>)(List<?>)this.parametersParametersComponent.getExtension();
     }
 
 }

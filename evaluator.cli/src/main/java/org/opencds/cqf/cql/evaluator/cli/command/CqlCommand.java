@@ -12,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -21,6 +20,7 @@ import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.dagger.CqlEvaluatorComponent;
 import org.opencds.cqf.cql.evaluator.dagger.DaggerCqlEvaluatorComponent;
 
@@ -87,7 +87,7 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    private Map<String, LibraryLoader> libraryLoaderIndex = new HashMap<>();
+    private Map<String, LibraryContentProvider> libraryContentProviderIndex = new HashMap<>();
     private Map<String, TerminologyProvider> terminologyProviderIndex = new HashMap<>();
 
     @Override
@@ -102,15 +102,15 @@ public class CqlCommand implements Callable<Integer> {
 
             CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder();
 
-            LibraryLoader libraryLoader = libraryLoaderIndex.get(library.libraryUrl);
+            LibraryContentProvider libraryContentProvider = libraryContentProviderIndex.get(library.libraryUrl);
 
-            if (libraryLoader == null) {
-                libraryLoader = cqlEvaluatorComponent.createLibraryLoaderFactory()
-                        .create(new EndpointInfo().setAddress(library.libraryUrl), null);
-                this.libraryLoaderIndex.put(library.libraryUrl, libraryLoader);
+            if (libraryContentProvider == null) {
+                libraryContentProvider = cqlEvaluatorComponent.createLibraryContentProviderFactory()
+                        .create(new EndpointInfo().setAddress(library.libraryUrl));
+                this.libraryContentProviderIndex.put(library.libraryUrl, libraryContentProvider);
             }
 
-            cqlEvaluatorBuilder.withLibraryLoader(libraryLoader);
+            cqlEvaluatorBuilder.withLibraryContentProvider(libraryContentProvider);
 
             if (library.terminologyUrl != null) {
                 TerminologyProvider terminologyProvider = this.terminologyProviderIndex.get(library.terminologyUrl);

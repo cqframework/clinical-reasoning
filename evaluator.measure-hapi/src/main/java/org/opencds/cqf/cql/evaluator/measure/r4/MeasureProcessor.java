@@ -102,7 +102,7 @@ public class MeasureProcessor {
      *                            evaluation.
      * @return The completed Measure report.
      */
-    MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType, String subject,
+    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType, String subject,
             String practitioner, String lastReceivedOn, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
 

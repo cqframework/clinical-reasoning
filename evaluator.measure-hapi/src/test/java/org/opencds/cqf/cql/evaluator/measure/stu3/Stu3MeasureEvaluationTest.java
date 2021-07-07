@@ -36,8 +36,8 @@ import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
-import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.parser.IParser;
@@ -84,7 +84,7 @@ public class Stu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
     
     @Test
-    public void testContinousVariableMeasureEvaluation() throws Exception {
+    public void testContinuosVariableMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
         
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -117,7 +117,7 @@ public class Stu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         context.registerLibraryLoader(ll);
         
         Stu3MeasureEvaluation<Patient> evaluation = new Stu3MeasureEvaluation<>(context, measure, measurementPeriod, modelResolver.getPackageName(), r -> r.getId() , patient.getId());
-        MeasureReport report = evaluation.evaluate(MeasureReportType.INDIVIDUAL);
+        MeasureReport report = evaluation.evaluate(MeasureEvalType.PATIENT);
         assertNotNull(report);
         
         // Simulate sending it across the wire

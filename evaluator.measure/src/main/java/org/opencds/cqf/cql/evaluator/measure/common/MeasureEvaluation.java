@@ -130,20 +130,21 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
         this.packageName = packageName;        
     }
 
-    public MeasureReportT evaluate(MeasureReportType type) {
+    public MeasureReportT evaluate(MeasureEvalType type) {
         switch (type) {
-            case INDIVIDUAL:
-                return this.evaluatePatientMeasure();
+            case PATIENT:
+            case SUBJECT:
+                return this.evaluateIndividualMeasure();
             case SUBJECTLIST:
                 return this.evaluateSubjectListMeasure();
             case PATIENTLIST:
                 return this.evaluatePatientListMeasure();
             default:
-                return this.evaluatePatientListMeasure();
+                return this.evaluatePopulationMeasure();
         }
     }
 
-    protected MeasureReportT evaluatePatientMeasure() {
+    protected MeasureReportT evaluateIndividualMeasure() {
         logger.info("Generating individual report");
 
         if (this.subjectOrPractitionerId == null) {

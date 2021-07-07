@@ -34,8 +34,8 @@ import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
-import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.parser.IParser;
@@ -114,7 +114,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         context.registerLibraryLoader(ll);
         
         R4MeasureEvaluation<Patient> evaluation = new R4MeasureEvaluation<>(context, measure, measurementPeriod, modelResolver.getPackageName(), r -> r.getId() , patient.getId());
-        MeasureReport report = evaluation.evaluate(MeasureReportType.INDIVIDUAL);
+        MeasureReport report = evaluation.evaluate(MeasureEvalType.SUBJECT);
         assertNotNull(report);
         
         // Simulate sending it across the wire

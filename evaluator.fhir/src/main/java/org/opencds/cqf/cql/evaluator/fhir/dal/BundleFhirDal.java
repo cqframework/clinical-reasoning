@@ -8,7 +8,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -72,7 +72,7 @@ public class BundleFhirDal implements FhirDal {
 
         List<IBaseResource> returnList = new ArrayList<>();
         for (IBaseResource resource : resources) {
-            Optional<StringType> urlString = this.fhirPath.evaluateFirst(resource, "url", StringType.class);
+            Optional<UriType> urlString = this.fhirPath.evaluateFirst(resource, "url", UriType.class);
             if (urlString.isPresent() && urlString.get().getValue().equals(url)) {
                 returnList.add(resource);
             }

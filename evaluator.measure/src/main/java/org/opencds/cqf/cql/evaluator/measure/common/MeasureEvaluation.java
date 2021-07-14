@@ -213,7 +213,12 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
             return Collections.emptyList();
         }
 
-        context.setContextValue("Patient", this.getId.apply(subject));
+        String subjectId =  this.getId.apply(subject);
+        if (subjectId.contains("/")) {
+            subjectId = subjectId.split("/")[1];
+        }
+
+        context.setContextValue("Patient", subjectId);
         Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
         if (result == null) {
             Collections.emptyList();
@@ -563,10 +568,16 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
         return report;
     }
     
-    private void populateSDEAccumulators(MeasureT measure, Context context, SubjectT patient,
+    private void populateSDEAccumulators(MeasureT measure, Context context, SubjectT subject,
             HashMap<String, HashMap<String, Integer>> sdeAccumulators,
             List<MeasureSupplementalDataComponentT> sde) {
-        context.setContextValue("Patient", this.getId.apply(patient));
+        
+        String subjectId =  this.getId.apply(subject);
+        if (subjectId.contains("/")) {
+            subjectId = subjectId.split("/")[1];
+        }
+
+        context.setContextValue("Patient", subjectId);
         List<Object> sdeList = sde.stream()
                 .map(sdeItem -> context.resolveExpressionRef(getSDEExpression(sdeItem)).evaluate(context))
                 .collect(Collectors.toList());

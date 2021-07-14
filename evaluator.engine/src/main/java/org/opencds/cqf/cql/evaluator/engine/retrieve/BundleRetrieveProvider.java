@@ -35,10 +35,10 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 	private final CodeUtil codeUtil;
 	private final IFhirPath fhirPath;
 
-	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle bundle) {
+	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle iBaseBundle) {
 		
 		this.fhirContext = requireNonNull(fhirContext, "bundle can not be null.");
-		this.bundle = requireNonNull(bundle, "bundle can not be null.");
+		this.bundle = requireNonNull(iBaseBundle, "bundle can not be null.");
 		this.codeUtil = new CodeUtil(fhirContext);
 		this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
 	}

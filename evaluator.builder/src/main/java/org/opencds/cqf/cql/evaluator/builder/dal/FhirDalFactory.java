@@ -26,9 +26,9 @@ public class FhirDalFactory implements org.opencds.cqf.cql.evaluator.builder.Fhi
     private FhirContext fhirContext;
 
     @Inject
-    public FhirDalFactory(FhirContext fhirContent, Set<TypedFhirDalFactory> fhirDalFactories) {
+    public FhirDalFactory(FhirContext fhirContext, Set<TypedFhirDalFactory> fhirDalFactories) {
         this.fhirDalFactories = fhirDalFactories;
-        this.fhirContext = fhirContent;
+        this.fhirContext = fhirContext;
     }
 
     public FhirDal create(EndpointInfo endpointInfo) {

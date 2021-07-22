@@ -152,7 +152,6 @@ public class MeasureProcessorTest {
 
     @Test
     public void exm108() {
-
         Endpoint endpoint = new Endpoint().setAddress("EXM108-8.3.000-bundle.json")
         .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
@@ -164,6 +163,17 @@ public class MeasureProcessorTest {
         validateGroup(report.getGroup().get(0), "numerator", 0);
         validateGroup(report.getGroup().get(0), "denominator", 1);
 
+
+    }
+
+    @Test
+    public void patientId() {
+        Endpoint endpoint = new Endpoint().setAddress("EXM108-8.3.000-bundle.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", "subject", "Patient/numer-EXM108", null, null, endpoint, endpoint, endpoint, null);
+        validateGroup(report.getGroup().get(0), "numerator", 1);
+        validateGroup(report.getGroup().get(0), "denominator", 1);
 
     }
 

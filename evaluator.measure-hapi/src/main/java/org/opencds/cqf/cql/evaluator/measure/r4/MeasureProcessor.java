@@ -152,7 +152,7 @@ public class MeasureProcessor {
         
         context.setParameter(null, "Measurement Period", measurementPeriod);
         R4MeasureEvaluation<Patient> measureEvaluation = new R4MeasureEvaluation<>(context, measure, measurementPeriod,
-                "org.hl7.fhir.r4.model", x -> x.getId(), subject);
+                "org.hl7.fhir.r4.model", x -> x.getIdElement().getIdPart(), subject);
 
         return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType));
     }

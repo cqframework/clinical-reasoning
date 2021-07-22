@@ -184,28 +184,28 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				}
 				
 				if (!id.equals(contextValue)) {
-					logger.debug("Found {} with id  {}. Skipping.", dataType, id);
+					logger.info("Found {} with id {}. Skipping.", dataType, id);
 					continue;
 				}
 			}
 			else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
-					String id = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
-					if (id == null) {
+					String reference = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
+					if (reference == null) {
 						logger.debug("Found null reference for {} resource. Skipping.", dataType);
 						continue;
 					}
 
-					if (id.startsWith("urn:")) {
+					if (reference.startsWith("urn:")) {
 						logger.debug("Found reference with urn: prefix. Stripping.", dataType);
-						id = stripUrnScheme(id);
+						reference = stripUrnScheme(reference);
 					}
 	
-					if (id.contains("/")) {
-						id = id.split("/")[1];
+					if (reference.contains("/")) {
+						reference = reference.split("/")[1];
 					}
 					
-					if (!id.equals(contextValue)) {
-						logger.info("Found {} with id  {}. Skipping.", dataType, id);
+					if (!reference.equals(contextValue)) {
+						logger.info("Found {} with reference {}. Skipping.", dataType, reference);
 						continue;
 					}
 				}

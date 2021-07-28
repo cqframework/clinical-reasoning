@@ -112,9 +112,10 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Context context = new Context(cqlLibraries.get(0));
         context.registerDataProvider(FHIR_NS_URI, dataProvider);
         context.registerLibraryLoader(ll);
+        context.setParameter(null, "Measurement Period", measurementPeriod);
         
-        R4MeasureEvaluation<Patient> evaluation = new R4MeasureEvaluation<>(context, measure, measurementPeriod, modelResolver.getPackageName(), r -> r.getId() , patient.getId());
-        MeasureReport report = evaluation.evaluate(MeasureEvalType.SUBJECT);
+        R4MeasureEvaluation<Patient> evaluation = new R4MeasureEvaluation<>(context, measure);
+        MeasureReport report = evaluation.evaluate(MeasureEvalType.SUBJECT, patient.getId());
         assertNotNull(report);
         
         // Simulate sending it across the wire

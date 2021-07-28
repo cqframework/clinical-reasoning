@@ -52,8 +52,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				this.fhirContext, this.bundle,
 				this.fhirContext.getResourceDefinition(dataType).getImplementingClass());
 
-		resources = this.filterToContext(dataType, context, contextPath, contextValue, resources);
-		resources = this.filterToTerminology(dataType, codePath, codes, valueSet, resources);
+		resources = this.filterByContext(dataType, context, contextPath, contextValue, resources);
+		resources = this.filterByTerminology(dataType, codePath, codes, valueSet, resources);
 
 		return resources.stream().map(x -> (Object) x).collect(Collectors.toList());
 	}
@@ -116,7 +116,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return false;
 	}
 
-	private List<? extends IBaseResource> filterToTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
+	private List<? extends IBaseResource> filterByTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
 			final String valueSet, final List<? extends IBaseResource> resources) {
 		if (codes == null && valueSet == null) {
 			return resources;
@@ -157,11 +157,11 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return filtered;
 	}
 
-	private List<? extends IBaseResource> filterToContext(final String dataType, final String context, final String contextPath,
+	private List<? extends IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,
 			final Object contextValue, final List<? extends IBaseResource> resources) {
 		if (context == null || contextValue == null || contextPath == null) {
 			logger.info(
-					"Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning all resources.",
+					"Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning unfiltered resources.",
 					dataType, context, contextPath, contextValue);
 			return resources;
 		}

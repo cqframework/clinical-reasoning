@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -45,14 +44,8 @@ public class R4MeasureEvaluation<ST extends DomainResource> extends
         MeasureReport, MeasureReportGroupComponent, MeasureReport.MeasureReportGroupPopulationComponent,
         Coding, Extension, Reference, ListResource, ListResource.ListEntryComponent, DomainResource, ST> {
 
-    public R4MeasureEvaluation(Context context, Measure measure, Interval measurementPeriod, String packageName,
-            Function<DomainResource, String> getId, String patientOrPractitionerId) {
-        super(context, measure, measurementPeriod, packageName, getId, patientOrPractitionerId);
-    }
-
-    public R4MeasureEvaluation(Context context, Measure measure, Interval measurementPeriod, String packageName,
-            Function<DomainResource, String> getId) {
-        super(context, measure, measurementPeriod, packageName, getId);
+    public R4MeasureEvaluation(Context context, Measure measure) {
+        super(context, measure, x -> x.getIdElement().getIdPart());
     }
 
     @Override
@@ -113,7 +106,7 @@ public class R4MeasureEvaluation<ST extends DomainResource> extends
     }
 
     @Override
-    protected MeasureReport createMeasureReport(String status, MeasureReportType type, Interval measurementPeriod, List<ST> subjects) {
+    protected MeasureReport createMeasureReport(String status, MeasureReportType type, List<ST> subjects) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
         report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
@@ -123,6 +116,7 @@ public class R4MeasureEvaluation<ST extends DomainResource> extends
         }
 
         Period period = null;
+        Interval measurementPeriod = this.getMeasurementPeriod();
         if( measurementPeriod.getStart() instanceof DateTime ) {
             DateTime dtStart = (DateTime)measurementPeriod.getStart();
             DateTime dtEnd = (DateTime)measurementPeriod.getEnd();

@@ -142,11 +142,11 @@ public class MeasureProcessor {
         TerminologyProvider terminologyProvider = this.buildTerminologyProvider(terminologyEndpoint);
         DataProvider dataProvider = this.buildDataProvider(dataEndpoint, additionalData, terminologyProvider);
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
-        Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider, measurementPeriod);
+        Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
 
         R4MeasureEvaluation<Patient> measureEvaluation = new R4MeasureEvaluation<>(context, measure);
 
-        return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType), subject);
+        return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType), subject, measurementPeriod);
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -204,12 +204,11 @@ public class MeasureProcessor {
     }
 
     // TODO: This is duplicate logic from the evaluator builder
-    private Context buildMeasureContext(Library primaryLibrary, LibraryLoader libraryLoader, TerminologyProvider terminologyProvider, DataProvider dataProvider, Interval measurementPeriod) {
+    private Context buildMeasureContext(Library primaryLibrary, LibraryLoader libraryLoader, TerminologyProvider terminologyProvider, DataProvider dataProvider) {
         Context context = new Context(primaryLibrary);
         context.registerLibraryLoader(libraryLoader);
         context.registerTerminologyProvider(terminologyProvider);
         context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
-        context.setParameter(null, "Measurement Period", measurementPeriod);
         return context;
     }
 

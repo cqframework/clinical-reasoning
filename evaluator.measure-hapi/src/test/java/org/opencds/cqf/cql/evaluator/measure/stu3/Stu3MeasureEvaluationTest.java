@@ -27,6 +27,11 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
@@ -47,135 +52,182 @@ public class Stu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     public String getFhirVersion() {
         return "3.0.0";
     }
-    
+
     @Test
     public void testCohortMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
-        
+
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
-        
-        String cql = skeleton_cql() + sde_race() + 
-                "define InitialPopulation: 'Doe' in Patient.name.family";
-        
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any())).thenReturn(Arrays.asList(patient));
+
+        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family";
+
         Measure measure = cohort_measure();
-        
+
         MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
-        
+
         checkEvidence(report);
     }
-    
+
     @Test
     public void testProportionMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
-        
+
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
-        
-        String cql = skeleton_cql() + sde_race() + 
-                "define InitialPopulation: 'Doe' in Patient.name.family\n" +
-                "define Denominator: 'John' in Patient.name.given\n" + 
-                "define Numerator: Patient.birthDate > @1970-01-01\n";
-        
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any())).thenReturn(Arrays.asList(patient));
+
+        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+                + "define Denominator: 'John' in Patient.name.given\n"
+                + "define Numerator: Patient.birthDate > @1970-01-01\n";
+
         Measure measure = proportion_measure();
-        
+
         MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
         checkEvidence(report);
     }
-    
+
     @Test
     public void testContinuosVariableMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
-        
+
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
-        
-        String cql = skeleton_cql() + sde_race() + 
-                "define InitialPopulation: 'Doe' in Patient.name.family\n" + 
-                "define MeasurePopulation: Patient.birthDate > @1970-01-01\n";
-        
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any())).thenReturn(Arrays.asList(patient));
+
+        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+                + "define MeasurePopulation: Patient.birthDate > @1970-01-01\n";
+
         Measure measure = continuous_variable_measure();
-        
+
         MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
         checkEvidence(report);
+    }
+
+    // @Test
+    public void testStratifiedMeasureEvaluation() throws Exception {
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any())).thenReturn(Arrays.asList(jane_doe(), john_doe()));
+
+        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+                + "define MeasurePopulation: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
+
+        Measure measure = stratified_measure();
+
+        MeasureReport report = runTest(cql, null, measure, retrieveProvider);
+        checkStratification(report);
+
     }
 
     private MeasureReport runTest(String cql, Patient patient, Measure measure, RetrieveProvider retrieveProvider)
             throws Exception {
         Interval measurementPeriod = measurementPeriod("2000-01-01", "2001-01-01");
-        
+
         Library primaryLibrary = library(cql);
         measure.addLibrary(new Reference(primaryLibrary.getId()));
-        
+
         List<org.cqframework.cql.elm.execution.Library> cqlLibraries = translate(cql);
         LibraryLoader ll = new InMemoryLibraryLoader(cqlLibraries);
-        
+
         Dstu3FhirModelResolver modelResolver = new Dstu3FhirModelResolver();
         DataProvider dataProvider = new CompositeDataProvider(modelResolver, retrieveProvider);
         Context context = new Context(cqlLibraries.get(0));
         context.registerDataProvider(FHIR_NS_URI, dataProvider);
         context.registerLibraryLoader(ll);
-        context.setParameter(null, "Measurement Period", measurementPeriod);
-        
+
         Stu3MeasureEvaluation<Patient> evaluation = new Stu3MeasureEvaluation<>(context, measure);
-        MeasureReport report = evaluation.evaluate(MeasureEvalType.PATIENT, patient.getId());
+        MeasureReport report = evaluation.evaluate(MeasureEvalType.PATIENT,  patient != null ? patient.getId() : null, measurementPeriod);
         assertNotNull(report);
-        
+
         // Simulate sending it across the wire
         IParser parser = modelResolver.getFhirContext().newJsonParser();
-        report = (MeasureReport) parser.parseResource( parser.encodeResourceToString(report) );
+        report = (MeasureReport) parser.parseResource(parser.encodeResourceToString(report));
         return report;
     }
-    
+
     private void checkEvidence(MeasureReport report) {
-        assertNotNull( report.getEvaluatedResources() );
-        assertNotNull( report.getEvaluatedResources().getReference() );
+        assertNotNull(report.getEvaluatedResources());
+        assertNotNull(report.getEvaluatedResources().getReference());
         String bundleRef = report.getEvaluatedResources().getReference();
-        
+
         // The Observation for the SDE and the list of references
-        assertEquals( report.getContained().size(), 2 );
-        Map<String,Resource> contained = report.getContained().stream().collect(Collectors.toMap(r -> r.getClass().getSimpleName(), Function.identity()));
-        
+        assertEquals(report.getContained().size(), 2);
+        Map<String, Resource> contained = report.getContained().stream()
+                .collect(Collectors.toMap(r -> r.getClass().getSimpleName(), Function.identity()));
+
         Bundle bundle = (Bundle) contained.get("Bundle");
-        assertEquals( bundle.getIdElement().getIdPart(), bundleRef );
-        
+        assertEquals(bundle.getIdElement().getIdPart(), bundleRef);
+
         Observation obs = (Observation) contained.get("Observation");
-        assertEquals( obs.getValueCodeableConcept().getCodingFirstRep().getCode(), OMB_CATEGORY_RACE_BLACK );
+        assertEquals(obs.getValueCodeableConcept().getCodingFirstRep().getCode(), OMB_CATEGORY_RACE_BLACK);
+    }
+
+    private void checkStratification(MeasureReport report) {
+        MeasureReportGroupStratifierComponent mrgsc = report.getGroupFirstRep().getStratifierFirstRep();
+        assertEquals(mrgsc.getId(), "patient-gender");
+        assertEquals(mrgsc.getStratum().size(), 2);
+
+        StratifierGroupComponent sgc = mrgsc.getStratum().stream().filter(x -> x.getValue().equals("male")).findFirst().get();
+        StratifierGroupPopulationComponent sgpc = sgc.getPopulation().stream().filter(x -> x.getCode().getCodingFirstRep().getCode().equals(MeasurePopulationType.INITIALPOPULATION.toCode())).findFirst().get();
+
+        assertEquals(sgpc.getCount(), 1);
+
+
+        sgc = mrgsc.getStratum().stream().filter(x -> x.getValue().equals("female")).findFirst().get();
+        sgpc = sgc.getPopulation().stream().filter(x -> x.getCode().getCodingFirstRep().getCode().equals(MeasurePopulationType.INITIALPOPULATION.toCode())).findFirst().get();
+
+        assertEquals(sgpc.getCount(), 1);
     }
 
     private Measure cohort_measure() {
-        
+
         Measure measure = measure("cohort");
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         measure.getSupplementalDataFirstRep().setCriteria("SDE Race");
-        
+
         return measure;
     }
-    
+
     private Measure proportion_measure() {
-        
+
         Measure measure = measure("proportion");
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
         addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
         measure.getSupplementalDataFirstRep().setCriteria("SDE Race");
-        
+
         return measure;
     }
-    
+
     private Measure continuous_variable_measure() {
-        
+
         Measure measure = measure("continuous-variable");
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.MEASUREPOPULATION, "MeasurePopulation");
         measure.getSupplementalDataFirstRep().setCriteria("SDE Race");
-        
+
+        return measure;
+    }
+
+    private Measure stratified_measure() {
+        Measure measure = proportion_measure();
+        addStratifier(measure, "patient-gender", "Gender");
+
         return measure;
     }
 
     private void addPopulation(Measure measure, MeasurePopulationType populationType, String expression) {
-        measure.getGroupFirstRep().getPopulationFirstRep().getCode().getCodingFirstRep().setCode(populationType.toCode());
+        measure.getGroupFirstRep().getPopulationFirstRep().getCode().getCodingFirstRep()
+                .setCode(populationType.toCode());
         measure.getGroupFirstRep().getPopulationFirstRep().setCriteria(expression);
+    }
+
+    private void addStratifier(Measure measure, String stratifierId, String expression) {
+        MeasureGroupStratifierComponent mgsc = measure.getGroupFirstRep().addStratifier();
+        mgsc.setCriteria(expression);
+        mgsc.setId(stratifierId);
     }
 
     private Measure measure(String scoring) {
@@ -197,17 +249,33 @@ public class Stu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         library.getContentFirstRep().setContentType("text/cql").setData(cql.getBytes());
         return library;
     }
-    
+
     private Patient john_doe() {
         Patient patient = new Patient();
         patient.setId("john-doe");
-        patient.setName(Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("John")))));
+        patient.setName(
+                Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("John")))));
         patient.setBirthDate(new Date());
-        
+        patient.setGender(AdministrativeGender.MALE);
+
         Extension usCoreRace = new Extension();
-        usCoreRace.setUrl(EXT_URL_US_CORE_RACE)
-            .addExtension().setUrl(OMB_CATEGORY).setValue(
-                    new Coding().setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK).setDisplay(BLACK_OR_AFRICAN_AMERICAN));
+        usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY).setValue(new Coding()
+                .setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK).setDisplay(BLACK_OR_AFRICAN_AMERICAN));
+        patient.getExtension().add(usCoreRace);
+        return patient;
+    }
+
+    private Patient jane_doe() {
+        Patient patient = new Patient();
+        patient.setId("jane-doe");
+        patient.setName(
+                Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("Jane")))));
+        patient.setBirthDate(new Date());
+        patient.setGender(AdministrativeGender.FEMALE);
+
+        Extension usCoreRace = new Extension();
+        usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY).setValue(new Coding()
+                .setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK).setDisplay(BLACK_OR_AFRICAN_AMERICAN));
         patient.getExtension().add(usCoreRace);
         return patient;
     }

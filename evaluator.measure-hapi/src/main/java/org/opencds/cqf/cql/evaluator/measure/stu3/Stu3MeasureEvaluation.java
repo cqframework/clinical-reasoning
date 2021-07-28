@@ -156,7 +156,7 @@ public class Stu3MeasureEvaluation<ST extends DomainResource> extends
     }
 
     @Override
-    protected String getSDEExpression(MeasureSupplementalDataComponent sdeItem) {
+    protected String getSdeExpression(MeasureSupplementalDataComponent sdeItem) {
         String result = null;
         if (sdeItem.getCriteria() != null) {
             result = sdeItem.getCriteria();
@@ -165,7 +165,7 @@ public class Stu3MeasureEvaluation<ST extends DomainResource> extends
     }
 
     @Override
-    protected Coding getSDECoding(MeasureSupplementalDataComponent sdeItem) {
+    protected Coding getSdeCoding(MeasureSupplementalDataComponent sdeItem) {
         Coding result = null;
         if (sdeItem.getIdentifier() != null) {
             // TODO - Is this correct? There isn't an obvious code in STU3

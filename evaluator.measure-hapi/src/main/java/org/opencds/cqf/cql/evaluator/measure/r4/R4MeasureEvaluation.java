@@ -162,7 +162,7 @@ public class R4MeasureEvaluation<ST extends DomainResource> extends
     }
 
     @Override
-    protected String getSDEExpression(MeasureSupplementalDataComponent sdeItem) {
+    protected String getSdeExpression(MeasureSupplementalDataComponent sdeItem) {
         String result = null; 
         if( sdeItem.getCriteria() != null ) {
             result = sdeItem.getCriteria().getExpression();
@@ -171,7 +171,7 @@ public class R4MeasureEvaluation<ST extends DomainResource> extends
     }
 
     @Override
-    protected Coding getSDECoding(MeasureSupplementalDataComponent sdeItem) {
+    protected Coding getSdeCoding(MeasureSupplementalDataComponent sdeItem) {
         Coding result = null;
         if( sdeItem.getCode() != null && sdeItem.getCode().getCodingFirstRep() != null ) {
             result = sdeItem.getCode().getCodingFirstRep();

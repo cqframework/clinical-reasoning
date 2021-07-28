@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,12 +34,6 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
 
     protected MeasureT measure;
     protected Context context;
-    protected String subjectOrPractitionerId;
-    protected Interval measurementPeriod;
-
-    // TODO: Figure this out dynamically based on the ResourceType
-    protected String packageName;
-
     protected Function<ResourceT, String> getId;
 
     protected abstract MeasureScoring getMeasureScoring();
@@ -57,8 +52,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
             MeasureGroupPopulationComponentT populationCriteria, int populationCount,
             Iterable<SubjectT> subjectPopulation);
 
-    protected abstract MeasureReportT createMeasureReport(String status, MeasureReportType type,
-            Interval measurementPeriod, List<SubjectT> subjects);
+    protected abstract MeasureReportT createMeasureReport(String status, MeasureReportType type, List<SubjectT> subjects);
 
     protected abstract MeasureReportGroupComponentT createReportGroup(String id);
 
@@ -115,49 +109,48 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
     
     protected abstract void setEvaluatedResources(MeasureReportT report, Collection<ReferenceT> evaluatedResources);
 
-    public MeasureEvaluation(Context context, MeasureT measure, Interval measurementPeriod, String packageName,
+    public MeasureEvaluation(Context context, MeasureT measure,
             Function<ResourceT, String> getId) {
-        this(context, measure, measurementPeriod, packageName, getId, null);
-    }
-
-    public MeasureEvaluation(Context context, MeasureT measure, Interval measurementPeriod, String packageName,
-            Function<ResourceT, String> getId, String patientOrPractitionerId) {
         this.measure = measure;
         this.context = context;
-        this.subjectOrPractitionerId = patientOrPractitionerId;
-        this.measurementPeriod = measurementPeriod;
-        this.getId = getId;
-        this.packageName = packageName;        
+        this.getId = getId;     
     }
 
     public MeasureReportT evaluate(MeasureEvalType type) {
+        return this.evaluate(type, null);
+    }
+
+    public MeasureReportT evaluate(MeasureEvalType type, String subjectOrPractitionerId) {
         switch (type) {
             case PATIENT:
             case SUBJECT:
-                return this.evaluateIndividualMeasure();
+                if (subjectOrPractitionerId != null) {
+                    return this.evaluateIndividualMeasure(subjectOrPractitionerId);
+                }
+                else {
+                    return this.evaluatePopulationMeasure();
+                }
             case SUBJECTLIST:
-                return this.evaluateSubjectListMeasure();
+                return this.evaluateSubjectListMeasure(subjectOrPractitionerId);
             case PATIENTLIST:
-                return this.evaluatePatientListMeasure();
-            default:
+                return this.evaluatePatientListMeasure(subjectOrPractitionerId);
+            case POPULATION:
                 return this.evaluatePopulationMeasure();
+            default:
+                throw new IllegalArgumentException(String.format("Unsupported Measure Evaluation type: %s", type.getDisplay()));
         }
     }
 
-    protected MeasureReportT evaluateIndividualMeasure() {
+    protected MeasureReportT evaluateIndividualMeasure(String subjectId) {
+        Objects.requireNonNull(subjectId, "subjectId can not be null for individual Measures");
         logger.info("Generating individual report");
 
-        if (this.subjectOrPractitionerId == null) {
-            return evaluatePopulationMeasure();
-        }
-
-        String id = this.subjectOrPractitionerId;
-        if (id.startsWith("Patient/") ) {
-            id = id.substring("Patient/".length());
+        if (subjectId.startsWith("Patient/") ) {
+            subjectId = subjectId.substring("Patient/".length());
         }
         
         Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Patient", "id",
-                id, "Patient", null, null, null, null, null, null, null, null);
+                subjectId, "Patient", null, null, null, null, null, null, null, null);
         SubjectT patient = null;
         if (subjectRetrieve.iterator().hasNext()) {
             patient = (SubjectT) subjectRetrieve.iterator().next();
@@ -167,18 +160,24 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
                 MeasureReportType.INDIVIDUAL, true);
     }
 
-    protected MeasureReportT evaluateSubjectListMeasure() {
+    protected MeasureReportT evaluateSubjectListMeasure(String practitionerId) {
         logger.info("Generating subject-list report");
-        List<SubjectT> subjects = this.subjectOrPractitionerId == null ? getAllSubjects()
-                : getPractitionerSubjects(this.subjectOrPractitionerId);
+        List<SubjectT> subjects = practitionerId == null ? getAllSubjects()
+                : getPractitionerSubjects(practitionerId);
         return evaluate(subjects, MeasureReportType.SUBJECTLIST, false);
     }
 
-    protected MeasureReportT evaluatePatientListMeasure() {
+    protected MeasureReportT evaluatePatientListMeasure(String practitionerId) {
         logger.info("Generating patient-list report");
-        List<SubjectT> subjects = this.subjectOrPractitionerId == null ? getAllSubjects()
-                : getPractitionerSubjects(this.subjectOrPractitionerId);
+        List<SubjectT> subjects = practitionerId == null ? getAllSubjects()
+                : getPractitionerSubjects(practitionerId);
         return evaluate(subjects, MeasureReportType.PATIENTLIST, false);
+    }
+
+    public MeasureReportT evaluatePopulationMeasure() {
+        logger.info("Generating summary report");
+
+        return evaluate(getAllSubjects(), MeasureReportType.SUMMARY, false);
     }
 
     private List<SubjectT> getPractitionerSubjects(String practitionerRef) {
@@ -189,8 +188,12 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
         return subjects;
     }
 
-    private DataProvider getDataProvider() {
-        return this.context.resolveDataProvider(this.packageName);
+    protected Interval getMeasurementPeriod() {
+        return (Interval)this.context.resolveParameterRef(null, "Measurement Period");
+    }
+
+    protected DataProvider getDataProvider() {
+        return this.context.resolveDataProviderByModelUri("http://hl7.org/fhir");
     }
 
     private List<SubjectT> getAllSubjects() {
@@ -199,12 +202,6 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
                 null, null, null, null, null, null);
         patientRetrieve.forEach(x -> patients.add((SubjectT) x));
         return patients;
-    }
-
-    public MeasureReportT evaluatePopulationMeasure() {
-        logger.info("Generating summary report");
-
-        return evaluate(getAllSubjects(), MeasureReportType.SUMMARY, false);
     }
 
     private Iterable<ResourceT> evaluateCriteria(SubjectT subject, MeasureGroupPopulationComponentT pop) {
@@ -277,7 +274,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureGr
     }
 
     private MeasureReportT evaluate(List<SubjectT> patients, MeasureReportType type, boolean isSingle) {
-        MeasureReportT report = this.createMeasureReport("complete", type, this.measurementPeriod, patients);
+        MeasureReportT report = this.createMeasureReport("complete", type, patients);
         HashMap<String, ResourceT> resources = new HashMap<>();
         HashMap<String, Set<String>> codeToResourceMap = new HashMap<>();
 

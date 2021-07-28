@@ -115,9 +115,10 @@ public class Stu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Context context = new Context(cqlLibraries.get(0));
         context.registerDataProvider(FHIR_NS_URI, dataProvider);
         context.registerLibraryLoader(ll);
+        context.setParameter(null, "Measurement Period", measurementPeriod);
         
-        Stu3MeasureEvaluation<Patient> evaluation = new Stu3MeasureEvaluation<>(context, measure, measurementPeriod, modelResolver.getPackageName(), r -> r.getId() , patient.getId());
-        MeasureReport report = evaluation.evaluate(MeasureEvalType.PATIENT);
+        Stu3MeasureEvaluation<Patient> evaluation = new Stu3MeasureEvaluation<>(context, measure);
+        MeasureReport report = evaluation.evaluate(MeasureEvalType.PATIENT, patient.getId());
         assertNotNull(report);
         
         // Simulate sending it across the wire

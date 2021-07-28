@@ -110,7 +110,6 @@ public class MeasureProcessor {
             logger.warn("the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
         }
         
-        
         FhirDal fhirDal = this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint));
 
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
@@ -139,22 +138,15 @@ public class MeasureProcessor {
         LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
 
         Library library = libraryLoader.load(new VersionedIdentifier().withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
-        Context context = new Context(library);
-        context.registerLibraryLoader(libraryLoader);
 
         TerminologyProvider terminologyProvider = this.buildTerminologyProvider(terminologyEndpoint);
-        context.registerTerminologyProvider(terminologyProvider);
-
         DataProvider dataProvider = this.buildDataProvider(dataEndpoint, additionalData, terminologyProvider);
-        context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
-
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
-        
-        context.setParameter(null, "Measurement Period", measurementPeriod);
-        R4MeasureEvaluation<Patient> measureEvaluation = new R4MeasureEvaluation<>(context, measure, measurementPeriod,
-                "org.hl7.fhir.r4.model", x -> x.getIdElement().getIdPart(), subject);
+        Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider, measurementPeriod);
 
-        return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType));
+        R4MeasureEvaluation<Patient> measureEvaluation = new R4MeasureEvaluation<>(context, measure);
+
+        return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType), subject);
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -209,6 +201,16 @@ public class MeasureProcessor {
         }
 
         return null;
+    }
+
+    // TODO: This is duplicate logic from the evaluator builder
+    private Context buildMeasureContext(Library primaryLibrary, LibraryLoader libraryLoader, TerminologyProvider terminologyProvider, DataProvider dataProvider, Interval measurementPeriod) {
+        Context context = new Context(primaryLibrary);
+        context.registerLibraryLoader(libraryLoader);
+        context.registerTerminologyProvider(terminologyProvider);
+        context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
+        context.setParameter(null, "Measurement Period", measurementPeriod);
+        return context;
     }
 
 }

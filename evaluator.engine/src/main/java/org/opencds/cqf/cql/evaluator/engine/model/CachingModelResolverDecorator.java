@@ -17,11 +17,13 @@ public class CachingModelResolverDecorator implements ModelResolver {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public String getPackageName() {
         return this.innerResolver.getPackageName();
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void setPackageName(String packageName) {
         this.innerResolver.setPackageName(packageName);
     }

@@ -34,7 +34,6 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -60,10 +59,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         this.measureReportScorer = new R4MeasureReportScorer();
     }
 
+    protected Measure measure = null;
     protected MeasureReport report = null;
     protected HashMap<String, Reference> evaluatedResourceReferences = null;
 
     protected void reset() {
+        this.measure = null;
         this.report = null;
         this.evaluatedResourceReferences = null;
     }
@@ -154,7 +155,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         sgpc.setId(population.getId());
       
         // This is a temporary resource that was carried by the population component
-        Set<String> popSubjectIds = (Set<String>)sgpc.getUserData(POPULATION_SUBJECT_SET);
+        Set<String> popSubjectIds = (Set<String>)population.getUserData(POPULATION_SUBJECT_SET);
 
         if (popSubjectIds == null) {
             return;
@@ -186,7 +187,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // Report Type behavior
         switch (this.report.getType()) {
             case SUBJECTLIST:
-                ListResource subjectList = createSubjectList(populationDef.getSubjects());
+                ListResource subjectList = createSubjectIdList(populationSet);
                 this.report.addContained(subjectList);
                 reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
                 break;
@@ -473,20 +474,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected Observation createMeasureObservation(String observationName) {
-        Observation obs = new Observation();
-        obs.setStatus(Observation.ObservationStatus.FINAL);
-        obs.setId(UUID.randomUUID().toString());
+        Observation obs = this.createObservation(this.measure, observationName);
         CodeableConcept cc = new CodeableConcept();
         cc.setText(observationName);
         obs.setCode(cc);
-        Extension obsExtension = new Extension().setUrl("http://hl7.org/fhir/StructureDefinition/cqf-measureInfo");
-        Extension extExtMeasure = new Extension().setUrl("measure").setValue(
-                new UriType(report.getMeasure().toString().startsWith("http://") ? report.getMeasure().toString()
-                        : ("http://hl7.org/fhir/us/cqfmeasures/" + report.getMeasure())));
-        obsExtension.addExtension(extExtMeasure);
-        Extension extExtPop = new Extension().setUrl("populationId").setValue(new StringType(observationName));
-        obsExtension.addExtension(extExtPop);
-        obs.addExtension(obsExtension);
         return obs;
 
     }

@@ -10,6 +10,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
@@ -37,6 +40,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 
 public abstract class BaseMeasureProcessorTest {
@@ -52,14 +56,24 @@ public abstract class BaseMeasureProcessorTest {
     protected MeasureProcessor measureProcessor = null;
     protected Endpoint endpoint = null;
 
-    protected void validateGroup(MeasureReportGroupComponent group, String groupName, int count) {
-        Optional<MeasureReportGroupPopulationComponent> population = group.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(groupName)).findFirst();
+    protected void validateGroup(MeasureReportGroupComponent group, String populationName, int count) {
+        Optional<MeasureReportGroupPopulationComponent> population = group.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
 
-        if (!population.isPresent()) {
-            throw new IllegalArgumentException(String.format("Unable to locate a population with id \"%s\"", groupName));
-        }
+        assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
 
-        assertEquals(population.get().getCount(), count, String.format("expected count for group \"%s\" did not match", groupName));
+        assertEquals(population.get().getCount(), count, String.format("expected count for population \"%s\" did not match", populationName));
+    }
+
+    protected void validateStratifier(MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue, String populationName, int count) {
+        Optional<StratifierGroupComponent> stratumOpt = stratifierComponent.getStratum().stream().filter(x -> x.hasValue() && x.getValue().hasText() && x.getValue().getText().equals(stratumValue)).findFirst();
+        assertTrue(stratumOpt.isPresent(), String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
+
+        StratifierGroupComponent stratum = stratumOpt.get();
+        Optional<StratifierGroupPopulationComponent> population = stratum.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
+
+        assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
+
+        assertEquals(population.get().getCount(), count, String.format("expected count for stratum value \"%s\" population \"%s\" did not match", stratumValue, populationName));
     }
 
     @SuppressWarnings("serial")

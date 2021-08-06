@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Patient;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
@@ -144,7 +143,7 @@ public class MeasureProcessor {
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
 
-        R4MeasureEvaluation<Patient> measureEvaluation = new R4MeasureEvaluation<>(context, measure);
+        R4MeasureEvaluation measureEvaluation = new R4MeasureEvaluation(context, measure);
 
         return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType), subject, measurementPeriod);
     }

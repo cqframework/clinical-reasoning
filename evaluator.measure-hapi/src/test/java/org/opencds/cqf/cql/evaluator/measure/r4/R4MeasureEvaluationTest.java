@@ -25,6 +25,8 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
+import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
@@ -81,7 +83,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
     
     @Test
-    public void testContinousVariableMeasureEvaluation() throws Exception {
+    public void testContinuousVariableMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
         
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -113,7 +115,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         context.registerDataProvider(FHIR_NS_URI, dataProvider);
         context.registerLibraryLoader(ll);
         
-        R4MeasureEvaluation<Patient> evaluation = new R4MeasureEvaluation<>(context, measure);
+        R4MeasureEvaluation evaluation = new R4MeasureEvaluation(context, measure);
         MeasureReport report = evaluation.evaluate(MeasureEvalType.SUBJECT, patient.getId(), measurementPeriod);
         assertNotNull(report);
         
@@ -165,13 +167,15 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private void addPopulation(Measure measure, MeasurePopulationType measurePopulationType, String expression) {
-        measure.getGroupFirstRep().getPopulationFirstRep().getCode().getCodingFirstRep().setCode(measurePopulationType.toCode());
-        measure.getGroupFirstRep().getPopulationFirstRep().getCriteria().setExpression(expression);
+        MeasureGroupPopulationComponent mgpc = measure.getGroupFirstRep().addPopulation();
+        mgpc.getCode().getCodingFirstRep().setCode(measurePopulationType.toCode());
+        mgpc.getCriteria().setExpression(expression);
     }
     
     private void addSDEComponent(Measure measure) {
-        measure.getSupplementalDataFirstRep().getCode().setText("sde-race");
-        measure.getSupplementalDataFirstRep().getCriteria().setLanguage("text/cql").setExpression("SDE Race");
+        MeasureSupplementalDataComponent sde = measure.getSupplementalDataFirstRep();
+        sde.getCode().setText("sde-race");
+        sde.getCriteria().setLanguage("text/cql").setExpression("SDE Race");
     }
 
     private Measure measure(String scoring) {

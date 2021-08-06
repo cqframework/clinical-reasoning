@@ -9,7 +9,7 @@ public class EncounterBasisMeasureProcessorTest extends BaseMeasureProcessorTest
     }
 
     @Test
-    public void hospitalMeasure_encounterPopulationBasis_exm104() {
+    public void exm104_singlePatient() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://ecqi.healthit.gov/ecqms/Measure/DischargedonAntithromboticTherapyFHIR", "2019-01-01", "2020-01-01", "subject", "numer-EXM104", null, null, endpoint, endpoint, endpoint, null);
         validateGroup(report.getGroup().get(0), "initial-population", 1);
     }

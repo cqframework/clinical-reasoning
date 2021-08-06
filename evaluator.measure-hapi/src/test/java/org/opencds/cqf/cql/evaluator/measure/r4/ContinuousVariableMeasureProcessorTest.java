@@ -10,7 +10,7 @@ public class ContinuousVariableMeasureProcessorTest extends BaseMeasureProcessor
     }
 
     @Test
-    public void continuousVariableMeasure_cms111() {
+    public void cms111_singlePatient() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://ecqi.healthit.gov/ecqms/Measure/CMS111", "2019-01-01", "2020-01-01", "subject", "measure-strat1-EXM111", null, null, endpoint, endpoint, endpoint, null);
         validateGroup(report.getGroup().get(0), "initial-population", 1);
     }

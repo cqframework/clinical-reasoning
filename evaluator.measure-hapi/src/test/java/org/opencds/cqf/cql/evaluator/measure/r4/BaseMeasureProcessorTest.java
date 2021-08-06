@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -56,11 +57,15 @@ public abstract class BaseMeasureProcessorTest {
     protected MeasureProcessor measureProcessor = null;
     protected Endpoint endpoint = null;
 
+    protected void validateGroupScore(MeasureReportGroupComponent group, BigDecimal score) {
+        assertTrue(group.hasMeasureScore(), String.format("group \"%s\" does not have a score", group.getId()));
+        assertEquals(group.getMeasureScore().getValue(), score);
+    }
+
     protected void validateGroup(MeasureReportGroupComponent group, String populationName, int count) {
         Optional<MeasureReportGroupPopulationComponent> population = group.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
 
         assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
-
         assertEquals(population.get().getCount(), count, String.format("expected count for population \"%s\" did not match", populationName));
     }
 
@@ -74,6 +79,15 @@ public abstract class BaseMeasureProcessorTest {
         assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
 
         assertEquals(population.get().getCount(), count, String.format("expected count for stratum value \"%s\" population \"%s\" did not match", stratumValue, populationName));
+    }
+
+    protected void validateStratumScore(MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue, BigDecimal score) {
+        Optional<StratifierGroupComponent> stratumOpt = stratifierComponent.getStratum().stream().filter(x -> x.hasValue() && x.getValue().hasText() && x.getValue().getText().equals(stratumValue)).findFirst();
+        assertTrue(stratumOpt.isPresent(), String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
+
+        StratifierGroupComponent stratum = stratumOpt.get();
+        assertTrue(stratum.hasMeasureScore(), String.format("stratum \"%s\" does not have a score", stratum.getId()));
+        assertEquals(stratum.getMeasureScore().getValue(), score);
     }
 
     @SuppressWarnings("serial")

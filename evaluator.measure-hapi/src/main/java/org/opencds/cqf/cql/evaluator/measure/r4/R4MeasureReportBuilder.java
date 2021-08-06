@@ -74,6 +74,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Interval measurementPeriod, List<DomainResource> subjects) {
         this.reset();
 
+        this.measure = measure;
         this.report = this.createMeasureReport(measure, measureReportType, subjects, measurementPeriod);
 
         buildGroups(measure, measureDef);
@@ -319,10 +320,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 DomainResource obs = null;
                 switch (this.report.getType()) {
                     case INDIVIDUAL:
-                        obs = createPatientObservation(measure, sdeKey, valueCoding);
+                        obs = createPatientObservation(sdeKey, valueCoding);
                         break;
                     default:
-                        obs = createPopulationObservation(measure, sdeKey, valueCoding, accumulatorValue);
+                        obs = createPopulationObservation(sdeKey, valueCoding, accumulatorValue);
                         break;
                 }
 
@@ -433,10 +434,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obsExtension;
     }
 
-    protected DomainResource createPopulationObservation(Measure measure, String populationId, Coding valueCoding,
+    protected DomainResource createPopulationObservation(String populationId, Coding valueCoding,
             Long sdeAccumulatorValue) {
 
-        Observation obs = createObservation(measure, populationId);
+        Observation obs = createObservation(populationId);
 
         CodeableConcept obsCodeableConcept = new CodeableConcept();
         obsCodeableConcept.setCoding(Collections.singletonList(valueCoding));
@@ -447,9 +448,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    protected DomainResource createPatientObservation(Measure measure, String populationId, Coding valueCoding) {
+    protected DomainResource createPatientObservation(String populationId, Coding valueCoding) {
 
-        Observation obs = createObservation(measure, populationId);
+        Observation obs = createObservation(populationId);
 
         CodeableConcept codeCodeableConcept = new CodeableConcept().setText(populationId);
         obs.setCode(codeCodeableConcept);
@@ -460,9 +461,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    protected Observation createObservation(Measure measure, String populationId) {
+    protected Observation createObservation(String populationId) {
         MeasureInfo measureInfo = new MeasureInfo()
-                .withMeasure(MeasureInfo.MEASURE_PREFIX + measure.getIdElement().getIdPart())
+                .withMeasure(this.measure.hasUrl() ? measure.getUrl() : (measure.hasId() ? MeasureInfo.MEASURE_PREFIX + measure.getIdElement().getIdPart() : ""))
                 .withPopulationId(populationId);
 
         Observation obs = new Observation();
@@ -474,7 +475,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected Observation createMeasureObservation(String observationName) {
-        Observation obs = this.createObservation(this.measure, observationName);
+        Observation obs = this.createObservation(observationName);
         CodeableConcept cc = new CodeableConcept();
         cc.setText(observationName);
         obs.setCode(cc);

@@ -15,9 +15,14 @@
         "Unvalidated",
         "argfile",
         "mgpc",
+        "mgsc",
         "mrgc",
+        "mrgsc",
         "numer",
-        "ppca"
+        "ppca",
+        "sdes",
+        "sgpc"
     ],
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.dependency.packagePresentation": "hierarchical"
 }

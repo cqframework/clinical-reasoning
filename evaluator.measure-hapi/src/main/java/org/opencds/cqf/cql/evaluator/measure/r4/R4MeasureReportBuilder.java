@@ -51,9 +51,9 @@ import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
-    private static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
+    protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
-    private MeasureReportScorer<MeasureReport> measureReportScorer;
+    protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
@@ -151,12 +151,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     @SuppressWarnings("unchecked")
-    protected void buildStratumPopulation(StratifierGroupPopulationComponent sgpc, Set<String> subjectIds, MeasureGroupPopulationComponent population) {
+    protected void buildStratumPopulation(StratifierGroupPopulationComponent sgpc, Set<String> subjectIds,
+            MeasureGroupPopulationComponent population) {
         sgpc.setCode(population.getCode());
         sgpc.setId(population.getId());
-      
+
         // This is a temporary resource that was carried by the population component
-        Set<String> popSubjectIds = (Set<String>)population.getUserData(POPULATION_SUBJECT_SET);
+        Set<String> popSubjectIds = (Set<String>) population.getUserData(POPULATION_SUBJECT_SET);
 
         if (popSubjectIds == null) {
             return;
@@ -242,8 +243,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 Resource resource = (Resource) object;
                 String resourceId = resource.getId();
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
-                Extension ext = createCodingExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
-                        MeasureConstants.URL_CODESYSTEM_MEASURE_POPULATION, measurePopulationType.toCode());
+                Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
+                        measurePopulationType.toCode());
                 addExtension(reference, ext);
                 list.addEntry().setItem(reference);
             }
@@ -362,7 +363,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         report.setPeriod(getPeriod(measurementPeriod));
-        report.setMeasure(measure.getIdElement().getIdPart());
+        report.setMeasure(measure.getUrl());
+        report.setDate(new Date());
+        report.setImplicitRules(measure.getImplicitRules());
+        report.setImprovementNotation(measure.getImprovementNotation());
+        report.setLanguage(measure.getLanguage());
+
+        // TODO: Allow a way to pass in or set a default reporter
+        // report.setReporter(value)
 
         return report;
     }
@@ -393,10 +401,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return valueCoding;
     }
 
-    protected Extension createCodingExtension(String url, String codeSystem, String code) {
+    // protected Extension createCodingExtension(String url, String codeSystem,
+    // String code) {
+    // Extension ext = new Extension().setUrl(url);
+    // Coding coding = new Coding().setSystem(codeSystem).setCode(code);
+    // ext.setValue(coding);
+    // return ext;
+    // }
+
+    protected Extension createStringExtension(String url, String value) {
         Extension ext = new Extension().setUrl(url);
-        Coding coding = new Coding().setSystem(codeSystem).setCode(code);
-        ext.setValue(coding);
+        ext.setValue(new StringType(value));
         return ext;
     }
 
@@ -463,7 +478,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected Observation createObservation(String populationId) {
         MeasureInfo measureInfo = new MeasureInfo()
-                .withMeasure(this.measure.hasUrl() ? measure.getUrl() : (measure.hasId() ? MeasureInfo.MEASURE_PREFIX + measure.getIdElement().getIdPart() : ""))
+                .withMeasure(this.measure.hasUrl() ? measure.getUrl()
+                        : (measure.hasId() ? MeasureInfo.MEASURE_PREFIX + measure.getIdElement().getIdPart() : ""))
                 .withPopulationId(populationId);
 
         Observation obs = new Observation();

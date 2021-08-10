@@ -5,10 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
@@ -88,6 +91,22 @@ public abstract class BaseMeasureProcessorTest {
         StratifierGroupComponent stratum = stratumOpt.get();
         assertTrue(stratum.hasMeasureScore(), String.format("stratum \"%s\" does not have a score", stratum.getId()));
         assertEquals(stratum.getMeasureScore().getValue(), score);
+    }
+
+    protected void validateEvaluatedResourceExtension(List<Reference> measureReferences, String resourceId, String... populations) {
+        List<Reference> resourceReferences = measureReferences.stream().filter(x -> x.getReference().equals(resourceId)).collect(Collectors.toList());
+        assertEquals(resourceReferences.size(), 1);
+
+        Reference reference = resourceReferences.get(0);
+
+        List<Extension> extensions = reference.getExtension().stream().filter(x -> x.getUrl().equals("http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference")).collect(Collectors.toList());
+
+        assertEquals(extensions.size(), populations.length);
+
+        for (String p : populations) {
+            assertTrue(extensions.stream().anyMatch(x -> x.getValue().toString().equals(p)));
+        }
+
     }
 
     @SuppressWarnings("serial")

@@ -111,6 +111,8 @@ public abstract class BaseMeasureProcessorTest {
 
     @SuppressWarnings("serial")
     protected void setup() {
+        // TODO: Mockito a good solid chunk of this setup...
+
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
 
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
@@ -127,7 +129,7 @@ public abstract class BaseMeasureProcessorTest {
                     public LibraryContentProvider create(String url, List<String> headers) {
                         return new BundleFhirLibraryContentProvider(fhirContext,
                                 (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(SimpleMeasureProcessorTest.class.getResourceAsStream(url)),
+                                        .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)),
                                 adapterFactory, libraryVersionSelector);
                     }
                 });
@@ -154,7 +156,7 @@ public abstract class BaseMeasureProcessorTest {
                     public RetrieveProvider create(String url, List<String> headers) {
 
                         return new BundleRetrieveProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(SimpleMeasureProcessorTest.class.getResourceAsStream(url)));
+                                .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
                     }
                 });
             }
@@ -174,7 +176,7 @@ public abstract class BaseMeasureProcessorTest {
                     @Override
                     public TerminologyProvider create(String url, List<String> headers) {
                         return new BundleTerminologyProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(SimpleMeasureProcessorTest.class.getResourceAsStream(url)));
+                                .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
                     }
                 });
             }
@@ -194,7 +196,7 @@ public abstract class BaseMeasureProcessorTest {
                             @Override
                             public FhirDal create(String url, List<String> headers) {
                                 return new BundleFhirDal(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(SimpleMeasureProcessorTest.class.getResourceAsStream(url)));
+                                        .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
                             }
                         });
                     }

@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.measure.r4;
+package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +15,12 @@ import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
@@ -41,6 +42,7 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibra
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +56,9 @@ import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 // have been defined in other parts of the cql-evaluator project. The main issue
 // is the direct use of engine Context.
 @Named
-public class MeasureProcessor {
+public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, Endpoint, Bundle> {
 
-    private static Logger logger = LoggerFactory.getLogger(MeasureProcessor.class);
+    private static Logger logger = LoggerFactory.getLogger(Dstu3MeasureProcessor.class);
 
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected DataProviderFactory dataProviderFactory;
@@ -70,7 +72,7 @@ public class MeasureProcessor {
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
 
     @Inject
-    public MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
+    public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory, FhirDalFactory fhirDalFactory,
             EndpointConverter endpointConverter) {
         this.terminologyProviderFactory = terminologyProviderFactory;
@@ -81,26 +83,6 @@ public class MeasureProcessor {
 
     }
 
-    /**
-     * Evaluates a Measure according to the specifications defined in the FHIR
-     * Clinical Reasoning Module and the CQFMeasures IG.
-     * 
-     * @param url                 The canonical url of the Measure to evaluate
-     * @param periodStart         The start of the Measure period
-     * @param periodEnd           The end of the Measure period
-     * @param reportType          The type of report to generate
-     * @param subject             The subject Id to evaluate
-     * @param practitioner        The practitioner Id to evaluate
-     * @param lastReceivedOn      The date the report was last generated
-     * @param contentEndpoint     The endpoint to use for Measure content
-     * @param terminologyEndpoint The endpoint to use for Terminology content
-     * @param dataEndpoint        The endpoint to use for clinical data. NOTE:
-     *                            Mutually exclusive with the additionalData
-     *                            parameter
-     * @param additionalData      A Bundle of clinical data to use during the
-     *                            evaluation.
-     * @return The completed Measure report.
-     */
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType, String subject,
             String practitioner, String lastReceivedOn, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
@@ -123,15 +105,12 @@ public class MeasureProcessor {
             throw new IllegalArgumentException(String.format("Measure %s does not have a primary library specified", url)); 
         }
 
-        CanonicalType libraryUrl = measure.getLibrary().get(0);
+        Reference libraryReference = measure.getLibrary().get(0);
 
-        Iterable<IBaseResource> libraries = fhirDal.searchByUrl("Library", libraryUrl.getValue());
-        Iterator<IBaseResource> libraryIter = libraries.iterator();
-        if (!libraryIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate primary Library with url %s", url));
+        org.hl7.fhir.dstu3.model.Library primaryLibrary = (org.hl7.fhir.dstu3.model.Library)fhirDal.read(new IdType(libraryReference.getId()));
+        if (primaryLibrary == null) {
+            throw new IllegalArgumentException(String.format("Unable to locate primary Library with id %s", libraryReference.getId()));
         }
-
-        org.hl7.fhir.r4.model.Library primaryLibrary = ( org.hl7.fhir.r4.model.Library)libraryIter.next();
 
         LibraryContentProvider libraryContentProvider = this.libraryContentProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint));
         LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
@@ -143,7 +122,7 @@ public class MeasureProcessor {
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
 
-        R4MeasureEvaluation measureEvaluation = new R4MeasureEvaluation(context, measure);
+        Dstu3MeasureEvaluation measureEvaluation = new Dstu3MeasureEvaluation(context, measure);
 
         return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType), subject, measurementPeriod);
     }

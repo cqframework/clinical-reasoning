@@ -26,6 +26,16 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class implements the core Measure evaluation logic that's defined in the Quality Measure
+ * implementation guide and HQMF specifications. There are a number of model-independent concepts such as
+ * "groups", "populations", and "stratifiers" that can be used across a number of different data models
+ * including FHIR, QDM, and QICore. To the extent feasible, this class is intended to be model-independent
+ * so that it can be used in any Java-based implementation of Quality Measure evaluation.
+ * 
+ * @see <a href="http://hl7.org/fhir/us/cqfmeasures/introduction.html">http://hl7.org/fhir/us/cqfmeasures/introduction.html</a>
+ * @see <a href="http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
+ */
 public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureReportT extends BaseT, SubjectT> {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);

@@ -113,6 +113,11 @@
                 <artifactId>cql-to-elm</artifactId>
                 <version>${cql-translator.version}</version>
             </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
 
             <!-- HAPI depedencies -->
             <dependency>
@@ -283,10 +288,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
     </dependencies>
 

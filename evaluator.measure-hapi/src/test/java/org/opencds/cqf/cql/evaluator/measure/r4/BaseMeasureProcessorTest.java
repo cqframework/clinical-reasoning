@@ -57,7 +57,7 @@ public abstract class BaseMeasureProcessorTest {
     }
 
     protected FhirContext fhirContext = null;
-    protected MeasureProcessor measureProcessor = null;
+    protected R4MeasureProcessor measureProcessor = null;
     protected Endpoint endpoint = null;
 
     protected void validateGroupScore(MeasureReportGroupComponent group, BigDecimal score) {
@@ -206,7 +206,7 @@ public abstract class BaseMeasureProcessorTest {
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        this.measureProcessor = new MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
+        this.measureProcessor = new R4MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
                 libraryContentProviderFactory, fhirDalFactory, endpointConverter);
 
     }

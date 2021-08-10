@@ -149,7 +149,7 @@ public class CqlCommand implements Callable<Integer> {
             EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
 
             for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
-                System.out.println(libraryEntry.getKey() + "=" + this.tempComvert(libraryEntry.getValue()));
+                System.out.println(libraryEntry.getKey() + "=" + this.tempConvert(libraryEntry.getValue()));
             }
 
             System.out.println();
@@ -158,7 +158,7 @@ public class CqlCommand implements Callable<Integer> {
         return 0;
     }
 
-    private String tempComvert(Object value) {
+    private String tempConvert(Object value) {
         if (value == null) {
             return "null";
         }
@@ -169,7 +169,7 @@ public class CqlCommand implements Callable<Integer> {
             Iterable<?> values = (Iterable<?>) value;
             for (Object o : values) {
 
-                result += (tempComvert(o) + ", ");
+                result += (tempConvert(o) + ", ");
             }
 
             if (result.length() > 1) {

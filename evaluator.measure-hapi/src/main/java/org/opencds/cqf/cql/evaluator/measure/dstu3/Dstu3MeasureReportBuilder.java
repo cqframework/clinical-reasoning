@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.measure.r4;
+package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,30 +11,32 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
-import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
+import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.ListResource.ListEntryComponent;
-import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
-import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.ListResource;
+import org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
+import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupPopulationComponent;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -50,14 +52,14 @@ import org.opencds.cqf.cql.evaluator.measure.common.PopulationDef;
 import org.opencds.cqf.cql.evaluator.measure.common.SdeDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
-public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
+public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
     protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
-    public R4MeasureReportBuilder() {
-        this.measureReportScorer = new R4MeasureReportScorer();
+    public Dstu3MeasureReportBuilder() {
+        this.measureReportScorer = new Dstu3MeasureReportScorer();
     }
 
     protected Measure measure = null;
@@ -83,9 +85,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
 
-        for (Reference r : this.getEvaluatedResourceReferences().values()) {
-            report.addEvaluatedResource(r);
-        }
+        ListResource references = this.createReferenceList(this.getEvaluatedResourceReferences().values());
+        this.report.addContained(references);
+        this.report.setEvaluatedResources(new Reference("#" + references.getId()));
 
         return this.report;
     }
@@ -115,7 +117,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     "The MeasureGroup has a different number of stratifiers defined than the GroupDef");
         }
 
-        reportGroup.setCode(measureGroup.getCode());
         reportGroup.setId(measureGroup.getId());
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
@@ -132,7 +133,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     protected void buildStratifier(MeasureGroupStratifierComponent measureStratifier,
             MeasureReportGroupStratifierComponent reportStratifier, StratifierDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations) {
-        reportStratifier.setCode(Collections.singletonList(measureStratifier.getCode()));
         reportStratifier.setId(measureStratifier.getId());
 
         Map<Object, Set<String>> values = stratifierDef.getValues();
@@ -159,9 +159,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             stratumValue = value.toString();
         }
 
-        if (stratumValue != null) {
-            stratum.setValue(new CodeableConcept().setText(stratumValue));
-        }
+        stratum.setValue(stratumValue);
 
         for (MeasureGroupPopulationComponent mgpc : populations) {
             buildStratumPopulation(stratum.addPopulation(), subjectIds, mgpc);
@@ -187,7 +185,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         ListResource popSubjectList = this.createIdList(intersection);
         this.report.addContained(popSubjectList);
-        sgpc.setSubjectResults(new Reference().setReference("#" + popSubjectList.getId()));
+        sgpc.setPatients(new Reference().setReference("#" + popSubjectList.getId()));
     }
 
     protected void buildPopulation(MeasureGroupPopulationComponent measurePopulation,
@@ -206,10 +204,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // Report Type behavior
         switch (this.report.getType()) {
-            case SUBJECTLIST:
+            case PATIENTLIST:
                 ListResource subjectList = createIdList(populationSet);
                 this.report.addContained(subjectList);
-                reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
+                reportPopulation.setPatients(new Reference("#" + subjectList.getId()));
                 break;
             default:
                 break;
@@ -241,8 +239,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected ListResource createSubjectList(Set<Object> subjects) {
-        return this.createIdList(
-                subjects.stream().map(x -> ((DomainResource) x).getId()).collect(Collectors.toList()));
+        return this.createIdList(subjects.stream().map(x -> ((DomainResource) x).getId()).collect(Collectors.toList()));
     }
 
     protected ListResource createIdList(Collection<String> ids) {
@@ -310,7 +307,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 Long accumulatorValue = accumulator.getValue();
                 Coding valueCoding = new Coding().setCode(accumulatorCode);
                 String sdeKey = sde.getCode();
-                if (!sdeKey.equalsIgnoreCase("sde-sex")) {
+
+                if (sdeKey != null && !sdeKey.equalsIgnoreCase("sde-sex")) {
 
                     // /**
                     // * Match up the category part of our SDE key (e.g. sde-race has a category of
@@ -377,17 +375,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
-        report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
+        report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
         ;
         if (type == MeasureReportType.INDIVIDUAL && !subjects.isEmpty()) {
-            report.setSubject(new Reference(subjects.get(0).getId()));
+            report.setPatient(new Reference(subjects.get(0).getId()));
         }
 
         report.setPeriod(getPeriod(measurementPeriod));
-        report.setMeasure(measure.getUrl());
+        report.setMeasure(new Reference(measure.getId()));
         report.setDate(new Date());
         report.setImplicitRules(measure.getImplicitRules());
-        report.setImprovementNotation(measure.getImprovementNotation());
         report.setLanguage(measure.getLanguage());
 
         // TODO: Allow a way to pass in or set a default reporter
@@ -451,14 +448,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reference.addExtension(extension);
     }
 
-    protected void setEvaluatedResources(MeasureReport report, Collection<Reference> evaluatedResources) {
-        report.getEvaluatedResource().addAll(evaluatedResources);
-    }
-
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {
 
         Extension extExtMeasure = new Extension().setUrl(MeasureInfo.MEASURE)
-                .setValue(new CanonicalType(measureInfo.getMeasure()));
+                .setValue(new IdType(measureInfo.getMeasure()));
 
         Extension extExtPop = new Extension().setUrl(MeasureInfo.POPULATION_ID)
                 .setValue(new StringType(measureInfo.getPopulationId()));
@@ -479,7 +472,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         obsCodeableConcept.setCoding(Collections.singletonList(valueCoding));
 
         obs.setCode(obsCodeableConcept);
-        obs.setValue(new IntegerType(sdeAccumulatorValue));
+        obs.setValue(new Quantity().setValue(sdeAccumulatorValue));
 
         return obs;
     }

@@ -4,7 +4,7 @@ import static org.testng.Assert.assertNotNull;
 
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
-import org.opencds.cqf.cql.evaluator.measure.r4.MeasureProcessor;
+import org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.spring.configuration.TestConfigurationR4;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -15,7 +15,7 @@ public class CqlEvaluatorR4Test extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canInstantiateMeasureProcessor() {
-        MeasureProcessor measureProcessor = this.applicationContext.getBean(MeasureProcessor.class);
+        R4MeasureProcessor measureProcessor = this.applicationContext.getBean(R4MeasureProcessor.class);
         assertNotNull(measureProcessor);
     }
 

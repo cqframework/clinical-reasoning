@@ -71,27 +71,61 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
 
+    // TODO: This should all be collapsed down to FhirDal
+    protected LibraryContentProvider localLibraryContentProvider;
+    protected DataProvider localDataProvider;
+    protected TerminologyProvider localTerminologyProvider;
+    protected FhirDal localFhirDal;
+
     @Inject
     public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
-            DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory, FhirDalFactory fhirDalFactory,
-            EndpointConverter endpointConverter) {
+            DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
+            FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
+        this(terminologyProviderFactory, dataProviderFactory, libraryContentProviderFactory, fhirDalFactory,
+                endpointConverter, null, null, null, null);
+    }
+
+    public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
+            DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
+            FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
+            TerminologyProvider localTerminologyProvider, LibraryContentProvider localLibraryContentProvider,
+            DataProvider localDataProvider, FhirDal localFhirDal) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
         this.libraryContentProviderFactory = libraryContentProviderFactory;
         this.endpointConverter = endpointConverter;
         this.fhirDalFactory = fhirDalFactory;
 
+        this.localTerminologyProvider = localTerminologyProvider;
+        this.localLibraryContentProvider = localLibraryContentProvider;
+        this.localFhirDal = localFhirDal;
+        this.localDataProvider = localDataProvider;
+
     }
 
-    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType, String subject,
-            String practitioner, String lastReceivedOn, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint, Bundle additionalData) {
+    public Dstu3MeasureProcessor(TerminologyProvider localTerminologyProvider,
+            LibraryContentProvider localLibraryContentProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
+        this(null, null, null, null, null, localTerminologyProvider, localLibraryContentProvider, localDataProvider,
+                localFhirDal);
+    }
+
+    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
+            String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
         if (lastReceivedOn != null) {
-            logger.warn("the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
+            logger.warn(
+                    "the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
         }
-        
-        FhirDal fhirDal = this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint));
+
+        FhirDal fhirDal = contentEndpoint != null
+                ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
+                : localFhirDal;
+
+        if (fhirDal == null) {
+            throw new IllegalStateException(
+                    String.format("a fhirDal was not provided and one could not be constructed"));
+        }
 
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
         Iterator<IBaseResource> measureIter = measures.iterator();
@@ -99,26 +133,54 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
             throw new IllegalArgumentException(String.format("Unable to locate Measure with url %s", url));
         }
 
-        Measure measure = (Measure)measureIter.next();
+        Measure measure = (Measure) measureIter.next();
 
         if (!measure.hasLibrary()) {
-            throw new IllegalArgumentException(String.format("Measure %s does not have a primary library specified", url)); 
+            throw new IllegalArgumentException(
+                    String.format("Measure %s does not have a primary library specified", url));
         }
 
         Reference libraryReference = measure.getLibrary().get(0);
 
-        org.hl7.fhir.dstu3.model.Library primaryLibrary = (org.hl7.fhir.dstu3.model.Library)fhirDal.read(new IdType(libraryReference.getId()));
+        org.hl7.fhir.dstu3.model.Library primaryLibrary = (org.hl7.fhir.dstu3.model.Library) fhirDal
+                .read(new IdType(libraryReference.getId()));
         if (primaryLibrary == null) {
-            throw new IllegalArgumentException(String.format("Unable to locate primary Library with id %s", libraryReference.getId()));
+            throw new IllegalArgumentException(
+                    String.format("Unable to locate primary Library with id %s", libraryReference.getId()));
         }
 
-        LibraryContentProvider libraryContentProvider = this.libraryContentProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint));
+        LibraryContentProvider libraryContentProvider = contentEndpoint != null
+                ? this.libraryContentProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
+                : localLibraryContentProvider;
+
+        if (libraryContentProvider == null) {
+            throw new IllegalStateException(
+                    String.format("a libraryContentProvider was not provided and one could not be constructed"));
+        }
+
         LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
 
-        Library library = libraryLoader.load(new VersionedIdentifier().withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
+        Library library = libraryLoader.load(
+                new VersionedIdentifier().withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
 
-        TerminologyProvider terminologyProvider = this.buildTerminologyProvider(terminologyEndpoint);
-        DataProvider dataProvider = this.buildDataProvider(dataEndpoint, additionalData, terminologyProvider);
+        TerminologyProvider terminologyProvider = terminologyEndpoint != null
+                ? this.buildTerminologyProvider(terminologyEndpoint)
+                : this.localTerminologyProvider;
+
+        if (terminologyProvider == null) {
+            throw new IllegalStateException(
+                    String.format("a terminologyProvider was not provided and one could not be constructed"));
+        }
+
+        DataProvider dataProvider = dataEndpoint != null
+                ? this.buildDataProvider(dataEndpoint, additionalData, terminologyProvider)
+                : this.localDataProvider;
+
+        if (dataProvider == null) {
+            throw new IllegalStateException(
+                    String.format("a dataProvider was not provided and one could not be constructed"));
+        }
+
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
 
@@ -146,15 +208,15 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     }
 
     // TODO: This is duplicate logic from the evaluator builder
-    private DataProvider buildDataProvider(Endpoint dataEndpoint, Bundle additionalData, TerminologyProvider terminologyProvider) {
+    private DataProvider buildDataProvider(Endpoint dataEndpoint, Bundle additionalData,
+            TerminologyProvider terminologyProvider) {
         if (dataEndpoint != null && additionalData != null) {
             throw new IllegalArgumentException(
                     "dataEndpoint and additionalData parameters are currently mutually exclusive. Use only one.");
         }
 
         if (dataEndpoint == null && additionalData == null) {
-            throw new IllegalArgumentException(
-                "Either dataEndpoint or additionalData must be specified");
+            throw new IllegalArgumentException("Either dataEndpoint or additionalData must be specified");
         }
         Triple<String, ModelResolver, RetrieveProvider> dataProvider = null;
         if (dataEndpoint != null) {
@@ -163,8 +225,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
             dataProvider = this.dataProviderFactory.create(additionalData);
         }
 
-        RetrieveProviderConfigurer retrieveProviderConfigurer = new RetrieveProviderConfigurer(
-            retrieveProviderConfig);
+        RetrieveProviderConfigurer retrieveProviderConfigurer = new RetrieveProviderConfigurer(retrieveProviderConfig);
 
         retrieveProviderConfigurer.configure(dataProvider.getRight(), terminologyProvider);
 
@@ -182,7 +243,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     }
 
     // TODO: This is duplicate logic from the evaluator builder
-    private Context buildMeasureContext(Library primaryLibrary, LibraryLoader libraryLoader, TerminologyProvider terminologyProvider, DataProvider dataProvider) {
+    private Context buildMeasureContext(Library primaryLibrary, LibraryLoader libraryLoader,
+            TerminologyProvider terminologyProvider, DataProvider dataProvider) {
         Context context = new Context(primaryLibrary);
         context.registerLibraryLoader(libraryLoader);
         context.registerTerminologyProvider(terminologyProvider);

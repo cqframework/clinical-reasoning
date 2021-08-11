@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,6 +145,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     protected void buildStratum(StratifierGroupComponent stratum, Object value, Set<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations) {
 
+        if (value instanceof Iterable) {
+            Iterator<?> iValue = ((Iterable<?>)value).iterator();
+            if (iValue.hasNext()) {
+                value = iValue.next();
+            }
+        }
+
         String stratumValue = null;
         if (value instanceof Coding) {
             stratumValue = ((Coding) value).getCode();
@@ -183,9 +191,11 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
-        ListResource popSubjectList = this.createIdList(intersection);
-        this.report.addContained(popSubjectList);
-        sgpc.setPatients(new Reference().setReference("#" + popSubjectList.getId()));
+        if (intersection.size() > 0) {
+            ListResource popSubjectList = this.createIdList(intersection);
+            this.report.addContained(popSubjectList);
+            sgpc.setPatients(new Reference().setReference("#" + popSubjectList.getId()));
+        }
     }
 
     protected void buildPopulation(MeasureGroupPopulationComponent measurePopulation,
@@ -205,9 +215,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // Report Type behavior
         switch (this.report.getType()) {
             case PATIENTLIST:
-                ListResource subjectList = createIdList(populationSet);
-                this.report.addContained(subjectList);
-                reportPopulation.setPatients(new Reference("#" + subjectList.getId()));
+                if (populationSet.size() > 0) {
+                    ListResource subjectList = createIdList(populationSet);
+                    this.report.addContained(subjectList);
+                    reportPopulation.setPatients(new Reference("#" + subjectList.getId()));
+                }
+
                 break;
             default:
                 break;

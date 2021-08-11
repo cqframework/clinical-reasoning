@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,6 +145,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     protected void buildStratum(StratifierGroupComponent stratum, Object value, Set<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations) {
 
+
+        if (value instanceof Iterable) {
+            Iterator<?> iValue = ((Iterable<?>)value).iterator();
+            if (iValue.hasNext()) {
+                value = iValue.next();
+            }
+        }
+
         String stratumValue = null;
         if (value instanceof Coding) {
             stratumValue = ((Coding) value).getCode();
@@ -185,9 +194,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
-        ListResource popSubjectList = this.createIdList(intersection);
-        this.report.addContained(popSubjectList);
-        sgpc.setSubjectResults(new Reference().setReference("#" + popSubjectList.getId()));
+        if (intersection.size() > 0) {
+            ListResource popSubjectList = this.createIdList(intersection);
+            this.report.addContained(popSubjectList);
+            sgpc.setSubjectResults(new Reference().setReference("#" + popSubjectList.getId()));
+        }
     }
 
     protected void buildPopulation(MeasureGroupPopulationComponent measurePopulation,
@@ -207,9 +218,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // Report Type behavior
         switch (this.report.getType()) {
             case SUBJECTLIST:
-                ListResource subjectList = createIdList(populationSet);
-                this.report.addContained(subjectList);
-                reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
+                if (populationSet.size() > 0) {
+                    ListResource subjectList = createIdList(populationSet);
+                    this.report.addContained(subjectList);
+                    reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
+                }
                 break;
             default:
                 break;
@@ -241,8 +254,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected ListResource createSubjectList(Set<Object> subjects) {
-        return this.createIdList(
-                subjects.stream().map(x -> ((DomainResource) x).getId()).collect(Collectors.toList()));
+        return this.createIdList(subjects.stream().map(x -> ((DomainResource) x).getId()).collect(Collectors.toList()));
     }
 
     protected ListResource createIdList(Collection<String> ids) {

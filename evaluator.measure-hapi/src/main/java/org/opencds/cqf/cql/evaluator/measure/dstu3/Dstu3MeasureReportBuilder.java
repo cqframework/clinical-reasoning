@@ -458,9 +458,16 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void addExtension(Reference reference, Extension extension) {
+        List<Extension> extensions = reference.getExtensionsByUrl(extension.getUrl());
+        for (Extension e : extensions) {
+            if (e.getValue().equalsShallow(extension.getValue())) {
+                return;
+            }
+        }
+        
         reference.addExtension(extension);
     }
-
+    
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {
 
         Extension extExtMeasure = new Extension().setUrl(MeasureInfo.MEASURE)

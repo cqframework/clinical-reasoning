@@ -460,6 +460,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected void addExtension(Reference reference, Extension extension) {
+        List<Extension> extensions = reference.getExtensionsByUrl(extension.getUrl());
+        for (Extension e : extensions) {
+            if (e.getValue().equalsShallow(extension.getValue())) {
+                return;
+            }
+        }
+        
         reference.addExtension(extension);
     }
 

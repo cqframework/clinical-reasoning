@@ -150,6 +150,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             if (iValue.hasNext()) {
                 value = iValue.next();
             }
+            else {
+                value = null;
+            }
         }
 
         String stratumValue = null;
@@ -467,7 +470,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         
         reference.addExtension(extension);
     }
-    
+
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {
 
         Extension extExtMeasure = new Extension().setUrl(MeasureInfo.MEASURE)

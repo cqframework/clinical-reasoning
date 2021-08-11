@@ -151,6 +151,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             if (iValue.hasNext()) {
                 value = iValue.next();
             }
+            else {
+                value = null;
+            }
         }
 
         String stratumValue = null;
@@ -466,7 +469,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 return;
             }
         }
-        
+
         reference.addExtension(extension);
     }
 

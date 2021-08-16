@@ -6,6 +6,8 @@ import org.hl7.fhir.r4.model.MeasureReport;
 
 import static org.testng.Assert.assertNotNull;
 
+import java.io.IOException;
+
 public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
 
         
@@ -14,14 +16,20 @@ public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
     }
 
     @Test
-    public void a1c_population() {
+    public void a1c_population() throws IOException {
 
-        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR", "2019-01-01", "2020-01-01", "subject-list", null, null, null, endpoint, endpoint, endpoint, null);
+        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR", "2019-01-01", "2020-01-01", "patient", "numer-CMS122-Patient", null, null, endpoint, endpoint, endpoint, null);
         assertNotNull(report);
+
+        // java.io.File yourFile = new java.io.File("target/sample.json");
+        // yourFile.createNewFile(); // if file already exists will do nothing 
 
         // ca.uhn.fhir.parser.IParser parser = fhirContext.newJsonParser();
         // parser.setPrettyPrint(true);
 
-        // System.out.println(parser.encodeResourceToString(report));
+        // java.io.FileWriter fileWriter = new java.io.FileWriter(yourFile);
+        // fileWriter.write(parser.encodeResourceToString(report));
+        // fileWriter.flush();;
+        // fileWriter.close();
     }
 }

@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class StratifierDef {
 
     private String expression;
     private String code;
 
-    private Map<Object, Set<String>> values;
+    private Map<String, Object> subjectValues;
 
     private List<StratifierComponentDef> stratifierComponentDefs;
 
@@ -31,12 +30,12 @@ public class StratifierDef {
         this.code = code;
     }
 
-    public Map<Object, Set<String>> getValues() {
-        if (this.values == null) {
-            this.values = new HashMap<>();
+    public Map<String, Object> getSubjectValues() {
+        if (this.subjectValues == null) {
+            this.subjectValues = new HashMap<>();
         }
 
-        return this.values;
+        return this.subjectValues;
     }
 
     public List<StratifierComponentDef> getComponents() {

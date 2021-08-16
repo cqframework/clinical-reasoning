@@ -1,14 +1,16 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PopulationDef {
 
     protected MeasurePopulationType measurePopulationType;
-    protected Set<Object> evaluatedResources;
-    protected Set<Object> resources;
-    protected Set<Object> subjects;
+    protected List<Object> evaluatedResources;
+    protected List<Object> resources;
+    protected Set<String> subjects;
 
     protected String criteriaExpression;
 
@@ -28,15 +30,15 @@ public class PopulationDef {
         return this.measurePopulationType;
     }
 
-    public Set<Object> getEvaluatedResources() {
+    public List<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
-            this.evaluatedResources = new HashSet<>();
+            this.evaluatedResources = new ArrayList<>();
         }
 
         return this.evaluatedResources;
     }
 
-    public Set<Object> getSubjects() {
+    public Set<String> getSubjects() {
         if (this.subjects == null) {
             this.subjects = new HashSet<>();
         }
@@ -44,9 +46,9 @@ public class PopulationDef {
         return this.subjects;
     }
 
-    public Set<Object> getResources() {
+    public List<Object> getResources() {
         if (this.resources == null) {
-            this.resources = new HashSet<>();
+            this.resources = new ArrayList<>();
         }
 
         return this.resources;

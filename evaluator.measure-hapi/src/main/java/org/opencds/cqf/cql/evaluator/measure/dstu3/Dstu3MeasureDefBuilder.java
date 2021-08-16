@@ -29,8 +29,11 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         for (MeasureSupplementalDataComponent c : sdes) {
             SdeDef def = new SdeDef();
 
-            // STU3 / R4 Mismatch. might be better to call this "key"
-            def.setCode(c.getId());
+            String expression = c.getCriteria();
+            // DSTU3 / R4 mismatch. Perhaps better to call this key?
+            String code = c.hasId() ? c.getId()
+                            : expression.toLowerCase().trim().replace(" ", "-");
+            def.setCode(code);
             def.setExpression(c.getCriteria());
 
             measureDef.getSdes().add(def);

@@ -12,9 +12,8 @@ import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.cqframework.cql.elm.execution.ExpressionDef;
@@ -27,14 +26,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements the core Measure evaluation logic that's defined in the Quality Measure
- * implementation guide and HQMF specifications. There are a number of model-independent concepts such as
- * "groups", "populations", and "stratifiers" that can be used across a number of different data models
- * including FHIR, QDM, and QICore. To the extent feasible, this class is intended to be model-independent
- * so that it can be used in any Java-based implementation of Quality Measure evaluation.
+ * This class implements the core Measure evaluation logic that's defined in the
+ * Quality Measure implementation guide and HQMF specifications. There are a
+ * number of model-independent concepts such as "groups", "populations", and
+ * "stratifiers" that can be used across a number of different data models
+ * including FHIR, QDM, and QICore. To the extent feasible, this class is
+ * intended to be model-independent so that it can be used in any Java-based
+ * implementation of Quality Measure evaluation.
  * 
- * @see <a href="http://hl7.org/fhir/us/cqfmeasures/introduction.html">http://hl7.org/fhir/us/cqfmeasures/introduction.html</a>
- * @see <a href="http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
+ * @see <a href=
+ *      "http://hl7.org/fhir/us/cqfmeasures/introduction.html">http://hl7.org/fhir/us/cqfmeasures/introduction.html</a>
+ * @see <a href=
+ *      "http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
  */
 public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureReportT extends BaseT, SubjectT> {
 
@@ -49,18 +52,23 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     protected String modelUri = null;
     protected String measurementPeriodParameterName = null;
 
-    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId, MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder, MeasureDefBuilder<MeasureT> measureDefBuilder) {
-        this(context, measure, getId, measureReportBuilder, measureDefBuilder, MeasureConstants.FHIR_MODEL_URI, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
+            MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
+            MeasureDefBuilder<MeasureT> measureDefBuilder) {
+        this(context, measure, getId, measureReportBuilder, measureDefBuilder, MeasureConstants.FHIR_MODEL_URI,
+                MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
 
     }
 
-    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId, MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder, MeasureDefBuilder<MeasureT> measureDefBuilder, String modelUri, String measurementPeriodParameterName) {
+    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
+            MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
+            MeasureDefBuilder<MeasureT> measureDefBuilder, String modelUri, String measurementPeriodParameterName) {
         this.measure = measure;
         this.context = context;
         this.getId = getId;
         this.measureDefBuilder = measureDefBuilder;
         this.measureReportBuilder = measureReportBuilder;
-        this.measurementPeriodParameterName= measurementPeriodParameterName;
+        this.measurementPeriodParameterName = measurementPeriodParameterName;
         this.modelUri = modelUri;
     }
 
@@ -79,24 +87,24 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     public MeasureReportT evaluate(MeasureEvalType type, String subjectOrPractitionerId, Interval measurementPeriod) {
         this.setMeasurementPeriod(measurementPeriod);
 
-        List<SubjectT> subjects = getSubjects(type, subjectOrPractitionerId);
+        List<String> subjectIds = getSubjectIds(type, subjectOrPractitionerId);
         switch (type) {
             case PATIENT:
             case SUBJECT:
-                return this.evaluate(subjects, MeasureReportType.INDIVIDUAL);
+                return this.evaluate(subjectIds, MeasureReportType.INDIVIDUAL);
             case SUBJECTLIST:
-                return this.evaluate(subjects, MeasureReportType.SUBJECTLIST);
+                return this.evaluate(subjectIds, MeasureReportType.SUBJECTLIST);
             case PATIENTLIST:
-                return this.evaluate(subjects, MeasureReportType.PATIENTLIST);
+                return this.evaluate(subjectIds, MeasureReportType.PATIENTLIST);
             case POPULATION:
-                return this.evaluate(subjects, MeasureReportType.SUMMARY);
+                return this.evaluate(subjectIds, MeasureReportType.SUMMARY);
             default:
                 throw new IllegalArgumentException(
                         String.format("Unsupported Measure Evaluation type: %s", type.getDisplay()));
         }
     }
 
-    public List<SubjectT> getSubjects(MeasureEvalType type, String subjectOrPractitionerId) {
+    public List<String> getSubjectIds(MeasureEvalType type, String subjectOrPractitionerId) {
         switch (type) {
             case PATIENT:
             case SUBJECT:
@@ -109,20 +117,19 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
                     this.subjectType = "Patient";
                     subjectId = subjectOrPractitionerId;
                     logger.info("Could not determine subjectType. Defaulting to Patient");
-        
-                }
-                else {
+                } else {
                     throw new IllegalArgumentException("subjectOrPractitionerId can not be null for a Subject report");
                 }
 
-                return this.getIndividualSubject(subjectId);
+                return Collections.singletonList(this.subjectType + "/" + subjectId);
             case SUBJECTLIST:
             case PATIENTLIST:
-                    this.subjectType = "Patient";
-                    return subjectOrPractitionerId == null ? getAllSubjects() : getPractitionerSubjects(subjectOrPractitionerId);
+                this.subjectType = "Patient";
+                return subjectOrPractitionerId == null ? getAllSubjectIds()
+                        : getPractitionerSubjectIds(subjectOrPractitionerId);
             case POPULATION:
                 this.subjectType = "Patient";
-                return this.getAllSubjects();
+                return this.getAllSubjectIds();
             default:
                 throw new IllegalArgumentException(
                         String.format("Unsupported Measure Evaluation type: %s", type.getDisplay()));
@@ -135,7 +142,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
     protected void setMeasurementPeriod(Interval measurementPeriod) {
         if (measurementPeriod != null) {
-                this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
         }
     }
 
@@ -144,47 +151,39 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     }
 
     @SuppressWarnings("unchecked")
-    protected List<SubjectT> getAllSubjects() {
-        List<SubjectT> subjects = new ArrayList<>();
+    protected List<String> getAllSubjectIds() {
+        List<String> subjectIds = new ArrayList<>();
         Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null, subjectType, null, null,
                 null, null, null, null, null, null);
-        subjectRetrieve.forEach(x -> subjects.add((SubjectT) x));
-        return subjects;
+        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+        return subjectIds;
     }
 
     @SuppressWarnings("unchecked")
-    protected List<SubjectT> getPractitionerSubjects(String practitionerRef) {
-        List<SubjectT> subjects = new ArrayList<>();
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
-                practitionerRef, subjectType, null, null, null, null, null, null, null, null);
-        subjectRetrieve.forEach(x -> subjects.add((SubjectT) x));
-        return subjects;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<SubjectT> getIndividualSubject(String subjectId) {
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(subjectType, "id", subjectId, subjectType,
-                null, null, null, null, null, null, null, null);
-        SubjectT subject = null;
-        if (subjectRetrieve.iterator().hasNext()) {
-            subject = (SubjectT) subjectRetrieve.iterator().next();
+    protected List<String> getPractitionerSubjectIds(String practitionerRef) {
+        List<String> subjectIds = new ArrayList<>();
+        
+        if (!practitionerRef.contains("/")) {
+            practitionerRef = "Practitioner/" + practitionerRef;
         }
 
-        return subject == null ? Collections.emptyList() : Collections.singletonList(subject);
+        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
+                practitionerRef, subjectType, null, null, null, null, null, null, null, null);
+        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+        return subjectIds;
     }
 
-    protected void setContextToSubject(SubjectT subject) {
-        String subjectId = this.getId.apply(subject);
-
+    protected void setContextToSubject(String subjectId) {
         if (subjectId.contains("/")) {
             String[] subjectIdParts = subjectId.split("/");
             subjectId = subjectIdParts[1];
         }
 
+        // TODO: Extract subject type from each subjectId?
         context.setContextValue(subjectType, subjectId);
     }
 
-    protected void captureEvaluatedResources(Set<Object> outEvaluatedResources) {
+    protected void captureEvaluatedResources(List<Object> outEvaluatedResources) {
         if (outEvaluatedResources != null) {
             if (this.context.getEvaluatedResources() != null) {
                 for (Object o : this.context.getEvaluatedResources()) {
@@ -196,19 +195,18 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         this.context.clearEvaluatedResources();
     }
 
-    protected MeasureReportT evaluate(List<SubjectT> subjects, MeasureReportType type) {
+    protected MeasureReportT evaluate(List<String> subjectIds, MeasureReportType type) {
         MeasureDef measureDef = this.measureDefBuilder.build(this.measure);
 
-        this.innerEvaluate(measureDef, subjects, type);
+        this.innerEvaluate(measureDef, subjectIds, type);
 
-        return this.measureReportBuilder.build(this.measure, measureDef, type, this.getMeasurementPeriod(), subjects);
+        return this.measureReportBuilder.build(this.measure, measureDef, type, this.getMeasurementPeriod(), subjectIds);
     }
 
-    protected void innerEvaluate(
-            MeasureDef measureDef,
-            List<SubjectT> subjects, MeasureReportType type) {
+    protected void innerEvaluate(MeasureDef measureDef, List<String> subjectIds, MeasureReportType type) {
 
-        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)",  measureDef.getUrl(), type.toCode(), subjects.size());
+        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.getUrl(), type.toCode(),
+                subjectIds.size());
 
         MeasureScoring measureScoring = measureDef.getMeasureScoring();
         if (measureScoring == null) {
@@ -216,13 +214,13 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         }
 
         for (GroupDef groupDef : measureDef.getGroups()) {
-            evaluateGroup(measureScoring, groupDef, measureDef.getSdes(), subjects);
+            evaluateGroup(measureScoring, groupDef, measureDef.getSdes(), subjectIds);
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected Iterable<SubjectT> evaluatePopulationCriteria(SubjectT subject, String criteriaExpression,
-            Set<Object> outEvaluatedResources) {
+    protected Iterable<BaseT> evaluatePopulationCriteria(String subjectId, String criteriaExpression,
+            List<Object> outEvaluatedResources) {
         if (criteriaExpression == null || criteriaExpression.isEmpty()) {
             return Collections.emptyList();
         }
@@ -235,16 +233,17 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
         if (result instanceof Boolean) {
             if (((Boolean) result)) {
-                return Collections.singletonList(subject);
+                return Collections.singletonList(
+                        (BaseT) this.context.resolveExpressionRef(this.subjectType).evaluate(this.context));
             } else {
                 return Collections.emptyList();
             }
         }
 
-        return (Iterable<SubjectT>) result;
+        return (Iterable<BaseT>) result;
     }
 
-    protected Object evaluateCriteria(String criteriaExpression, Set<Object> outEvaluatedResources) {
+    protected Object evaluateCriteria(String criteriaExpression, List<Object> outEvaluatedResources) {
         Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
 
         captureEvaluatedResources(outEvaluatedResources);
@@ -253,7 +252,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     }
 
     protected Object evaluateObservationCriteria(Object resource, String criteriaExpression,
-            Set<Object> outEvaluatedResources) {
+            List<Object> outEvaluatedResources) {
 
         ExpressionDef ed = context.resolveExpressionRef(criteriaExpression);
         if (!(ed instanceof FunctionDef)) {
@@ -271,14 +270,14 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         }
 
         captureEvaluatedResources(outEvaluatedResources);
- 
+
         return result;
     }
 
-    protected boolean evaluatePopulationMembership(SubjectT subject, PopulationDef inclusionDef,
+    protected boolean evaluatePopulationMembership(String subjectId, PopulationDef inclusionDef,
             PopulationDef exclusionDef) {
         boolean inPopulation = false;
-        for (Object resource : evaluatePopulationCriteria(subject, inclusionDef.getCriteriaExpression(),
+        for (Object resource : evaluatePopulationCriteria(subjectId, inclusionDef.getCriteriaExpression(),
                 inclusionDef.getEvaluatedResources())) {
             inPopulation = true;
             inclusionDef.getResources().add(resource);
@@ -286,7 +285,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
         if (inPopulation) {
             if (exclusionDef != null) {
-                for (Object resource : evaluatePopulationCriteria(subject, exclusionDef.getCriteriaExpression(),
+                for (Object resource : evaluatePopulationCriteria(subjectId, exclusionDef.getCriteriaExpression(),
                         exclusionDef.getEvaluatedResources())) {
                     inPopulation = false;
                     exclusionDef.getResources().add(resource);
@@ -296,27 +295,27 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         }
 
         if (inPopulation) {
-            inclusionDef.getSubjects().add(subject);
+            inclusionDef.getSubjects().add(subjectId);
         }
 
         if (!inPopulation && exclusionDef != null) {
-            exclusionDef.getSubjects().add(subject);
+            exclusionDef.getSubjects().add(subjectId);
         }
 
         return inPopulation;
     }
 
-    protected void evaluateProportion(GroupDef groupDef, SubjectT subject) {
+    protected void evaluateProportion(GroupDef groupDef, String subjectId) {
         // Are they in the initial population?
-        boolean inInitialPopulation = evaluatePopulationMembership(subject, groupDef.get(INITIALPOPULATION), null);
+        boolean inInitialPopulation = evaluatePopulationMembership(subjectId, groupDef.get(INITIALPOPULATION), null);
         if (inInitialPopulation) {
             // Are they in the denominator?
-            boolean inDenominator = evaluatePopulationMembership(subject, groupDef.get(DENOMINATOR),
+            boolean inDenominator = evaluatePopulationMembership(subjectId, groupDef.get(DENOMINATOR),
                     groupDef.get(DENOMINATOREXCLUSION));
 
             if (inDenominator) {
                 // Are they in the numerator?
-                boolean inNumerator = evaluatePopulationMembership(subject, groupDef.get(NUMERATOR),
+                boolean inNumerator = evaluatePopulationMembership(subjectId, groupDef.get(NUMERATOR),
                         groupDef.get(NUMERATOREXCLUSION));
 
                 if (!inNumerator && inDenominator && groupDef.get(DENOMINATOREXCLUSION) != null) {
@@ -325,7 +324,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
                     PopulationDef denominatorExclusion = groupDef.get(DENOMINATOREXCLUSION);
                     PopulationDef denominator = groupDef.get(DENOMINATOR);
                     boolean inException = false;
-                    for (SubjectT resource : evaluatePopulationCriteria(subject,
+                    for (BaseT resource : evaluatePopulationCriteria(subjectId,
                             denominatorExclusion.getCriteriaExpression(),
                             denominatorExclusion.getEvaluatedResources())) {
                         inException = true;
@@ -335,21 +334,21 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
                     }
 
                     if (inException) {
-                        denominatorExclusion.getSubjects().add(subject);
-                        denominator.getSubjects().remove(subject);
+                        denominatorExclusion.getSubjects().add(subjectId);
+                        denominator.getSubjects().remove(subjectId);
                     }
                 }
             }
         }
     }
 
-    protected void evaluateContinuousVariable(GroupDef groupDef, SubjectT subject) {
-        boolean inInitialPopulation = evaluatePopulationMembership(subject, groupDef.get(INITIALPOPULATION), null);
+    protected void evaluateContinuousVariable(GroupDef groupDef, String subjectId) {
+        boolean inInitialPopulation = evaluatePopulationMembership(subjectId, groupDef.get(INITIALPOPULATION), null);
 
         if (inInitialPopulation) {
             // Are they in the MeasureType population?
             PopulationDef measurePopulation = groupDef.get(MEASUREPOPULATION);
-            boolean inMeasurePopulation = evaluatePopulationMembership(subject, measurePopulation,
+            boolean inMeasurePopulation = evaluatePopulationMembership(subjectId, measurePopulation,
                     groupDef.get(MEASUREPOPULATIONEXCLUSION));
 
             if (inMeasurePopulation) {
@@ -365,49 +364,60 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         }
     }
 
-    protected void evaluateCohort(GroupDef groupDef, SubjectT subject) {
-        evaluatePopulationMembership(subject, groupDef.get(INITIALPOPULATION), null);
+    protected void evaluateCohort(GroupDef groupDef, String subjectId) {
+        evaluatePopulationMembership(subjectId, groupDef.get(INITIALPOPULATION), null);
     }
 
-    protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef, Set<SdeDef> sdes,
-            Collection<SubjectT> subjects) {
-        for (SubjectT subject : subjects) {
-            setContextToSubject(subject);
+    protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef, List<SdeDef> sdes,
+            Collection<String> subjectIds) {
+        for (String subjectId : subjectIds) {
+            setContextToSubject(subjectId);
             evaluateSdes(sdes);
-            evaluateStratifiers(subject, groupDef.getStratifiers());
+            evaluateStratifiers(subjectId, groupDef.getStratifiers());
             switch (measureScoring) {
                 case PROPORTION:
                 case RATIO:
-                    evaluateProportion(groupDef, subject);
+                    evaluateProportion(groupDef, subjectId);
                     break;
                 case CONTINUOUSVARIABLE:
-                    evaluateContinuousVariable(groupDef, subject);
+                    evaluateContinuousVariable(groupDef, subjectId);
                     break;
                 case COHORT:
-                    evaluateCohort(groupDef, subject);
+                    evaluateCohort(groupDef, subjectId);
                     break;
             }
         }
     }
 
-    protected void evaluateSdes(Set<SdeDef> sdes) {
+    protected void evaluateSdes(List<SdeDef> sdes) {
         for (SdeDef sde : sdes) {
             Object result = this.context.resolveExpressionRef(sde.getExpression()).evaluate(this.context);
 
+            // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
         }
     }
 
-    protected void evaluateStratifiers(SubjectT subject, List<StratifierDef> stratifierDefs) {
+    protected void evaluateStratifiers(String subjectId, List<StratifierDef> stratifierDefs) {
         for (StratifierDef sd : stratifierDefs) {
             if (sd.getComponents().size() > 0) {
                 throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
             }
 
+            // TODO: Handle list values as components?
             Object result = this.context.resolveExpressionRef(sd.getExpression()).evaluate(this.context);
+            if (result instanceof Iterable) {
+                Iterator<?> resultIter = ((Iterable<?>) result).iterator();
+                if (resultIter.hasNext()) {
+                    result = resultIter.next();
+                } else {
+                    result = null;
+                }
+            }
 
-            Set<String> subjectIds = sd.getValues().computeIfAbsent(result, k -> new HashSet<>());
-            subjectIds.add(this.getId.apply(subject));
+            if (result != null) {
+                sd.getSubjectValues().put(subjectId, result);
+            }
         }
     }
 
@@ -417,7 +427,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         }
 
         if (item instanceof Iterable) {
-            for (Object o : (Iterable<?>)item) {
+            for (Object o : (Iterable<?>) item) {
                 flattenAdd(values, o);
             }
         } else {

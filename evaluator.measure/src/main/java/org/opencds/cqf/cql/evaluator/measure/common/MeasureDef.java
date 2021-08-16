@@ -1,24 +1,22 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class MeasureDef {
 
     private List<GroupDef> groups;
 
-    private Set<SdeDef> sdes;
+    private ArrayList<SdeDef> sdes;
 
     private MeasureScoring measureScoring;
 
     private String url;
 
 
-    public Set<SdeDef> getSdes() {
+    public List<SdeDef> getSdes() {
         if (this.sdes == null) {
-            this.sdes = new HashSet<>();
+            this.sdes = new ArrayList<>();
         }
 
         return this.sdes;

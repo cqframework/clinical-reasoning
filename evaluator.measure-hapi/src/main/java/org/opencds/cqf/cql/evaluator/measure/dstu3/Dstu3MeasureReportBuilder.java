@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +53,7 @@ import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
     protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
+    protected static String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
@@ -123,8 +123,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         if (measureGroup.hasDescription()) {
             reportGroup.addExtension(
-                    this.createStringExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/extension-description",
-                            measureGroup.getDescription()));
+                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measureGroup.getDescription()));
         }
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
@@ -145,7 +144,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         // TODO: Consider using coding.code as a fallback
         if (code != null && code.hasText()) {
-            return prefix + "-" + code.getText().toLowerCase().trim().replace(" ", "-");
+            return prefix + "-" + this.escapeForFhirId(code.getText());
         }
 
         return prefix + "-" + Integer.toString(index + 1);
@@ -156,69 +155,45 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             StratifierDef stratifierDef, List<MeasureGroupPopulationComponent> populations) {
         reportStratifier.setId(measureStratifier.getId());
 
+        // NOTE: DSTU3 does not support descriptions
+
         String stratifierKey = this.getKey("stratifier", measureStratifier.getId(), null, stratIndex);
 
         Map<String, Object> subjectValues = stratifierDef.getSubjectValues();
-        Map<Object, List<String>> subjectsByValue = subjectValues.keySet().stream().collect(Collectors.groupingBy(x -> subjectValues.get(x)));
-        for (Map.Entry<Object, List<String>> stratValue : subjectsByValue.entrySet()) {
+
+        // Because most of the types we're dealing with don't implement hashCode or
+        // equals
+        // the ValueWrapper does it for them.
+        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
+                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x))));
+
+        for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(groupKey, stratifierKey, reportStratifier.addStratum(), stratValue.getKey(),
                     stratValue.getValue(), populations);
         }
     }
 
-    protected void buildStratum(String groupKey, String stratifierKey, StratifierGroupComponent stratum, Object value,
-            List<String> subjectIds, List<MeasureGroupPopulationComponent> populations) {
+    protected void buildStratum(String groupKey, String stratifierKey, StratifierGroupComponent stratum,
+            ValueWrapper value, List<String> subjectIds, List<MeasureGroupPopulationComponent> populations) {
 
-        if (value instanceof Iterable) {
-            Iterator<?> iValue = ((Iterable<?>) value).iterator();
-            if (iValue.hasNext()) {
-                value = iValue.next();
-            } else {
-                value = null;
-            }
-        }
+        String stratumKey = this.escapeForFhirId(value.getKey());
 
-        String stratumValue = null;
-        String stratumKey = null;
-        if (value instanceof Coding) {
-            Coding codingValue = ((Coding) value);
-            stratumValue = codingValue.getCode();
-            stratumKey = codingValue.getDisplay().toLowerCase().trim().replace(" ", "-");
-        } else if (value instanceof CodeableConcept) {
-            CodeableConcept codeableConceptValue = (CodeableConcept) value;
-            stratumValue = codeableConceptValue.getCodingFirstRep().getCode();
-            stratumKey = codeableConceptValue.getCodingFirstRep().getDisplay().toLowerCase().trim().replace(" ", "-");
-        } else if (value instanceof Code) {
-            Code codeValue = (Code) value;
-            stratumValue = codeValue.getCode();
-            stratifierKey = codeValue.getDisplay().toLowerCase().trim().replace(" ", "-");
-        } else if (value instanceof Enum) {
-            stratumValue = ((Enum<?>) value).toString();
-        } else if (value instanceof IPrimitiveType<?>) {
-            stratumValue = ((IPrimitiveType<?>) value).getValueAsString();
-        } else if (value != null) {
-            stratumValue = value.toString();
-        }
-
-        stratum.setValue(stratumValue);
+        stratum.setValue(value.getValueAsString());
 
         for (MeasureGroupPopulationComponent mgpc : populations) {
-            buildStratumPopulation(groupKey, stratifierKey, stratumKey, stratumValue, stratum.addPopulation(),
-                    subjectIds, mgpc);
+            buildStratumPopulation(groupKey, stratifierKey, stratumKey, stratum.addPopulation(), subjectIds, mgpc);
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected void buildStratumPopulation(String groupKey, String stratifierKey, String stratumKey, String stratumValue,
+    protected void buildStratumPopulation(String groupKey, String stratifierKey, String stratumKey,
             StratifierGroupPopulationComponent sgpc, List<String> subjectIds,
             MeasureGroupPopulationComponent population) {
         sgpc.setCode(population.getCode());
         sgpc.setId(population.getId());
 
         if (population.hasDescription()) {
-            sgpc.addExtension(
-                    this.createStringExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/extension-description",
-                            population.getDescription()));
+            sgpc.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, population.getDescription()));
         }
 
         // This is a temporary resource that was carried by the population component
@@ -235,8 +210,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         if (intersection.size() > 0) {
             ListResource popSubjectList = this.createIdList("subject-list-" + groupKey + "-" + stratifierKey + "-"
-                    + "stratum-" + (stratumKey != null ? stratumKey : stratumValue != null ? stratumValue.toLowerCase() : "null") + "-"
-                    + population.getCode().getCodingFirstRep().getCode(), intersection);
+                    + "stratum-" + stratumKey + "-" + population.getCode().getCodingFirstRep().getCode(), intersection);
             this.report.addContained(popSubjectList);
             sgpc.setPatients(new Reference().setReference("#" + popSubjectList.getId()));
         }
@@ -251,8 +225,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         if (measurePopulation.hasDescription()) {
             reportPopulation.addExtension(
-                    this.createStringExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/extension-description",
-                            measurePopulation.getDescription()));
+                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
         }
 
         addResourceReferences(populationDef.getType(), populationDef.getEvaluatedResources());
@@ -287,15 +260,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildMeasureObservations(String observationName, List<Object> resources) {
-        int i = 1;
-        for (Object resource : resources) {
-            Observation observation = createMeasureObservation("measure-observation-" + observationName + "-" + i,
+        for (int i = 0; i < resources.size(); i++) {
+            // TODO: Do something with the resource...
+            Observation observation = createMeasureObservation("measure-observation-" + observationName + "-" + (i + 1),
                     observationName);
             this.report.addContained(observation);
-            i++;
         }
-
-        // And then presumably do something with it....
     }
 
     protected ListResource createList(String id) {
@@ -344,17 +314,17 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     protected Pair<String, String> getAccumulatorKeyAndDescription(Object object) {
         if (object instanceof Code) {
-            Code codeObject = (Code)object;
+            Code codeObject = (Code) object;
             return Pair.of(codeObject.getCode(), codeObject.getDisplay());
         }
 
         if (object instanceof Coding) {
-            Coding codingObject = (Coding)object;
+            Coding codingObject = (Coding) object;
             return Pair.of(codingObject.getCode(), codingObject.getDisplay());
         }
 
         if (object instanceof CodeableConcept) {
-            CodeableConcept codeableConceptObject = (CodeableConcept)object;
+            CodeableConcept codeableConceptObject = (CodeableConcept) object;
             return Pair.of(codeableConceptObject.getCodingFirstRep().getCode(), codeableConceptObject.getText());
         }
 
@@ -381,7 +351,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     valueKey = valueCode;
                 }
 
-                valueKey = valueKey.toLowerCase().trim().replace(" ", "-");
+                valueKey = this.escapeForFhirId(valueKey);
 
                 Coding valueCoding = new Coding().setCode(valueCode);
                 if (!sdeCode.equalsIgnoreCase("sde-sex")) {
@@ -397,12 +367,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     // */
 
                     // String coreCategory = sdeCode
-                    //         .substring(sdeCode.lastIndexOf('-') >= 0 ? sdeCode.lastIndexOf('-') + 1 : 0);
+                    // .substring(sdeCode.lastIndexOf('-') >= 0 ? sdeCode.lastIndexOf('-') + 1 : 0);
                     // for (DomainResource pt : subjectIds) {
-                    //     valueCoding = getExtensionCoding(pt, coreCategory, valueCode);
-                    //     if (valueCoding != null) {
-                    //         break;
-                    //     }
+                    // valueCoding = getExtensionCoding(pt, coreCategory, valueCode);
+                    // if (valueCoding != null) {
+                    // break;
+                    // }
                     // }
                 }
 
@@ -457,8 +427,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         report.setLanguage(measure.getLanguage());
 
         if (measure.hasDescription()) {
-            report.addExtension(this.createStringExtension(
-                    "http://hl7.org/fhir/uv/cpg/StructureDefinition/extension-description", measure.getDescription()));
+            report.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measure.getDescription()));
         }
 
         // TODO: Allow a way to pass in or set a default reporter
@@ -583,4 +552,132 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     }
 
+    protected String escapeForFhirId(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value.toLowerCase().trim().replace(" ", "-").replace("_", "-");
+    }
+
+    // This is some hackery because most of these objects don't implement
+    // hashCode or equals, meaning it's hard to detect distinct values;
+    class ValueWrapper {
+        protected Object value;
+
+        public ValueWrapper(Object value) {
+            this.value = value;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.getKey().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null)
+                return false;
+            if (this.getClass() != o.getClass())
+                return false;
+
+            ValueWrapper other = (ValueWrapper) o;
+
+            if (other.getValue() == null ^ this.getValue() == null) {
+                return false;
+            }
+
+            if (other.getValue() == null && this.getValue() == null) {
+                return true;
+            }
+
+            return this.getKey().equals(other.getKey());
+        }
+
+        public String getKey() {
+            if (value instanceof Coding) {
+                Coding c = ((Coding) value);
+                // ASSUMPTION: We won't have different systems with the same code
+                // within a given stratifier / sde
+                return joinValues("coding", c.getCode());
+            } else if (value instanceof CodeableConcept) {
+                CodeableConcept c = ((CodeableConcept) value);
+                return joinValues("codeable-concept", c.getCodingFirstRep().getCode());
+            } else if (value instanceof Code) {
+                Code c = (Code) value;
+                return joinValues("code", c.getCode());
+            } else if (value instanceof Enum) {
+                Enum<?> e = (Enum<?>) value;
+                return joinValues("enum", e.toString());
+            } else if (value instanceof IPrimitiveType<?>) {
+                IPrimitiveType<?> p = (IPrimitiveType<?>) value;
+                return joinValues("primitive", p.getValueAsString());
+            } else if (value != null) {
+                return value.toString();
+            } else {
+                return null;
+            }
+        }
+
+        public String getValueAsString() {
+            if (value instanceof Coding) {
+                Coding c = ((Coding) value);
+                return c.getCode();
+            } else if (value instanceof CodeableConcept) {
+                CodeableConcept c = ((CodeableConcept) value);
+                return c.getCodingFirstRep().getCode();
+            } else if (value instanceof Code) {
+                Code c = (Code) value;
+                return c.getCode();
+            } else if (value instanceof Enum) {
+                Enum<?> e = (Enum<?>) value;
+                return e.toString();
+            } else if (value instanceof IPrimitiveType<?>) {
+                IPrimitiveType<?> p = (IPrimitiveType<?>) value;
+                return p.getValueAsString();
+            } else if (value != null) {
+                return value.toString();
+            } else {
+                return null;
+            }
+        }
+
+        public String getDescription() {
+            if (value instanceof Coding) {
+                Coding c = ((Coding) value);
+                return c.hasDisplay() ? c.getDisplay() : c.getCode();
+            } else if (value instanceof CodeableConcept) {
+                CodeableConcept c = ((CodeableConcept) value);
+                return c.getCodingFirstRep().hasDisplay() ? c.getCodingFirstRep().getDisplay()
+                        : c.getCodingFirstRep().getCode();
+            } else if (value instanceof Code) {
+                Code c = (Code) value;
+                return c.getDisplay() != null ? c.getDisplay() : c.getCode();
+            } else if (value instanceof Enum) {
+                Enum<?> e = (Enum<?>) value;
+                return e.toString();
+            } else if (value instanceof IPrimitiveType<?>) {
+                IPrimitiveType<?> p = (IPrimitiveType<?>) value;
+                return p.getValueAsString();
+            } else if (value != null) {
+                return value.toString();
+            } else {
+                return null;
+            }
+        }
+
+        public Object getValue() {
+            return this.value;
+        }
+
+        public Class<?> getValueClass() {
+            return this.value.getClass();
+        }
+
+        private String joinValues(String... elements) {
+            return String.join("-", elements);
+        }
+    }
 }

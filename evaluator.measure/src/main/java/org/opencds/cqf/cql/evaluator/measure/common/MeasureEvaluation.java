@@ -113,15 +113,21 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
                     String[] subjectIdParts = subjectOrPractitionerId.split("/");
                     this.subjectType = subjectIdParts[0];
                     subjectId = subjectIdParts[1];
-                } else if (subjectOrPractitionerId != null) {
-                    this.subjectType = "Patient";
-                    subjectId = subjectOrPractitionerId;
-                    logger.info("Could not determine subjectType. Defaulting to Patient");
                 } else {
-                    throw new IllegalArgumentException("subjectOrPractitionerId can not be null for a Subject report");
+                    this.subjectType = "Patient";
+                    logger.info("Could not determine subjectType. Defaulting to Patient");
                 }
-
-                return Collections.singletonList(this.subjectType + "/" + subjectId);
+                
+                if (subjectId == null) {
+                    subjectId = subjectOrPractitionerId;
+                }
+  
+                if (subjectId != null) {
+                    return Collections.singletonList(this.subjectType + "/" + subjectId);
+                }
+                else {
+                    return this.getAllSubjectIds();
+                }
             case SUBJECTLIST:
             case PATIENTLIST:
                 this.subjectType = "Patient";

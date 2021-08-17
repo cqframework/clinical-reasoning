@@ -13,6 +13,6 @@ public class Dstu3MeasureEvaluation extends
         MeasureEvaluation<IBase, Measure, MeasureReport, DomainResource> {
 
     public Dstu3MeasureEvaluation(Context context, Measure measure) {
-        super(context, measure, x -> x.getId(), new Dstu3MeasureReportBuilder(), new Dstu3MeasureDefBuilder());
+        super(context, measure, x -> x.getIdElement().getResourceType() + "/" + x.getIdElement().getIdPart(), new Dstu3MeasureReportBuilder(), new Dstu3MeasureDefBuilder());
     }
 }

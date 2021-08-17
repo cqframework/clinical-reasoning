@@ -13,6 +13,6 @@ public class R4MeasureEvaluation extends
         MeasureEvaluation<IBase, Measure, MeasureReport, DomainResource> {
 
     public R4MeasureEvaluation(Context context, Measure measure) {
-        super(context, measure, x -> x.getId(), new R4MeasureReportBuilder(), new R4MeasureDefBuilder());
+        super(context, measure, x -> x.getIdElement().getResourceType() + "/" + x.getIdElement().getIdPart(), new R4MeasureReportBuilder(), new R4MeasureDefBuilder());
     }
 }

@@ -19,7 +19,7 @@ public class DaVinciExtensionMeasureProcessorTest extends BaseMeasureProcessorTe
 
         validateGroupScore(report.getGroupFirstRep(), new BigDecimal("1.0"));
 
-        validateEvaluatedResourceExtension(report.getEvaluatedResource(), "Patient/numer-EXM125", "initial-population", "denominator", "denominator-exclusion");
+        validateEvaluatedResourceExtension(report.getEvaluatedResource(), "Patient/numer-EXM125", "initial-population", "denominator-exclusion");
         validateEvaluatedResourceExtension(report.getEvaluatedResource(), "DiagnosticReport/numer-EXM125-3", "numerator");
     }
 

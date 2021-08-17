@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.dstu3;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.function.Function;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
@@ -54,6 +54,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
+    protected static String EXT_SDE_REFERENCE_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
@@ -84,10 +85,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
 
-        ListResource references = this.createReferenceList("evaluated-resources-references",
-                this.getEvaluatedResourceReferences().values());
-        this.report.addContained(references);
-        this.report.setEvaluatedResources(new Reference("#" + references.getId()));
+        // Only add evaluated resources to individual reports
+        if (measureReportType == MeasureReportType.INDIVIDUAL) {
+            ListResource references = this.createReferenceList("evaluated-resources-references",
+                    this.getEvaluatedResourceReferences().values());
+            this.report.addContained(references);
+            this.report.setEvaluatedResources(new Reference("#" + references.getId()));
+        }
 
         return this.report;
     }
@@ -208,7 +212,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
-        if (intersection.size() > 0) {
+        if (intersection.size() > 0 && this.report.getType() == org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.PATIENTLIST) {
             ListResource popSubjectList = this.createIdList("subject-list-" + groupKey + "-" + stratifierKey + "-"
                     + "stratum-" + stratumKey + "-" + population.getCode().getCodingFirstRep().getCode(), intersection);
             this.report.addContained(popSubjectList);
@@ -295,7 +299,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
                 Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
                         measurePopulationType.toCode());
-                addExtension(reference, ext);
+                addExtensionToReference(reference, ext);
             }
         }
     }
@@ -312,39 +316,20 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.getEvaluatedResourceReferences().computeIfAbsent(id, k -> new Reference(k));
     }
 
-    protected Pair<String, String> getAccumulatorKeyAndDescription(Object object) {
-        if (object instanceof Code) {
-            Code codeObject = (Code) object;
-            return Pair.of(codeObject.getCode(), codeObject.getDisplay());
-        }
-
-        if (object instanceof Coding) {
-            Coding codingObject = (Coding) object;
-            return Pair.of(codingObject.getCode(), codingObject.getDisplay());
-        }
-
-        if (object instanceof CodeableConcept) {
-            CodeableConcept codeableConceptObject = (CodeableConcept) object;
-            return Pair.of(codeableConceptObject.getCodingFirstRep().getCode(), codeableConceptObject.getText());
-        }
-
-        return Pair.of(object.toString(), object.toString());
-    }
-
     protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc = measure.getSupplementalData().get(i);
             SdeDef sde = measureDef.getSdes().get(i);
-            Map<Pair<String, String>, Long> accumulated = sde.getValues().stream()
-                    .collect(Collectors.groupingBy(x -> getAccumulatorKeyAndDescription(x), Collectors.counting()));
+            Map<ValueWrapper, Long> accumulated = sde.getValues().stream().map(x -> new ValueWrapper(x))
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             String sdeKey = this.getKey("sde-observation", msdc.getId(), null, i);
             String sdeCode = sde.getCode();
-            for (Map.Entry<Pair<String, String>, Long> accumulator : accumulated.entrySet()) {
+            for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
-                String valueCode = accumulator.getKey().getLeft();
-                String valueKey = accumulator.getKey().getRight();
+                String valueCode = accumulator.getKey().getValueAsString();
+                String valueKey = accumulator.getKey().getKey();
                 Long valueCount = accumulator.getValue();
 
                 if (valueKey == null) {
@@ -386,11 +371,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                         break;
                 }
 
-                // addEvaluatedResource(report, obs);
-                // addContained(report, obs);
-                // newRefList.add(new Reference("#" + obs.getId()));
+                report.addExtension(this.createReferenceExtension(EXT_SDE_REFERENCE_URL, "#" + obs.getId()));
                 report.addContained(obs);
-
             }
         }
     }
@@ -476,7 +458,14 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return ext;
     }
 
-    protected void addExtension(Reference reference, Extension extension) {
+    protected Extension createReferenceExtension(String url, String reference) {
+        Extension ext = new Extension().setUrl(url);
+        ext.setValue(new Reference(reference));
+
+        return ext;
+    }
+
+    protected void addExtensionToReference(Reference reference, Extension extension) {
         List<Extension> extensions = reference.getExtensionsByUrl(extension.getUrl());
         for (Extension e : extensions) {
             if (e.getValue().equalsShallow(extension.getValue())) {

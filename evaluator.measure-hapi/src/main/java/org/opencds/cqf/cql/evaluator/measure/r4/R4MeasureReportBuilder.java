@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -55,6 +54,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
+    protected static String EXT_SDE_REFERENCE_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
@@ -85,8 +85,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
 
-        for (Reference r : this.getEvaluatedResourceReferences().values()) {
-            report.addEvaluatedResource(r);
+        // Only add evaluated resources to individual reports
+        if (measureReportType == MeasureReportType.INDIVIDUAL) {
+            for (Reference r : this.getEvaluatedResourceReferences().values()) {
+                report.addEvaluatedResource(r);
+            }
         }
 
         return this.report;
@@ -218,7 +221,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
-        if (intersection.size() > 0) {
+        if (intersection.size() > 0 && this.report.getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
             ListResource popSubjectList = this.createIdList("subject-list-" + groupKey + "-" + stratifierKey + "-"
                     + "stratum-" + stratumKey + "-" + population.getCode().getCodingFirstRep().getCode(), intersection);
             this.report.addContained(popSubjectList);
@@ -304,7 +307,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
                 Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
                         measurePopulationType.toCode());
-                addExtension(reference, ext);
+                addExtensionToReference(reference, ext);
             }
         }
     }
@@ -319,25 +322,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected Reference getEvaluatedResourceReference(String id) {
         return this.getEvaluatedResourceReferences().computeIfAbsent(id, k -> new Reference(k));
-    }
-
-    protected Pair<String, String> getAccumulatorKeyAndDescription(Object object) {
-        if (object instanceof Code) {
-            Code codeObject = (Code) object;
-            return Pair.of(codeObject.getCode(), codeObject.getDisplay());
-        }
-
-        if (object instanceof Coding) {
-            Coding codingObject = (Coding) object;
-            return Pair.of(codingObject.getCode(), codingObject.getDisplay());
-        }
-
-        if (object instanceof CodeableConcept) {
-            CodeableConcept codeableConceptObject = (CodeableConcept) object;
-            return Pair.of(codeableConceptObject.getCodingFirstRep().getCode(), codeableConceptObject.getText());
-        }
-
-        return Pair.of(object.toString(), object.toString());
     }
 
     protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
@@ -395,11 +379,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         break;
                 }
 
-                // addEvaluatedResource(report, obs);
-                // addContained(report, obs);
-                // newRefList.add(new Reference("#" + obs.getId()));
+                report.addExtension(this.createReferenceExtension(EXT_SDE_REFERENCE_URL, "#" + obs.getId()));
                 report.addContained(obs);
-
             }
         }
     }
@@ -486,7 +467,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return ext;
     }
 
-    protected void addExtension(Reference reference, Extension extension) {
+    protected Extension createReferenceExtension(String url, String reference) {
+        Extension ext = new Extension().setUrl(url);
+        ext.setValue(new Reference(reference));
+
+        return ext;
+    }
+
+    protected void addExtensionToReference(Reference reference, Extension extension) {
         List<Extension> extensions = reference.getExtensionsByUrl(extension.getUrl());
         for (Extension e : extensions) {
             if (e.getValue().equalsShallow(extension.getValue())) {

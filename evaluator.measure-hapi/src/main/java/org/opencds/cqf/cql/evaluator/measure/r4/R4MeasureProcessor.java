@@ -181,7 +181,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                     String.format("a terminologyProvider was not provided and one could not be constructed"));
         }
 
-        DataProvider dataProvider = dataEndpoint != null
+        DataProvider dataProvider = (dataEndpoint != null || additionalData != null)
                 ? this.buildDataProvider(dataEndpoint, additionalData, terminologyProvider)
                 : this.localDataProvider;
 

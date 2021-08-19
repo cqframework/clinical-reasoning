@@ -1,0 +1,167 @@
+{
+    "resourceType": "Bundle",
+    "entry": [
+        {
+            "resource": {
+                "resourceType": "Observation",
+                "id": "numer-CMS122-2-Observation",
+                "meta": {
+                    "versionId": "1"
+                },
+                "status": "final",
+                "category": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                "code": "laboratory"
+                            }
+                        ]
+                    }
+                ],
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://loinc.org",
+                            "code": "17856-6",
+                            "display": "Hemoglobin A1c/Hemoglobin.total in Blood by HPLC"
+                        }
+                    ]
+                },
+                "subject": {
+                    "reference": "Patient/numer-CMS122-2-Patient"
+                },
+                "effectiveDateTime": "2019-10-17T00:00:00+00:00",
+                "valueQuantity": {
+                    "value": 9.1,
+                    "unit": "%",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "%"
+                }
+            }
+        },
+        {
+            "resource": {
+                "resourceType": "Patient",
+                "id": "numer-CMS122-2-Patient",
+                "meta": {
+                    "versionId": "1"
+                },
+                "extension": [
+                    {
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2106-3",
+                                    "display": "White"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+                        "extension": [
+                            {
+                                "url": "ombCategory",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2186-5",
+                                    "display": "Not Hispanic or Latino"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "active": true,
+                "name": [
+                    {
+                        "use": "official",
+                        "text": "BECK,TOM",
+                        "family": "BECK",
+                        "given": [
+                            "TOM"
+                        ]
+                    }
+                ],
+                "gender": "male",
+                "birthDate": "1965-06-30"
+            }
+        },
+        {
+            "resource": {
+                "resourceType": "Condition",
+                "id": "numer-CMS122-2-Condition",
+                "meta": {
+                    "versionId": "1"
+                },
+                "clinicalStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                            "code": "active",
+                            "display": "Active"
+                        }
+                    ]
+                },
+                "verificationStatus": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/condition-verification",
+                            "code": "confirmed",
+                            "display": "confirmed"
+                        }
+                    ]
+                },
+                "code": {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                            "code": "E10.10",
+                            "display": "Type 1 diabetes mellitus with ketoacidosis without coma"
+                        }
+                    ]
+                },
+                "subject": {
+                    "reference": "Patient/numer-CMS122-2-Patient"
+                },
+                "encounter": {
+                    "reference": "Encounter/numer-CMS122-2-Encounter"
+                },
+                "onsetPeriod": {
+                    "start": "2009-01-16T08:30:00"
+                }
+            }
+        },
+        {
+            "resource": {
+                "resourceType": "Encounter",
+                "id": "numer-CMS122-2-Encounter",
+                "meta": {
+                    "versionId": "1"
+                },
+                "status": "finished",
+                "type": [
+                    {
+                        "coding": [
+                            {
+                                "system": "http://www.ama-assn.org/go/cpt",
+                                "code": "99202",
+                                "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination and straightforward medical decision making. When using time for code selection, 15-29 minutes of total time is spent on the date of the encounter."
+                            }
+                        ]
+                    }
+                ],
+                "subject": {
+                    "reference": "Patient/numer-CMS122-2-Patient"
+                },
+                "period": {
+                    "start": "2019-01-16T00:00:00+00:00",
+                    "end": "2019-01-20T00:00:00+00:00"
+                }
+            }
+        }
+    ]
+}

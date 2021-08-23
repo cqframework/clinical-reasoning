@@ -6,7 +6,6 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
 public class StratifierMeasureProcessorTest extends BaseMeasureProcessorTest {
@@ -31,7 +30,7 @@ public class StratifierMeasureProcessorTest extends BaseMeasureProcessorTest {
     }
 
     @Test
-    public void exm74_singlePatient_numerator() throws IOException {
+    public void exm74_singlePatient_numerator() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR", "2019-01-01", "2020-01-01", "subject", "numer-EXM74-strat1-case7", null, null, endpoint, endpoint, endpoint, null);
         
         MeasureReportGroupComponent mrgc = report.getGroup().get(0);
@@ -48,7 +47,7 @@ public class StratifierMeasureProcessorTest extends BaseMeasureProcessorTest {
     }
 
     @Test
-    public void exm74_subject_list() throws IOException {
+    public void exm74_subject_list() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR", "2019-01-01", "2020-01-01", "subject-list", null, null, null, endpoint, endpoint, endpoint, null);
         
         MeasureReportGroupComponent mrgc = report.getGroup().get(0);
@@ -75,7 +74,7 @@ public class StratifierMeasureProcessorTest extends BaseMeasureProcessorTest {
     }
 
     @Test
-    public void exm74_population() throws IOException {
+    public void exm74_population() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR", "2019-01-01", "2020-01-01", "population", null, null, null, endpoint, endpoint, endpoint, null);
         
         MeasureReportGroupComponent mrgc = report.getGroup().get(0);

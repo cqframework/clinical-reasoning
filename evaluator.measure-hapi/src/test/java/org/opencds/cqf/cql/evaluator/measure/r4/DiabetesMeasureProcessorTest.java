@@ -16,7 +16,7 @@ public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
     }
 
     @Test
-    public void a1c_singlePatient_numerator() throws IOException {
+    public void a1c_singlePatient_numerator() {
 
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR", "2019-01-01", "2020-01-01", "patient", "numer-CMS122-Patient", null, null, endpoint, endpoint, endpoint, null);
         assertNotNull(report);

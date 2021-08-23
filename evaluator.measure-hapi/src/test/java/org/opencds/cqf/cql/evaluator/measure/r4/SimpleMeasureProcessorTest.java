@@ -46,6 +46,31 @@ public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
         assertEquals(report.getType(), MeasureReportType.SUMMARY);
     }
 
+    @Test
+    public void exm108_noReportType_noSubject_runsPopulation() {
+        // This default behavior if no type or subject is specified is "population"
+        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", null, null, null, null, endpoint, endpoint, endpoint, null);
+        validateGroup(report.getGroup().get(0), "numerator", 1);
+        validateGroup(report.getGroup().get(0), "denominator", 2);
+        validateGroup(report.getGroup().get(0), "initial-population", 2);
+        validateGroupScore(report.getGroup().get(0), new BigDecimal("0.5"));
+
+        assertEquals(report.getType(), MeasureReportType.SUMMARY);
+    }
+
+
+    @Test
+    public void exm108_noType_hasSubject_runsIndividual() {
+        // This default behavior if no type is specified is "individual"
+        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", null, "Patient/numer-EXM108", null, null, endpoint, endpoint, endpoint, null);
+        validateGroup(report.getGroup().get(0), "numerator", 1);
+        validateGroup(report.getGroup().get(0), "denominator", 1);
+        validateGroupScore(report.getGroup().get(0), new BigDecimal("1.0"));
+
+
+        assertEquals(report.getType(), MeasureReportType.INDIVIDUAL);
+    }
+
 
     @Test
     public void exm108_singlePatient_hasMetadata() {

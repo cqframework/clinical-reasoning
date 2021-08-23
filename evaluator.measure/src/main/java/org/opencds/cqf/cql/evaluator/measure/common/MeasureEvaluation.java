@@ -85,6 +85,12 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     }
 
     public MeasureReportT evaluate(MeasureEvalType type, String subjectOrPractitionerId, Interval measurementPeriod) {
+        // Default behavior for unspecified type is Subject if a subject is specified,
+        // and Population if one is not.
+        if (type == null) {
+            type = subjectOrPractitionerId != null ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION;
+        }
+
         this.setMeasurementPeriod(measurementPeriod);
 
         List<String> subjectIds = getSubjectIds(type, subjectOrPractitionerId);
@@ -108,35 +114,38 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         switch (type) {
             case PATIENT:
             case SUBJECT:
-                String subjectId = null;
-                if (subjectOrPractitionerId != null && subjectOrPractitionerId.contains("/")) {
-                    String[] subjectIdParts = subjectOrPractitionerId.split("/");
-                    this.subjectType = subjectIdParts[0];
-                    subjectId = subjectIdParts[1];
-                } else {
-                    this.subjectType = "Patient";
-                    subjectId = subjectOrPractitionerId;
-                    logger.info("Could not determine subjectType. Defaulting to Patient");
-                }
-                
-                if (subjectId == null) {
-                    throw new IllegalArgumentException("subjectId is required for individual reports.");
-                }
-
-                return Collections.singletonList(this.subjectType + "/" + subjectId);
-
+                return getIndividualSubjectId(subjectOrPractitionerId);
             case SUBJECTLIST:
             case PATIENTLIST:
-                this.subjectType = "Patient";
-                return subjectOrPractitionerId == null ? getAllSubjectIds()
-                        : getPractitionerSubjectIds(subjectOrPractitionerId);
+                return this.getPractitionerSubjectIds(subjectOrPractitionerId);
             case POPULATION:
-                this.subjectType = "Patient";
                 return this.getAllSubjectIds();
             default:
-                throw new IllegalArgumentException(
-                        String.format("Unsupported Measure Evaluation type: %s", type.getDisplay()));
+                if (subjectOrPractitionerId != null) {
+                    return getIndividualSubjectId(subjectOrPractitionerId);
+                } else {
+                    return getAllSubjectIds();
+                }
         }
+    }
+
+    public List<String> getIndividualSubjectId(String subjectId) {
+        String parsedSubjectId = null;
+        if (subjectId != null && subjectId.contains("/")) {
+            String[] subjectIdParts = subjectId.split("/");
+            this.subjectType = subjectIdParts[0];
+            parsedSubjectId = subjectIdParts[1];
+        } else {
+            this.subjectType = "Patient";
+            parsedSubjectId = subjectId;
+            logger.info("Could not determine subjectType. Defaulting to Patient");
+        }
+
+        if (parsedSubjectId == null) {
+            throw new IllegalArgumentException("subjectId is required for individual reports.");
+        }
+
+        return Collections.singletonList(this.subjectType + "/" + parsedSubjectId);
     }
 
     protected Interval getMeasurementPeriod() {
@@ -155,6 +164,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
     @SuppressWarnings("unchecked")
     protected List<String> getAllSubjectIds() {
+        this.subjectType = "Patient";
         List<String> subjectIds = new ArrayList<>();
         Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null, subjectType, null, null,
                 null, null, null, null, null, null);
@@ -164,8 +174,14 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
     @SuppressWarnings("unchecked")
     protected List<String> getPractitionerSubjectIds(String practitionerRef) {
+        this.subjectType = "Patient";
+
+        if (practitionerRef == null) {
+            return getAllSubjectIds();
+        }
+
         List<String> subjectIds = new ArrayList<>();
-        
+
         if (!practitionerRef.contains("/")) {
             practitionerRef = "Practitioner/" + practitionerRef;
         }

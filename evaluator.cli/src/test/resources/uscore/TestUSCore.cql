@@ -86,7 +86,7 @@ define TestSlices:
 
 define TestSimpleExtensions:
   Patient P
-    where P.birthsex = 'M'
+    where P.birthsex = 'F'
 
 define TestComplexExtensions:
   Patient P

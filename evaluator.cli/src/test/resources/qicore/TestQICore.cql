@@ -1,6 +1,8 @@
 library TestQICore
 
-using QICore version '4.0.0'
+using QICore version '4.1.0'
+
+include FHIRHelpers version '4.0.1'
 
 codesystem "Marital Status Codes": 'http://terminology.hl7.org/CodeSystem/v3-MaritalStatus'
 codesystem "CDC Race and Ethnicity Codes": 'urn:oid:2.16.840.1.113883.6.238'
@@ -78,19 +80,35 @@ define TestServiceRequest: ["ServiceRequest"]
 define TestSpecimen: ["Specimen"]
 define TestSubstsance: ["Substance"]
 define TestTask: ["Task"]
+define TestTaskNotDone: ["TaskNotDone"]
 
-define TestPrimitives:
+define TestPatientGender:
   Patient P
     where P.gender = 'male'
-      and P.active is true
-      and P.birthDate before Today()
-      and P.maritalStatus in "Marital Status"
-      and P.maritalStatus ~ "Marital Status - Married"
 
-define TestChoice:
+define TestPatientActive:
+  Patient P
+    where P.active is true
+
+define TestPatientBirthDate:
+  Patient P
+    where P.birthDate before Today()
+
+define TestPatientMaritalStatusMembership:
+  Patient P
+    where P.maritalStatus in "Marital Status"
+
+define TestPatientMartialStatusComparison:
+  Patient P
+    where P.maritalStatus ~ "Marital Status - Married"
+
+define TestPatientDeceasedAsBoolean:
   Patient P
     where P.deceased is false
-      or P.deceased before Today()
+
+define TestPatientDeceasedAsDateTime:
+  Patient P
+    where P.deceased before Today()
 
 define TestSlices:
   ["observation-bp"] BP
@@ -103,8 +121,8 @@ define TestSimpleExtensions:
 
 define TestComplexExtensions:
   Patient P
-    where P.race.ombCategory contains "American Indian or Alaska Native"
-      and P.race.detailed contains "Alaska Native"
+    where exists (P.race.ombCategory C where C ~ "American Indian or Alaska Native")
+      and exists (P.race.detailed C where C ~ "Alaska Native")
 
 
 

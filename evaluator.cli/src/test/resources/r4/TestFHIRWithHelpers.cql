@@ -67,7 +67,7 @@ define TestTask: ["Task"]
 
 define TestPatientGender:
   Patient P
-    where P.gender = 'female'
+    where P.gender = 'male'
 
 define TestPatientActive:
   Patient P

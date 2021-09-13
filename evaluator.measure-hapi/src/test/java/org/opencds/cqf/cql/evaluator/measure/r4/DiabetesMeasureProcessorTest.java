@@ -8,6 +8,8 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 
+
+@Test(singleThreaded = true)
 public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
 
         

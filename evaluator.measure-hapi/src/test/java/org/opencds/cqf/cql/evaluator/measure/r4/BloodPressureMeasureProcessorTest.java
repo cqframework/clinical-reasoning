@@ -1,11 +1,14 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 
+
+@Test(singleThreaded = true)
 public class BloodPressureMeasureProcessorTest extends BaseMeasureProcessorTest {
 
 
@@ -14,7 +17,7 @@ public class BloodPressureMeasureProcessorTest extends BaseMeasureProcessorTest 
         super("ControllingBloodPressureFHIR-bundle.json");
     }
 
-    // @Test
+    @Test(enabled = false)
     public void exm165_singlePatient_numerator() throws IOException {
 
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/ControllingBloodPressureFHIR", "2019-01-01", "2020-01-01", "patient", "numer-EXM165", null, null, endpoint, endpoint, endpoint, null);
@@ -37,7 +40,7 @@ public class BloodPressureMeasureProcessorTest extends BaseMeasureProcessorTest 
 
     }
 
-    // @Test
+    @Test(enabled = false)
     public void exm165_population() throws IOException {
 
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/ControllingBloodPressureFHIR", "2019-01-01", "2020-01-01", "population", null, null, null, endpoint, endpoint, endpoint, null);

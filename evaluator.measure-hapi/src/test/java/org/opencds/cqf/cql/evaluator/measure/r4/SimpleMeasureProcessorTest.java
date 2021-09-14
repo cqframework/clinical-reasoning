@@ -9,6 +9,8 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+
+@Test(singleThreaded = true)
 public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
     
     public SimpleMeasureProcessorTest() {

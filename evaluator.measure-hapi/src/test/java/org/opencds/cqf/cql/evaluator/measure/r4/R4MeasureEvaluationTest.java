@@ -48,6 +48,8 @@ import org.testng.annotations.Test;
 
 import ca.uhn.fhir.parser.IParser;
 
+
+@Test(singleThreaded = true)
 public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     public String getFhirVersion() {

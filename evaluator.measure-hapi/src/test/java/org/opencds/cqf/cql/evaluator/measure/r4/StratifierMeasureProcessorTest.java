@@ -8,6 +8,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.math.BigDecimal;
 
+
+@Test(singleThreaded = true)
 public class StratifierMeasureProcessorTest extends BaseMeasureProcessorTest {
     public StratifierMeasureProcessorTest() {
         super("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR-bundle.json");

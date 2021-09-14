@@ -5,6 +5,8 @@ import static org.testng.Assert.assertEquals;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
+
+@Test(singleThreaded = true)
 public class CohortMeasureProcessorTest extends BaseMeasureProcessorTest {
     public CohortMeasureProcessorTest() {
         super("SeenPatients-bundle.json");

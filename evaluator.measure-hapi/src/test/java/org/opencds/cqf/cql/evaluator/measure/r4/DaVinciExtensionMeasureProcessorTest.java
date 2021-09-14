@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
+
+@Test(singleThreaded = true)
 public class DaVinciExtensionMeasureProcessorTest extends BaseMeasureProcessorTest {
     
     public DaVinciExtensionMeasureProcessorTest() {

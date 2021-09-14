@@ -49,7 +49,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-
 public abstract class BaseMeasureProcessorTest {
 
     public BaseMeasureProcessorTest(String bundleName) {

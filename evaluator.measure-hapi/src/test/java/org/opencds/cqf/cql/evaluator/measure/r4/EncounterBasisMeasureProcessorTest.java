@@ -3,6 +3,8 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
+
+@Test(singleThreaded = true)
 public class EncounterBasisMeasureProcessorTest extends BaseMeasureProcessorTest {
     public EncounterBasisMeasureProcessorTest() {
         super("DischargedonAntithromboticTherapyFHIR-bundle.json");

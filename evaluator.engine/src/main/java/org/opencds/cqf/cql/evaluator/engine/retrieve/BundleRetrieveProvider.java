@@ -160,7 +160,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 	private List<? extends IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,
 			final Object contextValue, final List<? extends IBaseResource> resources) {
 		if (context == null || contextValue == null || contextPath == null) {
-			logger.info(
+			logger.debug(
 					"Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning unfiltered resources.",
 					dataType, context, contextPath, contextValue);
 			return resources;
@@ -182,9 +182,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 					logger.debug("Found {} with urn: prefix. Stripping.", dataType);
 					id = stripUrnScheme(id);
 				}
-				
 				if (!id.equals(contextValue)) {
-					logger.info("Found {} with id {}. Skipping.", dataType, id);
+					logger.debug("Found {} with id {}. Skipping.", dataType, id);
 					continue;
 				}
 			}
@@ -205,14 +204,14 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 					}
 					
 					if (!reference.equals(contextValue)) {
-						logger.info("Found {} with reference {}. Skipping.", dataType, reference);
+						logger.debug("Found {} with reference {}. Skipping.", dataType, reference);
 						continue;
 					}
 				}
 			else {
 				final Optional<IBase> reference = this.fhirPath.evaluateFirst(res, "reference", IBase.class);
 				if (!reference.isPresent()) {
-					logger.info("Found {} resource unrelated to context. Skipping.", dataType);
+					logger.debug("Found {} resource unrelated to context. Skipping.", dataType);
 					continue;
 				}
 
@@ -228,7 +227,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				}
 
 				if (!referenceString.equals((String) contextValue)) {
-					logger.info("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
+					logger.debug("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
 							referenceString, (String) contextValue);
 					continue;
 				}

@@ -208,7 +208,5 @@ public class CliTest {
         };
 
         Main.run(args);
-
-        String output = outContent.toString();
     }
 }

@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.measure-hapi</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <description>CQL Evaluator - Measure Evaluation for HAPI FHIR</description>
@@ -13,34 +13,34 @@
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>
-        <version>1.2.1-SNAPSHOT</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.cql2elm</artifactId>
-            <version>1.2.1-SNAPSHOT</version>
+            <version>1.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.fhir</artifactId>
-            <version>1.2.1-SNAPSHOT</version>
+            <version>1.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.measure</artifactId>
-            <version>1.2.1-SNAPSHOT</version>
+            <version>1.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.builder</artifactId>
-            <version>1.2.1-SNAPSHOT</version>
+            <version>1.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.engine</artifactId>
-            <version>1.2.1-SNAPSHOT</version>
+            <version>1.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>

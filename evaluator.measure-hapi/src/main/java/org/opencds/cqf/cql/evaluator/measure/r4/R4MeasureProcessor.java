@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
@@ -71,6 +72,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new HashMap<>();
 
+    private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
+
     private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     private MeasureEvalConfig measureEvalConfig = MeasureEvalConfig.defaultConfig();
@@ -86,14 +89,14 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
         this(terminologyProviderFactory, dataProviderFactory, libraryContentProviderFactory, fhirDalFactory,
-                endpointConverter, null, null, null, null, null);
+                endpointConverter, null, null, null, null, null, null);
     }
 
     public R4MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
             TerminologyProvider localTerminologyProvider, LibraryContentProvider localLibraryContentProvider,
-            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig) {
+            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
         this.libraryContentProviderFactory = libraryContentProviderFactory;
@@ -105,6 +108,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         this.localFhirDal = localFhirDal;
         this.localDataProvider = localDataProvider;
 
+        this.libraryCache = libraryCache;
+
         if (measureEvalConfig != null) {
             this.measureEvalConfig = measureEvalConfig;
         }
@@ -114,7 +119,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     public R4MeasureProcessor(TerminologyProvider localTerminologyProvider,
             LibraryContentProvider localLibraryContentProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
         this(null, null, null, null, null, localTerminologyProvider, localLibraryContentProvider, localDataProvider,
-                localFhirDal, null);
+                localFhirDal, null, null);
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
@@ -206,6 +211,10 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
                 new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlTranslatorOptions);
+
+        if (this.libraryCache != null) {
+            libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
+        }
 
         return libraryLoader;
     }

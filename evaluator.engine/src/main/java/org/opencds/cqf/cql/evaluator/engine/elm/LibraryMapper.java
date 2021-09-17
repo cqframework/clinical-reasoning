@@ -29,7 +29,7 @@ public interface LibraryMapper {
     @ExcludeFromMapping
     org.opencds.cqf.cql.engine.elm.execution.ExpressionDefEvaluator mapToEvaluator(
             org.hl7.elm.r1.ExpressionDef element);
-  
+
     @Named("ExpressionToCodeSystemRef")
     default org.cqframework.cql.elm.execution.CodeSystemRef mapCodeSystemRef(org.hl7.elm.r1.Expression expression) {
         if (expression == null) {
@@ -60,12 +60,12 @@ public interface LibraryMapper {
 
     @Mapping(target = "annotation")
     default List<Object> mapAnnotations(List<Object> annotations) {
-        if ( annotations == null ) {
+        if (annotations == null) {
             return null;
         }
 
-        List<Object> list = new ArrayList<Object>( annotations.size() );
-        for ( Object object : annotations ) {
+        List<Object> list = new ArrayList<Object>(annotations.size());
+        for (Object object : annotations) {
 
             list.add(mapAnnotation(object));
         }
@@ -80,7 +80,6 @@ public interface LibraryMapper {
     default Object mapAnnotation(Object annotation) {
         return annotation;
     }
-
 
     @Mapping(target = "valueset", qualifiedByName = { "ExpressionToValueSetRef" })
     org.opencds.cqf.cql.engine.elm.execution.InValueSetEvaluator map(org.hl7.elm.r1.InValueSet element);

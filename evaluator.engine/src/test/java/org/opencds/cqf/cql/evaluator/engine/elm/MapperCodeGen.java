@@ -12,11 +12,18 @@ import com.google.common.collect.Lists;
 
 import org.hl7.elm.r1.Element;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
 // import org.testng.annotations.Test;
+import org.slf4j.LoggerFactory;
 
 // This is just some code that helps bootstrap the library mapper code-gen
 // It's a one-off for now, but we could integrate it into the build at some point.
 public class MapperCodeGen {
+
+    private Logger logger = LoggerFactory.getLogger(MapperCodeGen.class);
+
+    // TODO: Write to a file rather than stdout.
+    // Part of the file is manually generated, so whats the java equivalent of partial classes? Hmm.
 
     // @Test
     public void writeClasses() {
@@ -73,7 +80,7 @@ public class MapperCodeGen {
             Class<?> clazz = engineClass.getSuperclass();
             Optional<Class<? extends Element>> translatorType = translatorTypeList.stream().filter(x -> x.getSimpleName().equals(clazz.getSimpleName())).findFirst();
             if (!translatorType.isPresent()) {
-                System.err.println("Could not find translator type for engine implementation type: " + engineClass.getName());
+                logger.info("Could not find translator type for engine implementation type: " + engineClass.getName());
                 continue;
             }
 
@@ -85,13 +92,13 @@ public class MapperCodeGen {
 
             long count = engineTypeList.stream().filter(x -> engineClass.isAssignableFrom(x)).count();
             if (count != 1) {
-                System.err.println("Skipped polymorphic type: " + engineClass.getName());
+                logger.info("Skipped polymorphic type: " + engineClass.getName());
                 continue;
             }
             
             Optional<Class<? extends Element>> translatorType = translatorTypeList.stream().filter(x -> x.getSimpleName().equals(engineClass.getSimpleName())).findFirst();
             if (!translatorType.isPresent()) {
-                System.err.println("Could not find translator type for engine type: " + engineClass.getName());
+                logger.info("Could not find translator type for engine type: " + engineClass.getName());
                 continue;
             }
 

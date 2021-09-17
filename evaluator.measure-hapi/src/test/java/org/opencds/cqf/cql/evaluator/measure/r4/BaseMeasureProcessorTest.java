@@ -212,7 +212,7 @@ public abstract class BaseMeasureProcessorTest {
         config.setMeasureEvalOptions(EnumSet.of(MeasureEvalOptions.ENABLE_DEBUG_LOGGING));
 
         this.measureProcessor = new R4MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
-                libraryContentProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config);
+                libraryContentProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null);
 
     }
 }

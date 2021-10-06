@@ -247,7 +247,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         Object result = this.evaluateCriteria(criteriaExpression, outEvaluatedResources);
 
         if (result == null) {
-            Collections.emptyList();
+            return Collections.emptyList();
         }
 
         if (result instanceof Boolean) {

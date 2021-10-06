@@ -128,6 +128,24 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     }
 
+    @Test
+    public void testEvaluatePopulationCriteriaNullResult() throws Exception {
+        Patient patient = john_doe();
+
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any())).thenReturn(Arrays.asList(patient));
+
+        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: null\n"
+                + "define Denominator: null\n"
+                + "define Numerator: null\n";
+
+        Measure measure = proportion_measure();
+
+        MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
+        checkEvidence(patient, report);
+    }
+
     private void checkStratification(MeasureReport report) {
         MeasureReportGroupStratifierComponent mrgsc = report.getGroupFirstRep().getStratifierFirstRep();
         assertEquals(mrgsc.getId(), "patient-gender");

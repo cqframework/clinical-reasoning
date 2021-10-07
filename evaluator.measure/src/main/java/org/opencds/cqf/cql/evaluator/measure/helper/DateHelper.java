@@ -6,12 +6,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import joptsimple.internal.Strings;
+
 public class DateHelper {
 
     // Helper class to resolve period dates
     public static Date resolveRequestDate(String date, boolean start) {
         // split it up - support dashes or slashes
-        String[] dissect = date.contains("-") ? date.split("-") : date.split("/");
+        String dateString = date;
+        String timeZoneString = "";
+        if (date.contains("T")) {
+            dateString = date.substring(0, date.indexOf("T"));
+            timeZoneString = date.substring(date.indexOf("T") + date.length());
+        }
+        String[] dissect = dateString.contains("-") ? dateString.split("-") : dateString.split("/");
         List<Integer> dateVals = new ArrayList<>();
         for (String dateElement : dissect) {
             dateVals.add(Integer.parseInt(dateElement));
@@ -41,6 +49,27 @@ public class DateHelper {
                 calendar.add(Calendar.MONTH, 1);
                 calendar.set(Calendar.DAY_OF_MONTH, 1);
                 calendar.add(Calendar.DATE, -1);
+            }
+        }
+
+        if (!Strings.isNullOrEmpty(timeZoneString)) {
+            String[] dissectTimeZone = dateString.split(":");
+            List<Integer> timeVals = new ArrayList<>();
+            Integer offset = null;
+            for (String timeElement : dissectTimeZone) {
+                if (timeElement.contains("-")) {
+                    timeVals.add(Integer.parseInt(timeElement.substring(0, timeElement.indexOf("-"))));
+                    offset = Integer.parseInt(timeElement.substring(timeElement.indexOf("-"), timeElement.length()));
+                } else {
+                    timeVals.add(Integer.parseInt(timeElement));
+                }
+            }
+
+            calendar.set(Calendar.HOUR_OF_DAY, timeVals.get(0));
+            calendar.set(Calendar.MINUTE, timeVals.get(1));
+            calendar.set(Calendar.SECOND, timeVals.get(2));
+            if (offset != null) {
+                calendar.set(Calendar.ZONE_OFFSET, offset);
             }
         }
         return calendar.getTime();

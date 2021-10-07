@@ -29,4 +29,12 @@ public class DateHelperTest {
         Date resolvedDate = DateHelper.resolveRequestDate(date, start);
         assertTrue(resolvedDate != null);
     }
+
+    @Test
+    public void testResolveRequestDateWithZOffset() throws Exception {
+        String date = "2017-01-01T00:00:00.000Z";
+        boolean start = false;
+        Date resolvedDate = DateHelper.resolveRequestDate(date, start);
+        assertTrue(resolvedDate != null);
+    }
 }

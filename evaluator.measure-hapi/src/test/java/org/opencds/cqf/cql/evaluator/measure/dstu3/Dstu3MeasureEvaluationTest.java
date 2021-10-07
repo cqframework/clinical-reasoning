@@ -10,6 +10,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,23 +18,23 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.Measure;
+import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
+import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
-import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
-import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
-import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
@@ -147,7 +148,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(context, measure);
         MeasureReport report = evaluation.evaluate(
                 patient != null ? MeasureEvalType.PATIENT : MeasureEvalType.POPULATION,
-                patient != null ? patient.getId() : null, measurementPeriod);
+                patient != null ? Collections.singletonList(patient.getId()) : null, measurementPeriod);
         assertNotNull(report);
 
         // Simulate sending it across the wire

@@ -2,6 +2,8 @@ package org.opencds.cqf.cql.evaluator.library;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,11 +164,9 @@ public class CqlFhirParametersConverter {
         }
     }
 
-    public Map<String, Object> toCqlParameters(IBaseParameters parameters) {
-        Map<String, Object> parameterMap = new HashMap<>();
-
+    public List<CqlParameterDefinition> toCqlParameterDefinitions(IBaseParameters parameters) {
         if (parameters == null) {
-            return parameterMap;
+            return Collections.emptyList();
         }
 
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
@@ -175,41 +175,103 @@ public class CqlFhirParametersConverter {
                 .map(x -> this.adapterFactory.createParametersParameters(x)).filter(x -> x.getName() != null)
                 .collect(Collectors.groupingBy(ParametersParameterComponentAdapter::getName));
 
+        List<CqlParameterDefinition> cqlParameterDefinitions = new ArrayList<>();
         for (Map.Entry<String, List<ParametersParameterComponentAdapter>> entry : children.entrySet()) {
-            // No value, therefore no way to determine the parameter def or value
-            if (entry.getValue() == null || entry.getValue().isEmpty()) {
-                parameterMap.put(entry.getKey(), null);
-                continue;
-            }
-
+            // Meta data extension, if present
             Optional<IBaseExtension<?, ?>> ext = entry.getValue().stream().filter(x -> x.hasExtension())
                     .flatMap(x -> x.getExtension().stream())
                     .filter(x -> x.getUrl() != null && x.getUrl()
                             .equals("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition"))
                     .findFirst();
 
+            // Actual values. if present
+            List<Object> values = entry.getValue().stream().map(x -> convertToCql(x)).filter(x -> x != null)
+            .collect(Collectors.toList());
+
+            String name = entry.getKey();
+
             Boolean isList = null;
             if (ext.isPresent()) {
                 isList = this.isListType(ext.get());
             }
 
-            if (isList != null && isList == false && entry.getValue().size() > 1) {
+            // Unable to determine via the extension
+            // So infer based on the values.
+            if (isList == null) {
+                if (values.isEmpty()) {
+                    throw new IllegalArgumentException(
+                        String.format("Unable to determine if parameter %s is meant to be collection. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
+                                entry.getKey()));
+                }
+                else if (values.size() == 1) {
+                    isList = false;
+                }
+                else {
+                    isList = true;
+                }
+            }
+
+            if (!isList && entry.getValue().size() > 1) {
                 throw new IllegalArgumentException(
                         String.format("The parameter %s was defined as a single value but multiple values were passed",
                                 entry.getKey()));
             }
 
-            if ((isList != null && isList == true) || (isList == null && entry.getValue().size() > 1)) {
-                List<Object> values = entry.getValue().stream().map(x -> convertToCql(x)).filter(x -> x != null)
-                        .collect(Collectors.toList());
-                parameterMap.put(entry.getKey(), values);
-            } else {
-                parameterMap.put(entry.getKey(), convertToCql(entry.getValue().get(0)));
+            String type = null;
+            if (ext.isPresent()) {
+                type = this.getType(ext.get());
             }
+
+            // TODO: This breaks down a bit for CQL System types because they aren't prefixed.
+            if (type == null && !values.isEmpty()) {
+                type = values.get(0).getClass().getSimpleName();
+            }
+
+            if (type == null) {
+                throw new IllegalArgumentException(
+                    String.format("Unable to infer type for parameter %s. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
+                            entry.getKey()));
+            }
+            
+            Object value = null;
+            if (isList) 
+            {
+                value = values;
+            }
+            else if (!values.isEmpty()) {
+                value = values.get(0);
+            }
+
+            cqlParameterDefinitions.add(new CqlParameterDefinition(name, type, isList, value));
 
         }
 
+        return cqlParameterDefinitions;
+    }
+
+    public Map<String, Object> toCqlParameters(IBaseParameters parameters) {
+        List<CqlParameterDefinition> cqlParameterDefinitions = this.toCqlParameterDefinitions(parameters);
+        if (cqlParameterDefinitions == null || cqlParameterDefinitions.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Object> parameterMap = new HashMap<>();
+        for (CqlParameterDefinition def : cqlParameterDefinitions) {
+            parameterMap.put(def.getName(), def.getValue());
+        }
+
         return parameterMap;
+    }
+
+    private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
+        @SuppressWarnings("rawtypes")
+        Optional<IPrimitiveType> type = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "type",
+                IPrimitiveType.class);
+        if (type.isPresent()) {
+            return type.get().getValueAsString();
+        }
+
+        return null;
     }
 
     private Boolean isListType(IBaseExtension<?, ?> parameterDefinitionExtension) {

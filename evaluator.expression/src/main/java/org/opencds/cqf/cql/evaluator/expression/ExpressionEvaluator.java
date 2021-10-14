@@ -53,6 +53,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvi
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
+import org.opencds.cqf.cql.evaluator.library.CqlParameterDefinition;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -266,37 +267,25 @@ public class ExpressionEvaluator {
 
         // TODO: Can we consolidate this logic in the Library evaluator somehow? Then we
         // don't have to do this conversion twice
-        Map<String, Object> cqlParameters = this.cqlFhirParametersConverter.toCqlParameters(parameters);
+        List<CqlParameterDefinition> cqlParameters = this.cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
         if (cqlParameters.size() == 0) {
             return;
         }
 
-        for (Map.Entry<String, Object> entry : cqlParameters.entrySet()) {
-            sb.append("parameter \"" + entry.getKey() + "\" " + getType(entry.getValue()) + "\n");
+        for (CqlParameterDefinition cpd : cqlParameters) {
+            sb.append("parameter \"" + cpd.getName() + "\" " + this.getTypeDeclaration(cpd.getType(), cpd.getIsList()) + "\n");
         }
     }
 
-    private String getType(Object value) {
-        if (value instanceof Iterable)
-        {
-            Iterable<?> iterable = (Iterable<?>)value;
-            if (iterable.iterator().hasNext()) {
-                Object firstValue = ((Iterable<?>)value).iterator().next();
-                return "List<" + getType(firstValue) + ">";
-            }
-            else {
-                return "List<System.Any>";
-            }
+    private String getTypeDeclaration(String type, Boolean isList) {
+        // TODO: Handle "FHIR" and "System" prefixes
+        // Should probably mark system types in the CqlParameterDefinition?
+        if (isList) {
+            return "List<" + type + ">";
         }
-
-        if (value instanceof IBase) {
-            return "FHIR." + value.getClass().getSimpleName();
+        else {
+            return type;
         }
-        else if (value != null) {
-            return "System." + value.getClass().getSimpleName(); 
-        }
-
-        return "System.Any";
     }
 
     private void constructUsings(StringBuilder sb, IBaseParameters parameters) {

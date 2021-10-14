@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
@@ -105,9 +106,11 @@ public class ExpressionEvaluatorTest {
             }
         };
 
+        FhirModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
+
         Set<ModelResolverFactory> modelResolverFactories = new HashSet<ModelResolverFactory>() {
             {
-                add(new FhirModelResolverFactory());
+                add(fhirModelResolverFactory);
             }
         };
 
@@ -163,7 +166,7 @@ public class ExpressionEvaluatorTest {
                 adapterFactory, fhirTypeConverter);
 
         evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
     }
     @Test
     public void testSimpleExpressionEvaluate() {
@@ -337,6 +340,19 @@ public class ExpressionEvaluatorTest {
         expected.addParameter().setName("return").setValue(new BooleanType(false));
 
         Parameters actual = (Parameters) evaluator.evaluate("%measurereport.group.select(population).where(code.coding[0].code = 'initial-population' and count > 0).exists()", input);
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    public void testPropertyAccess() {
+        Parameters input = new Parameters();
+        ParametersParameterComponent ppc = input.addParameter();
+        ppc.setName("%encounter").setResource(new Encounter().setId("1"));
+
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("return").setValue(new IdType("1"));
+
+        Parameters actual = (Parameters) evaluator.evaluate("%encounter.id", input);
         assertTrue(expected.equalsDeep(actual));
     }
 }

@@ -243,7 +243,6 @@ public class CqlFhirParametersConverter {
             }
 
             cqlParameterDefinitions.add(new CqlParameterDefinition(name, type, isList, value));
-
         }
 
         return cqlParameterDefinitions;

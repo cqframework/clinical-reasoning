@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.measure.helper;
 
-import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.util.Calendar;
 import java.util.Date;

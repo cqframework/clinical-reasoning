@@ -7,12 +7,14 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,22 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     @Test
     public void testCohortMeasureEvaluation() throws Exception {
+        Patient patient = john_doe();
+
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any())).thenReturn(Arrays.asList(patient));
+
+        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
+
+        Measure measure = cohort_measure();
+
+        MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
+        checkEvidence(patient, report);
+    }
+
+    @Test
+    public void testSDEInMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -206,6 +224,9 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Observation obs = (Observation) contained.get("Observation");
         assertNotNull(obs);
         assertEquals(obs.getValueCodeableConcept().getCodingFirstRep().getCode(), OMB_CATEGORY_RACE_BLACK);
+
+        Optional<org.hl7.fhir.r4.model.Reference> optional = report.getEvaluatedResource().stream().filter(x -> x.getReference().contains(obs.getId())).findFirst();
+        assertTrue(optional.isPresent());
     }
 
     private Measure cohort_measure() {

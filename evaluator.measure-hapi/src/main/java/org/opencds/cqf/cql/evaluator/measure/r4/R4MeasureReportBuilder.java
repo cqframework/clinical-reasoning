@@ -379,7 +379,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         break;
                 }
 
-                report.addExtension(this.createReferenceExtension(EXT_SDE_REFERENCE_URL, "#" + obs.getId()));
+                report.addEvaluatedResource(new Reference(obs));
                 report.addContained(obs);
             }
         }

@@ -4,8 +4,9 @@ import java.util.Iterator;
 
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportAggregator;
 
-public class MeasureReportAggregator {
+public class R4MeasureReportAggregator implements MeasureReportAggregator<MeasureReport> {
     public MeasureReport aggregate(Iterable<MeasureReport> reports) {
         if (reports == null) {
             return null;
@@ -44,7 +45,5 @@ public class MeasureReportAggregator {
         if (carry.hasType() ^ current.hasType() || (carry.hasType() && !carry.getType().equals(current.getType()))) {
             throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be of the same type. carry: %s, current: %s", carry.getType().toCode(), current.getType().toCode()));  
         }
-
     }
-    
 }

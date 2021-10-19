@@ -7,21 +7,27 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertEquals;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
+
+import static org.testng.Assert.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 
-public class MeasureReportAggregatorTests {
+public class R4MeasureReportAggregatorTest {
 
-    protected MeasureReportAggregator aggregator;
+    protected R4MeasureReportAggregator aggregator;
+    protected FhirContext fhirContext;
 
     @BeforeClass
     public void setup()
     {
-        this.aggregator = new MeasureReportAggregator();
+        this.aggregator = new R4MeasureReportAggregator();
+        this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     }
 
     @Test
@@ -86,5 +92,20 @@ public class MeasureReportAggregatorTests {
     }
     
     
-    
+    @Test 
+    public void aggregateReports_combines_reports() {
+        IParser parser = fhirContext.newJsonParser();
+        MeasureReport left = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport1.json"));
+        assertNotNull(left);
+
+        MeasureReport right = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport2.json"));
+        assertNotNull(right);
+
+        MeasureReport expected = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregatedReport.json"));
+        assertNotNull(expected);
+
+        MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
+
+        assertTrue(actual.equalsDeep(expected));
+    }
 }

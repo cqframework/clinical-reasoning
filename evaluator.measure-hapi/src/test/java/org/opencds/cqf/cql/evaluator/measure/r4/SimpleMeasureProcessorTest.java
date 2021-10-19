@@ -96,13 +96,13 @@ public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
         assertNotNull(report.getDate());
     }
 
-    @Test
-    public void exm108_viewOutput() {
-        //MeasureReport report = 
-        this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", "subject", "Patient/numer-EXM108", null, null, endpoint, endpoint, endpoint, null);
-        // ca.uhn.fhir.parser.IParser parser = fhirContext.newJsonParser();
-        // parser.setPrettyPrint(true);
-
-        // System.out.println(parser.encodeResourceToString(report));
-    }
+    // @Test
+    // public void exm108_viewOutput() {
+    //     MeasureReport report = 
+    //     this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", "population", null, null, null, endpoint, endpoint, endpoint, null);
+    //     ca.uhn.fhir.parser.IParser parser = fhirContext.newJsonParser();
+    //     parser.setPrettyPrint(true);
+    //     String result = parser.encodeResourceToString(report);
+    //     System.out.println(result);
+    // }
 }

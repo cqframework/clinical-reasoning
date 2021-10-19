@@ -3,9 +3,8 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -88,12 +87,12 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        Map<String, Integer> codeScore = new HashedMap();
+        HashMap<String, String> codeScore = new HashMap<String, String>();
 
         for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : current.getGroupFirstRep().getPopulation()) {
             CodeableConcept codeableConcept = populationComponent.getCode();
             if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
-                codeScore.put(codeableConcept.getCodingFirstRep().getCode(), populationComponent.getCount());
+                codeScore.put(codeableConcept.getCodingFirstRep().getCode(), Integer.toString(populationComponent.getCount()));
             }
         }
 
@@ -102,7 +101,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
                 if(codeScore.get(codeableConcept.getCodingFirstRep().getCode()) != null) {
                     populationComponent.setCount(populationComponent.getCount() +
-                            codeScore.get(codeableConcept.getCodingFirstRep().getCode()));
+                            Integer.parseInt(codeScore.get(codeableConcept.getCodingFirstRep().getCode())));
                 }
             }
         }

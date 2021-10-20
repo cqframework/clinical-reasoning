@@ -43,11 +43,6 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        mergeContained(carry, current);
-        mergeExtensions(carry, current);
-        mergePopulation(carry, current);
-        mergeStratifier(carry, current);
-
         if (carry.hasMeasure() ^ current.hasMeasure() || (carry.hasMeasure() && !carry.getMeasure().equals(current.getMeasure()))) {
             throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be for the same Measure. carry: %s, current: %s", carry.getMeasure(), current.getMeasure()));
         }
@@ -59,6 +54,12 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         if (carry.hasType() ^ current.hasType() || (carry.hasType() && !carry.getType().equals(current.getType()))) {
             throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be of the same type. carry: %s, current: %s", carry.getType().toCode(), current.getType().toCode()));  
         }
+
+        mergeContained(carry, current);
+        mergeExtensions(carry, current);
+        mergePopulation(carry, current);
+        mergeStratifier(carry, current);
+
     }
 
     protected void mergeContained(MeasureReport carry, MeasureReport current) {

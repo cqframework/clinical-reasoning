@@ -181,38 +181,201 @@
             ],
             "stratifier": [
                 {
-                    "code": {
-                        "coding": [
-                            {
-                                "system": "http://loinc.org",
-                                "code": "30525-0",
-                                "display": "Age"
-                            }
-                        ],
-                        "text": "stratifier-age-group"
-                    },
-                    "description": "Age Group",
-                    "criteria": {
-                        "language": "text/cql",
-                        "expression": "SDE Age Group"
-                    }
-                },
-                {
-                    "code": {
-                        "coding": [
-                            {
-                                "system": "http://loinc.org",
-                                "code": "88124-3",
-                                "display": "Food insecurity risk [HVS]"
-                            }
-                        ],
-                        "text": "stratifier-food-insecurity-risk-status"
-                    },
-                    "description": "Food insecurity risk status",
-                    "criteria": {
-                        "language": "text/cql",
-                        "expression": "SDE Food Insecurity Risk Status"
-                    }
+                    "code": [
+                        {
+                            "text": "stratifier-gender"
+                        }
+                    ],
+                    "stratum": [
+                        {
+                            "value": {
+                                "text": "male"
+                            },
+                            "population": [
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "initial-population"
+                                            }
+                                        ]
+                                    },
+                                    "count": 150
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "numerator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 50
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 150
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator-exclusion"
+                                            }
+                                        ]
+                                    },
+                                    "count": 25
+                                }
+                            ]
+                        },
+                        {
+                            "value": {
+                                "text": "female"
+                            },
+                            "population": [
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "initial-population"
+                                            }
+                                        ]
+                                    },
+                                    "count": 150
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "numerator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 50
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 150
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator-exclusion"
+                                            }
+                                        ]
+                                    },
+                                    "count": 25
+                                }
+                            ]
+                        },
+                        {
+                            "value": {
+                                "text": "other"
+                            },
+                            "population": [
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "initial-population"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "numerator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator-exclusion"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                }
+                            ]
+                        },
+                        {
+                            "value": {
+                                "text": "unknown"
+                            },
+                            "population": [
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "initial-population"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "numerator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator-exclusion"
+                                            }
+                                        ]
+                                    },
+                                    "count": 0
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "measureScore": {

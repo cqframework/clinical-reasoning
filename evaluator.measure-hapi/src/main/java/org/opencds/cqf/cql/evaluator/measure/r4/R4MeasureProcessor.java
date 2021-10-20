@@ -48,7 +48,6 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibra
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvalOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
@@ -268,7 +267,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             context.setExpressionCaching(true);
         }
 
-        if (this.measureEvalConfig.getMeasureEvalOptions().contains(MeasureEvalOptions.ENABLE_DEBUG_LOGGING)) {
+        if (this.measureEvalConfig.getDebugLoggingEnabled()) {
             context.getDebugMap().setIsLoggingEnabled(true);
         }
 

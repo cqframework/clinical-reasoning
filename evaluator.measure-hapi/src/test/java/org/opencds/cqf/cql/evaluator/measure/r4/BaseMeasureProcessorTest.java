@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.math.BigDecimal;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,8 +34,6 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvalOptions;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
@@ -171,7 +168,7 @@ public abstract class BaseMeasureProcessorTest {
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
         MeasureEvalConfig config = MeasureEvalConfig.defaultConfig();
-        config.setMeasureEvalOptions(EnumSet.of(MeasureEvalOptions.ENABLE_DEBUG_LOGGING));
+        config.setDebugLoggingEnabled(true);
 
         this.measureProcessor = new R4MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
                 libraryContentProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null);

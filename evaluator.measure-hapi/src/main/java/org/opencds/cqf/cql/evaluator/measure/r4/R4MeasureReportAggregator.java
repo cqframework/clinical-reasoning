@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Resource;
@@ -41,8 +42,9 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         }
 
         mergeContained(carry, current);
+        mergeExtensions(carry, current);
         mergePopulation(carry, current);
-
+        mergeStratifier(carry, current);
 
         if (carry.hasMeasure() ^ current.hasMeasure() || (carry.hasMeasure() && !carry.getMeasure().equals(current.getMeasure()))) {
             throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be for the same Measure. carry: %s, current: %s", carry.getMeasure(), current.getMeasure()));
@@ -81,6 +83,29 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         }
     }
 
+    protected void mergeExtensions(MeasureReport carry, MeasureReport current) {
+        if (current == null || carry == null) {
+            return;
+        }
+
+        List<String> carryIds = new ArrayList<>();
+
+        for (Extension extension : carry.getExtension()) {
+            if (extension.hasUrl()) {
+                carryIds.add(extension.getUrl());
+            }
+        }
+
+        for (Extension extension : current.getExtension()) {
+            if (extension.hasUrl()) {
+                if (!carryIds.contains(extension.getUrl())) {
+                    carryIds.add(extension.getUrl());
+                    carry.getExtension().add(extension);
+                }
+            }
+        }
+    }
+
     protected void mergePopulation(MeasureReport carry, MeasureReport current) {
 
         if (current == null || carry == null) {
@@ -105,7 +130,102 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 }
             }
         }
+    }
 
+    protected void mergeStratifier(MeasureReport carry, MeasureReport current) {
+
+        if (current == null || carry == null) {
+            return;
+        }
+
+        HashMap<String, String> codeScore = new HashMap<String, String>();
+
+        String stratifierCodeKey = "";
+        String stratifierStratumKey = "";
+        String stratifierStratumPopulationKey = "";
+        for (MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent : current.getGroupFirstRep().getStratifier()) {
+            CodeableConcept codeableConcept = stratifierComponent.getCodeFirstRep();
+            stratifierCodeKey = getKeyValue(codeableConcept);
+
+            if (stratifierComponent.hasStratum()) {
+                for (MeasureReport.StratifierGroupComponent stratumComponent : stratifierComponent.getStratum()) {
+                    if (stratumComponent.hasValue()) {
+                        CodeableConcept value = stratumComponent.getValue();
+                        stratifierStratumKey = getKeyValue(value);
+                    }
+
+                    if (stratumComponent.hasPopulation()) {
+                        for (MeasureReport.StratifierGroupPopulationComponent stratumPopulationComp : stratumComponent.getPopulation()) {
+                            if (stratumPopulationComp.hasCode()) {
+                                CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
+                                stratifierStratumPopulationKey = getKeyValue(populationCodeableConcept);
+
+                                if (stratumPopulationComp.hasCount()) {
+                                    codeScore.put(generateKey(stratifierCodeKey, stratifierStratumKey, stratifierStratumPopulationKey),
+                                            Integer.toString(stratumPopulationComp.getCount()));
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+        stratifierCodeKey = "";
+        stratifierStratumKey = "";
+        stratifierStratumPopulationKey = "";
+
+        for (MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent : carry.getGroupFirstRep().getStratifier()) {
+            CodeableConcept codeableConcept = stratifierComponent.getCodeFirstRep();
+            stratifierCodeKey = getKeyValue(codeableConcept);
+
+            if (stratifierComponent.hasStratum()) {
+                for (MeasureReport.StratifierGroupComponent stratumComponent : stratifierComponent.getStratum()) {
+                    if (stratumComponent.hasValue()) {
+                        CodeableConcept value = stratumComponent.getValue();
+                        stratifierStratumKey = getKeyValue(value);
+                    }
+
+                    if (stratumComponent.hasPopulation()) {
+                        for (MeasureReport.StratifierGroupPopulationComponent stratumPopulationComp : stratumComponent.getPopulation()) {
+                            if (stratumPopulationComp.hasCode()) {
+                                CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
+                                stratifierStratumPopulationKey = getKeyValue(populationCodeableConcept);
+
+                                if (stratumPopulationComp.hasCount()) {
+                                    String key = generateKey(stratifierCodeKey, stratifierStratumKey, stratifierStratumPopulationKey);
+                                    if (codeScore.containsKey(key)) {
+                                        stratumPopulationComp.setCount(stratumPopulationComp.getCount() +
+                                                Integer.parseInt(codeScore.get(key)));
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+    }
+
+    private String getKeyValue(CodeableConcept codeableConcept) {
+        if (codeableConcept.hasCoding()) {
+            if (StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
+                return codeableConcept.getCodingFirstRep().getCode().trim();
+            }
+        } else if (codeableConcept.hasText()) {
+            return codeableConcept.getText().trim();
+        }
+        return "";
+    }
+
+    private String generateKey(String part1, String part2, String part3) {
+        return new StringBuilder(part1).append(part2).append(part3).toString();
     }
 
 }

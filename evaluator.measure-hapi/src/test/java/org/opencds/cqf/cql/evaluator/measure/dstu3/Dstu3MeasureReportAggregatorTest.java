@@ -1,34 +1,33 @@
-package org.opencds.cqf.cql.evaluator.measure.r4;
-
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
-import org.hl7.fhir.r4.model.Resource;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.testng.collections.Lists;
+package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
-
-import static org.testng.Assert.*;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.testng.collections.Lists;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class R4MeasureReportAggregatorTest {
+import static org.testng.Assert.*;
 
-    protected R4MeasureReportAggregator aggregator;
+public class Dstu3MeasureReportAggregatorTest {
+
+    protected Dstu3MeasureReportAggregator aggregator;
     protected FhirContext fhirContext;
 
     @BeforeClass
     public void setup()
     {
-        this.aggregator = new R4MeasureReportAggregator();
-        this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+        this.aggregator = new Dstu3MeasureReportAggregator();
+        this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
     }
 
     @Test
@@ -64,10 +63,10 @@ public class R4MeasureReportAggregatorTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void aggregate_mismatched_measure_throws_exception() {
         MeasureReport one = new MeasureReport();
-        one.setMeasure("1");
+        one.setMeasure(new Reference("1"));
 
         MeasureReport two = new MeasureReport();
-        one.setMeasure("2");
+        one.setMeasure(new Reference("2"));
 
         aggregator.aggregate(Lists.newArrayList(one, two));
     }
@@ -96,20 +95,16 @@ public class R4MeasureReportAggregatorTest {
     @Test 
     public void aggregateReports_combines_reports() {
         IParser parser = fhirContext.newJsonParser();
-        MeasureReport left = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport1.json"));
+        MeasureReport left = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport1.json"));
         assertNotNull(left);
 
-        MeasureReport right = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport2.json"));
+        MeasureReport right = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport2.json"));
         assertNotNull(right);
 
-        MeasureReport expected = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregatedReport.json"));
+        MeasureReport expected = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregatedReport.json"));
         assertNotNull(expected);
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
-        /*
-        FhirContext fhirContext = FhirContext.forR4();
-        System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
-        */
         assertTrue(actual.equalsDeep(expected));
     }
 }

@@ -119,7 +119,6 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
             case PATIENTLIST:
                 return this.getPractitionerSubjectIds(subjectOrPractitionerId);
             case POPULATION:
-                return this.getAllSubjectIds();
             default:
                 if (subjectOrPractitionerId != null) {
                     return getIndividualSubjectId(subjectOrPractitionerId);

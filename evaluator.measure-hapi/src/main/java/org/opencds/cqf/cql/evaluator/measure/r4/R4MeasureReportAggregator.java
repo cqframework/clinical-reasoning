@@ -10,7 +10,9 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportAggregator;
 
 public class R4MeasureReportAggregator implements MeasureReportAggregator<MeasureReport> {
@@ -65,18 +67,18 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        List<String> carryIds = new ArrayList<>();
+        List<String> resourceIds = new ArrayList<>();
 
         for (Resource resource : carry.getContained()) {
             if (resource.hasId()) {
-                carryIds.add(resource.getId());
+                resourceIds.add(resource.getId());
             }
         }
 
         for (Resource resource : current.getContained()) {
             if (resource.hasId()) {
-                if (!carryIds.contains(resource.getId())) {
-                    carryIds.add(resource.getId());
+                if (!resourceIds.contains(resource.getId())) {
+                    resourceIds.add(resource.getId());
                     carry.getContained().add(resource);
                 }
             }
@@ -88,19 +90,28 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        List<String> carryIds = new ArrayList<>();
+        List<String> extensionDummyIds = new ArrayList<>();
 
         for (Extension extension : carry.getExtension()) {
-            if (extension.hasUrl()) {
-                carryIds.add(extension.getUrl());
+            if (extension.hasValue()) {
+                if(extension.getValue() instanceof StringType) {
+                    extensionDummyIds.add(((StringType)extension.getValue()).getValue());
+                } else if(extension.getValue() instanceof Reference) {
+                    extensionDummyIds.add(((Reference)extension.getValue()).getReference());
+                }
             }
         }
 
         for (Extension extension : current.getExtension()) {
-            if (extension.hasUrl()) {
-                if (!carryIds.contains(extension.getUrl())) {
-                    carryIds.add(extension.getUrl());
-                    carry.getExtension().add(extension);
+            if (extension.hasValue()) {
+                if(extension.getValue() instanceof StringType) {
+                    if (!extensionDummyIds.contains(((StringType)extension.getValue()).getValue())) {
+                       carry.getExtension().add(extension);
+                    }
+                }  else if(extension.getValue() instanceof Reference) {
+                    if (!extensionDummyIds.contains(((Reference)extension.getValue()).getReference())) {
+                       carry.getExtension().add(extension);
+                    }
                 }
             }
         }
@@ -143,6 +154,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         String stratifierCodeKey = "";
         String stratifierStratumKey = "";
         String stratifierStratumPopulationKey = "";
+
         for (MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent : current.getGroupFirstRep().getStratifier()) {
             CodeableConcept codeableConcept = stratifierComponent.getCodeFirstRep();
             stratifierCodeKey = getKeyValue(codeableConcept);
@@ -209,8 +221,6 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
 
             }
         }
-
-
     }
 
     private String getKeyValue(CodeableConcept codeableConcept) {

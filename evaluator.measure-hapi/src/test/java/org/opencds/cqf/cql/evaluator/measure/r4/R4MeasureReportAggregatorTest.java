@@ -106,11 +106,10 @@ public class R4MeasureReportAggregatorTest {
         assertNotNull(expected);
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
-
+        /*
         FhirContext fhirContext = FhirContext.forR4();
-        System.out.println("NKARIM:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
-
-
+        System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
+        */
         assertTrue(actual.equalsDeep(expected));
     }
 }

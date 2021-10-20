@@ -27,7 +27,7 @@
           }
         ]
       },
-      "valueInteger": 2
+      "valueInteger": 1
     },
     {
       "resourceType": "Observation",
@@ -52,34 +52,6 @@
         "coding": [
           {
             "code": "2106-3"
-          }
-        ]
-      },
-      "valueInteger": 2
-    },
-    {
-      "resourceType": "Observation",
-      "id": "sde-observation-sde-sex-code-m",
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
-          "extension": [
-            {
-              "url": "measure",
-              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108"
-            },
-            {
-              "url": "populationId",
-              "valueString": "sde-sex"
-            }
-          ]
-        }
-      ],
-      "status": "final",
-      "code": {
-        "coding": [
-          {
-            "code": "M"
           }
         ]
       },
@@ -112,6 +84,34 @@
         ]
       },
       "valueInteger": 1
+    },
+    {
+      "resourceType": "Observation",
+      "id": "sde-observation-sde-sex-code-m",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108"
+            },
+            {
+              "url": "populationId",
+              "valueString": "sde-sex"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "M"
+          }
+        ]
+      },
+      "valueInteger": 1
     }
   ],
   "extension": [
@@ -134,20 +134,20 @@
     {
       "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
       "valueReference": {
-        "reference": "#sde-observation-sde-sex-code-m"
+        "reference": "#sde-observation-sde-sex-code-f"
       }
     },
     {
       "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
       "valueReference": {
-        "reference": "#sde-observation-sde-sex-code-f"
+        "reference": "#sde-observation-sde-sex-code-m"
       }
     }
   ],
   "status": "complete",
   "type": "summary",
   "measure": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108",
-  "date": "2021-10-18T21:50:38-06:00",
+  "date": "2021-10-18T21:47:36-06:00",
   "period": {
     "start": "2018-12-31T00:00:00-07:00",
     "end": "2019-12-31T23:59:59-07:00"
@@ -213,6 +213,9 @@
           "count": 0
         }
       ],
+      "measureScore": {
+        "value": 1.0
+      },
       "stratifier": [
         {
           "code": [
@@ -411,10 +414,7 @@
             }
           ]
         }
-      ],
-      "measureScore": {
-        "value": 0.5
-      }
+      ]
     }
   ]
 }

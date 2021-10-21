@@ -194,17 +194,12 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         R4MeasureReportAggregator reportAggregator = new R4MeasureReportAggregator();
 
-        MeasureReport aggregatedReport = reportAggregator.aggregate(reports);
-
-        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoring, aggregatedReport);
-
         return reportAggregator.aggregate(reports);
     }
 
     public static <T> List<List<T>> getBatches(List<T> collection,int batchSize){
         int i = 0;
-        List<List<T>> batches = new ArrayList<List<T>>();
+        List<List<T>> batches = new ArrayList<>();
         while(i<collection.size()){
             int nextInc = Math.min(collection.size()-i,batchSize);
             List<T> batch = collection.subList(i,i+nextInc);

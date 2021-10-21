@@ -1,9 +1,17 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
-import org.opencds.cqf.cql.evaluator.measure.r4.MeasureValidationUtils;
+import org.hl7.fhir.r4.model.Period;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -11,13 +19,6 @@ import org.testng.collections.Lists;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
-
-import static org.testng.Assert.*;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
 
 public class R4MeasureReportAggregatorTest {
 

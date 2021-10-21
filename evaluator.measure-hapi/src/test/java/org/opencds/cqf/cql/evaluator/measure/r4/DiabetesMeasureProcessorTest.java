@@ -53,7 +53,8 @@ public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
         // validateGroup(report.getGroup().get(0), "initial-population", 3);
     }
 
-    @Test
+    // TODO: Work on the additional data Bundle integration with the Subject provider
+    @Test(enabled = false)
     public void a1c_additionalData() {
         Bundle additionalData = 
         (Bundle) fhirContext.newJsonParser()

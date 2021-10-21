@@ -16,8 +16,8 @@ public class MeasureEvalConfig {
     private Integer parallelThreshold = 200;
     private Integer parallelThreads = null;
 
-    private Boolean distributedEnabled = false;
-    private Integer distributedThreshold = 5000;
+    // private Boolean distributedEnabled = false;
+    // private Integer distributedThreshold = 5000;
 
     private Boolean debugLoggingEnabled = false;
 
@@ -87,19 +87,20 @@ public class MeasureEvalConfig {
         this.parallelThreads = value;
     }
 
-    public Boolean getDistributedEnabled() {
-        return this.distributedEnabled;
-    }
+    // TODO: This probably something that's implemented at the platform level
+    // public Boolean getDistributedEnabled() {
+    //     return this.distributedEnabled;
+    // }
 
-    public void setDistributedEnabled(Boolean value) {
-        this.distributedEnabled = value;
-    }
+    // public void setDistributedEnabled(Boolean value) {
+    //     this.distributedEnabled = value;
+    // }
 
-    public Integer getDistributedThreshold() {
-        return this.distributedThreshold;
-    }
+    // public Integer getDistributedThreshold() {
+    //     return this.distributedThreshold;
+    // }
 
-    public void setDistributedThreshold(Integer value) {
-        this.distributedThreshold = value;
-    }
+    // public void setDistributedThreshold(Integer value) {
+    //     this.distributedThreshold = value;
+    // }
 }

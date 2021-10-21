@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.Measure;
@@ -68,7 +69,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = cohort_measure();
 
-        MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
 
         checkEvidence(report);
     }
@@ -87,7 +88,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = proportion_measure();
 
-        MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
         checkEvidence(report);
     }
 
@@ -104,7 +105,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = continuous_variable_measure();
 
-        MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
         checkEvidence(report);
     }
 
@@ -124,13 +125,14 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = stratified_measure();
 
-        MeasureReport report = runTest(cql, null, measure, retrieveProvider);
+        MeasureReport report = runTest(cql, Arrays.asList(jane_doe().getId(), john_doe().getId()), measure,
+                retrieveProvider);
         checkStratification(report);
 
     }
 
-    private MeasureReport runTest(String cql, Patient patient, Measure measure, RetrieveProvider retrieveProvider)
-            throws Exception {
+    private MeasureReport runTest(String cql, List<String> subjectIds, Measure measure,
+            RetrieveProvider retrieveProvider) throws Exception {
         Interval measurementPeriod = measurementPeriod("2000-01-01", "2001-01-01");
 
         Library primaryLibrary = library(cql);
@@ -147,8 +149,8 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(context, measure);
         MeasureReport report = evaluation.evaluate(
-                patient != null ? MeasureEvalType.PATIENT : MeasureEvalType.POPULATION,
-                patient != null ? Collections.singletonList(patient.getId()) : null, measurementPeriod);
+                subjectIds.size() == 1 ? MeasureEvalType.PATIENT : MeasureEvalType.POPULATION, subjectIds,
+                measurementPeriod);
         assertNotNull(report);
 
         // Simulate sending it across the wire
@@ -179,8 +181,8 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         assertEquals(mrgsc.getId(), "patient-gender");
         assertEquals(mrgsc.getStratum().size(), 2);
 
-        StratifierGroupComponent sgc = mrgsc.getStratum().stream().filter(x -> x.hasValue() && x.getValue().equals("male")).findFirst()
-                .get();
+        StratifierGroupComponent sgc = mrgsc.getStratum().stream()
+                .filter(x -> x.hasValue() && x.getValue().equals("male")).findFirst().get();
         StratifierGroupPopulationComponent sgpc = sgc.getPopulation().stream().filter(
                 x -> x.getCode().getCodingFirstRep().getCode().equals(MeasurePopulationType.INITIALPOPULATION.toCode()))
                 .findFirst().get();
@@ -265,7 +267,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private Patient john_doe() {
         Patient patient = new Patient();
-        patient.setId("john-doe");
+        patient.setId(new IdType("Patient", "john-doe"));
         patient.setName(
                 Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("John")))));
         patient.setBirthDate(new Date());
@@ -280,7 +282,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private Patient jane_doe() {
         Patient patient = new Patient();
-        patient.setId("jane-doe");
+        patient.setId(new IdType("Patient", "jane-doe"));
         patient.setName(
                 Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("Jane")))));
         patient.setBirthDate(new Date());

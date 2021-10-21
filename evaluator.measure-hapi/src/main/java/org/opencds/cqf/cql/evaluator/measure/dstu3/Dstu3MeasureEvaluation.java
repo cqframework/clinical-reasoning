@@ -6,7 +6,7 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.evaluator.measure.common.BaseMeasureEvaluation;
 /**
- * Implementation of MeasureEvaluation on top of HAPI FHIR R4 structures.
+ * Implementation of MeasureEvaluation on top of HAPI FHIR DSTU3 structures.
  */
 public class Dstu3MeasureEvaluation extends
         BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
@@ -14,4 +14,5 @@ public class Dstu3MeasureEvaluation extends
     public Dstu3MeasureEvaluation(Context context, Measure measure) {
         super(context, measure, new Dstu3MeasureDefBuilder(), new Dstu3MeasureReportBuilder());
     }
+    
 }

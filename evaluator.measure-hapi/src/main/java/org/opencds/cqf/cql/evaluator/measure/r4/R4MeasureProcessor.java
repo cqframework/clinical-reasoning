@@ -16,12 +16,15 @@ import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -156,8 +159,23 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                     }
 
                     return ids;
-                } else {
+                } else if (subjectId.indexOf("/") == -1) {
                     IBaseResource r = fhirDal.read(new IdType("Patient/" + subjectId));
+                    return Collections
+                            .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+                }
+                else if (subjectId.startsWith("Group")) {
+                    Group r = (Group)fhirDal.read(new IdType(subjectId));
+                    List<String> subjectIds = new ArrayList<>();
+
+                    for (GroupMemberComponent gmc : r.getMember()) {
+                        IIdType ref = gmc.getEntity().getReferenceElement();
+                        subjectIds.add(ref.getResourceType() + "/" + ref.getIdPart());
+                    }
+
+                    return subjectIds;
+                } else {
+                    IBaseResource r = fhirDal.read(new IdType(subjectId));
                     return Collections
                             .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
                 }

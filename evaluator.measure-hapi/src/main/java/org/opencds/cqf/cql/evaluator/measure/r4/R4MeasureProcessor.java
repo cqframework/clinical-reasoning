@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,15 +15,11 @@ import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -147,42 +142,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
 
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
-        SubjectProvider subjectProvider = new SubjectProvider() {
-
-            @Override
-            public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
-                if (subjectId == null) {
-                    Iterable<IBaseResource> resources = fhirDal.search("Patient");
-                    List<String> ids = new ArrayList<>();
-                    for (IBaseResource r : resources) {
-                        ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-                    }
-
-                    return ids;
-                } else if (subjectId.indexOf("/") == -1) {
-                    IBaseResource r = fhirDal.read(new IdType("Patient/" + subjectId));
-                    return Collections
-                            .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-                }
-                else if (subjectId.startsWith("Group")) {
-                    Group r = (Group)fhirDal.read(new IdType(subjectId));
-                    List<String> subjectIds = new ArrayList<>();
-
-                    for (GroupMemberComponent gmc : r.getMember()) {
-                        IIdType ref = gmc.getEntity().getReferenceElement();
-                        subjectIds.add(ref.getResourceType() + "/" + ref.getIdPart());
-                    }
-
-                    return subjectIds;
-                } else {
-                    IBaseResource r = fhirDal.read(new IdType(subjectId));
-                    return Collections
-                            .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-                }
-            }
-        };
-
-        List<String> subjectIds = subjectProvider.getSubjects(measureEvalType,
+        List<String> subjectIds = this.getSubjects(measureEvalType,
                 subject != null ? subject : practitioner);
 
         if (this.measureEvalConfig.getParallelEnabled()
@@ -226,6 +186,26 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
     
         return batches;
+    }
+
+    public List<String> getSubjects(String reportType, String subjectId) {
+        return this.getSubjects(reportType, subjectId, null);
+    }
+
+    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint) {
+        MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
+        return getSubjects(measureEvalType, subjectId, dataEndpoint);
+    }
+
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint) {
+        FhirDal fhirDal = dataEndpoint != null ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint)) : localFhirDal;
+        SubjectProvider subjectProvider = new R4FhirDalSubjectProvider(fhirDal);
+        return subjectProvider.getSubjects(measureEvalType, subjectId);
+        
+    }
+
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
+        return this.getSubjects(measureEvalType, subjectId, null);
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,

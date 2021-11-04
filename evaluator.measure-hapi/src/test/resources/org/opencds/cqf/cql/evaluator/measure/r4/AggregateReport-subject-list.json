@@ -1,98 +1,118 @@
 {
   "resourceType": "MeasureReport",
   "language": "en",
-  "contained": [ {
-    "resourceType": "Observation",
-    "id": "sde-observation-sde-ethnicity-coding-2186-5",
-    "extension": [
-      {
-        "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
-        "extension": [
-          {
-            "url": "measure",
-            "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108"
-          },
-          {
-            "url": "populationId",
-            "valueString": "sde-ethnicity"
-          }
-        ]
-      }
-    ],
-    "status": "final",
-    "code": {
-      "coding": [
+  "contained": [
+    {
+      "resourceType": "List",
+      "id": "subject-list-group-group-1-initial-population",
+      "entry": [
         {
-          "code": "2186-5"
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case1"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case2"
+          }
         }
       ]
     },
-    "valueInteger": 1
-  },{
-    "resourceType": "List",
-    "id": "subject-list-group-group-1-initial-population",
-    "entry": [ {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat1-case1"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat1-case2"
-      }
-    } ]
-  }, {
-    "resourceType": "List",
-    "id": "subject-list-group-group-1-denominator",
-    "entry": [ {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat1-case2"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/numer-EXM74-strat2-case10"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/numer-EXM74-strat1-case8"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/numer-EXM74-strat1-case7"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat1-case1"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat3-case5"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/numer-EXM74-strat2-case9"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat3-case6"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat2-case4"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/numer-EXM74-strat3-case11"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/denom-EXM74-strat2-case3"
-      }
-    }, {
-      "item": {
-        "reference": "Patient/numer-EXM74-strat3-case12"
-      }
-    } ]
-  } ],
+    {
+      "resourceType": "List",
+      "id": "subject-list-group-group-1-denominator",
+      "entry": [
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case2"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat2-case10"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat1-case8"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat1-case7"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case1"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat3-case5"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat2-case9"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat3-case6"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat2-case4"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat3-case11"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat2-case3"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat3-case12"
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "Observation",
+      "id": "sde-observation-sde-ethnicity-coding-2186-5",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108"
+            },
+            {
+              "url": "populationId",
+              "valueString": "sde-ethnicity"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "2186-5"
+          }
+        ]
+      },
+      "valueInteger": 1
+    }
+  ],
   "extension": [ {
     "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
     "valueString": "Percentage of children, 6 months - 20 years of age, who received a fluoride varnish application during the measurement period"

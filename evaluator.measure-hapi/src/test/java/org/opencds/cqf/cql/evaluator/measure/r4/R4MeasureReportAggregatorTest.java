@@ -105,10 +105,29 @@ public class R4MeasureReportAggregatorTest {
         assertNotNull(expected);
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
+
+        MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
+        MeasureReport.MeasureReportGroupComponent expectedMrgc = actual.getGroup().get(0);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "initial-population", 2);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "initial-population", 2);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "numerator", 1);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "numerator", 1);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "denominator", 2);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator", 2);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "denominator-exclusion", 0);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator-exclusion", 0);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "initial-population", 400);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "male", "numerator", 150);
+
         /*
         FhirContext fhirContext = FhirContext.forR4();
         System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
         */
-        assertTrue(actual.equalsDeep(expected));
     }
+
 }

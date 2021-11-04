@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportAggregator;
 
@@ -69,19 +72,45 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         }
 
         List<String> resourceIds = new ArrayList<>();
+        Map<String, Resource> listResources = new HashMap<>();
 
         for (Resource resource : carry.getContained()) {
-            if (resource.hasId()) {
-                resourceIds.add(resource.getId());
+                if (resource.hasId()) {
+                    listResources.put(resource.getId(), resource);
             }
         }
 
+        carry.getContained().clear();
+
         for (Resource resource : current.getContained()) {
-            if (resource.hasId()) {
-                if (!resourceIds.contains(resource.getId())) {
-                    resourceIds.add(resource.getId());
-                    carry.getContained().add(resource);
+            if (resource.hasId() && resource.getResourceType().equals(ResourceType.List)) {
+                if (listResources.containsKey(resource.getId())) {
+                    ListResource localCarry = (ListResource) listResources.get(resource.getId());
+                    mergeList(localCarry, (ListResource) resource);
+                    listResources.put(resource.getId(),localCarry);
+                } else {
+                    listResources.put(resource.getId(), resource);
                 }
+            } else if (resource.hasId()) {
+                if(!listResources.containsKey(resource.getId())) {
+                    listResources.put(resource.getId(), resource);
+                }
+            }
+        }
+
+        carry.getContained().addAll(listResources.values());
+
+    }
+
+    private void mergeList(ListResource carry, ListResource current) {
+        List<String> itemIds = new ArrayList<>();
+        for(ListResource.ListEntryComponent comp : carry.getEntry()) {
+            itemIds.add(comp.getItem().getReference());
+        }
+
+        for(ListResource.ListEntryComponent comp : current.getEntry()) {
+            if(!itemIds.contains(comp.getItem().getReference())) {
+                carry.getEntry().add(comp);
             }
         }
     }
@@ -129,6 +158,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : current.getGroupFirstRep().getPopulation()) {
             CodeableConcept codeableConcept = populationComponent.getCode();
             if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
+                System.out.println("key:"+ codeableConcept.getCodingFirstRep().getCode() + "val:"+Integer.toString(populationComponent.getCount()));
                 codeScore.put(codeableConcept.getCodingFirstRep().getCode(), Integer.toString(populationComponent.getCount()));
             }
         }
@@ -137,6 +167,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             CodeableConcept codeableConcept = populationComponent.getCode();
             if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
                 if(codeScore.get(codeableConcept.getCodingFirstRep().getCode()) != null) {
+                    System.out.println("Matched key:"+ codeableConcept.getCodingFirstRep().getCode() + "val:"+Integer.toString(populationComponent.getCount()) + "val2:" + codeScore.get(codeableConcept.getCodingFirstRep().getCode()));
                     populationComponent.setCount(populationComponent.getCount() +
                             Integer.parseInt(codeScore.get(codeableConcept.getCodingFirstRep().getCode())));
                 }

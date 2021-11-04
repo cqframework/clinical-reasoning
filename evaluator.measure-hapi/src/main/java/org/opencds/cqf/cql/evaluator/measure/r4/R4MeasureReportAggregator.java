@@ -71,34 +71,32 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        List<String> resourceIds = new ArrayList<>();
-        Map<String, Resource> listResources = new HashMap<>();
+        Map<String, Resource> resourceMap = new HashMap<>();
 
         for (Resource resource : carry.getContained()) {
-                if (resource.hasId()) {
-                    listResources.put(resource.getId(), resource);
+            if (resource.hasId()) {
+                resourceMap.put(resource.getId(), resource);
             }
         }
-
         carry.getContained().clear();
 
         for (Resource resource : current.getContained()) {
             if (resource.hasId() && resource.getResourceType().equals(ResourceType.List)) {
-                if (listResources.containsKey(resource.getId())) {
-                    ListResource localCarry = (ListResource) listResources.get(resource.getId());
+                if (resourceMap.containsKey(resource.getId())) {
+                    ListResource localCarry = (ListResource) resourceMap.get(resource.getId());
                     mergeList(localCarry, (ListResource) resource);
-                    listResources.put(resource.getId(),localCarry);
+                    resourceMap.put(resource.getId(),localCarry);
                 } else {
-                    listResources.put(resource.getId(), resource);
+                    resourceMap.put(resource.getId(), resource);
                 }
             } else if (resource.hasId()) {
-                if(!listResources.containsKey(resource.getId())) {
-                    listResources.put(resource.getId(), resource);
+                if(!resourceMap.containsKey(resource.getId())) {
+                    resourceMap.put(resource.getId(), resource);
                 }
             }
         }
 
-        carry.getContained().addAll(listResources.values());
+        carry.getContained().addAll(resourceMap.values());
 
     }
 

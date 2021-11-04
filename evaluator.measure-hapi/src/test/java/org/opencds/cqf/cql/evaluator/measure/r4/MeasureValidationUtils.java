@@ -4,12 +4,17 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -65,16 +70,39 @@ public class MeasureValidationUtils {
 
     }
 
-    protected static void validateContained(ListResource actual, ListResource expected) {
-        Stream<ListResource.ListEntryComponent> actualStream =  actual.getEntry().stream();
+    protected static void validateListEquality(ListResource actual, ListResource expected) {
+        Set<String> listItems = new HashSet<>();
+
+        for (ListResource.ListEntryComponent comp : actual.getEntry()) {
+            if (comp.hasItem()) {
+                listItems.add(comp.getItem().getReference());
+            }
+        }
 
         for(ListResource.ListEntryComponent comp : expected.getEntry()) {
-            assertTrue(actualStream.anyMatch(x -> x.getItem().getReference().equals(comp.getItem().getReference())));
+            assertTrue(actual.getEntry().stream().anyMatch(x -> listItems.contains(x.getItem().getReference())));
         }
     }
 
-    protected static void validateMeasureRepostContained(ListResource actual, ListResource expected) {
+    protected static void validateMeasureReportContained(MeasureReport actual, MeasureReport expected) {
+        assertEquals(actual.getContained().size(), expected.getContained().size());
 
+        Map<String, Resource> listResources = new HashMap<>();
+
+        for (Resource resource : actual.getContained()) {
+            if (resource.hasId()) {
+                listResources.put(resource.getId(), resource);
+            }
+        }
+
+        for (Resource resource : expected.getContained()) {
+            if (resource.hasId() && listResources.containsKey(resource.getId())) {
+                if (resource.getResourceType().equals(ResourceType.List)) {
+                    validateListEquality((ListResource) listResources.get(resource.getId()), (ListResource) resource);
+                    validateListEquality((ListResource) resource, (ListResource) listResources.get(resource.getId()));
+                }
+            }
+        }
     }
 
 }

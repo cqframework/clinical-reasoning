@@ -130,4 +130,23 @@ public class R4MeasureReportAggregatorTest {
         */
     }
 
+    @Test
+    public void aggregateReports_subject_listType_combines_reports() {
+        IParser parser = fhirContext.newJsonParser();
+        MeasureReport left = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list1.json"));
+        assertNotNull(left);
+
+        MeasureReport right = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list2.json"));
+        assertNotNull(right);
+
+        MeasureReport expected = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list.json"));
+        assertNotNull(expected);
+
+        MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
+
+        MeasureValidationUtils.validateMeasureReportContained(expected, actual);
+
+    }
+
+
 }

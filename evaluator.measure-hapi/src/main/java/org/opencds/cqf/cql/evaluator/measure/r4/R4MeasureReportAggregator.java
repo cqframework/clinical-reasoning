@@ -156,7 +156,6 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : current.getGroupFirstRep().getPopulation()) {
             CodeableConcept codeableConcept = populationComponent.getCode();
             if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
-                System.out.println("key:"+ codeableConcept.getCodingFirstRep().getCode() + "val:"+Integer.toString(populationComponent.getCount()));
                 codeScore.put(codeableConcept.getCodingFirstRep().getCode(), Integer.toString(populationComponent.getCount()));
             }
         }
@@ -165,7 +164,6 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             CodeableConcept codeableConcept = populationComponent.getCode();
             if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
                 if(codeScore.get(codeableConcept.getCodingFirstRep().getCode()) != null) {
-                    System.out.println("Matched key:"+ codeableConcept.getCodingFirstRep().getCode() + "val:"+Integer.toString(populationComponent.getCount()) + "val2:" + codeScore.get(codeableConcept.getCodingFirstRep().getCode()));
                     populationComponent.setCount(populationComponent.getCount() +
                             Integer.parseInt(codeScore.get(codeableConcept.getCodingFirstRep().getCode())));
                 }

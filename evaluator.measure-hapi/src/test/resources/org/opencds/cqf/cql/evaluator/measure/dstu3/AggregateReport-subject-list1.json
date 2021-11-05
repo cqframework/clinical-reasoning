@@ -1,0 +1,105 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "AggregateReport-subject-list1",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>"
+  },
+  "contained": [
+    {
+      "resourceType": "List",
+      "id": "subject-list-group-group-1-initial-population",
+      "entry": [
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case1"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case2"
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "Organization",
+      "id": "reporter",
+      "name": "Good Health Hospital"
+    }
+  ],
+  "identifier": [
+    {
+      "value": "measurereport-cms146-cat2-example-2017-03-13"
+    }
+  ],
+  "status": "complete",
+  "type": "patient-list",
+  "measure": "Measure/CMS146",
+  "reporter": {
+    "reference": "#reporter"
+  },
+  "period": {
+    "start": "2014-01-01",
+    "end": "2014-03-31"
+  },
+  "group": [
+    {
+      "id": "CMS146-group-1",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "initial-population"
+              }
+            ]
+          },
+          "count": 500,
+          "subjects": {
+            "reference": "List/CMS146-initial-population"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "numerator"
+              }
+            ]
+          },
+          "count": 200,
+          "subjects": {
+            "reference": "List/CMS146-numerator"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator"
+              }
+            ]
+          },
+          "count": 500,
+          "subjects": {
+            "reference": "List/CMS146-denominator"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator-exclusion"
+              }
+            ]
+          },
+          "count": 100,
+          "subjects": {
+            "reference": "List/CMS146-denominator-exclusions"
+          }
+        }
+      ]
+    }
+  ]
+}

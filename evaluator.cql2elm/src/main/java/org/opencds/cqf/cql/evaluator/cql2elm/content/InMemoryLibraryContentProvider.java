@@ -41,9 +41,8 @@ public class InMemoryLibraryContentProvider implements LibraryContentProvider {
     }
 
     public InputStream getOptionsSource(org.hl7.elm.r1.VersionedIdentifier libraryIdentifier) {
-        String matchText = "\\s*\\{(.*\\s*)*\\}\\s*";
         for (String library : this.libraries) {
-            if (library.matches(matchText)) {
+            if (library.trim().startsWith("{") && !library.contains("\"resourceType\"")) {
                 return new ByteArrayInputStream(library.getBytes());
             }
         }

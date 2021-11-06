@@ -208,5 +208,90 @@ public class CliTest {
         };
 
         Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
+        // TODO: This is because the engine is not validating on profile-based retrieve...
+        //assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
+    }
+
+    @Test
+    public void testQICoreCommon() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/qicorecommon",
+                "-ln=QICoreCommonTests",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/qicorecommon",
+                "-t=" + testResourcePath + "/qicorecommon/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
+    }
+
+    @Test
+    public void testOptions() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/options",
+                "-ln=FluentFunctions",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/options",
+                "-t=" + testResourcePath + "/options/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("Four=4"));
+        assertTrue(output.contains("TestPlus=true"));
+        assertTrue(output.contains("Testplus=-8"));
+    }
+
+    @Test
+    public void testOptionsFailure() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/optionsFailure",
+                "-ln=FluentFunctions",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/optionsFailure",
+                "-t=" + testResourcePath + "/optionsFailure/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String errOutput = errContent.toString();
+        assertTrue(errOutput.contains("org.opencds.cqf.cql.engine.exception.CqlException: Translation of library FluentFunctions failed with the following message: Feature Fluent functions was introduced in version 1.5 and so cannot be used at compatibility level 1.4"));
     }
 }

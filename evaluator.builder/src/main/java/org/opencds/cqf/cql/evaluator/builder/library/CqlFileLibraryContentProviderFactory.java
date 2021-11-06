@@ -96,7 +96,7 @@ public class CqlFileLibraryContentProviderFactory implements TypedLibraryContent
         }
 
         if (resourceDirectory.getAbsoluteFile().isDirectory()) {
-            return FileUtils.listFiles(resourceDirectory, new String[] { "cql" }, true);
+            return FileUtils.listFiles(resourceDirectory, new String[] { "cql", "json" }, true);
         }
         else if (path.toLowerCase().endsWith("cql")) {
             return Collections.singletonList(resourceDirectory);

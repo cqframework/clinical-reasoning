@@ -43,6 +43,8 @@ public abstract class BaseFhirLibraryContentProvider
             case JXSON: 
             case JSON:
                 return this.getContentStream(library, "application/elm+json");
+            case OPTIONS:
+                return this.getContentStream(library, "application/json");
             case COFFEE:
             default:
                 throw new UnsupportedOperationException(String.format("This content provider does not support the %s LibraryContentType", libraryContentType.toString()));

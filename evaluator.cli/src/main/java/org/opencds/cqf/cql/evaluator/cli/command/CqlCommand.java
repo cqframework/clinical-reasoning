@@ -38,6 +38,9 @@ public class CqlCommand implements Callable<Integer> {
     List<LibraryParameter> libraries;
 
     static class LibraryParameter {
+        @Option(names= { "-on", "--options-name" }, defaultValue = "cql-options")
+        public String optionsName;
+
         @Option(names = { "-lu", "--library-url" }, required = true)
         public String libraryUrl;
 
@@ -101,6 +104,10 @@ public class CqlCommand implements Callable<Integer> {
         for (LibraryParameter library : libraries) {
 
             CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder();
+
+            if (library.optionsName != null) {
+                cqlEvaluatorBuilder.withOptionsName(library.optionsName);
+            }
 
             LibraryContentProvider libraryContentProvider = libraryContentProviderIndex.get(library.libraryUrl);
 

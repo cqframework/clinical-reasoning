@@ -14,6 +14,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
@@ -70,6 +71,8 @@ public class CqlEvaluatorBuilder {
 
     private Boolean useEmbeddedLibraries = true;
 
+    private String optionsName;
+
     private RetrieveProviderConfig retrieveProviderConfig;
 
     private Boolean stale = false;
@@ -83,7 +86,6 @@ public class CqlEvaluatorBuilder {
         this.terminologyProviders = new ArrayList<>();
         this.dataProviderParts = new HashMap<>();
         this.libraryCache = new HashMap<>();
-        this.cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
         this.retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
         this.engineOptions = EnumSet.of(CqlEngine.Options.EnableExpressionCaching);
     }
@@ -223,6 +225,17 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
+     * Sets the name of an options file name or library name to be used as the source for translator options
+     * when libraries need to be translated during evaluation.
+     * @param optionsName
+     * @return this CqlEvaluatorBuilder
+     */
+    public CqlEvaluatorBuilder withOptionsName(String optionsName) {
+        this.optionsName = optionsName;
+        return this;
+    }
+
+    /**
      * Sets the CqlTranslatorOptions to use for Cql translation when loading content
      * 
      * @param cqlTranslatorOptions the translator options to use
@@ -292,10 +305,41 @@ public class CqlEvaluatorBuilder {
         return dataProviders;
     }
 
+    private CqlTranslatorOptions getDefaultOptions() {
+        CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
+        if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
+            options.getFormats().add(CqlTranslator.Format.XML);
+        }
+        System.out.println("cql-options not found. Using default options.");
+        return options;
+    }
+
+    private CqlTranslatorOptions loadTranslatorOptions() {
+        VersionedIdentifier optionsIdentifier = new VersionedIdentifier().withId(this.optionsName);
+        for (LibraryContentProvider provider : this.libraryContentProviders) {
+            CqlTranslatorOptions options = provider.getTranslatorOptions(optionsIdentifier);
+            if (options != null) {
+                return options;
+            }
+        }
+
+        return null;
+    }
+
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.libraryContentProviders);
         if (this.useEmbeddedLibraries) {
             this.libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+        }
+
+        if (this.cqlTranslatorOptions == null) {
+            if (this.optionsName != null) {
+                this.cqlTranslatorOptions = loadTranslatorOptions();
+            }
+        }
+
+        if (this.cqlTranslatorOptions == null) {
+            this.cqlTranslatorOptions = getDefaultOptions();
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
@@ -352,7 +396,7 @@ public class CqlEvaluatorBuilder {
         }
 
         this.stale = true;
-        
+
         LibraryLoader libraryLoader = this.buildLibraryLoader();
         TerminologyProvider terminologyProvider = this.buildTerminologyProvider();
         Map<String, DataProvider> dataProviders = this.buildDataProviders(terminologyProvider);

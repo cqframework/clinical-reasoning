@@ -1,8 +1,12 @@
 package org.opencds.cqf.cql.evaluator.cql2elm.content;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 
@@ -31,5 +35,20 @@ public interface LibraryContentProvider extends LibrarySourceProvider {
      */
     default InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
         return getLibraryContent(libraryIdentifier, LibraryContentType.CQL);
+    }
+
+    /**
+     * Provides translator options for an evaluation context.
+     * @return CqlTranslatorOptions
+     */
+    default CqlTranslatorOptions getTranslatorOptions(VersionedIdentifier vi) {
+        if (vi != null) {
+            InputStream is = getLibraryContent(vi, LibraryContentType.OPTIONS);
+            if (is != null) {
+                return CqlTranslatorOptionsMapper.fromReader(new InputStreamReader(is));
+            }
+        }
+
+        return null;
     }
 }

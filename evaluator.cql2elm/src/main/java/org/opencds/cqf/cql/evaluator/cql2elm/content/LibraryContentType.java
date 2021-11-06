@@ -8,5 +8,6 @@ public enum LibraryContentType {
     XML,
     JSON,
     JXSON,
-    COFFEE
+    COFFEE,
+    OPTIONS
 }

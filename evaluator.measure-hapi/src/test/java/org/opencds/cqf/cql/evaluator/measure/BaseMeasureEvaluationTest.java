@@ -59,8 +59,28 @@ public abstract class BaseMeasureEvaluationTest {
         return new Interval( start, true, end, true );
     }
 
-    public String skeleton_cql() {
-        return String.format("library Test version '1.0.0'\n\nusing FHIR version '%1$s'\ninclude FHIRHelpers version '%1$s'\n\ncontext Patient\n", getFhirVersion());
+    public String cql_with_date() {
+        return library_header() + measurement_period_date() + patient_context();
+    }
+
+    public String cql_with_dateTime() {
+        return library_header() + measurement_period_dateTime() + patient_context();
+    }
+
+    public String library_header() {
+        return String.format("library Test version '1.0.0'\n\nusing FHIR version '%1$s'\ninclude FHIRHelpers version '%1$s'\n\n", getFhirVersion());
+    }
+
+    public String measurement_period_date() {
+        return "parameter \"Measurement Period\" Interval<Date> default Interval[@2019-01-01, @2019-12-31]\n\n";
+    }
+
+    public String measurement_period_dateTime() {
+        return "parameter \"Measurement Period\" Interval<DateTime> default Interval[@2019-01-01T00:00:00.0, @2020-01-01T00:00:00.0)\n\n";
+    }
+
+    public String patient_context() {
+        return "context Patient\n";
     }
     
     public abstract String getFhirVersion();

@@ -294,7 +294,7 @@ public interface LibraryMapper {
 
     org.opencds.cqf.cql.engine.elm.execution.CountEvaluator map(org.hl7.elm.r1.Count element);
 
-    org.opencds.cqf.cql.engine.elm.execution.ProperlyIncludesEvaluator map(org.hl7.elm.r1.ProperIncludes element);
+    org.opencds.cqf.cql.engine.elm.execution.ProperIncludesEvaluator map(org.hl7.elm.r1.ProperIncludes element);
 
     org.cqframework.cql.elm.execution.Times map(org.hl7.elm.r1.Times element);
 
@@ -485,7 +485,7 @@ public interface LibraryMapper {
 
     org.opencds.cqf.cql.engine.elm.execution.ModeEvaluator map(org.hl7.elm.r1.Mode element);
 
-    org.opencds.cqf.cql.engine.elm.execution.ProperlyIncludedInEvaluator map(org.hl7.elm.r1.ProperIncludedIn element);
+    org.opencds.cqf.cql.engine.elm.execution.ProperIncludedInEvaluator map(org.hl7.elm.r1.ProperIncludedIn element);
 
     org.opencds.cqf.cql.engine.elm.execution.ConvertsToTimeEvaluator map(org.hl7.elm.r1.ConvertsToTime element);
 

@@ -14,7 +14,6 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.testng.annotations.Test;
-import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.execution.JsonCqlLibraryReader;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
@@ -29,17 +28,6 @@ public class TranslatorOptionsUtilTests {
         try 
         {
             return JsonCqlLibraryReader.read(new InputStreamReader(libraryStream));
-        }
-        catch(Exception e) {
-            return null;
-        }
-    }
-
-    private Library getLibraryXml(String libraryName) {
-        InputStream libraryStream = TranslatorOptionsUtil.class.getResourceAsStream(libraryName + ".xml");
-        try 
-        {
-            return CqlLibraryReader.read(libraryStream);
         }
         catch(Exception e) {
             return null;
@@ -109,14 +97,6 @@ public class TranslatorOptionsUtilTests {
     public void canReadMappedOptions() {
         Library test = this.translateLibrary("LibraryTestMappedOptions");
         EnumSet<CqlTranslator.Options> expected = CqlTranslatorOptions.defaultOptions().getOptions();
-        EnumSet<CqlTranslator.Options> actual = TranslatorOptionsUtil.getTranslatorOptions(test);
-        assertEquals(actual, expected);
-    }
-
-    @Test
-    public void canReadXmlOptions() {
-        Library test = this.getLibraryXml("AdultOutpatientEncounters_FHIR4-2.0.000");
-        EnumSet<CqlTranslator.Options> expected = EnumSet.of(EnableDateRangeOptimization, EnableAnnotations,EnableLocators,EnableResultTypes,DisableListDemotion,DisableListPromotion,DisableMethodInvocation);
         EnumSet<CqlTranslator.Options> actual = TranslatorOptionsUtil.getTranslatorOptions(test);
         assertEquals(actual, expected);
     }

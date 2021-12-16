@@ -242,7 +242,6 @@ public class ExpressionEvaluator {
         cql = sb.toString();
 
         logger.debug(cql);
-        System.out.println(sb.toString());
         return cql;
     }
 

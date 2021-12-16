@@ -21,7 +21,6 @@
         <cql-engine.version>1.5.2</cql-engine.version>
         <spring.version>5.3.6</spring.version>
         <dagger.version>2.34.1</dagger.version>
-        <core.version>5.3.9</core.version>
         <hapi.version>5.5.3</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <slf4j.version>1.7.29</slf4j.version>

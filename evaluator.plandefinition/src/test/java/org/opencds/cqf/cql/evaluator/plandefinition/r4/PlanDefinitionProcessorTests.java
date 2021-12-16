@@ -202,12 +202,7 @@ public class PlanDefinitionProcessorTests {
         Parameters actual = (Parameters) planDefinitionProcessor.apply(
                 new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", null, null, null, null, null, null, null, null, null, expected, null, new Bundle(), null, dataEndpoint,
                 endpoint, endpoint);
-        try {
-            Charset charset = null;
-            FileUtils.writeStringToFile(new File("C:\\Users\\jreys\\Documents\\src\\testParameters.json"), fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual), charset, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         assertTrue(expected.equalsShallow(actual));
     }
 

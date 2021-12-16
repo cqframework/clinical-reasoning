@@ -3,7 +3,6 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
-import org.hl7.fhir.r4.model.Resource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;

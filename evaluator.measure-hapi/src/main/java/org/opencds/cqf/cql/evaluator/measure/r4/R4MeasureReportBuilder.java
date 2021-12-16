@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.measure.common.GroupDef;
@@ -379,7 +379,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         break;
                 }
 
-                report.addExtension(this.createReferenceExtension(EXT_SDE_REFERENCE_URL, "#" + obs.getId()));
+                report.addEvaluatedResource(new Reference(obs));
                 report.addContained(obs);
             }
         }
@@ -393,10 +393,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return new Period().setStart(dtStart.toJavaDate()).setEnd(dtEnd.toJavaDate());
 
         } else if (measurementPeriod.getStart() instanceof Date) {
-            return new Period().setStart((Date) measurementPeriod.getStart()).setEnd((Date) measurementPeriod.getEnd());
+            Date dStart = (Date) measurementPeriod.getStart();
+            Date dEnd = (Date) measurementPeriod.getEnd();
+            return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
             throw new IllegalArgumentException(
-                    "Measurement period should be an interval of CQL DateTime or Java Date objects");
+                    "Measurement period should be an interval of CQL DateTime or Date");
         }
     }
 
@@ -412,7 +414,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         report.setPeriod(getPeriod(measurementPeriod));
         report.setMeasure(measure.getUrl());
-        report.setDate(new Date());
+        report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());
         report.setImprovementNotation(measure.getImprovementNotation());
         report.setLanguage(measure.getLanguage());

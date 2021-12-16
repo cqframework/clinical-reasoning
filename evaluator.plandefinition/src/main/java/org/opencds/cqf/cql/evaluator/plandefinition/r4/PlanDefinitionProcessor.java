@@ -617,7 +617,6 @@ public class PlanDefinitionProcessor {
               codeFilterParam.addParameter().setName("%resource").setResource(resource);
               if (filter != null && filter.hasPath() && filter.hasValueSet()) {
                 Iterable<IBaseResource> valueset = fhirDal.searchByUrl("ValueSet", filter.getValueSet());
-                System.out.println(filter.getValueSet());
                 if (valueset != null && valueset.iterator().hasNext()) {
                   codeFilterParam.addParameter().setName("%valueset").setResource((Resource)valueset.iterator().next());
                   String codeFilterExpression = "%" + String.format("resource.%s.where(code.memberOf(\'%s\'))", filter.getPath(), "%" + "valueset");

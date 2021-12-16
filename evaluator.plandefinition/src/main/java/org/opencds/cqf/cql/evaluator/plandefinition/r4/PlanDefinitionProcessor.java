@@ -106,7 +106,7 @@ public class PlanDefinitionProcessor {
     this.operationParametersParser = operationParametersParser;
   }
 
-  public IBaseParameters apply(IdType theId, String patientId, String encounterId, String practitionerId,
+  public CarePlan apply(IdType theId, String patientId, String encounterId, String practitionerId,
       String organizationId, String userType, String userLanguage, String userTaskContext, String setting,
       String settingContext, Boolean mergeNestedCarePlans, IBaseParameters parameters, Boolean useServerData,
       IBaseBundle bundle, IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
@@ -178,10 +178,7 @@ public class PlanDefinitionProcessor {
         contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, useServerData, mergeNestedCarePlans,
         prefetchDataData, prefetchDataDescription, prefetchDataKey);
 
-    CarePlan carePlan = (CarePlan) ContainedHelper.liftContainedResourcesToParent(resolveActions(session));
-    IBaseParameters returnParameters = new Parameters();
-    operationParametersParser.addResourceChild(returnParameters, "return", carePlan);
-    return returnParameters;
+    return (CarePlan) ContainedHelper.liftContainedResourcesToParent(resolveActions(session));
   }
 
   private CarePlan resolveActions(Session session) {
@@ -292,23 +289,16 @@ public class PlanDefinitionProcessor {
       throw new RuntimeException("No plan definition found for definition: " + definition);
     }
     PlanDefinition planDefinition = (PlanDefinition) iterator.next();
-    IBaseParameters result = apply(planDefinition.getIdElement(), session.patientId, session.encounterId,
+    carePlan = apply(planDefinition.getIdElement(), session.patientId, session.encounterId,
         session.practitionerId, session.organizationId, session.userType, session.userLanguage, session.userTaskContext,
         session.setting, session.settingContext, session.mergeNestedCarePlans, session.parameters,
         session.useServerData, session.bundle, session.prefetchData, session.dataEndpoint, session.contentEndpoint,
         session.terminologyEndpoint);
 
-    IBaseResource baseCarePlan = operationParametersParser.getResourceChild(result, "return");
-    if (!(baseCarePlan instanceof CarePlan)) {
-      throw new RuntimeException(
-          "Invalid PlanDefinition apply result expected Parameters with return parameter CarePlan" + result);
-    }
-    carePlan = (CarePlan) baseCarePlan;
-
     if (carePlan.getId() == null) {
       carePlan.setId(UUID.randomUUID().toString());
     }
-    applyAction(session, result, action);
+    applyAction(session, carePlan, action);
 
     // Add an action to the request group which points to this CarePlan
     session.requestGroup

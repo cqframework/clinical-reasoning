@@ -178,19 +178,19 @@ public class PlanDefinitionProcessorTests {
         Endpoint dataEndpoint = new Endpoint().setAddress("tests-Reportable-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
         
-        Parameters actual = (Parameters) planDefinitionProcessor.apply(
+        Resource actualCarePlan = planDefinitionProcessor.apply(
                 new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "Reportable", "reportable-encounter", null, null, null, null, null, null, null, null, expected, null, null, null, dataEndpoint,
                 endpoint, endpoint);
 
         CarePlan expectedCarePlan = getExpectedCarePlan("ReportableCarePlan.json");
-        Resource actualCarePlan = actual.getParameter().get(0).getResource();
         assertTrue(expectedCarePlan.equalsShallow(actualCarePlan));
     }
 
     @Test
     public void TestRuleFiltersNotReportable() throws JsonProcessingException {
-        Parameters expected = new Parameters();
-        expected.addParameter().setName("return").setResource(getExpectedCarePlan("NotReportableCarePlan.json"));
+        Parameters params = new Parameters();
+        
+        CarePlan expected = getExpectedCarePlan("NotReportableCarePlan.json");
 
         Endpoint endpoint = new Endpoint().setAddress("RuleFilters-1.0.0-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
@@ -198,9 +198,10 @@ public class PlanDefinitionProcessorTests {
         Endpoint dataEndpoint = new Endpoint().setAddress("tests-NotReportable-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Parameters actual = (Parameters) planDefinitionProcessor.apply(
-                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", null, null, null, null, null, null, null, null, null, expected, null, new Bundle(), null, dataEndpoint,
-                endpoint, endpoint);
+        CarePlan actual = planDefinitionProcessor.apply(
+                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", 
+                null, null, null, null, null, null, null, null, null, params, null, 
+                new Bundle(), null, dataEndpoint, endpoint, endpoint);
 
         assertTrue(expected.equalsShallow(actual));
     }

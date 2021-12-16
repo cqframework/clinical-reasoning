@@ -1,7 +1,8 @@
 {
     "cSpell.words": [
-        "CONTINUOUSVARIABLE",
+        "argfile",
         "Configurer",
+        "CONTINUOUSVARIABLE",
         "DENOMINATOREXCEPTION",
         "DENOMINATOREXCLUSION",
         "INITIALPOPULATION",
@@ -9,15 +10,21 @@
         "MEASUREOBSERVATION",
         "MEASUREPOPULATION",
         "MEASUREPOPULATIONEXCLUSION",
+        "mgpc",
+        "mgsc",
+        "mrgc",
+        "mrgsc",
+        "numer",
         "NUMERATOREXCLUSION",
         "PATIENTLIST",
+        "ppca",
+        "qicore",
+        "sdes",
+        "sgpc",
         "SUBJECTLIST",
         "Unvalidated",
-        "argfile",
-        "mgpc",
-        "mrgc",
-        "numer",
-        "ppca"
+        "uscore"
     ],
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.dependency.packagePresentation": "hierarchical"
 }

@@ -173,7 +173,7 @@ public class CqlFhirParametersConverterTests {
         Parameters testData = new Parameters();
         ParametersParameterComponent ppc = testData.addParameter();
         ppc.setName("%encounters");
-        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters"));
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters").setType("Encounter"));
 
         Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 

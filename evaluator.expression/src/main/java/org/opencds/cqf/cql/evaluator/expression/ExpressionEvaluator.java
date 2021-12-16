@@ -44,15 +44,18 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
+import org.opencds.cqf.cql.evaluator.library.CqlParameterDefinition;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,12 +78,14 @@ public class ExpressionEvaluator {
     protected CqlEvaluatorBuilder cqlEvaluatorBuilder;
     protected IFhirPath fhirPath;
     protected LibraryProcessor libraryProcessor;
+    protected ModelResolverFactory fhirModelResolverFactory;
     protected Supplier<CqlEvaluatorBuilder> cqlEvaluatorSupplier;
 
     @Inject
     public ExpressionEvaluator(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
             LibraryContentProviderFactory libraryContentProviderFactory, DataProviderFactory dataProviderFactory,
             TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
+            ModelResolverFactory fhirModelResolverFactory,
             Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
@@ -95,6 +100,12 @@ public class ExpressionEvaluator {
         this.cqlEvaluatorSupplier = requireNonNull(cqlEvaluatorBuilderSupplier,
                 "cqlEvaluatorBuilderSupplier can not be null");
         this.endpointConverter = requireNonNull(endpointConverter, "endpointConverter can not be null");
+
+        this.fhirModelResolverFactory = requireNonNull(fhirModelResolverFactory, "fhirModelResolverFactory can not be null");
+
+        if (!this.fhirModelResolverFactory.getModelUri().equals(Constants.FHIR_MODEL_URI)) {
+            throw new IllegalArgumentException("fhirModelResolverFactory was a FHIR modelResolverFactory");
+        }
     }
 
     /**
@@ -209,7 +220,7 @@ public class ExpressionEvaluator {
         expressions.add("return");
 
         libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> builder);
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> builder);
 
         return libraryProcessor.evaluate(new VersionedIdentifier().withId("expression").withVersion("1.0.0"), subject,
                 parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, expressions);
@@ -267,37 +278,25 @@ public class ExpressionEvaluator {
 
         // TODO: Can we consolidate this logic in the Library evaluator somehow? Then we
         // don't have to do this conversion twice
-        Map<String, Object> cqlParameters = this.cqlFhirParametersConverter.toCqlParameters(parameters);
+        List<CqlParameterDefinition> cqlParameters = this.cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
         if (cqlParameters.size() == 0) {
             return;
         }
 
-        for (Map.Entry<String, Object> entry : cqlParameters.entrySet()) {
-            sb.append("parameter \"" + entry.getKey() + "\" " + getType(entry.getValue()) + "\n");
+        for (CqlParameterDefinition cpd : cqlParameters) {
+            sb.append("parameter \"" + cpd.getName() + "\" " + this.getTypeDeclaration(cpd.getType(), cpd.getIsList()) + "\n");
         }
     }
 
-    private String getType(Object value) {
-        if (value instanceof Iterable)
-        {
-            Iterable<?> iterable = (Iterable<?>)value;
-            if (iterable.iterator().hasNext()) {
-                Object firstValue = ((Iterable<?>)value).iterator().next();
-                return "List<" + getType(firstValue) + ">";
-            }
-            else {
-                return "List<System.Any>";
-            }
+    private String getTypeDeclaration(String type, Boolean isList) {
+        // TODO: Handle "FHIR" and "System" prefixes
+        // Should probably mark system types in the CqlParameterDefinition?
+        if (isList) {
+            return "List<" + type + ">";
         }
-
-        if (value instanceof IBase) {
-            return "FHIR." + value.getClass().getSimpleName();
+        else {
+            return type;
         }
-        else if (value != null) {
-            return "System." + value.getClass().getSimpleName(); 
-        }
-
-        return "System.Any";
     }
 
     private void constructUsings(StringBuilder sb, IBaseParameters parameters) {

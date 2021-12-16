@@ -1,4 +1,6 @@
 target
+test-output
+bin/
 
 .classpath
 .project
@@ -16,6 +18,7 @@ dump.*
 heapdump.*
 javacore.*
 jitdump.*
+.attach_*
 
 .idea
 *.iml

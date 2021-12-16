@@ -33,9 +33,16 @@ public class BuilderModule {
     @Provides
     @IntoSet
     @Singleton
-    ModelResolverFactory fhirModelResolverFactory(FhirModelResolverFactory fhirModelResolverFactory) {
+    ModelResolverFactory fhirModelResolverFactorySet(FhirModelResolverFactory fhirModelResolverFactory) {
         return fhirModelResolverFactory;
     }
+
+    @Provides
+    @Singleton
+    ModelResolverFactory fhirModelResolverFactory(FhirModelResolverFactory fhirModelResolverFactory) {
+        return fhirModelResolverFactory;
+    }   
+      
 
     @Provides
     @Singleton

@@ -6,14 +6,22 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+import java.lang.reflect.Method;
+
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.elm.execution.Library;
+import org.hl7.cql_annotations.r1.CqlToElmInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
 
 /**
  * This class provides functions for extracting and parsing CQL Translator Options from
  * a Library
  */
 public class TranslatorOptionsUtil {
+
+    protected static final Logger logger = LoggerFactory.getLogger(TranslatorOptionsUtil.class);
 
     /**
      * Gets the translator options used to generate an elm Library.
@@ -33,8 +41,20 @@ public class TranslatorOptionsUtil {
         return parseTranslatorOptions(translatorOptions);
     }
 
+    // TODO: This has some hackery to work around type serialization that's being tracked here:
+    // https://github.com/DBCG/cql_engine/issues/436
+    // Once the deserializers are fixed this should only need engine annotation types. 
     private static String getTranslatorOptions(List<Object> annotations){
         for (Object o : annotations) {
+            // Library mapped through the  Library mapper
+            // The Library mapper currently uses the translator types instead of the engine
+            // types because that's all there are.
+            if (o instanceof CqlToElmInfo) {
+                CqlToElmInfo c = (CqlToElmInfo)o;
+                return c.getTranslatorOptions();
+            }
+
+            // Library loaded from JSON
             if (o instanceof LinkedHashMap<?,?>) {
                 try {
                     @SuppressWarnings("unchecked")
@@ -48,6 +68,30 @@ public class TranslatorOptionsUtil {
                     continue;
                 }
 
+            }
+
+            // Library read from XML
+            // ElementNsImpl is a private class internal to the JVM
+            // that we aren't allowed to use, hence all the reflection
+            if (o.getClass().getSimpleName().equals("ElementNSImpl")) {
+                try {
+                    Class<?> elementNsClass = o.getClass();
+                    Method method = elementNsClass.getMethod("getAttributes");
+                    org.w3c.dom.NamedNodeMap nodeMap =  (org.w3c.dom.NamedNodeMap)method.invoke(o);
+                    if (nodeMap == null) {
+                        continue;
+                    }
+
+                    Node attributeNode = nodeMap.getNamedItem("translatorOptions");
+                    if (attributeNode == null) {
+                        continue;
+                    }
+
+                    return  attributeNode.getNodeValue();
+                }
+                catch(Exception e) {
+                    continue;
+                }
             }
         }
 

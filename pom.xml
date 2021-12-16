@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>evaluator.shared</name>
@@ -17,12 +17,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cql-translator.version>1.5.3</cql-translator.version>
-        <cql-engine.version>1.5.1</cql-engine.version>
+        <cql-translator.version>1.5.5-SNAPSHOT</cql-translator.version>
+        <cql-engine.version>1.5.3-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.6</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <core.version>5.3.9</core.version>
-        <hapi.version>5.4.1</hapi.version>
+        <hapi.version>5.5.3</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <slf4j.version>1.7.29</slf4j.version>
         <caffeine.version>2.9.0</caffeine.version>
@@ -40,6 +40,7 @@
         <module>evaluator.cli</module>
         <module>evaluator.content-test</module>
         <module>evaluator.measure</module>
+        <module>evaluator.measure-hapi</module>
         <module>evaluator.activitydefinition</module>
         <module>evaluator.plandefinition</module>
         <module>evaluator.expression</module>
@@ -112,6 +113,11 @@
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm</artifactId>
                 <version>${cql-translator.version}</version>
             </dependency>
 
@@ -285,10 +291,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -339,6 +341,7 @@
                     <version>3.2.0</version>
                     <configuration>
                         <source>8</source>
+                        <show>private</show>
                     </configuration>
                     <executions>
                         <execution>
@@ -442,6 +445,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.21.0</version>
+                    <configuration>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

@@ -17,6 +17,7 @@ import dagger.Component;
 @Component(modules = { LibraryModule.class })
 @Singleton
 public interface CqlEvaluatorComponent {
+    // MeasureProcessor createMeasureProcessor();
     LibraryProcessor createLibraryProcessor();
     CqlEvaluatorBuilder createBuilder();
     DataProviderFactory createDataProviderFactory();

@@ -72,9 +72,11 @@ public class LibraryProcessorTests {
             }
         };
 
+        ModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
+
         Set<ModelResolverFactory> modelResolverFactories = new HashSet<ModelResolverFactory>() {
             {
-                add(new FhirModelResolverFactory());
+                add(fhirModelResolverFactory);
             }
         };
 
@@ -130,7 +132,7 @@ public class LibraryProcessorTests {
                 adapterFactory, fhirTypeConverter);
                 
         libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
     }
 
     @Test

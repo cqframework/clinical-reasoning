@@ -153,13 +153,15 @@ public class PlanDefinitionProcessorTests {
         TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
                 fhirContext, typedTerminologyProviderFactories);
 
+        FhirModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
+
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
         LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
             
         ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
 
         ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);

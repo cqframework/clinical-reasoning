@@ -39,7 +39,7 @@ public class EndpointConverter {
         IBaseCoding connectionType = (IBaseCoding)adapter.getSingleProperty("connectionType");
 
         if (url == null) {
-            throw new IllegalArgumentException("endpoint does not address specified");
+            throw new IllegalArgumentException("endpoint does not have address specified");
         }
 
         List<String> headers = null;

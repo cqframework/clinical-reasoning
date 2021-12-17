@@ -26,13 +26,16 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
     private FhirContext fhirContext;
 
     @Inject
-    public TerminologyProviderFactory(FhirContext fhirContent, Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
+    public TerminologyProviderFactory(FhirContext fhirContext, Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
         this.terminologyProviderFactories = terminologyProviderFactories;
-        this.fhirContext = fhirContent;
+        this.fhirContext = fhirContext;
     }
 
     public TerminologyProvider create(EndpointInfo endpointInfo) {
-        requireNonNull(endpointInfo, "endpointInfo can not be null");
+        if (endpointInfo == null) {
+            return null;
+        }
+
         if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
@@ -62,11 +65,15 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
             }
         }
 
-        throw new IllegalArgumentException("invalid connectionType for loading FHIR terminology");
+        throw new IllegalArgumentException("unsupported or unknown connectionType for loading FHIR terminology");
     }
 
     @Override
     public TerminologyProvider create(IBaseBundle terminologyBundle) {
+        if (terminologyBundle == null) {
+            return null;
+        }
+
         return new BundleTerminologyProvider(this.fhirContext, terminologyBundle);
     }
 }

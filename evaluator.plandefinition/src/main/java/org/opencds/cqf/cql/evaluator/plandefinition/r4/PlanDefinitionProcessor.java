@@ -248,8 +248,7 @@ public class PlanDefinitionProcessor {
     try {
       boolean referenceToContained = definition.getValue().startsWith("#");
       if (referenceToContained) {
-        ActivityDefinition activityDefinition = (ActivityDefinition) resolveContained(session.planDefinition,
-            definition.getValue());
+        ActivityDefinition activityDefinition = (ActivityDefinition) resolveContained(session.planDefinition, definition.getValue());
         result = this.activityDefinitionProcessor.resolveActivityDefinition(activityDefinition, session.patientId,
             session.practitionerId, session.organizationId, session.parameters, session.contentEndpoint,
             session.terminologyEndpoint, session.dataEndpoint);
@@ -528,79 +527,64 @@ public class PlanDefinitionProcessor {
     throw new RuntimeException("CanonicalType must have a value for resource name extraction");
   }
 
+  public Object getParameterComponentByName(Parameters params, String name) {
+    Optional<ParametersParameterComponent> first = params.getParameter().stream().filter(x -> x.getName().equals(name)).findFirst();
+    ParametersParameterComponent component = first.isPresent() ? first.get() : null;
+    return component.hasValue() ? component.getValue() : component.getResource();
+  }
+  
+  // TODO: We don't have tests for this function. 
   protected Object evaluateConditionOrDynamicValue(String expression, String language, String libraryToBeEvaluated, Session session, List<DataRequirement> dataRequirements) {
+    Parameters params = resolveInputParameters(dataRequirements);
+    if (session.parameters != null && session.parameters instanceof Parameters) {
+      params.getParameter().addAll(((Parameters) session.parameters).getParameter());
+    }
+
     Object result = null;
     switch (language) {
       case "text/cql":
       case "text/cql.expression":
-      case "text/cql-expression": {
-        if (dataRequirements != null && !dataRequirements.isEmpty()) {
-          Parameters params = resolveInputParameters(dataRequirements);
-          if (session.parameters != null && session.parameters instanceof Parameters) {
-            ((Parameters) session.parameters).getParameter().forEach(parameter -> params.addParameter(parameter));
-          }
-          expressionEvaluator.evaluate(expression, params);
-        } else {
-          expressionEvaluator.evaluate(expression, session.parameters);
-        }
-      } break;
+      case "text/cql-expression": 
+        result = expressionEvaluator.evaluate(expression, params);
+        break;
       case "text/cql-identifier":
       case "text/cql.identifier":
       case "text/cql.name":
-      case "text/cql-name": {
-        Set<String> expressions = new HashSet<>();
-        expressions.add(expression);
+      case "text/cql-name": 
         result = libraryProcessor.evaluate(libraryToBeEvaluated, session.patientId, session.parameters,
-            session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint, session.bundle, expressions);
-      } break;
-      case "text/fhirpath": {
-        Parameters params = resolveInputParameters(dataRequirements);
-        if (params != null) {
-          IBaseParameters resultParams = expressionEvaluator.evaluate(expression, params);
-          IBaseDatatype tempResult = operationParametersParser.getValueChild(((Parameters) resultParams), "return");
-          if (tempResult == null) {
-            IBaseResource tempResource = operationParametersParser.getResourceChild(((Parameters) resultParams), "return");
-            result = tempResource;
-          } else {
-            result = tempResult;
-          }
-        } else {
-          result = null;
+            session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint, session.bundle, 
+            Collections.singleton(expression));
+        break;
+      case "text/fhirpath": 
+        IBaseParameters resultParams = expressionEvaluator.evaluate(expression, params);
+        if (resultParams instanceof Parameters) {
+          result = getParameterComponentByName((Parameters) resultParams, "return");
         }
-      }
         break;
       default:
         logger.warn("An action language other than CQL was found: " + language);
     }
     if (result != null) {
       if (result instanceof Parameters) {
-        IBaseDatatype tempResult = operationParametersParser.getValueChild(((Parameters) result), expression);
-        if (tempResult == null) {
-          IBaseResource tempResource = operationParametersParser.getResourceChild(((Parameters) result), expression);
-          result = tempResource;
-        } else {
-          result = tempResult;
-        }
+        result = getParameterComponentByName((Parameters) result, expression);
       }
     }
     return result;
   }
 
   private Parameters resolveInputParameters(List<DataRequirement> dataRequirements) {
-    if (dataRequirements == null || dataRequirements.isEmpty()) {
-      return null;
-    }
+    if (dataRequirements == null) return new Parameters();
+
     Parameters params = new Parameters();
     for (DataRequirement req : dataRequirements) {
-      String name = req.getId();
-      String fhirType = req.getType();
-      Iterator<IBaseResource> searchResult = fhirDal.search(fhirType).iterator();
-      if (searchResult != null && searchResult.hasNext()) {
+      Iterator<IBaseResource> resources = fhirDal.search(req.getType()).iterator();
+      
+      if (resources != null && resources.hasNext()) {
         int index = 0;
         Boolean found = true;
-        while (searchResult.hasNext()) {
-          Resource resource = (Resource)searchResult.next();
-          ParametersParameterComponent parameter = new ParametersParameterComponent().setName("%" + String.format("%s", name));
+        while (resources.hasNext()) {
+          Resource resource = (Resource)resources.next();
+          ParametersParameterComponent parameter = new ParametersParameterComponent().setName("%" + String.format("%s", req.getId()));
           if (req.hasCodeFilter()) {
             for (DataRequirement.DataRequirementCodeFilterComponent filter : req.getCodeFilter()) {
               Parameters codeFilterParam = new Parameters();
@@ -612,18 +596,16 @@ public class PlanDefinitionProcessor {
                   String codeFilterExpression = "%" + String.format("resource.%s.where(code.memberOf(\'%s\'))", filter.getPath(), "%" + "valueset");
                   IBaseParameters codeFilterResult = expressionEvaluator.evaluate(codeFilterExpression, codeFilterParam);
                   IBaseDatatype tempResult = operationParametersParser.getValueChild(((Parameters) codeFilterResult), "return");
-                  if (tempResult != null) {
-                    if (tempResult instanceof BooleanType) {
-                      found = ((BooleanType)tempResult).booleanValue();
-                    }
+                  if (tempResult != null && tempResult instanceof BooleanType) {
+                    found = ((BooleanType)tempResult).booleanValue();
                   }
                 }
                 logger.debug(String.format("Could not find ValueSet with url %s on the local server.", filter.getValueSet()));
               }
             }
           }
-          if (!searchResult.hasNext() && index == 0) {
-            parameter.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%" + name));
+          if (!resources.hasNext() && index == 0) {
+            parameter.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%" + req.getId()));
             if (found) {
               parameter.setResource(resource);
             }
@@ -638,8 +620,8 @@ public class PlanDefinitionProcessor {
           index++;
         }
       } else {
-        ParametersParameterComponent parameter = new ParametersParameterComponent().setName("%" + String.format("%s", name));
-        parameter.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%" + name));
+        ParametersParameterComponent parameter = new ParametersParameterComponent().setName("%" + String.format("%s", req.getId()));
+        parameter.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%" + req.getId()));
         params.addParameter(parameter);
       }
     }
@@ -647,16 +629,11 @@ public class PlanDefinitionProcessor {
   }
 
   protected Resource resolveContained(DomainResource resource, String id) {
-    for (Resource res : resource.getContained()) {
-      if (res.hasIdElement()) {
-        if (res.getIdElement().getIdPart().equals(id)) {
-          return res;
-        }
-      }
-    }
-
-    throw new RuntimeException(
-        String.format("Resource %s does not contain resource with id %s", resource.fhirType(), id));
+    Optional<Resource> first = resource.getContained().stream()
+        .filter(x -> x.hasIdElement())
+        .filter(x -> x.getIdElement().getIdPart().equals(id))
+        .findFirst();
+    return first.isPresent() ? first.get() : null;
   }
 }
 

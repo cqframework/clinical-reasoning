@@ -41,6 +41,7 @@
         <module>evaluator.measure</module>
         <module>evaluator.measure-hapi</module>
         <module>evaluator.activitydefinition</module>
+        <module>evaluator.plandefinition</module>
         <module>evaluator.expression</module>
     </modules>
 

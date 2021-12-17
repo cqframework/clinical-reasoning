@@ -18,10 +18,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
+import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 
@@ -40,12 +42,14 @@ public class LibraryProcessor {
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected EndpointConverter endpointConverter;
     protected CqlEvaluatorBuilder cqlEvaluatorBuilder;
+    protected ModelResolverFactory fhirModelResolverFactory;
     protected Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier;
 
     @Inject
     public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
             LibraryContentProviderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
             TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
+            ModelResolverFactory fhirModelResolverFactory,
             Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
@@ -57,6 +61,11 @@ public class LibraryProcessor {
 
         this.endpointConverter = requireNonNull(endpointConverter, "endpointConverter can not be null");
         this.cqlEvaluatorBuilderSupplier = requireNonNull(cqlEvaluatorBuilderSupplier, "cqlEvaluatorBuilder can not be null");
+        this.fhirModelResolverFactory = requireNonNull(fhirModelResolverFactory, "fhirModelResolverFactory can not be null");
+
+        if (!this.fhirModelResolverFactory.getModelUri().equals(Constants.FHIR_MODEL_URI)) {
+            throw new IllegalArgumentException("fhirModelResolverFactory was a FHIR modelResolverFactory");
+        }
     }
 
     /**
@@ -185,6 +194,12 @@ public class LibraryProcessor {
             Triple<String, ModelResolver, RetrieveProvider> dataProvider = this.dataProviderFactory
                     .create(additionalData);
             this.cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider);
+        }
+
+        if (additionalData == null && dataEndpoint == null) {
+            // Set up a FHIR resolver in the event we don't have any data
+            ModelResolver modelResolver = this.fhirModelResolverFactory.create(fhirContext.getVersion().getVersion().getFhirVersionString());
+            this.cqlEvaluatorBuilder.withModelResolver(Constants.FHIR_MODEL_URI, modelResolver);
         }
     }
 

@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.evaluator.builder.dal;
 
-import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
+
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.Set;
@@ -9,26 +10,29 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
+import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @Named
 public class FhirDalFactory implements org.opencds.cqf.cql.evaluator.builder.FhirDalFactory {
 
     private Set<TypedFhirDalFactory> fhirDalFactories;
+    private FhirContext fhirContext;
 
     @Inject
-    public FhirDalFactory(Set<TypedFhirDalFactory> fhirDalFactories) {
+    public FhirDalFactory(FhirContext fhirContext, Set<TypedFhirDalFactory> fhirDalFactories) {
         this.fhirDalFactories = fhirDalFactories;
+        this.fhirContext = fhirContext;
     }
 
     public FhirDal create(EndpointInfo endpointInfo) {
-        if (endpointInfo == null) {
-            return null;
-        }
-
+        requireNonNull(endpointInfo, "endpointInfo can not be null");
         if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
         }
@@ -58,6 +62,11 @@ public class FhirDalFactory implements org.opencds.cqf.cql.evaluator.builder.Fhi
             }
         }
 
-        throw new IllegalArgumentException("unsupported connectionType for loading FHIR resources");
+        throw new IllegalArgumentException("invalid connectionType for loading FHIR resources");
+    }
+
+    @Override
+    public FhirDal create(IBaseBundle resourceBundle) {
+        return new BundleFhirDal(this.fhirContext, resourceBundle);
     }
 }

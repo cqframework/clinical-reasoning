@@ -1,503 +1,519 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOR;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOREXCLUSION;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.INITIALPOPULATION;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREOBSERVATION;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREPOPULATION;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOR;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
+
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import org.hl7.fhir.instance.model.api.IBase;
+import org.cqframework.cql.elm.execution.ExpressionDef;
+import org.cqframework.cql.elm.execution.FunctionDef;
+import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
+import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
+import org.cqframework.cql.elm.execution.ParameterDef;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.execution.Variable;
+import org.opencds.cqf.cql.engine.runtime.Date;
+import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("unchecked")
-public abstract class MeasureEvaluation<MeasureT extends IBase,  MeasureGroupComponentT extends IBase, MeasureGroupPopulationComponentT extends IBase, MeasureReportT extends IBase, MeasureReportGroupComponentT extends IBase, MeasureReportGroupPopulationComponentT extends IBase, ResourceT, SubjectT extends ResourceT> {
+/**
+ * This class implements the core Measure evaluation logic that's defined in the
+ * Quality Measure implementation guide and HQMF specifications. There are a
+ * number of model-independent concepts such as "groups", "populations", and
+ * "stratifiers" that can be used across a number of different data models
+ * including FHIR, QDM, and QICore. To the extent feasible, this class is
+ * intended to be model-independent so that it can be used in any Java-based
+ * implementation of Quality Measure evaluation.
+ * 
+ * @see <a href=
+ *      "http://hl7.org/fhir/us/cqfmeasures/introduction.html">http://hl7.org/fhir/us/cqfmeasures/introduction.html</a>
+ * @see <a href=
+ *      "http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
+ */
+public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureReportT extends BaseT, SubjectT> {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
 
     protected MeasureT measure;
     protected Context context;
-    protected String subjectOrPractitionerId;
-    protected Interval measurementPeriod;
+    protected Function<SubjectT, String> getId;
+    protected String subjectType = null;
+    protected MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder;
+    protected MeasureDefBuilder<MeasureT> measureDefBuilder;
+    protected String modelUri = null;
+    protected String measurementPeriodParameterName = null;
 
-    // TODO: Figure this out dynamically based on the ResourceType
-    protected String packageName;
+    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
+            MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
+            MeasureDefBuilder<MeasureT> measureDefBuilder) {
+        this(context, measure, getId, measureReportBuilder, measureDefBuilder, MeasureConstants.FHIR_MODEL_URI,
+                MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
 
-    protected Function<ResourceT, String> getId;
-
-    protected abstract MeasureScoring getMeasureScoring();
-
-    protected abstract String getCriteriaExpression(MeasureGroupPopulationComponentT mgpc);
-
-    protected abstract void setGroupScore(MeasureReportGroupComponentT mrgc, Double score);
-
-    protected abstract MeasurePopulationType getPopulationType(MeasureGroupPopulationComponentT mgpc);
-
-    protected abstract Iterable<MeasureGroupComponentT> getGroup();
-
-    protected abstract Iterable<MeasureGroupPopulationComponentT> getPopulation(MeasureGroupComponentT mgc);
-
-    protected abstract void addPopulationReport(MeasureReportT report, MeasureReportGroupComponentT reportGroup,
-            MeasureGroupPopulationComponentT populationCriteria, int populationCount,
-            Iterable<SubjectT> subjectPopulation);
-
-    protected abstract MeasureReportT createMeasureReport(String status, MeasureReportType type,
-            Interval measurementPeriod, List<SubjectT> subjects);
-
-    protected abstract MeasureReportGroupComponentT createReportGroup(String id);
-
-    protected abstract String getGroupId(MeasureGroupComponentT group);
-
-    protected abstract void addReportGroup(MeasureReportT report, MeasureReportGroupComponentT group);
-
-    public MeasureEvaluation(Context context, MeasureT measure, Interval measurementPeriod, String packageName,
-            Function<ResourceT, String> getId) {
-        this(context, measure, measurementPeriod, packageName, getId, null);
     }
 
-    public MeasureEvaluation(Context context, MeasureT measure, Interval measurementPeriod, String packageName,
-            Function<ResourceT, String> getId, String patientOrPractitionerId) {
+    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
+            MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
+            MeasureDefBuilder<MeasureT> measureDefBuilder, String modelUri, String measurementPeriodParameterName) {
         this.measure = measure;
         this.context = context;
-        this.subjectOrPractitionerId = patientOrPractitionerId;
-        this.measurementPeriod = measurementPeriod;
         this.getId = getId;
-        this.packageName = packageName;        
+        this.measureDefBuilder = measureDefBuilder;
+        this.measureReportBuilder = measureReportBuilder;
+        this.measurementPeriodParameterName = measurementPeriodParameterName;
+        this.modelUri = modelUri;
     }
 
-    public MeasureReportT evaluate(MeasureReportType type) {
+    public MeasureReportT evaluate(MeasureEvalType type) {
+        return this.evaluate(type, null, null);
+    }
+
+    public MeasureReportT evaluate(MeasureEvalType type, String subjectOrPractitionerId) {
+        return this.evaluate(type, subjectOrPractitionerId, null);
+    }
+
+    public MeasureReportT evaluate(MeasureEvalType type, Interval interval) {
+        return this.evaluate(type, null, interval);
+    }
+
+    public MeasureReportT evaluate(MeasureEvalType type, String subjectOrPractitionerId, Interval measurementPeriod) {
+        // Default behavior for unspecified type is Subject if a subject is specified,
+        // and Population if one is not.
+        if (type == null) {
+            type = subjectOrPractitionerId != null ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION;
+        }
+
+        this.setMeasurementPeriod(measurementPeriod);
+
+        List<String> subjectIds = getSubjectIds(type, subjectOrPractitionerId);
         switch (type) {
-            case INDIVIDUAL:
-                return this.evaluatePatientMeasure();
+            case PATIENT:
+            case SUBJECT:
+                return this.evaluate(subjectIds, MeasureReportType.INDIVIDUAL);
             case SUBJECTLIST:
-                return this.evaluateSubjectListMeasure();
+                return this.evaluate(subjectIds, MeasureReportType.SUBJECTLIST);
             case PATIENTLIST:
-                return this.evaluatePatientListMeasure();
+                return this.evaluate(subjectIds, MeasureReportType.PATIENTLIST);
+            case POPULATION:
+                return this.evaluate(subjectIds, MeasureReportType.SUMMARY);
             default:
-                return this.evaluatePatientListMeasure();
+                throw new IllegalArgumentException(
+                        String.format("Unsupported Measure Evaluation type: %s", type.getDisplay()));
         }
     }
 
-    protected MeasureReportT evaluatePatientMeasure() {
-        logger.info("Generating individual report");
+    public List<String> getSubjectIds(MeasureEvalType type, String subjectOrPractitionerId) {
+        switch (type) {
+            case PATIENT:
+            case SUBJECT:
+                return getIndividualSubjectId(subjectOrPractitionerId);
+            case SUBJECTLIST:
+            case PATIENTLIST:
+                return this.getPractitionerSubjectIds(subjectOrPractitionerId);
+            case POPULATION:
+            default:
+                if (subjectOrPractitionerId != null) {
+                    return getIndividualSubjectId(subjectOrPractitionerId);
+                } else {
+                    return getAllSubjectIds();
+                }
+        }
+    }
 
-        if (this.subjectOrPractitionerId == null) {
-            return evaluatePopulationMeasure();
+    public List<String> getIndividualSubjectId(String subjectId) {
+        String parsedSubjectId = null;
+        if (subjectId != null && subjectId.contains("/")) {
+            String[] subjectIdParts = subjectId.split("/");
+            this.subjectType = subjectIdParts[0];
+            parsedSubjectId = subjectIdParts[1];
+        } else {
+            this.subjectType = "Patient";
+            parsedSubjectId = subjectId;
+            logger.info("Could not determine subjectType. Defaulting to Patient");
         }
 
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Patient", "id",
-                this.subjectOrPractitionerId, "Patient", null, null, null, null, null, null, null, null);
-        SubjectT patient = null;
-        if (subjectRetrieve.iterator().hasNext()) {
-            patient = (SubjectT) subjectRetrieve.iterator().next();
+        if (parsedSubjectId == null) {
+            throw new IllegalArgumentException("subjectId is required for individual reports.");
         }
 
-        return evaluate(patient == null ? Collections.emptyList() : Collections.singletonList(patient),
-                MeasureReportType.INDIVIDUAL);
+        return Collections.singletonList(this.subjectType + "/" + parsedSubjectId);
     }
 
-    protected MeasureReportT evaluateSubjectListMeasure() {
-        logger.info("Generating subject-list report");
-        List<SubjectT> subjects = this.subjectOrPractitionerId == null ? getAllSubjects()
-                : getPractitionerSubjects(this.subjectOrPractitionerId);
-        return evaluate(subjects, MeasureReportType.SUBJECTLIST);
+    protected Interval getMeasurementPeriod() {
+        return (Interval) this.context.resolveParameterRef(null, this.measurementPeriodParameterName);
     }
 
-    protected MeasureReportT evaluatePatientListMeasure() {
-        logger.info("Generating patient-list report");
-        List<SubjectT> subjects = this.subjectOrPractitionerId == null ? getAllSubjects()
-                : getPractitionerSubjects(this.subjectOrPractitionerId);
-        return evaluate(subjects, MeasureReportType.PATIENTLIST);
+    protected ParameterDef getMeasurementPeriodParameterDef() {
+        Library lib = this.context.getCurrentLibrary();
+
+        if (lib.getParameters() == null || lib.getParameters().getDef() == null || lib.getParameters().getDef().isEmpty()) {
+            return null; 
+        }
+
+        for (ParameterDef pd : lib.getParameters().getDef()) {
+            if (pd.getName().equals(this.measurementPeriodParameterName)) {
+                return pd;
+            }
+        }
+         
+        return null;
+
     }
 
-    private List<SubjectT> getPractitionerSubjects(String practitionerRef) {
-        List<SubjectT> subjects = new ArrayList<>();
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
-                practitionerRef, "Patient", null, null, null, null, null, null, null, null);
-        subjectRetrieve.forEach(x -> subjects.add((SubjectT) x));
-        return subjects;
+    protected void setMeasurementPeriod(Interval measurementPeriod) {
+        if (measurementPeriod == null) {
+            return;
+        }
+
+        ParameterDef pd = this.getMeasurementPeriodParameterDef();
+        if (pd == null) {
+            logger.warn("Parameter \"{}\" was not found. Unable to validate type.", this.measurementPeriodParameterName);
+            this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            return;
+        }
+
+        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier)pd.getParameterTypeSpecifier();
+        if (intervalTypeSpecifier == null) {
+            logger.debug("No ELM type information available. Unable to validate type of \"{}\"", this.measurementPeriodParameterName);
+            this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            return;
+        }
+
+        NamedTypeSpecifier pointType = (NamedTypeSpecifier)intervalTypeSpecifier.getPointType();
+        String targetType = pointType.getName().getLocalPart();
+        Interval convertedPeriod = convertInterval(measurementPeriod, targetType);
+        
+        this.context.setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
     }
 
-    private DataProvider getDataProvider() {
-        return this.context.resolveDataProvider(this.packageName);
+    protected Interval convertInterval(Interval interval, String targetType) {
+        String sourceTypeQualified = interval.getPointType().getTypeName();
+        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
+        if (sourceType.equals(targetType)) {
+            return interval;
+        }
+
+        if (sourceType.equals("DateTime") && targetType.equals("Date")) {
+            logger.debug("A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
+            return new Interval(truncateDateTime((DateTime)interval.getLow()), interval.getLowClosed(), truncateDateTime((DateTime)interval.getHigh()), interval.getHighClosed());
+        }
+
+        throw new IllegalArgumentException(String.format("The interval type of %s did not match the expected type of %s and no conversion was possible.", sourceType, targetType));
     }
 
-    private List<SubjectT> getAllSubjects() {
-        List<SubjectT> patients = new ArrayList<>();
-        Iterable<Object> patientRetrieve = this.getDataProvider().retrieve(null, null, null, "Patient", null, null,
+    protected Date truncateDateTime(DateTime dateTime) {
+        OffsetDateTime odt = dateTime.getDateTime();
+        return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
+    }
+
+    protected DataProvider getDataProvider() {
+        return this.context.resolveDataProviderByModelUri(this.modelUri);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<String> getAllSubjectIds() {
+        this.subjectType = "Patient";
+        List<String> subjectIds = new ArrayList<>();
+        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null, subjectType, null, null,
                 null, null, null, null, null, null);
-        patientRetrieve.forEach(x -> patients.add((SubjectT) x));
-        return patients;
+        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+        return subjectIds;
     }
 
-    public MeasureReportT evaluatePopulationMeasure() {
-        logger.info("Generating summary report");
+    @SuppressWarnings("unchecked")
+    protected List<String> getPractitionerSubjectIds(String practitionerRef) {
+        this.subjectType = "Patient";
 
-        return evaluate(getAllSubjects(), MeasureReportType.SUMMARY);
+        if (practitionerRef == null) {
+            return getAllSubjectIds();
+        }
+
+        List<String> subjectIds = new ArrayList<>();
+
+        if (!practitionerRef.contains("/")) {
+            practitionerRef = "Practitioner/" + practitionerRef;
+        }
+
+        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
+                practitionerRef, subjectType, null, null, null, null, null, null, null, null);
+        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+        return subjectIds;
     }
 
-    private Iterable<ResourceT> evaluateCriteria(SubjectT subject, MeasureGroupPopulationComponentT pop) {
-        String criteriaExpression = this.getCriteriaExpression(pop);
+    protected void setContextToSubject(String subjectId) {
+        if (subjectId.contains("/")) {
+            String[] subjectIdParts = subjectId.split("/");
+            subjectId = subjectIdParts[1];
+        }
+
+        // TODO: Extract subject type from each subjectId?
+        context.setContextValue(subjectType, subjectId);
+    }
+
+    protected void captureEvaluatedResources(List<Object> outEvaluatedResources) {
+        if (outEvaluatedResources != null) {
+            if (this.context.getEvaluatedResources() != null) {
+                for (Object o : this.context.getEvaluatedResources()) {
+                    outEvaluatedResources.add(o);
+                }
+            }
+        }
+
+        this.context.clearEvaluatedResources();
+    }
+
+    protected MeasureReportT evaluate(List<String> subjectIds, MeasureReportType type) {
+        MeasureDef measureDef = this.measureDefBuilder.build(this.measure);
+
+        this.innerEvaluate(measureDef, subjectIds, type);
+
+        return this.measureReportBuilder.build(this.measure, measureDef, type, this.getMeasurementPeriod(), subjectIds);
+    }
+
+    protected void innerEvaluate(MeasureDef measureDef, List<String> subjectIds, MeasureReportType type) {
+
+        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.getUrl(), type.toCode(),
+                subjectIds.size());
+
+        MeasureScoring measureScoring = measureDef.getMeasureScoring();
+        if (measureScoring == null) {
+            throw new RuntimeException("MeasureScoring type is required in order to calculate.");
+        }
+
+        for (GroupDef groupDef : measureDef.getGroups()) {
+            evaluateGroup(measureScoring, groupDef, measureDef.getSdes(), subjectIds);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Iterable<BaseT> evaluatePopulationCriteria(String subjectId, String criteriaExpression,
+            List<Object> outEvaluatedResources) {
         if (criteriaExpression == null || criteriaExpression.isEmpty()) {
             return Collections.emptyList();
         }
 
-        context.setContextValue("Patient", this.getId.apply(subject));
-        Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
+        Object result = this.evaluateCriteria(criteriaExpression, outEvaluatedResources);
+
         if (result == null) {
-            Collections.emptyList();
+            return Collections.emptyList();
         }
 
         if (result instanceof Boolean) {
             if (((Boolean) result)) {
-                return Collections.singletonList(subject);
+                return Collections.singletonList(
+                        (BaseT) this.context.resolveExpressionRef(this.subjectType).evaluate(this.context));
             } else {
                 return Collections.emptyList();
             }
         }
 
-        return (Iterable<ResourceT>)result;
+        return (Iterable<BaseT>) result;
     }
 
-    private boolean evaluatePopulationCriteria(SubjectT subject, MeasureGroupPopulationComponentT criteria,
-            HashMap<String, ResourceT> population, HashMap<String, SubjectT> populationSubjects,
-            MeasureGroupPopulationComponentT exclusionCriteria, HashMap<String, ResourceT> exclusionPopulation,
-            HashMap<String, SubjectT> exclusionSubjects) {
+    protected Object evaluateCriteria(String criteriaExpression, List<Object> outEvaluatedResources) {
+        Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
+
+        captureEvaluatedResources(outEvaluatedResources);
+
+        return result;
+    }
+
+    protected Object evaluateObservationCriteria(Object resource, String criteriaExpression,
+            List<Object> outEvaluatedResources) {
+
+        ExpressionDef ed = context.resolveExpressionRef(criteriaExpression);
+        if (!(ed instanceof FunctionDef)) {
+            throw new IllegalArgumentException(String
+                    .format("Measure observation %s does not reference a function definition", criteriaExpression));
+        }
+
+        Object result = null;
+        context.pushWindow();
+        try {
+            context.push(new Variable().withName(((FunctionDef) ed).getOperand().get(0).getName()).withValue(resource));
+            result = ed.getExpression().evaluate(context);
+        } finally {
+            context.popWindow();
+        }
+
+        captureEvaluatedResources(outEvaluatedResources);
+
+        return result;
+    }
+
+    protected boolean evaluatePopulationMembership(String subjectId, PopulationDef inclusionDef,
+            PopulationDef exclusionDef) {
         boolean inPopulation = false;
-        if (criteria != null) {
-            for (ResourceT resource : evaluateCriteria(subject, criteria)) {
-                inPopulation = true;
-                population.put(this.getId.apply(resource), resource);
-            }
+        for (Object resource : evaluatePopulationCriteria(subjectId, inclusionDef.getCriteriaExpression(),
+                inclusionDef.getEvaluatedResources())) {
+            inPopulation = true;
+            inclusionDef.getResources().add(resource);
         }
 
         if (inPopulation) {
-            // Are they in the exclusion?
-            if (exclusionCriteria != null) {
-                for (ResourceT resource : evaluateCriteria(subject, exclusionCriteria)) {
+            if (exclusionDef != null) {
+                for (Object resource : evaluatePopulationCriteria(subjectId, exclusionDef.getCriteriaExpression(),
+                        exclusionDef.getEvaluatedResources())) {
                     inPopulation = false;
-                    exclusionPopulation.put(this.getId.apply(resource), resource);
-                    population.remove(this.getId.apply(resource));
+                    exclusionDef.getResources().add(resource);
+                    inclusionDef.getResources().remove(resource);
                 }
             }
         }
 
-        if (inPopulation && populationSubjects != null) {
-            populationSubjects.put(this.getId.apply(subject), subject);
+        if (inPopulation) {
+            inclusionDef.getSubjects().add(subjectId);
         }
-        if (!inPopulation && exclusionSubjects != null) {
-            exclusionSubjects.put(this.getId.apply(subject), subject);
+
+        if (!inPopulation && exclusionDef != null) {
+            exclusionDef.getSubjects().add(subjectId);
         }
 
         return inPopulation;
     }
 
-    private void addPopulationCriteriaReport(MeasureReportT report, MeasureReportGroupComponentT reportGroup,
-            MeasureGroupPopulationComponentT populationCriteria, int populationCount,
-            Iterable<SubjectT> patientPopulation) {
-        if (populationCriteria != null) {
-            this.addPopulationReport(report, reportGroup, populationCriteria, populationCount, patientPopulation);
-        }
-    }
+    protected void evaluateProportion(GroupDef groupDef, String subjectId) {
+        // Are they in the initial population?
+        boolean inInitialPopulation = evaluatePopulationMembership(subjectId, groupDef.get(INITIALPOPULATION), null);
+        if (inInitialPopulation) {
+            // Are they in the denominator?
+            boolean inDenominator = evaluatePopulationMembership(subjectId, groupDef.get(DENOMINATOR),
+                    groupDef.get(DENOMINATOREXCLUSION));
 
-    private MeasureReportT evaluate(List<SubjectT> patients, MeasureReportType type) {
-        MeasureReportT report = this.createMeasureReport("complete", type, this.measurementPeriod, patients);
-        HashMap<String, ResourceT> resources = new HashMap<>();
-        HashMap<String, HashSet<String>> codeToResourceMap = new HashMap<>();
+            if (inDenominator) {
+                // Are they in the numerator?
+                boolean inNumerator = evaluatePopulationMembership(subjectId, groupDef.get(NUMERATOR),
+                        groupDef.get(NUMERATOREXCLUSION));
 
-        MeasureScoring measureScoring = this.getMeasureScoring();
-        if (measureScoring == null) {
-            throw new RuntimeException("MeasureType scoring is required in order to calculate.");
-        }
+                if (!inNumerator && inDenominator && groupDef.get(DENOMINATOREXCLUSION) != null) {
+                    // Are they in the denominator exception?
 
-        for (MeasureGroupComponentT group : this.getGroup()) {
-            MeasureReportGroupComponentT reportGroup = this.createReportGroup(this.getGroupId(group));
-            this.addReportGroup(report, reportGroup);
+                    PopulationDef denominatorExclusion = groupDef.get(DENOMINATOREXCLUSION);
+                    PopulationDef denominator = groupDef.get(DENOMINATOR);
+                    boolean inException = false;
+                    for (BaseT resource : evaluatePopulationCriteria(subjectId,
+                            denominatorExclusion.getCriteriaExpression(),
+                            denominatorExclusion.getEvaluatedResources())) {
+                        inException = true;
+                        denominatorExclusion.getResources().add(resource);
+                        denominator.getResources().remove(resource);
 
-            // Declare variables to avoid a hash lookup on every patient
-            // TODO: Isn't quite right, there may be multiple initial populations for a
-            // ratio MeasureType...
-            MeasureGroupPopulationComponentT initialPopulationCriteria = null;
-            MeasureGroupPopulationComponentT numeratorCriteria = null;
-            MeasureGroupPopulationComponentT numeratorExclusionCriteria = null;
-            MeasureGroupPopulationComponentT denominatorCriteria = null;
-            MeasureGroupPopulationComponentT denominatorExclusionCriteria = null;
-            MeasureGroupPopulationComponentT denominatorExceptionCriteria = null;
-            MeasureGroupPopulationComponentT measurePopulationCriteria = null;
-            MeasureGroupPopulationComponentT measurePopulationExclusionCriteria = null;
-            // TODO: Isn't quite right, there may be multiple MeasureType observations...
-            MeasureGroupPopulationComponentT measureObservationCriteria = null;
+                    }
 
-            HashMap<String, ResourceT> initialPopulation = null;
-            HashMap<String, ResourceT> numerator = null;
-            HashMap<String, ResourceT> numeratorExclusion = null;
-            HashMap<String, ResourceT> denominator = null;
-            HashMap<String, ResourceT> denominatorExclusion = null;
-            HashMap<String, ResourceT> denominatorException = null;
-            HashMap<String, ResourceT> measurePopulation = null;
-            HashMap<String, ResourceT> measurePopulationExclusion = null;
-            HashMap<String, ResourceT> measureObservation = null;
-
-            HashMap<String, SubjectT> initialPopulationPatients = null;
-            HashMap<String, SubjectT> numeratorPatients = null;
-            HashMap<String, SubjectT> numeratorExclusionPatients = null;
-            HashMap<String, SubjectT> denominatorPatients = null;
-            HashMap<String, SubjectT> denominatorExclusionPatients = null;
-            HashMap<String, SubjectT> denominatorExceptionPatients = null;
-            HashMap<String, SubjectT> measurePopulationPatients = null;
-            HashMap<String, SubjectT> measurePopulationExclusionPatients = null;
-
-            for (MeasureGroupPopulationComponentT pop : this.getPopulation(group)) {
-                MeasurePopulationType populationType = this.getPopulationType(pop);
-                if (populationType != null) {
-                    switch (populationType) {
-                        case INITIALPOPULATION:
-                            initialPopulationCriteria = pop;
-                            initialPopulation = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                initialPopulationPatients = new HashMap<>();
-                            }
-                            break;
-                        case NUMERATOR:
-                            numeratorCriteria = pop;
-                            numerator = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                numeratorPatients = new HashMap<>();
-                            }
-                            break;
-                        case NUMERATOREXCLUSION:
-                            numeratorExclusionCriteria = pop;
-                            numeratorExclusion = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                numeratorExclusionPatients = new HashMap<>();
-                            }
-                            break;
-                        case DENOMINATOR:
-                            denominatorCriteria = pop;
-                            denominator = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                denominatorPatients = new HashMap<>();
-                            }
-                            break;
-                        case DENOMINATOREXCLUSION:
-                            denominatorExclusionCriteria = pop;
-                            denominatorExclusion = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                denominatorExclusionPatients = new HashMap<>();
-                            }
-                            break;
-                        case DENOMINATOREXCEPTION:
-                            denominatorExceptionCriteria = pop;
-                            denominatorException = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                denominatorExceptionPatients = new HashMap<>();
-                            }
-                            break;
-                        case MEASUREPOPULATION:
-                            measurePopulationCriteria = pop;
-                            measurePopulation = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                measurePopulationPatients = new HashMap<>();
-                            }
-                            break;
-                        case MEASUREPOPULATIONEXCLUSION:
-                            measurePopulationExclusionCriteria = pop;
-                            measurePopulationExclusion = new HashMap<>();
-                            if (type == MeasureReportType.SUBJECTLIST || type == MeasureReportType.PATIENTLIST) {
-                                measurePopulationExclusionPatients = new HashMap<>();
-                            }
-                            break;
-                        case MEASUREOBSERVATION:
-                            measureObservation = new HashMap<>();
-                            break;
+                    if (inException) {
+                        denominatorExclusion.getSubjects().add(subjectId);
+                        denominator.getSubjects().remove(subjectId);
                     }
                 }
             }
+        }
+    }
 
+    protected void evaluateContinuousVariable(GroupDef groupDef, String subjectId) {
+        boolean inInitialPopulation = evaluatePopulationMembership(subjectId, groupDef.get(INITIALPOPULATION), null);
+
+        if (inInitialPopulation) {
+            // Are they in the MeasureType population?
+            PopulationDef measurePopulation = groupDef.get(MEASUREPOPULATION);
+            boolean inMeasurePopulation = evaluatePopulationMembership(subjectId, measurePopulation,
+                    groupDef.get(MEASUREPOPULATIONEXCLUSION));
+
+            if (inMeasurePopulation) {
+                PopulationDef measureObservation = groupDef.get(MEASUREOBSERVATION);
+                if (measureObservation != null) {
+                    for (Object resource : measurePopulation.getResources()) {
+                        Object observationResult = evaluateObservationCriteria(resource,
+                                measureObservation.getCriteriaExpression(), measureObservation.getEvaluatedResources());
+                        measureObservation.getResources().add(observationResult);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void evaluateCohort(GroupDef groupDef, String subjectId) {
+        evaluatePopulationMembership(subjectId, groupDef.get(INITIALPOPULATION), null);
+    }
+
+    protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef, List<SdeDef> sdes,
+            Collection<String> subjectIds) {
+        for (String subjectId : subjectIds) {
+            setContextToSubject(subjectId);
+            evaluateSdes(sdes);
+            evaluateStratifiers(subjectId, groupDef.getStratifiers());
             switch (measureScoring) {
                 case PROPORTION:
-                case RATIO: {
-
-                    // For each patient in the initial population
-                    for (SubjectT patient : patients) {
-
-                        // Are they in the initial population?
-                        boolean inInitialPopulation = evaluatePopulationCriteria(patient, initialPopulationCriteria,
-                                initialPopulation, initialPopulationPatients, null, null, null);
-                        populateResourceMap(MeasurePopulationType.INITIALPOPULATION, resources, codeToResourceMap);
-
-                        if (inInitialPopulation) {
-                            // Are they in the denominator?
-                            boolean inDenominator = evaluatePopulationCriteria(patient, denominatorCriteria,
-                                    denominator, denominatorPatients, denominatorExclusionCriteria,
-                                    denominatorExclusion, denominatorExclusionPatients);
-                            populateResourceMap(MeasurePopulationType.DENOMINATOR, resources, codeToResourceMap);
-
-                            if (inDenominator) {
-                                // Are they in the numerator?
-                                boolean inNumerator = evaluatePopulationCriteria(patient, numeratorCriteria, numerator,
-                                        numeratorPatients, numeratorExclusionCriteria, numeratorExclusion,
-                                        numeratorExclusionPatients);
-                                populateResourceMap(MeasurePopulationType.NUMERATOR, resources, codeToResourceMap);
-
-                                if (!inNumerator && inDenominator && (denominatorExceptionCriteria != null)) {
-                                    // Are they in the denominator exception?
-                                    boolean inException = false;
-                                    for (ResourceT resource : evaluateCriteria(patient, denominatorExceptionCriteria)) {
-                                        inException = true;
-                                        denominatorException.put(this.getId.apply(resource), resource);
-                                        denominator.remove(this.getId.apply(resource));
-                                        populateResourceMap(MeasurePopulationType.DENOMINATOREXCEPTION, resources,
-                                                codeToResourceMap);
-                                    }
-                                    if (inException) {
-                                        if (denominatorExceptionPatients != null) {
-                                            denominatorExceptionPatients.put(this.getId.apply(patient), patient);
-                                        }
-                                        if (denominatorPatients != null) {
-                                            denominatorPatients.remove(this.getId.apply(patient));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Calculate actual MeasureType score, Count(numerator) / Count(denominator)
-                    if (denominator != null && numerator != null && denominator.size() > 0) {
-                        this.setGroupScore(reportGroup, numerator.size() / (double) denominator.size());
-                    }
-
+                case RATIO:
+                    evaluateProportion(groupDef, subjectId);
                     break;
-                }
-                case CONTINUOUSVARIABLE: {
-
-                    // For each patient in the PatientType list
-                    for (SubjectT patient : patients) {
-
-                        // Are they in the initial population?
-                        boolean inInitialPopulation = evaluatePopulationCriteria(patient, initialPopulationCriteria,
-                                initialPopulation, initialPopulationPatients, null, null, null);
-                        populateResourceMap(MeasurePopulationType.INITIALPOPULATION, resources, codeToResourceMap);
-
-                        if (inInitialPopulation) {
-                            // Are they in the MeasureType population?
-                            boolean inMeasurePopulation = evaluatePopulationCriteria(patient, measurePopulationCriteria,
-                                    measurePopulation, measurePopulationPatients, measurePopulationExclusionCriteria,
-                                    measurePopulationExclusion, measurePopulationExclusionPatients);
-
-                            if (inMeasurePopulation) {
-                                // TODO: Evaluate MeasureType observations
-                                for (ResourceT resource : evaluateCriteria(patient, measureObservationCriteria)) {
-                                    measureObservation.put(this.getId.apply(resource), resource);
-                                }
-                            }
-                        }
-                    }
-
+                case CONTINUOUSVARIABLE:
+                    evaluateContinuousVariable(groupDef, subjectId);
                     break;
-                }
-
-                case COHORT: {
-
-                    // For each patient in the PatientType list
-                    for (SubjectT patient : patients) {
-                        // Are they in the initial population?
-                        evaluatePopulationCriteria(patient, initialPopulationCriteria,
-                                initialPopulation, initialPopulationPatients, null, null, null);
-                        populateResourceMap(MeasurePopulationType.INITIALPOPULATION, resources, codeToResourceMap);
-                    }
-
+                case COHORT:
+                    evaluateCohort(groupDef, subjectId);
                     break;
+            }
+        }
+    }
+
+    protected void evaluateSdes(List<SdeDef> sdes) {
+        for (SdeDef sde : sdes) {
+            Object result = this.context.resolveExpressionRef(sde.getExpression()).evaluate(this.context);
+
+            // TODO: Is it valid for an SDE to give multiple results?
+            flattenAdd(sde.getValues(), result);
+        }
+    }
+
+    protected void evaluateStratifiers(String subjectId, List<StratifierDef> stratifierDefs) {
+        for (StratifierDef sd : stratifierDefs) {
+            if (sd.getComponents().size() > 0) {
+                throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
+            }
+
+            // TODO: Handle list values as components?
+            Object result = this.context.resolveExpressionRef(sd.getExpression()).evaluate(this.context);
+            if (result instanceof Iterable) {
+                Iterator<?> resultIter = ((Iterable<?>) result).iterator();
+                if (resultIter.hasNext()) {
+                    result = resultIter.next();
+                } else {
+                    result = null;
                 }
             }
 
-            // Add population reports for each group
-            addPopulationCriteriaReport(report, reportGroup, initialPopulationCriteria,
-                    initialPopulation != null ? initialPopulation.size() : 0,
-                    initialPopulationPatients != null ? initialPopulationPatients.values() : null);
-            addPopulationCriteriaReport(report, reportGroup, numeratorCriteria,
-                    numerator != null ? numerator.size() : 0,
-                    numeratorPatients != null ? numeratorPatients.values() : null);
-            addPopulationCriteriaReport(report, reportGroup, numeratorExclusionCriteria,
-                    numeratorExclusion != null ? numeratorExclusion.size() : 0,
-                    numeratorExclusionPatients != null ? numeratorExclusionPatients.values() : null);
-            addPopulationCriteriaReport(report, reportGroup, denominatorCriteria,
-                    denominator != null ? denominator.size() : 0,
-                    denominatorPatients != null ? denominatorPatients.values() : null);
-            addPopulationCriteriaReport(report, reportGroup, denominatorExclusionCriteria,
-                    denominatorExclusion != null ? denominatorExclusion.size() : 0,
-                    denominatorExclusionPatients != null ? denominatorExclusionPatients.values() : null);
-            addPopulationCriteriaReport(report, reportGroup, denominatorExceptionCriteria,
-                    denominatorException != null ? denominatorException.size() : 0,
-                    denominatorExceptionPatients != null ? denominatorExceptionPatients.values() : null);
-            addPopulationCriteriaReport(report, reportGroup, measurePopulationCriteria,
-                    measurePopulation != null ? measurePopulation.size() : 0,
-                    measurePopulationPatients != null ? measurePopulationPatients.values() : null);
-            addPopulationCriteriaReport(report, reportGroup, measurePopulationExclusionCriteria,
-                    measurePopulationExclusion != null ? measurePopulationExclusion.size() : 0,
-                    measurePopulationExclusionPatients != null ? measurePopulationExclusionPatients.values() : null);
-            // TODO: MeasureType Observations...
+            if (result != null) {
+                sd.getSubjectValues().put(subjectId, result);
+            }
         }
-
-        // for (String key : codeToResourceMap.keySet()) {
-        // list = new ListResource();
-        // for (String element : codeToResourceMap.get(key)) {
-        // ListResource.ListEntryComponent comp = new ListEntryComponent();
-        // comp.setItem(new Reference('#' + element));
-        // list.addEntry(comp);
-        // }
-
-        // if (!list.isEmpty()) {
-        // list.setId(UUID.randomUUID().toString());
-        // list.setTitle(key);
-        // resources.put(list.getId(), list);
-        // }
-        // }
-
-        // if (!resources.isEmpty()) {
-        // FhirMeasureBundler bundler = new FhirMeasureBundler();
-        // Bundle evaluatedResources = bundler.bundle(resources.values());
-        // evaluatedResources.setId(UUID.randomUUID().toString());
-        // report.setEvaluatedResource(Collections.singletonList(new Reference('#' +
-        // evaluatedResources.getId())));
-        // report.addContained(evaluatedResources);
-        // }
-
-        return report;
     }
 
-    private void populateResourceMap(MeasurePopulationType type, HashMap<String, ResourceT> resources,
-            HashMap<String, HashSet<String>> codeToResourceMap) {
-        if (this.context.getEvaluatedResources().isEmpty()) {
+    protected void flattenAdd(List<Object> values, Object item) {
+        if (item == null) {
             return;
         }
 
-        if (!codeToResourceMap.containsKey(type.toCode())) {
-            codeToResourceMap.put(type.toCode(), new HashSet<>());
-        }
-
-        HashSet<String> codeHashSet = codeToResourceMap.get((type.toCode()));
-
-        for (Object o : this.context.getEvaluatedResources()) {
-            try {
-                ResourceT r = (ResourceT) o;
-                String id = this.getId.apply(r);
-                if (!codeHashSet.contains(id)) {
-                    codeHashSet.add(id);
-                }
-
-                if (!resources.containsKey(id)) {
-                    resources.put(id, r);
-                }
-            } catch (Exception e) {
+        if (item instanceof Iterable) {
+            for (Object o : (Iterable<?>) item) {
+                flattenAdd(values, o);
             }
+        } else {
+            values.add(item);
         }
-
-        this.context.clearEvaluatedResources();
     }
 }

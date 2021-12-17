@@ -81,6 +81,8 @@ public class ActivityDefinitionProcessorTests {
             }
         };
 
+        ModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
+
         Set<ModelResolverFactory> modelResolverFactories = new HashSet<ModelResolverFactory>() {
             /**
              *
@@ -88,7 +90,7 @@ public class ActivityDefinitionProcessorTests {
             private static final long serialVersionUID = 1L;
 
             {
-                add(new FhirModelResolverFactory());
+                add(fhirModelResolverFactory);
             }
         };
 
@@ -148,7 +150,7 @@ public class ActivityDefinitionProcessorTests {
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
         LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
 
         activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
     }

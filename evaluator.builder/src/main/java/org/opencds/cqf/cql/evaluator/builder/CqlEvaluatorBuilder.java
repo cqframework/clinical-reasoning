@@ -32,6 +32,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
+import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
@@ -273,6 +274,10 @@ public class CqlEvaluatorBuilder {
 
             List<RetrieveProvider> providers = entry.getValue().getRight();
             Collections.reverse(providers);
+
+            if (providers.isEmpty()) {
+                providers.add(new NoOpRetrieveProvider());
+            }
 
             RetrieveProviderConfigurer retrieveProviderConfigurer = new RetrieveProviderConfigurer(
                     retrieveProviderConfig);

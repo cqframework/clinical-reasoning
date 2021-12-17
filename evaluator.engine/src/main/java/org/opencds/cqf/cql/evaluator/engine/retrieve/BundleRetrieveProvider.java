@@ -35,10 +35,10 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 	private final CodeUtil codeUtil;
 	private final IFhirPath fhirPath;
 
-	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle bundle) {
+	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle iBaseBundle) {
 		
 		this.fhirContext = requireNonNull(fhirContext, "bundle can not be null.");
-		this.bundle = requireNonNull(bundle, "bundle can not be null.");
+		this.bundle = requireNonNull(iBaseBundle, "bundle can not be null.");
 		this.codeUtil = new CodeUtil(fhirContext);
 		this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
 	}
@@ -52,8 +52,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				this.fhirContext, this.bundle,
 				this.fhirContext.getResourceDefinition(dataType).getImplementingClass());
 
-		resources = this.filterToContext(dataType, context, contextPath, contextValue, resources);
-		resources = this.filterToTerminology(dataType, codePath, codes, valueSet, resources);
+		resources = this.filterByContext(dataType, context, contextPath, contextValue, resources);
+		resources = this.filterByTerminology(dataType, codePath, codes, valueSet, resources);
 
 		return resources.stream().map(x -> (Object) x).collect(Collectors.toList());
 	}
@@ -116,7 +116,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return false;
 	}
 
-	private List<? extends IBaseResource> filterToTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
+	private List<? extends IBaseResource> filterByTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
 			final String valueSet, final List<? extends IBaseResource> resources) {
 		if (codes == null && valueSet == null) {
 			return resources;
@@ -157,11 +157,11 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return filtered;
 	}
 
-	private List<? extends IBaseResource> filterToContext(final String dataType, final String context, final String contextPath,
+	private List<? extends IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,
 			final Object contextValue, final List<? extends IBaseResource> resources) {
 		if (context == null || contextValue == null || contextPath == null) {
-			logger.info(
-					"Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning all resources.",
+			logger.debug(
+					"Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning unfiltered resources.",
 					dataType, context, contextPath, contextValue);
 			return resources;
 		}
@@ -182,37 +182,36 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 					logger.debug("Found {} with urn: prefix. Stripping.", dataType);
 					id = stripUrnScheme(id);
 				}
-				
 				if (!id.equals(contextValue)) {
-					logger.debug("Found {} with id  {}. Skipping.", dataType, id);
+					logger.debug("Found {} with id {}. Skipping.", dataType, id);
 					continue;
 				}
 			}
 			else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
-					String id = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
-					if (id == null) {
+					String reference = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
+					if (reference == null) {
 						logger.debug("Found null reference for {} resource. Skipping.", dataType);
 						continue;
 					}
 
-					if (id.startsWith("urn:")) {
+					if (reference.startsWith("urn:")) {
 						logger.debug("Found reference with urn: prefix. Stripping.", dataType);
-						id = stripUrnScheme(id);
+						reference = stripUrnScheme(reference);
 					}
 	
-					if (id.contains("/")) {
-						id = id.split("/")[1];
+					if (reference.contains("/")) {
+						reference = reference.split("/")[1];
 					}
 					
-					if (!id.equals(contextValue)) {
-						logger.info("Found {} with id  {}. Skipping.", dataType, id);
+					if (!reference.equals(contextValue)) {
+						logger.debug("Found {} with reference {}. Skipping.", dataType, reference);
 						continue;
 					}
 				}
 			else {
 				final Optional<IBase> reference = this.fhirPath.evaluateFirst(res, "reference", IBase.class);
 				if (!reference.isPresent()) {
-					logger.info("Found {} resource unrelated to context. Skipping.", dataType);
+					logger.debug("Found {} resource unrelated to context. Skipping.", dataType);
 					continue;
 				}
 
@@ -228,7 +227,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				}
 
 				if (!referenceString.equals((String) contextValue)) {
-					logger.info("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
+					logger.debug("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
 							referenceString, (String) contextValue);
 					continue;
 				}

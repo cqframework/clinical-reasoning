@@ -111,13 +111,6 @@ public class CliTest {
                 "-mu=" + testResourcePath + "/r4",
                 "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
                 "-c=Patient",
-                "-cv=example",
-                "-lu="+ testResourcePath + "/r4",
-                "-ln=TestFHIR",
-                "-m=FHIR",
-                "-mu=" + testResourcePath + "/r4",
-                "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
-                "-c=Patient",
                 "-cv=example"
             };
     
@@ -127,15 +120,93 @@ public class CliTest {
 
         assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
+    }
+
+    @Test
+    public void testR4WithHelpers() {
+        String[] args = new String[] {
+                "cql",
+                "-fv=R4",
+                "-lu=" + testResourcePath + "/r4",
+                "-ln=TestFHIRWithHelpers",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/r4",
+                "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
     }
 
     @Test
     public void testUSCore() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/uscore",
+                "-ln=TestUSCore",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/uscore",
+                "-t=" + testResourcePath + "/uscore/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
 
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
     }
 
     @Test
     public void testQICore() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/qicore",
+                "-ln=TestQICore",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/qicore",
+                "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
 
+        Main.run(args);
     }
 }

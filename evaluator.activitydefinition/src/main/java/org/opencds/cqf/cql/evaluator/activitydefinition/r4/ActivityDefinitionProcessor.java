@@ -41,9 +41,6 @@ import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
 public class ActivityDefinitionProcessor {
-    /**
-     *
-     */
     private static final String targetStatusExtension = "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus";
     FhirContext fhirContext;
     FhirDal fhirDal;

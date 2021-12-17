@@ -27,7 +27,6 @@ import ca.uhn.fhir.parser.IParser;
 
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -153,13 +152,15 @@ public class PlanDefinitionProcessorTests {
         TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
                 fhirContext, typedTerminologyProviderFactories);
 
+        FhirModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
+
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
         LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
             
         ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, () -> new CqlEvaluatorBuilder());
+            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
 
         ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
@@ -177,19 +178,19 @@ public class PlanDefinitionProcessorTests {
         Endpoint dataEndpoint = new Endpoint().setAddress("tests-Reportable-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
         
-        Parameters actual = (Parameters) planDefinitionProcessor.apply(
+        Resource actualCarePlan = planDefinitionProcessor.apply(
                 new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "Reportable", "reportable-encounter", null, null, null, null, null, null, null, null, expected, null, null, null, dataEndpoint,
                 endpoint, endpoint);
 
         CarePlan expectedCarePlan = getExpectedCarePlan("ReportableCarePlan.json");
-        Resource actualCarePlan = actual.getParameter().get(0).getResource();
         assertTrue(expectedCarePlan.equalsShallow(actualCarePlan));
     }
 
     @Test
     public void TestRuleFiltersNotReportable() throws JsonProcessingException {
-        Parameters expected = new Parameters();
-        expected.addParameter().setName("return").setResource(getExpectedCarePlan("NotReportableCarePlan.json"));
+        Parameters params = new Parameters();
+        
+        CarePlan expected = getExpectedCarePlan("NotReportableCarePlan.json");
 
         Endpoint endpoint = new Endpoint().setAddress("RuleFilters-1.0.0-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
@@ -197,15 +198,11 @@ public class PlanDefinitionProcessorTests {
         Endpoint dataEndpoint = new Endpoint().setAddress("tests-NotReportable-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Parameters actual = (Parameters) planDefinitionProcessor.apply(
-                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", null, null, null, null, null, null, null, null, null, expected, null, new Bundle(), null, dataEndpoint,
-                endpoint, endpoint);
-        try {
-            Charset charset = null;
-            FileUtils.writeStringToFile(new File("C:\\Users\\jreys\\Documents\\src\\testParameters.json"), fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual), charset, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        CarePlan actual = planDefinitionProcessor.apply(
+                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "NotReportable", 
+                null, null, null, null, null, null, null, null, null, params, null, 
+                new Bundle(), null, dataEndpoint, endpoint, endpoint);
+
         assertTrue(expected.equalsShallow(actual));
     }
 

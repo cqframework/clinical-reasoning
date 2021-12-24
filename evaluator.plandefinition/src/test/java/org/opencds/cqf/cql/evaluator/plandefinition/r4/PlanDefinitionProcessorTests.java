@@ -2,14 +2,11 @@ package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static org.testng.Assert.assertTrue;
 
-import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
@@ -69,6 +66,8 @@ public class PlanDefinitionProcessorTests {
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
         CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+
+        @SuppressWarnings("serial")
         Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories = new HashSet<TypedLibraryContentProviderFactory>() {
             {
                 add(new TypedLibraryContentProviderFactory() {

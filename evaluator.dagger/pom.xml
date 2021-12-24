@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.dagger</artifactId>
-    <version>1.3.1-SNAPSHOT</version>
+    <version>1.4.0</version>
     <packaging>jar</packaging>
 
     <name>evaluator.dagger</name>
@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>
-        <version>1.3.1-SNAPSHOT</version>
+        <version>1.4.0</version>
     </parent>
 
     <dependencies>
@@ -29,47 +29,47 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.engine</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.cql2elm</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.builder</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.fhir</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.library</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.expression</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.measure</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.measure-hapi</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.dagger</groupId>

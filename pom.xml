@@ -18,7 +18,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cql-translator.version>1.5.5</cql-translator.version>
-        <cql-engine.version>1.5.2</cql-engine.version>
+        <cql-engine.version>1.5.3-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.6</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>5.5.3</hapi.version>
@@ -107,6 +107,11 @@
             <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine.fhir</artifactId>
+                <version>${cql-engine.version}</version>
+            </dependency>
+                        <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine.jaxb</artifactId>
                 <version>${cql-engine.version}</version>
             </dependency>
             <dependency>

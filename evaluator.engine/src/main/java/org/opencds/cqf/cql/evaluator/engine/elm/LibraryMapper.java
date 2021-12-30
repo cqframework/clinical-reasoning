@@ -91,7 +91,7 @@ public interface LibraryMapper {
     org.opencds.cqf.cql.engine.elm.execution.InCodeSystemEvaluator map(org.hl7.elm.r1.InCodeSystem element);
 
     @Mapping(target = "codesystem", qualifiedByName = { "ExpressionToCodeSystemRef" })
-    org.cqframework.cql.elm.execution.AnyInCodeSystem map(org.hl7.elm.r1.AnyInCodeSystem element);
+    org.opencds.cqf.cql.engine.elm.execution.AnyInCodeSystemEvaluator map(org.hl7.elm.r1.AnyInCodeSystem element);
 
     org.opencds.cqf.cql.engine.elm.execution.NullEvaluator map(org.hl7.elm.r1.Null element);
 
@@ -105,6 +105,8 @@ public interface LibraryMapper {
     org.cqframework.cql.elm.execution.Current map(org.hl7.elm.r1.Current element);
 
     org.opencds.cqf.cql.engine.elm.execution.AndEvaluator map(org.hl7.elm.r1.And element);
+
+    org.opencds.cqf.cql.engine.elm.execution.ExpandValueSetEvaluator map(org.hl7.elm.r1.ExpandValueSet element);
 
     org.opencds.cqf.cql.engine.elm.execution.MultiplyEvaluator map(org.hl7.elm.r1.Multiply element);
 
@@ -145,8 +147,6 @@ public interface LibraryMapper {
     org.opencds.cqf.cql.engine.elm.execution.SuccessorEvaluator map(org.hl7.elm.r1.Successor element);
 
     org.opencds.cqf.cql.engine.elm.execution.MaxValueEvaluator map(org.hl7.elm.r1.MaxValue element);
-
-    org.opencds.cqf.cql.engine.elm.execution.CodeSystemDefEvaluator map(org.hl7.elm.r1.CodeSystemDef element);
 
     org.opencds.cqf.cql.engine.elm.execution.AvgEvaluator map(org.hl7.elm.r1.Avg element);
 
@@ -322,14 +322,10 @@ public interface LibraryMapper {
 
     org.opencds.cqf.cql.engine.elm.execution.ToQuantityEvaluator map(org.hl7.elm.r1.ToQuantity element);
 
-    org.opencds.cqf.cql.engine.elm.execution.CodeDefEvaluator map(org.hl7.elm.r1.CodeDef element);
-
     org.cqframework.cql.elm.execution.Sort map(org.hl7.elm.r1.Sort element);
 
     org.opencds.cqf.cql.engine.elm.execution.DateTimeComponentFromEvaluator map(
             org.hl7.elm.r1.DateTimeComponentFrom element);
-
-    org.opencds.cqf.cql.engine.elm.execution.ConceptDefEvaluator map(org.hl7.elm.r1.ConceptDef element);
 
     org.opencds.cqf.cql.engine.elm.execution.EquivalentEvaluator map(org.hl7.elm.r1.Equivalent element);
 
@@ -706,6 +702,8 @@ public interface LibraryMapper {
             return map((org.hl7.elm.r1.ConvertsToQuantity) element);
         } else if (element instanceof org.hl7.elm.r1.ToDateTime) {
             return map((org.hl7.elm.r1.ToDateTime) element);
+        } else if (element instanceof org.hl7.elm.r1.ExpandValueSet) {
+            return map((org.hl7.elm.r1.ExpandValueSet) element);
         } else if (element instanceof org.hl7.elm.r1.Floor) {
             return map((org.hl7.elm.r1.Floor) element);
         }

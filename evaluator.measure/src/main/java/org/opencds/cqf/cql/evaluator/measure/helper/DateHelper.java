@@ -1,10 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.helper;
 
-import java.text.DateFormat;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -13,8 +10,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
-import joptsimple.internal.Strings;
 
 /**
  * Helper class to resolve measurement period start and end dates. If a timezone

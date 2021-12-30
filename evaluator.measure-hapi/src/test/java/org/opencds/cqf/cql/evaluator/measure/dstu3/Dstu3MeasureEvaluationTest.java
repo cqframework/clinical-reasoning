@@ -63,7 +63,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any())).thenReturn(Arrays.asList(patient));
 
-        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family";
+        String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family";
 
         Measure measure = cohort_measure();
 
@@ -80,7 +80,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any())).thenReturn(Arrays.asList(patient));
 
-        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+        String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n";
 
@@ -98,7 +98,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any())).thenReturn(Arrays.asList(patient));
 
-        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+        String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define MeasurePopulation: Patient.birthDate > @1970-01-01\n";
 
         Measure measure = continuous_variable_measure();
@@ -117,7 +117,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         when(retrieveProvider.retrieve(eq("Patient"), eq("id"), eq("jane-doe"), eq("Patient"), any(), any(), any(),
                 any(), any(), any(), any(), any())).thenReturn(Arrays.asList(jane_doe()));
 
-        String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+        String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
 

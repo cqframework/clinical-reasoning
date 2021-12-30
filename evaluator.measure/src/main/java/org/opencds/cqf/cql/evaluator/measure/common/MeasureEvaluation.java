@@ -9,6 +9,7 @@ import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,9 +19,15 @@ import java.util.function.Function;
 
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
+import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
+import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
+import org.cqframework.cql.elm.execution.ParameterDef;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
+import org.opencds.cqf.cql.engine.runtime.Date;
+import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,10 +158,67 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         return (Interval) this.context.resolveParameterRef(null, this.measurementPeriodParameterName);
     }
 
-    protected void setMeasurementPeriod(Interval measurementPeriod) {
-        if (measurementPeriod != null) {
-            this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+    protected ParameterDef getMeasurementPeriodParameterDef() {
+        Library lib = this.context.getCurrentLibrary();
+
+        if (lib.getParameters() == null || lib.getParameters().getDef() == null || lib.getParameters().getDef().isEmpty()) {
+            return null; 
         }
+
+        for (ParameterDef pd : lib.getParameters().getDef()) {
+            if (pd.getName().equals(this.measurementPeriodParameterName)) {
+                return pd;
+            }
+        }
+         
+        return null;
+
+    }
+
+    protected void setMeasurementPeriod(Interval measurementPeriod) {
+        if (measurementPeriod == null) {
+            return;
+        }
+
+        ParameterDef pd = this.getMeasurementPeriodParameterDef();
+        if (pd == null) {
+            logger.warn("Parameter \"{}\" was not found. Unable to validate type.", this.measurementPeriodParameterName);
+            this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            return;
+        }
+
+        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier)pd.getParameterTypeSpecifier();
+        if (intervalTypeSpecifier == null) {
+            logger.debug("No ELM type information available. Unable to validate type of \"{}\"", this.measurementPeriodParameterName);
+            this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            return;
+        }
+
+        NamedTypeSpecifier pointType = (NamedTypeSpecifier)intervalTypeSpecifier.getPointType();
+        String targetType = pointType.getName().getLocalPart();
+        Interval convertedPeriod = convertInterval(measurementPeriod, targetType);
+        
+        this.context.setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
+    }
+
+    protected Interval convertInterval(Interval interval, String targetType) {
+        String sourceTypeQualified = interval.getPointType().getTypeName();
+        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
+        if (sourceType.equals(targetType)) {
+            return interval;
+        }
+
+        if (sourceType.equals("DateTime") && targetType.equals("Date")) {
+            logger.debug("A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
+            return new Interval(truncateDateTime((DateTime)interval.getLow()), interval.getLowClosed(), truncateDateTime((DateTime)interval.getHigh()), interval.getHighClosed());
+        }
+
+        throw new IllegalArgumentException(String.format("The interval type of %s did not match the expected type of %s and no conversion was possible.", sourceType, targetType));
+    }
+
+    protected Date truncateDateTime(DateTime dateTime) {
+        OffsetDateTime odt = dateTime.getDateTime();
+        return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
     }
 
     protected DataProvider getDataProvider() {

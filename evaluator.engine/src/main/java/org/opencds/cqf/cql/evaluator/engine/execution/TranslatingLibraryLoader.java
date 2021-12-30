@@ -7,15 +7,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,9 +28,7 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.cql2elm.model.serialization.LibraryWrapper;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.hl7.elm.r1.ObjectFactory;
 import org.opencds.cqf.cql.engine.exception.CqlException;
-import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.execution.JsonCqlLibraryReader;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
@@ -53,9 +46,6 @@ import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
  * CQL content is found for the requested Library, null is returned.
  */
 public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoader {
-
-    protected static JAXBContext jaxbContext;
-    protected static Marshaller marshaller;
 
     protected static ObjectMapper objectMapper;
 
@@ -101,15 +91,6 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
                 return this.readJxson(content);
             } catch (Exception e) {
                 // Intentionally empty. Fall through to xml
-            }
-        }
-
-        content = this.getLibraryContent(versionedIdentifier, LibraryContentType.XML);
-        if (content != null) {
-            try {
-                return this.readXml(content);
-            } catch (Exception e) {
-                // Intentionally empty. Fall through to null
             }
         }
 
@@ -163,28 +144,12 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         }
     }
 
-    protected synchronized Library readJxson(String json) throws IOException, JAXBException {
+    protected synchronized Library readJxson(String json) throws IOException {
         return this.readJxson(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
     }
 
     protected synchronized Library readJxson(InputStream inputStream) throws IOException {
         return JsonCqlLibraryReader.read(new InputStreamReader(inputStream));
-    }
-
-    protected synchronized Library readXml(InputStream inputStream) throws IOException, JAXBException {
-        return CqlLibraryReader.read(inputStream);
-    }
-
-    protected synchronized Library readXml(String xml) throws IOException, JAXBException {
-        return this.readXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
-    }
-
-    protected synchronized String toXml(org.hl7.elm.r1.Library library) {
-        try {
-            return convertToXml(library);
-        } catch (JAXBException e) {
-            throw new IllegalArgumentException("Could not convert library to XML.", e);
-        }
     }
 
     protected synchronized String toJxson(org.hl7.elm.r1.Library library) {
@@ -193,30 +158,6 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Could not convert library to JXSON.", e);
         }
-    }
-
-    protected synchronized String convertToXml(org.hl7.elm.r1.Library library) throws JAXBException {
-        StringWriter writer = new StringWriter();
-        this.getMarshaller().marshal(new ObjectFactory().createLibrary(library), writer);
-        return writer.getBuffer().toString();
-    }
-
-    protected synchronized Marshaller getMarshaller() throws JAXBException {
-        if (marshaller == null) {
-            marshaller = this.getJaxbContext().createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        }
-
-        return marshaller;
-    }
-
-    protected synchronized JAXBContext getJaxbContext() throws JAXBException {
-        if (jaxbContext == null) {
-            jaxbContext = JAXBContext.newInstance(org.hl7.elm.r1.Library.class,
-                    org.hl7.cql_annotations.r1.Annotation.class);
-        }
-
-        return jaxbContext;
     }
 
     protected synchronized ObjectMapper getJxsonMapper() {

@@ -1,0 +1,25 @@
+{
+  "resourceType": "ValueSet",
+  "id": "narcolepsy",
+  "meta": {
+    "lastUpdated": "2021-08-30T02:02:35.837-04:00"
+  },
+  "url": "https://example.org/fhir/ValueSet/narcolepsy",
+  "version": "2021-08-02",
+  "name": "Narcolepsy",
+  "title": "Narcolepsy",
+  "status": "active",
+  "expansion": {
+    "timestamp": "2021-09-03T17:30:32-04:00",
+    "total": 16,
+    "offset": 0,
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "2021.03.20AB",
+        "code": "60380001",
+        "display": "Narcolepsy"
+      }
+    ]
+  }
+}

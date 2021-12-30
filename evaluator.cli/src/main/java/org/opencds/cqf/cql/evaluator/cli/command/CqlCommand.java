@@ -7,6 +7,8 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -34,13 +36,13 @@ public class CqlCommand implements Callable<Integer> {
     @Option(names = { "-fv", "--fhir-version" }, required = true)
     public String fhirVersion;
 
+    @Option(names= { "-op", "--options-path" })
+    public String optionsPath;
+
     @ArgGroup(multiplicity = "1..*", exclusive = false)
     List<LibraryParameter> libraries;
 
     static class LibraryParameter {
-        @Option(names= { "-on", "--options-name" }, defaultValue = "cql-options")
-        public String optionsName;
-
         @Option(names = { "-lu", "--library-url" }, required = true)
         public String libraryUrl;
 
@@ -101,12 +103,17 @@ public class CqlCommand implements Callable<Integer> {
         CqlEvaluatorComponent cqlEvaluatorComponent = DaggerCqlEvaluatorComponent.builder()
                 .fhirContext(fhirVersionEnum.newContext()).build();
 
+        CqlTranslatorOptions options = null;
+        if (optionsPath != null) {
+            options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
+        }
+
         for (LibraryParameter library : libraries) {
 
             CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder();
 
-            if (library.optionsName != null) {
-                cqlEvaluatorBuilder.withOptionsName(library.optionsName);
+            if (options != null) {
+                cqlEvaluatorBuilder.withCqlTranslatorOptions(options);
             }
 
             LibraryContentProvider libraryContentProvider = libraryContentProviderIndex.get(library.libraryUrl);

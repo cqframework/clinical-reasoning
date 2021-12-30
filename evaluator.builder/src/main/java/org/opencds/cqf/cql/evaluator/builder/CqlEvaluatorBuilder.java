@@ -71,8 +71,6 @@ public class CqlEvaluatorBuilder {
 
     private Boolean useEmbeddedLibraries = true;
 
-    private String optionsName;
-
     private RetrieveProviderConfig retrieveProviderConfig;
 
     private Boolean stale = false;
@@ -225,17 +223,6 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Sets the name of an options file name or library name to be used as the source for translator options
-     * when libraries need to be translated during evaluation.
-     * @param optionsName
-     * @return this CqlEvaluatorBuilder
-     */
-    public CqlEvaluatorBuilder withOptionsName(String optionsName) {
-        this.optionsName = optionsName;
-        return this;
-    }
-
-    /**
      * Sets the CqlTranslatorOptions to use for Cql translation when loading content
      * 
      * @param cqlTranslatorOptions the translator options to use
@@ -314,28 +301,10 @@ public class CqlEvaluatorBuilder {
         return options;
     }
 
-    private CqlTranslatorOptions loadTranslatorOptions() {
-        VersionedIdentifier optionsIdentifier = new VersionedIdentifier().withId(this.optionsName);
-        for (LibraryContentProvider provider : this.libraryContentProviders) {
-            CqlTranslatorOptions options = provider.getTranslatorOptions(optionsIdentifier);
-            if (options != null) {
-                return options;
-            }
-        }
-
-        return null;
-    }
-
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.libraryContentProviders);
         if (this.useEmbeddedLibraries) {
             this.libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
-        }
-
-        if (this.cqlTranslatorOptions == null) {
-            if (this.optionsName != null) {
-                this.cqlTranslatorOptions = loadTranslatorOptions();
-            }
         }
 
         if (this.cqlTranslatorOptions == null) {

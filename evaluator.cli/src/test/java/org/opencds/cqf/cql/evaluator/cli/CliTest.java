@@ -257,6 +257,7 @@ public class CliTest {
         String[] args = new String[]{
                 "cql",
                 "-fv=R4",
+                "-op=" + testResourcePath + "/options/cql-options.json",
                 "-lu="+ testResourcePath + "/options",
                 "-ln=FluentFunctions",
                 "-m=FHIR",
@@ -280,6 +281,7 @@ public class CliTest {
         String[] args = new String[]{
                 "cql",
                 "-fv=R4",
+                "-op=" + testResourcePath + "/optionsFailure/cql-options.json",
                 "-lu="+ testResourcePath + "/optionsFailure",
                 "-ln=FluentFunctions",
                 "-m=FHIR",
@@ -293,5 +295,51 @@ public class CliTest {
 
         String errOutput = errContent.toString();
         assertTrue(errOutput.contains("org.opencds.cqf.cql.engine.exception.CqlException: Translation of library FluentFunctions failed with the following message: Feature Fluent functions was introduced in version 1.5 and so cannot be used at compatibility level 1.4"));
+    }
+
+    @Test
+    public void testVSCastFunction14() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-op=" + testResourcePath + "/vscast/cql-options.json",
+                "-lu="+ testResourcePath + "/vscast",
+                "-ln=TestVSCastFunction",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/vscast/Patient-17",
+                "-t=" + testResourcePath + "/vscast/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=Patient-17"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("TestConditions=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsViaFunction=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsDirectly=[Condition(id=Condition-17-94)]"));
+    }
+
+    @Test
+    public void testVSCastFunction15() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-op=" + testResourcePath + "/vscast15/cql-options.json",
+                "-lu="+ testResourcePath + "/vscast15",
+                "-ln=TestVSCastFunction",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/vscast15/Patient-17",
+                "-t=" + testResourcePath + "/vscast15/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=Patient-17"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("TestConditions=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsViaFunction=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsDirectly=[Condition(id=Condition-17-94)]"));
     }
 }

@@ -40,23 +40,10 @@ public class InMemoryLibraryContentProvider implements LibraryContentProvider {
         return null;
     }
 
-    public InputStream getOptionsSource(org.hl7.elm.r1.VersionedIdentifier libraryIdentifier) {
-        for (String library : this.libraries) {
-            if (library.trim().startsWith("{") && !library.contains("\"resourceType\"")) {
-                return new ByteArrayInputStream(library.getBytes());
-            }
-        }
-
-        return null;
-    }
-
     @Override
     public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType libraryContentType) {
         if (libraryContentType == LibraryContentType.CQL) {
             return this.getLibrarySource(libraryIdentifier);
-        }
-        else if (libraryContentType == LibraryContentType.OPTIONS) {
-            return this.getOptionsSource(libraryIdentifier);
         }
 
         return null;

@@ -18,7 +18,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cql-translator.version>1.5.6</cql-translator.version>
-        <cql-engine.version>1.5.3</cql-engine.version>
+        <cql-engine.version>1.5.4-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.6</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>5.5.3</hapi.version>

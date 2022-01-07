@@ -25,6 +25,28 @@
         "Unvalidated",
         "uscore"
     ],
+    "cSpell.enabledLanguageIds": [
+		"java",
+		"json",
+		"xml",
+		"md"
+	],
+	"cSpell.ignorePaths": [
+		".git/objects",
+		".vscode",
+		"**/pom.xml",
+		"checkstyle.xml"
+	],
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.dependency.packagePresentation": "hierarchical"
+    "java.dependency.packagePresentation": "hierarchical",
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": true,
+		"editor.formatOnSave": true
+	},
+	"files.exclude": {
+		"**/.classpath": true,
+		"**/.project": true,
+		"**/.settings": true,
+		"**/.factorypath": true
+	}
 }

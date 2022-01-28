@@ -19,6 +19,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator</artifactId>
+            <version>1.4.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.fhir</artifactId>
+            <version>1.4.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
         </dependency>
@@ -31,31 +41,8 @@
             <artifactId>engine.fhir</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator</artifactId>
-            <version>1.4.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.engine</artifactId>
-            <version>1.4.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.cql2elm</artifactId>
-            <version>1.4.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.fhir</artifactId>
-            <version>1.4.3-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
-
-
     </dependencies>
 </project>

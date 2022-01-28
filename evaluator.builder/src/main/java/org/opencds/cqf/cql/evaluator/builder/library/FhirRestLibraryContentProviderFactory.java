@@ -3,12 +3,13 @@ package org.opencds.cqf.cql.evaluator.builder.library;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.opencds.cqf.cql.evaluator.builder.Constants;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.FhirClientFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.FhirClientFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.ClientFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;

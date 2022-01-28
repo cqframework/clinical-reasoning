@@ -35,16 +35,6 @@
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.engine</artifactId>
-            <version>1.4.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.cql2elm</artifactId>
-            <version>1.4.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.fhir</artifactId>
             <version>1.4.3-SNAPSHOT</version>
         </dependency>

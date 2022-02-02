@@ -1,0 +1,662 @@
+{
+  "resourceType": "MeasureReport",
+  "language": "en",
+  "contained": [
+    {
+      "resourceType": "List",
+      "id": "subject-list-group-group-1-initial-population",
+      "entry": [
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case1"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case2"
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "List",
+      "id": "subject-list-group-group-1-denominator",
+      "entry": [
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case1"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat2-case2"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat1-case3"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat1-case4"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case5"
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "List",
+      "id": "unmatched-id",
+      "entry": [
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case1"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case2"
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "Observation",
+      "id": "sde-observation-sde-ethnicity-coding-2186-5",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108"
+            },
+            {
+              "url": "populationId",
+              "valueString": "sde-ethnicity"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "2186-5"
+          }
+        ]
+      },
+      "valueInteger": 1
+    }
+  ],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
+    "valueString": "Percentage of children, 6 months - 20 years of age, who received a fluoride varnish application during the measurement period"
+  } ],
+  "status": "complete",
+  "type": "subject-list",
+  "measure": "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR",
+  "date": "2021-11-03T16:02:45-06:00",
+  "period": {
+    "start": "2019-01-01T00:00:00-07:00",
+    "end": "2020-01-01T23:59:59-07:00"
+  },
+  "improvementNotation": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+      "code": "increase"
+    } ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 15,
+          "subjectResults": {
+            "reference": "#subject-list-group-group-1-initial-population"
+          }
+        },
+        {
+          "id": "7EB2D0BA-606C-47B3-8AFC-6BCF3FD922B0",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 12,
+          "subjectResults": {
+            "reference": "#subject-list-group-group-1-denominator"
+          }
+        },
+        {
+          "id": "61AD6CDE-D9A2-477A-882D-869C8AFB349D",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator Exclusion"
+              }
+            ]
+          },
+          "count": 3,
+          "subjectResults": {
+            "reference": "#subject-list-group-group-1-denominator-exclusion"
+          }
+        },
+        {
+          "id": "BF7EBAD0-9C8E-41B1-913B-B93ECF0C6CA6",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 6,
+          "subjectResults": {
+            "reference": "#subject-list-group-group-1-numerator"
+          }
+        }
+      ],
+      "measureScore": {
+        "value": 0.5
+      },
+      "stratifier": [
+        {
+          "id": "8C1CBAAF-B59F-496F-9282-428E5D2C31FB",
+          "code": [
+            {
+              "text": "Stratum 3"
+            }
+          ],
+          "stratum": [
+            {
+              "value": {
+                "text": "false"
+              },
+              "population": [
+                {
+                  "id": "12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 10,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-false-initial-population"
+                  }
+                },
+                {
+                  "id": "7EB2D0BA-606C-47B3-8AFC-6BCF3FD922B0",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 8,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-false-denominator"
+                  }
+                },
+                {
+                  "id": "61AD6CDE-D9A2-477A-882D-869C8AFB349D",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 2,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-false-denominator-exclusion"
+                  }
+                },
+                {
+                  "id": "BF7EBAD0-9C8E-41B1-913B-B93ECF0C6CA6",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 4,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-false-numerator"
+                  }
+                }
+              ],
+              "measureScore": {
+                "value": 0.5
+              }
+            },
+            {
+              "value": {
+                "text": "true"
+              },
+              "population": [
+                {
+                  "id": "12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 5,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-true-initial-population"
+                  }
+                },
+                {
+                  "id": "7EB2D0BA-606C-47B3-8AFC-6BCF3FD922B0",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 4,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-true-denominator"
+                  }
+                },
+                {
+                  "id": "61AD6CDE-D9A2-477A-882D-869C8AFB349D",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 1,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-true-denominator-exclusion"
+                  }
+                },
+                {
+                  "id": "BF7EBAD0-9C8E-41B1-913B-B93ECF0C6CA6",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 2,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-8C1CBAAF-B59F-496F-9282-428E5D2C31FB-stratum-true-numerator"
+                  }
+                }
+              ],
+              "measureScore": {
+                "value": 0.5
+              }
+            }
+          ]
+        },
+        {
+          "id": "84277D0F-546A-48D8-B4D6-4B2E849935E3",
+          "code": [
+            {
+              "text": "Stratum 4"
+            }
+          ],
+          "stratum": [
+            {
+              "value": {
+                "text": "true"
+              },
+              "population": [
+                {
+                  "id": "12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 6,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-true-initial-population"
+                  }
+                },
+                {
+                  "id": "7EB2D0BA-606C-47B3-8AFC-6BCF3FD922B0",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 4,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-true-denominator"
+                  }
+                },
+                {
+                  "id": "61AD6CDE-D9A2-477A-882D-869C8AFB349D",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 2,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-true-denominator-exclusion"
+                  }
+                },
+                {
+                  "id": "BF7EBAD0-9C8E-41B1-913B-B93ECF0C6CA6",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 2,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-true-numerator"
+                  }
+                }
+              ],
+              "measureScore": {
+                "value": 0.5
+              }
+            },
+            {
+              "value": {
+                "text": "false"
+              },
+              "population": [
+                {
+                  "id": "12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 9,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-false-initial-population"
+                  }
+                },
+                {
+                  "id": "7EB2D0BA-606C-47B3-8AFC-6BCF3FD922B0",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 8,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-false-denominator"
+                  }
+                },
+                {
+                  "id": "61AD6CDE-D9A2-477A-882D-869C8AFB349D",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 1,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-false-denominator-exclusion"
+                  }
+                },
+                {
+                  "id": "BF7EBAD0-9C8E-41B1-913B-B93ECF0C6CA6",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 4,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-84277D0F-546A-48D8-B4D6-4B2E849935E3-stratum-false-numerator"
+                  }
+                }
+              ],
+              "measureScore": {
+                "value": 0.5
+              }
+            }
+          ]
+        },
+        {
+          "id": "75533601-6C60-4150-86E9-DEBA743ED515",
+          "code": [
+            {
+              "text": "Stratum 5"
+            }
+          ],
+          "stratum": [
+            {
+              "value": {
+                "text": "true"
+              },
+              "population": [
+                {
+                  "id": "12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 4,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-75533601-6C60-4150-86E9-DEBA743ED515-stratum-true-initial-population"
+                  }
+                },
+                {
+                  "id": "7EB2D0BA-606C-47B3-8AFC-6BCF3FD922B0",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 4,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-75533601-6C60-4150-86E9-DEBA743ED515-stratum-true-denominator"
+                  }
+                },
+                {
+                  "id": "61AD6CDE-D9A2-477A-882D-869C8AFB349D",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 0
+                },
+                {
+                  "id": "BF7EBAD0-9C8E-41B1-913B-B93ECF0C6CA6",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 2,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-75533601-6C60-4150-86E9-DEBA743ED515-stratum-true-numerator"
+                  }
+                }
+              ],
+              "measureScore": {
+                "value": 0.5
+              }
+            },
+            {
+              "value": {
+                "text": "false"
+              },
+              "population": [
+                {
+                  "id": "12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 11,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-75533601-6C60-4150-86E9-DEBA743ED515-stratum-false-initial-population"
+                  }
+                },
+                {
+                  "id": "7EB2D0BA-606C-47B3-8AFC-6BCF3FD922B0",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 8,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-75533601-6C60-4150-86E9-DEBA743ED515-stratum-false-denominator"
+                  }
+                },
+                {
+                  "id": "61AD6CDE-D9A2-477A-882D-869C8AFB349D",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 3,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-75533601-6C60-4150-86E9-DEBA743ED515-stratum-false-denominator-exclusion"
+                  }
+                },
+                {
+                  "id": "BF7EBAD0-9C8E-41B1-913B-B93ECF0C6CA6",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 4,
+                  "subjectResults": {
+                    "reference": "#subject-list-group-group-1-stratifier-75533601-6C60-4150-86E9-DEBA743ED515-stratum-false-numerator"
+                  }
+                }
+              ],
+              "measureScore": {
+                "value": 0.5
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

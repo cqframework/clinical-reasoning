@@ -1,9 +1,9 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
-import org.hl7.fhir.dstu3.model.ListResource;
-import org.hl7.fhir.dstu3.model.MeasureReport;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +16,7 @@ import static org.testng.Assert.assertTrue;
 
 public class MeasureValidationUtils {
 
-    protected static void validateGroup(MeasureReport.MeasureReportGroupComponent group, String populationName, int count) {
+    public static void validateGroup(MeasureReport.MeasureReportGroupComponent group, String populationName, int count) {
         Optional<MeasureReport.MeasureReportGroupPopulationComponent> population = group.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
 
         assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
@@ -24,7 +24,7 @@ public class MeasureValidationUtils {
     }
 
 
-    protected static void validateListEquality(ListResource actual, ListResource expected) {
+    public static void validateListEquality(ListResource actual, ListResource expected) {
         Set<String> listItems = new HashSet<>();
 
         for (ListResource.ListEntryComponent comp : actual.getEntry()) {
@@ -38,7 +38,7 @@ public class MeasureValidationUtils {
         }
     }
 
-    protected static void validateMeasureReportContained(MeasureReport actual, MeasureReport expected) {
+    public static void validateMeasureReportContained(MeasureReport actual, MeasureReport expected) {
         assertEquals(actual.getContained().size(), expected.getContained().size());
 
         Map<String, Resource> listResources = new HashMap<>();

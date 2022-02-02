@@ -2,13 +2,12 @@ package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
-import java.util.function.Function;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -36,6 +35,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.measure.common.GroupDef;
@@ -385,10 +385,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             return new Period().setStart(dtStart.toJavaDate()).setEnd(dtEnd.toJavaDate());
 
         } else if (measurementPeriod.getStart() instanceof Date) {
-            return new Period().setStart((Date) measurementPeriod.getStart()).setEnd((Date) measurementPeriod.getEnd());
+            Date dStart = (Date) measurementPeriod.getStart();
+            Date dEnd = (Date) measurementPeriod.getEnd();
+            return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
             throw new IllegalArgumentException(
-                    "Measurement period should be an interval of CQL DateTime or Java Date objects");
+                    "Measurement period should be an interval of CQL DateTime or Date");
         }
     }
 
@@ -404,7 +406,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         report.setPeriod(getPeriod(measurementPeriod));
         report.setMeasure(new Reference(measure.getId()));
-        report.setDate(new Date());
+        report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());
         report.setLanguage(measure.getLanguage());
 

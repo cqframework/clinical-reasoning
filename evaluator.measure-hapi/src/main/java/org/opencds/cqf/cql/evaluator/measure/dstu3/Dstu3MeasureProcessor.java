@@ -16,7 +16,6 @@ import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -43,7 +42,9 @@ import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
+import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
+import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
@@ -70,6 +71,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
     private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new HashMap<>();
 
+    private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
+
     private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     private MeasureEvalConfig measureEvalConfig = MeasureEvalConfig.defaultConfig();
@@ -85,14 +88,14 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
         this(terminologyProviderFactory, dataProviderFactory, libraryContentProviderFactory, fhirDalFactory,
-                endpointConverter, null, null, null, null, null);
+                endpointConverter, null, null, null, null, null, null);
     }
 
     public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
             TerminologyProvider localTerminologyProvider, LibraryContentProvider localLibraryContentProvider,
-            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig) {
+            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
         this.libraryContentProviderFactory = libraryContentProviderFactory;
@@ -104,6 +107,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         this.localFhirDal = localFhirDal;
         this.localDataProvider = localDataProvider;
 
+        this.libraryCache = libraryCache;
+
         if (measureEvalConfig != null) {
             this.measureEvalConfig = measureEvalConfig;
         }
@@ -113,7 +118,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     public Dstu3MeasureProcessor(TerminologyProvider localTerminologyProvider,
             LibraryContentProvider localLibraryContentProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
         this(null, null, null, null, null, localTerminologyProvider, localLibraryContentProvider, localDataProvider,
-                localFhirDal, null);
+                localFhirDal, null, null);
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
@@ -146,15 +151,9 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
                     String.format("Measure %s does not have a primary library specified", url));
         }
 
-        Reference libraryReference = measure.getLibrary().get(0);
+        Reference libraryUrl = measure.getLibrary().get(0);
 
-        org.hl7.fhir.dstu3.model.Library primaryLibrary = (org.hl7.fhir.dstu3.model.Library) fhirDal
-                .read(new IdType(libraryReference.getReference()));
-        if (primaryLibrary == null) {
-            throw new IllegalArgumentException(
-                    String.format("Unable to locate primary Library with id %s", libraryReference.getReference()));
-        }
-
+        org.hl7.fhir.dstu3.model.Library primaryLibrary = (org.hl7.fhir.dstu3.model.Library)this.localFhirDal.read(libraryUrl.getReferenceElement());
         LibraryContentProvider libraryContentProvider = contentEndpoint != null
                 ? this.libraryContentProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
                 : localLibraryContentProvider;
@@ -176,7 +175,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
             throw new IllegalStateException("a terminologyProvider was not provided and one could not be constructed");
         }
 
-        DataProvider dataProvider = dataEndpoint != null
+        DataProvider dataProvider = (dataEndpoint != null || additionalData != null)
                 ? this.buildDataProvider(dataEndpoint, additionalData, terminologyProvider)
                 : this.localDataProvider;
 
@@ -198,8 +197,14 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         libraryContentProviders.add(libraryContentProvider);
         libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
 
-        return new TranslatingLibraryLoader(
+        TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
                 new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlTranslatorOptions);
+
+        if (this.libraryCache != null) {
+            libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
+        }
+
+        return libraryLoader;
     }
 
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
@@ -252,7 +257,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
         context.setDebugMap(new DebugMap());
 
-        if(this.measureEvalConfig.getCqlEngineOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
+        if (this.measureEvalConfig.getCqlEngineOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
             context.setExpressionCaching(true);
         }
 

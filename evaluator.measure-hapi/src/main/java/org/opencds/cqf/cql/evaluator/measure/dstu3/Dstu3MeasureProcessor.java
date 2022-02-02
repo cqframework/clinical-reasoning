@@ -44,7 +44,6 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
@@ -131,8 +130,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
                 : localFhirDal;
 
         if (fhirDal == null) {
-            throw new IllegalStateException(
-                    String.format("a fhirDal was not provided and one could not be constructed"));
+            throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
         }
 
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
@@ -151,10 +149,10 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         Reference libraryReference = measure.getLibrary().get(0);
 
         org.hl7.fhir.dstu3.model.Library primaryLibrary = (org.hl7.fhir.dstu3.model.Library) fhirDal
-                .read(new IdType(libraryReference.getId()));
+                .read(new IdType(libraryReference.getReference()));
         if (primaryLibrary == null) {
             throw new IllegalArgumentException(
-                    String.format("Unable to locate primary Library with id %s", libraryReference.getId()));
+                    String.format("Unable to locate primary Library with id %s", libraryReference.getReference()));
         }
 
         LibraryContentProvider libraryContentProvider = contentEndpoint != null
@@ -162,8 +160,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
                 : localLibraryContentProvider;
 
         if (libraryContentProvider == null) {
-            throw new IllegalStateException(
-                    String.format("a libraryContentProvider was not provided and one could not be constructed"));
+            throw new IllegalStateException("a libraryContentProvider was not provided and one could not be constructed");
         }
 
         LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
@@ -176,8 +173,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
                 : this.localTerminologyProvider;
 
         if (terminologyProvider == null) {
-            throw new IllegalStateException(
-                    String.format("a terminologyProvider was not provided and one could not be constructed"));
+            throw new IllegalStateException("a terminologyProvider was not provided and one could not be constructed");
         }
 
         DataProvider dataProvider = dataEndpoint != null
@@ -185,8 +181,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
                 : this.localDataProvider;
 
         if (dataProvider == null) {
-            throw new IllegalStateException(
-                    String.format("a dataProvider was not provided and one could not be constructed"));
+            throw new IllegalStateException("a dataProvider was not provided and one could not be constructed");
         }
 
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
@@ -203,10 +198,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         libraryContentProviders.add(libraryContentProvider);
         libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
 
-        TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
+        return new TranslatingLibraryLoader(
                 new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlTranslatorOptions);
-
-        return libraryLoader;
     }
 
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {

@@ -135,8 +135,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 : localFhirDal;
 
         if (fhirDal == null) {
-            throw new IllegalStateException(
-                    String.format("a fhirDal was not provided and one could not be constructed"));
+            throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
         }
 
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
@@ -167,8 +166,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 : localLibraryContentProvider;
 
         if (libraryContentProvider == null) {
-            throw new IllegalStateException(
-                    String.format("a libraryContentProvider was not provided and one could not be constructed"));
+            throw new IllegalStateException("a libraryContentProvider was not provided and one could not be constructed");
         }
 
         LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
@@ -181,8 +179,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 : this.localTerminologyProvider;
 
         if (terminologyProvider == null) {
-            throw new IllegalStateException(
-                    String.format("a terminologyProvider was not provided and one could not be constructed"));
+            throw new IllegalStateException("a terminologyProvider was not provided and one could not be constructed");
         }
 
         DataProvider dataProvider = (dataEndpoint != null || additionalData != null)
@@ -190,8 +187,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 : this.localDataProvider;
 
         if (dataProvider == null) {
-            throw new IllegalStateException(
-                    String.format("a dataProvider was not provided and one could not be constructed"));
+            throw new IllegalStateException("a dataProvider was not provided and one could not be constructed");
         }
 
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);

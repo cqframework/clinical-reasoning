@@ -73,7 +73,7 @@ public class R4MeasureReportAggregatorTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void aggregate_mismatched_period_throws_exception() throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("YYYY");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy");
         Period periodOne = new Period();
         periodOne.setStart(format.parse("1999"));
         periodOne.setEnd(format.parse("2000"));

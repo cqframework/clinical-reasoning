@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportAggregator;
 
@@ -68,20 +71,44 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        List<String> resourceIds = new ArrayList<>();
+        Map<String, Resource> resourceMap = new HashMap<>();
 
         for (Resource resource : carry.getContained()) {
             if (resource.hasId()) {
-                resourceIds.add(resource.getId());
+                resourceMap.put(resource.getId(), resource);
+            }
+        }
+        carry.getContained().clear();
+
+        for (Resource resource : current.getContained()) {
+            if (resource.hasId() && resource.getResourceType().equals(ResourceType.List)) {
+                if (resourceMap.containsKey(resource.getId())) {
+                    ListResource localCarry = (ListResource) resourceMap.get(resource.getId());
+                    mergeList(localCarry, (ListResource) resource);
+                    resourceMap.put(resource.getId(),localCarry);
+                } else {
+                    resourceMap.put(resource.getId(), resource);
+                }
+            } else if (resource.hasId()) {
+                if(!resourceMap.containsKey(resource.getId())) {
+                    resourceMap.put(resource.getId(), resource);
+                }
             }
         }
 
-        for (Resource resource : current.getContained()) {
-            if (resource.hasId()) {
-                if (!resourceIds.contains(resource.getId())) {
-                    resourceIds.add(resource.getId());
-                    carry.getContained().add(resource);
-                }
+        carry.getContained().addAll(resourceMap.values());
+
+    }
+
+    private void mergeList(ListResource carry, ListResource current) {
+        List<String> itemIds = new ArrayList<>();
+        for(ListResource.ListEntryComponent comp : carry.getEntry()) {
+            itemIds.add(comp.getItem().getReference());
+        }
+
+        for(ListResource.ListEntryComponent comp : current.getEntry()) {
+            if(!itemIds.contains(comp.getItem().getReference())) {
+                carry.getEntry().add(comp);
             }
         }
     }

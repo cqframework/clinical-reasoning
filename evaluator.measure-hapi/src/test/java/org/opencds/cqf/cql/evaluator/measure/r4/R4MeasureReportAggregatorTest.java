@@ -105,10 +105,48 @@ public class R4MeasureReportAggregatorTest {
         assertNotNull(expected);
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
+
+        MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
+        MeasureReport.MeasureReportGroupComponent expectedMrgc = actual.getGroup().get(0);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "initial-population", 2);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "initial-population", 2);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "numerator", 1);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "numerator", 1);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "denominator", 2);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator", 2);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "denominator-exclusion", 0);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator-exclusion", 0);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "initial-population", 400);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "male", "numerator", 150);
+
         /*
         FhirContext fhirContext = FhirContext.forR4();
         System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
         */
-        assertTrue(actual.equalsDeep(expected));
     }
+
+    @Test
+    public void aggregateReports_subject_listType_combines_reports() {
+        IParser parser = fhirContext.newJsonParser();
+        MeasureReport left = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list1.json"));
+        assertNotNull(left);
+
+        MeasureReport right = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list2.json"));
+        assertNotNull(right);
+
+        MeasureReport expected = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list.json"));
+        assertNotNull(expected);
+
+        MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
+
+        MeasureValidationUtils.validateMeasureReportContained(expected, actual);
+
+    }
+
+
 }

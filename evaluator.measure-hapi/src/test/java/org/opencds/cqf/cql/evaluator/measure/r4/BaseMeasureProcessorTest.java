@@ -1,25 +1,16 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
-import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -63,52 +54,23 @@ public abstract class BaseMeasureProcessorTest {
     protected Endpoint endpoint = null;
 
     protected void validateGroupScore(MeasureReportGroupComponent group, BigDecimal score) {
-        assertTrue(group.hasMeasureScore(), String.format("group \"%s\" does not have a score", group.getId()));
-        assertEquals(group.getMeasureScore().getValue(), score);
+        MeasureValidationUtils.validateGroupScore(group, score);
     }
 
     protected void validateGroup(MeasureReportGroupComponent group, String populationName, int count) {
-        Optional<MeasureReportGroupPopulationComponent> population = group.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
-
-        assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
-        assertEquals(population.get().getCount(), count, String.format("expected count for population \"%s\" did not match", populationName));
+        MeasureValidationUtils.validateGroup(group, populationName, count);
     }
 
     protected void validateStratifier(MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue, String populationName, int count) {
-        Optional<StratifierGroupComponent> stratumOpt = stratifierComponent.getStratum().stream().filter(x -> x.hasValue() && x.getValue().hasText() && x.getValue().getText().equals(stratumValue)).findFirst();
-        assertTrue(stratumOpt.isPresent(), String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
-
-        StratifierGroupComponent stratum = stratumOpt.get();
-        Optional<StratifierGroupPopulationComponent> population = stratum.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
-
-        assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
-
-        assertEquals(population.get().getCount(), count, String.format("expected count for stratum value \"%s\" population \"%s\" did not match", stratumValue, populationName));
+        MeasureValidationUtils.validateStratifier(stratifierComponent, stratumValue, populationName, count);
     }
 
     protected void validateStratumScore(MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue, BigDecimal score) {
-        Optional<StratifierGroupComponent> stratumOpt = stratifierComponent.getStratum().stream().filter(x -> x.hasValue() && x.getValue().hasText() && x.getValue().getText().equals(stratumValue)).findFirst();
-        assertTrue(stratumOpt.isPresent(), String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
-
-        StratifierGroupComponent stratum = stratumOpt.get();
-        assertTrue(stratum.hasMeasureScore(), String.format("stratum \"%s\" does not have a score", stratum.getId()));
-        assertEquals(stratum.getMeasureScore().getValue(), score);
+        MeasureValidationUtils.validateStratumScore(stratifierComponent, stratumValue, score);
     }
 
     protected void validateEvaluatedResourceExtension(List<Reference> measureReferences, String resourceId, String... populations) {
-        List<Reference> resourceReferences = measureReferences.stream().filter(x -> x.getReference().equals(resourceId)).collect(Collectors.toList());
-        assertEquals(resourceReferences.size(), 1);
-
-        Reference reference = resourceReferences.get(0);
-
-        List<Extension> extensions = reference.getExtension().stream().filter(x -> x.getUrl().equals("http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference")).collect(Collectors.toList());
-
-        assertEquals(extensions.size(), populations.length);
-
-        for (String p : populations) {
-            assertTrue(extensions.stream().anyMatch(x -> x.getValue().toString().equals(p)));
-        }
-
+        MeasureValidationUtils.validateEvaluatedResourceExtension(measureReferences, resourceId, populations);
     }
 
     @SuppressWarnings("serial")

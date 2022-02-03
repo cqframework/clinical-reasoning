@@ -23,13 +23,13 @@ mvn package
 Then you can run the cli with:
 
 ```bash
-java -jar ./evaluator.cli/target/evaluator.cli-1.3.0-SNAPSHOT-shaded.jar --help
+java -jar ./evaluator.cli/target/evaluator.cli-1.4.3-SNAPSHOT-shaded.jar --help
 ```
 
 That will list the command line options. There is some CQL content available in the [Connectathon IG](https://github.com/DBCG/connectathon) repository. If you have that repository checked out as a sibling repo to this one, you can execute a sample Measure test case by running:
 
 ```bash
-java -jar ./evaluator.cli/target/evaluator.cli-1.3.0-SNAPSHOT-shaded.jar \
+java -jar ./evaluator.cli/target/evaluator.cli-1.4.3-SNAPSHOT-shaded.jar \
 --lu ../connectathon/fhir4/input/pagecontent/cql \
 --ln EXM104_FHIR4 \
 -m FHIR=../connectathon/fhir4/input/tests/EXM104_FHIR4-8.1.000 \
@@ -42,7 +42,7 @@ java -jar ./evaluator.cli/target/evaluator.cli-1.3.0-SNAPSHOT-shaded.jar \
 
 ```bash
 .
-|-- evaluator            # core cql-evaluator classes
+|-- evaluator            # core cql-evaluator classes, code to glue the engine/translator together
 |   |-- src
 |   |   |-- main
 |   |   `-- test
@@ -51,14 +51,6 @@ java -jar ./evaluator.cli/target/evaluator.cli-1.3.0-SNAPSHOT-shaded.jar \
 |   |   |-- main
 |   |   `-- test
 |-- evaluator.cli        # cli tool for running the cql-evaluator
-|   |-- src
-|   |   |-- main
-|   |   `-- test
-|-- evaluator.cql2elm    # cql-evaluator specific extensions to the cql-translator
-|   |-- src
-|   |   |-- main
-|   |   `-- test
-|-- evaluator.engine     # cql-evaluator specific extensions to the cql-engine
 |   |-- src
 |   |   |-- main
 |   |   `-- test

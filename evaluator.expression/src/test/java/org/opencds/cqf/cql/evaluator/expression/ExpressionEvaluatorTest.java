@@ -19,8 +19,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Procedure;
 import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
@@ -37,8 +37,8 @@ import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
@@ -79,7 +79,6 @@ public class ExpressionEvaluatorTest {
     }
 
     @BeforeClass
-    @SuppressWarnings("serial")
     public void setup() {
         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
@@ -87,6 +86,7 @@ public class ExpressionEvaluatorTest {
 
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
 
+        @SuppressWarnings("serial")
         Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories = new HashSet<TypedLibraryContentProviderFactory>() {
             {
                 add(new TypedLibraryContentProviderFactory() {

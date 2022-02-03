@@ -43,7 +43,9 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
 
     @Override
     public Triple<String, ModelResolver, RetrieveProvider> create(EndpointInfo endpointInfo) {
-        requireNonNull(endpointInfo, "endpointInfo can not be null");
+        if (endpointInfo == null) {
+            return null;
+        }
 
         if (endpointInfo.getType() == null) {
             endpointInfo.setType(detectType(endpointInfo.getAddress()));
@@ -112,7 +114,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
 
             if (retrieveProvider == null) {
                 throw new IllegalArgumentException(
-                        String.format("unknown connectionType for loading FHIR Resources: %s", connectionType));
+                        String.format("unsupported or unknown connectionType for loading FHIR Resources: %s", connectionType));
             }
         }
 
@@ -121,7 +123,9 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
 
     @Override
     public Triple<String, ModelResolver, RetrieveProvider> create(IBaseBundle dataBundle) {
-        requireNonNull(dataBundle, "dataBundle can not be null");
+        if (dataBundle == null) {
+            return null;
+        }
 
         if (!dataBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
             throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");

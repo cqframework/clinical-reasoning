@@ -76,7 +76,7 @@ public class LibraryContentProviderFactory implements org.opencds.cqf.cql.evalua
                 catch (Exception e) {
                     directoryPath = Paths.get(url);
                 }
-                
+
                 File directory = new File(directoryPath.toAbsolutePath().toString());
 
                 File[] files = directory.listFiles((d, name) -> name.endsWith(".cql"));

@@ -1,14 +1,13 @@
 package org.opencds.cqf.cql.evaluator.measure.helper;
 
-import java.time.ZoneOffset;
-import java.util.Calendar;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
 
+// TODO: These tests are only partially complete. We need to actually verify that resolved dates are correct.
 public class DateHelperTest {
 
     @Test
@@ -20,8 +19,6 @@ public class DateHelperTest {
         Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
         assertEquals(resolvedDateStart, resolvedDateEnd);
-
-        Calendar calendar = Calendar.getInstance();
     }
 
     @Test
@@ -33,10 +30,6 @@ public class DateHelperTest {
         Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
         assertEquals(resolvedDateStart, resolvedDateEnd);
-
-        String[] zones = TimeZone.getAvailableIDs(ZoneOffset.of("-06:00").getTotalSeconds() * 1000);
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(zones[0]));
     }
 
     @Test
@@ -48,8 +41,6 @@ public class DateHelperTest {
         Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
         assertEquals(resolvedDateStart, resolvedDateEnd);
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     }
 
     @Test
@@ -60,9 +51,6 @@ public class DateHelperTest {
 
         Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
-
-
-        Calendar calendar = Calendar.getInstance();
     }
 
     @Test
@@ -73,7 +61,5 @@ public class DateHelperTest {
 
         Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
-
-        Calendar calendar = Calendar.getInstance();
     }
 }

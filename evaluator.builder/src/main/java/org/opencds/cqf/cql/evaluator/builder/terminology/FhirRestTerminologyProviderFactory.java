@@ -24,8 +24,8 @@ public class FhirRestTerminologyProviderFactory implements TypedTerminologyProvi
     private ClientFactory clientFactory;
 
     @Inject
-    public FhirRestTerminologyProviderFactory(FhirContext fhirContent, ClientFactory clientFactory) {
-        this.fhirContext = requireNonNull(fhirContent, "fhirContext can not be null");
+    public FhirRestTerminologyProviderFactory(FhirContext fhirContext, ClientFactory clientFactory) {
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.clientFactory = requireNonNull(clientFactory, "clientFactory can not be null");
     }
 

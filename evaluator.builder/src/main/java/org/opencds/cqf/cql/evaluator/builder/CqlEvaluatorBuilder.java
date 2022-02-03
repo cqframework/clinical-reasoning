@@ -14,6 +14,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
@@ -26,6 +27,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
+import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
@@ -34,9 +36,8 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
-import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
-import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
+import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,6 @@ public class CqlEvaluatorBuilder {
         this.terminologyProviders = new ArrayList<>();
         this.dataProviderParts = new HashMap<>();
         this.libraryCache = new HashMap<>();
-        this.cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
         this.retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
         this.engineOptions = EnumSet.of(CqlEngine.Options.EnableExpressionCaching);
     }
@@ -292,10 +292,23 @@ public class CqlEvaluatorBuilder {
         return dataProviders;
     }
 
+    private CqlTranslatorOptions getDefaultOptions() {
+        CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
+        if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
+            options.getFormats().add(CqlTranslator.Format.XML);
+        }
+        logger.info("cql-options not found. Using default options.");
+        return options;
+    }
+
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.libraryContentProviders);
         if (this.useEmbeddedLibraries) {
             this.libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+        }
+
+        if (this.cqlTranslatorOptions == null) {
+            this.cqlTranslatorOptions = getDefaultOptions();
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
@@ -352,7 +365,7 @@ public class CqlEvaluatorBuilder {
         }
 
         this.stale = true;
-        
+
         LibraryLoader libraryLoader = this.buildLibraryLoader();
         TerminologyProvider terminologyProvider = this.buildTerminologyProvider();
         Map<String, DataProvider> dataProviders = this.buildDataProviders(terminologyProvider);

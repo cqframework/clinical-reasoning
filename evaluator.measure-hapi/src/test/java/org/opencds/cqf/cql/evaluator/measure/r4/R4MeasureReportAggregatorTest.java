@@ -150,5 +150,4 @@ public class R4MeasureReportAggregatorTest {
 
     }
 
-
 }

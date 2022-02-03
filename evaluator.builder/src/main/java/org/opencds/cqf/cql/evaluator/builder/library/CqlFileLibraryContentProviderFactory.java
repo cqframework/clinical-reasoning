@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.builder.library;
 
+import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -24,8 +26,6 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvi
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
 
 @Named
 public class CqlFileLibraryContentProviderFactory implements TypedLibraryContentProviderFactory {

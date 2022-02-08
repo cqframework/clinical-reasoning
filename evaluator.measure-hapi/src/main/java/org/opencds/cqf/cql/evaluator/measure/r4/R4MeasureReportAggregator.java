@@ -1,6 +1,11 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +32,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
 
         MeasureReport carry = iterator.next();
         if (carry.hasType() && carry.getType().equals(MeasureReportType.INDIVIDUAL)) {
-            throw new IllegalArgumentException(String.format("Can not aggregate MeasureReports of type: " + MeasureReportType.INDIVIDUAL.toCode()));
+            throw new IllegalArgumentException(String.format("Can not aggregate MeasureReports of type: %s", MeasureReportType.INDIVIDUAL.toCode()));
         }
         
         while(iterator.hasNext()) {

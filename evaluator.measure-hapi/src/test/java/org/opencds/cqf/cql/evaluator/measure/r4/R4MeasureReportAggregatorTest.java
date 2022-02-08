@@ -3,7 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
-import org.opencds.cqf.cql.evaluator.measure.dstu3.MeasureValidationUtils;
+import org.opencds.cqf.cql.evaluator.measure.r4.MeasureValidationUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -74,7 +74,7 @@ public class R4MeasureReportAggregatorTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void aggregate_mismatched_period_throws_exception() throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("YYYY");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy");
         Period periodOne = new Period();
         periodOne.setStart(format.parse("1999"));
         periodOne.setEnd(format.parse("2000"));
@@ -122,10 +122,8 @@ public class R4MeasureReportAggregatorTest {
         MeasureValidationUtils.validateGroup(actualMrgc, "denominator-exclusion", 0);
         MeasureValidationUtils.validateGroup(expectedMrgc, "denominator-exclusion", 0);
 
-//        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "initial-population", 400);
-//        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "male", "numerator", 150);
-
-//        System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expected));
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "initial-population", 400);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "male", "numerator", 150);
 
     }
 
@@ -142,10 +140,25 @@ public class R4MeasureReportAggregatorTest {
         assertNotNull(expected);
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
-//
-//        //MeasureValidationUtils.validateMeasureReportContained(expected, actual);
+
+        MeasureValidationUtils.validateMeasureReportContained(expected, actual);
+        MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
+        MeasureReport.MeasureReportGroupComponent expectedMrgc = actual.getGroup().get(0);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "false", "initial-population", 20);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "false", "initial-population", 20);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "false", "denominator", 16);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "false", "denominator", 16);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true", "initial-population", 12);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true", "initial-population", 12);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true", "denominator", 8);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true", "denominator", 8);
+
 //        FhirContext fhirContext = FhirContext.forR4();
-        System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
+//        System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
 
 
     }

@@ -1,9 +1,9 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
-import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.dstu3.model.ListResource;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -156,7 +156,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         Iterable<IBaseResource> libraries = fhirDal.searchByUrl("Library", libraryUrl.getValue());
         Iterator<IBaseResource> libraryIter = libraries.iterator();
         if (!libraryIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate primary Library with url %s", url));
+            throw new IllegalArgumentException(String.format("Unable to locate primary Library with url %s", libraryUrl.getValue()));
         }
 
         org.hl7.fhir.r4.model.Library primaryLibrary = (org.hl7.fhir.r4.model.Library) libraryIter.next();

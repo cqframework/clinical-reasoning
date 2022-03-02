@@ -139,5 +139,20 @@ public class Dstu3MeasureReportAggregatorTest {
 
         MeasureValidationUtils.validateMeasureReportContained(expected, actual);
 
+        MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
+        MeasureReport.MeasureReportGroupComponent expectedMrgc = actual.getGroup().get(0);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "true", "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "true", "initial-population", 500);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "true", "numerator", 200);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "true", "numerator", 200);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "false", "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "false", "initial-population", 500);
+
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true", "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true", "initial-population", 500);
+
     }
 }

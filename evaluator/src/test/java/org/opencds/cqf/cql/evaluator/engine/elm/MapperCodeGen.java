@@ -20,13 +20,11 @@ import org.slf4j.LoggerFactory;
 // It's a one-off for now, but we could integrate it into the build at some point.
 public class MapperCodeGen {
 
-    private Logger logger = LoggerFactory.getLogger(MapperCodeGen.class);
+    private static Logger logger = LoggerFactory.getLogger(MapperCodeGen.class);
 
     // TODO: Write to a file rather than stdout.
     // Part of the file is manually generated, so whats the java equivalent of partial classes? Hmm.
-
-    // @Test
-    public void writeClasses() {
+    public static void main(String[] args) {
 
         Reflections reflections = new Reflections("org.hl7.elm.r1");
         Set<Class<? extends Element>> subTypes = reflections.getSubTypesOf(Element.class);
@@ -64,7 +62,7 @@ public class MapperCodeGen {
         generateFunctionForAbstractType(Element.class, translatorTypeList);
     }
 
-    Map<Class<? extends Element>, Class<? extends org.cqframework.cql.elm.execution.Element>> createConcreteTypeMap(List<Class<? extends Element>> translatorTypeList, List<Class<? extends org.cqframework.cql.elm.execution.Element>> engineTypeList, List<Class<? extends org.cqframework.cql.elm.execution.Element>> engineImplementationTypeList) {
+    static Map<Class<? extends Element>, Class<? extends org.cqframework.cql.elm.execution.Element>> createConcreteTypeMap(List<Class<? extends Element>> translatorTypeList, List<Class<? extends org.cqframework.cql.elm.execution.Element>> engineTypeList, List<Class<? extends org.cqframework.cql.elm.execution.Element>> engineImplementationTypeList) {
         Map<Class<? extends Element>, Class<? extends org.cqframework.cql.elm.execution.Element>> typeMap = new HashMap<>();
 
         // Map all the types that have implementation
@@ -110,7 +108,7 @@ public class MapperCodeGen {
         return typeMap;
     }
 
-    private void generateFunctionForAbstractType(Class<? extends Element> abstractType, List<Class<? extends Element>> allTypes) {
+    static void generateFunctionForAbstractType(Class<? extends Element> abstractType, List<Class<? extends Element>> allTypes) {
 
         List<Class<? extends Element>> concreteSubClasses = allTypes.stream()
                 .filter(x -> !Modifier.isAbstract(x.getModifiers())).filter(x -> abstractType.isAssignableFrom(x))

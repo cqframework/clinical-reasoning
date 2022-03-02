@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch MapperCodeGen",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.cql.evaluator.engine.elm.MapperCodeGen",
+            "projectName": "evaluator"
+        },
+        {
+            "type": "java",
             "name": "Debug (Attach)",
             "request": "attach",
             "hostName": "localhost",

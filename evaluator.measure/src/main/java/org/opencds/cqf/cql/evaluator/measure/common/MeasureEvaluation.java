@@ -290,6 +290,33 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
         for (GroupDef groupDef : measureDef.getGroups()) {
             evaluateGroup(measureScoring, groupDef, measureDef.getSdes(), subjectIds);
+            validateEvaluatedMeasureCount(measureScoring, groupDef);
+        }
+    }
+
+    private void validateEvaluatedMeasureCount(MeasureScoring measureScoring, GroupDef groupDef) {
+        switch (measureScoring) {
+            case PROPORTION:
+            case RATIO:
+                //the count of denominator + denominator exclusion + denominator exception must be <= the count of initial population.
+                if (groupDef.get(INITIALPOPULATION).getResources().size() <
+                        (groupDef.get(DENOMINATOR).getResources().size() +
+                                groupDef.get(DENOMINATOREXCEPTION).getResources().size() +
+                                groupDef.get(DENOMINATOREXCLUSION).getResources().size())) {
+                    logger.debug("For group: {}, Initial population count is less than the sum of denominator," +
+                            " denominator exception and denominator exclusion", groupDef.getId());
+                }
+
+                //the count of numerator + numerator exclusion must be <= the count of the denominator.
+                if (groupDef.get(DENOMINATOR).getResources().size() <
+                        (groupDef.get(NUMERATOR).getResources().size() +
+                                groupDef.get(NUMERATOREXCLUSION).getResources().size())
+                ) {
+                    logger.debug("For group: {}, Denominator count is less than the sum of numerator and numerator exclusion", groupDef.getId());
+                }
+
+                break;
+            default:
         }
     }
 

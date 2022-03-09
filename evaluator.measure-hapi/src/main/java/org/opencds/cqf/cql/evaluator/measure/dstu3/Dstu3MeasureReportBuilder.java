@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
@@ -55,6 +57,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
     protected static String EXT_SDE_REFERENCE_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
+    protected static final String POPULATION_BASIS_URL = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
@@ -225,7 +228,16 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
-        reportPopulation.setCount(populationDef.getSubjects().size());
+
+        if (checkIfNotBooleanBasedMeasure(measure)) {
+            reportPopulation.setCount(
+                    CollectionUtils.isEmpty(populationDef.getResources()) ?
+                            0 : populationDef.getResources().size());
+        } else {
+            reportPopulation.setCount(
+                    CollectionUtils.isEmpty(populationDef.getSubjects()) ?
+                            0 : populationDef.getSubjects().size());
+        }
 
         if (measurePopulation.hasDescription()) {
             reportPopulation.addExtension(
@@ -399,7 +411,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
-        ;
+
         if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {
             report.setPatient(new Reference(subjectIds.get(0)));
         }
@@ -476,6 +488,20 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
 
         reference.addExtension(extension);
+    }
+
+    protected boolean checkIfNotBooleanBasedMeasure(Measure measure) {
+        if (measure.hasExtension() && measure.getExtension().size() > 0) {
+            return measure.getExtension().stream().anyMatch(item -> checkForNotBoolean(item)
+            );
+        }
+        return false;
+    }
+
+    private boolean checkForNotBoolean(Extension item) {
+        return (item.getUrl() != null &&
+                StringUtils.equalsIgnoreCase(item.getUrl(), POPULATION_BASIS_URL) &&
+                !StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
     }
 
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {

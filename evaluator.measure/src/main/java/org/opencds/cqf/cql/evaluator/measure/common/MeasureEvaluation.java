@@ -299,18 +299,18 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
             case PROPORTION:
             case RATIO:
                 //the count of denominator + denominator exclusion + denominator exception must be <= the count of initial population.
-                if (groupDef.get(INITIALPOPULATION).getResources().size() <
-                        (groupDef.get(DENOMINATOR).getResources().size() +
-                                groupDef.get(DENOMINATOREXCEPTION).getResources().size() +
-                                groupDef.get(DENOMINATOREXCLUSION).getResources().size())) {
+                if ((groupDef.get(INITIALPOPULATION) != null ? groupDef.get(INITIALPOPULATION).getResources().size() : 0) <
+                        ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size() : 0) +
+                                (groupDef.get(DENOMINATOREXCEPTION) != null ? groupDef.get(DENOMINATOREXCEPTION).getResources().size() : 0) +
+                                (groupDef.get(DENOMINATOREXCLUSION) != null ? groupDef.get(DENOMINATOREXCLUSION).getResources().size() : 0))) {
                     logger.debug("For group: {}, Initial population count is less than the sum of denominator," +
                             " denominator exception and denominator exclusion", groupDef.getId());
                 }
 
                 //the count of numerator + numerator exclusion must be <= the count of the denominator.
-                if (groupDef.get(DENOMINATOR).getResources().size() <
-                        (groupDef.get(NUMERATOR).getResources().size() +
-                                groupDef.get(NUMERATOREXCLUSION).getResources().size())
+                if ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size() : 0) <
+                        ((groupDef.get(NUMERATOR) != null ? groupDef.get(NUMERATOR).getResources().size() : 0) +
+                                (groupDef.get(NUMERATOREXCLUSION) != null ? groupDef.get(NUMERATOREXCLUSION).getResources().size() : 0))
                 ) {
                     logger.debug("For group: {}, Denominator count is less than the sum of numerator and numerator exclusion", groupDef.getId());
                 }

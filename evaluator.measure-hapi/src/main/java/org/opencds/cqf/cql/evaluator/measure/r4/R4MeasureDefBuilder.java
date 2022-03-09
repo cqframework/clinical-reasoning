@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
@@ -45,6 +46,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // Groups
         for (MeasureGroupComponent group : measure.getGroup()) {
             GroupDef groupDef = new GroupDef();
+
+            if (StringUtils.isNotBlank(group.getId())) {
+                groupDef.setId(group.getId());
+            }
+
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 MeasurePopulationType populationType = MeasurePopulationType
                         .fromCode(pop.getCode().getCodingFirstRep().getCode());

@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 
 public class GroupDef {
 
+    private String id = "";
+
     private HashMap<MeasurePopulationType, PopulationDef> populationSets = new HashMap<>();
 
     private List<StratifierDef> stratifiers;
@@ -40,4 +42,8 @@ public class GroupDef {
 
         return this.stratifiers;
     }
+
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
 }

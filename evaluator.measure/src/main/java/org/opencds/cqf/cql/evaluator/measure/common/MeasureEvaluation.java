@@ -1,14 +1,5 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOR;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOREXCLUSION;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.INITIALPOPULATION;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREOBSERVATION;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREPOPULATION;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOR;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
-
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +22,8 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.*;
 
 /**
  * This class implements the core Measure evaluation logic that's defined in the
@@ -400,23 +393,23 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
                 boolean inNumerator = evaluatePopulationMembership(subjectId, groupDef.get(NUMERATOR),
                         groupDef.get(NUMERATOREXCLUSION));
 
-                if (!inNumerator && inDenominator && groupDef.get(DENOMINATOREXCLUSION) != null) {
+                if (!inNumerator && inDenominator && groupDef.get(DENOMINATOREXCEPTION) != null) {
                     // Are they in the denominator exception?
 
-                    PopulationDef denominatorExclusion = groupDef.get(DENOMINATOREXCLUSION);
+                    PopulationDef denominatorException = groupDef.get(DENOMINATOREXCEPTION);
                     PopulationDef denominator = groupDef.get(DENOMINATOR);
                     boolean inException = false;
                     for (BaseT resource : evaluatePopulationCriteria(subjectId,
-                            denominatorExclusion.getCriteriaExpression(),
-                            denominatorExclusion.getEvaluatedResources())) {
+                            denominatorException.getCriteriaExpression(),
+                            denominatorException.getEvaluatedResources())) {
                         inException = true;
-                        denominatorExclusion.getResources().add(resource);
+                        denominatorException.getResources().add(resource);
                         denominator.getResources().remove(resource);
 
                     }
 
                     if (inException) {
-                        denominatorExclusion.getSubjects().add(subjectId);
+                        denominatorException.getSubjects().add(subjectId);
                         denominator.getSubjects().remove(subjectId);
                     }
                 }

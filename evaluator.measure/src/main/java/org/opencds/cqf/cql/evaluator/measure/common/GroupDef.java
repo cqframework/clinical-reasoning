@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 public class GroupDef {
 
-    private String id = "";
+    private String id;
 
     private HashMap<MeasurePopulationType, PopulationDef> populationSets = new HashMap<>();
 

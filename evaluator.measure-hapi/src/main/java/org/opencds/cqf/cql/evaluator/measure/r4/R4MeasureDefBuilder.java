@@ -47,9 +47,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         for (MeasureGroupComponent group : measure.getGroup()) {
             GroupDef groupDef = new GroupDef();
 
-            if (StringUtils.isNotBlank(group.getId())) {
-                groupDef.setId(group.getId());
-            }
+            groupDef.setId(group.getId());
 
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 MeasurePopulationType populationType = MeasurePopulationType

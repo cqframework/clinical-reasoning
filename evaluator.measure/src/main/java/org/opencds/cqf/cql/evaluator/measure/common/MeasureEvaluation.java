@@ -307,7 +307,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
             case PROPORTION:
             case RATIO:
                 //the count of denominator + denominator exclusion + denominator exception must be <= the count of initial population.
-                if ((groupDef.get(INITIALPOPULATION) != null ? groupDef.get(INITIALPOPULATION).getResources().size() : 0) <
+                if (groupDef.get(INITIALPOPULATION).getResources().size() <
                         ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size() : 0) +
                                 (groupDef.get(DENOMINATOREXCEPTION) != null ? groupDef.get(DENOMINATOREXCEPTION).getResources().size() : 0) +
                                 (groupDef.get(DENOMINATOREXCLUSION) != null ? groupDef.get(DENOMINATOREXCLUSION).getResources().size() : 0))) {

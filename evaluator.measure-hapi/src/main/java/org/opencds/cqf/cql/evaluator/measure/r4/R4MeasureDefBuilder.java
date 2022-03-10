@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;

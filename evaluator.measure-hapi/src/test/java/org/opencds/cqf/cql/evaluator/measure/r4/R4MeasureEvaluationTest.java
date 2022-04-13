@@ -19,12 +19,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-<<<<<<< HEAD
-=======
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.IdType;
->>>>>>> a7a8b68 (Parallel WIP)
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
@@ -60,7 +55,6 @@ import ca.uhn.fhir.parser.IParser;
 @Test(singleThreaded = true)
 public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
-<<<<<<< HEAD
     public String getFhirVersion() {
         return "4.0.1";
     }
@@ -70,67 +64,54 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any())).thenReturn(Arrays.asList(patient));
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
 
         Measure measure = cohort_measure();
-=======
-        public String getFhirVersion() {
-                return "4.0.1";
-        }
->>>>>>> a7a8b68 (Parallel WIP)
 
-        @Test
-        public void testCohortMeasureEvaluation() throws Exception {
-                Patient patient = john_doe();
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
+                measure, retrieveProvider);
+        checkEvidence(patient, report);
+    }
 
-                RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-                when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
-                                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
+    @Test
+    public void testSDEInMeasureEvaluation() throws Exception {
+        Patient patient = john_doe();
 
-                String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
 
-<<<<<<< HEAD
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
-=======
-                Measure measure = cohort_measure();
->>>>>>> a7a8b68 (Parallel WIP)
 
-                MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
-                                measure, retrieveProvider);
-                checkEvidence(patient, report);
-        }
+        Measure measure = cohort_measure();
 
-        @Test
-        public void testSDEInMeasureEvaluation() throws Exception {
-                Patient patient = john_doe();
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
+                measure, retrieveProvider);
+        checkEvidence(patient, report);
+    }
 
-                RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-                when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
-                                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
+    @Test
+    public void testProportionMeasureEvaluation() throws Exception {
+        Patient patient = john_doe();
 
-                String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
 
-<<<<<<< HEAD
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n";
-=======
-                Measure measure = cohort_measure();
->>>>>>> a7a8b68 (Parallel WIP)
 
-                MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
-                                measure, retrieveProvider);
-                checkEvidence(patient, report);
-        }
+        Measure measure = proportion_measure();
 
-        @Test
-        public void testProportionMeasureEvaluation() throws Exception {
-                Patient patient = john_doe();
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
+                measure, retrieveProvider);
+        checkEvidence(patient, report);
+    }
 
-<<<<<<< HEAD
     @Test
     public void testProportionMeasureEvaluationWithDate() throws Exception {
         Patient patient = john_doe();
@@ -145,121 +126,100 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = proportion_measure();
 
-        MeasureReport report = runTest(cql, patient, measure, retrieveProvider);
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
         checkEvidence(patient, report);
     }
 
     @Test
     public void testContinuousVariableMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
-=======
-                RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-                when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
-                                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
->>>>>>> a7a8b68 (Parallel WIP)
 
-                String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                                + "define Denominator: 'John' in Patient.name.given\n"
-                                + "define Numerator: Patient.birthDate > @1970-01-01\n";
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
 
-<<<<<<< HEAD
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define MeasurePopulation: Patient.birthDate > @1970-01-01\n";
-=======
-                Measure measure = proportion_measure();
->>>>>>> a7a8b68 (Parallel WIP)
 
-                MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
-                                measure, retrieveProvider);
-                checkEvidence(patient, report);
-        }
+        Measure measure = continuous_variable_measure();
 
-        @Test
-        public void testContinuousVariableMeasureEvaluation() throws Exception {
-                Patient patient = john_doe();
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
+                measure, retrieveProvider);
+        checkEvidence(patient, report);
+    }
 
-                RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-                when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
-                                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
+    @Test
+    public void testStratifiedMeasureEvaluation() throws Exception {
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(isNull(), isNull(), isNull(), eq("Patient"), any(), any(), any(), any(),
+                any(), any(), any(), any())).thenReturn(Arrays.asList(jane_doe(), john_doe()));
+        when(retrieveProvider.retrieve(eq("Patient"), eq("id"), eq("john-doe"), eq("Patient"), any(), any(),
+                any(), any(), any(), any(), any(), any())).thenReturn(Arrays.asList(john_doe()));
+        when(retrieveProvider.retrieve(eq("Patient"), eq("id"), eq("jane-doe"), eq("Patient"), any(), any(),
+                any(), any(), any(), any(), any(), any())).thenReturn(Arrays.asList(jane_doe()));
 
-<<<<<<< HEAD
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
-=======
-                String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                                + "define MeasurePopulation: Patient.birthDate > @1970-01-01\n";
->>>>>>> a7a8b68 (Parallel WIP)
 
-                Measure measure = continuous_variable_measure();
+        Measure measure = stratified_measure();
 
-                MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
-                                measure, retrieveProvider);
-                checkEvidence(patient, report);
-        }
+        MeasureReport report = runTest(cql, Arrays.asList(jane_doe().getId(),
+                john_doe().getId()), measure, retrieveProvider);
+        checkStratification(report);
 
-        @Test
-        public void testStratifiedMeasureEvaluation() throws Exception {
-                RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-                when(retrieveProvider.retrieve(isNull(), isNull(), isNull(), eq("Patient"), any(), any(), any(), any(),
-                                any(), any(), any(), any())).thenReturn(Arrays.asList(jane_doe(), john_doe()));
-                when(retrieveProvider.retrieve(eq("Patient"), eq("id"), eq("john-doe"), eq("Patient"), any(), any(),
-                                any(), any(), any(), any(), any(), any())).thenReturn(Arrays.asList(john_doe()));
-                when(retrieveProvider.retrieve(eq("Patient"), eq("id"), eq("jane-doe"), eq("Patient"), any(), any(),
-                                any(), any(), any(), any(), any(), any())).thenReturn(Arrays.asList(jane_doe()));
+    }
 
-                String cql = skeleton_cql() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                                + "define Denominator: 'John' in Patient.name.given\n"
-                                + "define Numerator: Patient.birthDate > @1970-01-01\n"
-                                + "define Gender: Patient.gender\n";
+    @Test
+    public void testEvaluatePopulationCriteriaNullResult() throws Exception {
+        Patient patient = john_doe();
 
-                Measure measure = stratified_measure();
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
 
-<<<<<<< HEAD
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: null\n"
                 + "define Denominator: null\n"
                 + "define Numerator: null\n";
-=======
-                MeasureReport report = runTest(cql, Arrays.asList(jane_doe().getId(),
-                                john_doe().getId()), measure, retrieveProvider);
-                checkStratification(report);
->>>>>>> a7a8b68 (Parallel WIP)
 
-        }
+        Measure measure = proportion_measure();
 
-        @Test
-        public void testEvaluatePopulationCriteriaNullResult() throws Exception {
-                Patient patient = john_doe();
+        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
+                measure, retrieveProvider);
+        checkEvidence(patient, report);
+    }
 
-                RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-                when(retrieveProvider.retrieve(eq("Patient"), anyString(), any(), any(), any(), any(), any(), any(),
-                                any(), any(), any(), any())).thenReturn(Arrays.asList(patient));
+    private void checkStratification(MeasureReport report) {
+        MeasureReportGroupStratifierComponent mrgsc = report.getGroupFirstRep().getStratifierFirstRep();
+        assertEquals(mrgsc.getId(), "patient-gender");
+        assertEquals(mrgsc.getStratum().size(), 2);
 
-                String cql = skeleton_cql() + sde_race() + "define InitialPopulation: null\n"
-                                + "define Denominator: null\n" + "define Numerator: null\n";
+        StratifierGroupComponent sgc = mrgsc.getStratum().stream()
+                .filter(x -> x.hasValue() && x.getValue().getText().equals("male")).findFirst().get();
+        StratifierGroupPopulationComponent sgpc = sgc.getPopulation().stream()
+                .filter(x -> x.getCode().getCodingFirstRep().getCode()
+                        .equals(MeasurePopulationType.INITIALPOPULATION.toCode()))
+                .findFirst().get();
 
-                Measure measure = proportion_measure();
+        assertEquals(sgpc.getCount(), 1);
 
-                MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
-                                measure, retrieveProvider);
-                checkEvidence(patient, report);
-        }
+        sgc = mrgsc.getStratum().stream().filter(x -> x.hasValue() && x.getValue().getText().equals("female"))
+                .findFirst().get();
+        sgpc = sgc.getPopulation().stream()
+                .filter(x -> x.getCode().getCodingFirstRep().getCode()
+                        .equals(MeasurePopulationType.INITIALPOPULATION.toCode()))
+                .findFirst().get();
 
-        private void checkStratification(MeasureReport report) {
-                MeasureReportGroupStratifierComponent mrgsc = report.getGroupFirstRep().getStratifierFirstRep();
-                assertEquals(mrgsc.getId(), "patient-gender");
-                assertEquals(mrgsc.getStratum().size(), 2);
+        assertEquals(sgpc.getCount(), 1);
+    }
 
-                StratifierGroupComponent sgc = mrgsc.getStratum().stream()
-                                .filter(x -> x.hasValue() && x.getValue().getText().equals("male")).findFirst().get();
-                StratifierGroupPopulationComponent sgpc = sgc.getPopulation().stream()
-                                .filter(x -> x.getCode().getCodingFirstRep().getCode()
-                                                .equals(MeasurePopulationType.INITIALPOPULATION.toCode()))
-                                .findFirst().get();
+    private MeasureReport runTest(String cql, List<String> subjectIds, Measure measure,
+                                  RetrieveProvider retrieveProvider) throws Exception {
+        Interval measurementPeriod = measurementPeriod("2000-01-01", "2001-01-01");
 
-                assertEquals(sgpc.getCount(), 1);
+        Library primaryLibrary = library(cql);
+        measure.addLibrary(primaryLibrary.getId());
 
-<<<<<<< HEAD
         List<org.cqframework.cql.elm.execution.Library> cqlLibraries = translate(cql);
         LibraryLoader ll = new InMemoryLibraryLoader(cqlLibraries);
 
@@ -271,8 +231,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         R4MeasureEvaluation evaluation = new R4MeasureEvaluation(context, measure);
         MeasureReport report = evaluation.evaluate(
-                patient != null ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION,
-                patient != null ? Collections.singletonList(patient.getId()) : null, measurementPeriod);
+                subjectIds.size() == 1 ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION,
+                subjectIds, measurementPeriod);
         assertNotNull(report);
 
         // Simulate sending it across the wire
@@ -292,7 +252,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         assertNotNull(obs);
         assertEquals(obs.getValueCodeableConcept().getCodingFirstRep().getCode(), OMB_CATEGORY_RACE_BLACK);
 
-        Optional<org.hl7.fhir.r4.model.Reference> optional = report.getEvaluatedResource().stream().filter(x -> x.getReference().contains(obs.getId())).findFirst();
+        Optional<org.hl7.fhir.r4.model.Reference> optional = report.getEvaluatedResource().stream()
+                .filter(x -> x.getReference().contains(obs.getId())).findFirst();
         assertTrue(optional.isPresent());
     }
 
@@ -372,15 +333,15 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private Patient john_doe() {
         Patient patient = new Patient();
-        patient.setId("john-doe");
-        patient.setName(
-                Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("John")))));
+        patient.setId(new IdType("Patient", "john-doe"));
+        patient.setName(Arrays.asList(
+                new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("John")))));
         patient.setBirthDate(new Date());
         patient.setGender(AdministrativeGender.MALE);
 
         /**
          * Retrieve the coding from an extension that that looks like the following...
-         * 
+         *
          * { "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
          * "extension": [ { "url": "ombCategory", "valueCoding": { "system":
          * "urn:oid:2.16.840.1.113883.6.238", "code": "2054-5", "display": "Black or
@@ -388,8 +349,9 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
          */
 
         Extension usCoreRace = new Extension();
-        usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY).setValue(new Coding()
-                .setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK).setDisplay(BLACK_OR_AFRICAN_AMERICAN));
+        usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY)
+                .setValue(new Coding().setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK)
+                        .setDisplay(BLACK_OR_AFRICAN_AMERICAN));
         patient.getExtension().add(usCoreRace);
 
         return patient;
@@ -397,187 +359,17 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private Patient jane_doe() {
         Patient patient = new Patient();
-        patient.setId("jane-doe");
-        patient.setName(
-                Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("Jane")))));
+        patient.setId(new IdType("Patient", "jane-doe"));
+        patient.setName(Arrays.asList(
+                new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("Jane")))));
         patient.setBirthDate(new Date());
         patient.setGender(AdministrativeGender.FEMALE);
 
         Extension usCoreRace = new Extension();
-        usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY).setValue(new Coding()
-                .setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK).setDisplay(BLACK_OR_AFRICAN_AMERICAN));
+        usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY)
+                .setValue(new Coding().setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK)
+                        .setDisplay(BLACK_OR_AFRICAN_AMERICAN));
         patient.getExtension().add(usCoreRace);
         return patient;
     }
-=======
-                sgc = mrgsc.getStratum().stream().filter(x -> x.hasValue() && x.getValue().getText().equals("female"))
-                                .findFirst().get();
-                sgpc = sgc.getPopulation().stream()
-                                .filter(x -> x.getCode().getCodingFirstRep().getCode()
-                                                .equals(MeasurePopulationType.INITIALPOPULATION.toCode()))
-                                .findFirst().get();
-
-                assertEquals(sgpc.getCount(), 1);
-        }
-
-        private MeasureReport runTest(String cql, List<String> subjectIds, Measure measure,
-                        RetrieveProvider retrieveProvider) throws Exception {
-                Interval measurementPeriod = measurementPeriod("2000-01-01", "2001-01-01");
-
-                Library primaryLibrary = library(cql);
-                measure.addLibrary(primaryLibrary.getId());
-
-                List<org.cqframework.cql.elm.execution.Library> cqlLibraries = translate(cql);
-                LibraryLoader ll = new InMemoryLibraryLoader(cqlLibraries);
-
-                R4FhirModelResolver modelResolver = new R4FhirModelResolver();
-                DataProvider dataProvider = new CompositeDataProvider(modelResolver, retrieveProvider);
-                Context context = new Context(cqlLibraries.get(0));
-                context.registerDataProvider(FHIR_NS_URI, dataProvider);
-                context.registerLibraryLoader(ll);
-
-                R4MeasureEvaluation evaluation = new R4MeasureEvaluation(context, measure);
-                MeasureReport report = evaluation.evaluate(
-                                subjectIds.size() == 1 ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION,
-                                subjectIds, measurementPeriod);
-                assertNotNull(report);
-
-                // Simulate sending it across the wire
-                IParser parser = modelResolver.getFhirContext().newJsonParser();
-                report = (MeasureReport) parser.parseResource(parser.encodeResourceToString(report));
-
-                return report;
-        }
-
-        private void checkEvidence(Patient patient, MeasureReport report) {
-                Map<String, Resource> contained = report.getContained().stream()
-                                .collect(Collectors.toMap(r -> r.getClass().getSimpleName(), Function.identity()));
-
-                assertEquals(contained.size(), 1);
-
-                Observation obs = (Observation) contained.get("Observation");
-                assertNotNull(obs);
-                assertEquals(obs.getValueCodeableConcept().getCodingFirstRep().getCode(), OMB_CATEGORY_RACE_BLACK);
-
-                Optional<org.hl7.fhir.r4.model.Reference> optional = report.getEvaluatedResource().stream()
-                                .filter(x -> x.getReference().contains(obs.getId())).findFirst();
-                assertTrue(optional.isPresent());
-        }
-
-        private Measure cohort_measure() {
-
-                Measure measure = measure("cohort");
-                addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
-                addSDEComponent(measure);
-
-                return measure;
-        }
-
-        private Measure proportion_measure() {
-
-                Measure measure = measure("proportion");
-                addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
-                addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
-                addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
-                addSDEComponent(measure);
-
-                return measure;
-        }
-
-        private Measure continuous_variable_measure() {
-
-                Measure measure = measure("continuous-variable");
-                addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
-                addPopulation(measure, MeasurePopulationType.MEASUREPOPULATION, "MeasurePopulation");
-                addSDEComponent(measure);
-
-                return measure;
-        }
-
-        private Measure stratified_measure() {
-                Measure measure = proportion_measure();
-                addStratifier(measure, "patient-gender", "Gender");
-                return measure;
-        }
-
-        private void addStratifier(Measure measure, String stratifierId, String expression) {
-                MeasureGroupStratifierComponent mgsc = measure.getGroupFirstRep().addStratifier();
-                mgsc.getCriteria().setExpression(expression);
-                mgsc.setId(stratifierId);
-        }
-
-        private void addPopulation(Measure measure, MeasurePopulationType measurePopulationType, String expression) {
-                MeasureGroupPopulationComponent mgpc = measure.getGroupFirstRep().addPopulation();
-                mgpc.getCode().getCodingFirstRep().setCode(measurePopulationType.toCode());
-                mgpc.getCriteria().setExpression(expression);
-        }
-
-        private void addSDEComponent(Measure measure) {
-                MeasureSupplementalDataComponent sde = measure.getSupplementalDataFirstRep();
-                sde.getCode().setText("sde-race");
-                sde.getCriteria().setLanguage("text/cql").setExpression("SDE Race");
-        }
-
-        private Measure measure(String scoring) {
-                Measure measure = new Measure();
-                measure.setName("Test");
-                measure.setVersion("1.0.0");
-                measure.setUrl("http://test.com/fhir/Measure/Test");
-                measure.getScoring().getCodingFirstRep().setCode(scoring);
-                return measure;
-        }
-
-        private Library library(String cql) {
-                Library library = new Library();
-                library.setId("library-Test");
-                library.setName("Test");
-                library.setVersion("1.0.0");
-                library.setUrl("http://test.com/fhir/Library/Test");
-                library.getType().getCodingFirstRep().setCode("logic-library");
-                library.getContentFirstRep().setContentType("text/cql").setData(cql.getBytes());
-                return library;
-        }
-
-        private Patient john_doe() {
-                Patient patient = new Patient();
-                patient.setId(new IdType("Patient", "john-doe"));
-                patient.setName(Arrays.asList(
-                                new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("John")))));
-                patient.setBirthDate(new Date());
-                patient.setGender(AdministrativeGender.MALE);
-
-                /**
-                 * Retrieve the coding from an extension that that looks like the following...
-                 * 
-                 * { "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-                 * "extension": [ { "url": "ombCategory", "valueCoding": { "system":
-                 * "urn:oid:2.16.840.1.113883.6.238", "code": "2054-5", "display": "Black or
-                 * African American" } } ] }
-                 */
-
-                Extension usCoreRace = new Extension();
-                usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY)
-                                .setValue(new Coding().setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK)
-                                                .setDisplay(BLACK_OR_AFRICAN_AMERICAN));
-                patient.getExtension().add(usCoreRace);
-
-                return patient;
-        }
-
-        private Patient jane_doe() {
-                Patient patient = new Patient();
-                patient.setId(new IdType("Patient", "jane-doe"));
-                patient.setName(Arrays.asList(
-                                new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("Jane")))));
-                patient.setBirthDate(new Date());
-                patient.setGender(AdministrativeGender.FEMALE);
-
-                Extension usCoreRace = new Extension();
-                usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY)
-                                .setValue(new Coding().setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK)
-                                                .setDisplay(BLACK_OR_AFRICAN_AMERICAN));
-                patient.getExtension().add(usCoreRace);
-                return patient;
-        }
->>>>>>> a7a8b68 (Parallel WIP)
 }

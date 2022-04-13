@@ -143,7 +143,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         List<String> subjectIds = this.getSubjects(measureEvalType,
-                subject != null ? subject : practitioner);
+                subject != null ? subject : practitioner, dataEndpoint);
 
         if (this.measureEvalConfig.getParallelEnabled()
                 && subjectIds.size() > this.measureEvalConfig.getParallelThreshold()) {

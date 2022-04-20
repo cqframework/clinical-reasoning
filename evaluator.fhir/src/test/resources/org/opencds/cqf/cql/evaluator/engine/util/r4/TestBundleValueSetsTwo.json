@@ -1,0 +1,39 @@
+{
+    "resourceType": "Bundle",
+    "id": "test-bundle-two-valuesets",
+    "type": "collection",
+    "entry": [
+        {
+            "resource": {
+                "resourceType": "ValueSet",
+                "id": "value-set-five",
+                "url": "http://localhost/fhir/ValueSet/value-set-five",
+                "name": "ValueSetFive",
+                "title": "ValueSetFive",
+                "status": "active",
+                "compose": {
+                    "include": [
+                        {
+                            "system": "http://localhost/unit-test",
+                            "version": "2018-03",
+                            "filter": [{
+                                "property": "parent",
+                                "op": "=",
+                                "value": "000"
+                            }]
+                        },
+                        {
+                            "system": "http://localhost/unit-test-2",
+                            "version": "2018-03",
+                            "filter": [{
+                                "property": "parent",
+                                "op": "=",
+                                "value": "333"
+                            }]
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

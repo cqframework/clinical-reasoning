@@ -88,6 +88,28 @@ public class ValueSetUtil {
     
         return concepts;
 	}
+
+	public static List<IBase> getIncludeFilters(FhirContext fhirContext, IBaseResource valueSet) {
+        List<IBase> includes = getIncludes(fhirContext, valueSet);
+
+        if (includes == null) {
+            return null;
+        }
+
+        BaseRuntimeChildDefinition filterChild = getIncludeFilterDefinition(fhirContext);
+    
+        // TODO: The system is defined at the include level, while codes are at the concept level
+		// Need to return a class that represents that.
+		List<IBase> filters = new ArrayList<>();
+		for (IBase include : includes) {
+			List<IBase> currentFilters = filterChild.getAccessor().getValues(include);
+			if (currentFilters != null) {
+				filters.addAll(currentFilters);
+			}
+		}
+    
+        return filters;
+	}
 	
 	public static List<IBase> getExcludeConcepts(FhirContext fhirContext, IBaseResource valueSet) {
         List<IBase> excludes = getExcludes(fhirContext, valueSet);
@@ -109,6 +131,28 @@ public class ValueSetUtil {
 		}
     
         return concepts;
+	}
+
+	public static List<IBase> getExcludeFilters(FhirContext fhirContext, IBaseResource valueSet) {
+        List<IBase> excludes = getExcludes(fhirContext, valueSet);
+
+        if (excludes == null) {
+            return null;
+        }
+
+        BaseRuntimeChildDefinition filterChild = getExcludeFilterDefinition(fhirContext);
+    
+        // TODO: The system is defined at the include level, while codes are at the concept level
+		// Need to return a class that represents that.
+		List<IBase> filters = new ArrayList<>();
+		for (IBase exclude : excludes) {
+			List<IBase> currentFilters = filterChild.getAccessor().getValues(exclude);
+			if (currentFilters != null) {
+				filters.addAll(currentFilters);
+			}
+		}
+    
+        return filters;
 	}
 
 	public static IBase getExpansion(FhirContext fhirContext, IBaseResource valueSet) {
@@ -273,9 +317,19 @@ public class ValueSetUtil {
 		RuntimeResourceBlockDefinition includeBlockChild = (RuntimeResourceBlockDefinition)includeChild.getChildByName("include");
 		return getConceptDefinition(includeBlockChild);
 	}
+	
+	private static BaseRuntimeChildDefinition getIncludeFilterDefinition(FhirContext fhirContext) {
+		BaseRuntimeChildDefinition includeChild = getIncludeDefinition(fhirContext);
+		RuntimeResourceBlockDefinition includeBlockChild = (RuntimeResourceBlockDefinition)includeChild.getChildByName("include");
+		return getFilterDefinition(includeBlockChild);
+	}
 
 	private static RuntimeChildResourceBlockDefinition getConceptDefinition(RuntimeResourceBlockDefinition includeOrExcludeChild) {
 		return (RuntimeChildResourceBlockDefinition)includeOrExcludeChild.getChildByName("concept");
+	}
+
+	private static RuntimeChildResourceBlockDefinition getFilterDefinition(RuntimeResourceBlockDefinition includeOrExcludeChild) {
+		return (RuntimeChildResourceBlockDefinition)includeOrExcludeChild.getChildByName("filter");
 	}
 
     private static BaseRuntimeChildDefinition getExcludeDefinition(FhirContext fhirContext) {
@@ -293,6 +347,12 @@ public class ValueSetUtil {
 		BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
 		RuntimeResourceBlockDefinition excludeBlockChild = (RuntimeResourceBlockDefinition)excludeChild.getChildByName("exclude");
 		return getConceptDefinition(excludeBlockChild);
+	}
+
+	private static BaseRuntimeChildDefinition getExcludeFilterDefinition(FhirContext fhirContext) {
+		BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
+		RuntimeResourceBlockDefinition excludeBlockChild = (RuntimeResourceBlockDefinition)excludeChild.getChildByName("exclude");
+		return getFilterDefinition(excludeBlockChild);
 	}
 
 	private static BaseRuntimeChildDefinition getExpansionDefinition(FhirContext fhirContext) {

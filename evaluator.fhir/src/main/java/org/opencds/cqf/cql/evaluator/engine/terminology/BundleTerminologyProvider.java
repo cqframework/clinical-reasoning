@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Iterables;
+
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -52,6 +55,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
         Iterable<Code> codes = this.expand(valueSet);
+        checkExpansion(codes, valueSet);
         for (Code c : codes) {
             if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
                 return true;
@@ -61,7 +65,6 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         return false;
     }
 
-    
     /** 
      * This method expands a ValueSet into a list of Codes. It will use the "expansion" element of the ValueSet if present.
      * It will fall back the to "compose" element if not present. <b>NOTE:</b> This provider does not provide a full expansion
@@ -129,6 +132,45 @@ public class BundleTerminologyProvider implements TerminologyProvider {
 
 
         this.initialized = true;
+    }
+
+    
+    private void checkExpansion(Iterable<Code> expandedCodes, ValueSetInfo valueSet) {
+        if (expandedCodes != null && !Iterables.isEmpty(expandedCodes)) {
+            return;
+        }
+
+        IBaseResource resource = null;
+        for (IBaseResource res : this.valueSets) {
+            String idPart = res.getIdElement().getIdPart();
+            String versionIdPart = res.getIdElement().getVersionIdPart();
+            if (valueSet.getId().equals(idPart) || valueSet.getId().endsWith(idPart) || valueSet.getId().endsWith(idPart + "|" + versionIdPart)) {
+                resource = res;
+            }
+        }
+
+        if (resource == null) {
+            throw new IllegalArgumentException(String.format("Unable to locate ValueSet %s", valueSet.getId()));
+        }
+
+        if (containsExpansionLogic(resource)) {
+            String msg = "ValueSet {} not expanded and compose contained expansion logic.";
+            logger.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
+
+    private boolean containsExpansionLogic(IBaseResource resource) {
+        List<IBase> includeFilters = ValueSetUtil.getIncludeFilters(this.fhirContext, resource);
+        if (includeFilters != null && !includeFilters.isEmpty()) {
+            return true;
+        }
+        List<IBase> excludeFilters = ValueSetUtil.getExcludeFilters(this.fhirContext, resource);
+        if (excludeFilters != null && !excludeFilters.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
 }

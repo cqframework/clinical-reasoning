@@ -27,6 +27,9 @@ import ca.uhn.fhir.parser.IParser;
 
 public class BundleTerminologyProviderTests {
 
+    private String bundlePathOne = "../util/r4/TestBundleValueSets.json";
+    private String bundlePathTwo = "../util/r4/TestBundleValueSetsTwo.json";
+
     private IBaseBundle loadBundle(FhirContext fhirContext, String path) {
         InputStream stream = BundleTerminologyProviderTests.class.getResourceAsStream(path);
         IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
@@ -46,25 +49,33 @@ public class BundleTerminologyProviderTests {
     }
 
 
-    private TerminologyProvider getTerminologyProvider() {
+    private TerminologyProvider getTerminologyProvider(String path) {
         FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
-        IBaseBundle bundle = this.loadBundle(context, "../util/r4/TestBundleValueSets.json");
+        IBaseBundle bundle = this.loadBundle(context, path);
         return new BundleTerminologyProvider(context, bundle);
     }
 
 
     @Test
     public void test_expandFromExpansion() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-three"));
         assertNotNull(codes);
         List<Code> codesList = Lists.newArrayList(codes);
         assertEquals(3, codesList.size());
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void test_notExpandedFromExpansionLogic() {
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathTwo);
+        terminology.in(
+            new Code().withSystem("http://localhost/unit-test").withCode("000"),
+            new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-five"));
+    }
+
     @Test
     public void test_expandFromCompose() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-two"));
         assertNotNull(codes);
         List<Code> codesList = Lists.newArrayList(codes);
@@ -73,7 +84,7 @@ public class BundleTerminologyProviderTests {
 
     @Test
     public void test_expand_expansionOverridesCompose() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));
         assertNotNull(codes);
         List<Code> codesList = Lists.newArrayList(codes);
@@ -83,7 +94,7 @@ public class BundleTerminologyProviderTests {
 
     @Test
     public void test_expand_noCodes_returnsEmptySet() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         Iterable<Code> codes = terminology.expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-four"));
         assertNotNull(codes);
         List<Code> codesList = Lists.newArrayList(codes);
@@ -92,19 +103,19 @@ public class BundleTerminologyProviderTests {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void test_expand_invalidValueSet() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         terminology.expand(new ValueSetInfo().withId("http://not-value-set"));
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void test_expand_nullValueSet() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         terminology.expand(null);
     }
 
     @Test
     public void test_inValueSet() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         boolean inValueSet = terminology.in(
             new Code().withSystem("http://localhost/unit-test").withCode("000"),
             new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));
@@ -118,13 +129,13 @@ public class BundleTerminologyProviderTests {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void test_inValueSet_nullValueSet() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         terminology.in(new Code().withSystem("http://localhost/not-a-system").withCode("XXX"), null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void test_inValueSet_nullCode() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         terminology.in(null, new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-one"));
     }
 
@@ -132,7 +143,7 @@ public class BundleTerminologyProviderTests {
     // for Bundles (the assumption is that the full code-system is not available)
     @Test
     public void test_lookupReturnsNull() {
-        TerminologyProvider terminology = this.getTerminologyProvider();
+        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathOne);
         Code result = terminology.lookup(new Code().withCode("000"), new CodeSystemInfo().withId("http://localhost/unit-test"));
         assertNull(result);
     }

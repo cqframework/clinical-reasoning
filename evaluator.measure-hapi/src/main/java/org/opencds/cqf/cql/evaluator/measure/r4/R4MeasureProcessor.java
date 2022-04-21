@@ -172,6 +172,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         R4MeasureReportAggregator reportAggregator = new R4MeasureReportAggregator();
 
+        MeasureReport aggregatedReport = reportAggregator.aggregate(reports);
+
+        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+        scorer.score(measureScoring, aggregatedReport);
+
         return reportAggregator.aggregate(reports);
     }
 

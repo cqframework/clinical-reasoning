@@ -1,0 +1,190 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1418",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1418",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1418"
+  } ],
+  "version": "20200307",
+  "name": "CornealEdema",
+  "title": "Corneal Edema",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.11",
+      "display": "Bullous keratopathy, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.12",
+      "display": "Bullous keratopathy, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.13",
+      "display": "Bullous keratopathy, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.20",
+      "display": "Unspecified corneal edema"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.221",
+      "display": "Idiopathic corneal edema, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.222",
+      "display": "Idiopathic corneal edema, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.223",
+      "display": "Idiopathic corneal edema, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.231",
+      "display": "Secondary corneal edema, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.232",
+      "display": "Secondary corneal edema, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.233",
+      "display": "Secondary corneal edema, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.421",
+      "display": "Band keratopathy, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.422",
+      "display": "Band keratopathy, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.423",
+      "display": "Band keratopathy, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.43",
+      "display": "Other calcerous corneal degeneration"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129627002",
+      "display": "Keratitis bullosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736081000119108",
+      "display": "Microcystic edema of cornea of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736161000119100",
+      "display": "Microcystic edema of cornea of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736201000119105",
+      "display": "Edema of cornea of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736241000119107",
+      "display": "Edema of cornea of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736281000119102",
+      "display": "Edema of cornea of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1794009",
+      "display": "Idiopathic corneal edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231921008",
+      "display": "Phakic corneal edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231922001",
+      "display": "Pseudophakic corneal edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231923006",
+      "display": "Aphakic corneal edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "248503005",
+      "display": "Fine corneal edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27194006",
+      "display": "Corneal edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27536004",
+      "display": "Secondary corneal edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "373428006",
+      "display": "Corneal epithelial edema (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "373429003",
+      "display": "Bullous corneal epithelial edema (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "373430008",
+      "display": "Corneal stromal edema (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49362009",
+      "display": "Corneal edema caused by wearing of contact lenses (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57207003",
+      "display": "Bullous keratopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "678991000119103",
+      "display": "Pseudophakic bullous keratopathy of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "679011000119100",
+      "display": "Pseudophakic bullous keratopathy of right eye (disorder)"
+    } ]
+  }
+}

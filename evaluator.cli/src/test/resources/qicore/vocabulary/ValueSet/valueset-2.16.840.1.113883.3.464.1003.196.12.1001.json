@@ -1,0 +1,3300 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1001",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1001",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1001"
+  } ],
+  "version": "20170504",
+  "name": "AntibioticMedicationsforPharyngitis",
+  "title": "Antibiotic Medications for Pharyngitis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013659",
+      "display": "24 HR Minocycline 105 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013662",
+      "display": "24 HR Minocycline 55 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013665",
+      "display": "24 HR Minocycline 80 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1043022",
+      "display": "Cefixime 100 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1043027",
+      "display": "Cefixime 150 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1043030",
+      "display": "Cefixime 200 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "105171",
+      "display": "Cefadroxil 100 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1088677",
+      "display": "Penicillin V Potassium 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302650",
+      "display": "24 HR Minocycline 45 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302659",
+      "display": "24 HR Minocycline 67.5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302664",
+      "display": "24 HR Minocycline 90 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302669",
+      "display": "24 HR Minocycline 112.5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302674",
+      "display": "24 HR Minocycline 135 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1373014",
+      "display": "Cefixime 100 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "141963",
+      "display": "Azithromycin 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "142118",
+      "display": "Sulfamethoxazole 100 MG / Trimethoprim 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1423080",
+      "display": "doxycycline hyclate 200 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1648755",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 25 MG / Nitrofurantoin, Monohydrate 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1648759",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649401",
+      "display": "Doxycycline Monohydrate 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649405",
+      "display": "doxycycline hyclate 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649425",
+      "display": "doxycycline hyclate 75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649429",
+      "display": "Doxycycline Monohydrate 75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649988",
+      "display": "doxycycline hyclate 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649990",
+      "display": "Doxycycline Monohydrate 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650030",
+      "display": "Doxycycline Monohydrate 5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650142",
+      "display": "Doxycycline Monohydrate 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650143",
+      "display": "doxycycline hyclate 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650444",
+      "display": "Doxycycline Monohydrate 150 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650446",
+      "display": "doxycycline hyclate 150 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1652673",
+      "display": "Doxycycline Monohydrate 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1652674",
+      "display": "doxycycline hyclate 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1653433",
+      "display": "doxycycline hyclate 50 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1656313",
+      "display": "Cefotaxime 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1656318",
+      "display": "Cefotaxime 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659131",
+      "display": "Piperacillin 2000 MG / tazobactam 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659137",
+      "display": "Piperacillin 3000 MG / tazobactam 375 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659149",
+      "display": "Piperacillin 4000 MG / tazobactam 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659278",
+      "display": "Ceftazidime 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659283",
+      "display": "Ceftazidime 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659287",
+      "display": "Ceftazidime 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659592",
+      "display": "Ampicillin 1000 MG / Sulbactam 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659598",
+      "display": "Ampicillin 2000 MG / Sulbactam 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1662285",
+      "display": "300 ML linezolid 2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1664981",
+      "display": "Aztreonam 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1664986",
+      "display": "Aztreonam 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665005",
+      "display": "Ceftriaxone 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665021",
+      "display": "Ceftriaxone 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665046",
+      "display": "Ceftriaxone 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665050",
+      "display": "Cefazolin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665052",
+      "display": "Cefazolin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665060",
+      "display": "Cefazolin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665088",
+      "display": "cefepime 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665093",
+      "display": "cefepime 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665097",
+      "display": "cefepime 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665102",
+      "display": "Cefoxitin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665107",
+      "display": "Cefoxitin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665210",
+      "display": "100 ML Ciprofloxacin 2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665212",
+      "display": "200 ML Ciprofloxacin 2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665227",
+      "display": "20 ML Ciprofloxacin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665229",
+      "display": "40 ML Ciprofloxacin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665444",
+      "display": "Cefuroxime 1500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665449",
+      "display": "Cefuroxime 750 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665497",
+      "display": "50 ML Levofloxacin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665507",
+      "display": "100 ML Levofloxacin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665515",
+      "display": "150 ML Levofloxacin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665517",
+      "display": "20 ML Levofloxacin 25 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665519",
+      "display": "30 ML Levofloxacin 25 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1668238",
+      "display": "Azithromycin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1668264",
+      "display": "erythromycin lactobionate 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721458",
+      "display": "Nafcillin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721460",
+      "display": "Nafcillin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721473",
+      "display": "Ampicillin 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721474",
+      "display": "Ampicillin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721475",
+      "display": "Ampicillin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721476",
+      "display": "Ampicillin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1722916",
+      "display": "Cefotetan 180 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1722919",
+      "display": "Cefotetan 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1722921",
+      "display": "Cefotetan 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1723156",
+      "display": "2 ML Amikacin 250 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1723160",
+      "display": "4 ML Amikacin 250 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1728082",
+      "display": "telavancin 750 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1728087",
+      "display": "telavancin 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1737244",
+      "display": "2 ML Clindamycin 150 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1737578",
+      "display": "4 ML Clindamycin 150 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1737581",
+      "display": "6 ML Clindamycin 150 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1739890",
+      "display": "Cefoxitin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1743547",
+      "display": "Oxacillin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1743549",
+      "display": "Oxacillin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1747115",
+      "display": "50 ML Cefotaxime 20 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1747121",
+      "display": "50 ML Cefotaxime 40 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1791505",
+      "display": "doxycycline hyclate 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1801138",
+      "display": "doxycycline hyclate 120 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807508",
+      "display": "200 ML Vancomycin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807510",
+      "display": "150 ML Vancomycin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807511",
+      "display": "100 ML Vancomycin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807513",
+      "display": "Vancomycin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807516",
+      "display": "Vancomycin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807518",
+      "display": "Vancomycin 750 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870631",
+      "display": "100 ML Gentamicin 1.2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870633",
+      "display": "50 ML Gentamicin 1.2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870650",
+      "display": "2 ML Gentamicin 40 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870676",
+      "display": "2 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870681",
+      "display": "6 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870685",
+      "display": "8 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870686",
+      "display": "10 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197449",
+      "display": "Cefaclor 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197451",
+      "display": "Cefixime 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197452",
+      "display": "cefprozil 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197453",
+      "display": "cefprozil 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197454",
+      "display": "Cephalexin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197511",
+      "display": "Ciprofloxacin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197512",
+      "display": "Ciprofloxacin 750 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197516",
+      "display": "Clarithromycin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197517",
+      "display": "Clarithromycin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197518",
+      "display": "Clindamycin 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197595",
+      "display": "Dicloxacillin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197596",
+      "display": "Dicloxacillin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197650",
+      "display": "Erythromycin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197984",
+      "display": "Minocycline 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197985",
+      "display": "Minocycline 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198044",
+      "display": "Norfloxacin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198048",
+      "display": "Ofloxacin 200 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198049",
+      "display": "Ofloxacin 300 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198050",
+      "display": "Ofloxacin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198201",
+      "display": "Rifampin 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198202",
+      "display": "Rifampin 300 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198250",
+      "display": "tetracycline hydrochloride 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198252",
+      "display": "tetracycline hydrochloride 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198332",
+      "display": "Trimethoprim 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198334",
+      "display": "Sulfamethoxazole 400 MG / Trimethoprim 80 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198335",
+      "display": "Sulfamethoxazole 800 MG / Trimethoprim 160 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199055",
+      "display": "Metronidazole 375 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199327",
+      "display": "Metronidazole 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199332",
+      "display": "Trimethoprim 300 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199370",
+      "display": "Ciprofloxacin 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1996246",
+      "display": "Daptomycin 350 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1998483",
+      "display": "doxycycline hyclate 200 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199884",
+      "display": "Levofloxacin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199885",
+      "display": "Levofloxacin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2000127",
+      "display": "Vancomycin 25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2000134",
+      "display": "Vancomycin 50 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "200346",
+      "display": "cefdinir 300 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "204466",
+      "display": "50 ML Penicillin G Potassium 40000 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "204844",
+      "display": "Azithromycin 600 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "205964",
+      "display": "Clindamycin 150 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207362",
+      "display": "Minocycline 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207364",
+      "display": "Minocycline 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207390",
+      "display": "50 ML Penicillin G Potassium 20000 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207391",
+      "display": "50 ML Penicillin G Potassium 60000 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239189",
+      "display": "Nafcillin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239191",
+      "display": "Amoxicillin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239204",
+      "display": "Gentamicin 10 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239209",
+      "display": "Vancomycin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240637",
+      "display": "50 ML Oxacillin 40 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240741",
+      "display": "Clarithromycin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240984",
+      "display": "Ampicillin 100 MG/ML / Sulbactam 50 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242800",
+      "display": "Ceftazidime 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242825",
+      "display": "50 ML Tobramycin 1.2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "248656",
+      "display": "Azithromycin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "259290",
+      "display": "dalfopristin 350 MG / quinupristin 150 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "283535",
+      "display": "doxycycline hyclate 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "284215",
+      "display": "Clindamycin 300 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308177",
+      "display": "Amoxicillin 125 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308181",
+      "display": "Amoxicillin 200 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308182",
+      "display": "Amoxicillin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308188",
+      "display": "Amoxicillin 400 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308189",
+      "display": "Amoxicillin 80 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308191",
+      "display": "Amoxicillin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308192",
+      "display": "Amoxicillin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308194",
+      "display": "Amoxicillin 875 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308207",
+      "display": "Ampicillin 125 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308210",
+      "display": "Ampicillin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308212",
+      "display": "Ampicillin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308459",
+      "display": "Azithromycin 20 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308460",
+      "display": "Azithromycin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309040",
+      "display": "Cefaclor 37.4 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309043",
+      "display": "12 HR Cefaclor 500 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309044",
+      "display": "Cefaclor 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309045",
+      "display": "Cefaclor 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309047",
+      "display": "Cefadroxil 1000 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309048",
+      "display": "Cefadroxil 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309049",
+      "display": "Cefadroxil 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309054",
+      "display": "cefdinir 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309058",
+      "display": "Cefixime 20 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309065",
+      "display": "Cefotaxime 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309068",
+      "display": "Cefotaxime 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309072",
+      "display": "Cefoxitin 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309076",
+      "display": "cefpodoxime 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309077",
+      "display": "cefpodoxime 20 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309078",
+      "display": "cefpodoxime 200 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309079",
+      "display": "cefpodoxime 10 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309080",
+      "display": "cefprozil 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309081",
+      "display": "cefprozil 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309085",
+      "display": "ceftibuten 36 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309086",
+      "display": "ceftibuten 400 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309087",
+      "display": "ceftibuten 18 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309090",
+      "display": "Ceftriaxone 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309092",
+      "display": "Ceftriaxone 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309095",
+      "display": "Cefuroxime 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309096",
+      "display": "Cefuroxime 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309097",
+      "display": "Cefuroxime 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309098",
+      "display": "Cefuroxime 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309101",
+      "display": "Cefuroxime 95 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309110",
+      "display": "Cephalexin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309112",
+      "display": "Cephalexin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309113",
+      "display": "Cephalexin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309114",
+      "display": "Cephalexin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309115",
+      "display": "Cephalexin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309308",
+      "display": "Ciprofloxacin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309309",
+      "display": "Ciprofloxacin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309310",
+      "display": "Ciprofloxacin 100 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309322",
+      "display": "Clarithromycin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309329",
+      "display": "Clindamycin 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309335",
+      "display": "50 ML Clindamycin 12 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309336",
+      "display": "50 ML Clindamycin 18 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309339",
+      "display": "50 ML Clindamycin 6 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310026",
+      "display": "Doxycycline Calcium 10 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310027",
+      "display": "doxycycline hyclate 100 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310028",
+      "display": "doxycycline hyclate 20 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310154",
+      "display": "Erythromycin 250 MG Delayed Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310155",
+      "display": "Erythromycin 250 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310157",
+      "display": "Erythromycin 500 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311296",
+      "display": "Levofloxacin 750 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311681",
+      "display": "Metronidazole 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311787",
+      "display": "moxifloxacin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311989",
+      "display": "Nitrofurantoin 5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311991",
+      "display": "Nitrofurantoin 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311994",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311995",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312127",
+      "display": "Oxacillin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312128",
+      "display": "50 ML Oxacillin 20 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312447",
+      "display": "Piperacillin 200 MG/ML / tazobactam 25 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313115",
+      "display": "Streptomycin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313134",
+      "display": "Sulfamethoxazole 40 MG/ML / Trimethoprim 8 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313137",
+      "display": "Sulfamethoxazole 80 MG/ML / Trimethoprim 16 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313416",
+      "display": "Tobramycin 10 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313570",
+      "display": "Vancomycin 125 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313571",
+      "display": "Vancomycin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313572",
+      "display": "Vancomycin 50 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313797",
+      "display": "Amoxicillin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313799",
+      "display": "Ampicillin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313800",
+      "display": "Ampicillin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313850",
+      "display": "Amoxicillin 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313888",
+      "display": "Cefaclor 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313920",
+      "display": "Cefazolin 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313926",
+      "display": "Cefuroxime 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313996",
+      "display": "Gentamicin 40 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "314106",
+      "display": "Metronidazole 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "314108",
+      "display": "Minocycline 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "315090",
+      "display": "Erythromycin 333 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "317127",
+      "display": "Minocycline 100 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "348869",
+      "display": "doxycycline hyclate 100 MG Delayed Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "348870",
+      "display": "doxycycline hyclate 75 MG Delayed Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351127",
+      "display": "cefditoren pivoxil 200 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351156",
+      "display": "250 ML moxifloxacin 1.6 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "359383",
+      "display": "24 HR Ciprofloxacin 500 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "359385",
+      "display": "24 HR Clarithromycin 500 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "388510",
+      "display": "telithromycin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403840",
+      "display": "Minocycline 75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403920",
+      "display": "Daptomycin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403921",
+      "display": "24 HR Ciprofloxacin 1000 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "406524",
+      "display": "doxycycline hyclate 75 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "409823",
+      "display": "Cefixime 400 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "419849",
+      "display": "Cefixime 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "434018",
+      "display": "doxycycline hyclate 100 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "476576",
+      "display": "cefdinir 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "477391",
+      "display": "Levofloxacin 25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562251",
+      "display": "Amoxicillin 250 MG / Clavulanate 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562266",
+      "display": "Clindamycin 15 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562508",
+      "display": "Amoxicillin 875 MG / Clavulanate 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562707",
+      "display": "Trimethoprim 10 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "577378",
+      "display": "Azithromycin 33.3 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "597455",
+      "display": "Clarithromycin 1000 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "597761",
+      "display": "telithromycin 300 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "597823",
+      "display": "Tobramycin 40 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "598006",
+      "display": "Erythromycin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "598025",
+      "display": "Amoxicillin 250 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617296",
+      "display": "Amoxicillin 500 MG / Clavulanate 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617302",
+      "display": "Amoxicillin 25 MG/ML / Clavulanate 6.25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617309",
+      "display": "Amoxicillin 200 MG / Clavulanate 28.5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617316",
+      "display": "Amoxicillin 400 MG / Clavulanate 57 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617322",
+      "display": "Amoxicillin 50 MG/ML / Clavulanate 12.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617423",
+      "display": "Amoxicillin 40 MG/ML / Clavulanate 5.7 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617430",
+      "display": "Amoxicillin 80 MG/ML / Clavulanate 11.4 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617993",
+      "display": "Amoxicillin 120 MG/ML / Clavulanate 8.58 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617995",
+      "display": "12 HR Amoxicillin 1000 MG / Clavulanate 62.5 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "629695",
+      "display": "24 HR Minocycline 135 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "629697",
+      "display": "24 HR Minocycline 45 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "629699",
+      "display": "24 HR Minocycline 90 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "636559",
+      "display": "24 HR Metronidazole 750 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "637173",
+      "display": "Cephalexin 750 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "637560",
+      "display": "gemifloxacin 320 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "645617",
+      "display": "Cephalexin 333 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686355",
+      "display": "erythromycin stearate 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686383",
+      "display": "Erythromycin Ethylsuccinate 40 MG/ML / Sulfisoxazole 120 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686400",
+      "display": "Erythromycin Ethylsuccinate 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686405",
+      "display": "Erythromycin Ethylsuccinate 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686406",
+      "display": "erythromycin stearate 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686418",
+      "display": "Erythromycin Ethylsuccinate 80 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "700408",
+      "display": "Doxycycline Monohydrate 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "728207",
+      "display": "Doxycycline Monohydrate 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731538",
+      "display": "2 ML penicillin G benzathine 300000 UNT/ML / penicillin G procaine 300000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731564",
+      "display": "1 ML penicillin G benzathine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731567",
+      "display": "2 ML penicillin G benzathine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731570",
+      "display": "4 ML penicillin G benzathine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "745302",
+      "display": "Penicillin G Sodium 100000 UNT/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "745462",
+      "display": "2 ML penicillin G procaine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "745560",
+      "display": "1 ML penicillin G procaine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749780",
+      "display": "{3 (Azithromycin 500 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749783",
+      "display": "{6 (Azithromycin 250 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "757460",
+      "display": "{31 (Doxycycline Monohydrate 100 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "757464",
+      "display": "{31 (Doxycycline Monohydrate 75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "757466",
+      "display": "{60 (Doxycycline Monohydrate 100 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "789980",
+      "display": "Ampicillin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "799048",
+      "display": "doxycycline hyclate 150 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "802550",
+      "display": "Amoxicillin 775 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834040",
+      "display": "Penicillin V Potassium 50 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834046",
+      "display": "Penicillin V Potassium 25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834061",
+      "display": "Penicillin V Potassium 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834102",
+      "display": "Penicillin V Potassium 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "835700",
+      "display": "{30 (Doxycycline Monohydrate 150 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "836306",
+      "display": "2 ML penicillin G benzathine 450000 UNT/ML / penicillin G procaine 150000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "847360",
+      "display": "cefditoren pivoxil 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "858062",
+      "display": "24 HR Minocycline 115 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "858372",
+      "display": "24 HR Minocycline 65 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "863538",
+      "display": "Penicillin G Potassium 1000000 UNT/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "901399",
+      "display": "doxycycline anhydrous 40 MG Delayed Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013659",
+      "display": "24 HR Minocycline 105 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013662",
+      "display": "24 HR Minocycline 55 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013665",
+      "display": "24 HR Minocycline 80 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1043022",
+      "display": "Cefixime 100 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1043027",
+      "display": "Cefixime 150 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1043030",
+      "display": "Cefixime 200 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "105171",
+      "display": "Cefadroxil 100 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1088677",
+      "display": "Penicillin V Potassium 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302650",
+      "display": "24 HR Minocycline 45 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302659",
+      "display": "24 HR Minocycline 67.5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302664",
+      "display": "24 HR Minocycline 90 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302669",
+      "display": "24 HR Minocycline 112.5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302674",
+      "display": "24 HR Minocycline 135 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1373014",
+      "display": "Cefixime 100 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "141963",
+      "display": "Azithromycin 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "142118",
+      "display": "Sulfamethoxazole 100 MG / Trimethoprim 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1423080",
+      "display": "doxycycline hyclate 200 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1648755",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 25 MG / Nitrofurantoin, Monohydrate 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1648759",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649401",
+      "display": "Doxycycline Monohydrate 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649405",
+      "display": "doxycycline hyclate 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649425",
+      "display": "doxycycline hyclate 75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649429",
+      "display": "Doxycycline Monohydrate 75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649988",
+      "display": "doxycycline hyclate 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1649990",
+      "display": "Doxycycline Monohydrate 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650030",
+      "display": "Doxycycline Monohydrate 5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650142",
+      "display": "Doxycycline Monohydrate 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650143",
+      "display": "doxycycline hyclate 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650444",
+      "display": "Doxycycline Monohydrate 150 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1650446",
+      "display": "doxycycline hyclate 150 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1652673",
+      "display": "Doxycycline Monohydrate 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1652674",
+      "display": "doxycycline hyclate 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1653433",
+      "display": "doxycycline hyclate 50 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1656313",
+      "display": "Cefotaxime 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1656318",
+      "display": "Cefotaxime 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659131",
+      "display": "Piperacillin 2000 MG / tazobactam 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659137",
+      "display": "Piperacillin 3000 MG / tazobactam 375 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659149",
+      "display": "Piperacillin 4000 MG / tazobactam 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659278",
+      "display": "Ceftazidime 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659283",
+      "display": "Ceftazidime 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659287",
+      "display": "Ceftazidime 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659592",
+      "display": "Ampicillin 1000 MG / Sulbactam 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659598",
+      "display": "Ampicillin 2000 MG / Sulbactam 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1662285",
+      "display": "300 ML linezolid 2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1664981",
+      "display": "Aztreonam 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1664986",
+      "display": "Aztreonam 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665005",
+      "display": "Ceftriaxone 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665021",
+      "display": "Ceftriaxone 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665046",
+      "display": "Ceftriaxone 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665050",
+      "display": "Cefazolin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665052",
+      "display": "Cefazolin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665060",
+      "display": "Cefazolin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665088",
+      "display": "cefepime 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665093",
+      "display": "cefepime 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665097",
+      "display": "cefepime 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665102",
+      "display": "Cefoxitin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665107",
+      "display": "Cefoxitin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665210",
+      "display": "100 ML Ciprofloxacin 2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665212",
+      "display": "200 ML Ciprofloxacin 2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665227",
+      "display": "20 ML Ciprofloxacin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665229",
+      "display": "40 ML Ciprofloxacin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665444",
+      "display": "Cefuroxime 1500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665449",
+      "display": "Cefuroxime 750 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665497",
+      "display": "50 ML Levofloxacin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665507",
+      "display": "100 ML Levofloxacin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665515",
+      "display": "150 ML Levofloxacin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665517",
+      "display": "20 ML Levofloxacin 25 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665519",
+      "display": "30 ML Levofloxacin 25 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1668238",
+      "display": "Azithromycin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1668264",
+      "display": "erythromycin lactobionate 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721458",
+      "display": "Nafcillin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721460",
+      "display": "Nafcillin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721473",
+      "display": "Ampicillin 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721474",
+      "display": "Ampicillin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721475",
+      "display": "Ampicillin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721476",
+      "display": "Ampicillin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1722916",
+      "display": "Cefotetan 180 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1722919",
+      "display": "Cefotetan 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1722921",
+      "display": "Cefotetan 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1723156",
+      "display": "2 ML Amikacin 250 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1723160",
+      "display": "4 ML Amikacin 250 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1728082",
+      "display": "telavancin 750 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1728087",
+      "display": "telavancin 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1737244",
+      "display": "2 ML Clindamycin 150 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1737578",
+      "display": "4 ML Clindamycin 150 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1737581",
+      "display": "6 ML Clindamycin 150 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1739890",
+      "display": "Cefoxitin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1743547",
+      "display": "Oxacillin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1743549",
+      "display": "Oxacillin 2000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1747115",
+      "display": "50 ML Cefotaxime 20 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1747121",
+      "display": "50 ML Cefotaxime 40 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1791505",
+      "display": "doxycycline hyclate 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1801138",
+      "display": "doxycycline hyclate 120 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807508",
+      "display": "200 ML Vancomycin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807510",
+      "display": "150 ML Vancomycin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807511",
+      "display": "100 ML Vancomycin 5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807513",
+      "display": "Vancomycin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807516",
+      "display": "Vancomycin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807518",
+      "display": "Vancomycin 750 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870631",
+      "display": "100 ML Gentamicin 1.2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870633",
+      "display": "50 ML Gentamicin 1.2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870650",
+      "display": "2 ML Gentamicin 40 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870676",
+      "display": "2 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870681",
+      "display": "6 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870685",
+      "display": "8 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1870686",
+      "display": "10 ML Gentamicin 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197449",
+      "display": "Cefaclor 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197451",
+      "display": "Cefixime 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197452",
+      "display": "cefprozil 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197453",
+      "display": "cefprozil 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197454",
+      "display": "Cephalexin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197511",
+      "display": "Ciprofloxacin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197512",
+      "display": "Ciprofloxacin 750 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197516",
+      "display": "Clarithromycin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197517",
+      "display": "Clarithromycin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197518",
+      "display": "Clindamycin 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197595",
+      "display": "Dicloxacillin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197596",
+      "display": "Dicloxacillin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197650",
+      "display": "Erythromycin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197984",
+      "display": "Minocycline 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197985",
+      "display": "Minocycline 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198044",
+      "display": "Norfloxacin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198048",
+      "display": "Ofloxacin 200 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198049",
+      "display": "Ofloxacin 300 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198050",
+      "display": "Ofloxacin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198201",
+      "display": "Rifampin 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198202",
+      "display": "Rifampin 300 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198250",
+      "display": "tetracycline hydrochloride 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198252",
+      "display": "tetracycline hydrochloride 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198332",
+      "display": "Trimethoprim 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198334",
+      "display": "Sulfamethoxazole 400 MG / Trimethoprim 80 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198335",
+      "display": "Sulfamethoxazole 800 MG / Trimethoprim 160 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199055",
+      "display": "Metronidazole 375 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199327",
+      "display": "Metronidazole 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199332",
+      "display": "Trimethoprim 300 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199370",
+      "display": "Ciprofloxacin 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1996246",
+      "display": "Daptomycin 350 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1998483",
+      "display": "doxycycline hyclate 200 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199884",
+      "display": "Levofloxacin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199885",
+      "display": "Levofloxacin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2000127",
+      "display": "Vancomycin 25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2000134",
+      "display": "Vancomycin 50 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "200346",
+      "display": "cefdinir 300 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "204466",
+      "display": "50 ML Penicillin G Potassium 40000 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "204844",
+      "display": "Azithromycin 600 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "205964",
+      "display": "Clindamycin 150 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207362",
+      "display": "Minocycline 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207364",
+      "display": "Minocycline 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207390",
+      "display": "50 ML Penicillin G Potassium 20000 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "207391",
+      "display": "50 ML Penicillin G Potassium 60000 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239189",
+      "display": "Nafcillin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239191",
+      "display": "Amoxicillin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239204",
+      "display": "Gentamicin 10 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "239209",
+      "display": "Vancomycin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240637",
+      "display": "50 ML Oxacillin 40 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240741",
+      "display": "Clarithromycin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240984",
+      "display": "Ampicillin 100 MG/ML / Sulbactam 50 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242800",
+      "display": "Ceftazidime 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242825",
+      "display": "50 ML Tobramycin 1.2 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "248656",
+      "display": "Azithromycin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "259290",
+      "display": "dalfopristin 350 MG / quinupristin 150 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "283535",
+      "display": "doxycycline hyclate 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "284215",
+      "display": "Clindamycin 300 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308177",
+      "display": "Amoxicillin 125 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308181",
+      "display": "Amoxicillin 200 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308182",
+      "display": "Amoxicillin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308188",
+      "display": "Amoxicillin 400 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308189",
+      "display": "Amoxicillin 80 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308191",
+      "display": "Amoxicillin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308192",
+      "display": "Amoxicillin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308194",
+      "display": "Amoxicillin 875 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308207",
+      "display": "Ampicillin 125 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308210",
+      "display": "Ampicillin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308212",
+      "display": "Ampicillin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308459",
+      "display": "Azithromycin 20 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308460",
+      "display": "Azithromycin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309040",
+      "display": "Cefaclor 37.4 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309043",
+      "display": "12 HR Cefaclor 500 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309044",
+      "display": "Cefaclor 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309045",
+      "display": "Cefaclor 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309047",
+      "display": "Cefadroxil 1000 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309048",
+      "display": "Cefadroxil 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309049",
+      "display": "Cefadroxil 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309054",
+      "display": "cefdinir 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309058",
+      "display": "Cefixime 20 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309065",
+      "display": "Cefotaxime 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309068",
+      "display": "Cefotaxime 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309072",
+      "display": "Cefoxitin 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309076",
+      "display": "cefpodoxime 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309077",
+      "display": "cefpodoxime 20 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309078",
+      "display": "cefpodoxime 200 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309079",
+      "display": "cefpodoxime 10 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309080",
+      "display": "cefprozil 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309081",
+      "display": "cefprozil 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309085",
+      "display": "ceftibuten 36 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309086",
+      "display": "ceftibuten 400 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309087",
+      "display": "ceftibuten 18 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309090",
+      "display": "Ceftriaxone 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309092",
+      "display": "Ceftriaxone 250 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309095",
+      "display": "Cefuroxime 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309096",
+      "display": "Cefuroxime 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309097",
+      "display": "Cefuroxime 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309098",
+      "display": "Cefuroxime 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309101",
+      "display": "Cefuroxime 95 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309110",
+      "display": "Cephalexin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309112",
+      "display": "Cephalexin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309113",
+      "display": "Cephalexin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309114",
+      "display": "Cephalexin 500 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309115",
+      "display": "Cephalexin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309308",
+      "display": "Ciprofloxacin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309309",
+      "display": "Ciprofloxacin 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309310",
+      "display": "Ciprofloxacin 100 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309322",
+      "display": "Clarithromycin 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309329",
+      "display": "Clindamycin 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309335",
+      "display": "50 ML Clindamycin 12 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309336",
+      "display": "50 ML Clindamycin 18 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309339",
+      "display": "50 ML Clindamycin 6 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310026",
+      "display": "Doxycycline Calcium 10 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310027",
+      "display": "doxycycline hyclate 100 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310028",
+      "display": "doxycycline hyclate 20 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310154",
+      "display": "Erythromycin 250 MG Delayed Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310155",
+      "display": "Erythromycin 250 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310157",
+      "display": "Erythromycin 500 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311296",
+      "display": "Levofloxacin 750 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311681",
+      "display": "Metronidazole 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311787",
+      "display": "moxifloxacin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311989",
+      "display": "Nitrofurantoin 5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311991",
+      "display": "Nitrofurantoin 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311994",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311995",
+      "display": "NITROFURANTOIN, MACROCRYSTALS 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312127",
+      "display": "Oxacillin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312128",
+      "display": "50 ML Oxacillin 20 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312447",
+      "display": "Piperacillin 200 MG/ML / tazobactam 25 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313115",
+      "display": "Streptomycin 1000 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313134",
+      "display": "Sulfamethoxazole 40 MG/ML / Trimethoprim 8 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313137",
+      "display": "Sulfamethoxazole 80 MG/ML / Trimethoprim 16 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313416",
+      "display": "Tobramycin 10 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313570",
+      "display": "Vancomycin 125 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313571",
+      "display": "Vancomycin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313572",
+      "display": "Vancomycin 50 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313797",
+      "display": "Amoxicillin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313799",
+      "display": "Ampicillin 25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313800",
+      "display": "Ampicillin 250 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313850",
+      "display": "Amoxicillin 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313888",
+      "display": "Cefaclor 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313920",
+      "display": "Cefazolin 200 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313926",
+      "display": "Cefuroxime 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "313996",
+      "display": "Gentamicin 40 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "314106",
+      "display": "Metronidazole 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "314108",
+      "display": "Minocycline 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "315090",
+      "display": "Erythromycin 333 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "317127",
+      "display": "Minocycline 100 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "348869",
+      "display": "doxycycline hyclate 100 MG Delayed Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "348870",
+      "display": "doxycycline hyclate 75 MG Delayed Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351127",
+      "display": "cefditoren pivoxil 200 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351156",
+      "display": "250 ML moxifloxacin 1.6 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "359383",
+      "display": "24 HR Ciprofloxacin 500 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "359385",
+      "display": "24 HR Clarithromycin 500 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "388510",
+      "display": "telithromycin 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403840",
+      "display": "Minocycline 75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403920",
+      "display": "Daptomycin 500 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403921",
+      "display": "24 HR Ciprofloxacin 1000 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "406524",
+      "display": "doxycycline hyclate 75 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "409823",
+      "display": "Cefixime 400 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "419849",
+      "display": "Cefixime 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "434018",
+      "display": "doxycycline hyclate 100 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "476576",
+      "display": "cefdinir 50 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "477391",
+      "display": "Levofloxacin 25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562251",
+      "display": "Amoxicillin 250 MG / Clavulanate 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562266",
+      "display": "Clindamycin 15 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562508",
+      "display": "Amoxicillin 875 MG / Clavulanate 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "562707",
+      "display": "Trimethoprim 10 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "577378",
+      "display": "Azithromycin 33.3 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "597455",
+      "display": "Clarithromycin 1000 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "597761",
+      "display": "telithromycin 300 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "597823",
+      "display": "Tobramycin 40 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "598006",
+      "display": "Erythromycin 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "598025",
+      "display": "Amoxicillin 250 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617296",
+      "display": "Amoxicillin 500 MG / Clavulanate 125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617302",
+      "display": "Amoxicillin 25 MG/ML / Clavulanate 6.25 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617309",
+      "display": "Amoxicillin 200 MG / Clavulanate 28.5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617316",
+      "display": "Amoxicillin 400 MG / Clavulanate 57 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617322",
+      "display": "Amoxicillin 50 MG/ML / Clavulanate 12.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617423",
+      "display": "Amoxicillin 40 MG/ML / Clavulanate 5.7 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617430",
+      "display": "Amoxicillin 80 MG/ML / Clavulanate 11.4 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617993",
+      "display": "Amoxicillin 120 MG/ML / Clavulanate 8.58 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "617995",
+      "display": "12 HR Amoxicillin 1000 MG / Clavulanate 62.5 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "629695",
+      "display": "24 HR Minocycline 135 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "629697",
+      "display": "24 HR Minocycline 45 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "629699",
+      "display": "24 HR Minocycline 90 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "636559",
+      "display": "24 HR Metronidazole 750 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "637173",
+      "display": "Cephalexin 750 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "637560",
+      "display": "gemifloxacin 320 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "645617",
+      "display": "Cephalexin 333 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686355",
+      "display": "erythromycin stearate 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686383",
+      "display": "Erythromycin Ethylsuccinate 40 MG/ML / Sulfisoxazole 120 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686400",
+      "display": "Erythromycin Ethylsuccinate 40 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686405",
+      "display": "Erythromycin Ethylsuccinate 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686406",
+      "display": "erythromycin stearate 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "686418",
+      "display": "Erythromycin Ethylsuccinate 80 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "700408",
+      "display": "Doxycycline Monohydrate 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "728207",
+      "display": "Doxycycline Monohydrate 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731538",
+      "display": "2 ML penicillin G benzathine 300000 UNT/ML / penicillin G procaine 300000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731564",
+      "display": "1 ML penicillin G benzathine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731567",
+      "display": "2 ML penicillin G benzathine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "731570",
+      "display": "4 ML penicillin G benzathine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "745302",
+      "display": "Penicillin G Sodium 100000 UNT/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "745462",
+      "display": "2 ML penicillin G procaine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "745560",
+      "display": "1 ML penicillin G procaine 600000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749780",
+      "display": "{3 (Azithromycin 500 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749783",
+      "display": "{6 (Azithromycin 250 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "757460",
+      "display": "{31 (Doxycycline Monohydrate 100 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "757464",
+      "display": "{31 (Doxycycline Monohydrate 75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "757466",
+      "display": "{60 (Doxycycline Monohydrate 100 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "789980",
+      "display": "Ampicillin 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "799048",
+      "display": "doxycycline hyclate 150 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "802550",
+      "display": "Amoxicillin 775 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834040",
+      "display": "Penicillin V Potassium 50 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834046",
+      "display": "Penicillin V Potassium 25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834061",
+      "display": "Penicillin V Potassium 250 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834102",
+      "display": "Penicillin V Potassium 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "835700",
+      "display": "{30 (Doxycycline Monohydrate 150 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "836306",
+      "display": "2 ML penicillin G benzathine 450000 UNT/ML / penicillin G procaine 150000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "847360",
+      "display": "cefditoren pivoxil 400 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "858062",
+      "display": "24 HR Minocycline 115 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "858372",
+      "display": "24 HR Minocycline 65 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "863538",
+      "display": "Penicillin G Potassium 1000000 UNT/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "901399",
+      "display": "doxycycline anhydrous 40 MG Delayed Release Oral Capsule"
+    } ]
+  }
+}

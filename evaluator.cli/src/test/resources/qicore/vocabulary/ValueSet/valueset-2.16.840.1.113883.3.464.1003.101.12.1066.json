@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.12.1066",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1066",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.101.12.1066"
+  } ],
+  "version": "20170504",
+  "name": "AudiologyVisit",
+  "title": "Audiology Visit",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92540",
+      "display": "Basic vestibular evaluation, includes spontaneous nystagmus test with eccentric gaze fixation nystagmus, with recording, positional nystagmus test, minimum of 4 positions, with recording, optokinetic nystagmus test, bidirectional foveal and peripheral stimulation, with recording, and oscillating tracking test, with recording"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92541",
+      "display": "Spontaneous nystagmus test, including gaze and fixation nystagmus, with recording"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92542",
+      "display": "Positional nystagmus test, minimum of 4 positions, with recording"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92548",
+      "display": "Computerized dynamic posturography sensory organization test (CDP-SOT), 6 conditions (ie, eyes open, eyes closed, visual sway, platform sway, eyes closed platform sway, platform and visual sway), including interpretation and report"
+    } ]
+  }
+}

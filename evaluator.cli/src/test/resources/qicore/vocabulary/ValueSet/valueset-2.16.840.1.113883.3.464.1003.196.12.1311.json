@@ -1,0 +1,55 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1311",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1311",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1311"
+  } ],
+  "version": "20170504",
+  "name": "Disopyramide",
+  "title": "Disopyramide",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "104285",
+      "display": "Disopyramide 250 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199730",
+      "display": "Disopyramide 250 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199824",
+      "display": "Disopyramide 150 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309958",
+      "display": "Disopyramide 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "309960",
+      "display": "Disopyramide 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "636793",
+      "display": "12 HR Disopyramide 100 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "636794",
+      "display": "12 HR Disopyramide 150 MG Extended Release Oral Capsule"
+    } ]
+  }
+}

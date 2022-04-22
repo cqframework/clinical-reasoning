@@ -1,0 +1,60 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1366",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1366",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1366"
+  } ],
+  "version": "20170504",
+  "name": "Indomethacin",
+  "title": "Indomethacin",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1490727",
+      "display": "Indomethacin 20 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1491529",
+      "display": "Indomethacin 40 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197817",
+      "display": "Indomethacin 25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197818",
+      "display": "Indomethacin 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "251255",
+      "display": "Indomethacin 25 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310991",
+      "display": "Indomethacin 5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310992",
+      "display": "Indomethacin 75 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "392073",
+      "display": "Indomethacin 75 MG Oral Capsule"
+    } ]
+  }
+}

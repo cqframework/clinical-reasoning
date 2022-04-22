@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.11.1233",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1233",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.101.11.1233"
+  } ],
+  "version": "20190327",
+  "name": "MedicalDisabilityExam",
+  "title": "Medical Disability Exam",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99455",
+      "display": "Work related or medical disability examination by the treating physician that includes: Completion of a medical history commensurate with the patient's condition; Performance of an examination commensurate with the patient's condition; Formulation of a diagnosis, assessment of capabilities and stability, and calculation of impairment; Development of future medical treatment plan; and Completion of necessary documentation/certificates and report."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99456",
+      "display": "Work related or medical disability examination by other than the treating physician that includes: Completion of a medical history commensurate with the patient's condition; Performance of an examination commensurate with the patient's condition; Formulation of a diagnosis, assessment of capabilities and stability, and calculation of impairment; Development of future medical treatment plan; and Completion of necessary documentation/certificates and report."
+    } ]
+  }
+}

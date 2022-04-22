@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1059",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1059",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.198.12.1059"
+  } ],
+  "version": "20170504",
+  "name": "MeaslesAntibodyTest(IgGAntibodyTiter)",
+  "title": "Measles Antibody Test (IgG Antibody Titer)",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21500-4",
+      "display": "Measles virus IgG Ab [Titer] in Cerebral spinal fluid by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21501-2",
+      "display": "Measles virus IgG Ab [Titer] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22501-1",
+      "display": "Measles virus IgG Ab [Titer] in Cerebral spinal fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22502-9",
+      "display": "Measles virus IgG Ab [Titer] in Serum"
+    } ]
+  }
+}

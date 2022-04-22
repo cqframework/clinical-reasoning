@@ -1,0 +1,550 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.369",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.369",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.369"
+  } ],
+  "version": "20200306",
+  "name": "CoronaryArteryDiseaseNoMI",
+  "title": "Coronary Artery Disease No MI",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I20.0",
+      "display": "Unstable angina"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I20.1",
+      "display": "Angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I20.8",
+      "display": "Other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I20.9",
+      "display": "Angina pectoris, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I24.0",
+      "display": "Acute coronary thrombosis not resulting in myocardial infarction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I24.1",
+      "display": "Dressler's syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I24.8",
+      "display": "Other forms of acute ischemic heart disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I24.9",
+      "display": "Acute ischemic heart disease, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.10",
+      "display": "Atherosclerotic heart disease of native coronary artery without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.110",
+      "display": "Atherosclerotic heart disease of native coronary artery with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.111",
+      "display": "Atherosclerotic heart disease of native coronary artery with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.118",
+      "display": "Atherosclerotic heart disease of native coronary artery with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.119",
+      "display": "Atherosclerotic heart disease of native coronary artery with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.5",
+      "display": "Ischemic cardiomyopathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.6",
+      "display": "Silent myocardial ischemia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.700",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.701",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.708",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.709",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.710",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.711",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.718",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.719",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.720",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.721",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.728",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.729",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.730",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.731",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.738",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.739",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.750",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with unstable angina"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.751",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.758",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.759",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.760",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with unstable angina"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.761",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.768",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.769",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.790",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.791",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.798",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.799",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.810",
+      "display": "Atherosclerosis of coronary artery bypass graft(s) without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.811",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.812",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.82",
+      "display": "Chronic total occlusion of coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.83",
+      "display": "Coronary atherosclerosis due to lipid rich plaque"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.89",
+      "display": "Other forms of chronic ischemic heart disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.9",
+      "display": "Chronic ischemic heart disease, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Z95.1",
+      "display": "Presence of aortocoronary bypass graft"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Z95.5",
+      "display": "Presence of coronary angioplasty implant and graft"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Z98.61",
+      "display": "Coronary angioplasty status"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10365005",
+      "display": "Right main coronary artery thrombosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123641001",
+      "display": "Left coronary artery occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123642008",
+      "display": "Right coronary artery occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19057007",
+      "display": "Status anginosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194823009",
+      "display": "Acute coronary insufficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194828000",
+      "display": "Angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194842008",
+      "display": "Single coronary vessel disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194843003",
+      "display": "Double coronary vessel disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "21470009",
+      "display": "Syncope anginosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233817007",
+      "display": "Triple vessel disease of the heart (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233819005",
+      "display": "Stable angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233821000",
+      "display": "New onset angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233970002",
+      "display": "Coronary artery stenosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28248000",
+      "display": "Left anterior descending coronary artery thrombosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29899005",
+      "display": "Coronary artery embolism (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300995000",
+      "display": "Exercise-induced angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314116003",
+      "display": "Post infarct angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315025001",
+      "display": "Refractory angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315348000",
+      "display": "Asymptomatic coronary heart disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35928006",
+      "display": "Nocturnal angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371803003",
+      "display": "Multi vessel coronary artery disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371804009",
+      "display": "Left main coronary artery disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371805005",
+      "display": "Significant coronary bypass graft disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371806006",
+      "display": "Progressive angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371807002",
+      "display": "Atypical angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371808007",
+      "display": "Recurrent angina status post percutaneous transluminal coronary angioplasty (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371809004",
+      "display": "Recurrent angina status post coronary stent placement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371810009",
+      "display": "Recurrent angina status post coronary artery bypass graft (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371811008",
+      "display": "Recurrent angina status post rotational atherectomy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371812001",
+      "display": "Recurrent angina status post directional coronary atherectomy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "398274000",
+      "display": "Coronary artery thrombosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408546009",
+      "display": "Coronary artery bypass graft occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41334000",
+      "display": "Angina, class II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420006002",
+      "display": "Obliterative coronary artery disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "421327009",
+      "display": "Coronary artery stent thrombosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427919004",
+      "display": "Coronary arteriosclerosis caused by radiation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429245005",
+      "display": "Recurrent coronary arteriosclerosis after percutaneous transluminal coronary angioplasty (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429559004",
+      "display": "Typical angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443502000",
+      "display": "Atherosclerosis of coronary artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4557003",
+      "display": "Preinfarction syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50570003",
+      "display": "Aneurysm of coronary vessels (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53741008",
+      "display": "Coronary arteriosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59021001",
+      "display": "Angina decubitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61490001",
+      "display": "Angina, class I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62207008",
+      "display": "Syphilitic ostial coronary disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63739005",
+      "display": "Coronary occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67682002",
+      "display": "Coronary artery atheroma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74218008",
+      "display": "Coronary artery arising from main pulmonary artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75398000",
+      "display": "Anomalous origin of coronary artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85284003",
+      "display": "Angina, class III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87343002",
+      "display": "Prinzmetal angina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89323001",
+      "display": "Angina, class IV (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "92517006",
+      "display": "Calcific coronary arteriosclerosis (disorder)"
+    } ]
+  }
+}

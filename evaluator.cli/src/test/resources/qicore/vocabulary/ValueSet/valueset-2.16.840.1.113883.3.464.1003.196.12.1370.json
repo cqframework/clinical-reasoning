@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1370",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1370",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1370"
+  } ],
+  "version": "20170504",
+  "name": "Methocarbamol",
+  "title": "Methocarbamol",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197943",
+      "display": "Methocarbamol 500 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197944",
+      "display": "Methocarbamol 750 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197945",
+      "display": "Aspirin 325 MG / Methocarbamol 400 MG Oral Tablet"
+    } ]
+  }
+}

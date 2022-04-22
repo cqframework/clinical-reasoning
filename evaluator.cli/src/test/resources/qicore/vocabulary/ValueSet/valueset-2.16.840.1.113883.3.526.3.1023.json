@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1023",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1023",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1023"
+  } ],
+  "version": "20190315",
+  "name": "Behavioral_NeuropsychAssessment",
+  "title": "Behavioral/Neuropsych Assessment",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96116",
+      "display": "Neurobehavioral status exam (clinical assessment of thinking, reasoning and judgment, [eg, acquired knowledge, attention, language, memory, planning and problem solving, and visual spatial abilities]), by physician or other qualified health care professional, both face-to-face time with the patient and time interpreting test results and preparing the report; first hour"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307808008",
+      "display": "Neuropsychological testing (procedure)"
+    } ]
+  }
+}

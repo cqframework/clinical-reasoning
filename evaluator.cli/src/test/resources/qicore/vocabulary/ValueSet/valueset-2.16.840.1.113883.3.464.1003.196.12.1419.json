@@ -1,0 +1,45 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1419",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1419",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1419"
+  } ],
+  "version": "20170504",
+  "name": "EsterifiedEstrogens",
+  "title": "Esterified Estrogens",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1000353",
+      "display": "Estrogens, Conjugated (USP) 0.625 MG / Estrogens, Esterified (USP) 0.625 MG / medroxyprogesterone acetate 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197666",
+      "display": "Estrogens, Esterified (USP) 0.3 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197667",
+      "display": "Estrogens, Esterified (USP) 0.625 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197668",
+      "display": "Estrogens, Esterified (USP) 1.25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197669",
+      "display": "Estrogens, Esterified (USP) 2.5 MG Oral Tablet"
+    } ]
+  }
+}

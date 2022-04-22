@@ -1,0 +1,1120 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1352",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1352",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1352"
+  } ],
+  "version": "20170504",
+  "name": "Chlorpheniramine",
+  "title": "Chlorpheniramine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013619",
+      "display": "Chlorpheniramine Maleate 3 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1038876",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1042688",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1042693",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Codeine Phosphate 2 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1042829",
+      "display": "Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 10 MG / Pyrilamine Maleate 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046384",
+      "display": "Acetaminophen 21.7 MG/ML / Chlorpheniramine Maleate 0.133 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046781",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046799",
+      "display": "{12 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048124",
+      "display": "12 HR Atropine Sulfate 0.04 MG / Chlorpheniramine Maleate 8 MG / Hyoscyamine Sulfate 0.19 MG / Pseudoephedrine Hydrochloride 90 MG / Scopolamine Hydrobromide 0.01 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1052679",
+      "display": "Acetaminophen 500 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1053618",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1053624",
+      "display": "Chlorpheniramine Maleate 1 MG / Pseudoephedrine Hydrochloride 15 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1086443",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 3 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1086463",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1086475",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / Phenylephrine Hydrochloride 20 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1086750",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1086991",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1087459",
+      "display": "12 HR CHLORPHENIRAMINE POLISTIREX 1.6 MG/ML / HYDROCODONE POLISTIREX 2 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1089968",
+      "display": "Acetaminophen 500 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 15 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1090443",
+      "display": "Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1090699",
+      "display": "Chlorpheniramine Maleate 2 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091008",
+      "display": "Acetaminophen 163 MG / Chlorpheniramine Maleate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1098496",
+      "display": "Acetaminophen 500 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1101555",
+      "display": "{12 (Acetaminophen 500 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 16 (Acetaminophen 500 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1101855",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / methscopolamine nitrate 2.5 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1111171",
+      "display": "12 HR Belladonna Alkaloids 0.24 MG / Chlorpheniramine Maleate 8 MG / Pseudoephedrine Hydrochloride 90 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1111440",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1112220",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Hydrocodone Bitartrate 1 MG/ML / Pseudoephedrine Hydrochloride 12 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1112489",
+      "display": "Chlorpheniramine Maleate 1 MG/ML / Phenylephrine Hydrochloride 2.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1112779",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / Pseudoephedrine Hydrochloride 120 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1112864",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1112906",
+      "display": "{10 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 10 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1112908",
+      "display": "{12 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1113397",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1113417",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Codeine Phosphate 2 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1113522",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1113998",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Codeine Phosphate 1.6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1114003",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Codeine Phosphate 1.6 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1114361",
+      "display": "Chlorpheniramine Maleate 0.133 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1114838",
+      "display": "Chlorpheniramine Maleate 2 MG/ML / Phenylephrine Hydrochloride 5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1116173",
+      "display": "CARBETAPENTANE TANNATE 60 MG / Chlorpheniramine Tannate 5 MG / EPHEDRINE TANNATE 10 MG / Phenylephrine Tannate 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1117392",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Pseudoephedrine Hydrochloride 3 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1147795",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190174",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Dextromethorphan Hydrobromide 3 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1193292",
+      "display": "Acetaminophen 250 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1193293",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1234941",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / dihydrocodeine bitartrate 0.6 MG/ML / Phenylephrine Hydrochloride 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1236070",
+      "display": "Acetaminophen 21.7 MG/ML / Chlorpheniramine Maleate 0.13 MG/ML / Dextromethorphan Hydrobromide 0.67 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1242240",
+      "display": "Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1242747",
+      "display": "Acetaminophen 162.5 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1244951",
+      "display": "{10 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 10 (Acetaminophen 325 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1245169",
+      "display": "Acetaminophen 163 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1245291",
+      "display": "Chlorpheniramine Maleate 1 MG / Dextromethorphan Hydrobromide 5 MG / Pseudoephedrine Hydrochloride 15 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1245706",
+      "display": "chlophedianol hydrochloride 4.8 MG/ML / Chlorpheniramine Maleate 0.8 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1249040",
+      "display": "CARBETAPENTANE TANNATE 15 MG/ML / Chlorpheniramine Tannate 2 MG/ML / Phenylephrine Tannate 2.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1250528",
+      "display": "Acetaminophen 4.17 MG/ML / Chlorpheniramine Maleate 0.0167 MG/ML / Dextromethorphan Hydrobromide 0.125 MG/ML / Pseudoephedrine Hydrochloride 0.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1250904",
+      "display": "Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 20 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1250983",
+      "display": "{8 (Acetaminophen 500 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 15 MG Oral Tablet) / 16 (Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251185",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 3 MG/ML / Phenylephrine Hydrochloride 2.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251811",
+      "display": "Chlorpheniramine Maleate 1 MG / Dextromethorphan Hydrobromide 5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251928",
+      "display": "Acetaminophen 500 MG / Chlorpheniramine Maleate 2 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1291266",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1292342",
+      "display": "Acetaminophen 43.3 MG/ML / Chlorpheniramine Maleate 0.267 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293298",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 15 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293331",
+      "display": "{12 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 15 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293344",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293468",
+      "display": "Chlorpheniramine Tannate 0.4 MG/ML / Phenylephrine Tannate 1 MG/ML / PYRILAMINE TANNATE 2.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293472",
+      "display": "Chlorpheniramine Tannate 0.9 MG/ML / Phenylephrine Tannate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293491",
+      "display": "Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 20 MG / Phenyltoloxamine citrate 40 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294201",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Pseudoephedrine Hydrochloride 30 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1297369",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Ibuprofen 20 MG/ML / Pseudoephedrine Hydrochloride 3 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1297390",
+      "display": "Chlorpheniramine Maleate 2 MG / Ibuprofen 200 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1299646",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 15 MG / Pseudoephedrine Hydrochloride 30 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1299662",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Pseudoephedrine Hydrochloride 30 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1302760",
+      "display": "{6 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 6 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1303251",
+      "display": "Acetaminophen 100 MG / Caffeine 2 MG / Chlorpheniramine Maleate 2 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1304074",
+      "display": "Acetaminophen 105 MG / Chlorpheniramine Maleate 1.05 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1307225",
+      "display": "Chlorpheniramine Tannate 0.8 MG/ML / Phenylephrine Tannate 4 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1307244",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 15 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1308442",
+      "display": "Chlorpheniramine Maleate 0.5 MG/ML / Phenylephrine Hydrochloride 1 MG/ML / Phenyltoloxamine citrate 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1310503",
+      "display": "Chlorpheniramine Maleate 4 MG / Ibuprofen 200 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1313969",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1357553",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1357894",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / Dextromethorphan Hydrobromide 30 MG / Phenylephrine Hydrochloride 20 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359114",
+      "display": "Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 20 MG / Pseudoephedrine Hydrochloride 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359157",
+      "display": "Acetaminophen 650 MG / Chlorpheniramine Maleate 4 MG / Pseudoephedrine Hydrochloride 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1363212",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / Pseudoephedrine Hydrochloride 120 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1363288",
+      "display": "12 HR Chlorpheniramine Maleate 12 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1363306",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1363309",
+      "display": "Chlorpheniramine Maleate 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1363651",
+      "display": "Chlorpheniramine Maleate 2 MG / methscopolamine nitrate 1.25 MG / Phenylephrine Hydrochloride 15 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1363752",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1363780",
+      "display": "12 HR Chlorpheniramine Maleate 12 MG / Pseudoephedrine Hydrochloride 120 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366022",
+      "display": "{8 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366508",
+      "display": "Acetaminophen 10 MG/ML / Caffeine 1 MG/ML / Chlorpheniramine Maleate 0.083 MG/ML / Guaifenesin 2.78 MG/ML / METHYLEPHEDRINE HYDROCHLORIDE, DL- 0.583 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366653",
+      "display": "{8 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366819",
+      "display": "Acetaminophen 80 MG / Chlorpheniramine Maleate 0.5 MG / Pseudoephedrine Hydrochloride 7.5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366822",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Pseudoephedrine Hydrochloride 3 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366825",
+      "display": "Acetaminophen 80 MG / Chlorpheniramine Maleate 0.5 MG / Dextromethorphan Hydrobromide 2.5 MG / Pseudoephedrine Hydrochloride 7.5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366948",
+      "display": "Chlorpheniramine Tannate 8 MG / Phenylephrine Tannate 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366953",
+      "display": "Chlorpheniramine Tannate 0.8 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1367225",
+      "display": "Chlorpheniramine Maleate 2 MG / Guaifenesin 100 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1367227",
+      "display": "Chlorpheniramine Maleate 3.5 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1368963",
+      "display": "chlophedianol hydrochloride 25 MG / Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1369910",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Pseudoephedrine Hydrochloride 3 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1370122",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1370125",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Dextromethorphan Hydrobromide 3 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1370440",
+      "display": "Acetaminophen 50 MG/ML / Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1372265",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Hydrocodone Bitartrate 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1372312",
+      "display": "Acetaminophen 32 MG/ML / Chlorpheniramine Maleate 0.2 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1372644",
+      "display": "Acetaminophen 50 MG / Caffeine 1 MG / Chlorpheniramine Maleate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1421985",
+      "display": "Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1423710",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Phenylpropanolamine Hydrochloride 2.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1423711",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1423834",
+      "display": "Chlorpheniramine Maleate 0.266 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Pseudoephedrine Hydrochloride 4 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1424295",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Codeine Phosphate 8 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1424872",
+      "display": "chlophedianol hydrochloride 24 MG / Chlorpheniramine Maleate 3.5 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1425315",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 6.25 MG / Dextromethorphan Hydrobromide 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1425331",
+      "display": "{20 (Acetaminophen 325 MG / Chlorpheniramine Maleate 6.25 MG / Dextromethorphan Hydrobromide 15 MG Oral Tablet) / 20 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1429345",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1430400",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / methscopolamine nitrate 1.25 MG / Pseudoephedrine Hydrochloride 60 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1432508",
+      "display": "{48 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 120 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1437775",
+      "display": "Acetaminophen 100 MG / Chlorpheniramine Maleate 2 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1489310",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 4 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1534666",
+      "display": "Acetaminophen 650 MG / Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 20 MG / Phenylephrine Hydrochloride 10 MG Powder for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1535923",
+      "display": "Chlorpheniramine Maleate 1 MG/ML / Dextromethorphan Hydrobromide 3 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1535979",
+      "display": "Chlorpheniramine Maleate 0.5 MG/ML / Hydrocodone Bitartrate 0.65 MG/ML / Phenylephrine Hydrochloride 1.6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536477",
+      "display": "Acetaminophen 250 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536840",
+      "display": "Aspirin 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536862",
+      "display": "Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536931",
+      "display": "Acetaminophen 250 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536934",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / PHENYLPROPANOLAMINE BITARTRATE 20 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536993",
+      "display": "Aspirin 500 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine bitartrate 8 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1537029",
+      "display": "Aspirin 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1540507",
+      "display": "Acetaminophen 80 MG / Chlorpheniramine Maleate 0.5 MG / Phenylephrine Hydrochloride 1.25 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1593105",
+      "display": "Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1599133",
+      "display": "Acetaminophen 60 MG / Chlorpheniramine Maleate 0.667 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1652087",
+      "display": "12 HR CHLORPHENIRAMINE POLISTIREX 0.8 MG/ML / CODEINE POLISTIREX 4 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1655571",
+      "display": "Acetaminophen 100 MG / Chlorpheniramine Maleate 1.25 MG / Dextromethorphan Hydrobromide 7.5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659956",
+      "display": "Acetaminophen 650 MG / Chlorpheniramine Maleate 4 MG / Pseudoephedrine Hydrochloride 60 MG Powder for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1664543",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / Codeine Phosphate 54.3 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1741529",
+      "display": "Acetaminophen 650 MG / Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 10 MG Oral Powder"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1743369",
+      "display": "Acetaminophen 25 MG/ML / Chlorpheniramine Maleate 0.4 MG/ML / Dextromethorphan Hydrobromide 1.33 MG/ML / Guaifenesin 20 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1744049",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 3 MG / Dextromethorphan Hydrobromide 30 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1800670",
+      "display": "{48 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 120 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1801964",
+      "display": "{8 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1857273",
+      "display": "{12 (Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1876117",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1927026",
+      "display": "Aspirin 250 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2001623",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Codeine Phosphate 2.4 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2003130",
+      "display": "Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 18 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2003179",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 3.6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2049411",
+      "display": "Chlorpheniramine Maleate 0.133 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Pseudoephedrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2049841",
+      "display": "Acetaminophen 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2056893",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Codeine Phosphate 2 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2119482",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / methscopolamine nitrate 2.5 MG / Phenylephrine Hydrochloride 25 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2119625",
+      "display": "{1 (118 ML) (Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1.5 MG/ML Oral Solution) / 1 (118 ML) (Dextromethorphan Hydrobromide 1 MG/ML / Guaifenesin 20 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2121065",
+      "display": "Acetaminophen 65 MG/ML / Chlorpheniramine Maleate 0.4 MG/ML / Dextromethorphan Hydrobromide 1.3 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2167740",
+      "display": "Chlorpheniramine Maleate 0.133 MG/ML / Dextromethorphan Hydrobromide 0.333 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2167750",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 6 MG/ML / Phenylephrine Hydrochloride 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2167752",
+      "display": "Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 20 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2167835",
+      "display": "Acetaminophen 650 MG / Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 20 MG / Pseudoephedrine Hydrochloride 60 MG Powder for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2167842",
+      "display": "Acetaminophen 1000 MG / Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 30 MG / Pseudoephedrine Hydrochloride 60 MG Powder for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2178934",
+      "display": "Acetaminophen 15 MG/ML / Chlorpheniramine Maleate 0.125 MG/ML / Ephedrine hydrochloride 0.9 MG/ML / Guaifenesin 2.1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2178941",
+      "display": "Acetaminophen 15 MG/ML / Chlorpheniramine Maleate 0.125 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181301",
+      "display": "12 HR Chlorpheniramine Maleate 8 MG / methscopolamine nitrate 1.25 MG / Phenylephrine Hydrochloride 20 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181307",
+      "display": "Acetaminophen 325 MG / Caffeine 45 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181309",
+      "display": "Chlorpheniramine Maleate 0.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181310",
+      "display": "Chlorpheniramine Tannate 0.9 MG/ML / Phenylephrine Tannate 1 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181311",
+      "display": "Chlorpheniramine Tannate 1.6 MG/ML / Phenylephrine Tannate 3 MG/ML / PYRILAMINE TANNATE 2.5 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181312",
+      "display": "Chlorpheniramine Maleate 12 MG / Phenylpropanolamine Hydrochloride 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181313",
+      "display": "Chlorpheniramine Maleate 12 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181315",
+      "display": "Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 10 MG / Pyrilamine Maleate 10 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181316",
+      "display": "Chlorpheniramine Maleate 2 MG / Phenylephrine Hydrochloride 10 MG / Pyrilamine Maleate 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181317",
+      "display": "Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 10 MG / Phenylpropanolamine Hydrochloride 50 MG / Pyrilamine Maleate 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181318",
+      "display": "Chlorpheniramine Maleate 4 MG / Phenylephrine Hydrochloride 10 MG / Pyrilamine Maleate 25 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181319",
+      "display": "Chlorpheniramine Maleate 8 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2182346",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Pseudoephedrine Hydrochloride 3 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2182349",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Hydrocodone Bitartrate 0.5 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183669",
+      "display": "Chlorpheniramine Tannate 0.8 MG/ML / hydrocodone tannate 1 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183672",
+      "display": "Chlorpheniramine Tannate 0.8 MG/ML / Phenylephrine Tannate 4 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183676",
+      "display": "Chlorpheniramine Tannate 1 MG/ML / PSEUDOEPHEDRINE TANNATE 15 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183684",
+      "display": "Chlorpheniramine Tannate 1.6 MG/ML / Phenylephrine Tannate 2 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183687",
+      "display": "Chlorpheniramine Tannate 1.6 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183697",
+      "display": "Chlorpheniramine Maleate 2 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183700",
+      "display": "Chlorpheniramine Maleate 4 MG / Pseudoephedrine Hydrochloride 60 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183701",
+      "display": "Chlorpheniramine Maleate 8 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183891",
+      "display": "Chlorpheniramine Tannate 8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183896",
+      "display": "CARBETAPENTANE TANNATE 60 MG / Chlorpheniramine Tannate 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "477045",
+      "display": "Chlorpheniramine Maleate 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "604664",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Phenylephrine Hydrochloride 1.5 MG/ML / Pyrilamine Maleate 2.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "636568",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "668752",
+      "display": "Chlorpheniramine Maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 6 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "700949",
+      "display": "Chlorpheniramine Maleate 0.6 MG/ML / Dextromethorphan Hydrobromide 2.75 MG/ML / Phenylephrine Hydrochloride 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "759494",
+      "display": "{14 (12 HR Brompheniramine Maleate 6 MG / Pseudoephedrine Hydrochloride 45 MG Extended Release Oral Tablet) / 14 (12 HR Chlorpheniramine Maleate 8 MG / methscopolamine nitrate 2.5 MG / Phenylephrine Hydrochloride 25 MG Extended Release Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "804145",
+      "display": "Chlorpheniramine Maleate 4 MG / Dextromethorphan Hydrobromide 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "857510",
+      "display": "12 HR CHLORPHENIRAMINE POLISTIREX 4 MG / HYDROCODONE POLISTIREX 5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "857512",
+      "display": "12 HR CHLORPHENIRAMINE POLISTIREX 8 MG / HYDROCODONE POLISTIREX 10 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "857734",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Hydrocodone Bitartrate 0.334 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "857839",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Hydrocodone Bitartrate 0.4 MG/ML / Phenylephrine Hydrochloride 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "859027",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Hydrocodone Bitartrate 0.7 MG/ML / Phenylephrine Hydrochloride 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "859137",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Hydrocodone Bitartrate 1 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "859146",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Hydrocodone Bitartrate 1 MG/ML / Phenylephrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "859156",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Hydrocodone Bitartrate 1 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995041",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Codeine Phosphate 1 MG/ML / Pseudoephedrine Hydrochloride 3 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995062",
+      "display": "Chlorpheniramine Maleate 0.2 MG/ML / Codeine Phosphate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995065",
+      "display": "Chlorpheniramine Maleate 0.222 MG/ML / Codeine Phosphate 1 MG/ML / Pseudoephedrine Hydrochloride 3.33 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995068",
+      "display": "Chlorpheniramine Maleate 0.222 MG/ML / Codeine Phosphate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995071",
+      "display": "Chlorpheniramine Maleate 0.25 MG/ML / Codeine Phosphate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995075",
+      "display": "Chlorpheniramine Maleate 0.25 MG/ML / Codeine Phosphate 1 MG/ML / Pseudoephedrine Hydrochloride 0.375 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995079",
+      "display": "Chlorpheniramine Maleate 0.266 MG/ML / Codeine Phosphate 1 MG/ML / Pseudoephedrine Hydrochloride 4 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995082",
+      "display": "Chlorpheniramine Maleate 0.267 MG/ML / Codeine Phosphate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995086",
+      "display": "Chlorpheniramine Maleate 0.286 MG/ML / Codeine Phosphate 1 MG/ML / Pseudoephedrine Hydrochloride 4.29 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995093",
+      "display": "Chlorpheniramine Maleate 0.286 MG/ML / Codeine Phosphate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995108",
+      "display": "Chlorpheniramine Maleate 0.333 MG/ML / Codeine Phosphate 1 MG/ML / Pseudoephedrine Hydrochloride 5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995116",
+      "display": "Chlorpheniramine Maleate 0.333 MG/ML / Codeine Phosphate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995120",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Codeine Phosphate 1 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995123",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Codeine Phosphate 1 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "995128",
+      "display": "Chlorpheniramine Maleate 0.4 MG/ML / Codeine Phosphate 1.8 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "998254",
+      "display": "Chlorpheniramine Maleate 4 MG / Pseudoephedrine Hydrochloride 60 MG Oral Tablet"
+    } ]
+  }
+}

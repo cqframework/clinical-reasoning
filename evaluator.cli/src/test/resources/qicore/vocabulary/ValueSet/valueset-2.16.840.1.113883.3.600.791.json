@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.791",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.791",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.791"
+  } ],
+  "version": "20170504",
+  "name": "PatientDeclined",
+  "title": "Patient Declined",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105480006",
+      "display": "Refusal of treatment by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183944003",
+      "display": "Procedure refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183945002",
+      "display": "Procedure refused for religious reason (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413310006",
+      "display": "Patient non-compliant - refused access to services (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413311005",
+      "display": "Patient non-compliant - refused intervention / support (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413312003",
+      "display": "Patient non-compliant - refused service (situation)"
+    } ]
+  }
+}

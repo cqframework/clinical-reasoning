@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.222",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.222",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.222"
+  } ],
+  "version": "20170726",
+  "name": "Intravenousroute",
+  "title": "Intravenous route",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418114005",
+      "display": "Intravenous central route (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419993007",
+      "display": "Intravenous peripheral route (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "47625008",
+      "display": "Intravenous route (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418114005",
+      "display": "Intravenous central route (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419993007",
+      "display": "Intravenous peripheral route (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "47625008",
+      "display": "Intravenous route (qualifier value)"
+    } ]
+  }
+}

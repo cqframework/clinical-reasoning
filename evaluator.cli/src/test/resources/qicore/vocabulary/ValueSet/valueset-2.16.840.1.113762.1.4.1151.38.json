@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1151.38",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1151.38",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1151.38"
+  } ],
+  "version": "20170812",
+  "name": "DEXADualEnergyXrayAbsorptiometry,BoneDensityforUrologyCare",
+  "title": "DEXA Dual Energy Xray Absorptiometry, Bone Density for Urology Care",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38265-5",
+      "display": "DXA Radius and Ulna [T-score] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38268-9",
+      "display": "DXA Skeletal system Views for bone density"
+    } ]
+  }
+}

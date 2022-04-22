@@ -1,0 +1,55 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.125.12.1002",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.125.12.1002",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.125.12.1002"
+  } ],
+  "version": "20170504",
+  "name": "FluorideVarnishApplicationforChildren",
+  "title": "Fluoride Varnish Application for Children",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D1206",
+      "display": "topical application of fluoride varnish"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D1208",
+      "display": "topical application of fluoride - excluding varnish"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99188",
+      "display": "Application of topical fluoride varnish by a physician or other qualified health care professional"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234723000",
+      "display": "Topical application of fluoride - tooth (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "313042009",
+      "display": "Application of dental fluoride varnish (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35889000",
+      "display": "Topical application of fluoride excluding prophylaxis, child (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70468009",
+      "display": "Topical application of fluoride including prophylaxis, child (procedure)"
+    } ]
+  }
+}

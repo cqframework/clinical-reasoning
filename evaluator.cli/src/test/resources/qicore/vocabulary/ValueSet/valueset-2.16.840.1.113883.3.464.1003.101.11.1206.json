@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.11.1206",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1206",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.101.11.1206"
+  } ],
+  "version": "20170504",
+  "name": "OphthalmologicServices",
+  "title": "Ophthalmologic Services",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92002",
+      "display": "Ophthalmological services: medical examination and evaluation with initiation of diagnostic and treatment program; intermediate, new patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92004",
+      "display": "Ophthalmological services: medical examination and evaluation with initiation of diagnostic and treatment program; comprehensive, new patient, 1 or more visits"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92012",
+      "display": "Ophthalmological services: medical examination and evaluation, with initiation or continuation of diagnostic and treatment program; intermediate, established patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92014",
+      "display": "Ophthalmological services: medical examination and evaluation, with initiation or continuation of diagnostic and treatment program; comprehensive, established patient, 1 or more visits"
+    } ]
+  }
+}

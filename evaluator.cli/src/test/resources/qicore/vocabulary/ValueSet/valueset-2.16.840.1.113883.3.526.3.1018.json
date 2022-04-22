@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1018",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1018",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1018"
+  } ],
+  "version": "20190315",
+  "name": "PsychVisit-FamilyPsychotherapy",
+  "title": "Psych Visit - Family Psychotherapy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90846",
+      "display": "Family psychotherapy (without the patient present), 50 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90847",
+      "display": "Family psychotherapy (conjoint psychotherapy) (with patient present), 50 minutes"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "108313002",
+      "display": "Family psychotherapy procedure (regime/therapy)"
+    } ]
+  }
+}

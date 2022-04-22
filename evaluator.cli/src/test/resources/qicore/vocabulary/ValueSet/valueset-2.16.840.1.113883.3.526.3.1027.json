@@ -1,0 +1,205 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1027",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1027",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1027"
+  } ],
+  "version": "20170504",
+  "name": "ChemotherapyAdministration",
+  "title": "Chemotherapy Administration",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "51720",
+      "display": "Bladder instillation of anticarcinogenic agent (including retention time)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96401",
+      "display": "Chemotherapy administration, subcutaneous or intramuscular; non-hormonal anti-neoplastic"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96405",
+      "display": "Chemotherapy administration; intralesional, up to and including 7 lesions"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96406",
+      "display": "Chemotherapy administration; intralesional, more than 7 lesions"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96409",
+      "display": "Chemotherapy administration; intravenous, push technique, single or initial substance/drug"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96413",
+      "display": "Chemotherapy administration, intravenous infusion technique; up to 1 hour, single or initial substance/drug"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96416",
+      "display": "Chemotherapy administration, intravenous infusion technique; initiation of prolonged chemotherapy infusion (more than 8 hours), requiring use of a portable or implantable pump"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96420",
+      "display": "Chemotherapy administration, intra-arterial; push technique"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96422",
+      "display": "Chemotherapy administration, intra-arterial; infusion technique, up to 1 hour"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96425",
+      "display": "Chemotherapy administration, intra-arterial; infusion technique, initiation of prolonged infusion (more than 8 hours), requiring the use of a portable or implantable pump"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96440",
+      "display": "Chemotherapy administration into pleural cavity, requiring and including thoracentesis"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96446",
+      "display": "Chemotherapy administration into the peritoneal cavity via indwelling port or catheter"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96450",
+      "display": "Chemotherapy administration, into CNS (eg, intrathecal), requiring and including spinal puncture"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96521",
+      "display": "Refilling and maintenance of portable pump"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96522",
+      "display": "Refilling and maintenance of implantable pump or reservoir for drug delivery, systemic (eg, intravenous, intra-arterial)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96523",
+      "display": "Irrigation of implanted venous access device for drug delivery systems"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96542",
+      "display": "Chemotherapy injection, subarachnoid or intraventricular via subcutaneous reservoir, single or multiple agents"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96549",
+      "display": "Unlisted chemotherapy procedure"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "169396008",
+      "display": "Radiomimetic chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24977001",
+      "display": "Topical chemotherapy for malignant neoplasm (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265760000",
+      "display": "Intravenous chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265761001",
+      "display": "Intramuscular chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265762008",
+      "display": "Subcutaneous chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266719004",
+      "display": "Oral chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268500004",
+      "display": "Prophylactic chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315601005",
+      "display": "Ambulatory chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31652009",
+      "display": "Intracavitary chemotherapy for malignant neoplasm (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "367336001",
+      "display": "Chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38216008",
+      "display": "Infusion chemotherapy for malignant neoplasm (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "394894008",
+      "display": "Pre-operative chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "394895009",
+      "display": "Postoperative chemotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "394935005",
+      "display": "Combined post-operative chemotherapy and radiotherapy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4114003",
+      "display": "Parenteral chemotherapy for malignant neoplasm (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51534007",
+      "display": "Oral chemotherapy for malignant neoplasm (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6872008",
+      "display": "Perfusion chemotherapy for malignant neoplasm (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "716872004",
+      "display": "Antineoplastic chemotherapy regimen (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77738002",
+      "display": "Local chemotherapy for malignant neoplasm (procedure)"
+    } ]
+  }
+}

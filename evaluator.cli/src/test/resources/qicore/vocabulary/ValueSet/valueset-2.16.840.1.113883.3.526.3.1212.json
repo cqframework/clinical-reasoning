@@ -1,0 +1,100 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1212",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1212",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1212"
+  } ],
+  "version": "20170504",
+  "name": "IntolerancetoACEInhibitororARB",
+  "title": "Intolerance to ACE Inhibitor or ARB",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293500009",
+      "display": "Angiotensin-converting-enzyme inhibitor adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293501008",
+      "display": "Captopril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293502001",
+      "display": "Lisinopril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293503006",
+      "display": "Quinapril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293504000",
+      "display": "Ramipril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293505004",
+      "display": "Cilazapril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293506003",
+      "display": "Trandolapril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293507007",
+      "display": "Enalapril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293508002",
+      "display": "Fosinopril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293509005",
+      "display": "Perindopril adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293513003",
+      "display": "Adverse reaction caused by losartan (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371627004",
+      "display": "Angiotensin converting enzyme inhibitor-aggravated angioedema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "407564000",
+      "display": "Angiotensin converting enzyme inhibitor not tolerated (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "407565004",
+      "display": "Angiotensin II receptor antagonist not tolerated (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "407590002",
+      "display": "Angiotensin II receptor antagonist adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "422593004",
+      "display": "Acute renal failure caused by angiotensin-converting-enzyme inhibitor (disorder)"
+    } ]
+  }
+}

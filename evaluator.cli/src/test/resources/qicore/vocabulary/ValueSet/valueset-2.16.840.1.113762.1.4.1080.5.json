@@ -1,0 +1,160 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1080.5",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1080.5",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1080.5"
+  } ],
+  "version": "20180313",
+  "name": "ContactorOfficeVisit",
+  "title": "Contact or Office Visit",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2019",
+      "code": "99444",
+      "display": "Online evaluation and management service provided by a physician or other qualified health care professional who may report evaluation and management services provided to an established patient or guardian, not originating from a related E/M service provided within the previous 7 days, using the Internet or similar electronic communications network"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90791",
+      "display": "Psychiatric diagnostic evaluation"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90792",
+      "display": "Psychiatric diagnostic evaluation with medical services"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90832",
+      "display": "Psychotherapy, 30 minutes with patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90834",
+      "display": "Psychotherapy, 45 minutes with patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90837",
+      "display": "Psychotherapy, 60 minutes with patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99201",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99202",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: An expanded problem focused history; An expanded problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 20 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99203",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A detailed history; A detailed examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate severity. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99204",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99205",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99211",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, that may not require the presence of a physician or other qualified health care professional. Usually, the presenting problem(s) are minimal. Typically, 5 minutes are spent performing or supervising these services."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99212",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99213",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 15 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99214",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 25 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99215",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 40 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99421",
+      "display": "Online digital evaluation and management service, for an established patient, for up to 7 days, cumulative time during the 7 days; 5-10 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99422",
+      "display": "Online digital evaluation and management service, for an established patient, for up to 7 days, cumulative time during the 7 days; 11-20 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99423",
+      "display": "Online digital evaluation and management service, for an established patient, for up to 7 days, cumulative time during the 7 days; 21 or more minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99441",
+      "display": "Telephone evaluation and management service by a physician or other qualified health care professional who may report evaluation and management services provided to an established patient, parent, or guardian not originating from a related E/M service provided within the previous 7 days nor leading to an E/M service or procedure within the next 24 hours or soonest available appointment; 5-10 minutes of medical discussion"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99442",
+      "display": "Telephone evaluation and management service by a physician or other qualified health care professional who may report evaluation and management services provided to an established patient, parent, or guardian not originating from a related E/M service provided within the previous 7 days nor leading to an E/M service or procedure within the next 24 hours or soonest available appointment; 11-20 minutes of medical discussion"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99443",
+      "display": "Telephone evaluation and management service by a physician or other qualified health care professional who may report evaluation and management services provided to an established patient, parent, or guardian not originating from a related E/M service provided within the previous 7 days nor leading to an E/M service or procedure within the next 24 hours or soonest available appointment; 21-30 minutes of medical discussion"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0402",
+      "display": "Initial preventive physical examination; face-to-face visit, services limited to new beneficiary during the first 12 months of medicare enrollment"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0438",
+      "display": "Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0439",
+      "display": "Annual wellness visit, includes a personalized prevention plan of service (pps), subsequent visit"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G2061",
+      "display": "Qualified nonphysician healthcare professional online assessment, for an established patient, for up to seven days, cumulative time during the 7 days; 5-10 minutes"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G2062",
+      "display": "Qualified nonphysician healthcare professional online assessment service, for an established patient, for up to seven days, cumulative time during the 7 days; 11-20 minutes"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G2063",
+      "display": "Qualified nonphysician qualified healthcare professional assessment service, for an established patient, for up to seven days, cumulative time during the 7 days; 21 or more minutes"
+    } ]
+  }
+}

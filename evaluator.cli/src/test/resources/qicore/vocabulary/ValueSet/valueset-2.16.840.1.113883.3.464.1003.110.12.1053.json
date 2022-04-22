@@ -1,0 +1,135 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1053",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1053",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1053"
+  } ],
+  "version": "20170504",
+  "name": "Measles",
+  "title": "Measles",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.0",
+      "display": "Measles complicated by encephalitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.1",
+      "display": "Measles complicated by meningitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.2",
+      "display": "Measles complicated by pneumonia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.3",
+      "display": "Measles complicated by otitis media"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.4",
+      "display": "Measles with intestinal complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.81",
+      "display": "Measles keratitis and keratoconjunctivitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.89",
+      "display": "Other measles complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B05.9",
+      "display": "Measles without complication"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105841000119101",
+      "display": "Immunity to measles by positive serology (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111873003",
+      "display": "Measles without complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14189004",
+      "display": "Measles (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "161419000",
+      "display": "History of measles (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186561002",
+      "display": "Measles complicated by meningitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186562009",
+      "display": "Measles with intestinal complications (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195900001",
+      "display": "Pneumonia co-occurrent and due to measles (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240483006",
+      "display": "Atypical measles (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240484000",
+      "display": "Modified measles (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28463004",
+      "display": "Measles keratitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371111005",
+      "display": "Measles immune (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38921001",
+      "display": "Measles with complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406592004",
+      "display": "Measles of the central nervous system (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60013002",
+      "display": "Measles keratoconjunctivitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74918002",
+      "display": "Measles myocarditis (disorder)"
+    } ]
+  }
+}

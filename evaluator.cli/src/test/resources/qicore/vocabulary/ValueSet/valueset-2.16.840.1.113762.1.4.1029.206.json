@@ -1,0 +1,380 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1029.206",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1029.206",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1029.206"
+  } ],
+  "version": "20190305",
+  "name": "IntensiveCareUnit",
+  "title": "Intensive Care Unit",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1025-6",
+      "display": "Trauma Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1026-4",
+      "display": "Burn Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1027-2",
+      "display": "Medical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1028-0",
+      "display": "Medical Cardiac Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1029-8",
+      "display": "Medical-Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1030-6",
+      "display": "Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1031-4",
+      "display": "Neurosurgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1032-2",
+      "display": "Surgical Cardiothoracic Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1033-0",
+      "display": "Respiratory Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1034-8",
+      "display": "Prenatal Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1035-5",
+      "display": "Neurologic Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1042-1",
+      "display": "Pediatric Burn Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1043-9",
+      "display": "Pediatric Cardiothoracic Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1044-7",
+      "display": "Pediatric Medical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1045-4",
+      "display": "Pediatric Medical-Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1046-2",
+      "display": "Pediatric Neurosurgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1047-0",
+      "display": "Pediatric Respiratory Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1048-8",
+      "display": "Pediatric Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1049-6",
+      "display": "Pediatric Trauma Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1220-3",
+      "display": "Long Term Acute Care Intensive Care Unit"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1222-9",
+      "display": "Long Term Acute Care Pediatric Intensive Care Unit"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1223-7",
+      "display": "Oncology Medical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1224-5",
+      "display": "Oncology Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1225-2",
+      "display": "Oncology Medical-Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1233-6",
+      "display": "Oncology Pediatric Critical Care"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309904001",
+      "display": "Intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309905000",
+      "display": "Adult intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309907008",
+      "display": "Cardiac intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309908003",
+      "display": "Metabolic intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309909006",
+      "display": "Neurological intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309910001",
+      "display": "Pediatric intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309911002",
+      "display": "Respiratory intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418433008",
+      "display": "Surgical intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426439001",
+      "display": "Burns intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441994008",
+      "display": "Medical intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "448391000124102",
+      "display": "Trauma intensive care unit (environment)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1025-6",
+      "display": "Trauma Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1026-4",
+      "display": "Burn Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1027-2",
+      "display": "Medical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1028-0",
+      "display": "Medical Cardiac Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1029-8",
+      "display": "Medical-Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1030-6",
+      "display": "Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1031-4",
+      "display": "Neurosurgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1032-2",
+      "display": "Surgical Cardiothoracic Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1033-0",
+      "display": "Respiratory Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1034-8",
+      "display": "Prenatal Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1035-5",
+      "display": "Neurologic Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1042-1",
+      "display": "Pediatric Burn Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1043-9",
+      "display": "Pediatric Cardiothoracic Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1044-7",
+      "display": "Pediatric Medical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1045-4",
+      "display": "Pediatric Medical-Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1046-2",
+      "display": "Pediatric Neurosurgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1047-0",
+      "display": "Pediatric Respiratory Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1048-8",
+      "display": "Pediatric Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1049-6",
+      "display": "Pediatric Trauma Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1220-3",
+      "display": "Long Term Acute Care Intensive Care Unit"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1222-9",
+      "display": "Long Term Acute Care Pediatric Intensive Care Unit"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1223-7",
+      "display": "Oncology Medical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1224-5",
+      "display": "Oncology Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1225-2",
+      "display": "Oncology Medical-Surgical Critical Care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/hsloc",
+      "version": "2017",
+      "code": "1233-6",
+      "display": "Oncology Pediatric Critical Care"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309904001",
+      "display": "Intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309905000",
+      "display": "Adult intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309907008",
+      "display": "Cardiac intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309908003",
+      "display": "Metabolic intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309909006",
+      "display": "Neurological intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309910001",
+      "display": "Pediatric intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309911002",
+      "display": "Respiratory intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418433008",
+      "display": "Surgical intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426439001",
+      "display": "Burns intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441994008",
+      "display": "Medical intensive care unit (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "448391000124102",
+      "display": "Trauma intensive care unit (environment)"
+    } ]
+  }
+}

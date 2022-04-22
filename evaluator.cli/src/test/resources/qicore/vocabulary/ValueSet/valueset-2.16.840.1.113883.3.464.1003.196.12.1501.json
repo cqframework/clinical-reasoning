@@ -1,0 +1,155 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1501",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1501",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1501"
+  } ],
+  "version": "20180310",
+  "name": "Hyoscyamine",
+  "title": "Hyoscyamine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1037234",
+      "display": "Benzoic Acid 9 MG / Hyoscyamine Sulfate 0.12 MG / Methenamine 81.6 MG / Methylene blue 10.8 MG / phenyl salicylate 36.2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1044608",
+      "display": "12 HR Hyoscyamine Sulfate 0.375 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046770",
+      "display": "12 HR Hyoscyamine Sulfate 0.375 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046787",
+      "display": "Atropine Sulfate 0.00388 MG/ML / Hyoscyamine Sulfate 0.0207 MG/ML / Phenobarbital 3.24 MG/ML / Scopolamine Hydrobromide 0.0013 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046815",
+      "display": "Atropine Sulfate 0.0194 MG / Hyoscyamine Sulfate 0.1037 MG / Phenobarbital 16.2 MG / Scopolamine Hydrobromide 0.0065 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046820",
+      "display": "Atropine Sulfate 0.03 MG / Benzoic Acid 4.5 MG / Hyoscyamine Sulfate 0.03 MG / Methenamine 40.8 MG / Methylene blue 5.4 MG / phenyl salicylate 18.1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046982",
+      "display": "Hyoscyamine Sulfate 0.125 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046985",
+      "display": "Hyoscyamine Sulfate 0.125 MG Disintegrating Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046997",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.311 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1047786",
+      "display": "Hyoscyamine Sulfate 0.12 MG / Methenamine 81.6 MG / Methylene blue 10.8 MG / phenyl salicylate 36.2 MG / Sodium Phosphate, Monobasic 40.8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1047805",
+      "display": "butabarbital 15 MG / Hyoscyamine hydrobromide 0.3 MG / Phenazopyridine hydrochloride 150 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1047881",
+      "display": "Hyoscyamine Sulfate 0.025 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1047895",
+      "display": "Hyoscyamine Sulfate 0.125 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1047905",
+      "display": "Hyoscyamine Sulfate 0.125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1047916",
+      "display": "1 ML Hyoscyamine Sulfate 0.5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048078",
+      "display": "Atropine Sulfate 0.0194 MG / Hyoscyamine Sulfate 0.1037 MG / Scopolamine Hydrobromide 0.0065 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048124",
+      "display": "12 HR Atropine Sulfate 0.04 MG / Chlorpheniramine Maleate 8 MG / Hyoscyamine Sulfate 0.19 MG / Pseudoephedrine Hydrochloride 90 MG / Scopolamine Hydrobromide 0.01 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048147",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.3111 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048307",
+      "display": "Hyoscyamine Sulfate 0.12 MG / Methenamine 120 MG / Methylene blue 10 MG / phenyl salicylate 36 MG / Sodium Phosphate, Monobasic 40.8 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048336",
+      "display": "Hyoscyamine Sulfate 0.12 MG / Methenamine 81 MG / Methylene blue 10.8 MG / phenyl salicylate 32.4 MG / Sodium Phosphate, Monobasic 40.8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048411",
+      "display": "Hyoscyamine Sulfate 0.15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1050325",
+      "display": "Hyoscyamine Sulfate 0.12 MG / Methenamine 81.6 MG / Methylene blue 10.8 MG / Sodium Phosphate, Monobasic 40.8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1087365",
+      "display": "Hyoscyamine Sulfate 0.12 MG / Methenamine 118 MG / Methylene blue 10 MG / phenyl salicylate 36 MG / Sodium Phosphate, Monobasic 40.8 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1440869",
+      "display": "Hyoscyamine Sulfate 0.12 MG / Methenamine 120 MG / Methylene blue 10.8 MG / phenyl salicylate 36.2 MG / Sodium Phosphate, Monobasic 40.8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1598634",
+      "display": "Hyoscyamine Sulfate 0.12 MG / Methenamine 120 MG / Methylene blue 10 MG / Sodium Phosphate, Monobasic 40.8 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1807886",
+      "display": "Biphasic 12 HR Hyoscyamine Sulfate 0.375 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "998726",
+      "display": "Hyoscyamine Sulfate 0.0625 MG / Phenyltoloxamine citrate 15 MG Oral Capsule"
+    } ]
+  }
+}

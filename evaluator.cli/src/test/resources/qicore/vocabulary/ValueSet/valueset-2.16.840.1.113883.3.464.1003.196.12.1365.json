@@ -1,0 +1,235 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1365",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1365",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1365"
+  } ],
+  "version": "20170504",
+  "name": "Estradiol",
+  "title": "Estradiol",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1000161",
+      "display": "estradiol valerate 2 MG / medroxyprogesterone acetate 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1149632",
+      "display": "84 HR Estradiol 0.00313 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251493",
+      "display": "84 HR Estradiol 0.00208 MG/HR / norethindrone acetate 0.00583 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251499",
+      "display": "84 HR Estradiol 0.00208 MG/HR / norethindrone acetate 0.0104 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359123",
+      "display": "Estradiol 0.5 MG / norethindrone acetate 0.1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359124",
+      "display": "{28 (Estradiol 0.5 MG / norethindrone acetate 0.1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359126",
+      "display": "Estradiol 1 MG / norethindrone acetate 0.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359127",
+      "display": "{28 (Estradiol 1 MG / norethindrone acetate 0.5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1483549",
+      "display": "drospirenone 0.25 MG / Estradiol 0.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1483550",
+      "display": "{28 (drospirenone 0.25 MG / Estradiol 0.5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1483552",
+      "display": "drospirenone 0.5 MG / Estradiol 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1483553",
+      "display": "{28 (drospirenone 0.5 MG / Estradiol 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197657",
+      "display": "Estradiol 0.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197658",
+      "display": "Estradiol 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197659",
+      "display": "Estradiol 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "205333",
+      "display": "Estradiol 1.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2108924",
+      "display": "Estradiol 1 MG / Progesterone 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "238003",
+      "display": "168 HR Estradiol 0.00208 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "238004",
+      "display": "168 HR Estradiol 0.00417 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "241527",
+      "display": "168 HR Estradiol 0.00312 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "241946",
+      "display": "84 HR Estradiol 0.00156 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242333",
+      "display": "168 HR Estradiol 0.00104 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242891",
+      "display": "84 HR Estradiol 0.00208 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242892",
+      "display": "84 HR Estradiol 0.00417 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "248478",
+      "display": "84 HR Estradiol 0.00104 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "249869",
+      "display": "Estradiol 2 MG / Norethindrone 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "250213",
+      "display": "Estradiol 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "250838",
+      "display": "Estradiol 2 MG / Norethindrone 0.7 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "348906",
+      "display": "Estradiol 1 MG / norgestimate 0.09 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "402250",
+      "display": "168 HR Estradiol 0.00188 MG/HR / Levonorgestrel 0.000625 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403922",
+      "display": "168 HR Estradiol 0.00156 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "403923",
+      "display": "168 HR Estradiol 0.0025 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "476545",
+      "display": "168 HR Estradiol 0.000583 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "483169",
+      "display": "Estradiol 0.9 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "577027",
+      "display": "Estradiol 0.45 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "577029",
+      "display": "Estradiol 1.8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "728118",
+      "display": "Estradiol 1.53 MG/ACTUAT Topical Spray"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749850",
+      "display": "{15 (Estradiol 1 MG / norgestimate 0.09 MG Oral Tablet) / 15 (Estradiol 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978941",
+      "display": "estradiol valerate 3 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978944",
+      "display": "dienogest 2 MG / estradiol valerate 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978946",
+      "display": "dienogest 3 MG / estradiol valerate 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978948",
+      "display": "estradiol valerate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978949",
+      "display": "{5 (dienogest 2 MG / estradiol valerate 2 MG Oral Tablet) / 17 (dienogest 3 MG / estradiol valerate 2 MG Oral Tablet) / 2 (estradiol valerate 1 MG Oral Tablet) / 2 (estradiol valerate 3 MG Oral Tablet) / 2 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    } ]
+  }
+}

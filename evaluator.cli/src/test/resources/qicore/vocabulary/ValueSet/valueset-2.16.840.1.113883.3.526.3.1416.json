@@ -1,0 +1,65 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1416",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1416",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1416"
+  } ],
+  "version": "20200307",
+  "name": "ChronicIridocyclitis",
+  "title": "Chronic Iridocyclitis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A18.54",
+      "display": "Tuberculous iridocyclitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.11",
+      "display": "Chronic iridocyclitis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.12",
+      "display": "Chronic iridocyclitis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.13",
+      "display": "Chronic iridocyclitis, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.9",
+      "display": "Unspecified iridocyclitis"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186266008",
+      "display": "Tuberculous chronic iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193493000",
+      "display": "Chronic iridocyclitis due to another disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416449002",
+      "display": "Chronic iridocyclitis in young girls (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6869001",
+      "display": "Recurrent iridocyclitis (disorder)"
+    } ]
+  }
+}

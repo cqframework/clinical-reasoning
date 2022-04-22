@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.12.1006",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1006",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.101.12.1006"
+  } ],
+  "version": "20170504",
+  "name": "DischargeServices-HospitalInpatientSameDayDischarge",
+  "title": "Discharge Services - Hospital Inpatient Same Day Discharge",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99234",
+      "display": "Observation or inpatient hospital care, for the evaluation and management of a patient including admission and discharge on the same date, which requires these 3 key components: A detailed or comprehensive history; A detailed or comprehensive examination; and Medical decision making that is straightforward or of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually the presenting problem(s) requiring admission are of low severity. Typically, 40 minutes are spent at the bedside and on the patient's hospital floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99235",
+      "display": "Observation or inpatient hospital care, for the evaluation and management of a patient including admission and discharge on the same date, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually the presenting problem(s) requiring admission are of moderate severity. Typically, 50 minutes are spent at the bedside and on the patient's hospital floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99236",
+      "display": "Observation or inpatient hospital care, for the evaluation and management of a patient including admission and discharge on the same date, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually the presenting problem(s) requiring admission are of high severity. Typically, 55 minutes are spent at the bedside and on the patient's hospital floor or unit."
+    } ]
+  }
+}

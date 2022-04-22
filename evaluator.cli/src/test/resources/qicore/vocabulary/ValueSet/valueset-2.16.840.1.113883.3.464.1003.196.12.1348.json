@@ -1,0 +1,170 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1348",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1348",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1348"
+  } ],
+  "version": "20170504",
+  "name": "Phenobarbital",
+  "title": "Phenobarbital",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046787",
+      "display": "Atropine Sulfate 0.00388 MG/ML / Hyoscyamine Sulfate 0.0207 MG/ML / Phenobarbital 3.24 MG/ML / Scopolamine Hydrobromide 0.0013 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046815",
+      "display": "Atropine Sulfate 0.0194 MG / Hyoscyamine Sulfate 0.1037 MG / Phenobarbital 16.2 MG / Scopolamine Hydrobromide 0.0065 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046997",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.311 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048147",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.3111 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091265",
+      "display": "Phenobarbital 10 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294394",
+      "display": "Belladonna Alkaloids 0.2 MG / Ergotamine Tartrate 0.6 MG / Phenobarbital 40 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198083",
+      "display": "Phenobarbital 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198084",
+      "display": "Phenobarbital 16 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198085",
+      "display": "Phenobarbital 16 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198086",
+      "display": "Phenobarbital 16.2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198089",
+      "display": "Phenobarbital 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198368",
+      "display": "Phenobarbital 65 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199164",
+      "display": "Phenobarbital 97.2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199167",
+      "display": "Phenobarbital 32.4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199168",
+      "display": "Phenobarbital 64.8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "245385",
+      "display": "Phenobarbital 120 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "251325",
+      "display": "Phenobarbital 15 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "282462",
+      "display": "Phenobarbital 30 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "282463",
+      "display": "Phenobarbital 60 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308589",
+      "display": "Belladonna Alkaloids 0.13 MG / Phenobarbital 16.2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312357",
+      "display": "Phenobarbital 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312362",
+      "display": "Phenobarbital 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312363",
+      "display": "Phenobarbital 32 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312368",
+      "display": "Phenobarbital 90 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312370",
+      "display": "Phenobarbital 130 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "702519",
+      "display": "Phenobarbital 4 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "756143",
+      "display": "Phenobarbital 3 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "756144",
+      "display": "Phenobarbital 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "756260",
+      "display": "Belladonna Alkaloids 0.026 MG/ML / Phenobarbital 3.24 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "756331",
+      "display": "Phenobarbital 5 MG/ML Oral Solution"
+    } ]
+  }
+}

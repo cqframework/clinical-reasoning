@@ -1,0 +1,225 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.120.12.1007",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.120.12.1007",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.120.12.1007"
+  } ],
+  "version": "20170504",
+  "name": "SevereCombinedImmunodeficiency",
+  "title": "Severe Combined Immunodeficiency",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.0",
+      "display": "Severe combined immunodeficiency [SCID] with reticular dysgenesis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.1",
+      "display": "Severe combined immunodeficiency [SCID] with low T- and B-cell numbers"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.2",
+      "display": "Severe combined immunodeficiency [SCID] with low or normal B-cell numbers"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.9",
+      "display": "Combined immunodeficiency, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-03",
+      "code": "203592006",
+      "display": "X-linked severe combined immunodeficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111584000",
+      "display": "Reticular dysgenesis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111587007",
+      "display": "Severe combined immunodeficiency due to absent interleukin-2 receptor (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190993005",
+      "display": "Autosomal recessive severe combined immunodeficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190996002",
+      "display": "Severe combined immunodeficiency with reticular dysgenesis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190997006",
+      "display": "Severe combined immunodeficiency with low T- and B-cell numbers (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190998001",
+      "display": "Severe combined immunodeficiency with low or normal B-cell numbers (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191001007",
+      "display": "Major histocompatibility complex class I deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191002000",
+      "display": "Major histocompatibility complex class II deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22406001",
+      "display": "Severe combined immunodeficiency due to absent lymphoid stem cells (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234570002",
+      "display": "Severe combined immunodeficiency with maternofetal engraftment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234571003",
+      "display": "Warts, hypogammaglobulinemia, infections, and myelokathexis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31323000",
+      "display": "Severe combined immunodeficiency disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3439009",
+      "display": "Severe combined immunodeficiency due to absent peripheral T cell maturation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "350353007",
+      "display": "De Vaal's syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "351287008",
+      "display": "Reticular dysgenesis with congenital aleukocytosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "362993009",
+      "display": "Autosomal recessive severe combined immunodeficiency disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36980009",
+      "display": "Severe combined immunodeficiency due to absent adenosine deaminase (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44940001",
+      "display": "Adenosine deaminase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45390000",
+      "display": "Severe combined immunodeficiency due to absent interleukin-2 production (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49555001",
+      "display": "Severe combined immunodeficiency due to absent T cell receptor (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55602000",
+      "display": "Nezelof's syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "715982006",
+      "display": "Severe combined immunodeficiency due to deoxyribonucleic acid cross-link repair protein 1c deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "716378008",
+      "display": "Combined immunodeficiency due to Zeta-chain associated protein kinase 70 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "716871006",
+      "display": "Severe combined immunodeficiency due to deoxyribonucleic acid dependent protein kinase catalytic subunit deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "718107000",
+      "display": "Severe combined immunodeficiency T-cell negative B-cell positive due to janus kinase-3 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71904008",
+      "display": "Severe combined immunodeficiency due to absent class II human leukocyte antigens (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720345008",
+      "display": "Severe T-cell immunodeficiency, congenital alopecia, nail dystrophy syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720853005",
+      "display": "Severe combined immunodeficiency, microcephaly, growth retardation, sensitivity to ionizing radiation syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720986005",
+      "display": "Anhidrotic ectodermal dysplasia, immunodeficiency, osteopetrosis, lymphedema syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721977007",
+      "display": "Lung fibrosis, immunodeficiency, 46,XX gonadal dysgenesis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722067005",
+      "display": "Severe combined immunodeficiency with hypereosinophilia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724177005",
+      "display": "Ligase 4 syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724361001",
+      "display": "Hepatic veno-occlusive disease with immunodeficiency syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "725135004",
+      "display": "Combined immunodeficiency due to CD3gamma deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "725136003",
+      "display": "Immunodeficiency by defective expression of human leukocyte antigen class 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "725290000",
+      "display": "Combined immunodeficiency due to partial recombination-activating gene 1 deficiency (disorder)"
+    } ]
+  }
+}

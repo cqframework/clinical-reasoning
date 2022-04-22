@@ -1,0 +1,490 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.256",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.256",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.256"
+  } ],
+  "version": "20170725",
+  "name": "Graduatedcompressionstockings(GCS)",
+  "title": "Graduated compression stockings (GCS)",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "348681001",
+      "display": "Graduated compression elastic hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401621005",
+      "display": "Compression hosiery class I below knee stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401622003",
+      "display": "Compression hosiery class I below knee stocking lightweight elastic net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401623008",
+      "display": "Compression hosiery class I thigh length stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401624002",
+      "display": "Compression hosiery class I thigh length stocking lightweight elastic net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401625001",
+      "display": "Compression hosiery class I thigh length stocking lightweight elastic net made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401626000",
+      "display": "Compression hosiery class II anklet circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401627009",
+      "display": "Compression hosiery class II anklet circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401628004",
+      "display": "Compression hosiery class II anklet flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401629007",
+      "display": "Compression hosiery class II anklet flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401630002",
+      "display": "Compression hosiery class II anklet net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401631003",
+      "display": "Compression hosiery class II below knee stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401632005",
+      "display": "Compression hosiery class II below knee stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401633000",
+      "display": "Compression hosiery class II below knee stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401634006",
+      "display": "Compression hosiery class II below knee stocking net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401635007",
+      "display": "Compression hosiery class II kneecap circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401636008",
+      "display": "Compression hosiery class II kneecap circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401637004",
+      "display": "Compression hosiery class II kneecap flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401638009",
+      "display": "Compression hosiery class II kneecap flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401639001",
+      "display": "Compression hosiery class II kneecap net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401640004",
+      "display": "Compression hosiery class II thigh length stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401641000",
+      "display": "Compression hosiery class II thigh length stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401642007",
+      "display": "Compression hosiery class II thigh length stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401643002",
+      "display": "Compression hosiery class II thigh length stocking flatbed knit made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401644008",
+      "display": "Compression hosiery class II thigh length stocking net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401645009",
+      "display": "Compression hosiery class II thigh length stocking net made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401646005",
+      "display": "Compression hosiery class III anklet flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401647001",
+      "display": "Compression hosiery class III anklet flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401648006",
+      "display": "Compression hosiery class III below knee stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401649003",
+      "display": "Compression hosiery class III below knee stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401650003",
+      "display": "Compression hosiery class III below knee stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401651004",
+      "display": "Compression hosiery class III kneecap circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401652006",
+      "display": "Compression hosiery class III kneecap flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401653001",
+      "display": "Compression hosiery class III kneecap flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401654007",
+      "display": "Compression hosiery class III thigh length stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401655008",
+      "display": "Compression hosiery class III thigh length stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401656009",
+      "display": "Compression hosiery class III thigh length stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401657000",
+      "display": "Compression hosiery class III thigh length stocking flatbed knit made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401776005",
+      "display": "Class I compression hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401777001",
+      "display": "Class II compression hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401778006",
+      "display": "Class III compression hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408127000",
+      "display": "Class I bacteriostatic thigh length stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408128005",
+      "display": "Class I bacteriostatic below knee stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408129002",
+      "display": "Class II bacteriostatic thigh length stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408130007",
+      "display": "Class II bacteriostatic b-knee stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408131006",
+      "display": "Class III bacteriostatic thigh length stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408132004",
+      "display": "Class III bacteriostatic below knee stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "348681001",
+      "display": "Graduated compression elastic hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401621005",
+      "display": "Compression hosiery class I below knee stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401622003",
+      "display": "Compression hosiery class I below knee stocking lightweight elastic net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401623008",
+      "display": "Compression hosiery class I thigh length stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401624002",
+      "display": "Compression hosiery class I thigh length stocking lightweight elastic net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401625001",
+      "display": "Compression hosiery class I thigh length stocking lightweight elastic net made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401626000",
+      "display": "Compression hosiery class II anklet circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401627009",
+      "display": "Compression hosiery class II anklet circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401628004",
+      "display": "Compression hosiery class II anklet flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401629007",
+      "display": "Compression hosiery class II anklet flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401630002",
+      "display": "Compression hosiery class II anklet net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401631003",
+      "display": "Compression hosiery class II below knee stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401632005",
+      "display": "Compression hosiery class II below knee stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401633000",
+      "display": "Compression hosiery class II below knee stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401634006",
+      "display": "Compression hosiery class II below knee stocking net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401635007",
+      "display": "Compression hosiery class II kneecap circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401636008",
+      "display": "Compression hosiery class II kneecap circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401637004",
+      "display": "Compression hosiery class II kneecap flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401638009",
+      "display": "Compression hosiery class II kneecap flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401639001",
+      "display": "Compression hosiery class II kneecap net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401640004",
+      "display": "Compression hosiery class II thigh length stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401641000",
+      "display": "Compression hosiery class II thigh length stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401642007",
+      "display": "Compression hosiery class II thigh length stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401643002",
+      "display": "Compression hosiery class II thigh length stocking flatbed knit made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401644008",
+      "display": "Compression hosiery class II thigh length stocking net made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401645009",
+      "display": "Compression hosiery class II thigh length stocking net made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401646005",
+      "display": "Compression hosiery class III anklet flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401647001",
+      "display": "Compression hosiery class III anklet flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401648006",
+      "display": "Compression hosiery class III below knee stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401649003",
+      "display": "Compression hosiery class III below knee stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401650003",
+      "display": "Compression hosiery class III below knee stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401651004",
+      "display": "Compression hosiery class III kneecap circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401652006",
+      "display": "Compression hosiery class III kneecap flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401653001",
+      "display": "Compression hosiery class III kneecap flatbed knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401654007",
+      "display": "Compression hosiery class III thigh length stocking circular knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401655008",
+      "display": "Compression hosiery class III thigh length stocking circular knit standard stock size (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401656009",
+      "display": "Compression hosiery class III thigh length stocking flatbed knit made to measure (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401657000",
+      "display": "Compression hosiery class III thigh length stocking flatbed knit made to measure with fitted suspender (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401776005",
+      "display": "Class I compression hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401777001",
+      "display": "Class II compression hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401778006",
+      "display": "Class III compression hosiery (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408127000",
+      "display": "Class I bacteriostatic thigh length stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408128005",
+      "display": "Class I bacteriostatic below knee stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408129002",
+      "display": "Class II bacteriostatic thigh length stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408130007",
+      "display": "Class II bacteriostatic b-knee stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408131006",
+      "display": "Class III bacteriostatic thigh length stocking (physical object)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408132004",
+      "display": "Class III bacteriostatic below knee stocking (physical object)"
+    } ]
+  }
+}

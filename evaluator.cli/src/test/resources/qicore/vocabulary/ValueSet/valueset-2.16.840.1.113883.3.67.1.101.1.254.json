@@ -1,0 +1,70 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.67.1.101.1.254",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.67.1.101.1.254",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.67.1.101.1.254"
+  } ],
+  "version": "20170504",
+  "name": "Dysthymia",
+  "title": "Dysthymia",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F34.1",
+      "display": "Dysthymic disorder"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19694002",
+      "display": "Late onset dysthymia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "2506003",
+      "display": "Early onset dysthymia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3109008",
+      "display": "Secondary dysthymia early onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36170009",
+      "display": "Secondary dysthymia late onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38451003",
+      "display": "Primary dysthymia early onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67711008",
+      "display": "Primary dysthymia late onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78667006",
+      "display": "Dysthymia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83176005",
+      "display": "Primary dysthymia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85080004",
+      "display": "Secondary dysthymia (disorder)"
+    } ]
+  }
+}

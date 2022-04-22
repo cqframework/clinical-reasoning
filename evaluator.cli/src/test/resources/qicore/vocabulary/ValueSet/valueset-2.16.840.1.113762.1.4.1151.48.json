@@ -1,0 +1,120 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1151.48",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1151.48",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1151.48"
+  } ],
+  "version": "20200206",
+  "name": "AndrogendeprivationtherapyforUrologyCare",
+  "title": "Androgen deprivation therapy for Urology Care",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115257",
+      "display": "1.5 ML Leuprolide Acetate 30 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115447",
+      "display": "1 ML Leuprolide Acetate 11.25 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115454",
+      "display": "1 ML Leuprolide Acetate 15 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115457",
+      "display": "1 ML Leuprolide Acetate 3.75 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115462",
+      "display": "1 ML Leuprolide Acetate 7.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115467",
+      "display": "1.5 ML Leuprolide Acetate 15 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115472",
+      "display": "1.5 ML Leuprolide Acetate 7.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1946519",
+      "display": "3-Month 1.5 ML Leuprolide Acetate 20 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1946521",
+      "display": "4-Month 1.5 ML Leuprolide Acetate 20 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310592",
+      "display": "Goserelin 3.6 MG Drug Implant"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "545835",
+      "display": "Leuprolide Acetate 5 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "571914",
+      "display": "Goserelin 10.8 MG [Zoladex]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "752884",
+      "display": "0.375 ML Leuprolide Acetate 120 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "752889",
+      "display": "0.5 ML Leuprolide Acetate 60 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "752894",
+      "display": "0.375 ML Leuprolide Acetate 60 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "752899",
+      "display": "0.25 ML Leuprolide Acetate 30 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "828749",
+      "display": "degarelix 80 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "828751",
+      "display": "degarelix 120 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "905053",
+      "display": "Triptorelin 22.5 MG Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "905062",
+      "display": "Triptorelin 11.25 MG Injection"
+    } ]
+  }
+}

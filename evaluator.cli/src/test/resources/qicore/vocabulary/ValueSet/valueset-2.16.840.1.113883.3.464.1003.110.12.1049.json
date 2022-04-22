@@ -1,0 +1,110 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1049",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1049",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1049"
+  } ],
+  "version": "20180310",
+  "name": "GenitalHerpes",
+  "title": "Genital Herpes",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A60.00",
+      "display": "Herpesviral infection of urogenital system, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A60.03",
+      "display": "Herpesviral cervicitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A60.04",
+      "display": "Herpesviral vulvovaginitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A60.09",
+      "display": "Herpesviral infection of other urogenital tract"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129670002",
+      "display": "Herpetic cervicitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27420004",
+      "display": "Herpetic vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "278068003",
+      "display": "Herpetic vesicle in vagina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33839006",
+      "display": "Genital herpes simplex (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402888002",
+      "display": "Primary herpes simplex infection of genitalia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402890001",
+      "display": "Primary herpetic vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402894005",
+      "display": "Recurrent genital herpes simplex (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402896007",
+      "display": "Recurrent herpetic vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "423391007",
+      "display": "Genital herpes simplex type 2 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427578006",
+      "display": "Herpes simplex of female genitalia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439912007",
+      "display": "Recurrent genital Herpes simplex type 1 infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439913002",
+      "display": "Recurrent genital Herpes simplex type 2 infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440714005",
+      "display": "Genital Herpes simplex type 1 infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59819007",
+      "display": "Herpetic ulceration of vulva (disorder)"
+    } ]
+  }
+}

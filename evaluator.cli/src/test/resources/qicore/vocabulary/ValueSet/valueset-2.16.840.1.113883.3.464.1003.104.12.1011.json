@@ -1,0 +1,105 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.104.12.1011",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.104.12.1011",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.104.12.1011"
+  } ],
+  "version": "20170504",
+  "name": "EssentialHypertension",
+  "title": "Essential Hypertension",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I10",
+      "display": "Essential (primary) hypertension"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "401.0",
+      "display": "Malignant essential hypertension"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "401.1",
+      "display": "Benign essential hypertension"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "401.9",
+      "display": "Unspecified essential hypertension"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2013-09",
+      "code": "276789009",
+      "display": "Labile hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10725009",
+      "display": "Benign hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1201005",
+      "display": "Benign essential hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371125006",
+      "display": "Labile essential hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429457004",
+      "display": "Systolic essential hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46481004",
+      "display": "Low-renin essential hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48146000",
+      "display": "Diastolic hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56218007",
+      "display": "Systolic hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59621000",
+      "display": "Essential hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59720008",
+      "display": "Sustained diastolic hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65518004",
+      "display": "Labile diastolic hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762463000",
+      "display": "Diastolic hypertension co-occurrent with systolic hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78975002",
+      "display": "Malignant essential hypertension (disorder)"
+    } ]
+  }
+}

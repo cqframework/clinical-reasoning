@@ -1,0 +1,100 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1047.502",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1047.502",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1047.502"
+  } ],
+  "version": "20180309",
+  "name": "OverweightorObese",
+  "title": "Overweight or Obese",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E66.01",
+      "display": "Morbid (severe) obesity due to excess calories"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E66.09",
+      "display": "Other obesity due to excess calories"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E66.1",
+      "display": "Drug-induced obesity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E66.2",
+      "display": "Morbid (severe) obesity with alveolar hypoventilation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E66.3",
+      "display": "Overweight"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E66.8",
+      "display": "Other obesity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E66.9",
+      "display": "Obesity, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "162863004",
+      "display": "Body mass index 25-29 - overweight (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "162864005",
+      "display": "Body mass index 30+ - obesity (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238131007",
+      "display": "Overweight (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238136002",
+      "display": "Morbid obesity (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408512008",
+      "display": "Body mass index 40+ - severely obese (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414915002",
+      "display": "Obese (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414916001",
+      "display": "Obesity (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415530009",
+      "display": "Simple obesity (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83911000119104",
+      "display": "Severe obesity (disorder)"
+    } ]
+  }
+}

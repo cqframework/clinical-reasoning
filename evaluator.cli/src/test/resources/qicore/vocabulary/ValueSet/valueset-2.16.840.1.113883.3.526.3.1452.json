@@ -1,0 +1,90 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1452",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1452",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1452"
+  } ],
+  "version": "20200307",
+  "name": "ChoroidalHemorrhageandRupture",
+  "title": "Choroidal Hemorrhage and Rupture",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.301",
+      "display": "Unspecified choroidal hemorrhage, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.302",
+      "display": "Unspecified choroidal hemorrhage, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.303",
+      "display": "Unspecified choroidal hemorrhage, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.311",
+      "display": "Expulsive choroidal hemorrhage, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.312",
+      "display": "Expulsive choroidal hemorrhage, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.313",
+      "display": "Expulsive choroidal hemorrhage, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.321",
+      "display": "Choroidal rupture, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.322",
+      "display": "Choroidal rupture, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H31.323",
+      "display": "Choroidal rupture, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11623000",
+      "display": "Expulsive choroidal hemorrhage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "122003",
+      "display": "Choroidal hemorrhage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193474002",
+      "display": "Choroidal hemorrhage and rupture (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "2532009",
+      "display": "Choroidal rupture (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419596007",
+      "display": "Suprachoroidal hemorrhage (disorder)"
+    } ]
+  }
+}

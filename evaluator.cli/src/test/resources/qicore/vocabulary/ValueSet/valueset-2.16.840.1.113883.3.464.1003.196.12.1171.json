@@ -1,0 +1,655 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1171",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1171",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1171"
+  } ],
+  "version": "20170504",
+  "name": "ADHDMedications",
+  "title": "ADHD Medications",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1006608",
+      "display": "24 HR dexmethylphenidate hydrochloride 40 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1009145",
+      "display": "Amphetamine aspartate 1.875 MG / Amphetamine Sulfate 1.875 MG / Dextroamphetamine saccharate 1.875 MG / Dextroamphetamine Sulfate 1.875 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013930",
+      "display": "12 HR Clonidine Hydrochloride 0.1 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013937",
+      "display": "12 HR Clonidine Hydrochloride 0.2 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091133",
+      "display": "Methylphenidate Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091145",
+      "display": "8 HR Methylphenidate Hydrochloride 10 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091150",
+      "display": "Methylphenidate Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091152",
+      "display": "Methylphenidate Hydrochloride 10 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091155",
+      "display": "24 HR Methylphenidate Hydrochloride 18 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091170",
+      "display": "24 HR Methylphenidate Hydrochloride 27 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091185",
+      "display": "24 HR Methylphenidate Hydrochloride 36 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091210",
+      "display": "24 HR Methylphenidate Hydrochloride 54 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091225",
+      "display": "8 HR Methylphenidate Hydrochloride 20 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091322",
+      "display": "Methylphenidate Hydrochloride 5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091341",
+      "display": "Methylphenidate Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091389",
+      "display": "Methylphenidate Hydrochloride 2.5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091392",
+      "display": "Methylphenidate Hydrochloride 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1091497",
+      "display": "Methylphenidate Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1092566",
+      "display": "{7 (24 HR Guanfacine 1 MG Extended Release Oral Tablet) / 7 (24 HR Guanfacine 2 MG Extended Release Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1101926",
+      "display": "24 HR dexmethylphenidate hydrochloride 25 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1101932",
+      "display": "24 HR dexmethylphenidate hydrochloride 35 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1233709",
+      "display": "Clonidine Hydrochloride 0.15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1312583",
+      "display": "24 HR Methylphenidate Hydrochloride 5 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1425847",
+      "display": "Dextroamphetamine Sulfate 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1425854",
+      "display": "Dextroamphetamine Sulfate 7.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1535454",
+      "display": "Dextroamphetamine Sulfate 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1535470",
+      "display": "Dextroamphetamine Sulfate 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1593856",
+      "display": "lisdexamfetamine dimesylate 10 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1648183",
+      "display": "40/60 Release 24 HR Methylphenidate Hydrochloride 15 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1727443",
+      "display": "Methylphenidate Hydrochloride 20 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1734928",
+      "display": "Methylphenidate Hydrochloride 30 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1734951",
+      "display": "Methylphenidate Hydrochloride 40 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806177",
+      "display": "50/50 Release 24 HR Methylphenidate Hydrochloride 20 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806179",
+      "display": "50/50 Release 24 HR Methylphenidate Hydrochloride 30 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806181",
+      "display": "30/70 Release 24 HR Methylphenidate Hydrochloride 10 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806183",
+      "display": "50/50 Release 24 HR Methylphenidate Hydrochloride 40 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806185",
+      "display": "50/50 Release 24 HR Methylphenidate Hydrochloride 60 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806187",
+      "display": "30/70 Release 24 HR Methylphenidate Hydrochloride 20 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806189",
+      "display": "30/70 Release 24 HR Methylphenidate Hydrochloride 30 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806191",
+      "display": "30/70 Release 24 HR Methylphenidate Hydrochloride 40 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806193",
+      "display": "30/70 Release 24 HR Methylphenidate Hydrochloride 50 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806195",
+      "display": "50/50 Release 24 HR Methylphenidate Hydrochloride 10 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806197",
+      "display": "30/70 Release 24 HR Methylphenidate Hydrochloride 60 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806200",
+      "display": "40/60 Release 24 HR Methylphenidate Hydrochloride 10 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806202",
+      "display": "40/60 Release 24 HR Methylphenidate Hydrochloride 20 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806204",
+      "display": "40/60 Release 24 HR Methylphenidate Hydrochloride 50 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806206",
+      "display": "40/60 Release 24 HR Methylphenidate Hydrochloride 30 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806208",
+      "display": "40/60 Release 24 HR Methylphenidate Hydrochloride 60 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1806210",
+      "display": "40/60 Release 24 HR Methylphenidate Hydrochloride 40 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1871456",
+      "display": "lisdexamfetamine dimesylate 40 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1871460",
+      "display": "lisdexamfetamine dimesylate 30 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1871462",
+      "display": "lisdexamfetamine dimesylate 20 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1871464",
+      "display": "lisdexamfetamine dimesylate 10 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1871466",
+      "display": "lisdexamfetamine dimesylate 60 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1871468",
+      "display": "lisdexamfetamine dimesylate 50 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1926840",
+      "display": "Methylphenidate 17.3 MG Disintegrating Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1926849",
+      "display": "Methylphenidate 25.9 MG Disintegrating Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1926853",
+      "display": "Methylphenidate 8.6 MG Disintegrating Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1927610",
+      "display": "3-Bead 24 HR Amphetamine aspartate 12.5 MG / Amphetamine Sulfate 12.5 MG / Dextroamphetamine saccharate 12.5 MG / Dextroamphetamine Sulfate 12.5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1927617",
+      "display": "3-Bead 24 HR Amphetamine aspartate 6.25 MG / Amphetamine Sulfate 6.25 MG / Dextroamphetamine saccharate 6.25 MG / Dextroamphetamine Sulfate 6.25 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1927630",
+      "display": "3-Bead 24 HR Amphetamine aspartate 3.125 MG / Amphetamine Sulfate 3.125 MG / Dextroamphetamine saccharate 3.125 MG / Dextroamphetamine Sulfate 3.125 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1927637",
+      "display": "3-Bead 24 HR Amphetamine aspartate 9.375 MG / Amphetamine Sulfate 9.375 MG / Dextroamphetamine saccharate 9.375 MG / Dextroamphetamine Sulfate 9.375 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197745",
+      "display": "Guanfacine 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "197746",
+      "display": "Guanfacine 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1995461",
+      "display": "24 HR Methylphenidate Hydrochloride 72 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2001564",
+      "display": "BX Rating 24 HR Methylphenidate Hydrochloride 18 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2001565",
+      "display": "BX Rating 24 HR Methylphenidate Hydrochloride 27 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2001566",
+      "display": "BX Rating 24 HR Methylphenidate Hydrochloride 36 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2001568",
+      "display": "BX Rating 24 HR Methylphenidate Hydrochloride 54 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "349591",
+      "display": "atomoxetine 10 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "349592",
+      "display": "atomoxetine 18 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "349593",
+      "display": "atomoxetine 25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "349594",
+      "display": "atomoxetine 40 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "349595",
+      "display": "atomoxetine 60 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "541363",
+      "display": "Amphetamine aspartate 7.5 MG / Amphetamine Sulfate 7.5 MG / Dextroamphetamine saccharate 7.5 MG / Dextroamphetamine Sulfate 7.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "541878",
+      "display": "Amphetamine aspartate 1.25 MG / Amphetamine Sulfate 1.25 MG / Dextroamphetamine saccharate 1.25 MG / Dextroamphetamine Sulfate 1.25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "541892",
+      "display": "Amphetamine aspartate 2.5 MG / Amphetamine Sulfate 2.5 MG / Dextroamphetamine saccharate 2.5 MG / Dextroamphetamine Sulfate 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "577957",
+      "display": "Amphetamine aspartate 3.75 MG / Amphetamine Sulfate 3.75 MG / Dextroamphetamine saccharate 3.75 MG / Dextroamphetamine Sulfate 3.75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "577961",
+      "display": "Amphetamine aspartate 5 MG / Amphetamine Sulfate 5 MG / Dextroamphetamine saccharate 5 MG / Dextroamphetamine Sulfate 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "608139",
+      "display": "atomoxetine 100 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "608143",
+      "display": "atomoxetine 80 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "687043",
+      "display": "Amphetamine aspartate 3.125 MG / Amphetamine Sulfate 3.125 MG / Dextroamphetamine saccharate 3.125 MG / Dextroamphetamine Sulfate 3.125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "753436",
+      "display": "9 HR Methylphenidate 1.11 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "753438",
+      "display": "9 HR Methylphenidate 1.67 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "753440",
+      "display": "9 HR Methylphenidate 2.22 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "753441",
+      "display": "9 HR Methylphenidate 3.33 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854830",
+      "display": "lisdexamfetamine dimesylate 20 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854834",
+      "display": "lisdexamfetamine dimesylate 30 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854838",
+      "display": "lisdexamfetamine dimesylate 40 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854842",
+      "display": "lisdexamfetamine dimesylate 70 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854846",
+      "display": "lisdexamfetamine dimesylate 60 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854850",
+      "display": "lisdexamfetamine dimesylate 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861221",
+      "display": "24 HR Amphetamine aspartate 2.5 MG / Amphetamine Sulfate 2.5 MG / Dextroamphetamine saccharate 2.5 MG / Dextroamphetamine Sulfate 2.5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861223",
+      "display": "24 HR Amphetamine aspartate 3.75 MG / Amphetamine Sulfate 3.75 MG / Dextroamphetamine saccharate 3.75 MG / Dextroamphetamine Sulfate 3.75 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861225",
+      "display": "24 HR Amphetamine aspartate 5 MG / Amphetamine Sulfate 5 MG / Dextroamphetamine saccharate 5 MG / Dextroamphetamine Sulfate 5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861227",
+      "display": "24 HR Amphetamine aspartate 6.25 MG / Amphetamine Sulfate 6.25 MG / Dextroamphetamine saccharate 6.25 MG / Dextroamphetamine Sulfate 6.25 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861232",
+      "display": "24 HR Amphetamine aspartate 7.5 MG / Amphetamine Sulfate 7.5 MG / Dextroamphetamine saccharate 7.5 MG / Dextroamphetamine Sulfate 7.5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861237",
+      "display": "24 HR Amphetamine aspartate 1.25 MG / Amphetamine Sulfate 1.25 MG / Dextroamphetamine saccharate 1.25 MG / Dextroamphetamine Sulfate 1.25 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "862006",
+      "display": "24 HR Guanfacine 1 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "862013",
+      "display": "24 HR Guanfacine 2 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "862019",
+      "display": "24 HR Guanfacine 3 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "862025",
+      "display": "24 HR Guanfacine 4 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884173",
+      "display": "Clonidine Hydrochloride 0.1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884185",
+      "display": "Clonidine Hydrochloride 0.2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884189",
+      "display": "Clonidine Hydrochloride 0.3 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884221",
+      "display": "10 ML Clonidine Hydrochloride 0.1 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884225",
+      "display": "10 ML Clonidine Hydrochloride 0.5 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884385",
+      "display": "Dextroamphetamine Sulfate 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884386",
+      "display": "Dextroamphetamine Sulfate 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884520",
+      "display": "Dextroamphetamine Sulfate 10 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884522",
+      "display": "Dextroamphetamine Sulfate 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884532",
+      "display": "Dextroamphetamine Sulfate 15 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884535",
+      "display": "Dextroamphetamine Sulfate 5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "884684",
+      "display": "Dextroamphetamine Sulfate 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "892791",
+      "display": "Clonidine Hydrochloride 0.025 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899439",
+      "display": "24 HR dexmethylphenidate hydrochloride 10 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899461",
+      "display": "24 HR dexmethylphenidate hydrochloride 15 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899485",
+      "display": "24 HR dexmethylphenidate hydrochloride 20 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899495",
+      "display": "24 HR dexmethylphenidate hydrochloride 30 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899511",
+      "display": "24 HR dexmethylphenidate hydrochloride 5 MG Extended Release Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899518",
+      "display": "dexmethylphenidate hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899548",
+      "display": "dexmethylphenidate hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "899557",
+      "display": "dexmethylphenidate hydrochloride 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "977860",
+      "display": "Methamphetamine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "998671",
+      "display": "168 HR Clonidine 0.00417 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "998675",
+      "display": "168 HR Clonidine 0.00833 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "998679",
+      "display": "168 HR Clonidine 0.0125 MG/HR Transdermal System"
+    } ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1067",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1067",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.198.12.1067"
+  } ],
+  "version": "20170504",
+  "name": "VaricellaZosterAntibodyTest(IgGAntibodyPresence)",
+  "title": "Varicella Zoster Antibody Test (IgG Antibody Presence)",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "15410-4",
+      "display": "Varicella zoster virus IgG Ab [Presence] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19162-7",
+      "display": "Varicella zoster virus IgG Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "41512-5",
+      "display": "Varicella zoster virus IgG Ab [Presence] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42537-1",
+      "display": "Varicella zoster virus IgG Ab [Presence] in Cerebral spinal fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53534-4",
+      "display": "Varicella zoster virus IgG Ab [Presence] in Body fluid by Immunoassay"
+    } ]
+  }
+}

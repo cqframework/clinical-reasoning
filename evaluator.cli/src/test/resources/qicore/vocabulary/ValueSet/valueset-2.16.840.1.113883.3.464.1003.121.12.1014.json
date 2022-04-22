@@ -1,0 +1,45 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.121.12.1014",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.121.12.1014",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.121.12.1014"
+  } ],
+  "version": "20170504",
+  "name": "Height",
+  "title": "Height",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "3137-7",
+      "display": "Body height Measured"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8302-2",
+      "display": "Body height"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8306-3",
+      "display": "Body height --lying"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8307-1",
+      "display": "Body height --preoperative"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8308-9",
+      "display": "Body height --standing"
+    } ]
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.113.12.1047",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1047",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.113.12.1047"
+  } ],
+  "version": "20180310",
+  "name": "EhlersDanlosSyndrome",
+  "title": "Ehlers Danlos Syndrome",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q79.6",
+      "display": "Ehlers-Danlos syndromes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q79.60",
+      "display": "Ehlers-Danlos syndrome, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q79.61",
+      "display": "Classical Ehlers-Danlos syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q79.62",
+      "display": "Hypermobile Ehlers-Danlos syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q79.63",
+      "display": "Vascular Ehlers-Danlos syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q79.69",
+      "display": "Other Ehlers-Danlos syndromes"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "756.83",
+      "display": "Ehlers-Danlos syndrome"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10033001",
+      "display": "Ehlers-Danlos syndrome, non hydroxylysine deficient ocular type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "17025000",
+      "display": "Ehlers-Danlos syndrome, type 4 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "20766005",
+      "display": "Ehlers-Danlos syndrome, type 2 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25606004",
+      "display": "Ehlers-Danlos syndrome, hydroxylysine-deficient (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30652003",
+      "display": "Ehlers-Danlos syndrome, type 3 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31798004",
+      "display": "Corneal fragility keratoglobus, blue sclerae AND joint hypermobility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "398114001",
+      "display": "Ehlers-Danlos syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4170004",
+      "display": "Ehlers-Danlos syndrome, procollagen proteinase resistant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50869007",
+      "display": "Ehlers-Danlos syndrome, type 8 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55711009",
+      "display": "Ehlers-Danlos syndrome, procollagen proteinase deficient (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59399004",
+      "display": "Cutis laxa, x-linked (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67202007",
+      "display": "Ehlers-Danlos syndrome, type 5 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70610001",
+      "display": "Ehlers-Danlos syndrome, recessive type 4 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71322004",
+      "display": "Ehlers-Danlos syndrome, familial joint laxity type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83470009",
+      "display": "Ehlers-Danlos syndrome, type 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83586000",
+      "display": "Ehlers-Danlos syndrome, dysfibronectinemic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86667008",
+      "display": "Ehlers-Danlos syndrome, dominant type 4 (disorder)"
+    } ]
+  }
+}

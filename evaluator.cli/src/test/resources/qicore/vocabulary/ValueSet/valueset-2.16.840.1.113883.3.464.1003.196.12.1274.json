@@ -1,0 +1,175 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1274",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1274",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1274"
+  } ],
+  "version": "20180310",
+  "name": "Atropine",
+  "title": "Atropine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046787",
+      "display": "Atropine Sulfate 0.00388 MG/ML / Hyoscyamine Sulfate 0.0207 MG/ML / Phenobarbital 3.24 MG/ML / Scopolamine Hydrobromide 0.0013 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046815",
+      "display": "Atropine Sulfate 0.0194 MG / Hyoscyamine Sulfate 0.1037 MG / Phenobarbital 16.2 MG / Scopolamine Hydrobromide 0.0065 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046820",
+      "display": "Atropine Sulfate 0.03 MG / Benzoic Acid 4.5 MG / Hyoscyamine Sulfate 0.03 MG / Methenamine 40.8 MG / Methylene blue 5.4 MG / phenyl salicylate 18.1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046997",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.311 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048078",
+      "display": "Atropine Sulfate 0.0194 MG / Hyoscyamine Sulfate 0.1037 MG / Scopolamine Hydrobromide 0.0065 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048124",
+      "display": "12 HR Atropine Sulfate 0.04 MG / Chlorpheniramine Maleate 8 MG / Hyoscyamine Sulfate 0.19 MG / Pseudoephedrine Hydrochloride 90 MG / Scopolamine Hydrobromide 0.01 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048147",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.3111 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190536",
+      "display": "0.3 ML Atropine Sulfate 0.833 MG/ML Auto-Injector"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190538",
+      "display": "0.7 ML Atropine Sulfate 0.714 MG/ML Auto-Injector"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190540",
+      "display": "0.7 ML Atropine Sulfate 1.43 MG/ML Auto-Injector"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190542",
+      "display": "0.7 ML Atropine Sulfate 2.86 MG/ML Auto-Injector"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190546",
+      "display": "10 ML Atropine Sulfate 0.1 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190551",
+      "display": "5 ML Atropine Sulfate 0.05 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190552",
+      "display": "5 ML Atropine Sulfate 0.1 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190556",
+      "display": "5 ML Atropine Sulfate 0.4 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190568",
+      "display": "Atropine Sulfate 0.005 MG/ML / Diphenoxylate Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190572",
+      "display": "Atropine Sulfate 0.025 MG / Diphenoxylate Hydrochloride 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190692",
+      "display": "Atropine Sulfate 0.4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190738",
+      "display": "Atropine Sulfate 0.025 MG / Difenoxin hydrochloride 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190748",
+      "display": "5 ML Atropine Sulfate 0.14 MG/ML / Edrophonium Chloride 10 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190757",
+      "display": "Atropine Sulfate 0.1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190764",
+      "display": "Atropine Sulfate 0.3 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190776",
+      "display": "Atropine Sulfate 0.4 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190783",
+      "display": "Atropine Sulfate 0.6 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190787",
+      "display": "Atropine Sulfate 0.6 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190793",
+      "display": "0.5 ML Atropine Sulfate 0.8 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190795",
+      "display": "1 ML Atropine Sulfate 1 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190798",
+      "display": "Atropine Sulfate 1.2 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190800",
+      "display": "Atropine Sulfate 1.25 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1666781",
+      "display": "1 ML Atropine Sulfate 0.4 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "727415",
+      "display": "2.7 ML Atropine 0.778 MG/ML / Pralidoxime chloride 222 MG/ML Auto-Injector"
+    } ]
+  }
+}

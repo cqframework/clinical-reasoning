@@ -1,0 +1,210 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.1515",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.1515",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.1515"
+  } ],
+  "version": "20200307",
+  "name": "DietaryRecommendations",
+  "title": "Dietary Recommendations",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S9452",
+      "display": "Nutrition classes, non-physician provider, per session"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S9470",
+      "display": "Nutritional counseling, dietitian visit"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Z71.3",
+      "display": "Dietary counseling and surveillance"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103699006",
+      "display": "Patient referral to dietitian (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11816003",
+      "display": "Diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182922004",
+      "display": "Dietary regime (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182954008",
+      "display": "Dietary prophylaxis (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182955009",
+      "display": "Low carbohydrate diet - prophylaxis (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182956005",
+      "display": "Low calorie diet - prophylaxis (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182960008",
+      "display": "Unsaturated fat diet - prophylaxis (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183061003",
+      "display": "Low fat diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183065007",
+      "display": "Low carbohydrate diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183070000",
+      "display": "Vegetarian diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183071001",
+      "display": "Vegan diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281085002",
+      "display": "Sugar-free diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284071006",
+      "display": "Dietary treatment for disorder (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284352003",
+      "display": "Obesity diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "289176001",
+      "display": "Recommendation to change sodium intake (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "289177005",
+      "display": "Recommendation to change potassium intake (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304491008",
+      "display": "Dietary education for disorder (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306163007",
+      "display": "Referral to dietetics service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "361231003",
+      "display": "Prescribed dietary intake (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370847001",
+      "display": "Dietary needs education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386464006",
+      "display": "Prescribed diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410114009",
+      "display": "Dietary compliance education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410171007",
+      "display": "Nutrition care education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410177006",
+      "display": "Special diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410270001",
+      "display": "Nutritionist education, guidance, and counseling (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413315001",
+      "display": "Nutrition / feeding management (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418995006",
+      "display": "Feeding regime (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424753004",
+      "display": "Dietary management education, guidance, and counseling (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "437211000124103",
+      "display": "Potassium modified diet (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "437231000124109",
+      "display": "Sodium modified diet (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "437391000124102",
+      "display": "Increased potassium diet (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "437421000124105",
+      "display": "Decreased sodium diet (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "438961000124108",
+      "display": "Potassium supplement therapy (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443288003",
+      "display": "Lifestyle education regarding diet (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61310001",
+      "display": "Nutrition education (procedure)"
+    } ]
+  }
+}

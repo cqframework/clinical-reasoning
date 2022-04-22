@@ -1,0 +1,120 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.367",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.367",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.367"
+  } ],
+  "version": "20200306",
+  "name": "AtrioventricularBlock",
+  "title": "Atrioventricular Block",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I44.1",
+      "display": "Atrioventricular block, second degree"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I44.2",
+      "display": "Atrioventricular block, complete"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195042002",
+      "display": "Second degree atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233917008",
+      "display": "Atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233918003",
+      "display": "Postoperative complete heart block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "251114004",
+      "display": "Intermittent second degree atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27885002",
+      "display": "Complete atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28189009",
+      "display": "Mobitz type II atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "283645003",
+      "display": "Lev's syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54016002",
+      "display": "Mobitz type I incomplete atrioventricular block (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I44.1",
+      "display": "Atrioventricular block, second degree"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I44.2",
+      "display": "Atrioventricular block, complete"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195042002",
+      "display": "Second degree atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233917008",
+      "display": "Atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233918003",
+      "display": "Postoperative complete heart block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "251114004",
+      "display": "Intermittent second degree atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27885002",
+      "display": "Complete atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28189009",
+      "display": "Mobitz type II atrioventricular block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "283645003",
+      "display": "Lev's syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54016002",
+      "display": "Mobitz type I incomplete atrioventricular block (disorder)"
+    } ]
+  }
+}

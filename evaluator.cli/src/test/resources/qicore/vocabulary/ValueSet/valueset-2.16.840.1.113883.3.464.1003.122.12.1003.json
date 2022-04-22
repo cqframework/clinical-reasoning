@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.122.12.1003",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.122.12.1003",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.122.12.1003"
+  } ],
+  "version": "20170504",
+  "name": "Ambulatory",
+  "title": "Ambulatory",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "255327002",
+      "display": "Ambulatory (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440655000",
+      "display": "Outpatient environment (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722171005",
+      "display": "Diagnostic institution (environment)"
+    } ]
+  }
+}

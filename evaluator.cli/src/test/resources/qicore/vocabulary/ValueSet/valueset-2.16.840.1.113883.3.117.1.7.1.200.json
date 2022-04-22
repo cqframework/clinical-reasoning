@@ -1,0 +1,275 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.200",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.200",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.200"
+  } ],
+  "version": "20200305",
+  "name": "AnticoagulantTherapy",
+  "title": "Anticoagulant Therapy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1037045",
+      "display": "dabigatran etexilate 150 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1037179",
+      "display": "dabigatran etexilate 75 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1114198",
+      "display": "rivaroxaban 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1232082",
+      "display": "rivaroxaban 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1232086",
+      "display": "rivaroxaban 20 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1361574",
+      "display": "heparin sodium, porcine 20000 UNT/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1361615",
+      "display": "heparin sodium, porcine 5000 UNT/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1364435",
+      "display": "apixaban 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1364445",
+      "display": "apixaban 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1549682",
+      "display": "{42 (rivaroxaban 15 MG Oral Tablet) / 9 (rivaroxaban 20 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1599543",
+      "display": "edoxaban 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1599551",
+      "display": "edoxaban 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1599555",
+      "display": "edoxaban 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1658717",
+      "display": "250 ML heparin sodium, porcine 100 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659195",
+      "display": "500 ML heparin sodium, porcine 50 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659197",
+      "display": "250 ML heparin sodium, porcine 50 UNT/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1723476",
+      "display": "dabigatran etexilate 110 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1804735",
+      "display": "50 ML argatroban 1 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1804737",
+      "display": "125 ML argatroban 1 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1804738",
+      "display": "250 ML argatroban 1 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1992427",
+      "display": "{74 (apixaban 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2059015",
+      "display": "rivaroxaban 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "308351",
+      "display": "2.5 ML argatroban 100 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854238",
+      "display": "0.6 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854241",
+      "display": "0.8 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854245",
+      "display": "0.8 ML Enoxaparin sodium 150 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854248",
+      "display": "1 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854252",
+      "display": "1 ML Enoxaparin sodium 150 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "854255",
+      "display": "Enoxaparin sodium 100 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855288",
+      "display": "Warfarin Sodium 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855296",
+      "display": "Warfarin Sodium 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855302",
+      "display": "Warfarin Sodium 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855312",
+      "display": "Warfarin Sodium 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855318",
+      "display": "Warfarin Sodium 3 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855324",
+      "display": "Warfarin Sodium 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855332",
+      "display": "Warfarin Sodium 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855338",
+      "display": "Warfarin Sodium 6 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "855344",
+      "display": "Warfarin Sodium 7.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861356",
+      "display": "0.8 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861360",
+      "display": "0.5 ML Fondaparinux sodium 5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861363",
+      "display": "0.4 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861365",
+      "display": "0.6 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978725",
+      "display": "0.2 ML Dalteparin Sodium 12500 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978733",
+      "display": "0.2 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978736",
+      "display": "0.3 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978740",
+      "display": "0.5 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978744",
+      "display": "0.6 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978746",
+      "display": "0.72 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978755",
+      "display": "1 ML Dalteparin Sodium 10000 UNT/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978759",
+      "display": "Dalteparin Sodium 10000 UNT/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978777",
+      "display": "Dalteparin Sodium 25000 UNT/ML Injectable Solution"
+    } ]
+  }
+}

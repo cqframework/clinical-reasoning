@@ -1,0 +1,65 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1218",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1218",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1218"
+  } ],
+  "version": "20170504",
+  "name": "InfluenzaVaccine",
+  "title": "Influenza Vaccine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "135",
+      "display": "influenza, high dose seasonal, preservative-free"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "140",
+      "display": "Influenza, seasonal, injectable, preservative free"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "141",
+      "display": "Influenza, seasonal, injectable"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "150",
+      "display": "Influenza, injectable, quadrivalent, preservative free"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "153",
+      "display": "Influenza, injectable, Madin Darby Canine Kidney, preservative free"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "155",
+      "display": "Seasonal, trivalent, recombinant, injectable influenza vaccine, preservative free"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "158",
+      "display": "influenza, injectable, quadrivalent, contains preservative"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "161",
+      "display": "Influenza, injectable,quadrivalent, preservative free, pediatric"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "88",
+      "display": "influenza virus vaccine, unspecified formulation"
+    } ]
+  }
+}

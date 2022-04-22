@@ -1,0 +1,245 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.113.12.1049",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1049",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.113.12.1049"
+  } ],
+  "version": "20180310",
+  "name": "Osteopenia",
+  "title": "Osteopenia",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.80",
+      "display": "Other specified disorders of bone density and structure, unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.811",
+      "display": "Other specified disorders of bone density and structure, right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.812",
+      "display": "Other specified disorders of bone density and structure, left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.819",
+      "display": "Other specified disorders of bone density and structure, unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.821",
+      "display": "Other specified disorders of bone density and structure, right upper arm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.822",
+      "display": "Other specified disorders of bone density and structure, left upper arm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.829",
+      "display": "Other specified disorders of bone density and structure, unspecified upper arm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.831",
+      "display": "Other specified disorders of bone density and structure, right forearm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.832",
+      "display": "Other specified disorders of bone density and structure, left forearm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.839",
+      "display": "Other specified disorders of bone density and structure, unspecified forearm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.841",
+      "display": "Other specified disorders of bone density and structure, right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.842",
+      "display": "Other specified disorders of bone density and structure, left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.849",
+      "display": "Other specified disorders of bone density and structure, unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.851",
+      "display": "Other specified disorders of bone density and structure, right thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.852",
+      "display": "Other specified disorders of bone density and structure, left thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.859",
+      "display": "Other specified disorders of bone density and structure, unspecified thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.861",
+      "display": "Other specified disorders of bone density and structure, right lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.862",
+      "display": "Other specified disorders of bone density and structure, left lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.869",
+      "display": "Other specified disorders of bone density and structure, unspecified lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.871",
+      "display": "Other specified disorders of bone density and structure, right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.872",
+      "display": "Other specified disorders of bone density and structure, left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.879",
+      "display": "Other specified disorders of bone density and structure, unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.88",
+      "display": "Other specified disorders of bone density and structure, other site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M85.89",
+      "display": "Other specified disorders of bone density and structure, multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X0",
+      "display": "Other specified disorders of bone, multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X1",
+      "display": "Other specified disorders of bone, shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X2",
+      "display": "Other specified disorders of bone, upper arm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X3",
+      "display": "Other specified disorders of bone, forearm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X4",
+      "display": "Other specified disorders of bone, hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X5",
+      "display": "Other specified disorders of bone, thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X6",
+      "display": "Other specified disorders of bone, lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X7",
+      "display": "Other specified disorders of bone, ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X8",
+      "display": "Other specified disorders of bone, other site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M89.8X9",
+      "display": "Other specified disorders of bone, unspecified site"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "733.90",
+      "display": "Disorder of bone and cartilage, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "733.99",
+      "display": "Other disorders of bone and cartilage"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "276703007",
+      "display": "Osteopenia of prematurity (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312894000",
+      "display": "Osteopenia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37605006",
+      "display": "Senile osteopenia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40308000",
+      "display": "Steroid-induced osteopenia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735613004",
+      "display": "Premenopausal idiopathic osteopenia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735614005",
+      "display": "Osteopenia following menopause (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735615006",
+      "display": "Osteopenia due to disuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735616007",
+      "display": "Osteopenia caused by drug (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78441005",
+      "display": "Osteopenia (morphologic abnormality)"
+    } ]
+  }
+}

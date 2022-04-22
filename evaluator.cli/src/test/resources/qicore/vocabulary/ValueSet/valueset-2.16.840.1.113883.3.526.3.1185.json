@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1185",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1185",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1185"
+  } ],
+  "version": "20170504",
+  "name": "PreviousReceiptofInfluenzaVaccine",
+  "title": "Previous Receipt of Influenza Vaccine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185900003",
+      "display": "Has influenza vaccination at home (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185901004",
+      "display": "Has influenza vaccination at surgery (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185902006",
+      "display": "Has influenza vaccination at hospital (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416928007",
+      "display": "Has influenza vaccination at work (finding)"
+    } ]
+  }
+}

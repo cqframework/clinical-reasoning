@@ -1,0 +1,1065 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.12.1046",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1046",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.101.12.1046"
+  } ],
+  "version": "20170504",
+  "name": "Referral",
+  "title": "Referral",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103696004",
+      "display": "Patient referral to specialist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103697008",
+      "display": "Patient referral for dental care (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103698003",
+      "display": "Patient referral to non-physician provider (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103699006",
+      "display": "Patient referral to dietitian (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103704003",
+      "display": "Patient referral to sex therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183515008",
+      "display": "Referral to physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183517000",
+      "display": "Referral to pediatrician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183528001",
+      "display": "Referral to psychiatrist for the elderly mentally ill (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183529009",
+      "display": "Referral to oncologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183530004",
+      "display": "Referral to diabetologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183541002",
+      "display": "Referral to surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183555005",
+      "display": "Burns referral (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183557002",
+      "display": "Referral to cardiothoracic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183561008",
+      "display": "Referral to general practitioner (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183567007",
+      "display": "Referral to hematologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183569005",
+      "display": "Refer to terminal care consult (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183583007",
+      "display": "Refer to mental health worker (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183591003",
+      "display": "Refer to partner (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183878008",
+      "display": "Private referral to general surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183879000",
+      "display": "Private referral to ophthalmologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183880002",
+      "display": "Private referral to ear, nose and throat surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183881003",
+      "display": "Private referral to orthopedic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183882005",
+      "display": "Private referral to neurosurgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183884006",
+      "display": "Private referral to pediatric surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183885007",
+      "display": "Private referral to obstetrician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183886008",
+      "display": "Private referral to gynecologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183887004",
+      "display": "Private referral to plastic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183888009",
+      "display": "Private referral to oral surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183889001",
+      "display": "Private referral to urologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183890005",
+      "display": "Private referral to thoracic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183891009",
+      "display": "Private referral to vascular surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183892002",
+      "display": "Private referral to maxillofacial surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183893007",
+      "display": "Private referral cardiothoracic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183894001",
+      "display": "Private referral to physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183895000",
+      "display": "Private referral to general physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183896004",
+      "display": "Private referral to pediatrician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183897008",
+      "display": "Private referral to dermatologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183899006",
+      "display": "Private referral to cardiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183900001",
+      "display": "Private referral to immunologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183901002",
+      "display": "Private referral to neurologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183902009",
+      "display": "Private referral to geriatrician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183903004",
+      "display": "Private referral to gastroenterologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183904005",
+      "display": "Private referral to psychiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183905006",
+      "display": "Private referral to venereologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183906007",
+      "display": "Private referral to rheumatologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183907003",
+      "display": "Private referral to chest physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183908008",
+      "display": "Private referral to psychogeriatrician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183909000",
+      "display": "Private referral to oncologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183910005",
+      "display": "Private referral to diabetologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183911009",
+      "display": "Private referral to radiotherapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183913007",
+      "display": "Private referral to geneticist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183914001",
+      "display": "Private referral to anesthetist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183915000",
+      "display": "Private referral to endocrinologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183916004",
+      "display": "Private referral to nephrologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266747000",
+      "display": "Referral to private doctor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "274410002",
+      "display": "Dental referral - child (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306241009",
+      "display": "Referral to audiological physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306242002",
+      "display": "Referral to audiological scientist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306243007",
+      "display": "Referral to community doctor in audiology (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306245000",
+      "display": "Referral to hearing therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306247008",
+      "display": "Referral to pediatric audiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306250006",
+      "display": "Referral to genetic counselor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306252003",
+      "display": "Referral to mental health counselor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306253008",
+      "display": "Referral to doctor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306254002",
+      "display": "Referral to Accident and Emergency doctor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306255001",
+      "display": "Referral to anesthetist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306256000",
+      "display": "Referral to radiotherapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306257009",
+      "display": "Referral to family planning doctor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306258004",
+      "display": "Referral to intensive care specialist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306259007",
+      "display": "Referral to adult intensive care specialist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306260002",
+      "display": "Referral to pediatric intensive care specialist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306261003",
+      "display": "Referral to community pediatrician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306262005",
+      "display": "Referral to neonatologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306263000",
+      "display": "Referral to pediatric neurologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306264006",
+      "display": "Referral to pediatric oncologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306265007",
+      "display": "Referral to pain management specialist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306266008",
+      "display": "Referral to pathologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306267004",
+      "display": "Referral to blood transfusion doctor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306268009",
+      "display": "Referral to chemical pathologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306269001",
+      "display": "Referral to general pathologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306270000",
+      "display": "Referral to medical microbiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306271001",
+      "display": "Referral to neuropathologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306272008",
+      "display": "Referral to clinical allergist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306273003",
+      "display": "Referral to chest physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306275005",
+      "display": "Referral to respiratory physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306276006",
+      "display": "Referral to clinical neurophysiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306277002",
+      "display": "Referral to clinical physiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306278007",
+      "display": "Referral to endocrinologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306279004",
+      "display": "Referral to clinical geneticist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306280001",
+      "display": "Referral to clinical cytogeneticist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306281002",
+      "display": "Referral to clinical molecular geneticist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306282009",
+      "display": "Referral to genitourinary physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306284005",
+      "display": "Referral to infectious diseases physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306285006",
+      "display": "Referral to medical ophthalmologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306286007",
+      "display": "Referral to nephrologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306287003",
+      "display": "Referral to nuclear medicine physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306288008",
+      "display": "Referral to palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306289000",
+      "display": "Referral to rehabilitation physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306290009",
+      "display": "Referral to rheumatologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306291008",
+      "display": "Referral to child and adolescent psychiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306293006",
+      "display": "Referral to liaison psychiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306294000",
+      "display": "Referral to psychiatrist for mental handicap (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306295004",
+      "display": "Referral to rehabilitation psychiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306296003",
+      "display": "Referral to public health physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306297007",
+      "display": "Referral to obstetrician and gynecologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306298002",
+      "display": "Referral to occupational health physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306299005",
+      "display": "Referral to radiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306300002",
+      "display": "Referral to breast surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306301003",
+      "display": "Referral to thoracic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306302005",
+      "display": "Referral to cardiac surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306303000",
+      "display": "Referral to dental surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306304006",
+      "display": "Referral to orthodontist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306305007",
+      "display": "Referral to pediatric dentist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306306008",
+      "display": "Referral to restorative dentist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306307004",
+      "display": "Referral to endocrine surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306308009",
+      "display": "Referral to gastrointestinal surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306309001",
+      "display": "Referral to general gastrointestinal surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306310006",
+      "display": "Referral to upper gastrointestinal surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306311005",
+      "display": "Referral to colorectal surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306312003",
+      "display": "Referral to hand surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306313008",
+      "display": "Referral to hepatobiliary surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306314002",
+      "display": "Referral to pancreatic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306315001",
+      "display": "Referral to plastic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306316000",
+      "display": "Referral to transplant surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306317009",
+      "display": "Referral to trauma surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306318004",
+      "display": "Referral to urologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306320001",
+      "display": "Referral to clinical nurse specialist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306338003",
+      "display": "Referral to nurse practitioner (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306341007",
+      "display": "Referral to community-based midwife (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306342000",
+      "display": "Referral to hospital-based midwife (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306343005",
+      "display": "Referral to psychotherapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306351008",
+      "display": "Referral to community-based podiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306352001",
+      "display": "Referral to hospital-based podiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306353006",
+      "display": "Referral to community-based dietitian (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306354000",
+      "display": "Referral to hospital-based dietitian (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306355004",
+      "display": "Referral to community-based occupational therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306356003",
+      "display": "Referral to social services department occupational therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306357007",
+      "display": "Referral to hospital-based occupational therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306358002",
+      "display": "Referral to community-based physiotherapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306359005",
+      "display": "Referral to hospital-based physiotherapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306360000",
+      "display": "Referral to community-based speech and language therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306361001",
+      "display": "Referral to hospital-based speech and language therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306736002",
+      "display": "Referral to general dental surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307063001",
+      "display": "Referral to clinical hematologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307777008",
+      "display": "Referral to vascular surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308439003",
+      "display": "Referral to midwife (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308447003",
+      "display": "Referral to physiotherapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308449000",
+      "display": "Referral to chiropractor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308450000",
+      "display": "Referral to osteopath (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308451001",
+      "display": "Referral to podiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308452008",
+      "display": "Referral to speech and language therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308453003",
+      "display": "Referral to occupational therapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308454009",
+      "display": "Referral to orthoptist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308455005",
+      "display": "Referral to orthotist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308456006",
+      "display": "Referral to audiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308459004",
+      "display": "Referral to psychologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308465004",
+      "display": "Referral to optometrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308469005",
+      "display": "Referral to geneticist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308470006",
+      "display": "Referral to general physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308471005",
+      "display": "Referral to cardiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308472003",
+      "display": "Referral to dermatologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308473008",
+      "display": "Referral to clinical immunologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308474002",
+      "display": "Referral to neurologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308475001",
+      "display": "Referral to care of the elderly physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308476000",
+      "display": "Referral to gastroenterologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308477009",
+      "display": "Referral to psychiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308478004",
+      "display": "Referral to general surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308479007",
+      "display": "Referral to ophthalmologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308480005",
+      "display": "Referral to ear, nose and throat surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308481009",
+      "display": "Referral to orthopedic surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308482002",
+      "display": "Referral to neurosurgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308483007",
+      "display": "Referral to pediatric surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308484001",
+      "display": "Referral to obstetrician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308485000",
+      "display": "Referral to gynecologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309046007",
+      "display": "Private referral to surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309623006",
+      "display": "Child referral to optician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309626003",
+      "display": "Child referral - school psychologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309627007",
+      "display": "Child referral - clinical psychologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309629005",
+      "display": "Child referral - community dentist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "310515004",
+      "display": "Referral to medical oncologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312487009",
+      "display": "Referral to pediatric cardiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312488004",
+      "display": "Referral to community child health doctor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "390866009",
+      "display": "Referral to mental health team (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401266006",
+      "display": "Referral to drug abuse counselor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406158007",
+      "display": "Referral to oral surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406159004",
+      "display": "Referral to maxillofacial surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408285001",
+      "display": "Referral to pediatric dietitian (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415277000",
+      "display": "Referral to pediatric endocrinologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416116000",
+      "display": "Referral to home registered dietitian (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416999007",
+      "display": "Private referral to physiotherapist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425971006",
+      "display": "Referral to pediatric pulmonologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428441000124100",
+      "display": "Referral to nurse anesthetist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428451000124103",
+      "display": "Referral to physician assistant (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428461000124101",
+      "display": "Referral to nutrition professional (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428471000124108",
+      "display": "Referral to clinical psychologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428481000124106",
+      "display": "Referral to clinical social worker (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428491000124109",
+      "display": "Referral to anesthesiologist assistant (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428541000124104",
+      "display": "Referral to nurse midwife (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429365000",
+      "display": "Referral to pediatric gastroenterologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "433151006",
+      "display": "Referral to educational psychologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "448761000124106",
+      "display": "Referral to endovascular specialist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "448771000124104",
+      "display": "Referral to prosthetist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54395008",
+      "display": "Patient referral for medical consultation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698563003",
+      "display": "Referral to bariatric surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698599008",
+      "display": "Private referral to breast surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703974003",
+      "display": "Private referral to colorectal surgeon (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703975002",
+      "display": "Private referral to podiatrist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703976001",
+      "display": "Private referral to radiologist (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "716634006",
+      "display": "Referral to neurological physiotherapist (procedure)"
+    } ]
+  }
+}

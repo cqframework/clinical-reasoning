@@ -1,0 +1,140 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.199.12.1036",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.199.12.1036",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.199.12.1036"
+  } ],
+  "version": "20180310",
+  "name": "ChronicMalnutrition",
+  "title": "Chronic Malnutrition",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F50.00",
+      "display": "Anorexia nervosa, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F50.01",
+      "display": "Anorexia nervosa, restricting type"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F50.02",
+      "display": "Anorexia nervosa, binge eating/purging type"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F50.2",
+      "display": "Bulimia nervosa"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F50.82",
+      "display": "Avoidant/restrictive food intake disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F50.9",
+      "display": "Eating disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "R63.0",
+      "display": "Anorexia"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "307.1",
+      "display": "Anorexia nervosa"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "307.50",
+      "display": "Eating disorder, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "307.51",
+      "display": "Bulimia nervosa"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "307.54",
+      "display": "Psychogenic vomiting"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "307.59",
+      "display": "Other disorders of eating"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "783.0",
+      "display": "Anorexia"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231522009",
+      "display": "Atypical anorexia nervosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231523004",
+      "display": "Atypical bulimia nervosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32721004",
+      "display": "Bulimia nervosa, purging type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427469003",
+      "display": "Eating disorder in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439960005",
+      "display": "Binge eating disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56882008",
+      "display": "Anorexia nervosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59645001",
+      "display": "Bulimia nervosa, nonpurging type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63393005",
+      "display": "Anorexia nervosa, binge-eating purging type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72366004",
+      "display": "Eating disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77675002",
+      "display": "Anorexia nervosa, restricting type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78004001",
+      "display": "Bulimia nervosa (disorder)"
+    } ]
+  }
+}

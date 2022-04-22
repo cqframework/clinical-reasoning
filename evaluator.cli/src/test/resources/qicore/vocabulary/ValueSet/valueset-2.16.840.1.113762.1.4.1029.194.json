@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1029.194",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1029.194",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1029.194"
+  } ],
+  "version": "20200304",
+  "name": "BirthWeight",
+  "title": "Birth Weight",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "56056-5",
+      "display": "Birth weight - Reported"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "56092-0",
+      "display": "Birth weight GNWCH"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "56093-8",
+      "display": "Birth weight NVSS"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8339-4",
+      "display": "Birth weight Measured"
+    } ]
+  }
+}

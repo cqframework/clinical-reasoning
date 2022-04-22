@@ -1,0 +1,1885 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.109.12.1018",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.109.12.1018",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.109.12.1018"
+  } ],
+  "version": "20170504",
+  "name": "GlomerulonephritisandNephroticSyndrome",
+  "title": "Glomerulonephritis and Nephrotic Syndrome",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.0",
+      "display": "Acute nephritic syndrome with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.1",
+      "display": "Acute nephritic syndrome with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.2",
+      "display": "Acute nephritic syndrome with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.3",
+      "display": "Acute nephritic syndrome with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.4",
+      "display": "Acute nephritic syndrome with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.5",
+      "display": "Acute nephritic syndrome with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.6",
+      "display": "Acute nephritic syndrome with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.7",
+      "display": "Acute nephritic syndrome with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.8",
+      "display": "Acute nephritic syndrome with other morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N00.9",
+      "display": "Acute nephritic syndrome with unspecified morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.0",
+      "display": "Rapidly progressive nephritic syndrome with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.1",
+      "display": "Rapidly progressive nephritic syndrome with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.2",
+      "display": "Rapidly progressive nephritic syndrome with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.3",
+      "display": "Rapidly progressive nephritic syndrome with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.4",
+      "display": "Rapidly progressive nephritic syndrome with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.5",
+      "display": "Rapidly progressive nephritic syndrome with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.6",
+      "display": "Rapidly progressive nephritic syndrome with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.7",
+      "display": "Rapidly progressive nephritic syndrome with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.8",
+      "display": "Rapidly progressive nephritic syndrome with other morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N01.9",
+      "display": "Rapidly progressive nephritic syndrome with unspecified morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.0",
+      "display": "Recurrent and persistent hematuria with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.1",
+      "display": "Recurrent and persistent hematuria with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.2",
+      "display": "Recurrent and persistent hematuria with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.3",
+      "display": "Recurrent and persistent hematuria with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.4",
+      "display": "Recurrent and persistent hematuria with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.5",
+      "display": "Recurrent and persistent hematuria with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.6",
+      "display": "Recurrent and persistent hematuria with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.7",
+      "display": "Recurrent and persistent hematuria with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.8",
+      "display": "Recurrent and persistent hematuria with other morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N02.9",
+      "display": "Recurrent and persistent hematuria with unspecified morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.0",
+      "display": "Chronic nephritic syndrome with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.1",
+      "display": "Chronic nephritic syndrome with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.2",
+      "display": "Chronic nephritic syndrome with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.3",
+      "display": "Chronic nephritic syndrome with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.4",
+      "display": "Chronic nephritic syndrome with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.5",
+      "display": "Chronic nephritic syndrome with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.6",
+      "display": "Chronic nephritic syndrome with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.7",
+      "display": "Chronic nephritic syndrome with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.8",
+      "display": "Chronic nephritic syndrome with other morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N03.9",
+      "display": "Chronic nephritic syndrome with unspecified morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.0",
+      "display": "Nephrotic syndrome with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.1",
+      "display": "Nephrotic syndrome with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.2",
+      "display": "Nephrotic syndrome with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.3",
+      "display": "Nephrotic syndrome with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.4",
+      "display": "Nephrotic syndrome with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.5",
+      "display": "Nephrotic syndrome with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.6",
+      "display": "Nephrotic syndrome with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.7",
+      "display": "Nephrotic syndrome with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.8",
+      "display": "Nephrotic syndrome with other morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N04.9",
+      "display": "Nephrotic syndrome with unspecified morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.0",
+      "display": "Unspecified nephritic syndrome with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.1",
+      "display": "Unspecified nephritic syndrome with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.2",
+      "display": "Unspecified nephritic syndrome with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.3",
+      "display": "Unspecified nephritic syndrome with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.4",
+      "display": "Unspecified nephritic syndrome with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.5",
+      "display": "Unspecified nephritic syndrome with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.6",
+      "display": "Unspecified nephritic syndrome with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.7",
+      "display": "Unspecified nephritic syndrome with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.8",
+      "display": "Unspecified nephritic syndrome with other morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N05.9",
+      "display": "Unspecified nephritic syndrome with unspecified morphologic changes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.0",
+      "display": "Isolated proteinuria with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.1",
+      "display": "Isolated proteinuria with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.2",
+      "display": "Isolated proteinuria with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.3",
+      "display": "Isolated proteinuria with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.4",
+      "display": "Isolated proteinuria with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.5",
+      "display": "Isolated proteinuria with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.6",
+      "display": "Isolated proteinuria with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.7",
+      "display": "Isolated proteinuria with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.8",
+      "display": "Isolated proteinuria with other morphologic lesion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N06.9",
+      "display": "Isolated proteinuria with unspecified morphologic lesion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.0",
+      "display": "Hereditary nephropathy, not elsewhere classified with minor glomerular abnormality"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.1",
+      "display": "Hereditary nephropathy, not elsewhere classified with focal and segmental glomerular lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.2",
+      "display": "Hereditary nephropathy, not elsewhere classified with diffuse membranous glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.3",
+      "display": "Hereditary nephropathy, not elsewhere classified with diffuse mesangial proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.4",
+      "display": "Hereditary nephropathy, not elsewhere classified with diffuse endocapillary proliferative glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.5",
+      "display": "Hereditary nephropathy, not elsewhere classified with diffuse mesangiocapillary glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.6",
+      "display": "Hereditary nephropathy, not elsewhere classified with dense deposit disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.7",
+      "display": "Hereditary nephropathy, not elsewhere classified with diffuse crescentic glomerulonephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.8",
+      "display": "Hereditary nephropathy, not elsewhere classified with other morphologic lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N07.9",
+      "display": "Hereditary nephropathy, not elsewhere classified with unspecified morphologic lesions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N08",
+      "display": "Glomerular disorders in diseases classified elsewhere"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N14.0",
+      "display": "Analgesic nephropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N14.1",
+      "display": "Nephropathy induced by other drugs, medicaments and biological substances"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N14.2",
+      "display": "Nephropathy induced by unspecified drug, medicament or biological substance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N14.3",
+      "display": "Nephropathy induced by heavy metals"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N14.4",
+      "display": "Toxic nephropathy, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N25.0",
+      "display": "Renal osteodystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N25.1",
+      "display": "Nephrogenic diabetes insipidus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N25.81",
+      "display": "Secondary hyperparathyroidism of renal origin"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N25.89",
+      "display": "Other disorders resulting from impaired renal tubular function"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N25.9",
+      "display": "Disorder resulting from impaired renal tubular function, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N26.1",
+      "display": "Atrophy of kidney (terminal)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N26.2",
+      "display": "Page kidney"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N26.9",
+      "display": "Renal sclerosis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q60.0",
+      "display": "Renal agenesis, unilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q60.1",
+      "display": "Renal agenesis, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q60.2",
+      "display": "Renal agenesis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q60.3",
+      "display": "Renal hypoplasia, unilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q60.4",
+      "display": "Renal hypoplasia, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q60.5",
+      "display": "Renal hypoplasia, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q60.6",
+      "display": "Potter's syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.00",
+      "display": "Congenital renal cyst, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.01",
+      "display": "Congenital single renal cyst"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.02",
+      "display": "Congenital multiple renal cysts"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.11",
+      "display": "Cystic dilatation of collecting ducts"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.19",
+      "display": "Other polycystic kidney, infantile type"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.2",
+      "display": "Polycystic kidney, adult type"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.3",
+      "display": "Polycystic kidney, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.4",
+      "display": "Renal dysplasia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.5",
+      "display": "Medullary cystic kidney"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.8",
+      "display": "Other cystic kidney diseases"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q61.9",
+      "display": "Cystic kidney disease, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "580.4",
+      "display": "Acute glomerulonephritis with lesion of rapidly progressive glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "580.81",
+      "display": "Acute glomerulonephritis in diseases classified elsewhere"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "580.89",
+      "display": "Acute glomerulonephritis with other specified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "580.9",
+      "display": "Acute glomerulonephritis with unspecified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "581.0",
+      "display": "Nephrotic syndrome with lesion of proliferative glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "581.1",
+      "display": "Nephrotic syndrome with lesion of membranous glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "581.2",
+      "display": "Nephrotic syndrome with lesion of membranoproliferative glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "581.3",
+      "display": "Nephrotic syndrome with lesion of minimal change glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "581.81",
+      "display": "Nephrotic syndrome in diseases classified elsewhere"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "581.89",
+      "display": "Nephrotic syndrome with other specified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "581.9",
+      "display": "Nephrotic syndrome with unspecified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "582.0",
+      "display": "Chronic glomerulonephritis with lesion of proliferative glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "582.1",
+      "display": "Chronic glomerulonephritis with lesion of membranous glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "582.2",
+      "display": "Chronic glomerulonephritis with lesion of membranoproliferative glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "582.4",
+      "display": "Chronic glomerulonephritis with lesion of rapidly progressive glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "582.81",
+      "display": "Chronic glomerulonephritis in diseases classified elsewhere"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "582.89",
+      "display": "Chronic glomerulonephritis with other specified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "582.9",
+      "display": "Chronic glomerulonephritis with unspecified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.0",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with lesion of proliferative glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.1",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with lesion of membranous glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.2",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with lesion of membranoproliferative glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.4",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with lesion of rapidly progressive glomerulonephritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.6",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with lesion of renal cortical necrosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.7",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with lesion of renal medullary necrosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.81",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, in diseases classified elsewhere"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.89",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with other specified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "583.9",
+      "display": "Nephritis and nephropathy, not specified as acute or chronic, with unspecified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "588.0",
+      "display": "Renal osteodystrophy"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "588.1",
+      "display": "Nephrogenic diabetes insipidus"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "588.81",
+      "display": "Secondary hyperparathyroidism (of renal origin)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "588.89",
+      "display": "Other specified disorders resulting from impaired renal function"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "588.9",
+      "display": "Unspecified disorder resulting from impaired renal function"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "197628008",
+      "display": "Focal glomerulonephritis with focal recurrent macroscopic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "54181000",
+      "display": "Diabetes-nephrosis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "197632002",
+      "display": "Berger's immunoglobulin A or immunoglobulin G nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "101711000119105",
+      "display": "Glomerulonephritis co-occurrent and due to antineutrophil cytoplasmic antibody positive vasculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "110996009",
+      "display": "Armanni-Ebstein kidney (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111395007",
+      "display": "Nephrogenic diabetes insipidus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "118951003",
+      "display": "Drug-induced nephrogenic diabetes insipidus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123609007",
+      "display": "Subacute glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123610002",
+      "display": "Healed glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123752003",
+      "display": "Immune-complex glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12491000132101",
+      "display": "Isolated proteinuria (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12511000132108",
+      "display": "Persistent proteinuria (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13335004",
+      "display": "Sclerosing glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1426004",
+      "display": "Necrotizing glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16726004",
+      "display": "Renal osteodystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1776003",
+      "display": "Renal tubular acidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19351000",
+      "display": "Acute glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194909006",
+      "display": "Acute pericarditis co-occurrent and due to uremia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195353004",
+      "display": "Granulomatosis with polyangiitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197579006",
+      "display": "Acute proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197580009",
+      "display": "Acute nephritis with lesions of necrotizing glomerulitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197582001",
+      "display": "Acute glomerulonephritis associated with another disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197584000",
+      "display": "Acute focal nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197585004",
+      "display": "Acute diffuse nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197589005",
+      "display": "Nephrotic syndrome with proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197590001",
+      "display": "Nephrotic syndrome with membranous glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197591002",
+      "display": "Nephrotic syndrome with membranoproliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197593004",
+      "display": "Nephrotic syndrome, minor glomerular abnormality (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197594005",
+      "display": "Nephrotic syndrome, focal and segmental glomerular lesions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197595006",
+      "display": "Nephrotic syndrome, diffuse membranous glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197596007",
+      "display": "Nephrotic syndrome, diffuse mesangial proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197597003",
+      "display": "Nephrotic syndrome, diffuse endocapillary proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197598008",
+      "display": "Nephrotic syndrome, diffuse mesangiocapillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197599000",
+      "display": "Nephrotic syndrome, dense deposit disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197600002",
+      "display": "Nephrotic syndrome, diffuse crescentic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197601003",
+      "display": "Finnish congenital nephrotic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197603000",
+      "display": "Nephrotic syndrome associated with another disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197605007",
+      "display": "Nephrotic syndrome due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197607004",
+      "display": "Nephrotic syndrome in polyarteritis nodosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197613008",
+      "display": "Chronic mesangial proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197616000",
+      "display": "Chronic glomerulonephritis associated with another disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197617009",
+      "display": "Chronic exudative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197618004",
+      "display": "Chronic focal glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197619007",
+      "display": "Chronic diffuse glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197626007",
+      "display": "Focal membranoproliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197629000",
+      "display": "Anaphylactoid glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197661001",
+      "display": "Glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197663003",
+      "display": "Impaired renal function disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197664009",
+      "display": "Phosphate-losing tubular disorders (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197671004",
+      "display": "Renal function impairment with growth failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197679002",
+      "display": "Glomerular disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197681000",
+      "display": "Acute nephritic syndrome, minor glomerular abnormality (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197682007",
+      "display": "Acute nephritic syndrome, focal and segmental glomerular lesions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197683002",
+      "display": "Acute nephritic syndrome, diffuse membranous glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197684008",
+      "display": "Acute nephritic syndrome, diffuse mesangial proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197685009",
+      "display": "Acute nephritic syndrome, diffuse endocapillary proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197686005",
+      "display": "Acute nephritic syndrome, diffuse mesangiocapillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197687001",
+      "display": "Acute nephritic syndrome, dense deposit disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197688006",
+      "display": "Acute nephritic syndrome, diffuse crescentic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197689003",
+      "display": "Rapidly progressive nephritic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197690007",
+      "display": "Rapidly progressive nephritic syndrome, minor glomerular abnormality (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197691006",
+      "display": "Rapidly progressive nephritic syndrome, focal and segmental glomerular lesions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197692004",
+      "display": "Rapidly progressive nephritic syndrome, diffuse membranous glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197693009",
+      "display": "Rapidly progressive nephritic syndrome, diffuse mesangial proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197694003",
+      "display": "Rapidly progressive nephritic syndrome, diffuse endocapillary proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197695002",
+      "display": "Rapidly progressive nephritic syndrome, diffuse mesangiocapillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197696001",
+      "display": "Rapidly progressive nephritic syndrome, dense deposit disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197697005",
+      "display": "Rapidly progressive nephritic syndrome, diffuse crescentic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197707007",
+      "display": "Chronic nephritic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197708002",
+      "display": "Chronic nephritic syndrome, minor glomerular abnormality (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197709005",
+      "display": "Chronic nephritic syndrome, focal and segmental glomerular lesions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197712008",
+      "display": "Chronic nephritic syndrome, diffuse endocapillary proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197713003",
+      "display": "Chronic nephritic syndrome, diffuse mesangiocapillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197714009",
+      "display": "Chronic nephritic syndrome, dense deposit disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197715005",
+      "display": "Chronic nephritic syndrome, diffuse crescentic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197716006",
+      "display": "Isolated proteinuria with specified morphological lesion (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197717002",
+      "display": "Isolated proteinuria with specified morphological lesion, minor glomerular abnormality (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197719004",
+      "display": "Isolated proteinuria with specified morphological lesion, focal and segmental glomerular lesions (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197720005",
+      "display": "Isolated proteinuria with specified morphological lesion, diffuse membranous glomerulonephritis (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197721009",
+      "display": "Isolated proteinuria with specified morphological lesion, diffuse mesangial proliferative glomerulonephritis (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197722002",
+      "display": "Isolated proteinuria with specified morphological lesion, diffuse endocapillary proliferative glomerulonephritis (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197723007",
+      "display": "Isolated proteinuria with specified morphological lesion, diffuse mesangiocapillary glomerulonephritis (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197724001",
+      "display": "Isolated proteinuria with specified morphological lesion, dense deposit disease (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197725000",
+      "display": "Isolated proteinuria with specified morphological lesion, diffuse concentric glomerulonephritis (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197738008",
+      "display": "Glomerular disorders in neoplastic diseases (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197739000",
+      "display": "Glomerular disorders in blood diseases and disorders involving the immune mechanism (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197769007",
+      "display": "Acute pyelonephritis with medullary necrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "20917003",
+      "display": "Chronic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22702000",
+      "display": "Glomerulitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232369001",
+      "display": "Granulomatosis with polyangiitis of nose (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232460001",
+      "display": "Granulomatosis with polyangiitis of larynx (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234485006",
+      "display": "Epstein syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235000001",
+      "display": "Granulomatosis with polyangiitis of gingiva (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236380004",
+      "display": "Steroid-sensitive nephrotic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236381000",
+      "display": "Steroid-resistant nephrotic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236382007",
+      "display": "Steroid-dependent nephrotic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236383002",
+      "display": "Familial mesangial sclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236384008",
+      "display": "Congenital nephrotic syndrome with focal glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236385009",
+      "display": "Drash syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236392004",
+      "display": "Rapidly progressive glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236393009",
+      "display": "Endocapillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236394003",
+      "display": "Idiopathic endocapillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236395002",
+      "display": "Post-infectious glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236397005",
+      "display": "Post-infectious glomerulonephritis - Garland variety (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236398000",
+      "display": "Crescentic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236399008",
+      "display": "Steroid-sensitive minimal change glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236400001",
+      "display": "Steroid-resistant minimal change glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236401002",
+      "display": "Steroid-dependent minimal change glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236402009",
+      "display": "Glomerulopathy due to ischemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236403004",
+      "display": "Focal segmental glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236404005",
+      "display": "Classical focal segmental glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236405006",
+      "display": "Hyperfiltration focal segmental glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236407003",
+      "display": "Immunoglobulin A nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236409000",
+      "display": "Mesangiocapillary glomerulonephritis type III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236410005",
+      "display": "Mesangiocapillary glomerulonephritis type IV (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236411009",
+      "display": "Immunoglobulin M nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236412002",
+      "display": "C1q nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236413007",
+      "display": "Membranous glomerulonephritis - stage I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236414001",
+      "display": "Membranous glomerulonephritis - stage II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236415000",
+      "display": "Membranous glomerulonephritis - stage III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236416004",
+      "display": "Membranous glomerulonephritis - stage IV (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236417008",
+      "display": "Membranous glomerulonephritis stage V (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236418003",
+      "display": "Thin basement membrane disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236419006",
+      "display": "Progressive hereditary glomerulonephritis without deafness (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236422008",
+      "display": "Fechtner syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236460004",
+      "display": "Familial proximal renal tubular acidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236461000",
+      "display": "Distal renal tubular acidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236463002",
+      "display": "Hyperkalemic renal tubular acidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236479001",
+      "display": "Magnesium-losing nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236480003",
+      "display": "Inherited magnesium-losing nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236508005",
+      "display": "Malignancy-associated glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236534002",
+      "display": "Familial lobular glomerulopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236535001",
+      "display": "Glomerulopathy with giant fibrillar deposits (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236587002",
+      "display": "Transplant glomerulopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236588007",
+      "display": "Transplant glomerulopathy - early form (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236589004",
+      "display": "Transplant glomerulopathy - late form (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236590008",
+      "display": "Cytomegalovirus-induced glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239932005",
+      "display": "Primary pauci-immune necrotizing and crescentic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239935007",
+      "display": "Limited granulomatosis with polyangiitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239936008",
+      "display": "Granulomatosis with polyangiitis with multisystem involvement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24790002",
+      "display": "Proximal renal tubular acidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "253864004",
+      "display": "Familial hypoplastic, glomerulocystic kidney (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25821008",
+      "display": "Focal glomerular sclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266549004",
+      "display": "Nephrotic syndrome with minimal change glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "276585000",
+      "display": "Congenital nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "282364005",
+      "display": "Immunoglobulin A nephropathy associated with liver disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309426007",
+      "display": "Glomerulopathy due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35546006",
+      "display": "Mesangial proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359694003",
+      "display": "Idiopathic crescentic glomerulonephritis, type II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36171008",
+      "display": "Glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "363234001",
+      "display": "Nephrotic syndrome secondary to systemic disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3704008",
+      "display": "Diffuse endocapillary proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370494002",
+      "display": "Protein-losing nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37085009",
+      "display": "Shunt nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38046004",
+      "display": "Diffuse type diabetic glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "399190000",
+      "display": "Non-progressive hereditary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "399340005",
+      "display": "Hereditary nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40233000",
+      "display": "Nephrotic-nephritic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42231000009109",
+      "display": "Bacterial nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425384007",
+      "display": "Sarcoidosis with glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425455002",
+      "display": "Diabetic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441815006",
+      "display": "Proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444977005",
+      "display": "Autosomal dominant focal segmental glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445258009",
+      "display": "Idiopathic rapidly progressive glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445388002",
+      "display": "Autosomal recessive focal segmental glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445404003",
+      "display": "Familial immunoglobulin A nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446923008",
+      "display": "Lipoprotein glomerulopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44785005",
+      "display": "Minimal change disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48796009",
+      "display": "Congenital nephrotic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52254009",
+      "display": "Nephrotic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52845002",
+      "display": "Nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54879000",
+      "display": "Hypokalemic nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55652009",
+      "display": "Idiopathic crescentic glomerulonephritis, type III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57965003",
+      "display": "Acute benign hemorrhagic glomerulonephritic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58574008",
+      "display": "Acute nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59479006",
+      "display": "Mesangiocapillary glomerulonephritis, type II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61165007",
+      "display": "Hereditary nephrogenic diabetes insipidus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61503006",
+      "display": "Acute nephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62240004",
+      "display": "Benign arteriolar nephrosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63510008",
+      "display": "Nodular type diabetic glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64168005",
+      "display": "Idiopathic crescentic glomerulonephritis, type I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64212008",
+      "display": "Diffuse crescentic glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68544003",
+      "display": "Acute post-streptococcal glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68779003",
+      "display": "Primary immunoglobulin A nephropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "717760006",
+      "display": "Multi-drug resistant nephrotic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "717766000",
+      "display": "Alport syndrome autosomal dominant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "717767009",
+      "display": "Alport syndrome autosomal recessive (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "717768004",
+      "display": "Alport syndrome X-linked (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "719839000",
+      "display": "Tubular renal disease with cardiomyopathy syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720982007",
+      "display": "Alport syndrome, intellectual disability, midface hypoplasia, elliptocytosis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721175003",
+      "display": "Idiopathic glomerular disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721207002",
+      "display": "Seizure, sensorineural deafness, ataxia, intellectual disability, electrolyte imbalance syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721297008",
+      "display": "Galloway Mowat syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721840000",
+      "display": "Hyperuricemia, anemia, renal failure syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722086002",
+      "display": "Membranous glomerulonephritis due to malignant neoplastic disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722118005",
+      "display": "Congenital nephrotic syndrome due to congenital infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722119002",
+      "display": "Idiopathic membranous glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722120008",
+      "display": "Membranous glomerulonephritis caused by drug (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722139003",
+      "display": "Focal segmental glomerulosclerosis caused by lithium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722147003",
+      "display": "Focal segmental glomerulosclerosis due to sickle cell disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722168002",
+      "display": "Membranous glomerulonephritis co-occurrent with infectious disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722294004",
+      "display": "Autosomal dominant intermediate Charcot-Marie-Tooth disease type E (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722369003",
+      "display": "Congenital nephrotic syndrome due to diffuse mesangial sclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722381004",
+      "display": "Congenital cataract, nephropathy, encephalopathy syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722433005",
+      "display": "Dyschondrosteosis and nephritis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722468005",
+      "display": "Distal renal tubular acidosis co-occurrent with sensorineural deafness (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722758004",
+      "display": "Complement component 3 glomerulopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722759007",
+      "display": "Glomerulopathy with fibronectin deposits 2 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722760002",
+      "display": "Dense deposit disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722761003",
+      "display": "Complement component 3 glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722948009",
+      "display": "Glomerular disorder due to non-neuropathic heredofamilial amyloidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "723074006",
+      "display": "Renal papillary necrosis due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724099000",
+      "display": "Acquired monoclonal immunoglobulin light chain-associated Fanconi syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "725592009",
+      "display": "Congenital membranous nephropathy due to maternal anti-neutral endopeptidase alloimmunization (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "726082003",
+      "display": "Immunotactoid glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73305009",
+      "display": "Fibrillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733453005",
+      "display": "Congenital nephrotic syndrome, interstitial lung disease, epidermolysis bullosa syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75888001",
+      "display": "Mesangiocapillary glomerulonephritis, type I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "766249007",
+      "display": "Deafness, nephritis, anorectal malformation syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "7703001",
+      "display": "Renal tubular defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77182004",
+      "display": "Membranous glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "7724006",
+      "display": "Nephritic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "80321008",
+      "display": "Mesangiocapillary glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81363003",
+      "display": "Malignant arteriolar nephrosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81475007",
+      "display": "Acquired nephrogenic diabetes insipidus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8199003",
+      "display": "Focal embolic nephritis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83866005",
+      "display": "Focal AND segmental proliferative glomerulonephritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90493000",
+      "display": "Arteriolar nephrosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90971000119103",
+      "display": "Glomerulonephritis co-occurrent and due to vasculitis (disorder)"
+    } ]
+  }
+}

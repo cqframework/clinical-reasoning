@@ -1,0 +1,2565 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.106.12.1004",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.106.12.1004",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.106.12.1004"
+  } ],
+  "version": "20170504",
+  "name": "SubstanceAbuse",
+  "title": "Substance Abuse",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.10",
+      "display": "Alcohol abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.11",
+      "display": "Alcohol abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.120",
+      "display": "Alcohol abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.121",
+      "display": "Alcohol abuse with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.129",
+      "display": "Alcohol abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.14",
+      "display": "Alcohol abuse with alcohol-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.150",
+      "display": "Alcohol abuse with alcohol-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.151",
+      "display": "Alcohol abuse with alcohol-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.159",
+      "display": "Alcohol abuse with alcohol-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.180",
+      "display": "Alcohol abuse with alcohol-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.181",
+      "display": "Alcohol abuse with alcohol-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.182",
+      "display": "Alcohol abuse with alcohol-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.188",
+      "display": "Alcohol abuse with other alcohol-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.19",
+      "display": "Alcohol abuse with unspecified alcohol-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.20",
+      "display": "Alcohol dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.21",
+      "display": "Alcohol dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.220",
+      "display": "Alcohol dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.221",
+      "display": "Alcohol dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.229",
+      "display": "Alcohol dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.230",
+      "display": "Alcohol dependence with withdrawal, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.231",
+      "display": "Alcohol dependence with withdrawal delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.232",
+      "display": "Alcohol dependence with withdrawal with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.239",
+      "display": "Alcohol dependence with withdrawal, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.24",
+      "display": "Alcohol dependence with alcohol-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.250",
+      "display": "Alcohol dependence with alcohol-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.251",
+      "display": "Alcohol dependence with alcohol-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.259",
+      "display": "Alcohol dependence with alcohol-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.26",
+      "display": "Alcohol dependence with alcohol-induced persisting amnestic disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.27",
+      "display": "Alcohol dependence with alcohol-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.280",
+      "display": "Alcohol dependence with alcohol-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.281",
+      "display": "Alcohol dependence with alcohol-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.282",
+      "display": "Alcohol dependence with alcohol-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.288",
+      "display": "Alcohol dependence with other alcohol-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.29",
+      "display": "Alcohol dependence with unspecified alcohol-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.920",
+      "display": "Alcohol use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.921",
+      "display": "Alcohol use, unspecified with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.929",
+      "display": "Alcohol use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.94",
+      "display": "Alcohol use, unspecified with alcohol-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.950",
+      "display": "Alcohol use, unspecified with alcohol-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.951",
+      "display": "Alcohol use, unspecified with alcohol-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.959",
+      "display": "Alcohol use, unspecified with alcohol-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.96",
+      "display": "Alcohol use, unspecified with alcohol-induced persisting amnestic disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.97",
+      "display": "Alcohol use, unspecified with alcohol-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.980",
+      "display": "Alcohol use, unspecified with alcohol-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.981",
+      "display": "Alcohol use, unspecified with alcohol-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.982",
+      "display": "Alcohol use, unspecified with alcohol-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.988",
+      "display": "Alcohol use, unspecified with other alcohol-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F10.99",
+      "display": "Alcohol use, unspecified with unspecified alcohol-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.10",
+      "display": "Opioid abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.11",
+      "display": "Opioid abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.120",
+      "display": "Opioid abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.121",
+      "display": "Opioid abuse with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.122",
+      "display": "Opioid abuse with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.129",
+      "display": "Opioid abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.14",
+      "display": "Opioid abuse with opioid-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.150",
+      "display": "Opioid abuse with opioid-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.151",
+      "display": "Opioid abuse with opioid-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.159",
+      "display": "Opioid abuse with opioid-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.181",
+      "display": "Opioid abuse with opioid-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.182",
+      "display": "Opioid abuse with opioid-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.188",
+      "display": "Opioid abuse with other opioid-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.19",
+      "display": "Opioid abuse with unspecified opioid-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.20",
+      "display": "Opioid dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.21",
+      "display": "Opioid dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.220",
+      "display": "Opioid dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.221",
+      "display": "Opioid dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.222",
+      "display": "Opioid dependence with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.229",
+      "display": "Opioid dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.23",
+      "display": "Opioid dependence with withdrawal"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.24",
+      "display": "Opioid dependence with opioid-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.250",
+      "display": "Opioid dependence with opioid-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.251",
+      "display": "Opioid dependence with opioid-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.259",
+      "display": "Opioid dependence with opioid-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.281",
+      "display": "Opioid dependence with opioid-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.282",
+      "display": "Opioid dependence with opioid-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.288",
+      "display": "Opioid dependence with other opioid-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.29",
+      "display": "Opioid dependence with unspecified opioid-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.90",
+      "display": "Opioid use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.920",
+      "display": "Opioid use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.921",
+      "display": "Opioid use, unspecified with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.922",
+      "display": "Opioid use, unspecified with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.929",
+      "display": "Opioid use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.93",
+      "display": "Opioid use, unspecified with withdrawal"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.94",
+      "display": "Opioid use, unspecified with opioid-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.950",
+      "display": "Opioid use, unspecified with opioid-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.951",
+      "display": "Opioid use, unspecified with opioid-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.959",
+      "display": "Opioid use, unspecified with opioid-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.981",
+      "display": "Opioid use, unspecified with opioid-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.982",
+      "display": "Opioid use, unspecified with opioid-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.988",
+      "display": "Opioid use, unspecified with other opioid-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F11.99",
+      "display": "Opioid use, unspecified with unspecified opioid-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.10",
+      "display": "Cannabis abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.11",
+      "display": "Cannabis abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.120",
+      "display": "Cannabis abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.121",
+      "display": "Cannabis abuse with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.122",
+      "display": "Cannabis abuse with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.129",
+      "display": "Cannabis abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.150",
+      "display": "Cannabis abuse with psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.151",
+      "display": "Cannabis abuse with psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.159",
+      "display": "Cannabis abuse with psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.180",
+      "display": "Cannabis abuse with cannabis-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.188",
+      "display": "Cannabis abuse with other cannabis-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.19",
+      "display": "Cannabis abuse with unspecified cannabis-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.20",
+      "display": "Cannabis dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.21",
+      "display": "Cannabis dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.220",
+      "display": "Cannabis dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.221",
+      "display": "Cannabis dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.222",
+      "display": "Cannabis dependence with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.229",
+      "display": "Cannabis dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.250",
+      "display": "Cannabis dependence with psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.251",
+      "display": "Cannabis dependence with psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.259",
+      "display": "Cannabis dependence with psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.280",
+      "display": "Cannabis dependence with cannabis-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.288",
+      "display": "Cannabis dependence with other cannabis-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.29",
+      "display": "Cannabis dependence with unspecified cannabis-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.90",
+      "display": "Cannabis use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.920",
+      "display": "Cannabis use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.921",
+      "display": "Cannabis use, unspecified with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.922",
+      "display": "Cannabis use, unspecified with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.929",
+      "display": "Cannabis use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.950",
+      "display": "Cannabis use, unspecified with psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.951",
+      "display": "Cannabis use, unspecified with psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.959",
+      "display": "Cannabis use, unspecified with psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.980",
+      "display": "Cannabis use, unspecified with anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.988",
+      "display": "Cannabis use, unspecified with other cannabis-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F12.99",
+      "display": "Cannabis use, unspecified with unspecified cannabis-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.10",
+      "display": "Sedative, hypnotic or anxiolytic abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.11",
+      "display": "Sedative, hypnotic or anxiolytic abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.120",
+      "display": "Sedative, hypnotic or anxiolytic abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.121",
+      "display": "Sedative, hypnotic or anxiolytic abuse with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.129",
+      "display": "Sedative, hypnotic or anxiolytic abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.14",
+      "display": "Sedative, hypnotic or anxiolytic abuse with sedative, hypnotic or anxiolytic-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.150",
+      "display": "Sedative, hypnotic or anxiolytic abuse with sedative, hypnotic or anxiolytic-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.151",
+      "display": "Sedative, hypnotic or anxiolytic abuse with sedative, hypnotic or anxiolytic-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.159",
+      "display": "Sedative, hypnotic or anxiolytic abuse with sedative, hypnotic or anxiolytic-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.180",
+      "display": "Sedative, hypnotic or anxiolytic abuse with sedative, hypnotic or anxiolytic-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.181",
+      "display": "Sedative, hypnotic or anxiolytic abuse with sedative, hypnotic or anxiolytic-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.182",
+      "display": "Sedative, hypnotic or anxiolytic abuse with sedative, hypnotic or anxiolytic-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.188",
+      "display": "Sedative, hypnotic or anxiolytic abuse with other sedative, hypnotic or anxiolytic-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.19",
+      "display": "Sedative, hypnotic or anxiolytic abuse with unspecified sedative, hypnotic or anxiolytic-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.20",
+      "display": "Sedative, hypnotic or anxiolytic dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.21",
+      "display": "Sedative, hypnotic or anxiolytic dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.220",
+      "display": "Sedative, hypnotic or anxiolytic dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.221",
+      "display": "Sedative, hypnotic or anxiolytic dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.229",
+      "display": "Sedative, hypnotic or anxiolytic dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.230",
+      "display": "Sedative, hypnotic or anxiolytic dependence with withdrawal, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.231",
+      "display": "Sedative, hypnotic or anxiolytic dependence with withdrawal delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.232",
+      "display": "Sedative, hypnotic or anxiolytic dependence with withdrawal with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.239",
+      "display": "Sedative, hypnotic or anxiolytic dependence with withdrawal, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.24",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.250",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.251",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.259",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.26",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced persisting amnestic disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.27",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.280",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.281",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.282",
+      "display": "Sedative, hypnotic or anxiolytic dependence with sedative, hypnotic or anxiolytic-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.288",
+      "display": "Sedative, hypnotic or anxiolytic dependence with other sedative, hypnotic or anxiolytic-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.29",
+      "display": "Sedative, hypnotic or anxiolytic dependence with unspecified sedative, hypnotic or anxiolytic-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.90",
+      "display": "Sedative, hypnotic, or anxiolytic use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.920",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.921",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.929",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.930",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with withdrawal, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.931",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with withdrawal delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.932",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with withdrawal with perceptual disturbances"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.939",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with withdrawal, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.94",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.950",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.951",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.959",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.96",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced persisting amnestic disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.97",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.980",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.981",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.982",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with sedative, hypnotic or anxiolytic-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.988",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with other sedative, hypnotic or anxiolytic-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F13.99",
+      "display": "Sedative, hypnotic or anxiolytic use, unspecified with unspecified sedative, hypnotic or anxiolytic-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.10",
+      "display": "Cocaine abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.11",
+      "display": "Cocaine abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.120",
+      "display": "Cocaine abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.121",
+      "display": "Cocaine abuse with intoxication with delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.122",
+      "display": "Cocaine abuse with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.129",
+      "display": "Cocaine abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.14",
+      "display": "Cocaine abuse with cocaine-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.150",
+      "display": "Cocaine abuse with cocaine-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.151",
+      "display": "Cocaine abuse with cocaine-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.159",
+      "display": "Cocaine abuse with cocaine-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.180",
+      "display": "Cocaine abuse with cocaine-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.181",
+      "display": "Cocaine abuse with cocaine-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.182",
+      "display": "Cocaine abuse with cocaine-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.188",
+      "display": "Cocaine abuse with other cocaine-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.19",
+      "display": "Cocaine abuse with unspecified cocaine-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.20",
+      "display": "Cocaine dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.21",
+      "display": "Cocaine dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.220",
+      "display": "Cocaine dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.221",
+      "display": "Cocaine dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.222",
+      "display": "Cocaine dependence with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.229",
+      "display": "Cocaine dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.23",
+      "display": "Cocaine dependence with withdrawal"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.24",
+      "display": "Cocaine dependence with cocaine-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.250",
+      "display": "Cocaine dependence with cocaine-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.251",
+      "display": "Cocaine dependence with cocaine-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.259",
+      "display": "Cocaine dependence with cocaine-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.280",
+      "display": "Cocaine dependence with cocaine-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.281",
+      "display": "Cocaine dependence with cocaine-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.282",
+      "display": "Cocaine dependence with cocaine-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.288",
+      "display": "Cocaine dependence with other cocaine-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.29",
+      "display": "Cocaine dependence with unspecified cocaine-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.90",
+      "display": "Cocaine use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.920",
+      "display": "Cocaine use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.921",
+      "display": "Cocaine use, unspecified with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.922",
+      "display": "Cocaine use, unspecified with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.929",
+      "display": "Cocaine use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.94",
+      "display": "Cocaine use, unspecified with cocaine-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.950",
+      "display": "Cocaine use, unspecified with cocaine-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.951",
+      "display": "Cocaine use, unspecified with cocaine-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.959",
+      "display": "Cocaine use, unspecified with cocaine-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.980",
+      "display": "Cocaine use, unspecified with cocaine-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.981",
+      "display": "Cocaine use, unspecified with cocaine-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.982",
+      "display": "Cocaine use, unspecified with cocaine-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.988",
+      "display": "Cocaine use, unspecified with other cocaine-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F14.99",
+      "display": "Cocaine use, unspecified with unspecified cocaine-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.10",
+      "display": "Other stimulant abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.11",
+      "display": "Other stimulant abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.120",
+      "display": "Other stimulant abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.121",
+      "display": "Other stimulant abuse with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.122",
+      "display": "Other stimulant abuse with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.129",
+      "display": "Other stimulant abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.14",
+      "display": "Other stimulant abuse with stimulant-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.150",
+      "display": "Other stimulant abuse with stimulant-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.151",
+      "display": "Other stimulant abuse with stimulant-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.159",
+      "display": "Other stimulant abuse with stimulant-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.180",
+      "display": "Other stimulant abuse with stimulant-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.181",
+      "display": "Other stimulant abuse with stimulant-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.182",
+      "display": "Other stimulant abuse with stimulant-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.188",
+      "display": "Other stimulant abuse with other stimulant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.19",
+      "display": "Other stimulant abuse with unspecified stimulant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.20",
+      "display": "Other stimulant dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.21",
+      "display": "Other stimulant dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.220",
+      "display": "Other stimulant dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.221",
+      "display": "Other stimulant dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.222",
+      "display": "Other stimulant dependence with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.229",
+      "display": "Other stimulant dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.23",
+      "display": "Other stimulant dependence with withdrawal"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.24",
+      "display": "Other stimulant dependence with stimulant-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.250",
+      "display": "Other stimulant dependence with stimulant-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.251",
+      "display": "Other stimulant dependence with stimulant-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.259",
+      "display": "Other stimulant dependence with stimulant-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.280",
+      "display": "Other stimulant dependence with stimulant-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.281",
+      "display": "Other stimulant dependence with stimulant-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.282",
+      "display": "Other stimulant dependence with stimulant-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.288",
+      "display": "Other stimulant dependence with other stimulant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.29",
+      "display": "Other stimulant dependence with unspecified stimulant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.90",
+      "display": "Other stimulant use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.920",
+      "display": "Other stimulant use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.921",
+      "display": "Other stimulant use, unspecified with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.922",
+      "display": "Other stimulant use, unspecified with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.929",
+      "display": "Other stimulant use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.93",
+      "display": "Other stimulant use, unspecified with withdrawal"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.94",
+      "display": "Other stimulant use, unspecified with stimulant-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.950",
+      "display": "Other stimulant use, unspecified with stimulant-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.951",
+      "display": "Other stimulant use, unspecified with stimulant-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.959",
+      "display": "Other stimulant use, unspecified with stimulant-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.980",
+      "display": "Other stimulant use, unspecified with stimulant-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.981",
+      "display": "Other stimulant use, unspecified with stimulant-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.982",
+      "display": "Other stimulant use, unspecified with stimulant-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.988",
+      "display": "Other stimulant use, unspecified with other stimulant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F15.99",
+      "display": "Other stimulant use, unspecified with unspecified stimulant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.10",
+      "display": "Hallucinogen abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.11",
+      "display": "Hallucinogen abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.120",
+      "display": "Hallucinogen abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.121",
+      "display": "Hallucinogen abuse with intoxication with delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.122",
+      "display": "Hallucinogen abuse with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.129",
+      "display": "Hallucinogen abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.14",
+      "display": "Hallucinogen abuse with hallucinogen-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.150",
+      "display": "Hallucinogen abuse with hallucinogen-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.151",
+      "display": "Hallucinogen abuse with hallucinogen-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.159",
+      "display": "Hallucinogen abuse with hallucinogen-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.180",
+      "display": "Hallucinogen abuse with hallucinogen-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.183",
+      "display": "Hallucinogen abuse with hallucinogen persisting perception disorder (flashbacks)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.188",
+      "display": "Hallucinogen abuse with other hallucinogen-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.19",
+      "display": "Hallucinogen abuse with unspecified hallucinogen-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.20",
+      "display": "Hallucinogen dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.21",
+      "display": "Hallucinogen dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.220",
+      "display": "Hallucinogen dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.221",
+      "display": "Hallucinogen dependence with intoxication with delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.229",
+      "display": "Hallucinogen dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.24",
+      "display": "Hallucinogen dependence with hallucinogen-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.250",
+      "display": "Hallucinogen dependence with hallucinogen-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.251",
+      "display": "Hallucinogen dependence with hallucinogen-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.259",
+      "display": "Hallucinogen dependence with hallucinogen-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.280",
+      "display": "Hallucinogen dependence with hallucinogen-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.283",
+      "display": "Hallucinogen dependence with hallucinogen persisting perception disorder (flashbacks)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.288",
+      "display": "Hallucinogen dependence with other hallucinogen-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.29",
+      "display": "Hallucinogen dependence with unspecified hallucinogen-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.90",
+      "display": "Hallucinogen use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.920",
+      "display": "Hallucinogen use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.921",
+      "display": "Hallucinogen use, unspecified with intoxication with delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.929",
+      "display": "Hallucinogen use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.94",
+      "display": "Hallucinogen use, unspecified with hallucinogen-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.950",
+      "display": "Hallucinogen use, unspecified with hallucinogen-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.951",
+      "display": "Hallucinogen use, unspecified with hallucinogen-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.959",
+      "display": "Hallucinogen use, unspecified with hallucinogen-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.980",
+      "display": "Hallucinogen use, unspecified with hallucinogen-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.983",
+      "display": "Hallucinogen use, unspecified with hallucinogen persisting perception disorder (flashbacks)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.988",
+      "display": "Hallucinogen use, unspecified with other hallucinogen-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F16.99",
+      "display": "Hallucinogen use, unspecified with unspecified hallucinogen-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.10",
+      "display": "Inhalant abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.11",
+      "display": "Inhalant abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.120",
+      "display": "Inhalant abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.121",
+      "display": "Inhalant abuse with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.129",
+      "display": "Inhalant abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.14",
+      "display": "Inhalant abuse with inhalant-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.150",
+      "display": "Inhalant abuse with inhalant-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.151",
+      "display": "Inhalant abuse with inhalant-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.159",
+      "display": "Inhalant abuse with inhalant-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.17",
+      "display": "Inhalant abuse with inhalant-induced dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.180",
+      "display": "Inhalant abuse with inhalant-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.188",
+      "display": "Inhalant abuse with other inhalant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.19",
+      "display": "Inhalant abuse with unspecified inhalant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.20",
+      "display": "Inhalant dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.21",
+      "display": "Inhalant dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.220",
+      "display": "Inhalant dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.221",
+      "display": "Inhalant dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.229",
+      "display": "Inhalant dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.24",
+      "display": "Inhalant dependence with inhalant-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.250",
+      "display": "Inhalant dependence with inhalant-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.251",
+      "display": "Inhalant dependence with inhalant-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.259",
+      "display": "Inhalant dependence with inhalant-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.27",
+      "display": "Inhalant dependence with inhalant-induced dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.280",
+      "display": "Inhalant dependence with inhalant-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.288",
+      "display": "Inhalant dependence with other inhalant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.29",
+      "display": "Inhalant dependence with unspecified inhalant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.90",
+      "display": "Inhalant use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.920",
+      "display": "Inhalant use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.921",
+      "display": "Inhalant use, unspecified with intoxication with delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.929",
+      "display": "Inhalant use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.94",
+      "display": "Inhalant use, unspecified with inhalant-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.950",
+      "display": "Inhalant use, unspecified with inhalant-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.951",
+      "display": "Inhalant use, unspecified with inhalant-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.959",
+      "display": "Inhalant use, unspecified with inhalant-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.97",
+      "display": "Inhalant use, unspecified with inhalant-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.980",
+      "display": "Inhalant use, unspecified with inhalant-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.988",
+      "display": "Inhalant use, unspecified with other inhalant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F18.99",
+      "display": "Inhalant use, unspecified with unspecified inhalant-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.10",
+      "display": "Other psychoactive substance abuse, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.11",
+      "display": "Other psychoactive substance abuse, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.120",
+      "display": "Other psychoactive substance abuse with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.121",
+      "display": "Other psychoactive substance abuse with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.122",
+      "display": "Other psychoactive substance abuse with intoxication with perceptual disturbances"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.129",
+      "display": "Other psychoactive substance abuse with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.14",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.150",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.151",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.159",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.16",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced persisting amnestic disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.17",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.180",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.181",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.182",
+      "display": "Other psychoactive substance abuse with psychoactive substance-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.188",
+      "display": "Other psychoactive substance abuse with other psychoactive substance-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.19",
+      "display": "Other psychoactive substance abuse with unspecified psychoactive substance-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.20",
+      "display": "Other psychoactive substance dependence, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.21",
+      "display": "Other psychoactive substance dependence, in remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.220",
+      "display": "Other psychoactive substance dependence with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.221",
+      "display": "Other psychoactive substance dependence with intoxication delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.222",
+      "display": "Other psychoactive substance dependence with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.229",
+      "display": "Other psychoactive substance dependence with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.230",
+      "display": "Other psychoactive substance dependence with withdrawal, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.231",
+      "display": "Other psychoactive substance dependence with withdrawal delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.232",
+      "display": "Other psychoactive substance dependence with withdrawal with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.239",
+      "display": "Other psychoactive substance dependence with withdrawal, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.24",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.250",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.251",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.259",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.26",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced persisting amnestic disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.27",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.280",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.281",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.282",
+      "display": "Other psychoactive substance dependence with psychoactive substance-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.288",
+      "display": "Other psychoactive substance dependence with other psychoactive substance-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.29",
+      "display": "Other psychoactive substance dependence with unspecified psychoactive substance-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.90",
+      "display": "Other psychoactive substance use, unspecified, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.920",
+      "display": "Other psychoactive substance use, unspecified with intoxication, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.921",
+      "display": "Other psychoactive substance use, unspecified with intoxication with delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.922",
+      "display": "Other psychoactive substance use, unspecified with intoxication with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.929",
+      "display": "Other psychoactive substance use, unspecified with intoxication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.930",
+      "display": "Other psychoactive substance use, unspecified with withdrawal, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.931",
+      "display": "Other psychoactive substance use, unspecified with withdrawal delirium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.932",
+      "display": "Other psychoactive substance use, unspecified with withdrawal with perceptual disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.939",
+      "display": "Other psychoactive substance use, unspecified with withdrawal, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.94",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced mood disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.950",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced psychotic disorder with delusions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.951",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced psychotic disorder with hallucinations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.959",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced psychotic disorder, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.96",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced persisting amnestic disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.97",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced persisting dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.980",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced anxiety disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.981",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced sexual dysfunction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.982",
+      "display": "Other psychoactive substance use, unspecified with psychoactive substance-induced sleep disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.988",
+      "display": "Other psychoactive substance use, unspecified with other psychoactive substance-induced disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F19.99",
+      "display": "Other psychoactive substance use, unspecified with unspecified psychoactive substance-induced disorder"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "724703003",
+      "display": "Harmful pattern of use of substituted amphetamine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1081000119105",
+      "display": "Opioid dependence, on agonist therapy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "110281001",
+      "display": "Chronic drug abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11047881000119101",
+      "display": "Cannabis hyperemesis syndrome co-occurrent and due to cannabis abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "144981000119109",
+      "display": "Nondependent intraveous amphetamine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "145101000119102",
+      "display": "Intravenous cocaine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "145841000119107",
+      "display": "Episodic phencyclidine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1461000119109",
+      "display": "Drug dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1471000119103",
+      "display": "Drug abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15167005",
+      "display": "Alcohol abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153501000119105",
+      "display": "Drug dependence, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191813001",
+      "display": "Chronic alcoholism in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191821007",
+      "display": "Opioid dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191827006",
+      "display": "Hypnotic or anxiolytic dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191833002",
+      "display": "Cocaine dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191839003",
+      "display": "Cannabis dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191851001",
+      "display": "Hallucinogen dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191857002",
+      "display": "Glue sniffing dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191869005",
+      "display": "Combined opioid with non-opioid drug dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191875001",
+      "display": "Combined drug dependence, excluding opioid, in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191882002",
+      "display": "Nondependent alcohol abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191883007",
+      "display": "Nondependent alcohol abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191884001",
+      "display": "Nondependent alcohol abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191889006",
+      "display": "Tobacco dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191891003",
+      "display": "Nondependent cannabis abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191893000",
+      "display": "Nondependent cannabis abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191894006",
+      "display": "Nondependent cannabis abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191895007",
+      "display": "Nondependent cannabis abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191899001",
+      "display": "Nondependent hallucinogen abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191900006",
+      "display": "Nondependent hallucinogen abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191901005",
+      "display": "Nondependent hallucinogen abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191905001",
+      "display": "Nondependent hypnotic or anxiolytic abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191906000",
+      "display": "Nondependent hypnotic or anxiolytic abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191907009",
+      "display": "Nondependent hypnotic or anxiolytic abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191909007",
+      "display": "Nondependent opioid abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191912005",
+      "display": "Nondependent opioid abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191913000",
+      "display": "Nondependent opioid abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191914006",
+      "display": "Nondependent opioid abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191916008",
+      "display": "Nondependent cocaine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191918009",
+      "display": "Nondependent cocaine abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191919001",
+      "display": "Nondependent cocaine abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191920007",
+      "display": "Nondependent cocaine abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191924003",
+      "display": "Nondependent amphetamine or psychostimulant abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191925002",
+      "display": "Nondependent amphetamine or psychostimulant abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191928000",
+      "display": "Abuse of antidepressant drug (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191930003",
+      "display": "Nondependent antidepressant type drug abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191931004",
+      "display": "Nondependent antidepressant type drug abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191932006",
+      "display": "Nondependent antidepressant type drug abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191934007",
+      "display": "Nondependent mixed drug abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191936009",
+      "display": "Nondependent mixed drug abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191937000",
+      "display": "Nondependent mixed drug abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191938005",
+      "display": "Nondependent mixed drug abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231458000",
+      "display": "Abuse of steroids (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231459008",
+      "display": "Abuse of nonpsychotropic analgesic drugs (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231461004",
+      "display": "Hypnotic or anxiolytic abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231462006",
+      "display": "Barbiturate abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "248119008",
+      "display": "Abuse of drugs to lose weight (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26416006",
+      "display": "Drug abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268645007",
+      "display": "Nondependent alcohol abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268646008",
+      "display": "Nondependent hallucinogen abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268647004",
+      "display": "Nondependent hypnotic or anxiolytic abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268648009",
+      "display": "Nondependent amphetamine or other psychostimulant abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "280982009",
+      "display": "Abuse of laxatives (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "280983004",
+      "display": "Abuse of vitamins (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "280984005",
+      "display": "Abuse of herbal medicine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "280985006",
+      "display": "Abuse of diuretics (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "280986007",
+      "display": "Abuse of antacids (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284591009",
+      "display": "Persistent alcohol abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "288281000119100",
+      "display": "Abuse of herbal medicine or folk remedy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304605000",
+      "display": "Methanol abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "34111000119108",
+      "display": "Nondependent amphetamine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37344009",
+      "display": "Cannabis abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414874007",
+      "display": "Nondependent amphetamine or psychostimulant abuse in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425533007",
+      "display": "Episodic drug abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425841004",
+      "display": "Phencyclidine dependence in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425885002",
+      "display": "Continuous phencyclidine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426095000",
+      "display": "Continuous inhalant abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426590003",
+      "display": "Drug abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427205009",
+      "display": "Amphetamine abuse, continuous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427229002",
+      "display": "Episodic inhalant abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428561000124100",
+      "display": "Maternal substance abuse (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429001000124103",
+      "display": "Catha edulis abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429692000",
+      "display": "Amphetamine abuse, episodic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441527004",
+      "display": "Stimulant abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445273005",
+      "display": "Polysubstance abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49540005",
+      "display": "Non dependent drug abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5602001",
+      "display": "Opioid abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64386003",
+      "display": "Sedative abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6525002",
+      "display": "Dependent drug abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66214007",
+      "display": "Substance abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70340006",
+      "display": "Inhalant abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "7071007",
+      "display": "Phencyclidine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713775002",
+      "display": "Novel psychoactive substance misuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724694006",
+      "display": "Harmful pattern of use of caffeine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724697004",
+      "display": "Harmful pattern of use of nicotine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724712001",
+      "display": "Harmful use of dissociative drug (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724713006",
+      "display": "Harmful use of ketamine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "737336003",
+      "display": "Synthetic cannabinoid abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74851005",
+      "display": "Hallucinogen abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762504005",
+      "display": "Abuse of synthetic cathinone (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78267003",
+      "display": "Cocaine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84758004",
+      "display": "Amphetamine abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "91388009",
+      "display": "Psychoactive substance abuse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9769006",
+      "display": "Drug habituation (disorder)"
+    } ]
+  }
+}

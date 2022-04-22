@@ -1,0 +1,450 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.113883.3.67.1.101.3.2444",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.113883.3.67.1.101.3.2444",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.113883.3.67.1.101.3.2444"
+  } ],
+  "version": "20170504",
+  "name": "MajorDepressionIncludingRemission",
+  "title": "Major Depression Including Remission",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F32.0",
+      "display": "Major depressive disorder, single episode, mild"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F32.1",
+      "display": "Major depressive disorder, single episode, moderate"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F32.2",
+      "display": "Major depressive disorder, single episode, severe without psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F32.3",
+      "display": "Major depressive disorder, single episode, severe with psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F32.4",
+      "display": "Major depressive disorder, single episode, in partial remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F32.5",
+      "display": "Major depressive disorder, single episode, in full remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F32.9",
+      "display": "Major depressive disorder, single episode, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.0",
+      "display": "Major depressive disorder, recurrent, mild"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.1",
+      "display": "Major depressive disorder, recurrent, moderate"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.2",
+      "display": "Major depressive disorder, recurrent severe without psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.3",
+      "display": "Major depressive disorder, recurrent, severe with psychotic symptoms"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.40",
+      "display": "Major depressive disorder, recurrent, in remission, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.41",
+      "display": "Major depressive disorder, recurrent, in partial remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.42",
+      "display": "Major depressive disorder, recurrent, in full remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F33.9",
+      "display": "Major depressive disorder, recurrent, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "191601008",
+      "display": "Single major depressive episode, mild (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "191602001",
+      "display": "Single major depressive episode, moderate (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "191606003",
+      "display": "Single major depressive episode, in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "268620009",
+      "display": "Single major depressive episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-03",
+      "code": "191615005",
+      "display": "Recurrent major depressive episodes, in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "104851000119103",
+      "display": "Postpartum major depression in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10811121000119102",
+      "display": "Major depressive disorder in mother complicating childbirth (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10811161000119107",
+      "display": "Major depressive disorder in mother complicating pregnancy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14183003",
+      "display": "Chronic major depressive disorder, single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15193003",
+      "display": "Severe recurrent major depression with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15639000",
+      "display": "Moderate major depression, single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16264901000119109",
+      "display": "Recurrent moderate major depressive disorder co-occurrent with anxiety (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16265951000119109",
+      "display": "Mild major depressive disorder co-occurrent with anxiety single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16266831000119100",
+      "display": "Moderate major depressive disorder co-occurrent with anxiety single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16266991000119108",
+      "display": "Severe major depressive disorder co-occurrent with anxiety single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "18818009",
+      "display": "Moderate recurrent major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191604000",
+      "display": "Single major depressive episode, severe, with psychosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191610000",
+      "display": "Recurrent major depressive episodes, mild (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191611001",
+      "display": "Recurrent major depressive episodes, moderate (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191613003",
+      "display": "Recurrent major depressive episodes, severe, with psychosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19527009",
+      "display": "Single episode of major depression in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "20250007",
+      "display": "Severe major depression, single episode, with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231499006",
+      "display": "Endogenous depression first episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "251000119105",
+      "display": "Severe major depression, single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25922000",
+      "display": "Major depressive disorder, single episode with postpartum onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "2618002",
+      "display": "Chronic recurrent major depressive disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268621008",
+      "display": "Recurrent major depressive episodes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "274948002",
+      "display": "Endogenous depression - recurrent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281000119103",
+      "display": "Severe recurrent major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28475009",
+      "display": "Severe recurrent major depression with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300706003",
+      "display": "Endogenous depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30605009",
+      "display": "Major depression in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "319768000",
+      "display": "Recurrent major depressive disorder with melancholic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "320751009",
+      "display": "Major depression, melancholic type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "321717001",
+      "display": "Involutional depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33078009",
+      "display": "Severe recurrent major depression with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33135002",
+      "display": "Recurrent major depression in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33736005",
+      "display": "Severe major depression with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36474008",
+      "display": "Severe recurrent major depression without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36923009",
+      "display": "Major depression, single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370143000",
+      "display": "Major depressive disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38694004",
+      "display": "Recurrent major depressive disorder with atypical features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39809009",
+      "display": "Recurrent major depressive disorder with catatonic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40379007",
+      "display": "Mild recurrent major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42810003",
+      "display": "Major depression in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42925002",
+      "display": "Major depressive disorder, single episode with atypical features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "430852001",
+      "display": "Severe major depression, single episode, with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "450714000",
+      "display": "Severe major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46244001",
+      "display": "Recurrent major depression in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60099002",
+      "display": "Severe major depression with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63412003",
+      "display": "Major depression in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63778009",
+      "display": "Major depressive disorder, single episode with melancholic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66344007",
+      "display": "Recurrent major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68019004",
+      "display": "Recurrent major depression in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69392006",
+      "display": "Major depressive disorder, single episode with catatonic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70747007",
+      "display": "Major depression single episode, in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71336009",
+      "display": "Recurrent major depressive disorder with postpartum onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "719592004",
+      "display": "Moderately severe major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720451004",
+      "display": "Minimal recurrent major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720452006",
+      "display": "Moderately severe recurrent major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720453001",
+      "display": "Moderately severe major depression single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720454007",
+      "display": "Minimal major depression single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720455008",
+      "display": "Minimal major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "726772006",
+      "display": "Major depression with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73867007",
+      "display": "Severe major depression with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75084000",
+      "display": "Severe major depression without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76441001",
+      "display": "Severe major depression, single episode, without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77911002",
+      "display": "Severe major depression, single episode, with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79298009",
+      "display": "Mild major depression, single episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "832007",
+      "display": "Moderate major depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87512008",
+      "display": "Mild major depression (disorder)"
+    } ]
+  }
+}

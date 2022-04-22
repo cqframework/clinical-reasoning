@@ -1,0 +1,115 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.102.12.1012",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.102.12.1012",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.102.12.1012"
+  } ],
+  "version": "20170504",
+  "name": "AcuteTonsillitis",
+  "title": "Acute Tonsillitis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J03.00",
+      "display": "Acute streptococcal tonsillitis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J03.01",
+      "display": "Acute recurrent streptococcal tonsillitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J03.80",
+      "display": "Acute tonsillitis due to other specified organisms"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J03.81",
+      "display": "Acute recurrent tonsillitis due to other specified organisms"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J03.90",
+      "display": "Acute tonsillitis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J03.91",
+      "display": "Acute recurrent tonsillitis, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10629231000119109",
+      "display": "Recurrent acute streptococcal tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10629271000119107",
+      "display": "Acute tonsillitis caused by Streptococcus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "17741008",
+      "display": "Acute tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195666007",
+      "display": "Acute erythematous tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195668008",
+      "display": "Acute ulcerative tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195669000",
+      "display": "Acute catarrhal tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195670004",
+      "display": "Acute gangrenous tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195671000",
+      "display": "Acute bacterial tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195672007",
+      "display": "Acute pneumococcal tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195673002",
+      "display": "Acute staphylococcal tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195676005",
+      "display": "Acute viral tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195677001",
+      "display": "Recurrent acute tonsillitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302911003",
+      "display": "Acute lingual tonsillitis (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1302",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1302",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1302"
+  } ],
+  "version": "20170504",
+  "name": "Orphenadrine",
+  "title": "Orphenadrine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994521",
+      "display": "12 HR Orphenadrine Citrate 100 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994528",
+      "display": "Aspirin 385 MG / Caffeine 30 MG / Orphenadrine Citrate 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994535",
+      "display": "Aspirin 770 MG / Caffeine 60 MG / Orphenadrine Citrate 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994810",
+      "display": "Aspirin 428 MG / Caffeine 30 MG / Orphenadrine Citrate 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994811",
+      "display": "Aspirin 856 MG / Caffeine 60 MG / Orphenadrine Citrate 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994824",
+      "display": "Orphenadrine Hydrochloride 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994837",
+      "display": "Orphenadrine Hydrochloride 10 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994841",
+      "display": "Orphenadrine Citrate 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "994847",
+      "display": "Orphenadrine Hydrochloride 5 MG/ML Oral Solution"
+    } ]
+  }
+}

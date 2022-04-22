@@ -1,0 +1,60 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.211",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.211",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.211"
+  } ],
+  "version": "20170726",
+  "name": "InjectableFactorXaInhibitorforVTEProphylaxis",
+  "title": "Injectable Factor Xa Inhibitor for VTE Prophylaxis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861356",
+      "display": "0.8 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861360",
+      "display": "0.5 ML Fondaparinux sodium 5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861363",
+      "display": "0.4 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861365",
+      "display": "0.6 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861356",
+      "display": "0.8 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861360",
+      "display": "0.5 ML Fondaparinux sodium 5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861363",
+      "display": "0.4 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861365",
+      "display": "0.6 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+    } ]
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1444",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1444",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1444"
+  } ],
+  "version": "20200307",
+  "name": "Uveitis",
+  "title": "Uveitis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.111",
+      "display": "Panuveitis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.112",
+      "display": "Panuveitis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.113",
+      "display": "Panuveitis, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.131",
+      "display": "Sympathetic uveitis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.132",
+      "display": "Sympathetic uveitis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.133",
+      "display": "Sympathetic uveitis, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128473001",
+      "display": "Uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16553002",
+      "display": "Choroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186854007",
+      "display": "Uveitis due to secondary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231947004",
+      "display": "Anterior uveitis idiopathic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314029000",
+      "display": "Tuberculous uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314429009",
+      "display": "Intermediate uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33382000",
+      "display": "Panophthalmitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "336541000119107",
+      "display": "Acute anterior uveitis of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "342151000119100",
+      "display": "Acute anterior uveitis of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "347311000119100",
+      "display": "Acute anterior uveitis of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "398155003",
+      "display": "Chronic anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410473001",
+      "display": "Lyme uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410476009",
+      "display": "Uveitis due to leptospirosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410477000",
+      "display": "Infective uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410494003",
+      "display": "Lens-induced uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410501000",
+      "display": "Drug-induced uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410692006",
+      "display": "Anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413716003",
+      "display": "Brucellosis uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413851004",
+      "display": "Cidofovir-induced anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414600000",
+      "display": "Lepromatous anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414689001",
+      "display": "Metipranolol-induced anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414996002",
+      "display": "Pamidronic acid-induced uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415344002",
+      "display": "Rifabutin-induced anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415359008",
+      "display": "Sarcoid uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416666007",
+      "display": "Anterior uveitis in juvenile idiopathic arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417321001",
+      "display": "Human T-cell Lymphoma Virus Type -1 associated uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418839003",
+      "display": "Tubulointerstitial nephritis with uveitis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428676003",
+      "display": "Uveitis caused by ranibizumab (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43363007",
+      "display": "Posterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444248002",
+      "display": "Chronic inflammation of uveal tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4927003",
+      "display": "Acute anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64015001",
+      "display": "Subacute anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733317009",
+      "display": "Primary anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75315001",
+      "display": "Sympathetic uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75614007",
+      "display": "Panuveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "766933000",
+      "display": "Idiopathic panuveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95706000",
+      "display": "Phacoantigenic uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95707009",
+      "display": "Phacotoxic uveitis (disorder)"
+    } ]
+  }
+}

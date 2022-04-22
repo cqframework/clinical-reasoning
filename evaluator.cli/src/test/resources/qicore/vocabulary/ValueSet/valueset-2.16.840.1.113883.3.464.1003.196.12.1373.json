@@ -1,0 +1,85 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1373",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1373",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1373"
+  } ],
+  "version": "20170504",
+  "name": "AmitriptylineHydrochloride",
+  "title": "Amitriptyline Hydrochloride",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856706",
+      "display": "Amitriptyline Hydrochloride 10 MG / Perphenazine 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856720",
+      "display": "Amitriptyline Hydrochloride 10 MG / Perphenazine 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856762",
+      "display": "Amitriptyline Hydrochloride 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856769",
+      "display": "Amitriptyline Hydrochloride 12.5 MG / Chlordiazepoxide 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856773",
+      "display": "Amitriptyline Hydrochloride 150 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856783",
+      "display": "Amitriptyline Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856792",
+      "display": "Amitriptyline Hydrochloride 25 MG / Chlordiazepoxide 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856797",
+      "display": "Amitriptyline Hydrochloride 25 MG / Perphenazine 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856825",
+      "display": "Amitriptyline Hydrochloride 25 MG / Perphenazine 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856834",
+      "display": "Amitriptyline Hydrochloride 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856840",
+      "display": "Amitriptyline Hydrochloride 50 MG / Perphenazine 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856845",
+      "display": "Amitriptyline Hydrochloride 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "856853",
+      "display": "Amitriptyline Hydrochloride 75 MG Oral Tablet"
+    } ]
+  }
+}

@@ -1,0 +1,1265 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.112.12.1002",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.112.12.1002",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.112.12.1002"
+  } ],
+  "version": "20200310",
+  "name": "Syphilis",
+  "title": "Syphilis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.09",
+      "display": "Other early congenital syphilis, symptomatic"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.1",
+      "display": "Early congenital syphilis, latent"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.2",
+      "display": "Early congenital syphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.31",
+      "display": "Late congenital syphilitic interstitial keratitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.40",
+      "display": "Late congenital neurosyphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.41",
+      "display": "Late congenital syphilitic meningitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.42",
+      "display": "Late congenital syphilitic encephalitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.45",
+      "display": "Juvenile general paresis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.49",
+      "display": "Other late congenital neurosyphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.52",
+      "display": "Hutchinson's teeth"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.57",
+      "display": "Syphilitic saddle nose"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.59",
+      "display": "Other late congenital syphilis, symptomatic"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.6",
+      "display": "Late congenital syphilis, latent"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.7",
+      "display": "Late congenital syphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.9",
+      "display": "Congenital syphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.0",
+      "display": "Primary genital syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.1",
+      "display": "Primary anal syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.2",
+      "display": "Primary syphilis of other sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.31",
+      "display": "Condyloma latum"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.32",
+      "display": "Syphilitic alopecia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.39",
+      "display": "Other secondary syphilis of skin"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.41",
+      "display": "Secondary syphilitic meningitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.42",
+      "display": "Secondary syphilitic female pelvic disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.43",
+      "display": "Secondary syphilitic oculopathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.44",
+      "display": "Secondary syphilitic nephritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.45",
+      "display": "Secondary syphilitic hepatitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.46",
+      "display": "Secondary syphilitic osteopathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.49",
+      "display": "Other secondary syphilitic conditions"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.5",
+      "display": "Early syphilis, latent"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A51.9",
+      "display": "Early syphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.00",
+      "display": "Cardiovascular syphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.01",
+      "display": "Syphilitic aneurysm of aorta"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.02",
+      "display": "Syphilitic aortitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.03",
+      "display": "Syphilitic endocarditis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.04",
+      "display": "Syphilitic cerebral arteritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.05",
+      "display": "Other cerebrovascular syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.06",
+      "display": "Other syphilitic heart involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.09",
+      "display": "Other cardiovascular syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.10",
+      "display": "Symptomatic neurosyphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.11",
+      "display": "Tabes dorsalis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.12",
+      "display": "Other cerebrospinal syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.13",
+      "display": "Late syphilitic meningitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.14",
+      "display": "Late syphilitic encephalitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.15",
+      "display": "Late syphilitic neuropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.16",
+      "display": "Charcôt's arthropathy (tabetic)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.17",
+      "display": "General paresis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.19",
+      "display": "Other symptomatic neurosyphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.2",
+      "display": "Asymptomatic neurosyphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.3",
+      "display": "Neurosyphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.71",
+      "display": "Late syphilitic oculopathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.72",
+      "display": "Syphilis of lung and bronchus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.73",
+      "display": "Symptomatic late syphilis of other respiratory organs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.74",
+      "display": "Syphilis of liver and other viscera"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.75",
+      "display": "Syphilis of kidney and ureter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.76",
+      "display": "Other genitourinary symptomatic late syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.77",
+      "display": "Syphilis of bone and joint"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.78",
+      "display": "Syphilis of other musculoskeletal tissue"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.79",
+      "display": "Other symptomatic late syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.8",
+      "display": "Late syphilis, latent"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.9",
+      "display": "Late syphilis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A53.0",
+      "display": "Latent syphilis, unspecified as early or late"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A53.9",
+      "display": "Syphilis, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-09",
+      "code": "240553000",
+      "display": "Late congenital neurovascular syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-09",
+      "code": "34242002",
+      "display": "Syphilis in mother complicating pregnancy, childbirth AND/OR puerperium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "186899004",
+      "display": "Syphilis of synovium, tendon or bursa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "316841006",
+      "display": "Tabes dorsalis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "37028008",
+      "display": "Juvenile tabes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10345003",
+      "display": "Primary syphilis of tonsils (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1107004",
+      "display": "Early latent syphilis, positive serology, negative cerebrospinal fluid, with relapse after treatment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11338007",
+      "display": "Syphilitic episcleritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12232008",
+      "display": "Syphilitic aneurysm of aorta (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13095005",
+      "display": "Primary symptomatic early syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13310005",
+      "display": "Taboparesis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13731006",
+      "display": "Secondary symptomatic early syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16070004",
+      "display": "Syphilitic cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186833000",
+      "display": "Early congenital syphilis - latent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186842007",
+      "display": "Late congenital syphilitic oculopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186846005",
+      "display": "Early symptomatic syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186847001",
+      "display": "Primary genital syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186850003",
+      "display": "Secondary syphilis of skin and mucous membrane (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186854007",
+      "display": "Uveitis due to secondary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186861006",
+      "display": "Secondary syphilis relapse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186863009",
+      "display": "Acute secondary syphilitic meningitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186867005",
+      "display": "Latent early syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186868000",
+      "display": "Serological relapse after treatment of latent early syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186875004",
+      "display": "Syphilitic endocarditis of mitral valve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186877007",
+      "display": "Syphilitic endocarditis of tricuspid valve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186878002",
+      "display": "Syphilitic endocarditis of pulmonary valve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186903006",
+      "display": "Late latent syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "192008",
+      "display": "Congenital syphilitic hepatomegaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19206003",
+      "display": "Syphilitic acoustic neuritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "192647003",
+      "display": "Secondary syphilitic meningitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19290004",
+      "display": "Clutton's joints (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193786000",
+      "display": "Keratitis caused by syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194907008",
+      "display": "Acute syphilitic pericarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194947001",
+      "display": "Acute myocarditis - syphilitic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197305002",
+      "display": "Syphilitic portal cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197347003",
+      "display": "Hepatitis in late syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197348008",
+      "display": "Hepatitis in secondary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197757004",
+      "display": "Late syphilis of kidney (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197966009",
+      "display": "Syphilitic prostatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198175009",
+      "display": "Female syphilitic pelvic inflammatory disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199154009",
+      "display": "Maternal syphilis during pregnancy, childbirth and the puerperium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199156006",
+      "display": "Maternal syphilis during pregnancy - baby delivered (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199157002",
+      "display": "Maternal syphilis in the puerperium - baby delivered during current episode of care (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199158007",
+      "display": "Maternal syphilis during pregnancy - baby not yet delivered (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199159004",
+      "display": "Maternal syphilis in the puerperium - baby delivered during previous episode of care (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "202933002",
+      "display": "Bursitis caused by Treponema pallidum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "20735004",
+      "display": "Syphilitic aortitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "21523006",
+      "display": "Syphilitic gumma of central nervous system (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22386003",
+      "display": "Syphilitic optic atrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230152000",
+      "display": "Late congenital syphilitic meningitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230182006",
+      "display": "Late syphilitic encephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230563005",
+      "display": "Late congenital syphilitic polyneuropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230735006",
+      "display": "Syphilitic cerebral arteritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232313005",
+      "display": "Endocochlear syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232367004",
+      "display": "Nasal syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233849007",
+      "display": "Syphilitic valve disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234017002",
+      "display": "Syphilitic aneurysm (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235032001",
+      "display": "Syphilitic oral leukoplakia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235062007",
+      "display": "Oral syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235064008",
+      "display": "Syphilitic gumma of oral cavity (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235065009",
+      "display": "Syphilitic oral snail track ulcer (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23550005",
+      "display": "Syphilis of bursa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237446005",
+      "display": "Syphilis of breast (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237447001",
+      "display": "Primary syphilis of nipple (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240552005",
+      "display": "Juvenile tabes dorsalis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240554006",
+      "display": "Hutchinson's triad (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240555007",
+      "display": "Acquired syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240556008",
+      "display": "Primary extragenital syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240557004",
+      "display": "Secondary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240558009",
+      "display": "Macular syphilide (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240560006",
+      "display": "Papular syphilide (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240562003",
+      "display": "Pustular syphilide (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240563008",
+      "display": "Syphilitic mucosal ulceration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240564002",
+      "display": "Secondary neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240565001",
+      "display": "Asymptomatic secondary neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240566000",
+      "display": "Gummatous neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240567009",
+      "display": "Syphilitic coronary artery disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240568004",
+      "display": "Meningovascular syphilis - quaternary stage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240569007",
+      "display": "Syphilitic polyneuropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26039008",
+      "display": "Neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26135000",
+      "display": "Syphilitic encephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266125005",
+      "display": "Early congenital syphilis with symptoms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266126006",
+      "display": "Late congenital neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266127002",
+      "display": "Primary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266128007",
+      "display": "Rash of secondary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266130009",
+      "display": "Acquired syphilis - early latent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266133006",
+      "display": "Late quaternary neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266136003",
+      "display": "Acquired syphilis - late latent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27460003",
+      "display": "Primary syphilis of breast (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275376007",
+      "display": "Congenital syphilitic chronic coryza (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27648007",
+      "display": "Congenital syphilitic periostitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "276700005",
+      "display": "Congenital syphilitic rhinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "278480000",
+      "display": "Syphilitic endocarditis of aortic valve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "278481001",
+      "display": "Quaternary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28198007",
+      "display": "Primary syphilis of lip (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30080002",
+      "display": "Secondary syphilitic iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302813001",
+      "display": "Syphilitic acoustic neuritis - quaternary stage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31015008",
+      "display": "Primary anal syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31137003",
+      "display": "Early latent syphilis, positive serology, negative cerebrospinal fluid, less than 2 years after infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312934004",
+      "display": "Syphilitic chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312955002",
+      "display": "Tertiary syphilitic chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314840009",
+      "display": "Progressive locomotor ataxia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315826004",
+      "display": "Tabetic neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32735002",
+      "display": "Congenital syphilitic encephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35742006",
+      "display": "Congenital syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3589003",
+      "display": "Syphilitic pericarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36276008",
+      "display": "Syphilitic retrobulbar neuritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371237000",
+      "display": "Syphilitic skin disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37430004",
+      "display": "Syphilis of synovium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37754005",
+      "display": "Asymptomatic neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38523005",
+      "display": "Syphilitic parkinsonism (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39085002",
+      "display": "Secondary syphilis of mucous membrane (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402940004",
+      "display": "Syphilitic chancre of penis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402941000",
+      "display": "Syphilitic chancre of vulva (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402942007",
+      "display": "Syphilitic chancre of oral mucous membranes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402943002",
+      "display": "Syphilitic balanitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402944008",
+      "display": "Condylomata lata of perianal skin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402945009",
+      "display": "Condylomata lata of penis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402946005",
+      "display": "Condylomata lata of vulva (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402947001",
+      "display": "Late secondary syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402949003",
+      "display": "Nodular syphilide (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402950003",
+      "display": "Syphilitic leukoplakia of tongue (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402951004",
+      "display": "Oral mucous membrane lesion due to late syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "405635002",
+      "display": "Late syphilis with clinical manifestations other than neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4082005",
+      "display": "Syphilitic myocarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410470003",
+      "display": "Syphilitic retinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410478005",
+      "display": "Ocular syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42770003",
+      "display": "Syphilis of tricuspid valve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4359001",
+      "display": "Early congenital syphilis (less than 2 years) (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444150000",
+      "display": "Latent syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44568006",
+      "display": "Syphilitic interstitial keratitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4483005",
+      "display": "Syphilitic punched out ulcer (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45058001",
+      "display": "Syphilis of pulmonary valve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46235002",
+      "display": "Early latent congenital syphilis, positive serology, negative spinal fluid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49923008",
+      "display": "Syphilis of tendon (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50528008",
+      "display": "Syphilis of bone (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51928006",
+      "display": "General paresis - neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51960003",
+      "display": "Secondary syphilis of pharynx (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52414005",
+      "display": "Secondary syphilis of vulva (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54069001",
+      "display": "Congenital syphilitic mucous patches (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54274001",
+      "display": "Primary syphilis of fingers (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55768006",
+      "display": "Syphilitic leukoderma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56118002",
+      "display": "Congenital syphilitic splenomegaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58056005",
+      "display": "Syphilis of mitral valve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58227000",
+      "display": "Secondary syphilis of viscera (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58392004",
+      "display": "Congenital syphilitic osteochondritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59233003",
+      "display": "Secondary syphilis of skin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59307008",
+      "display": "Syphilitic alopecia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59530001",
+      "display": "Syphilis of kidney (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59721007",
+      "display": "Congenital syphilitic pemphigus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59934002",
+      "display": "Secondary syphilitic adenopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60528006",
+      "display": "Secondary syphilis of mouth (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61612001",
+      "display": "Syphilitic aortic incompetence (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62207008",
+      "display": "Syphilitic ostial coronary disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6267005",
+      "display": "Congenital syphilitic meningitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62861003",
+      "display": "Secondary syphilis, relapse (untreated) (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63751007",
+      "display": "Secondary syphilis of bone (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64102008",
+      "display": "Syphilitic gumma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66281009",
+      "display": "Secondary syphilitic chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66887000",
+      "display": "Late syphilis, latent (positive serology, negative cephalospinal fluid 2 years after) (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67125004",
+      "display": "Latent syphilis with positive serology (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67391006",
+      "display": "Syphilitic endocarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68764005",
+      "display": "Juvenile taboparesis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69595007",
+      "display": "Secondary syphilitic periostitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713251003",
+      "display": "Gingival disease caused by Treponema pallidum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72083004",
+      "display": "Late syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735515000",
+      "display": "Symptomatic late congenital syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736686006",
+      "display": "Chancre caused by Treponema pallidum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75299005",
+      "display": "Spastic spinal syphilitic paralysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76272004",
+      "display": "Syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77028001",
+      "display": "Secondary syphilis of anus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77939001",
+      "display": "Syphilitic disseminated retinochoroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "80770009",
+      "display": "Secondary syphilis of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81339006",
+      "display": "Secondary syphilis of tonsil (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82323002",
+      "display": "Late congenital syphilis (2 years OR more) (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82355002",
+      "display": "Syphilitic aortic stenosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "827006",
+      "display": "Late congenital syphilis, latent (positive serology - cerebrospinal fluid, 2 years OR more) (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82959004",
+      "display": "Dementia paralytica juvenilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83883001",
+      "display": "Cardiovascular syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8555001",
+      "display": "Syphilis of lung (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85857008",
+      "display": "Secondary syphilis, relapse (treated) (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86028001",
+      "display": "Syphilis of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86443005",
+      "display": "Hutchinson's teeth (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87318008",
+      "display": "Congenital syphilis with gumma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88943008",
+      "display": "Syphilis of muscle (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "91554004",
+      "display": "Condyloma latum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9941009",
+      "display": "Congenital syphilitic choroiditis (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1047.514",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1047.514",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1047.514"
+  } ],
+  "version": "20190313",
+  "name": "FindingofElevatedBloodPressureorHypertension",
+  "title": "Finding of Elevated Blood Pressure or Hypertension",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "R03.0",
+      "display": "Elevated blood-pressure reading, without diagnosis of hypertension"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198941007",
+      "display": "Hypertension complicating pregnancy, childbirth and the puerperium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24184005",
+      "display": "Finding of increased blood pressure (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31992008",
+      "display": "Secondary hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371622005",
+      "display": "Elevated blood pressure reading without diagnosis of hypertension (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38341003",
+      "display": "Hypertensive disorder, systemic arterial (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443482000",
+      "display": "Hypertensive urgency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48146000",
+      "display": "Diastolic hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48194001",
+      "display": "Pregnancy-induced hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56218007",
+      "display": "Systolic hypertension (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,325 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.109.12.1028",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.109.12.1028",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.109.12.1028"
+  } ],
+  "version": "20170504",
+  "name": "KidneyFailure",
+  "title": "Kidney Failure",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N17.0",
+      "display": "Acute kidney failure with tubular necrosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N17.1",
+      "display": "Acute kidney failure with acute cortical necrosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N17.2",
+      "display": "Acute kidney failure with medullary necrosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N17.8",
+      "display": "Other acute kidney failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N17.9",
+      "display": "Acute kidney failure, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.1",
+      "display": "Chronic kidney disease, stage 1"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.2",
+      "display": "Chronic kidney disease, stage 2 (mild)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.3",
+      "display": "Chronic kidney disease, stage 3 (moderate)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.4",
+      "display": "Chronic kidney disease, stage 4 (severe)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.5",
+      "display": "Chronic kidney disease, stage 5"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.6",
+      "display": "End stage renal disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.9",
+      "display": "Chronic kidney disease, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N19",
+      "display": "Unspecified kidney failure"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "584.5",
+      "display": "Acute kidney failure with lesion of tubular necrosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "584.6",
+      "display": "Acute kidney failure with lesion of renal cortical necrosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "584.7",
+      "display": "Acute kidney failure with lesion of renal medullary [papillary] necrosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "584.8",
+      "display": "Acute kidney failure with other specified pathological lesion in kidney"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "584.9",
+      "display": "Acute kidney failure, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "585.1",
+      "display": "Chronic kidney disease, Stage I"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "585.2",
+      "display": "Chronic kidney disease, Stage II (mild)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "585.3",
+      "display": "Chronic kidney disease, Stage III (moderate)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "585.4",
+      "display": "Chronic kidney disease, Stage IV (severe)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "585.5",
+      "display": "Chronic kidney disease, Stage V"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "585.6",
+      "display": "End stage renal disease"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "585.9",
+      "display": "Chronic kidney disease, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "586",
+      "display": "Renal failure, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "587",
+      "display": "Renal sclerosis, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129151000119102",
+      "display": "Chronic kidney disease stage 4 due to hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129171000119106",
+      "display": "Chronic kidney disease stage 3 due to hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129181000119109",
+      "display": "Chronic kidney disease stage 2 due to hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "140111000119107",
+      "display": "Hypertension in chronic kidney disease stage 4 due to type 2 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "140131000119102",
+      "display": "Hypertension in chronic kidney disease stage 2 due to type 2 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "145681000119101",
+      "display": "Acute renal failure due to tubular necrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14669001",
+      "display": "Acute renal failure syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236434000",
+      "display": "End stage renal failure untreated by renal replacement therapy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236435004",
+      "display": "End stage renal failure on dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236436003",
+      "display": "End stage renal failure with renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284981000119102",
+      "display": "Chronic kidney disease stage 2 due to benign hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "285001000119105",
+      "display": "Chronic kidney disease stage 4 due to benign hypertension (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "285861000119100",
+      "display": "Malignant hypertensive chronic kidney disease stage 2 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "285881000119109",
+      "display": "Malignant hypertensive chronic kidney disease stage 4 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429224003",
+      "display": "Acute renal failure due to acute cortical necrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "431855005",
+      "display": "Chronic kidney disease stage 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "431857002",
+      "display": "Chronic kidney disease stage 4 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "433144002",
+      "display": "Chronic kidney disease stage 3 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "433146000",
+      "display": "Chronic kidney disease stage 5 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46177005",
+      "display": "End-stage renal disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "700378005",
+      "display": "Chronic kidney disease stage 3A (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "700379002",
+      "display": "Chronic kidney disease stage 3B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "711000119100",
+      "display": "Chronic kidney disease stage 5 due to type 2 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721000119107",
+      "display": "Chronic kidney disease stage 4 due to type 2 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722098007",
+      "display": "Chronic kidney disease following donor nephrectomy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722149000",
+      "display": "Chronic kidney disease following excision of renal neoplasm (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722150000",
+      "display": "Chronic kidney disease due to systemic infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722467000",
+      "display": "Chronic kidney disease due to traumatic loss of kidney (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "723190009",
+      "display": "Chronic renal insufficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "731000119105",
+      "display": "Chronic kidney disease stage 3 due to type 2 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90741000119107",
+      "display": "Chronic kidney disease stage 3 due to type 1 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90751000119109",
+      "display": "Chronic kidney disease stage 4 due to type 1 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "96721000119103",
+      "display": "Hypertensive heart AND chronic kidney disease stage 4 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "96741000119109",
+      "display": "Hypertensive heart AND chronic kidney disease stage 2 (disorder)"
+    } ]
+  }
+}

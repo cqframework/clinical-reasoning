@@ -1,0 +1,855 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.112.12.1001",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.112.12.1001",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.112.12.1001"
+  } ],
+  "version": "20200310",
+  "name": "GonococcalInfectionsandVenerealDiseases",
+  "title": "Gonococcal Infections and Venereal Diseases",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.01",
+      "display": "Early congenital syphilitic oculopathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.02",
+      "display": "Early congenital syphilitic osteochondropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.03",
+      "display": "Early congenital syphilitic pharyngitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.04",
+      "display": "Early congenital syphilitic pneumonia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.05",
+      "display": "Early congenital syphilitic rhinitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.06",
+      "display": "Early cutaneous congenital syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.07",
+      "display": "Early mucocutaneous congenital syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.08",
+      "display": "Early visceral congenital syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.30",
+      "display": "Late congenital syphilitic oculopathy, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.32",
+      "display": "Late congenital syphilitic chorioretinitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.39",
+      "display": "Other late congenital syphilitic oculopathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.43",
+      "display": "Late congenital syphilitic polyneuropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.44",
+      "display": "Late congenital syphilitic optic nerve atrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.51",
+      "display": "Clutton's joints"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.53",
+      "display": "Hutchinson's triad"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.54",
+      "display": "Late congenital cardiovascular syphilis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.55",
+      "display": "Late congenital syphilitic arthropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A50.56",
+      "display": "Late congenital syphilitic osteochondropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.00",
+      "display": "Gonococcal infection of lower genitourinary tract, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.01",
+      "display": "Gonococcal cystitis and urethritis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.02",
+      "display": "Gonococcal vulvovaginitis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.03",
+      "display": "Gonococcal cervicitis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.09",
+      "display": "Other gonococcal infection of lower genitourinary tract"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.1",
+      "display": "Gonococcal infection of lower genitourinary tract with periurethral and accessory gland abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.21",
+      "display": "Gonococcal infection of kidney and ureter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.22",
+      "display": "Gonococcal prostatitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.23",
+      "display": "Gonococcal infection of other male genital organs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.24",
+      "display": "Gonococcal female pelvic inflammatory disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.29",
+      "display": "Other gonococcal genitourinary infections"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.30",
+      "display": "Gonococcal infection of eye, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.31",
+      "display": "Gonococcal conjunctivitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.32",
+      "display": "Gonococcal iridocyclitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.33",
+      "display": "Gonococcal keratitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.39",
+      "display": "Other gonococcal eye infection"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.40",
+      "display": "Gonococcal infection of musculoskeletal system, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.41",
+      "display": "Gonococcal spondylopathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.42",
+      "display": "Gonococcal arthritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.43",
+      "display": "Gonococcal osteomyelitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.49",
+      "display": "Gonococcal infection of other musculoskeletal tissue"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.5",
+      "display": "Gonococcal pharyngitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.6",
+      "display": "Gonococcal infection of anus and rectum"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.81",
+      "display": "Gonococcal meningitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.82",
+      "display": "Gonococcal brain abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.83",
+      "display": "Gonococcal heart infection"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.84",
+      "display": "Gonococcal pneumonia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.85",
+      "display": "Gonococcal peritonitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.86",
+      "display": "Gonococcal sepsis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.89",
+      "display": "Other gonococcal infections"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A54.9",
+      "display": "Gonococcal infection, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A57",
+      "display": "Chancroid"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A58",
+      "display": "Granuloma inguinale"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A63.0",
+      "display": "Anogenital (venereal) warts"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A63.8",
+      "display": "Other specified predominantly sexually transmitted diseases"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A64",
+      "display": "Unspecified sexually transmitted disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A69.0",
+      "display": "Necrotizing ulcerative stomatitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A69.1",
+      "display": "Other Vincent's infections"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A69.8",
+      "display": "Other specified spirochetal infections"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A69.9",
+      "display": "Spirochetal infection, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-09",
+      "code": "266138002",
+      "display": "Gonococcal synovitis or tenosynovitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "35255008",
+      "display": "Gonorrhea in mother complicating pregnancy, childbirth AND/OR puerperium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1087021000119101",
+      "display": "Periurethral abscess caused by Neisseria gonorrhoeae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1087041000119107",
+      "display": "Infection of kidney and ureter caused by Neisseria gonorrhoeae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1087051000119109",
+      "display": "Gonococcal osteomyelitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "110041000119104",
+      "display": "Reactive arthritis co-occurrent and due to nonspecific urethritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111806005",
+      "display": "Acute gonococcal prostatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111807001",
+      "display": "Gonococcal endophthalmia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "114881000119108",
+      "display": "Maternal gonorrhea during pregnancy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11906007",
+      "display": "Chronic gonococcal vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12373006",
+      "display": "Chronic gonococcal bartholinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "151004",
+      "display": "Gonococcal meningitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15628003",
+      "display": "Gonorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16217981000119107",
+      "display": "Infection of upper genitourinary tract caused by Neisseria gonorrheae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "17305005",
+      "display": "Acute gonorrhea of genitourinary tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186915005",
+      "display": "Chronic gonorrhea lower genitourinary tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186931002",
+      "display": "Gonococcal anal infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186939000",
+      "display": "Gonococcal peritonitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186946009",
+      "display": "Lymphogranuloma venereum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197848003",
+      "display": "Gonococcal cystitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197967000",
+      "display": "Gonococcal prostatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198242009",
+      "display": "Female gonococcal pelvic inflammatory disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199161008",
+      "display": "Maternal gonorrhea during pregnancy, childbirth and the puerperium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199163006",
+      "display": "Maternal gonorrhea during pregnancy - baby delivered (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199164000",
+      "display": "Maternal gonorrhea in the puerperium - baby delivered during current episode of care (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199165004",
+      "display": "Maternal gonorrhea during pregnancy - baby not yet delivered (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "199166003",
+      "display": "Maternal gonorrhea in the puerperium - baby delivered during previous episode of care (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "20943002",
+      "display": "Acute gonococcal cervicitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231858009",
+      "display": "Gonococcal conjunctivitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235861001",
+      "display": "Abscess gonococcal (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235863003",
+      "display": "Gonococcal hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236682002",
+      "display": "Gonococcal urethritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236687008",
+      "display": "Gonococcal urethral abscess (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236766009",
+      "display": "Gonococcal epididymitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236772009",
+      "display": "Gonococcal epididymo-orchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237038001",
+      "display": "Gonococcal salpingitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237042003",
+      "display": "Gonococcal perihepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237046000",
+      "display": "Gonococcal tubo-ovarian abscess (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237069002",
+      "display": "Gonococcal endometritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237083000",
+      "display": "Gonococcal cervicitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237095000",
+      "display": "Gonococcal vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237096004",
+      "display": "Neonatal gonococcal vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238419002",
+      "display": "Gonococcal lymphangitis of penis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "2390000",
+      "display": "Acute gonococcal vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23975003",
+      "display": "Chronic gonococcal seminal vesiculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239785008",
+      "display": "Post-dysenteric reactive arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239808004",
+      "display": "Juvenile reactive arthritis triad (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240039005",
+      "display": "Gonococcal tenosynovitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240571007",
+      "display": "Neonatal gonococcal infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240572000",
+      "display": "Gonorrhea with local complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240573005",
+      "display": "Gonococcal Bartholin's gland abscess (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240574004",
+      "display": "Gonococcal Skenitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240575003",
+      "display": "Gonococcal Tysonitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240576002",
+      "display": "Gonococcal Cowperitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240577006",
+      "display": "Gonococcal Littritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240578001",
+      "display": "Gonococcal Littré gland abscess (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240579009",
+      "display": "Gonococcal paraurethral gland abscess (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240581006",
+      "display": "Gonococcal female pelvic infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240582004",
+      "display": "Gonococcal synovitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240583009",
+      "display": "Cutaneous gonorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240602008",
+      "display": "Early lymphogranuloma venereum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240603003",
+      "display": "Late lymphogranuloma venereum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240604009",
+      "display": "Latent lymphogranuloma venereum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24868007",
+      "display": "Acute gonococcal cystitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "272006008",
+      "display": "Gonococcal arthritis dermatitis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "272262003",
+      "display": "Esthiomene (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27681008",
+      "display": "Chronic gonorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28438004",
+      "display": "Gonococcal conjunctivitis neonatorum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28572009",
+      "display": "Chronic gonorrhea of genitourinary tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29864006",
+      "display": "Acute gonococcal urethritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30168008",
+      "display": "Acute gonococcal epididymo-orchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "301990003",
+      "display": "Gonococcal seminal vesiculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307423008",
+      "display": "Gonococcal pelvic peritonitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31999004",
+      "display": "Chronic gonococcal endometritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35526001",
+      "display": "Chronic gonococcal epididymo-orchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35876006",
+      "display": "Gonococcal infection of eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40149008",
+      "display": "Gonococcal keratitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402956009",
+      "display": "Localized cutaneous gonococcal infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402957000",
+      "display": "Gonococcal bartholinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402958005",
+      "display": "Pustular vasculitis caused by gonococcal bacteraemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406581000",
+      "display": "Gonococcal infection of the central nervous system (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42746002",
+      "display": "Gonorrhea of rectum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44412000",
+      "display": "Chronic gonococcal urethritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444834005",
+      "display": "Abscess of urethral gland caused by Neisseria gonorrhoeae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44743006",
+      "display": "Gonococcal infection of joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45377007",
+      "display": "Acute gonococcal salpingitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46699001",
+      "display": "Bursitis caused by Neisseria gonorrhoeae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5085001",
+      "display": "Gonococcemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50970007",
+      "display": "Acute gonorrhea of upper genitourinary tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53529004",
+      "display": "Chronic gonococcal salpingitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53664003",
+      "display": "Gonococcal spondylitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54825009",
+      "display": "Acute gonorrhea of lower genitourinary tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60335002",
+      "display": "Gonococcal keratosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60893000",
+      "display": "Chronic gonococcal prostatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61048000",
+      "display": "Gonococcal endocarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65049003",
+      "display": "Acute gonococcal seminal vesiculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65295003",
+      "display": "Acute gonococcal endometritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67224007",
+      "display": "Reactive arthritis triad (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713261005",
+      "display": "Gingival disease caused by Neisseria gonorrhoeae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "719755001",
+      "display": "Conjunctivitis of adulthood caused by Neisseria gonorrhoea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72225002",
+      "display": "Urethral stricture due to gonococcal infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74372003",
+      "display": "Gonorrhea of pharynx (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762257007",
+      "display": "Disseminated infection caused by Neisseria gonorrhoeae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76802005",
+      "display": "Chronic gonococcal cervicitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "80388004",
+      "display": "Chronic gonorrhea of upper genitourinary tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "80604007",
+      "display": "Acute gonococcal bartholinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88813005",
+      "display": "Chronic gonococcal cystitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9091006",
+      "display": "Gonococcal iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9241004",
+      "display": "Gonococcal heart disease (disorder)"
+    } ]
+  }
+}

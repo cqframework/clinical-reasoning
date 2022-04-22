@@ -1,0 +1,95 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1412",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1412",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1412"
+  } ],
+  "version": "20200307",
+  "name": "Cataract,Congenital",
+  "title": "Cataract, Congenital",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q12.0",
+      "display": "Congenital cataract"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "204128001",
+      "display": "Congenital lamellar cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "204138006",
+      "display": "Congenital blue dot cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "204139003",
+      "display": "Congenital membranous cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "21590003",
+      "display": "Congenital zonular cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "253223002",
+      "display": "Congenital polar cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "253224008",
+      "display": "Congenital anterior polar cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "253225009",
+      "display": "Congenital posterior polar cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "253226005",
+      "display": "Congenital sutural cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "253227001",
+      "display": "Rubella cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28550007",
+      "display": "Congenital capsular cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29590001",
+      "display": "Congenital total cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66499004",
+      "display": "Congenital cortical cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76562003",
+      "display": "Congenital subcapsular cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79410001",
+      "display": "Congenital cataract (disorder)"
+    } ]
+  }
+}

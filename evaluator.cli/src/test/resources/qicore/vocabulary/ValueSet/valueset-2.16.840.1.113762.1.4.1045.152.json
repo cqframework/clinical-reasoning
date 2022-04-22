@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.152",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.152",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1045.152"
+  } ],
+  "version": "20200307",
+  "name": "Bodytemperature",
+  "title": "Body temperature",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8310-5",
+      "display": "Body temperature"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8328-7",
+      "display": "Axillary temperature"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8329-5",
+      "display": "Body temperature - Core"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8331-1",
+      "display": "Oral temperature"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8332-9",
+      "display": "Rectal temperature"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8333-7",
+      "display": "Tympanic membrane temperature"
+    } ]
+  }
+}

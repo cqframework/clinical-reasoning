@@ -1,0 +1,605 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1005",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1005",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1005"
+  } ],
+  "version": "20200306",
+  "name": "Dementia&MentalDegenerations",
+  "title": "Dementia & Mental Degenerations",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A52.17",
+      "display": "General paresis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F01.50",
+      "display": "Vascular dementia without behavioral disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F01.51",
+      "display": "Vascular dementia with behavioral disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F02.80",
+      "display": "Dementia in other diseases classified elsewhere without behavioral disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F02.81",
+      "display": "Dementia in other diseases classified elsewhere with behavioral disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F03.90",
+      "display": "Unspecified dementia without behavioral disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F03.91",
+      "display": "Unspecified dementia with behavioral disturbance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F05",
+      "display": "Delirium due to known physiological condition"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F06.8",
+      "display": "Other specified mental disorders due to known physiological condition"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G30.0",
+      "display": "Alzheimer's disease with early onset"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G30.1",
+      "display": "Alzheimer's disease with late onset"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G30.8",
+      "display": "Other Alzheimer's disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G30.9",
+      "display": "Alzheimer's disease, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G31.01",
+      "display": "Pick's disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G31.09",
+      "display": "Other frontotemporal dementia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G31.83",
+      "display": "Dementia with Lewy bodies"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10349009",
+      "display": "Multi-infarct dementia with delirium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10532003",
+      "display": "Primary degenerative dementia of the Alzheimer type, presenile onset, with depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111480006",
+      "display": "Psychoactive substance-induced organic dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12348006",
+      "display": "Presenile dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14070001",
+      "display": "Multi-infarct dementia with depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15662003",
+      "display": "Senile dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191449005",
+      "display": "Uncomplicated senile dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191451009",
+      "display": "Uncomplicated presenile dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191452002",
+      "display": "Presenile dementia with delirium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191454001",
+      "display": "Presenile dementia with paranoia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191455000",
+      "display": "Presenile dementia with depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191457008",
+      "display": "Senile dementia with depressive or paranoid features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191458003",
+      "display": "Senile dementia with paranoia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191459006",
+      "display": "Senile dementia with depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191461002",
+      "display": "Senile dementia with delirium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191463004",
+      "display": "Uncomplicated arteriosclerotic dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191464005",
+      "display": "Arteriosclerotic dementia with delirium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191465006",
+      "display": "Arteriosclerotic dementia with paranoia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191466007",
+      "display": "Arteriosclerotic dementia with depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191493005",
+      "display": "Drug-induced dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22381000119105",
+      "display": "Primary degenerative dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230258005",
+      "display": "Amyotrophic lateral sclerosis with dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230270009",
+      "display": "Frontotemporal dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230282000",
+      "display": "Post-traumatic dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230283005",
+      "display": "Punch drunk syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230285003",
+      "display": "Vascular dementia of acute onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230286002",
+      "display": "Subcortical vascular dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230287006",
+      "display": "Mixed cortical and subcortical vascular dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230288001",
+      "display": "Semantic dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230289009",
+      "display": "Patchy dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25772007",
+      "display": "Multi-infarct dementia with delusions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26852004",
+      "display": "Primary degenerative dementia of the Alzheimer type, senile onset, with depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "278857002",
+      "display": "Dementia of frontal lobe type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "279982005",
+      "display": "Cerebral degeneration presenting primarily with dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281004",
+      "display": "Dementia associated with alcoholism (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31081000119101",
+      "display": "Presenile dementia with delusions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312991009",
+      "display": "Senile dementia of the Lewy body type (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32875003",
+      "display": "Inhalant-induced persisting dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371024007",
+      "display": "Senile dementia with delusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371026009",
+      "display": "Senile dementia with psychosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416780008",
+      "display": "Primary degenerative dementia of the Alzheimer type, presenile onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420614009",
+      "display": "Organic dementia associated with acquired immunodeficiency syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "421023003",
+      "display": "Presenile dementia associated with acquired immunodeficiency syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "421529006",
+      "display": "Dementia associated with acquired immunodeficiency syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425390006",
+      "display": "Dementia associated with Parkinson's Disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429458009",
+      "display": "Dementia due to Creutzfeldt Jakob disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429998004",
+      "display": "Vascular dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "430771000124100",
+      "display": "Moderate dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442344002",
+      "display": "Dementia due to Huntington chorea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4817008",
+      "display": "Primary degenerative dementia of the Alzheimer type, senile onset, with delirium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51928006",
+      "display": "General paresis - neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52448006",
+      "display": "Dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54502004",
+      "display": "Primary degenerative dementia of the Alzheimer type, presenile onset, with delusions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55009008",
+      "display": "Primary degenerative dementia of the Alzheimer type, senile onset, with delusions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56267009",
+      "display": "Multi-infarct dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59651006",
+      "display": "Sedative, hypnotic AND/OR anxiolytic-induced persisting dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62239001",
+      "display": "Parkinson-dementia complex of Guam (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6475002",
+      "display": "Primary degenerative dementia of the Alzheimer type, presenile onset, uncomplicated (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65096006",
+      "display": "Primary degenerative dementia of the Alzheimer type, presenile onset, with delirium (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66108005",
+      "display": "Primary degenerative dementia of the Alzheimer type, senile onset, uncomplicated (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698624003",
+      "display": "Dementia associated with cerebral lipidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698625002",
+      "display": "Dementia associated with normal pressure hydrocephalus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698626001",
+      "display": "Dementia associated with multiple sclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698687007",
+      "display": "Post-traumatic dementia with behavioral change (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698725008",
+      "display": "Dementia associated with neurosyphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698726009",
+      "display": "Dementia associated with viral encephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698781002",
+      "display": "Dementia associated with cerebral anoxia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "702393003",
+      "display": "Frontotemporal dementia with gene located on 3p11 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "702426001",
+      "display": "GRN-related frontotemporal dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "702429008",
+      "display": "Frontotemporal dementia with parkinsonism-17 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703544004",
+      "display": "Inclusion body myopathy with early-onset Paget disease and frontotemporal dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70936005",
+      "display": "Multi-infarct dementia, uncomplicated (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713488003",
+      "display": "Presenile dementia co-occurrent with human immunodeficiency virus infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713844000",
+      "display": "Dementia co-occurrent with human immunodeficiency virus infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "715737004",
+      "display": "Parkinsonism co-occurrent with dementia of Guadeloupe (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "716667005",
+      "display": "Right temporal atrophy variant frontotemporal dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "716994006",
+      "display": "Behavioral variant of frontotemporal dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722977005",
+      "display": "Dementia co-occurrent and due to neurocysticercosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722978000",
+      "display": "Dementia caused by toxin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722979008",
+      "display": "Dementia due to metabolic abnormality (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722980006",
+      "display": "Dementia due to chromosomal anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "723123001",
+      "display": "Ischemic vascular dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "723390000",
+      "display": "Rapidly progressive dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724776007",
+      "display": "Dementia due to disorder of central nervous system (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724777003",
+      "display": "Dementia due to infectious disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "724992007",
+      "display": "Epilepsy co-occurrent and due to dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "725898002",
+      "display": "Delirium co-occurrent with dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733184002",
+      "display": "Dementia caused by heavy metal exposure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733185001",
+      "display": "Dementia following injury caused by exposure to ionizing radiation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733190003",
+      "display": "Dementia due to primary malignant neoplasm of brain (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733191004",
+      "display": "Dementia due to chronic subdural hematoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733192006",
+      "display": "Dementia due to herpes encephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733193001",
+      "display": "Dementia co-occurrent and due to progressive multifocal leukoencephalopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "733194007",
+      "display": "Dementia co-occurrent and due to Down syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762350007",
+      "display": "Dementia due to prion disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762351006",
+      "display": "Dementia due to and following injury of head (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762707000",
+      "display": "Subcortical dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79341000119107",
+      "display": "Mixed dementia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82959004",
+      "display": "Dementia paralytica juvenilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90099008",
+      "display": "Subcortical leukoencephalopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9345005",
+      "display": "Dialysis dementia (disorder)"
+    } ]
+  }
+}

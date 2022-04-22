@@ -1,0 +1,90 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.139",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.139",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1045.139"
+  } ],
+  "version": "20200307",
+  "name": "Bicarbonatelabtest",
+  "title": "Bicarbonate lab test",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14627-4",
+      "display": "Bicarbonate [Moles/volume] in Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19223-7",
+      "display": "Carbon dioxide, total [Moles/volume] in Mixed venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19229-4",
+      "display": "Bicarbonate [Moles/volume] in Mixed venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19230-2",
+      "display": "Bicarbonate [Moles/volume] standard in Arterial blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19232-8",
+      "display": "Bicarbonate [Moles/volume] standard in Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19233-6",
+      "display": "Bicarbonate [Moles/volume] standard in Mixed venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1959-6",
+      "display": "Bicarbonate [Moles/volume] in Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1960-4",
+      "display": "Bicarbonate [Moles/volume] in Arterial blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1963-8",
+      "display": "Bicarbonate [Moles/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2026-3",
+      "display": "Carbon dioxide, total [Moles/volume] in Arterial blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2027-1",
+      "display": "Carbon dioxide, total [Moles/volume] in Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2028-9",
+      "display": "Carbon dioxide, total [Moles/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20565-8",
+      "display": "Carbon dioxide, total [Moles/volume] in Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77143-6",
+      "display": "Carbon dioxide, total [Moles/volume] in Serum, Plasma or Blood"
+    } ]
+  }
+}

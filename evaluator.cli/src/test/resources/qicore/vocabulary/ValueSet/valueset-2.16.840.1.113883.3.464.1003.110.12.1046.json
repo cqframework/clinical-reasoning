@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1046",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1046",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1046"
+  } ],
+  "version": "20170504",
+  "name": "PneumococcalConjugateVaccineAdministered",
+  "title": "Pneumococcal Conjugate Vaccine Administered",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90670",
+      "display": "Pneumococcal conjugate vaccine, 13 valent (PCV13), for intramuscular use"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "434751000124102",
+      "display": "Pneumococcal conjugate vaccination (procedure)"
+    } ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.560.100.1",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.560.100.1",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.560.100.1"
+  } ],
+  "version": "20160331",
+  "name": "Male",
+  "title": "Male",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender",
+      "version": "HL7V3.0_2019-12",
+      "code": "M",
+      "display": "Male"
+    } ]
+  }
+}

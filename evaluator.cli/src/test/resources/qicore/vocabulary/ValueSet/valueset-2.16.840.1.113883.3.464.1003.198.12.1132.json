@@ -1,0 +1,165 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1132",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1132",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.198.12.1132"
+  } ],
+  "version": "20200310",
+  "name": "OpiateAntagonists",
+  "title": "Opiate Antagonists",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1010600",
+      "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1010604",
+      "display": "Buprenorphine 8 MG / Naloxone 2 MG Oral Strip"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1307056",
+      "display": "Buprenorphine 4 MG / Naloxone 1 MG Oral Strip"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1307061",
+      "display": "Buprenorphine 12 MG / Naloxone 3 MG Oral Strip"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1431076",
+      "display": "Buprenorphine 1.4 MG / Naloxone 0.36 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1431102",
+      "display": "Buprenorphine 5.7 MG / Naloxone 1.4 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1483744",
+      "display": "Naltrexone hydrochloride 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1483774",
+      "display": "Naltrexone hydrochloride 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1483780",
+      "display": "Naltrexone hydrochloride 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1542390",
+      "display": "Buprenorphine 2.1 MG / Naloxone 0.3 MG Buccal Film"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1544851",
+      "display": "Buprenorphine 4.2 MG / Naloxone 0.7 MG Buccal Film"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1544854",
+      "display": "Buprenorphine 6.3 MG / Naloxone 1 MG Buccal Film"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1597568",
+      "display": "Buprenorphine 11.4 MG / Naloxone 2.9 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1597573",
+      "display": "Buprenorphine 8.6 MG / Naloxone 2.1 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1655032",
+      "display": "1 ML Buprenorphine 0.3 MG/ML Cartridge"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1666338",
+      "display": "Buprenorphine 2.9 MG / Naloxone 0.71 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1797650",
+      "display": "Buprenorphine 74.2 MG Drug Implant"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1864412",
+      "display": "Buprenorphine 0.7 MG / Naloxone 0.18 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1996184",
+      "display": "0.5 ML Buprenorphine 200 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1996192",
+      "display": "1.5 ML Buprenorphine 200 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2058257",
+      "display": "Buprenorphine 16 MG / Naloxone 4 MG Oral Strip"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "238129",
+      "display": "1 ML Buprenorphine 0.3 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "246474",
+      "display": "Buprenorphine 0.2 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "250426",
+      "display": "Buprenorphine 0.4 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351264",
+      "display": "Buprenorphine 2 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351265",
+      "display": "Buprenorphine 8 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351266",
+      "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "351267",
+      "display": "Buprenorphine 8 MG / Naloxone 2 MG Sublingual Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "637213",
+      "display": "Naltrexone 380 MG Injection"
+    } ]
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.109.12.1004",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.109.12.1004",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.109.12.1004"
+  } ],
+  "version": "20170504",
+  "name": "DiabeticNephropathy",
+  "title": "Diabetic Nephropathy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E08.21",
+      "display": "Diabetes mellitus due to underlying condition with diabetic nephropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E08.22",
+      "display": "Diabetes mellitus due to underlying condition with diabetic chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E08.29",
+      "display": "Diabetes mellitus due to underlying condition with other diabetic kidney complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E09.21",
+      "display": "Drug or chemical induced diabetes mellitus with diabetic nephropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E09.22",
+      "display": "Drug or chemical induced diabetes mellitus with diabetic chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E09.29",
+      "display": "Drug or chemical induced diabetes mellitus with other diabetic kidney complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E10.21",
+      "display": "Type 1 diabetes mellitus with diabetic nephropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E10.22",
+      "display": "Type 1 diabetes mellitus with diabetic chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E10.29",
+      "display": "Type 1 diabetes mellitus with other diabetic kidney complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E11.21",
+      "display": "Type 2 diabetes mellitus with diabetic nephropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E11.22",
+      "display": "Type 2 diabetes mellitus with diabetic chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E11.29",
+      "display": "Type 2 diabetes mellitus with other diabetic kidney complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E13.21",
+      "display": "Other specified diabetes mellitus with diabetic nephropathy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E13.22",
+      "display": "Other specified diabetes mellitus with diabetic chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E13.29",
+      "display": "Other specified diabetes mellitus with other diabetic kidney complication"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "250.41",
+      "display": "Diabetes with renal manifestations, type I [juvenile type], not stated as uncontrolled"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "250.42",
+      "display": "Diabetes with renal manifestations, type II or unspecified type, uncontrolled"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "250.43",
+      "display": "Diabetes with renal manifestations, type I [juvenile type], uncontrolled"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "54181000",
+      "display": "Diabetes-nephrosis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "127013003",
+      "display": "Disorder of kidney co-occurrent and due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236499007",
+      "display": "Microalbuminuric nephropathy due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236500003",
+      "display": "Proteinuric nephropathy due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38046004",
+      "display": "Diffuse type diabetic glomerulosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401110002",
+      "display": "Type 1 diabetes mellitus with persistent microalbuminuria (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420514000",
+      "display": "Persistent proteinuria associated with type I diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420715001",
+      "display": "Persistent microalbuminuria associated with type II diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "421305000",
+      "display": "Persistent microalbuminuria associated with type I diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "421986006",
+      "display": "Persistent proteinuria associated with type II diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445170001",
+      "display": "Macroalbuminuric diabetic nephropathy (disorder)"
+    } ]
+  }
+}

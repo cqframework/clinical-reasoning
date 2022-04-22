@@ -1,0 +1,55 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.102.12.1022",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.102.12.1022",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.102.12.1022"
+  } ],
+  "version": "20170504",
+  "name": "UpperRespiratoryInfection",
+  "title": "Upper Respiratory Infection",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J00",
+      "display": "Acute nasopharyngitis [common cold]"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J06.0",
+      "display": "Acute laryngopharyngitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J06.9",
+      "display": "Acute upper respiratory infection, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "78337007",
+      "display": "Acute upper respiratory infection of multiple sites (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43692000",
+      "display": "Influenzal acute upper respiratory infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54398005",
+      "display": "Acute upper respiratory infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82272006",
+      "display": "Common cold (disorder)"
+    } ]
+  }
+}

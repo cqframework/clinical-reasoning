@@ -1,0 +1,205 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1025",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1025",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1025"
+  } ],
+  "version": "20170504",
+  "name": "HepatitisB",
+  "title": "Hepatitis B",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B16.0",
+      "display": "Acute hepatitis B with delta-agent with hepatic coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B16.1",
+      "display": "Acute hepatitis B with delta-agent without hepatic coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B16.2",
+      "display": "Acute hepatitis B without delta-agent with hepatic coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B16.9",
+      "display": "Acute hepatitis B without delta-agent and without hepatic coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B17.0",
+      "display": "Acute delta-(super) infection of hepatitis B carrier"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B18.0",
+      "display": "Chronic viral hepatitis B with delta-agent"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B18.1",
+      "display": "Chronic viral hepatitis B without delta-agent"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B19.10",
+      "display": "Unspecified viral hepatitis B without hepatic coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B19.11",
+      "display": "Unspecified viral hepatitis B with hepatic coma"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1116000",
+      "display": "Chronic aggressive type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111891008",
+      "display": "Viral hepatitis B without hepatic coma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13265006",
+      "display": "Acute fulminating type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153091000119109",
+      "display": "Hepatic coma due to chronic hepatitis B with delta agent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "165806002",
+      "display": "Hepatitis B surface antigen positive (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186624004",
+      "display": "Acute hepatitis B with delta agent (coinfection) with hepatic coma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186626002",
+      "display": "Acute hepatitis B with delta-agent (coinfection) without hepatic coma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186639003",
+      "display": "Chronic viral hepatitis B without delta-agent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235864009",
+      "display": "Acute hepatitis B with hepatitis D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235865005",
+      "display": "Hepatitis D superinfection of hepatitis B carrier (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235869004",
+      "display": "Chronic viral hepatitis B with hepatitis D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235871004",
+      "display": "Hepatitis B carrier (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26206000",
+      "display": "Hepatic coma due to viral hepatitis B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "271511000",
+      "display": "Hepatitis B immune (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "313234004",
+      "display": "Hepatitis B antibody present (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38662009",
+      "display": "Chronic persistent type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406117000",
+      "display": "Hepatitis B surface antigen enzyme-linked immunosorbent assay positive (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424099008",
+      "display": "Hepatic coma due to acute hepatitis B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424340000",
+      "display": "Hepatic coma due to chronic hepatitis B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442134007",
+      "display": "Hepatitis B associated with Human immunodeficiency virus infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442374005",
+      "display": "Hepatitis B and hepatitis C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446698005",
+      "display": "Reactivation of hepatitis B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50167007",
+      "display": "Chronic active type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53425008",
+      "display": "Anicteric type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60498001",
+      "display": "Congenital viral hepatitis B infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61977001",
+      "display": "Chronic type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66071002",
+      "display": "Viral hepatitis type B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76795007",
+      "display": "Acute type B viral hepatitis (disorder)"
+    } ]
+  }
+}

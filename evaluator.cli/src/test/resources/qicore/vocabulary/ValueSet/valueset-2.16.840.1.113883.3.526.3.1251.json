@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1251",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1251",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1251"
+  } ],
+  "version": "20170504",
+  "name": "MacularExam",
+  "title": "Macular Exam",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32451-7",
+      "display": "Physical findings of Macula"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79820-7",
+      "display": "Physical findings of Right macula by Ophthalmoscopy"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79821-5",
+      "display": "Physical findings of Left macula by Ophthalmoscopy"
+    } ]
+  }
+}

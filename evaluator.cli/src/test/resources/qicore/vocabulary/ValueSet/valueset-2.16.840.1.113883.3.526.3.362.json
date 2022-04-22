@@ -1,0 +1,710 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.362",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.362",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.362"
+  } ],
+  "version": "20200306",
+  "name": "Asthma",
+  "title": "Asthma",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.20",
+      "display": "Mild intermittent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.21",
+      "display": "Mild intermittent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.22",
+      "display": "Mild intermittent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.30",
+      "display": "Mild persistent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.31",
+      "display": "Mild persistent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.32",
+      "display": "Mild persistent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.40",
+      "display": "Moderate persistent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.41",
+      "display": "Moderate persistent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.42",
+      "display": "Moderate persistent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.50",
+      "display": "Severe persistent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.51",
+      "display": "Severe persistent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.52",
+      "display": "Severe persistent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.901",
+      "display": "Unspecified asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.902",
+      "display": "Unspecified asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.909",
+      "display": "Unspecified asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.990",
+      "display": "Exercise induced bronchospasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.991",
+      "display": "Cough variant asthma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.998",
+      "display": "Other asthma"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11641008",
+      "display": "Millers' asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12428000",
+      "display": "Intrinsic asthma without status asthmaticus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13151001",
+      "display": "Flax-dressers' disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195949008",
+      "display": "Chronic asthmatic bronchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195967001",
+      "display": "Asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195977004",
+      "display": "Mixed asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225057002",
+      "display": "Brittle asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233672007",
+      "display": "Byssinosis grade 3 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233678006",
+      "display": "Childhood asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233679003",
+      "display": "Late onset asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233683003",
+      "display": "Hay fever with asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233688007",
+      "display": "Sulfite-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266361008",
+      "display": "Non-allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281239006",
+      "display": "Exacerbation of asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304527002",
+      "display": "Acute asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31387002",
+      "display": "Exercise-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370218001",
+      "display": "Mild asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370219009",
+      "display": "Moderate asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370220003",
+      "display": "Occasional asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370221004",
+      "display": "Severe asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "389145006",
+      "display": "Allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "405944004",
+      "display": "Asthmatic bronchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "407674008",
+      "display": "Aspirin-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "409663006",
+      "display": "Cough variant asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "423889005",
+      "display": "Non-immunoglobulin E mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424199006",
+      "display": "Substance induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424643009",
+      "display": "Immunoglobulin E-mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425969006",
+      "display": "Exacerbation of intermittent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426656000",
+      "display": "Severe persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426979002",
+      "display": "Mild persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427295004",
+      "display": "Moderate persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427603009",
+      "display": "Intermittent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427679007",
+      "display": "Mild intermittent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442025000",
+      "display": "Acute exacerbation of chronic asthmatic bronchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55570000",
+      "display": "Asthma without status asthmaticus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56968009",
+      "display": "Asthma caused by wood dust (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59786004",
+      "display": "Weavers' cough (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63088003",
+      "display": "Allergic asthma without status asthmaticus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707445000",
+      "display": "Exacerbation of mild persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707446004",
+      "display": "Exacerbation of moderate persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707447008",
+      "display": "Exacerbation of severe persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708038006",
+      "display": "Acute exacerbation of asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708090002",
+      "display": "Acute severe exacerbation of asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708093000",
+      "display": "Acute exacerbation of immunoglobulin E-mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708094006",
+      "display": "Acute exacerbation of intrinsic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708095007",
+      "display": "Acute severe exacerbation of immunoglobin E-mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708096008",
+      "display": "Acute severe exacerbation of intrinsic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "782520007",
+      "display": "Exacerbation of allergic asthma due to infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85761009",
+      "display": "Byssinosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "92807009",
+      "display": "Chemical-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "93432008",
+      "display": "Drug-induced asthma (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.20",
+      "display": "Mild intermittent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.21",
+      "display": "Mild intermittent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.22",
+      "display": "Mild intermittent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.30",
+      "display": "Mild persistent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.31",
+      "display": "Mild persistent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.32",
+      "display": "Mild persistent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.40",
+      "display": "Moderate persistent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.41",
+      "display": "Moderate persistent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.42",
+      "display": "Moderate persistent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.50",
+      "display": "Severe persistent asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.51",
+      "display": "Severe persistent asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.52",
+      "display": "Severe persistent asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.901",
+      "display": "Unspecified asthma with (acute) exacerbation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.902",
+      "display": "Unspecified asthma with status asthmaticus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.909",
+      "display": "Unspecified asthma, uncomplicated"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.990",
+      "display": "Exercise induced bronchospasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.991",
+      "display": "Cough variant asthma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "J45.998",
+      "display": "Other asthma"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11641008",
+      "display": "Millers' asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12428000",
+      "display": "Intrinsic asthma without status asthmaticus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13151001",
+      "display": "Flax-dressers' disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195949008",
+      "display": "Chronic asthmatic bronchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195967001",
+      "display": "Asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195977004",
+      "display": "Mixed asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225057002",
+      "display": "Brittle asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233672007",
+      "display": "Byssinosis grade 3 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233678006",
+      "display": "Childhood asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233679003",
+      "display": "Late onset asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233683003",
+      "display": "Hay fever with asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233688007",
+      "display": "Sulfite-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266361008",
+      "display": "Non-allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281239006",
+      "display": "Exacerbation of asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304527002",
+      "display": "Acute asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31387002",
+      "display": "Exercise-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370218001",
+      "display": "Mild asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370219009",
+      "display": "Moderate asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370220003",
+      "display": "Occasional asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370221004",
+      "display": "Severe asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "389145006",
+      "display": "Allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "405944004",
+      "display": "Asthmatic bronchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "407674008",
+      "display": "Aspirin-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "409663006",
+      "display": "Cough variant asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "423889005",
+      "display": "Non-immunoglobulin E mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424199006",
+      "display": "Substance induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424643009",
+      "display": "Immunoglobulin E-mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425969006",
+      "display": "Exacerbation of intermittent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426656000",
+      "display": "Severe persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426979002",
+      "display": "Mild persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427295004",
+      "display": "Moderate persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427603009",
+      "display": "Intermittent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427679007",
+      "display": "Mild intermittent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442025000",
+      "display": "Acute exacerbation of chronic asthmatic bronchitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55570000",
+      "display": "Asthma without status asthmaticus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56968009",
+      "display": "Asthma caused by wood dust (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59786004",
+      "display": "Weavers' cough (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63088003",
+      "display": "Allergic asthma without status asthmaticus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707445000",
+      "display": "Exacerbation of mild persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707446004",
+      "display": "Exacerbation of moderate persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707447008",
+      "display": "Exacerbation of severe persistent asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708038006",
+      "display": "Acute exacerbation of asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708090002",
+      "display": "Acute severe exacerbation of asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708093000",
+      "display": "Acute exacerbation of immunoglobulin E-mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708094006",
+      "display": "Acute exacerbation of intrinsic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708095007",
+      "display": "Acute severe exacerbation of immunoglobin E-mediated allergic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "708096008",
+      "display": "Acute severe exacerbation of intrinsic asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "782520007",
+      "display": "Exacerbation of allergic asthma due to infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85761009",
+      "display": "Byssinosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "92807009",
+      "display": "Chemical-induced asthma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "93432008",
+      "display": "Drug-induced asthma (disorder)"
+    } ]
+  }
+}

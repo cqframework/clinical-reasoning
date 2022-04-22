@@ -1,0 +1,510 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1293",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1293",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1293"
+  } ],
+  "version": "20170504",
+  "name": "Diphenhydramine",
+  "title": "Diphenhydramine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1020477",
+      "display": "Diphenhydramine Hydrochloride 50 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046751",
+      "display": "Acetaminophen 325 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1049630",
+      "display": "Diphenhydramine Hydrochloride 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1049884",
+      "display": "Diphenhydramine Hydrochloride 1.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1049900",
+      "display": "Diphenhydramine Hydrochloride 12.5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1049906",
+      "display": "Diphenhydramine Hydrochloride 2.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1049909",
+      "display": "Diphenhydramine Hydrochloride 25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1050385",
+      "display": "Acetaminophen 32 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1052462",
+      "display": "Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1052467",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Hydrochloride 12.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1052928",
+      "display": "Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1085945",
+      "display": "Diphenhydramine Hydrochloride 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1086720",
+      "display": "Diphenhydramine Hydrochloride 2.5 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1087607",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Hydrochloride 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1092189",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Hydrochloride 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1092373",
+      "display": "Acetaminophen 33.3 MG/ML / Diphenhydramine Hydrochloride 1.67 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1092398",
+      "display": "Aspirin 500 MG / Diphenhydramine Hydrochloride 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1093075",
+      "display": "Acetaminophen 325 MG / Diphenhydramine Hydrochloride 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1093083",
+      "display": "Acetaminophen 650 MG / Diphenhydramine Hydrochloride 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1093098",
+      "display": "Diphenhydramine Hydrochloride 25 MG Disintegrating Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1094131",
+      "display": "Acetaminophen 65 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Diphenhydramine Hydrochloride 2.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1098443",
+      "display": "{10 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 100 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 10 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1099872",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Citrate 38 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1117245",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Hydrochloride 25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1147619",
+      "display": "Acetaminophen 650 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190448",
+      "display": "12 HR Diphenhydramine Hydrochloride 100 MG / Pseudoephedrine Hydrochloride 120 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1233575",
+      "display": "Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1236048",
+      "display": "Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1248354",
+      "display": "Diphenhydramine Hydrochloride 1.67 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1250907",
+      "display": "Aspirin 500 MG / Diphenhydramine Citrate 38.3 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251783",
+      "display": "Diphenhydramine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1291711",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Hydrochloride 25 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1291867",
+      "display": "Ammonium Chloride 25 MG/ML / Diphenhydramine Hydrochloride 2.5 MG/ML / sodium citrate 10 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1291868",
+      "display": "Aspirin 325 MG / Diphenhydramine Citrate 38 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1291961",
+      "display": "Acetaminophen 65 MG/ML / Diphenhydramine Hydrochloride 5 MG/ML / Guaifenesin 40 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1291991",
+      "display": "Caffeine 100 MG / Diphenhydramine Hydrochloride 25 MG / Ergotamine Tartrate 1 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1292323",
+      "display": "Diphenhydramine Citrate 38 MG / Ibuprofen 200 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293964",
+      "display": "Diphenhydramine Hydrochloride 2.5 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294322",
+      "display": "Diphenhydramine Hydrochloride 5 MG/ML / Phenylephrine Hydrochloride 1.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294348",
+      "display": "Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294365",
+      "display": "Diphenhydramine Tannate 25 MG / Phenylephrine Tannate 10 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294366",
+      "display": "Diphenhydramine Tannate 5 MG/ML / Phenylephrine Tannate 1.5 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294370",
+      "display": "CARBETAPENTANE TANNATE 6 MG/ML / Diphenhydramine Tannate 5 MG/ML / Phenylephrine Tannate 3 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294372",
+      "display": "CARBETAPENTANE TANNATE 6 MG/ML / Diphenhydramine Tannate 5 MG/ML / Phenylephrine Tannate 1.5 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294376",
+      "display": "DEXTROMETHORPHAN TANNATE 15 MG/ML / Diphenhydramine Tannate 5 MG/ML / Phenylephrine Tannate 1.5 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294557",
+      "display": "Diphenhydramine Hydrochloride 25 MG / Pseudoephedrine Hydrochloride 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294567",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Hydrochloride 12.5 MG / Pseudoephedrine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294594",
+      "display": "Diphenhydramine Hydrochloride 2.5 MG/ML / Menthol 4.4 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1294602",
+      "display": "Acetaminophen 32 MG/ML / Diphenhydramine Hydrochloride 2.5 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1297517",
+      "display": "Diphenhydramine Hydrochloride 25 MG / Magnesium Salicylate 580 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1297947",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Citrate 38 MG Oral Powder"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1298288",
+      "display": "Acetaminophen 650 MG / Dextromethorphan Hydrobromide 30 MG / Diphenhydramine Hydrochloride 50 MG / Pseudoephedrine Hydrochloride 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1298348",
+      "display": "Acetaminophen 21.7 MG/ML / Diphenhydramine Hydrochloride 0.833 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1310475",
+      "display": "Diphenhydramine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1310483",
+      "display": "Diphenhydramine Hydrochloride 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1312784",
+      "display": "Diphenhydramine Hydrochloride 25 MG Oral Powder"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1356113",
+      "display": "{10 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 10 (Acetaminophen 325 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1375932",
+      "display": "Acetaminophen 32.5 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1424551",
+      "display": "{20 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 10 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1424850",
+      "display": "{1 (180 ML) (Acetaminophen 32.5 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Guaifenesin 20 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 1 (180 ML) (Acetaminophen 32.5 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1428880",
+      "display": "{6 (Acetaminophen 650 MG / Dextromethorphan Hydrobromide 20 MG / Phenylephrine Hydrochloride 10 MG Granules for Oral Solution) / 6 (Acetaminophen 650 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Granules for Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1535609",
+      "display": "{10 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 20 (Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1535702",
+      "display": "Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1537095",
+      "display": "{1 (180 ML) (Acetaminophen 32.5 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 1 (180 ML) (Acetaminophen 32.5 MG/ML / Guaifenesin 20 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1550957",
+      "display": "Diphenhydramine Hydrochloride 25 MG / Naproxen sodium 220 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1593110",
+      "display": "Acetaminophen 250 MG / Aspirin 250 MG / Diphenhydramine Citrate 38 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1606291",
+      "display": "{1 (118 ML) (Acetaminophen 32.5 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 1 (118 ML) (Dextromethorphan Hydrobromide 1 MG/ML / Guaifenesin 20 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1653139",
+      "display": "choline salicylate 29 MG/ML / Diphenhydramine Hydrochloride 1.67 MG/ML / Phenylephrine Hydrochloride 0.33 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659175",
+      "display": "Acetaminophen 500 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Powder for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659960",
+      "display": "Acetaminophen 650 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Granules for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1664631",
+      "display": "Acetaminophen 200 MG / Dextromethorphan Hydrobromide 8 MG / Diphenhydramine 18.75 MG / Guaifenesin 35 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1664658",
+      "display": "choline salicylate 15.3 MG/ML / Diphenhydramine Hydrochloride 0.877 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1666116",
+      "display": "{1 (120 ML) (Brompheniramine Maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 1 (120 ML) (Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1721472",
+      "display": "{1 (240 ML) (Acetaminophen 33.3 MG/ML / Diphenhydramine Hydrochloride 1.67 MG/ML Oral Solution) / 1 (240 ML) (Acetaminophen 33.3 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1727571",
+      "display": "{10 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 20 (Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1730190",
+      "display": "{1 (118 ML) (Dextromethorphan Hydrobromide 1 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 1 (118 ML) (Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1730192",
+      "display": "{1 (180 ML) (Acetaminophen 32.5 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 1 (180 ML) (Dextromethorphan Hydrobromide 1 MG/ML / Guaifenesin 20 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1731101",
+      "display": "{1 (237 ML) (Acetaminophen 33.3 MG/ML / Diphenhydramine Hydrochloride 1.67 MG/ML Oral Solution) / 1 (237 ML) (Acetaminophen 33.3 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1789740",
+      "display": "Diphenhydramine Hydrochloride 6.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1799180",
+      "display": "{20 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 20 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1803669",
+      "display": "{1 (245 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) / 1 (245 ML) (Acetaminophen 21.7 MG/ML / Diphenhydramine Hydrochloride 0.833 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1804449",
+      "display": "{6 (Acetaminophen 500 MG / Dextromethorphan Hydrobromide 20 MG / Phenylephrine Hydrochloride 10 MG Granules for Oral Solution) / 6 (Acetaminophen 650 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Granules for Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1855193",
+      "display": "{12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 100 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1926601",
+      "display": "{8 (Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet) / 12 (Phenylephrine Hydrochloride 10 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1939343",
+      "display": "{8 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 12 (Acetaminophen 325 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1941459",
+      "display": "{10 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 10 (Acetaminophen 325 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1944254",
+      "display": "{20 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 10 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1947507",
+      "display": "{6 (Acetaminophen 500 MG / Dextromethorphan Hydrobromide 20 MG / Phenylephrine Hydrochloride 10 MG Granules for Oral Solution) / 6 (Acetaminophen 500 MG / Diphenhydramine Hydrochloride 25 MG / Phenylephrine Hydrochloride 10 MG Powder for Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1993219",
+      "display": "{118 (Acetaminophen 32.5 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 118 (Dextromethorphan Hydrobromide 1 MG/ML / Guaifenesin 20 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1993220",
+      "display": "{180 (Acetaminophen 32.5 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution) / 180 (Dextromethorphan Hydrobromide 1 MG/ML / Guaifenesin 20 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1996098",
+      "display": "Acetaminophen 32.5 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Diphenhydramine Hydrochloride 1.25 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2002068",
+      "display": "{4 (Acetaminophen 325 MG / Diphenhydramine Hydrochloride 12.5 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 8 (Acetaminophen 325 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2046528",
+      "display": "Diphenhydramine Hydrochloride 25 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2047427",
+      "display": "{100 (Acetaminophen 250 MG / Aspirin 250 MG / Caffeine 65 MG Oral Tablet) / 24 (Acetaminophen 250 MG / Aspirin 250 MG / Diphenhydramine Citrate 38 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2166129",
+      "display": "Diphenhydramine Hydrochloride 0.833 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "882504",
+      "display": "Diphenhydramine Hydrochloride 12.5 MG Disintegrating Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "895664",
+      "display": "Diphenhydramine Citrate 38 MG / Ibuprofen 200 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "901814",
+      "display": "Diphenhydramine Hydrochloride 25 MG / Ibuprofen 200 MG Oral Capsule"
+    } ]
+  }
+}

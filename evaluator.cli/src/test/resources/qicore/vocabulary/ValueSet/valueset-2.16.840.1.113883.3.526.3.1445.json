@@ -1,0 +1,60 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1445",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1445",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1445"
+  } ],
+  "version": "20200307",
+  "name": "VascularDisordersofIrisandCiliaryBody",
+  "title": "Vascular Disorders of Iris and Ciliary Body",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H21.1X1",
+      "display": "Other vascular disorders of iris and ciliary body, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H21.1X2",
+      "display": "Other vascular disorders of iris and ciliary body, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H21.1X3",
+      "display": "Other vascular disorders of iris and ciliary body, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193501009",
+      "display": "Iris and ciliary body vascular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51995000",
+      "display": "Rubeosis iridis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "678191000119101",
+      "display": "Rubeosis iridis of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "678201000119103",
+      "display": "Rubeosis iridis of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "678211000119100",
+      "display": "Rubeosis iridis of right eye (disorder)"
+    } ]
+  }
+}

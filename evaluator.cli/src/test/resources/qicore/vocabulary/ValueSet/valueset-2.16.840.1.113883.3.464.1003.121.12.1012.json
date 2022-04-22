@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.121.12.1012",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.121.12.1012",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.121.12.1012"
+  } ],
+  "version": "20170504",
+  "name": "BMIpercentile",
+  "title": "BMI percentile",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59574-4",
+      "display": "Body mass index (BMI) [Percentile]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59575-1",
+      "display": "Body mass index (BMI) [Percentile] Per age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59576-9",
+      "display": "Body mass index (BMI) [Percentile] Per age and sex"
+    } ]
+  }
+}

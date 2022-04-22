@@ -1,0 +1,1415 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.376",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.376",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.376"
+  } ],
+  "version": "20200307",
+  "name": "HeartFailure",
+  "title": "Heart Failure",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I11.0",
+      "display": "Hypertensive heart disease with heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I13.0",
+      "display": "Hypertensive heart and chronic kidney disease with heart failure and stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I13.2",
+      "display": "Hypertensive heart and chronic kidney disease with heart failure and with stage 5 chronic kidney disease, or end stage renal disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.1",
+      "display": "Left ventricular failure, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.20",
+      "display": "Unspecified systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.21",
+      "display": "Acute systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.22",
+      "display": "Chronic systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.23",
+      "display": "Acute on chronic systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.30",
+      "display": "Unspecified diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.31",
+      "display": "Acute diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.32",
+      "display": "Chronic diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.33",
+      "display": "Acute on chronic diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.40",
+      "display": "Unspecified combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.41",
+      "display": "Acute combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.42",
+      "display": "Chronic combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.43",
+      "display": "Acute on chronic combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.814",
+      "display": "Right heart failure due to left heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.82",
+      "display": "Biventricular heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.83",
+      "display": "High output heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.84",
+      "display": "End stage heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.89",
+      "display": "Other heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.9",
+      "display": "Heart failure, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10091002",
+      "display": "High output heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "101281000119107",
+      "display": "Congestive heart failure due to cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10633002",
+      "display": "Acute congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111283005",
+      "display": "Chronic left-sided heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120851000119104",
+      "display": "Systolic heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120861000119102",
+      "display": "Systolic heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120871000119108",
+      "display": "Systolic heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120881000119106",
+      "display": "Diastolic heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120891000119109",
+      "display": "Diastolic heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120901000119108",
+      "display": "Diastolic heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153931000119109",
+      "display": "Acute combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153941000119100",
+      "display": "Chronic combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153951000119103",
+      "display": "Acute on chronic combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629541000119106",
+      "display": "Congestive heart failure stage C due to Ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629591000119103",
+      "display": "Congestive heart failure stage B due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629641000119107",
+      "display": "Systolic heart failure stage B due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629741000119102",
+      "display": "Systolic heart failure stage C due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15781000119107",
+      "display": "Hypertensive heart AND chronic kidney disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15964701000119109",
+      "display": "Acute cor pulmonale co-occurrent and due to saddle embolus of pulmonary artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194767001",
+      "display": "Benign hypertensive heart disease with congestive cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194779001",
+      "display": "Hypertensive heart and renal disease with (congestive) heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194781004",
+      "display": "Hypertensive heart and renal disease with both (congestive) heart failure and renal failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195111005",
+      "display": "Decompensated cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195112003",
+      "display": "Compensated cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195114002",
+      "display": "Acute left ventricular failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "206586007",
+      "display": "Congenital cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23341000119109",
+      "display": "Congestive heart failure with right heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233924009",
+      "display": "Heart failure as a complication of care (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25544003",
+      "display": "Low output heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314206003",
+      "display": "Refractory heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "364006",
+      "display": "Acute left-sided heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410431009",
+      "display": "Cardiorespiratory failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417996009",
+      "display": "Systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418304008",
+      "display": "Diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42343007",
+      "display": "Congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424404003",
+      "display": "Decompensated chronic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426263006",
+      "display": "Congestive heart failure due to left ventricular systolic dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426611007",
+      "display": "Congestive heart failure due to valvular disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43736008",
+      "display": "Rheumatic left ventricular failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44088000",
+      "display": "Low cardiac output syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441481004",
+      "display": "Chronic systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441530006",
+      "display": "Chronic diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44313006",
+      "display": "Right heart failure secondary to left heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443253003",
+      "display": "Acute on chronic systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443254009",
+      "display": "Acute systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443343001",
+      "display": "Acute diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443344007",
+      "display": "Acute on chronic diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46113002",
+      "display": "Hypertensive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "471880001",
+      "display": "Heart failure due to end stage congenital heart disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48447003",
+      "display": "Chronic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5148006",
+      "display": "Hypertensive heart disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5375005",
+      "display": "Chronic left-sided congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56675007",
+      "display": "Acute heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67431000119105",
+      "display": "Congestive heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67441000119101",
+      "display": "Congestive heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698594003",
+      "display": "Symptomatic congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703272007",
+      "display": "Heart failure with reduced ejection fraction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703273002",
+      "display": "Heart failure with reduced ejection fraction due to coronary artery disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703274008",
+      "display": "Heart failure with reduced ejection fraction due to myocarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703275009",
+      "display": "Heart failure with reduced ejection fraction due to cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703276005",
+      "display": "Heart failure with reduced ejection fraction due to heart valve disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "717840005",
+      "display": "Congestive heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72481000119103",
+      "display": "Congestive heart failure as early postoperative complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74960003",
+      "display": "Acute left-sided congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82523003",
+      "display": "Congestive rheumatic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83105008",
+      "display": "Malignant hypertensive heart disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84114007",
+      "display": "Heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85232009",
+      "display": "Left heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88805009",
+      "display": "Chronic congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90727007",
+      "display": "Pleural effusion due to congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "92506005",
+      "display": "Biventricular congestive heart failure (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I11.0",
+      "display": "Hypertensive heart disease with heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I13.0",
+      "display": "Hypertensive heart and chronic kidney disease with heart failure and stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I13.2",
+      "display": "Hypertensive heart and chronic kidney disease with heart failure and with stage 5 chronic kidney disease, or end stage renal disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.1",
+      "display": "Left ventricular failure, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.20",
+      "display": "Unspecified systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.21",
+      "display": "Acute systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.22",
+      "display": "Chronic systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.23",
+      "display": "Acute on chronic systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.30",
+      "display": "Unspecified diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.31",
+      "display": "Acute diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.32",
+      "display": "Chronic diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.33",
+      "display": "Acute on chronic diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.40",
+      "display": "Unspecified combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.41",
+      "display": "Acute combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.42",
+      "display": "Chronic combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.43",
+      "display": "Acute on chronic combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.814",
+      "display": "Right heart failure due to left heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.82",
+      "display": "Biventricular heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.83",
+      "display": "High output heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.84",
+      "display": "End stage heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.89",
+      "display": "Other heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.9",
+      "display": "Heart failure, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10091002",
+      "display": "High output heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "101281000119107",
+      "display": "Congestive heart failure due to cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10633002",
+      "display": "Acute congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111283005",
+      "display": "Chronic left-sided heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120851000119104",
+      "display": "Systolic heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120861000119102",
+      "display": "Systolic heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120871000119108",
+      "display": "Systolic heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120881000119106",
+      "display": "Diastolic heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120891000119109",
+      "display": "Diastolic heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120901000119108",
+      "display": "Diastolic heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153931000119109",
+      "display": "Acute combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153941000119100",
+      "display": "Chronic combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153951000119103",
+      "display": "Acute on chronic combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629541000119106",
+      "display": "Congestive heart failure stage C due to Ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629591000119103",
+      "display": "Congestive heart failure stage B due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629641000119107",
+      "display": "Systolic heart failure stage B due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629741000119102",
+      "display": "Systolic heart failure stage C due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15781000119107",
+      "display": "Hypertensive heart AND chronic kidney disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15964701000119109",
+      "display": "Acute cor pulmonale co-occurrent and due to saddle embolus of pulmonary artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194767001",
+      "display": "Benign hypertensive heart disease with congestive cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194779001",
+      "display": "Hypertensive heart and renal disease with (congestive) heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194781004",
+      "display": "Hypertensive heart and renal disease with both (congestive) heart failure and renal failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195111005",
+      "display": "Decompensated cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195112003",
+      "display": "Compensated cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195114002",
+      "display": "Acute left ventricular failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "206586007",
+      "display": "Congenital cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23341000119109",
+      "display": "Congestive heart failure with right heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233924009",
+      "display": "Heart failure as a complication of care (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25544003",
+      "display": "Low output heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314206003",
+      "display": "Refractory heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "364006",
+      "display": "Acute left-sided heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410431009",
+      "display": "Cardiorespiratory failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417996009",
+      "display": "Systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418304008",
+      "display": "Diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42343007",
+      "display": "Congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424404003",
+      "display": "Decompensated chronic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426263006",
+      "display": "Congestive heart failure due to left ventricular systolic dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426611007",
+      "display": "Congestive heart failure due to valvular disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43736008",
+      "display": "Rheumatic left ventricular failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44088000",
+      "display": "Low cardiac output syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441481004",
+      "display": "Chronic systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441530006",
+      "display": "Chronic diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44313006",
+      "display": "Right heart failure secondary to left heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443253003",
+      "display": "Acute on chronic systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443254009",
+      "display": "Acute systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443343001",
+      "display": "Acute diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443344007",
+      "display": "Acute on chronic diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46113002",
+      "display": "Hypertensive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "471880001",
+      "display": "Heart failure due to end stage congenital heart disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48447003",
+      "display": "Chronic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5148006",
+      "display": "Hypertensive heart disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5375005",
+      "display": "Chronic left-sided congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56675007",
+      "display": "Acute heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67431000119105",
+      "display": "Congestive heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67441000119101",
+      "display": "Congestive heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698594003",
+      "display": "Symptomatic congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703272007",
+      "display": "Heart failure with reduced ejection fraction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703273002",
+      "display": "Heart failure with reduced ejection fraction due to coronary artery disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703274008",
+      "display": "Heart failure with reduced ejection fraction due to myocarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703275009",
+      "display": "Heart failure with reduced ejection fraction due to cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703276005",
+      "display": "Heart failure with reduced ejection fraction due to heart valve disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "717840005",
+      "display": "Congestive heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72481000119103",
+      "display": "Congestive heart failure as early postoperative complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74960003",
+      "display": "Acute left-sided congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82523003",
+      "display": "Congestive rheumatic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83105008",
+      "display": "Malignant hypertensive heart disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84114007",
+      "display": "Heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85232009",
+      "display": "Left heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88805009",
+      "display": "Chronic congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90727007",
+      "display": "Pleural effusion due to congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "92506005",
+      "display": "Biventricular congestive heart failure (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I11.0",
+      "display": "Hypertensive heart disease with heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I13.0",
+      "display": "Hypertensive heart and chronic kidney disease with heart failure and stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I13.2",
+      "display": "Hypertensive heart and chronic kidney disease with heart failure and with stage 5 chronic kidney disease, or end stage renal disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.1",
+      "display": "Left ventricular failure, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.20",
+      "display": "Unspecified systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.21",
+      "display": "Acute systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.22",
+      "display": "Chronic systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.23",
+      "display": "Acute on chronic systolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.30",
+      "display": "Unspecified diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.31",
+      "display": "Acute diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.32",
+      "display": "Chronic diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.33",
+      "display": "Acute on chronic diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.40",
+      "display": "Unspecified combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.41",
+      "display": "Acute combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.42",
+      "display": "Chronic combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.43",
+      "display": "Acute on chronic combined systolic (congestive) and diastolic (congestive) heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.814",
+      "display": "Right heart failure due to left heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.82",
+      "display": "Biventricular heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.83",
+      "display": "High output heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.84",
+      "display": "End stage heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.89",
+      "display": "Other heart failure"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I50.9",
+      "display": "Heart failure, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10091002",
+      "display": "High output heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "101281000119107",
+      "display": "Congestive heart failure due to cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10633002",
+      "display": "Acute congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111283005",
+      "display": "Chronic left-sided heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120851000119104",
+      "display": "Systolic heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120861000119102",
+      "display": "Systolic heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120871000119108",
+      "display": "Systolic heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120881000119106",
+      "display": "Diastolic heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120891000119109",
+      "display": "Diastolic heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120901000119108",
+      "display": "Diastolic heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153931000119109",
+      "display": "Acute combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153941000119100",
+      "display": "Chronic combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "153951000119103",
+      "display": "Acute on chronic combined systolic and diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629541000119106",
+      "display": "Congestive heart failure stage C due to Ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629591000119103",
+      "display": "Congestive heart failure stage B due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629641000119107",
+      "display": "Systolic heart failure stage B due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15629741000119102",
+      "display": "Systolic heart failure stage C due to ischemic cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15781000119107",
+      "display": "Hypertensive heart AND chronic kidney disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15964701000119109",
+      "display": "Acute cor pulmonale co-occurrent and due to saddle embolus of pulmonary artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194767001",
+      "display": "Benign hypertensive heart disease with congestive cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194779001",
+      "display": "Hypertensive heart and renal disease with (congestive) heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194781004",
+      "display": "Hypertensive heart and renal disease with both (congestive) heart failure and renal failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195111005",
+      "display": "Decompensated cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195112003",
+      "display": "Compensated cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195114002",
+      "display": "Acute left ventricular failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "206586007",
+      "display": "Congenital cardiac failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23341000119109",
+      "display": "Congestive heart failure with right heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233924009",
+      "display": "Heart failure as a complication of care (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25544003",
+      "display": "Low output heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314206003",
+      "display": "Refractory heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "364006",
+      "display": "Acute left-sided heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410431009",
+      "display": "Cardiorespiratory failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417996009",
+      "display": "Systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418304008",
+      "display": "Diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42343007",
+      "display": "Congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424404003",
+      "display": "Decompensated chronic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426263006",
+      "display": "Congestive heart failure due to left ventricular systolic dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426611007",
+      "display": "Congestive heart failure due to valvular disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43736008",
+      "display": "Rheumatic left ventricular failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44088000",
+      "display": "Low cardiac output syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441481004",
+      "display": "Chronic systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441530006",
+      "display": "Chronic diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44313006",
+      "display": "Right heart failure secondary to left heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443253003",
+      "display": "Acute on chronic systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443254009",
+      "display": "Acute systolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443343001",
+      "display": "Acute diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443344007",
+      "display": "Acute on chronic diastolic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46113002",
+      "display": "Hypertensive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "471880001",
+      "display": "Heart failure due to end stage congenital heart disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48447003",
+      "display": "Chronic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5148006",
+      "display": "Hypertensive heart disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5375005",
+      "display": "Chronic left-sided congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56675007",
+      "display": "Acute heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67431000119105",
+      "display": "Congestive heart failure stage D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67441000119101",
+      "display": "Congestive heart failure stage C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698594003",
+      "display": "Symptomatic congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703272007",
+      "display": "Heart failure with reduced ejection fraction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703273002",
+      "display": "Heart failure with reduced ejection fraction due to coronary artery disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703274008",
+      "display": "Heart failure with reduced ejection fraction due to myocarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703275009",
+      "display": "Heart failure with reduced ejection fraction due to cardiomyopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703276005",
+      "display": "Heart failure with reduced ejection fraction due to heart valve disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "717840005",
+      "display": "Congestive heart failure stage B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72481000119103",
+      "display": "Congestive heart failure as early postoperative complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74960003",
+      "display": "Acute left-sided congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82523003",
+      "display": "Congestive rheumatic heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83105008",
+      "display": "Malignant hypertensive heart disease with congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84114007",
+      "display": "Heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85232009",
+      "display": "Left heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88805009",
+      "display": "Chronic congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90727007",
+      "display": "Pleural effusion due to congestive heart failure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "92506005",
+      "display": "Biventricular congestive heart failure (disorder)"
+    } ]
+  }
+}

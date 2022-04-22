@@ -1,0 +1,110 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1086",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1086",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1086"
+  } ],
+  "version": "20190315",
+  "name": "HibVaccine(4doseschedule)Administered",
+  "title": "Hib Vaccine (4 dose schedule) Administered",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90644",
+      "display": "Meningococcal conjugate vaccine, serogroups C & Y and Haemophilus influenzae type b vaccine (Hib-MenCY), 4 dose schedule, when administered to children 6 weeks-18 months of age, for intramuscular use"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90648",
+      "display": "Haemophilus influenzae type b vaccine (Hib), PRP-T conjugate, 4 dose schedule, for intramuscular use"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90698",
+      "display": "Diphtheria, tetanus toxoids, acellular pertussis vaccine, Haemophilus influenzae type b, and inactivated poliovirus vaccine, (DTaP-IPV/Hib), for intramuscular use"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90748",
+      "display": "Hepatitis B and Haemophilus influenzae type b vaccine (Hib-HepB), for intramuscular use"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "127787002",
+      "display": "Haemophilus influenzae type b vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170343007",
+      "display": "First haemophilus B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170344001",
+      "display": "Second haemophilus B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170345000",
+      "display": "Third haemophilus B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170346004",
+      "display": "Booster haemophilus B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "310306005",
+      "display": "First diphtheria, tetanus, pertussis, polio and haemophilus influenzae B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "310307001",
+      "display": "Second diphtheria, tetanus, pertussis, polio and haemophilus influenzae B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "310308006",
+      "display": "Third diphtheria, tetanus, pertussis, polio and haemophilus influenzae B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312869001",
+      "display": "Haemophilus influenzae B, diphtheria, tetanus and polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312870000",
+      "display": "Diphtheria, tetanus, pertussis, polio and haemophilus influenzae B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414001002",
+      "display": "Diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414259000",
+      "display": "First diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415507003",
+      "display": "Second diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415712004",
+      "display": "Third diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    } ]
+  }
+}

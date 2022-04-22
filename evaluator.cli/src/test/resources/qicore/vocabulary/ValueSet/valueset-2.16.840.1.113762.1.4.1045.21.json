@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.21",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.21",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1045.21"
+  } ],
+  "version": "20190314",
+  "name": "IntravenousorIntra-arterialThrombolytic(t-PA)Therapy",
+  "title": "Intravenous or Intra-arterial Thrombolytic (t-PA) Therapy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307521008",
+      "display": "Intravenous infusion of thrombolytic (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69245005",
+      "display": "Intra-arterial infusion of thrombolytic agent (procedure)"
+    } ]
+  }
+}

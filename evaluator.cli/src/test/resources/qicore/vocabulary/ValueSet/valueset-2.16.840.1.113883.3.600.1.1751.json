@@ -1,0 +1,555 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.1.1751",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.1.1751",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.1.1751"
+  } ],
+  "version": "20170504",
+  "name": "EncountertoEvaluateBMI",
+  "title": "Encounter to Evaluate BMI",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7111",
+      "display": "extraction, coronal remnants - primary tooth"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7140",
+      "display": "extraction, erupted tooth or exposed root (elevation and/or forceps removal)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7210",
+      "display": "extraction, erupted tooth requiring removal of bone and/or sectioning of tooth, and including elevation of mucoperiosteal flap if indicated"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7220",
+      "display": "removal of impacted tooth - soft tissue"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7230",
+      "display": "removal of impacted tooth - partially bony"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7240",
+      "display": "removal of impacted tooth - completely bony"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7241",
+      "display": "removal of impacted tooth - completely bony, with unusual surgical complications"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7250",
+      "display": "removal of residual tooth roots (cutting procedure)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D7251",
+      "display": "coronectomy - intentional partial tooth removal"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90791",
+      "display": "Psychiatric diagnostic evaluation"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90792",
+      "display": "Psychiatric diagnostic evaluation with medical services"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90832",
+      "display": "Psychotherapy, 30 minutes with patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90834",
+      "display": "Psychotherapy, 45 minutes with patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90837",
+      "display": "Psychotherapy, 60 minutes with patient"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96156",
+      "display": "Health behavior assessment, or re-assessment (ie, health-focused clinical interview, behavioral observations, clinical decision making)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96158",
+      "display": "Health behavior intervention, individual, face-to-face; initial 30 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "96159",
+      "display": "Health behavior intervention, individual, face-to-face; each additional 15 minutes (List separately in addition to code for primary service)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97161",
+      "display": "Physical therapy evaluation: low complexity, requiring these components: A history with no personal factors and/or comorbidities that impact the plan of care; An examination of body system(s) using standardized tests and measures addressing 1-2 elements from any of the following: body structures and functions, activity limitations, and/or participation restrictions; A clinical presentation with stable and/or uncomplicated characteristics; and Clinical decision making of low complexity using standardized patient assessment instrument and/or measurable assessment of functional outcome. Typically, 20 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97162",
+      "display": "Physical therapy evaluation: moderate complexity, requiring these components: A history of present problem with 1-2 personal factors and/or comorbidities that impact the plan of care; An examination of body systems using standardized tests and measures in addressing a total of 3 or more elements from any of the following: body structures and functions, activity limitations, and/or participation restrictions; An evolving clinical presentation with changing characteristics; and Clinical decision making of moderate complexity using standardized patient assessment instrument and/or measurable assessment of functional outcome. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97163",
+      "display": "Physical therapy evaluation: high complexity, requiring these components: A history of present problem with 3 or more personal factors and/or comorbidities that impact the plan of care; An examination of body systems using standardized tests and measures addressing a total of 4 or more elements from any of the following: body structures and functions, activity limitations, and/or participation restrictions; A clinical presentation with unstable and unpredictable characteristics; and Clinical decision making of high complexity using standardized patient assessment instrument and/or measurable assessment of functional outcome. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97165",
+      "display": "Occupational therapy evaluation, low complexity, requiring these components: An occupational profile and medical and therapy history, which includes a brief history including review of medical and/or therapy records relating to the presenting problem; An assessment(s) that identifies 1-3 performance deficits (ie, relating to physical, cognitive, or psychosocial skills) that result in activity limitations and/or participation restrictions; and Clinical decision making of low complexity, which includes an analysis of the occupational profile, analysis of data from problem-focused assessment(s), and consideration of a limited number of treatment options. Patient presents with no comorbidities that affect occupational performance. Modification of tasks or assistance (eg, physical or verbal) with assessment(s) is not necessary to enable completion of evaluation component. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97166",
+      "display": "Occupational therapy evaluation, moderate complexity, requiring these components: An occupational profile and medical and therapy history, which includes an expanded review of medical and/or therapy records and additional review of physical, cognitive, or psychosocial history related to current functional performance; An assessment(s) that identifies 3-5 performance deficits (ie, relating to physical, cognitive, or psychosocial skills) that result in activity limitations and/or participation restrictions; and Clinical decision making of moderate analytic complexity, which includes an analysis of the occupational profile, analysis of data from detailed assessment(s), and consideration of several treatment options. Patient may present with comorbidities that affect occupational performance. Minimal to moderate modification of tasks or assistance (eg, physical or verbal) with assessment(s) is necessary to enable patient to complete evaluation component. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97167",
+      "display": "Occupational therapy evaluation, high complexity, requiring these components: An occupational profile and medical and therapy history, which includes review of medical and/or therapy records and extensive additional review of physical, cognitive, or psychosocial history related to current functional performance; An assessment(s) that identifies 5 or more performance deficits (ie, relating to physical, cognitive, or psychosocial skills) that result in activity limitations and/or participation restrictions; and Clinical decision making of high analytic complexity, which includes an analysis of the patient profile, analysis of data from comprehensive assessment(s), and consideration of multiple treatment options. Patient presents with comorbidities that affect occupational performance. Significant modification of tasks or assistance (eg, physical or verbal) with assessment(s) is necessary to enable patient to complete evaluation component. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97802",
+      "display": "Medical nutrition therapy; initial assessment and intervention, individual, face-to-face with the patient, each 15 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97803",
+      "display": "Medical nutrition therapy; re-assessment and intervention, individual, face-to-face with the patient, each 15 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99201",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99202",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: An expanded problem focused history; An expanded problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 20 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99203",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A detailed history; A detailed examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate severity. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99204",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99205",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99212",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99213",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 15 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99214",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 25 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99215",
+      "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 40 minutes are spent face-to-face with the patient and/or family."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99236",
+      "display": "Observation or inpatient hospital care, for the evaluation and management of a patient including admission and discharge on the same date, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually the presenting problem(s) requiring admission are of high severity. Typically, 55 minutes are spent at the bedside and on the patient's hospital floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99304",
+      "display": "Initial nursing facility care, per day, for the evaluation and management of a patient, which requires these 3 key components: A detailed or comprehensive history; A detailed or comprehensive examination; and Medical decision making that is straightforward or of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the problem(s) requiring admission are of low severity. Typically, 25 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99305",
+      "display": "Initial nursing facility care, per day, for the evaluation and management of a patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the problem(s) requiring admission are of moderate severity. Typically, 35 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99306",
+      "display": "Initial nursing facility care, per day, for the evaluation and management of a patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the problem(s) requiring admission are of high severity. Typically, 45 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99307",
+      "display": "Subsequent nursing facility care, per day, for the evaluation and management of a patient, which requires at least 2 of these 3 key components: A problem focused interval history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the patient is stable, recovering, or improving. Typically, 10 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99308",
+      "display": "Subsequent nursing facility care, per day, for the evaluation and management of a patient, which requires at least 2 of these 3 key components: An expanded problem focused interval history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the patient is responding inadequately to therapy or has developed a minor complication. Typically, 15 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99309",
+      "display": "Subsequent nursing facility care, per day, for the evaluation and management of a patient, which requires at least 2 of these 3 key components: A detailed interval history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the patient has developed a significant complication or a significant new problem. Typically, 25 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99310",
+      "display": "Subsequent nursing facility care, per day, for the evaluation and management of a patient, which requires at least 2 of these 3 key components: A comprehensive interval history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. The patient may be unstable or may have developed a significant new problem requiring immediate physician attention. Typically, 35 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99315",
+      "display": "Nursing facility discharge day management; 30 minutes or less"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99316",
+      "display": "Nursing facility discharge day management; more than 30 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99318",
+      "display": "Evaluation and management of a patient involving an annual nursing facility assessment, which requires these 3 key components: A detailed interval history; A comprehensive examination; and Medical decision making that is of low to moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the patient is stable, recovering, or improving. Typically, 30 minutes are spent at the bedside and on the patient's facility floor or unit."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99324",
+      "display": "Domiciliary or rest home visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; and Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low severity. Typically, 20 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99325",
+      "display": "Domiciliary or rest home visit for the evaluation and management of a new patient, which requires these 3 key components: An expanded problem focused history; An expanded problem focused examination; and Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate severity. Typically, 30 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99326",
+      "display": "Domiciliary or rest home visit for the evaluation and management of a new patient, which requires these 3 key components: A detailed history; A detailed examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 45 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99327",
+      "display": "Domiciliary or rest home visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of high severity. Typically, 60 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99328",
+      "display": "Domiciliary or rest home visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the patient is unstable or has developed a significant new problem requiring immediate physician attention. Typically, 75 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99334",
+      "display": "Domiciliary or rest home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A problem focused interval history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self-limited or minor. Typically, 15 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99335",
+      "display": "Domiciliary or rest home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused interval history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 25 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99336",
+      "display": "Domiciliary or rest home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed interval history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 40 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99337",
+      "display": "Domiciliary or rest home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A comprehensive interval history; A comprehensive examination; Medical decision making of moderate to high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. The patient may be unstable or may have developed a significant new problem requiring immediate physician attention. Typically, 60 minutes are spent with the patient and/or family or caregiver."
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99339",
+      "display": "Individual physician supervision of a patient (patient not present) in home, domiciliary or rest home (eg, assisted living facility) requiring complex and multidisciplinary care modalities involving regular physician development and/or revision of care plans, review of subsequent reports of patient status, review of related laboratory and other studies, communication (including telephone calls) for purposes of assessment or care decisions with health care professional(s), family member(s), surrogate decision maker(s) (eg, legal guardian) and/or key caregiver(s) involved in patient's care, integration of new information into the medical treatment plan and/or adjustment of medical therapy, within a calendar month; 15-29 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99340",
+      "display": "Individual physician supervision of a patient (patient not present) in home, domiciliary or rest home (eg, assisted living facility) requiring complex and multidisciplinary care modalities involving regular physician development and/or revision of care plans, review of subsequent reports of patient status, review of related laboratory and other studies, communication (including telephone calls) for purposes of assessment or care decisions with health care professional(s), family member(s), surrogate decision maker(s) (eg, legal guardian) and/or key caregiver(s) involved in patient's care, integration of new information into the medical treatment plan and/or adjustment of medical therapy, within a calendar month; 30 minutes or more"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99385",
+      "display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 18-39 years"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99386",
+      "display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 40-64 years"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99387",
+      "display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 65 years and older"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99395",
+      "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 18-39 years"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99396",
+      "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 40-64 years"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99397",
+      "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 65 years and older"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99401",
+      "display": "Preventive medicine counseling and/or risk factor reduction intervention(s) provided to an individual (separate procedure); approximately 15 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99402",
+      "display": "Preventive medicine counseling and/or risk factor reduction intervention(s) provided to an individual (separate procedure); approximately 30 minutes"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0101",
+      "display": "Cervical or vaginal cancer screening; pelvic and clinical breast examination"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0108",
+      "display": "Diabetes outpatient self-management training services, individual, per 30 minutes"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0270",
+      "display": "Medical nutrition therapy; reassessment and subsequent intervention(s) following second referral in same year for change in diagnosis, medical condition or treatment regimen (including additional hours needed for renal disease), individual, face to face with the patient, each 15 minutes"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0271",
+      "display": "Medical nutrition therapy, reassessment and subsequent intervention(s) following second referral in same year for change in diagnosis, medical condition, or treatment regimen (including additional hours needed for renal disease), group (2 or more individuals), each 30 minutes"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0402",
+      "display": "Initial preventive physical examination; face-to-face visit, services limited to new beneficiary during the first 12 months of medicare enrollment"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0438",
+      "display": "Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0439",
+      "display": "Annual wellness visit, includes a personalized prevention plan of service (pps), subsequent visit"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0447",
+      "display": "Face-to-face behavioral counseling for obesity, 15 minutes"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "G0473",
+      "display": "Face-to-face behavioral counseling for obesity, group (2-10), 30 minutes"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10197000",
+      "display": "Psychiatric interview and evaluation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "108220007",
+      "display": "Evaluation AND/OR management - new patient (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "108221006",
+      "display": "Evaluation AND/OR management - established patient (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "108224003",
+      "display": "Preventive patient evaluation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "108311000",
+      "display": "Psychiatric procedure, interview AND/OR consultation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13607009",
+      "display": "Manual examination of breast (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14736009",
+      "display": "History and physical examination with evaluation and management of patient (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "165171009",
+      "display": "Initial psychiatric evaluation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "18512000",
+      "display": "Individual psychotherapy (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185349003",
+      "display": "Encounter for check up (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185463005",
+      "display": "Visit out of hours (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185465003",
+      "display": "Weekend visit (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225967005",
+      "display": "Self-care patient education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "270427003",
+      "display": "Patient-initiated encounter (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "270430005",
+      "display": "Provider-initiated encounter (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308335008",
+      "display": "Patient encounter procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35025007",
+      "display": "Manual pelvic examination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386372009",
+      "display": "Nutrition management (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "390906007",
+      "display": "Follow-up encounter (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406547006",
+      "display": "Urgent follow-up (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410155007",
+      "display": "Occupational therapy assessment (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410157004",
+      "display": "Occupational therapy management (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410158009",
+      "display": "Physical therapy assessment (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410160006",
+      "display": "Physical therapy management (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410170008",
+      "display": "Nutrition care assessment (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410172000",
+      "display": "Nutrition care management (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46662001",
+      "display": "Examination of breast (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55162003",
+      "display": "Tooth extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68381003",
+      "display": "Surgical removal of erupted tooth requiring elevation of mucoperiosteal flap and removal of bone and/or section of tooth (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78318003",
+      "display": "History and physical examination, annual for health maintenance (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83607001",
+      "display": "Gynecologic examination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8411005",
+      "display": "Interactive individual medical psychotherapy (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86013001",
+      "display": "Periodic reevaluation and management of healthy individual (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90526000",
+      "display": "Initial evaluation and management of healthy individual (procedure)"
+    } ]
+  }
+}

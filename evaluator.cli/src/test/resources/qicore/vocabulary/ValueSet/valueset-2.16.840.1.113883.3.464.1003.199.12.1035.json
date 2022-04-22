@@ -1,0 +1,730 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.199.12.1035",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.199.12.1035",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.199.12.1035"
+  } ],
+  "version": "20180310",
+  "name": "ChronicLiverDisease",
+  "title": "Chronic Liver Disease",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K70.0",
+      "display": "Alcoholic fatty liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K70.2",
+      "display": "Alcoholic fibrosis and sclerosis of liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K70.30",
+      "display": "Alcoholic cirrhosis of liver without ascites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K70.31",
+      "display": "Alcoholic cirrhosis of liver with ascites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K70.40",
+      "display": "Alcoholic hepatic failure without coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K70.41",
+      "display": "Alcoholic hepatic failure with coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K70.9",
+      "display": "Alcoholic liver disease, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.0",
+      "display": "Toxic liver disease with cholestasis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.10",
+      "display": "Toxic liver disease with hepatic necrosis, without coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.11",
+      "display": "Toxic liver disease with hepatic necrosis, with coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.3",
+      "display": "Toxic liver disease with chronic persistent hepatitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.4",
+      "display": "Toxic liver disease with chronic lobular hepatitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.50",
+      "display": "Toxic liver disease with chronic active hepatitis without ascites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.51",
+      "display": "Toxic liver disease with chronic active hepatitis with ascites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K71.7",
+      "display": "Toxic liver disease with fibrosis and cirrhosis of liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K72.10",
+      "display": "Chronic hepatic failure without coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K72.11",
+      "display": "Chronic hepatic failure with coma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K73.0",
+      "display": "Chronic persistent hepatitis, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K73.1",
+      "display": "Chronic lobular hepatitis, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K73.2",
+      "display": "Chronic active hepatitis, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K73.8",
+      "display": "Other chronic hepatitis, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K73.9",
+      "display": "Chronic hepatitis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.0",
+      "display": "Hepatic fibrosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.1",
+      "display": "Hepatic sclerosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.2",
+      "display": "Hepatic fibrosis with hepatic sclerosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.3",
+      "display": "Primary biliary cirrhosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.4",
+      "display": "Secondary biliary cirrhosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.5",
+      "display": "Biliary cirrhosis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.60",
+      "display": "Unspecified cirrhosis of liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K74.69",
+      "display": "Other cirrhosis of liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K76.1",
+      "display": "Chronic passive congestion of liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K76.2",
+      "display": "Central hemorrhagic necrosis of liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K76.3",
+      "display": "Infarction of liver"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K76.5",
+      "display": "Hepatic veno-occlusive disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K76.6",
+      "display": "Portal hypertension"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K76.7",
+      "display": "Hepatorenal syndrome"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.0",
+      "display": "Alcoholic fatty liver"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.1",
+      "display": "Acute alcoholic hepatitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.2",
+      "display": "Alcoholic cirrhosis of liver"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.3",
+      "display": "Alcoholic liver damage, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.40",
+      "display": "Chronic hepatitis, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.41",
+      "display": "Chronic persistent hepatitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.42",
+      "display": "Autoimmune hepatitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.49",
+      "display": "Other chronic hepatitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.5",
+      "display": "Cirrhosis of liver without mention of alcohol"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.6",
+      "display": "Biliary cirrhosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.8",
+      "display": "Other chronic nonalcoholic liver disease"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "571.9",
+      "display": "Unspecified chronic liver disease without mention of alcohol"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "572.0",
+      "display": "Abscess of liver"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "572.1",
+      "display": "Portal pyemia"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "572.2",
+      "display": "Hepatic encephalopathy"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "572.3",
+      "display": "Portal hypertension"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "572.4",
+      "display": "Hepatorenal syndrome"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "572.8",
+      "display": "Other sequelae of chronic liver disease"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.0",
+      "display": "Chronic passive congestion of liver"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.1",
+      "display": "Hepatitis in viral diseases classified elsewhere"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.2",
+      "display": "Hepatitis in other infectious diseases classified elsewhere"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.3",
+      "display": "Hepatitis, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.4",
+      "display": "Hepatic infarction"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.5",
+      "display": "Hepatopulmonary syndrome"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.8",
+      "display": "Other specified disorders of liver"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "573.9",
+      "display": "Unspecified disorder of liver"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2015-03",
+      "code": "111370006",
+      "display": "Cirrhosis of liver not due to alcohol (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2015-03",
+      "code": "197304003",
+      "display": "Cardituberculous cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-09",
+      "code": "235870003",
+      "display": "Chronic non-A non-B hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10295004",
+      "display": "Chronic viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "109819003",
+      "display": "Obstructive biliary cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1116000",
+      "display": "Chronic aggressive type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123604002",
+      "display": "Toxic cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123606000",
+      "display": "Cholangiolitic cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123607009",
+      "display": "Septal fibrosis of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12368000",
+      "display": "Secondary biliary cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123716002",
+      "display": "Latent cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123717006",
+      "display": "Advanced cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128302006",
+      "display": "Chronic hepatitis C (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15999000",
+      "display": "Mixed micro AND macronodular cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1761006",
+      "display": "Biliary cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186639003",
+      "display": "Chronic viral hepatitis B without delta-agent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186698009",
+      "display": "Cytomegalovirus hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197279005",
+      "display": "Cirrhosis and chronic liver disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197284004",
+      "display": "Chronic active hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197293003",
+      "display": "Diffuse nodular cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197296006",
+      "display": "Capsular portal cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197441003",
+      "display": "Primary sclerosing cholangitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197442005",
+      "display": "Secondary sclerosing cholangitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19943007",
+      "display": "Cirrhosis of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "21861000",
+      "display": "Micronodular cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235869004",
+      "display": "Chronic viral hepatitis B with hepatitis D (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235880004",
+      "display": "Alcoholic fibrosis and sclerosis of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235889003",
+      "display": "Drug-induced chronic hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235895002",
+      "display": "Laennec's cirrhosis, non-alcoholic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235896001",
+      "display": "Infectious cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235897005",
+      "display": "Hypoxia-associated cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235898000",
+      "display": "Pericellular fibrosis of congenital syphilis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235899008",
+      "display": "Hepatic sclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235900003",
+      "display": "Portal and splenic vein sclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235901004",
+      "display": "Hepatic fibrosis with hepatic sclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235902006",
+      "display": "Intrahepatic phlebosclerosis and fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235917005",
+      "display": "Sclerosing cholangitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266468003",
+      "display": "Cirrhosis - non-alcoholic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "271440004",
+      "display": "Cirrhosis secondary to cholestasis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27156006",
+      "display": "Posthepatitic cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281388009",
+      "display": "Human immunodeficiency virus-related sclerosing cholangitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30188007",
+      "display": "Alpha-1-antitrypsin deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31712002",
+      "display": "Primary biliary cholangitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "328383001",
+      "display": "Chronic liver disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33144001",
+      "display": "Parasitic cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371139006",
+      "display": "Early cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37688005",
+      "display": "Clonorchiasis with biliary cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38662009",
+      "display": "Chronic persistent type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41889008",
+      "display": "Chronic persistent hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420054005",
+      "display": "Alcoholic cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "424340000",
+      "display": "Hepatic coma due to chronic hepatitis B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425413006",
+      "display": "Drug-induced cirrhosis of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43904005",
+      "display": "Macronodular cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "450880008",
+      "display": "Chronic hepatitis E (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50167007",
+      "display": "Chronic active type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "536002",
+      "display": "Glissonian cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57339008",
+      "display": "Chronic lobular hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60037002",
+      "display": "Chronic persistent viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61977001",
+      "display": "Chronic type B viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62484002",
+      "display": "Hepatic fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66870002",
+      "display": "Chronic active viral hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735733008",
+      "display": "Cirrhosis of liver co-occurrent and due to primary sclerosing cholangitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "737202006",
+      "display": "Fibropolycystic disease of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76301009",
+      "display": "Florid cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "767809001",
+      "display": "Chronic hepatitis C caused by hepatitis C virus genotype 6 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "767810006",
+      "display": "Chronic hepatitis C caused by hepatitis C virus genotype 5 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76783007",
+      "display": "Chronic hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "768006009",
+      "display": "Chronic hepatitis C caused by Hepatitis C virus genotype 3 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "768125005",
+      "display": "Chronic hepatitis C caused by Hepatitis C virus genotype 2 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "768126006",
+      "display": "Chronic hepatitis C caused by Hepatitis C virus genotype 4 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "768127002",
+      "display": "Chronic hepatitis C caused by Hepatitis C virus genotype 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "768288001",
+      "display": "Chronic hepatitis C caused by Hepatitis C virus genotype 1b (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "768289009",
+      "display": "Chronic hepatitis C caused by Hepatitis C virus genotype 1a (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78208005",
+      "display": "Pigment cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79607001",
+      "display": "Congenital hepatic fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79720007",
+      "display": "Chronic nonalcoholic liver disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81675001",
+      "display": "Chronic yellow atrophy of liver (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86454000",
+      "display": "Postnecrotic cirrhosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88518009",
+      "display": "Wilson's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89789003",
+      "display": "Chronic aggressive viral hepatitis (disorder)"
+    } ]
+  }
+}

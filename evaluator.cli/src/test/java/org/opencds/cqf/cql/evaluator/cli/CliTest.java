@@ -428,4 +428,5 @@ public class CliTest {
         assertTrue(output.contains("Denominator Exclusion=false"));
         assertTrue(output.contains("Numerator=true"));
     }
+
 }

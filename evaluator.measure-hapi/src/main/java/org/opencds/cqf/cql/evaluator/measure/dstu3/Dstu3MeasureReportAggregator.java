@@ -16,8 +16,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<MeasureReport>{
+public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<MeasureReport> {
 
     @Override
     public MeasureReport aggregate(Iterable<MeasureReport> reports) {
@@ -35,7 +37,7 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
             throw new IllegalArgumentException(String.format("Can not aggregate MeasureReports of type: %s", MeasureReport.MeasureReportType.INDIVIDUAL.toCode()));
         }
 
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             merge(carry, iterator.next());
         }
 
@@ -62,9 +64,10 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
         mergeContained(carry, current);
         mergeExtensions(carry, current);
         mergePopulation(carry, current);
-        //mergeStratifier(carry, current);
+        mergeStratifier(carry, current);
 
     }
+
 
     protected void mergeContained(MeasureReport carry, MeasureReport current) {
 
@@ -72,43 +75,126 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
             return;
         }
 
+        //this map will store population code as key and subjectReference as list item
+        Map<String, List<Reference>> populationCodeSubjectsReferenceMap = new HashMap<>();
+
+        harvestSubjectReferencesAgainstPopulationCode(populationCodeSubjectsReferenceMap, carry);
+        harvestSubjectReferencesAgainstPopulationCode(populationCodeSubjectsReferenceMap, current);
+
         Map<String, Resource> resourceMap = new HashMap<>();
+        Map<String, Resource> carryListResourceMap = new HashMap<>();
+        Map<String, Resource> currentListResourceMap = new HashMap<>();
 
-        for (Resource resource : carry.getContained()) {
-            if (resource.hasId()) {
-                resourceMap.put(resource.getId(), resource);
-            }
-        }
+        populateMapsWithResourceAndListResource(carry, resourceMap, carryListResourceMap);
         carry.getContained().clear();
+        populateMapsWithResourceAndListResource(current, resourceMap, currentListResourceMap);
 
-        for (Resource resource : current.getContained()) {
-            if (resource.hasId() && resource.getResourceType().equals(ResourceType.List)) {
-                if (resourceMap.containsKey(resource.getId())) {
-                    ListResource localCarry = (ListResource) resourceMap.get(resource.getId());
-                    mergeList(localCarry, (ListResource) resource);
-                    resourceMap.put(resource.getId(),localCarry);
-                } else {
-                    resourceMap.put(resource.getId(), resource);
-                }
-            } else if (resource.hasId()) {
-                if(!resourceMap.containsKey(resource.getId())) {
-                    resourceMap.put(resource.getId(), resource);
-                }
+
+        populationCodeSubjectsReferenceMap.values().forEach(list -> {
+            ListResource carryList = null, currentList = null;
+
+            if (list.size() > 1) {
+                String carryReference = extractId(list.get(0).getReference());
+                String currentReference = extractId(list.get(1).getReference());
+
+
+                carryList = getMatchedListResource(carryListResourceMap, carryReference);
+                currentList = getMatchedListResource(currentListResourceMap, currentReference);
+
+            } else if (list.size() == 1) {
+                String reference = extractId(list.get(0).getReference());
+
+                carryList = getMatchedListResource(carryListResourceMap, reference);
+                carryList = getMatchedListResource(currentListResourceMap, reference);
+
             }
-        }
+
+            if (carryList != null && currentList != null) {
+                mergeList(carryList, currentList);
+            }
+            if (carryList != null) {
+                resourceMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(), carryList);
+            }
+        });
+
 
         carry.getContained().addAll(resourceMap.values());
+        carry.getContained().addAll(carryListResourceMap.values());
+        carry.getContained().addAll(currentListResourceMap.values());
 
+    }
+
+    private String extractId(String reference) {
+        if (reference != null) {
+            if (reference.startsWith("#")) {
+                return reference.substring(1);
+            } else if (reference.contains("/") && reference.length() > 1) {
+                return reference.substring(reference.indexOf("/") + 1);
+            }
+        }
+        return reference;
+    }
+
+    private ListResource getMatchedListResource(Map<String, Resource> listResourceMap, String key) {
+        ListResource listResource = null;
+        if (listResourceMap.containsKey(key)) {
+            listResource = (ListResource) listResourceMap.get(key);
+            listResourceMap.remove(key);
+        }
+        return listResource;
+    }
+
+    //eligible means having id, it is important having id as population subjectReference will match this id
+    private boolean isEligibleListResourceType(Resource resource) {
+        return resource.hasId() &&
+                (resource.getResourceType() != null &&
+                        resource.getResourceType().equals(ResourceType.List));
+    }
+
+    private void populateMapsWithResourceAndListResource(MeasureReport measureReport,
+                                                         Map<String, Resource> resourceMap,
+                                                         Map<String, Resource> listResourceMap) {
+        measureReport.getContained().forEach(resource -> {
+            String id = extractId(resource.getId());
+            if (!isEligibleListResourceType(resource)) {
+                if (!resourceMap.containsKey(id)) {
+                    resourceMap.put(id, resource);
+                }
+            } else if (isEligibleListResourceType(resource)) {
+                listResourceMap.put(id, resource);
+            }
+        });
+    }
+
+    private void harvestSubjectReferencesAgainstPopulationCode(Map<String, List<Reference>> populationCodeSubjectsReferenceMap,
+                                                               MeasureReport measureReport) {
+        measureReport.getGroupFirstRep().getPopulation().forEach(populationComponent -> {
+            if (populationComponent.hasCode()) {
+                CodeableConcept codeableConcept = populationComponent.getCode();
+                String key = codeableConcept.getCodingFirstRep().getCode();
+
+                if (StringUtils.isNotBlank(key) && populationComponent.hasPatients()) {
+                    if (populationCodeSubjectsReferenceMap.containsKey(key)) {
+                        (populationCodeSubjectsReferenceMap.get(key))
+                                .add(populationComponent.getPatients());
+                    } else {
+                        List<Reference> list = new ArrayList<>();
+                        list.add(populationComponent.getPatients());
+                        populationCodeSubjectsReferenceMap.put(key, list);
+                    }
+                }
+            }
+        });
     }
 
     private void mergeList(ListResource carry, ListResource current) {
         List<String> itemIds = new ArrayList<>();
-        for(ListResource.ListEntryComponent comp : carry.getEntry()) {
+        for (ListResource.ListEntryComponent comp : carry.getEntry()) {
             itemIds.add(comp.getItem().getReference());
         }
 
-        for(ListResource.ListEntryComponent comp : current.getEntry()) {
-            if(!itemIds.contains(comp.getItem().getReference())) {
+        for (ListResource.ListEntryComponent comp : current.getEntry()) {
+            if (!itemIds.contains(comp.getItem().getReference())) {
                 carry.getEntry().add(comp);
             }
         }
@@ -123,22 +209,22 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
 
         for (Extension extension : carry.getExtension()) {
             if (extension.hasValue()) {
-                if(extension.getValue() instanceof StringType) {
-                    extensionDummyIds.add(((StringType)extension.getValue()).getValue());
-                } else if(extension.getValue() instanceof Reference) {
-                    extensionDummyIds.add(((Reference)extension.getValue()).getReference());
+                if (extension.getValue() instanceof StringType) {
+                    extensionDummyIds.add(((StringType) extension.getValue()).getValue());
+                } else if (extension.getValue() instanceof Reference) {
+                    extensionDummyIds.add(((Reference) extension.getValue()).getReference());
                 }
             }
         }
 
         for (Extension extension : current.getExtension()) {
             if (extension.hasValue()) {
-                if(extension.getValue() instanceof StringType) {
-                    if (!extensionDummyIds.contains(((StringType)extension.getValue()).getValue())) {
+                if (extension.getValue() instanceof StringType) {
+                    if (!extensionDummyIds.contains(((StringType) extension.getValue()).getValue())) {
                         carry.getExtension().add(extension);
                     }
-                }  else if(extension.getValue() instanceof Reference) {
-                    if (!extensionDummyIds.contains(((Reference)extension.getValue()).getReference())) {
+                } else if (extension.getValue() instanceof Reference) {
+                    if (!extensionDummyIds.contains(((Reference) extension.getValue()).getReference())) {
                         carry.getExtension().add(extension);
                     }
                 }
@@ -156,15 +242,15 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
 
         for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : current.getGroupFirstRep().getPopulation()) {
             CodeableConcept codeableConcept = populationComponent.getCode();
-            if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
+            if (StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
                 codeScore.put(codeableConcept.getCodingFirstRep().getCode(), Integer.toString(populationComponent.getCount()));
             }
         }
 
         for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : carry.getGroupFirstRep().getPopulation()) {
             CodeableConcept codeableConcept = populationComponent.getCode();
-            if(StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
-                if(codeScore.get(codeableConcept.getCodingFirstRep().getCode()) != null) {
+            if (StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
+                if (codeScore.get(codeableConcept.getCodingFirstRep().getCode()) != null) {
                     populationComponent.setCount(populationComponent.getCount() +
                             Integer.parseInt(codeScore.get(codeableConcept.getCodingFirstRep().getCode())));
                 }
@@ -172,88 +258,90 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
         }
     }
 
-    /*
     protected void mergeStratifier(MeasureReport carry, MeasureReport current) {
 
         if (current == null || carry == null) {
             return;
         }
 
-        HashMap<String, String> codeScore = new HashMap<String, String>();
+        HashMap<String, String> codeScore = new HashMap<>();
 
-        String stratifierCodeKey = "";
-        String stratifierStratumKey = "";
-        String stratifierStratumPopulationKey = "";
+        AtomicReference<String> stratifierCodeKey = new AtomicReference<>("");
+        AtomicReference<String> stratifierStratumKey = new AtomicReference<>("");
+        AtomicReference<String> stratifierStratumPopulationKey = new AtomicReference<>("");
 
-        for (MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent : current.getGroupFirstRep().getStratifier()) {
-            CodeableConcept codeableConcept = stratifierComponent.getCOde;
-            stratifierCodeKey = getKeyValue(codeableConcept);
-
-            if (stratifierComponent.hasStratum()) {
-                for (MeasureReport.StratifierGroupComponent stratumComponent : stratifierComponent.getStratum()) {
-                    if (stratumComponent.hasValue()) {
-                        CodeableConcept value = stratumComponent.getValue();
-                        stratifierStratumKey = getKeyValue(value);
-                    }
-
-                    if (stratumComponent.hasPopulation()) {
-                        for (MeasureReport.StratifierGroupPopulationComponent stratumPopulationComp : stratumComponent.getPopulation()) {
-                            if (stratumPopulationComp.hasCode()) {
-                                CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
-                                stratifierStratumPopulationKey = getKeyValue(populationCodeableConcept);
-
-                                if (stratumPopulationComp.hasCount()) {
-                                    codeScore.put(generateKey(stratifierCodeKey, stratifierStratumKey, stratifierStratumPopulationKey),
-                                            Integer.toString(stratumPopulationComp.getCount()));
-                                }
-
-                            }
-                        }
-                    }
+        current.getGroupFirstRep().getStratifier().forEach(stratifierComponent -> {
+            if (stratifierComponent.hasIdentifier() && stratifierComponent.getIdentifier().hasValue()) {
+                String key = stratifierComponent.getIdentifier().getValue();
+                if (StringUtils.isNotBlank(key)) {
+                    stratifierCodeKey.set(key);
                 }
 
-            }
-        }
+                if (stratifierComponent.hasStratum()) {
+                    stratifierComponent.getStratum().forEach(stratumComponent -> {
+                        if (stratumComponent.hasValue()) {
+                            String value = stratumComponent.getValue();
+                            stratifierStratumKey.set(value);
+                        }
 
-        stratifierCodeKey = "";
-        stratifierStratumKey = "";
-        stratifierStratumPopulationKey = "";
+                        if (stratumComponent.hasPopulation()) {
+                            stratumComponent.getPopulation().forEach(stratumPopulationComp -> {
+                                if (stratumPopulationComp.hasCode()) {
+                                    CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
+                                    stratifierStratumPopulationKey.set(getKeyValue(populationCodeableConcept));
 
-        for (MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent : carry.getGroupFirstRep().getStratifier()) {
-            org.hl7.fhir.r4.model.CodeableConcept codeableConcept = stratifierComponent.getCodeFirstRep();
-            stratifierCodeKey = getKeyValue(codeableConcept);
-
-            if (stratifierComponent.hasStratum()) {
-                for (MeasureReport.StratifierGroupComponent stratumComponent : stratifierComponent.getStratum()) {
-                    if (stratumComponent.hasValue()) {
-                        CodeableConcept value = stratumComponent.getValue();
-                        stratifierStratumKey = getKeyValue(value);
-                    }
-
-                    if (stratumComponent.hasPopulation()) {
-                        for (MeasureReport.StratifierGroupPopulationComponent stratumPopulationComp : stratumComponent.getPopulation()) {
-                            if (stratumPopulationComp.hasCode()) {
-                                CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
-                                stratifierStratumPopulationKey = getKeyValue(populationCodeableConcept);
-
-                                if (stratumPopulationComp.hasCount()) {
-                                    String key = generateKey(stratifierCodeKey, stratifierStratumKey, stratifierStratumPopulationKey);
-                                    if (codeScore.containsKey(key)) {
-                                        stratumPopulationComp.setCount(stratumPopulationComp.getCount() +
-                                                Integer.parseInt(codeScore.get(key)));
+                                    if (stratumPopulationComp.hasCount()) {
+                                        codeScore.put(generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get()),
+                                                Integer.toString(stratumPopulationComp.getCount()));
                                     }
                                 }
-
-                            }
+                            });
                         }
-                    }
+                    });
+                }
+            }
+        });
+
+        stratifierCodeKey.set("");
+        stratifierStratumKey.set("");
+        stratifierStratumPopulationKey.set("");
+
+        carry.getGroupFirstRep().getStratifier().forEach(stratifierComponent -> {
+            if (stratifierComponent.hasIdentifier() && stratifierComponent.getIdentifier().hasValue()) {
+                String key = stratifierComponent.getIdentifier().getValue();
+                if (StringUtils.isNotBlank(key)) {
+                    stratifierCodeKey.set(key);
                 }
 
-            }
-        }
-    }
+                if (stratifierComponent.hasStratum()) {
+                    stratifierComponent.getStratum().forEach(stratumComponent -> {
+                        if (stratumComponent.hasValue()) {
+                            String value = stratumComponent.getValue();
+                            stratifierStratumKey.set(value);
+                        }
 
-    */
+                        if (stratumComponent.hasPopulation()) {
+                            stratumComponent.getPopulation().forEach(stratumPopulationComp -> {
+                                if (stratumPopulationComp.hasCode()) {
+                                    CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
+                                    stratifierStratumPopulationKey.set(getKeyValue(populationCodeableConcept));
+
+                                    if (stratumPopulationComp.hasCount()) {
+                                        String combinedKey = generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get());
+                                        if (codeScore.containsKey(combinedKey)) {
+                                            stratumPopulationComp.setCount(stratumPopulationComp.getCount() +
+                                                    Integer.parseInt(codeScore.get(combinedKey)));
+                                        }
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    }
 
     private String getKeyValue(CodeableConcept codeableConcept) {
         if (codeableConcept.hasCoding()) {

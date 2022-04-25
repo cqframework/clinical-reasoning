@@ -163,10 +163,32 @@ public class PlanDefinitionProcessorTests {
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
         planDefinitionProcessor = new PlanDefinitionProcessor(fhirContext, fhirDal, libraryProcessor, evaluator, activityDefinitionProcessor, operationParametersParser);
     }
+    @Test
+    public void TestHelloWorld() {
+        Parameters expected = new Parameters();
 
+        expected.addParameter().setName("return").setResource(getExpectedCarePlan("helloworld-careplan.json"));
+
+        Endpoint endpoint = new Endpoint().setAddress("hello-world-patient-view-bundle.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Endpoint dataEndpoint = new Endpoint().setAddress("helloworldpatientdata.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Resource actualCarePlan = planDefinitionProcessor.apply(
+                new IdType("PlanDefinition", "hello-world-patient-view"), "helloworld-patient-1",
+                "helloworld-patient-1-encounter-1", null, null, null, null,
+                null, null, null, null, expected, null,
+                null, null, dataEndpoint,
+                endpoint, endpoint);
+
+        CarePlan expectedCarePlan = getExpectedCarePlan("helloworld-careplan.json");
+        assertTrue(expectedCarePlan.equalsShallow(actualCarePlan));
+    }
     @Test
     public void TestRuleFiltersReportable() {
         Parameters expected = new Parameters();
+
         expected.addParameter().setName("return").setResource(getExpectedCarePlan("ReportableCarePlan.json"));
 
         Endpoint endpoint = new Endpoint().setAddress("RuleFilters-1.0.0-bundle.json")
@@ -176,8 +198,13 @@ public class PlanDefinitionProcessorTests {
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
         
         Resource actualCarePlan = planDefinitionProcessor.apply(
-                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "Reportable", "reportable-encounter", null, null, null, null, null, null, null, null, expected, null, null, null, dataEndpoint,
+                new IdType("PlanDefinition", "plandefinition-RuleFilters-1.0.0"), "Reportable",
+                "reportable-encounter", null, null, null, null,
+                null, null, null, null, expected, null,
+                null, null, dataEndpoint,
                 endpoint, endpoint);
+
+
 
         CarePlan expectedCarePlan = getExpectedCarePlan("ReportableCarePlan.json");
         assertTrue(expectedCarePlan.equalsShallow(actualCarePlan));

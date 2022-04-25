@@ -8,7 +8,7 @@
   "contained": [
     {
       "resourceType": "List",
-      "id": "subject-list-group-group-1-initial-population",
+      "id": "CMS146-initial-population",
       "entry": [
         {
           "item": {
@@ -56,7 +56,7 @@
             ]
           },
           "count": 500,
-          "subjects": {
+          "patients": {
             "reference": "List/CMS146-initial-population"
           }
         },
@@ -69,7 +69,7 @@
             ]
           },
           "count": 200,
-          "subjects": {
+          "patients": {
             "reference": "List/CMS146-numerator"
           }
         },
@@ -82,7 +82,7 @@
             ]
           },
           "count": 500,
-          "subjects": {
+          "patients": {
             "reference": "List/CMS146-denominator"
           }
         },
@@ -95,9 +95,253 @@
             ]
           },
           "count": 100,
-          "subjects": {
+          "patients": {
             "reference": "List/CMS146-denominator-exclusions"
           }
+        }
+      ],
+      "stratifier": [
+        {
+          "identifier": {
+            "value": "stratifier-ages-up-to-9"
+          },
+          "stratum": [
+            {
+              "value": "true",
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-denominator-exclusions"
+                  }
+                }
+              ]
+            },
+            {
+              "value": "false",
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-denominator-exclusions"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "identifier": {
+            "value": "stratifier-ages-10-plus"
+          },
+          "stratum": [
+            {
+              "value": "true",
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-denominator-exclusions"
+                  }
+                }
+              ]
+            },
+            {
+              "value": "false",
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "patients": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-denominator-exclusions"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }

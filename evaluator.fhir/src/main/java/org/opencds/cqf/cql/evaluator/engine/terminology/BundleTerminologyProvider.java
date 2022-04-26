@@ -13,6 +13,7 @@ import com.google.common.collect.Iterables;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.BundleUtil;
 
 public class BundleTerminologyProvider implements TerminologyProvider {
@@ -29,6 +31,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     private static final Logger logger = LoggerFactory.getLogger(BundleTerminologyProvider.class);
 
     private FhirContext fhirContext;
+    private IFhirPath fhirPath;
     private List<? extends IBaseResource> valueSets;
     private Map<String, Iterable<Code>> valueSetIndex = new HashMap<>();
 
@@ -39,6 +42,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         requireNonNull(bundle, "bundle can not be null.");
 
         this.fhirContext = fhirContext;
+        this.fhirPath = fhirContext.newFhirPath();
         this.valueSets = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle, this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
     }
 
@@ -121,6 +125,11 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             if (codes == null) {
                 logger.warn("ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
                 codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
+            } else {
+                Boolean isNaiveExpansion = isNaiveExpansion(resource);
+                if (isNaiveExpansion != null && isNaiveExpansion) {
+                    logger.warn("Codes expanded without a terminology server, some results may not be correct.");     
+                }
             }
 
             if (codes == null) {
@@ -132,6 +141,33 @@ public class BundleTerminologyProvider implements TerminologyProvider {
 
 
         this.initialized = true;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private Boolean isNaiveExpansion(IBaseResource resource) {
+        IBase expansion = ValueSetUtil.getExpansion(this.fhirContext, resource);
+        if (expansion != null) {
+            Object object = ValueSetUtil.getExpansionParameters(expansion, fhirPath, ".where(name = 'naive').value");
+            if (object instanceof IBase) {
+                return resolveNaiveBoolean((IBase)object);
+            } else if (object instanceof Iterable) {
+                List<IBase> naiveParameters = (List<IBase>) object;
+                for (IBase param : naiveParameters) {
+                    return resolveNaiveBoolean(param);
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private Boolean resolveNaiveBoolean(IBase param) {
+        if (param.fhirType().equals("boolean")) {
+            return (Boolean)((IPrimitiveType<?>)param).getValue();
+        } else {
+            return null;
+        }
     }
 
     

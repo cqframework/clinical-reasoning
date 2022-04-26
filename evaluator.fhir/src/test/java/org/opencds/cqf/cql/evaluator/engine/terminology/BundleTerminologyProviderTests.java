@@ -23,12 +23,12 @@ import org.testng.annotations.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import nl.altindag.log.LogCaptor;
 
 
 public class BundleTerminologyProviderTests {
 
     private String bundlePathOne = "../util/r4/TestBundleValueSets.json";
-    private String bundlePathTwo = "../util/r4/TestBundleValueSetsTwo.json";
 
     private IBaseBundle loadBundle(FhirContext fhirContext, String path) {
         InputStream stream = BundleTerminologyProviderTests.class.getResourceAsStream(path);
@@ -67,10 +67,28 @@ public class BundleTerminologyProviderTests {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void test_notExpandedFromExpansionLogic() {
-        TerminologyProvider terminology = this.getTerminologyProvider(bundlePathTwo);
+        TerminologyProvider terminology = this.getTerminologyProvider("../util/r4/TestExpansionLogicBundle.json");
         terminology.in(
             new Code().withSystem("http://localhost/unit-test").withCode("000"),
-            new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-five"));
+            new ValueSetInfo().withId("http://localhost/fhir/ValueSet/expansion-logic-valueset"));
+    }
+
+    @Test
+    public void test_naiveExpansion() {
+        LogCaptor logCaptor = LogCaptor.forClass(BundleTerminologyProvider.class);
+        TerminologyProvider terminology = this.getTerminologyProvider("../util/r4/TestNaiveExpansionBundle.json");
+        terminology.in(
+            new Code().withSystem("http://localhost/unit-test").withCode("000"),
+            new ValueSetInfo().withId("http://localhost/fhir/ValueSet/naive-expansion-valueset"));
+            
+        String expectedWarnMessage = "Codes expanded without a terminology server, some results may not be correct.";
+        boolean foundExpected = false;
+        for (String warning : logCaptor.getWarnLogs()) {
+            if (warning.equals(expectedWarnMessage)) {
+                foundExpected = true;
+            }
+        }
+        assertTrue(foundExpected);
     }
 
     @Test

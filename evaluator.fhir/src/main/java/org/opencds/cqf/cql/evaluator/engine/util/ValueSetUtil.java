@@ -14,6 +14,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 
 public class ValueSetUtil {
 
@@ -426,5 +427,13 @@ public class ValueSetUtil {
 	private static BaseRuntimeChildDefinition getIdDefinition(FhirContext fhirContext) {
 		RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
         return def.getChildByName("id");
+	}
+
+	public static <T extends IBase> List<IBase> getExpansionParameters(IBase expansion, IFhirPath fhirPath, String filterExpression) {
+		// String expression = "expansion.parameter";
+		// if (filterExpression != null) { expression = expression + filterExpression; }
+		String expression = String.format("parameter%s", filterExpression);
+		// String expression = (filterExpression == null) ? "expansion.parameter" : "expansion.parameter" + filterExpression;
+		return fhirPath.evaluate(expansion, expression, IBase.class);
 	}
 }

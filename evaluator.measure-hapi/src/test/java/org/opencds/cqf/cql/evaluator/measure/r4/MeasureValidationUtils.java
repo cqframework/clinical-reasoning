@@ -1,11 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -16,8 +12,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 
 public class MeasureValidationUtils {
 
@@ -80,7 +80,7 @@ public class MeasureValidationUtils {
         }
 
         for(ListResource.ListEntryComponent comp : expected.getEntry()) {
-            assertTrue(actual.getEntry().stream().anyMatch(x -> listItems.contains(x.getItem().getReference())));
+            assertTrue(actual.getEntry().stream().anyMatch(x -> listItems.contains(comp.getItem().getReference())));
         }
     }
 

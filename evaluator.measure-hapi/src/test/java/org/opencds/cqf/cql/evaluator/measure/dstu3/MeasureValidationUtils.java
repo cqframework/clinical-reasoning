@@ -1,9 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
-import org.hl7.fhir.dstu3.model.ListResource;
-import org.hl7.fhir.dstu3.model.MeasureReport;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -12,8 +10,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import org.hl7.fhir.dstu3.model.ListResource;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 public class MeasureValidationUtils {
 
@@ -60,7 +60,7 @@ public class MeasureValidationUtils {
         }
 
         for(ListResource.ListEntryComponent comp : expected.getEntry()) {
-            assertTrue(actual.getEntry().stream().anyMatch(x -> listItems.contains(x.getItem().getReference())));
+            assertTrue(actual.getEntry().stream().anyMatch(x -> listItems.contains(comp.getItem().getReference())));
         }
     }
 

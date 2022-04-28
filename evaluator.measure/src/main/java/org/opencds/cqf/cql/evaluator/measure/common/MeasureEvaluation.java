@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOR;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOREXCLUSION;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOREXCEPTION;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOREXCLUSION;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.INITIALPOPULATION;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREOBSERVATION;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREPOPULATION;
@@ -60,7 +60,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     protected String modelUri = null;
     protected String measurementPeriodParameterName = null;
 
-    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
+    protected MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
             MeasureDefBuilder<MeasureT> measureDefBuilder) {
         this(context, measure, getId, measureReportBuilder, measureDefBuilder, MeasureConstants.FHIR_MODEL_URI,
@@ -68,7 +68,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
     }
 
-    public MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
+    protected MeasureEvaluation(Context context, MeasureT measure, Function<SubjectT, String> getId,
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
             MeasureDefBuilder<MeasureT> measureDefBuilder, String modelUri, String measurementPeriodParameterName) {
         this.measure = measure;
@@ -162,8 +162,9 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     protected ParameterDef getMeasurementPeriodParameterDef() {
         Library lib = this.context.getCurrentLibrary();
 
-        if (lib.getParameters() == null || lib.getParameters().getDef() == null || lib.getParameters().getDef().isEmpty()) {
-            return null; 
+        if (lib.getParameters() == null || lib.getParameters().getDef() == null
+                || lib.getParameters().getDef().isEmpty()) {
+            return null;
         }
 
         for (ParameterDef pd : lib.getParameters().getDef()) {
@@ -171,7 +172,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
                 return pd;
             }
         }
-         
+
         return null;
 
     }
@@ -183,38 +184,45 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
 
         ParameterDef pd = this.getMeasurementPeriodParameterDef();
         if (pd == null) {
-            logger.warn("Parameter \"{}\" was not found. Unable to validate type.", this.measurementPeriodParameterName);
+            logger.warn("Parameter \"{}\" was not found. Unable to validate type.",
+                    this.measurementPeriodParameterName);
             this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
             return;
         }
 
-        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier)pd.getParameterTypeSpecifier();
+        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
         if (intervalTypeSpecifier == null) {
-            logger.debug("No ELM type information available. Unable to validate type of \"{}\"", this.measurementPeriodParameterName);
+            logger.debug("No ELM type information available. Unable to validate type of \"{}\"",
+                    this.measurementPeriodParameterName);
             this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
             return;
         }
 
-        NamedTypeSpecifier pointType = (NamedTypeSpecifier)intervalTypeSpecifier.getPointType();
+        NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
         String targetType = pointType.getName().getLocalPart();
         Interval convertedPeriod = convertInterval(measurementPeriod, targetType);
-        
+
         this.context.setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
     }
 
     protected Interval convertInterval(Interval interval, String targetType) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
-        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
+        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1,
+                sourceTypeQualified.length());
         if (sourceType.equals(targetType)) {
             return interval;
         }
 
         if (sourceType.equals("DateTime") && targetType.equals("Date")) {
-            logger.debug("A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
-            return new Interval(truncateDateTime((DateTime)interval.getLow()), interval.getLowClosed(), truncateDateTime((DateTime)interval.getHigh()), interval.getHighClosed());
+            logger.debug(
+                    "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
+            return new Interval(truncateDateTime((DateTime) interval.getLow()), interval.getLowClosed(),
+                    truncateDateTime((DateTime) interval.getHigh()), interval.getHighClosed());
         }
 
-        throw new IllegalArgumentException(String.format("The interval type of %s did not match the expected type of %s and no conversion was possible.", sourceType, targetType));
+        throw new IllegalArgumentException(String.format(
+                "The interval type of %s did not match the expected type of %s and no conversion was possible.",
+                sourceType, targetType));
     }
 
     protected Date truncateDateTime(DateTime dateTime) {
@@ -267,11 +275,9 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
     }
 
     protected void captureEvaluatedResources(List<Object> outEvaluatedResources) {
-        if (outEvaluatedResources != null) {
-            if (this.context.getEvaluatedResources() != null) {
-                for (Object o : this.context.getEvaluatedResources()) {
-                    outEvaluatedResources.add(o);
-                }
+        if (outEvaluatedResources != null && this.context.getEvaluatedResources() != null) {
+            for (Object o : this.context.getEvaluatedResources()) {
+                outEvaluatedResources.add(o);
             }
         }
 
@@ -306,21 +312,32 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                //the count of denominator + denominator exclusion + denominator exception must be <= the count of initial population.
-                if (groupDef.get(INITIALPOPULATION).getResources().size() <
-                        ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size() : 0) +
-                                (groupDef.get(DENOMINATOREXCEPTION) != null ? groupDef.get(DENOMINATOREXCEPTION).getResources().size() : 0) +
-                                (groupDef.get(DENOMINATOREXCLUSION) != null ? groupDef.get(DENOMINATOREXCLUSION).getResources().size() : 0))) {
+                // the count of denominator + denominator exclusion + denominator exception must
+                // be <= the count of initial population.
+                if (groupDef.get(INITIALPOPULATION).getResources()
+                        .size() < ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size()
+                                : 0) +
+                                (groupDef.get(DENOMINATOREXCEPTION) != null
+                                        ? groupDef.get(DENOMINATOREXCEPTION).getResources().size()
+                                        : 0)
+                                +
+                                (groupDef.get(DENOMINATOREXCLUSION) != null
+                                        ? groupDef.get(DENOMINATOREXCLUSION).getResources().size()
+                                        : 0))) {
                     logger.debug("For group: {}, Initial population count is less than the sum of denominator," +
                             " denominator exception and denominator exclusion", groupDef.getId());
                 }
 
-                //the count of numerator + numerator exclusion must be <= the count of the denominator.
-                if ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size() : 0) <
-                        ((groupDef.get(NUMERATOR) != null ? groupDef.get(NUMERATOR).getResources().size() : 0) +
-                                (groupDef.get(NUMERATOREXCLUSION) != null ? groupDef.get(NUMERATOREXCLUSION).getResources().size() : 0))
-                ) {
-                    logger.debug("For group: {}, Denominator count is less than the sum of numerator and numerator exclusion", groupDef.getId());
+                // the count of numerator + numerator exclusion must be <= the count of the
+                // denominator.
+                if ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size()
+                        : 0) < ((groupDef.get(NUMERATOR) != null ? groupDef.get(NUMERATOR).getResources().size() : 0) +
+                                (groupDef.get(NUMERATOREXCLUSION) != null
+                                        ? groupDef.get(NUMERATOREXCLUSION).getResources().size()
+                                        : 0))) {
+                    logger.debug(
+                            "For group: {}, Denominator count is less than the sum of numerator and numerator exclusion",
+                            groupDef.getId());
                 }
 
                 break;
@@ -342,7 +359,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
         }
 
         if (result instanceof Boolean) {
-            if (((Boolean) result)) {
+            if (Boolean.TRUE.equals(result)) {
                 return Collections.singletonList(
                         (BaseT) this.context.resolveExpressionRef(this.subjectType).evaluate(this.context));
             } else {
@@ -393,14 +410,12 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
             inclusionDef.getResources().add(resource);
         }
 
-        if (inPopulation) {
-            if (exclusionDef != null) {
-                for (Object resource : evaluatePopulationCriteria(subjectId, exclusionDef.getCriteriaExpression(),
-                        exclusionDef.getEvaluatedResources())) {
-                    inPopulation = false;
-                    exclusionDef.getResources().add(resource);
-                    inclusionDef.getResources().remove(resource);
-                }
+        if (inPopulation && exclusionDef != null) {
+            for (Object resource : evaluatePopulationCriteria(subjectId, exclusionDef.getCriteriaExpression(),
+                    exclusionDef.getEvaluatedResources())) {
+                inPopulation = false;
+                exclusionDef.getResources().add(resource);
+                inclusionDef.getResources().remove(resource);
             }
         }
 
@@ -428,7 +443,7 @@ public abstract class MeasureEvaluation<BaseT, MeasureT extends BaseT, MeasureRe
                 boolean inNumerator = evaluatePopulationMembership(subjectId, groupDef.get(NUMERATOR),
                         groupDef.get(NUMERATOREXCLUSION));
 
-                if (!inNumerator && inDenominator && groupDef.get(DENOMINATOREXCEPTION) != null) {
+                if (!inNumerator && groupDef.get(DENOMINATOREXCEPTION) != null) {
                     // Are they in the denominator exception?
 
                     PopulationDef denominatorException = groupDef.get(DENOMINATOREXCEPTION);

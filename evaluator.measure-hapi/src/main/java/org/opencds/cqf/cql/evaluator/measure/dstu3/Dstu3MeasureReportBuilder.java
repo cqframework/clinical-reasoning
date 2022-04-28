@@ -299,7 +299,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     private void addResourceReferences(MeasurePopulationType measurePopulationType, List<Object> evaluatedResources) {
-        if (evaluatedResources.size() > 0) {
+        if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
                 Resource resource = (Resource) object;
                 String resourceId = resource.getId();

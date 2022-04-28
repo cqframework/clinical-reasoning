@@ -308,7 +308,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void addResourceReferences(MeasurePopulationType measurePopulationType, List<Object> evaluatedResources) {
-        if (evaluatedResources.size() > 0) {
+        if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
                 Resource resource = (Resource) object;
                 String resourceId = resource.getId();

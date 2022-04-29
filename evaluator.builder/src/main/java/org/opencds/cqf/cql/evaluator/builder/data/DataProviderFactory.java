@@ -1,8 +1,7 @@
 package org.opencds.cqf.cql.evaluator.builder.data;
 
-import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
-
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
 
 import java.util.List;
 import java.util.Set;
@@ -42,15 +41,8 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
     }
 
     @Override
-<<<<<<< HEAD
-    public Triple<String, ModelResolver, RetrieveProvider> create(EndpointInfo endpointInfo) {
-        if (endpointInfo == null) {
-            return null;
-        }
-=======
     public DataProviderComponents create(EndpointInfo endpointInfo) {
         requireNonNull(endpointInfo, "endpointInfo can not be null");
->>>>>>> d1745fd (WIP Measure updates)
 
         if (endpointInfo.getType() == null) {
             endpointInfo.setType(detectType(endpointInfo.getAddress()));
@@ -127,15 +119,8 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
     }
 
     @Override
-<<<<<<< HEAD
-    public Triple<String, ModelResolver, RetrieveProvider> create(IBaseBundle dataBundle) {
-        if (dataBundle == null) {
-            return null;
-        }
-=======
     public DataProviderComponents create(IBaseBundle dataBundle) {
         requireNonNull(dataBundle, "dataBundle can not be null");
->>>>>>> d1745fd (WIP Measure updates)
 
         if (!dataBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
             throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");

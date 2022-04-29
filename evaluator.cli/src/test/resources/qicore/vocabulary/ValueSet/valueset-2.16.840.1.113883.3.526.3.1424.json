@@ -1,0 +1,235 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1424",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1424",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1424"
+  } ],
+  "version": "20200307",
+  "name": "HereditaryCornealDystrophies",
+  "title": "Hereditary Corneal Dystrophies",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.50",
+      "display": "Unspecified hereditary corneal dystrophies"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.51",
+      "display": "Endothelial corneal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.52",
+      "display": "Epithelial (juvenile) corneal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.53",
+      "display": "Granular corneal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.54",
+      "display": "Lattice corneal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.55",
+      "display": "Macular corneal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H18.59",
+      "display": "Other hereditary corneal dystrophies"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "123670005",
+      "display": "Adiposa cornea dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129623003",
+      "display": "Iridocorneal endothelial syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1674008",
+      "display": "Juvenile epithelial corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193837009",
+      "display": "Combined corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193839007",
+      "display": "Fuchs' corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231930000",
+      "display": "Reis-Bucklers' corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231931001",
+      "display": "Stromal corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231933003",
+      "display": "Lattice corneal dystrophy, isolated form (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231934009",
+      "display": "Pre-descemet's corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29504002",
+      "display": "Posterior polymorphous corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "361199007",
+      "display": "Lattice corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "373426005",
+      "display": "Epithelial basement membrane dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39662004",
+      "display": "Crystalline corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "397568004",
+      "display": "Avellino corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "404633004",
+      "display": "Cogan-Reese syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416633008",
+      "display": "Congenital hereditary endothelial dystrophy type 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416960004",
+      "display": "Corneal endothelial dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417065002",
+      "display": "Thiel-Behnke corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417183007",
+      "display": "Fleck corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417395001",
+      "display": "Congenital hereditary endothelial dystrophy type 2 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417651000",
+      "display": "Congenital hereditary endothelial dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418054005",
+      "display": "Macular corneal dystrophy Type I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418435001",
+      "display": "Macular corneal dystrophy Type II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418946006",
+      "display": "Lattice corneal dystrophy Type III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419039007",
+      "display": "Groenouw corneal dystrophy type I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419087002",
+      "display": "Lattice corneal dystrophy Type II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419197009",
+      "display": "Lattice corneal dystrophy Type I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419395007",
+      "display": "Schnyder crystalline cornea dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419900000",
+      "display": "Gelatinous droplike corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "430888006",
+      "display": "Dystrophy of anterior cornea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45283008",
+      "display": "Granular corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5587004",
+      "display": "Corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60258001",
+      "display": "Macular corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75663006",
+      "display": "Ring-like corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77797009",
+      "display": "Hereditary corneal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95488001",
+      "display": "Congenital macular corneal dystrophy (disorder)"
+    } ]
+  }
+}

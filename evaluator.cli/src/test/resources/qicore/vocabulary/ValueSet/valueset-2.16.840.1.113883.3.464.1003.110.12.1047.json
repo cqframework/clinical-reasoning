@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1047",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1047",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1047"
+  } ],
+  "version": "20190316",
+  "name": "RotavirusVaccine(3doseschedule)Administered",
+  "title": "Rotavirus Vaccine (3 dose schedule) Administered",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90680",
+      "display": "Rotavirus vaccine, pentavalent (RV5), 3 dose schedule, live, for oral use"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "434731000124109",
+      "display": "Rotavirus vaccination, 3 dose schedule (procedure)"
+    } ]
+  }
+}

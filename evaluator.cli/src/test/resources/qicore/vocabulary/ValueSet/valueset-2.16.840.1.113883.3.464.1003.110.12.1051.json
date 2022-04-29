@@ -1,0 +1,775 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1051",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1051",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1051"
+  } ],
+  "version": "20170504",
+  "name": "LabTestsforSexuallyTransmittedInfections",
+  "title": "Lab Tests for Sexually Transmitted Infections",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "10705-2",
+      "display": "Human papilloma virus Ag [Presence] in Tissue by Immune stain"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11083-3",
+      "display": "Human papilloma virus identified in Cervix"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11084-1",
+      "display": "Reagin Ab [Titer] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11481-9",
+      "display": "Human papilloma virus identified in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11597-2",
+      "display": "Treponema pallidum Ab [Units/volume] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12222-6",
+      "display": "Human papilloma virus Ag [Presence] in Genital specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12223-4",
+      "display": "Human papilloma virus 16+18 Ag [Presence] in Genital specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14499-8",
+      "display": "Human papilloma virus Ag [Presence] in Cervix"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14500-3",
+      "display": "Human papilloma virus Ag [Presence] in Vaginal fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14502-9",
+      "display": "Human papilloma virus Ag [Presence] in Urethra"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14503-7",
+      "display": "Human papilloma virus 16+18 Ag [Presence] in Cervix"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14504-5",
+      "display": "Human papilloma virus 16+18 Ag [Presence] in Vaginal fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14506-0",
+      "display": "Human papilloma virus 16+18 Ag [Presence] in Urethra"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "16280-0",
+      "display": "Human papilloma virus DNA [Presence] in Unspecified specimen by Probe with amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17398-9",
+      "display": "Human papilloma virus 11 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17399-7",
+      "display": "Human papilloma virus 16 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17400-3",
+      "display": "Human papilloma virus 16+18 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17401-1",
+      "display": "Human papilloma virus 18 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17402-9",
+      "display": "Human papilloma virus 31 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17403-7",
+      "display": "Human papilloma virus 31+33+35 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17404-5",
+      "display": "Human papilloma virus 33 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17405-2",
+      "display": "Human papilloma virus 42 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17406-0",
+      "display": "Human papilloma virus 43 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17407-8",
+      "display": "Human papilloma virus 44 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17408-6",
+      "display": "Human papilloma virus 45 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17409-4",
+      "display": "Human papilloma virus 5 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17410-2",
+      "display": "Human papilloma virus 51 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17411-0",
+      "display": "Human papilloma virus 6 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17412-8",
+      "display": "Human papilloma virus 6+11 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17723-8",
+      "display": "Treponema pallidum Ab [Presence] in Serum by Immobilization"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17724-6",
+      "display": "Treponema pallidum Ab [Units/volume] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17725-3",
+      "display": "Treponema pallidum Ab [Units/volume] in Serum by Latex agglutination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17726-1",
+      "display": "Treponema pallidum IgG Ab [Presence] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17727-9",
+      "display": "Treponema pallidum IgG Ab [Units/volume] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17728-7",
+      "display": "Treponema pallidum IgM Ab [Units/volume] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17729-5",
+      "display": "Treponema pallidum IgM Ab [Presence] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20507-0",
+      "display": "Reagin Ab [Presence] in Serum by RPR"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20508-8",
+      "display": "Reagin Ab [Units/volume] in Serum by RPR"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21414-8",
+      "display": "Neisseria gonorrhoeae DNA [Presence] in Cervical mucus by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21415-5",
+      "display": "Neisseria gonorrhoeae DNA [Presence] in Urethra by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21416-3",
+      "display": "Neisseria gonorrhoeae DNA [Presence] in Urine by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21440-3",
+      "display": "Human papilloma virus 16+18+31+33+35+45+51+52+56 DNA [Presence] in Cervix by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21441-1",
+      "display": "Human papilloma virus 6+11+42+43+44 DNA [Presence] in Cervix by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22461-8",
+      "display": "Reagin Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22462-6",
+      "display": "Reagin Ab [Units/volume] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22587-0",
+      "display": "Treponema pallidum Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22590-4",
+      "display": "Treponema pallidum Ab [Titer] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22592-0",
+      "display": "Treponema pallidum IgG Ab [Units/volume] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22594-6",
+      "display": "Treponema pallidum IgM Ab [Units/volume] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24110-9",
+      "display": "Treponema pallidum Ab [Presence] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24111-7",
+      "display": "Neisseria gonorrhoeae DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24312-1",
+      "display": "Treponema pallidum Ab [Presence] in Serum by Agglutination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "26009-1",
+      "display": "Treponema pallidum Ab [Titer] in Serum by Hemagglutination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "29311-8",
+      "display": "Neisseria gonorrhoeae Ag [Presence] in Unspecified specimen by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "30167-1",
+      "display": "Human papilloma virus 16+18+31+33+35+39+45+51+52+56+58+59+68 DNA [Presence] in Cervix by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "31147-2",
+      "display": "Reagin Ab [Titer] in Serum by RPR"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "31905-3",
+      "display": "Neisseria gonorrhoeae Ag [Presence] in Genital specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "31906-1",
+      "display": "Neisseria gonorrhoeae Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32198-4",
+      "display": "Neisseria gonorrhoeae rRNA [Presence] in Cervix by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32199-2",
+      "display": "Neisseria gonorrhoeae rRNA [Presence] in Urethra by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32705-6",
+      "display": "Neisseria gonorrhoeae DNA [Presence] in Vaginal fluid by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34147-9",
+      "display": "Treponema pallidum IgG+IgM Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34382-2",
+      "display": "Treponema pallidum Ab [Titer] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38372-9",
+      "display": "Human papilloma virus 6+11+16+18+31+33+35+39+42+43+44+45+51+52+56+58+59+68 DNA [Presence] in Cervix by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "40679-3",
+      "display": "Treponema pallidum IgG Ab [Presence] in Serum by Immunoblot"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "40680-1",
+      "display": "Treponema pallidum IgM Ab [Presence] in Serum by Immunoblot"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42481-2",
+      "display": "Human papilloma virus 6+11+42+43+44 DNA [Presence] in Cervix by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "43305-2",
+      "display": "Neisseria gonorrhoeae rRNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "43403-5",
+      "display": "Neisseria gonorrhoeae DNA [Presence] in Unspecified specimen by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44543-7",
+      "display": "Human papilloma virus 31+33 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44544-5",
+      "display": "Human papilloma virus 35 Ag [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44546-0",
+      "display": "Human papilloma virus DNA [Presence] in Vaginal fluid by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44547-8",
+      "display": "Human papilloma virus DNA [Presence] in Unspecified specimen by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44549-4",
+      "display": "Human papilloma virus DNA [Presence] in Vaginal fluid by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44550-2",
+      "display": "Human papilloma virus DNA [Presence] in Cervix by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "47236-5",
+      "display": "Treponema pallidum IgG+IgM Ab [Presence] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "47237-3",
+      "display": "Treponema pallidum IgM Ab [Presence] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "47238-1",
+      "display": "Treponema pallidum IgG Ab [Presence] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "47387-6",
+      "display": "Neisseria gonorrhoeae DNA [Presence] in Genital specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "48560-7",
+      "display": "Human papilloma virus genotype [Identifier] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49891-5",
+      "display": "Human papilloma virus DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49896-4",
+      "display": "Human papilloma virus 16+18+31+33+35+39+45+51+52+56+58+59+68 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "5028-6",
+      "display": "Neisseria gonorrhoeae rRNA [Presence] in Unspecified specimen by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "50388-8",
+      "display": "Neisseria gonorrhoeae rRNA [Presence] in Cervix by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "50690-7",
+      "display": "Reagin Ab [Titer] in Serum by VDRL"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "51838-1",
+      "display": "Treponema pallidum IgG Ab [Units/volume] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "51839-9",
+      "display": "Treponema pallidum IgM Ab [Units/volume] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "5291-0",
+      "display": "Reagin Ab [Units/volume] in Serum by VDRL"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "5292-8",
+      "display": "Reagin Ab [Presence] in Serum by VDRL"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53605-2",
+      "display": "Treponema pallidum DNA [Presence] in Blood by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53762-1",
+      "display": "Neisseria gonorrhoeae IgG Ab [Titer] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53879-3",
+      "display": "Neisseria gonorrhoeae rRNA [Presence] in Vaginal fluid by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "5392-6",
+      "display": "Treponema pallidum Ab [Units/volume] in Serum by Immobilization"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53927-0",
+      "display": "Neisseria gonorrhoeae rRNA [Presence] in Urethra by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "5393-4",
+      "display": "Treponema pallidum Ab [Presence] in Serum by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "5394-2",
+      "display": "Treponema pallidum Ab [Titer] in Serum by Latex agglutination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "55299-2",
+      "display": "Human papilloma virus 6+11+42+43+44 DNA [Presence] in Unspecified specimen by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "57032-5",
+      "display": "Treponema pallidum Ab [Presence] in Serum by Immunoblot"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59263-4",
+      "display": "Human papilloma virus 16 DNA [Presence] in Cervix by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59264-2",
+      "display": "Human papilloma virus 18 DNA [Presence] in Cervix by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59420-0",
+      "display": "Human papilloma virus 16+18+31+33+35+39+45+51+52+56+58+59+66+68 DNA [Presence] in Cervix by Probe with signal amplification"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61372-9",
+      "display": "Human papilloma virus 16 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61373-7",
+      "display": "Human papilloma virus 18 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61374-5",
+      "display": "Human papilloma virus 26 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61375-2",
+      "display": "Human papilloma virus 31 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61376-0",
+      "display": "Human papilloma virus 33 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61377-8",
+      "display": "Human papilloma virus 35 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61378-6",
+      "display": "Human papilloma virus 39 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61379-4",
+      "display": "Human papilloma virus 44 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61380-2",
+      "display": "Human papilloma virus 45 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61381-0",
+      "display": "Human papilloma virus 51 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61382-8",
+      "display": "Human papilloma virus 52 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61383-6",
+      "display": "Human papilloma virus 53 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61384-4",
+      "display": "Human papilloma virus 58 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61385-1",
+      "display": "Human papilloma virus 59 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61386-9",
+      "display": "Human papilloma virus 66 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61387-7",
+      "display": "Human papilloma virus 67 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61388-5",
+      "display": "Human papilloma virus 68 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61389-3",
+      "display": "Human papilloma virus 69 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61390-1",
+      "display": "Human papilloma virus 70 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61391-9",
+      "display": "Human papilloma virus 73 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61392-7",
+      "display": "Human papilloma virus 82 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61393-5",
+      "display": "Human papilloma virus 6 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61394-3",
+      "display": "Human papilloma virus 11 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61395-0",
+      "display": "Human papilloma virus 42 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "61396-8",
+      "display": "Human papilloma virus 56 DNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "63464-2",
+      "display": "Treponema pallidum Ab [Units/volume] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6487-3",
+      "display": "Neisseria gonorrhoeae Ag [Presence] in Genital specimen by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6488-1",
+      "display": "Neisseria gonorrhoeae Ag [Presence] in Genital specimen by Immunofluorescence"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6489-9",
+      "display": "Neisseria gonorrhoeae Ag [Presence] in Genital specimen by Latex agglutination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6510-2",
+      "display": "Human papilloma virus Ab [Presence] in Genital specimen by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6511-0",
+      "display": "Human papilloma virus Ab [Presence] in Genital specimen by Immunoblot"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6514-4",
+      "display": "Human papilloma virus rRNA [Presence] in Genital specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6516-9",
+      "display": "Human papilloma virus rRNA [Presence] in Unspecified specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6561-5",
+      "display": "Treponema pallidum IgG Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6562-3",
+      "display": "Treponema pallidum IgM Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "660-1",
+      "display": "Microscopic observation [Identifier] in Unspecified specimen by Dark field examination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "688-2",
+      "display": "Neisseria gonorrhoeae [Presence] in Cervix by Organism specific culture"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "690-8",
+      "display": "Neisseria gonorrhoeae [Presence] in Endometrium by Organism specific culture"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "69002-4",
+      "display": "Human papilloma virus E6+E7 mRNA [Presence] in Cervix by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "691-6",
+      "display": "Neisseria gonorrhoeae [Presence] in Genital specimen by Organism specific culture"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "692-4",
+      "display": "Neisseria gonorrhoeae [Presence] in Genital lochia by Organism specific culture"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "693-2",
+      "display": "Neisseria gonorrhoeae [Presence] in Vaginal fluid by Organism specific culture"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "698-1",
+      "display": "Neisseria gonorrhoeae [Presence] in Unspecified specimen by Organism specific culture"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "71431-1",
+      "display": "Human papilloma virus 31+33+35+39+45+51+52+56+58+59+66+68 DNA [Presence] in Cervix by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "71793-4",
+      "display": "Treponema pallidum Ab [Titer] in Serum or Plasma by Agglutination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "73732-0",
+      "display": "Human papilloma virus 26+31+33+35+39+45+51+52+53+56+58+59+66+68+73+82 DNA [Presence] in Genital specimen by NAA with probe detection"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "73752-8",
+      "display": "Reagin and Treponema pallidum IgG and IgM [Interpretation] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "73959-9",
+      "display": "Human papilloma virus 16+18+31+33+35+39+45+51+52+56+58+66 DNA [Presence] in Tissue by Probe"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "7975-6",
+      "display": "Human papilloma virus Ab [Presence] in Genital specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8041-6",
+      "display": "Treponema pallidum Ab [Presence] in Serum by Hemagglutination"
+    } ]
+  }
+}

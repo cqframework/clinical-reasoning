@@ -1,0 +1,100 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.113.12.1051",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1051",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.113.12.1051"
+  } ],
+  "version": "20180310",
+  "name": "DXA(DualenergyXrayAbsorptiometry)Scan",
+  "title": "DXA (Dual energy Xray Absorptiometry) Scan",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24701-5",
+      "display": "DXA Femur [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24890-6",
+      "display": "DXA Radius and Ulna [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24966-4",
+      "display": "DXA Lumbar spine [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38261-4",
+      "display": "DXA Hip [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38262-2",
+      "display": "DXA Calcaneus [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38263-0",
+      "display": "DXA Femur [T-score] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38264-8",
+      "display": "DXA Hip [T-score] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38265-5",
+      "display": "DXA Radius and Ulna [T-score] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38266-3",
+      "display": "DXA Calcaneus [T-score] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38267-1",
+      "display": "DXA Lumbar spine [T-score] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38268-9",
+      "display": "DXA Skeletal system Views for bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38269-7",
+      "display": "Study report Skeletal system DXA"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "46278-8",
+      "display": "DXA Hip - left [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "46279-6",
+      "display": "DXA Hip - right [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "46383-6",
+      "display": "DXA Bone [Mass/Area] Bone density"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "62910-5",
+      "display": "PhenX - spine - femur bone density by dual-energy x-ray absorptiometry protocol 170701"
+    } ]
+  }
+}

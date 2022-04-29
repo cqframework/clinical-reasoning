@@ -1,0 +1,1790 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.257",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.257",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.257"
+  } ],
+  "version": "20170801",
+  "name": "GynecologicalSurgery",
+  "title": "Gynecological Surgery",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U500ZZ",
+      "display": "Destruction of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U510ZZ",
+      "display": "Destruction of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U520ZZ",
+      "display": "Destruction of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U540ZZ",
+      "display": "Destruction of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U550ZZ",
+      "display": "Destruction of Right Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U557ZZ",
+      "display": "Destruction of Right Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U558ZZ",
+      "display": "Destruction of Right Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U560ZZ",
+      "display": "Destruction of Left Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U567ZZ",
+      "display": "Destruction of Left Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U568ZZ",
+      "display": "Destruction of Left Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U570ZZ",
+      "display": "Destruction of Bilateral Fallopian Tubes, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U577ZZ",
+      "display": "Destruction of Bilateral Fallopian Tubes, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U578ZZ",
+      "display": "Destruction of Bilateral Fallopian Tubes, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U800ZZ",
+      "display": "Division of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U810ZZ",
+      "display": "Division of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U820ZZ",
+      "display": "Division of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U840ZZ",
+      "display": "Division of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB00ZZ",
+      "display": "Excision of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB07ZZ",
+      "display": "Excision of Right Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB08ZZ",
+      "display": "Excision of Right Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB10ZZ",
+      "display": "Excision of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB17ZZ",
+      "display": "Excision of Left Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB18ZZ",
+      "display": "Excision of Left Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB20ZZ",
+      "display": "Excision of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB27ZZ",
+      "display": "Excision of Bilateral Ovaries, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB28ZZ",
+      "display": "Excision of Bilateral Ovaries, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB40ZZ",
+      "display": "Excision of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB47ZZ",
+      "display": "Excision of Uterine Supporting Structure, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB48ZZ",
+      "display": "Excision of Uterine Supporting Structure, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB50ZZ",
+      "display": "Excision of Right Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB57ZZ",
+      "display": "Excision of Right Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB58ZZ",
+      "display": "Excision of Right Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB60ZZ",
+      "display": "Excision of Left Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB67ZZ",
+      "display": "Excision of Left Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB68ZZ",
+      "display": "Excision of Left Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB70ZZ",
+      "display": "Excision of Bilateral Fallopian Tubes, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB77ZZ",
+      "display": "Excision of Bilateral Fallopian Tubes, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB78ZZ",
+      "display": "Excision of Bilateral Fallopian Tubes, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT00ZZ",
+      "display": "Resection of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT07ZZ",
+      "display": "Resection of Right Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT08ZZ",
+      "display": "Resection of Right Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT10ZZ",
+      "display": "Resection of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT17ZZ",
+      "display": "Resection of Left Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT18ZZ",
+      "display": "Resection of Left Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT20ZZ",
+      "display": "Resection of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT27ZZ",
+      "display": "Resection of Bilateral Ovaries, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT28ZZ",
+      "display": "Resection of Bilateral Ovaries, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT40ZZ",
+      "display": "Resection of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT47ZZ",
+      "display": "Resection of Uterine Supporting Structure, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT48ZZ",
+      "display": "Resection of Uterine Supporting Structure, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT50ZZ",
+      "display": "Resection of Right Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT57ZZ",
+      "display": "Resection of Right Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT58ZZ",
+      "display": "Resection of Right Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT60ZZ",
+      "display": "Resection of Left Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT67ZZ",
+      "display": "Resection of Left Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT68ZZ",
+      "display": "Resection of Left Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT70ZZ",
+      "display": "Resection of Bilateral Fallopian Tubes, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT77ZZ",
+      "display": "Resection of Bilateral Fallopian Tubes, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT78ZZ",
+      "display": "Resection of Bilateral Fallopian Tubes, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT90ZZ",
+      "display": "Resection of Uterus, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT97ZZ",
+      "display": "Resection of Uterus, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT98ZZ",
+      "display": "Resection of Uterus, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UTC0ZZ",
+      "display": "Resection of Cervix, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UTC7ZZ",
+      "display": "Resection of Cervix, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UTC8ZZ",
+      "display": "Resection of Cervix, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10T20ZZ",
+      "display": "Resection of Products of Conception, Ectopic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10T27ZZ",
+      "display": "Resection of Products of Conception, Ectopic, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10T28ZZ",
+      "display": "Resection of Products of Conception, Ectopic, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "112918004",
+      "display": "Vaginal hysterectomy with colpo-urethrocystopexy, Marshall-Marchetti-Krantz type (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116028008",
+      "display": "Salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116141005",
+      "display": "Abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116142003",
+      "display": "Radical hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116143008",
+      "display": "Total abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116144002",
+      "display": "Total abdominal hysterectomy with bilateral salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116167000",
+      "display": "Excision of lesion of ovary in fragments (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116173004",
+      "display": "Wedge resection of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "118865002",
+      "display": "Procedure on round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120053002",
+      "display": "Fallopian tube excision (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120064004",
+      "display": "Ovary destructive procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13254001",
+      "display": "Abdominal hysterectomy with colpo-urethrocystopexy, Marshall-Marchetti-Krantz type (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15306005",
+      "display": "Electrocoagulation of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1689004",
+      "display": "Local excision of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176914002",
+      "display": "Right salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176915001",
+      "display": "Left salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176916000",
+      "display": "Right salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176917009",
+      "display": "Left salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177018009",
+      "display": "Open destruction of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177019001",
+      "display": "Open cauterization of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177046006",
+      "display": "Endoscopic extirpation of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177055009",
+      "display": "Excision of lesion of broad ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177056005",
+      "display": "Destruction of lesion of broad ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "214173000",
+      "display": "Excision of lesion of uterine ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "223306006",
+      "display": "Electrocoagulation of broad ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22699007",
+      "display": "Partial salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23575009",
+      "display": "Local destruction of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236889009",
+      "display": "Laparoscopic supracervical hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236932009",
+      "display": "Multicauterization of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236935006",
+      "display": "Evacuation of broad ligament hematoma (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236987005",
+      "display": "Emergency cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236988000",
+      "display": "Elective cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25344002",
+      "display": "Fimbriectomy of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25811000",
+      "display": "Bilateral complete salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265056007",
+      "display": "Vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27185000",
+      "display": "Vaginal hysterectomy with partial colpectomy and repair of enterocele (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "276189003",
+      "display": "Excision of broad ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287931008",
+      "display": "Fallopian tube cornual resection (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287935004",
+      "display": "Bilateral partial fallopian removal (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287945002",
+      "display": "Bilateral fallopian tube resection (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29529008",
+      "display": "Supracervical hysterectomy with removal of both tubes and ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29672006",
+      "display": "Partial oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29827000",
+      "display": "Bilateral salpingectomy with oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300897007",
+      "display": "Total salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30160001",
+      "display": "Vaginal hysterectomy with total colpectomy and repair of enterocele (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30172007",
+      "display": "Electrocoagulation of round ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302190000",
+      "display": "Abdominal hysterectomy and right salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302191001",
+      "display": "Abdominal hysterectomy and left salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302376006",
+      "display": "Right oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302377002",
+      "display": "Left oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307771009",
+      "display": "Radical abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309879006",
+      "display": "Abdominal hysterocolpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309880009",
+      "display": "Vaginal hysterocolpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315059002",
+      "display": "Laparoscopic salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315060007",
+      "display": "Open salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33015000",
+      "display": "Laparoscopy with fulguration of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35887003",
+      "display": "Excision of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35955002",
+      "display": "Radical vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359971002",
+      "display": "Ward-Mayo operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359974005",
+      "display": "Tuffier operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359977003",
+      "display": "Mayo operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359980002",
+      "display": "Vaginal panhysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359983000",
+      "display": "Heaney operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "361222003",
+      "display": "Wertheim-Meigs abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "361223008",
+      "display": "Wertheim operation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "387739000",
+      "display": "Enucleation of ovarian cyst (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "387740003",
+      "display": "Removal of ovarian cyst (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "387741004",
+      "display": "Excision of cyst of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41058005",
+      "display": "Salpingectomy for tubal ectopic pregnancy by abdominal approach (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41059002",
+      "display": "Cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413144006",
+      "display": "Abdominal hysterectomy with conservation of ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413145007",
+      "display": "Vaginal hysterectomy with conservation of ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41393008",
+      "display": "Excision of cyst of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414575003",
+      "display": "Laparoscopic total abdominal hysterectomy and bilateral salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42349006",
+      "display": "Excision of cyst of broad ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "431316002",
+      "display": "Laparoscopic subtotal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43791001",
+      "display": "Vaginal hysterectomy with total colpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441820006",
+      "display": "Laparoscopy assisted vaginal hysterectomy with bilateral salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4443002",
+      "display": "Decortication of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445912000",
+      "display": "Excision of fallopian tube and surgical removal of ectopic pregnancy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44619000",
+      "display": "Bilateral wedge resection of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446446002",
+      "display": "Total abdominal hysterectomy and removal of vaginal cuff (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446526009",
+      "display": "Debulking of neoplasm of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "447771005",
+      "display": "Abdominal hysterectomy and excision of periuterine tissue (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44793005",
+      "display": "Excision of lesion of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "448539002",
+      "display": "Vaginal hysterectomy and excision of periuterine tissue (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "47045001",
+      "display": "Excision of lesion of round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49493009",
+      "display": "Bilateral resection of cornua of fallopian tubes (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54080001",
+      "display": "Cauterization of broad ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54490004",
+      "display": "Vaginal hysterectomy with repair of enterocele (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60158005",
+      "display": "Bilateral bisection of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62692004",
+      "display": "Partial salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63516002",
+      "display": "Vaginal hysterectomy with colpo-urethrocystopexy, Pereyra type (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63596003",
+      "display": "Laparoscopic treatment of ectopic pregnancy with salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66169000",
+      "display": "Excision of hydrocele of round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71225000",
+      "display": "Excision of uterine ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75835007",
+      "display": "Laparoscopic-assisted vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76876009",
+      "display": "Bilateral oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77902002",
+      "display": "Vaginal hysterectomy with partial colpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "784191009",
+      "display": "Classic intrafascial supracervical hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82269004",
+      "display": "Cauterization of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83152002",
+      "display": "Oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83416007",
+      "display": "Cauterization of round ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84093003",
+      "display": "Electrocoagulation of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8550006",
+      "display": "Partial bilateral salpingectomy for sterilization (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85855000",
+      "display": "Partial bilateral salpingectomy for sterilization by endoscopy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86477000",
+      "display": "Total hysterectomy with removal of both tubes and ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87102007",
+      "display": "Excision of round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89325008",
+      "display": "Cauterization of ovary (procedure)"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U500ZZ",
+      "display": "Destruction of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U510ZZ",
+      "display": "Destruction of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U520ZZ",
+      "display": "Destruction of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U540ZZ",
+      "display": "Destruction of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U550ZZ",
+      "display": "Destruction of Right Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U557ZZ",
+      "display": "Destruction of Right Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U558ZZ",
+      "display": "Destruction of Right Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U560ZZ",
+      "display": "Destruction of Left Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U567ZZ",
+      "display": "Destruction of Left Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U568ZZ",
+      "display": "Destruction of Left Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U570ZZ",
+      "display": "Destruction of Bilateral Fallopian Tubes, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U577ZZ",
+      "display": "Destruction of Bilateral Fallopian Tubes, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U578ZZ",
+      "display": "Destruction of Bilateral Fallopian Tubes, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U800ZZ",
+      "display": "Division of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U810ZZ",
+      "display": "Division of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U820ZZ",
+      "display": "Division of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0U840ZZ",
+      "display": "Division of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB00ZZ",
+      "display": "Excision of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB07ZZ",
+      "display": "Excision of Right Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB08ZZ",
+      "display": "Excision of Right Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB10ZZ",
+      "display": "Excision of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB17ZZ",
+      "display": "Excision of Left Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB18ZZ",
+      "display": "Excision of Left Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB20ZZ",
+      "display": "Excision of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB27ZZ",
+      "display": "Excision of Bilateral Ovaries, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB28ZZ",
+      "display": "Excision of Bilateral Ovaries, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB40ZZ",
+      "display": "Excision of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB47ZZ",
+      "display": "Excision of Uterine Supporting Structure, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB48ZZ",
+      "display": "Excision of Uterine Supporting Structure, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB50ZZ",
+      "display": "Excision of Right Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB57ZZ",
+      "display": "Excision of Right Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB58ZZ",
+      "display": "Excision of Right Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB60ZZ",
+      "display": "Excision of Left Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB67ZZ",
+      "display": "Excision of Left Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB68ZZ",
+      "display": "Excision of Left Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB70ZZ",
+      "display": "Excision of Bilateral Fallopian Tubes, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB77ZZ",
+      "display": "Excision of Bilateral Fallopian Tubes, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UB78ZZ",
+      "display": "Excision of Bilateral Fallopian Tubes, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT00ZZ",
+      "display": "Resection of Right Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT07ZZ",
+      "display": "Resection of Right Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT08ZZ",
+      "display": "Resection of Right Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT10ZZ",
+      "display": "Resection of Left Ovary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT17ZZ",
+      "display": "Resection of Left Ovary, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT18ZZ",
+      "display": "Resection of Left Ovary, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT20ZZ",
+      "display": "Resection of Bilateral Ovaries, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT27ZZ",
+      "display": "Resection of Bilateral Ovaries, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT28ZZ",
+      "display": "Resection of Bilateral Ovaries, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT40ZZ",
+      "display": "Resection of Uterine Supporting Structure, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT47ZZ",
+      "display": "Resection of Uterine Supporting Structure, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT48ZZ",
+      "display": "Resection of Uterine Supporting Structure, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT50ZZ",
+      "display": "Resection of Right Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT57ZZ",
+      "display": "Resection of Right Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT58ZZ",
+      "display": "Resection of Right Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT60ZZ",
+      "display": "Resection of Left Fallopian Tube, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT67ZZ",
+      "display": "Resection of Left Fallopian Tube, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT68ZZ",
+      "display": "Resection of Left Fallopian Tube, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT70ZZ",
+      "display": "Resection of Bilateral Fallopian Tubes, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT77ZZ",
+      "display": "Resection of Bilateral Fallopian Tubes, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT78ZZ",
+      "display": "Resection of Bilateral Fallopian Tubes, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT90ZZ",
+      "display": "Resection of Uterus, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT97ZZ",
+      "display": "Resection of Uterus, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UT98ZZ",
+      "display": "Resection of Uterus, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UTC0ZZ",
+      "display": "Resection of Cervix, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UTC7ZZ",
+      "display": "Resection of Cervix, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0UTC8ZZ",
+      "display": "Resection of Cervix, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10T20ZZ",
+      "display": "Resection of Products of Conception, Ectopic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10T27ZZ",
+      "display": "Resection of Products of Conception, Ectopic, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10T28ZZ",
+      "display": "Resection of Products of Conception, Ectopic, Via Natural or Artificial Opening Endoscopic"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "112918004",
+      "display": "Vaginal hysterectomy with colpo-urethrocystopexy, Marshall-Marchetti-Krantz type (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116028008",
+      "display": "Salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116141005",
+      "display": "Abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116142003",
+      "display": "Radical hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116143008",
+      "display": "Total abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116144002",
+      "display": "Total abdominal hysterectomy with bilateral salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116167000",
+      "display": "Excision of lesion of ovary in fragments (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "116173004",
+      "display": "Wedge resection of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "118865002",
+      "display": "Procedure on round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120053002",
+      "display": "Fallopian tube excision (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120064004",
+      "display": "Ovary destructive procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13254001",
+      "display": "Abdominal hysterectomy with colpo-urethrocystopexy, Marshall-Marchetti-Krantz type (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15306005",
+      "display": "Electrocoagulation of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1689004",
+      "display": "Local excision of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176914002",
+      "display": "Right salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176915001",
+      "display": "Left salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176916000",
+      "display": "Right salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176917009",
+      "display": "Left salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177018009",
+      "display": "Open destruction of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177019001",
+      "display": "Open cauterization of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177046006",
+      "display": "Endoscopic extirpation of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177055009",
+      "display": "Excision of lesion of broad ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177056005",
+      "display": "Destruction of lesion of broad ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "214173000",
+      "display": "Excision of lesion of uterine ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "223306006",
+      "display": "Electrocoagulation of broad ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22699007",
+      "display": "Partial salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23575009",
+      "display": "Local destruction of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236889009",
+      "display": "Laparoscopic supracervical hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236932009",
+      "display": "Multicauterization of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236935006",
+      "display": "Evacuation of broad ligament hematoma (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236987005",
+      "display": "Emergency cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236988000",
+      "display": "Elective cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25344002",
+      "display": "Fimbriectomy of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25811000",
+      "display": "Bilateral complete salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265056007",
+      "display": "Vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27185000",
+      "display": "Vaginal hysterectomy with partial colpectomy and repair of enterocele (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "276189003",
+      "display": "Excision of broad ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287931008",
+      "display": "Fallopian tube cornual resection (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287935004",
+      "display": "Bilateral partial fallopian removal (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287945002",
+      "display": "Bilateral fallopian tube resection (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29529008",
+      "display": "Supracervical hysterectomy with removal of both tubes and ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29672006",
+      "display": "Partial oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29827000",
+      "display": "Bilateral salpingectomy with oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300897007",
+      "display": "Total salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30160001",
+      "display": "Vaginal hysterectomy with total colpectomy and repair of enterocele (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30172007",
+      "display": "Electrocoagulation of round ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302190000",
+      "display": "Abdominal hysterectomy and right salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302191001",
+      "display": "Abdominal hysterectomy and left salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302376006",
+      "display": "Right oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302377002",
+      "display": "Left oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307771009",
+      "display": "Radical abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309879006",
+      "display": "Abdominal hysterocolpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309880009",
+      "display": "Vaginal hysterocolpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315059002",
+      "display": "Laparoscopic salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315060007",
+      "display": "Open salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33015000",
+      "display": "Laparoscopy with fulguration of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35887003",
+      "display": "Excision of lesion of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35955002",
+      "display": "Radical vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359971002",
+      "display": "Ward-Mayo operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359974005",
+      "display": "Tuffier operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359977003",
+      "display": "Mayo operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359980002",
+      "display": "Vaginal panhysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359983000",
+      "display": "Heaney operation for vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "361222003",
+      "display": "Wertheim-Meigs abdominal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "361223008",
+      "display": "Wertheim operation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "387739000",
+      "display": "Enucleation of ovarian cyst (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "387740003",
+      "display": "Removal of ovarian cyst (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "387741004",
+      "display": "Excision of cyst of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41058005",
+      "display": "Salpingectomy for tubal ectopic pregnancy by abdominal approach (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41059002",
+      "display": "Cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413144006",
+      "display": "Abdominal hysterectomy with conservation of ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413145007",
+      "display": "Vaginal hysterectomy with conservation of ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41393008",
+      "display": "Excision of cyst of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414575003",
+      "display": "Laparoscopic total abdominal hysterectomy and bilateral salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42349006",
+      "display": "Excision of cyst of broad ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "431316002",
+      "display": "Laparoscopic subtotal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43791001",
+      "display": "Vaginal hysterectomy with total colpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441820006",
+      "display": "Laparoscopy assisted vaginal hysterectomy with bilateral salpingo-oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4443002",
+      "display": "Decortication of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445912000",
+      "display": "Excision of fallopian tube and surgical removal of ectopic pregnancy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44619000",
+      "display": "Bilateral wedge resection of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446446002",
+      "display": "Total abdominal hysterectomy and removal of vaginal cuff (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446526009",
+      "display": "Debulking of neoplasm of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "447771005",
+      "display": "Abdominal hysterectomy and excision of periuterine tissue (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44793005",
+      "display": "Excision of lesion of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "448539002",
+      "display": "Vaginal hysterectomy and excision of periuterine tissue (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "47045001",
+      "display": "Excision of lesion of round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49493009",
+      "display": "Bilateral resection of cornua of fallopian tubes (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54080001",
+      "display": "Cauterization of broad ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54490004",
+      "display": "Vaginal hysterectomy with repair of enterocele (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60158005",
+      "display": "Bilateral bisection of ovary (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62692004",
+      "display": "Partial salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63516002",
+      "display": "Vaginal hysterectomy with colpo-urethrocystopexy, Pereyra type (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63596003",
+      "display": "Laparoscopic treatment of ectopic pregnancy with salpingectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66169000",
+      "display": "Excision of hydrocele of round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71225000",
+      "display": "Excision of uterine ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75835007",
+      "display": "Laparoscopic-assisted vaginal hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76876009",
+      "display": "Bilateral oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77902002",
+      "display": "Vaginal hysterectomy with partial colpectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "784191009",
+      "display": "Classic intrafascial supracervical hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82269004",
+      "display": "Cauterization of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83152002",
+      "display": "Oophorectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83416007",
+      "display": "Cauterization of round ligament of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84093003",
+      "display": "Electrocoagulation of fallopian tube (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8550006",
+      "display": "Partial bilateral salpingectomy for sterilization (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85855000",
+      "display": "Partial bilateral salpingectomy for sterilization by endoscopy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86477000",
+      "display": "Total hysterectomy with removal of both tubes and ovaries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87102007",
+      "display": "Excision of round ligament (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89325008",
+      "display": "Cauterization of ovary (procedure)"
+    } ]
+  }
+}

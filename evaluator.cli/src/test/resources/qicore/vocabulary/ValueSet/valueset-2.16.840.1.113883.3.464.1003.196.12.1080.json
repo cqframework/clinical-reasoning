@@ -1,0 +1,495 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1080",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1080",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1080"
+  } ],
+  "version": "20170504",
+  "name": "ContraceptiveMedications",
+  "title": "Contraceptive Medications",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1000126",
+      "display": "1 ML medroxyprogesterone acetate 150 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1000131",
+      "display": "medroxyprogesterone acetate 400 MG/ML Injectable Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1000153",
+      "display": "1 ML medroxyprogesterone acetate 150 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1000156",
+      "display": "0.65 ML medroxyprogesterone acetate 160 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1013629",
+      "display": "{24 (drospirenone 3 MG / Ethinyl Estradiol 0.02 MG / levomefolate calcium 0.451 MG Oral Tablet) / 4 (levomefolate calcium 0.451 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1037183",
+      "display": "Ethinyl Estradiol 0.01 MG / norethindrone acetate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1037184",
+      "display": "{24 (Ethinyl Estradiol 0.01 MG / norethindrone acetate 1 MG Oral Tablet) / 2 (Ethinyl Estradiol 0.01 MG Oral Tablet) / 2 (Ferrous fumarate 75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1050493",
+      "display": "{21 (drospirenone 3 MG / Ethinyl Estradiol 0.03 MG / levomefolate calcium 0.451 MG Oral Tablet) / 7 (levomefolate calcium 0.451 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "105510",
+      "display": "Levonorgestrel 0.03 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1090992",
+      "display": "Ethinyl Estradiol 0.005 MG / norethindrone acetate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1095224",
+      "display": "{21 (Ethinyl Estradiol 0.035 MG / Norethindrone 0.4 MG Chewable Tablet) / 7 (Ferrous fumarate 75 MG Chewable Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1099638",
+      "display": "Ethinyl Estradiol 0.025 MG / Norethindrone 0.8 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251323",
+      "display": "Ethinyl Estradiol 0.0025 MG / norethindrone acetate 0.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251334",
+      "display": "{28 (Ethinyl Estradiol 0.0025 MG / norethindrone acetate 0.5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251336",
+      "display": "{28 (Ethinyl Estradiol 0.005 MG / norethindrone acetate 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1358762",
+      "display": "Ethinyl Estradiol 0.02 MG / norethindrone acetate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1358763",
+      "display": "{21 (Ethinyl Estradiol 0.02 MG / norethindrone acetate 1 MG Oral Tablet) / 7 (Ferrous fumarate 75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1358776",
+      "display": "{21 (Ethinyl Estradiol 0.02 MG / norethindrone acetate 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359022",
+      "display": "Ethinyl Estradiol 0.03 MG / norethindrone acetate 1.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359023",
+      "display": "{21 (Ethinyl Estradiol 0.03 MG / norethindrone acetate 1.5 MG Oral Tablet) / 7 (Ferrous fumarate 75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359028",
+      "display": "{21 (Ethinyl Estradiol 0.03 MG / norethindrone acetate 1.5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359117",
+      "display": "{24 (Ethinyl Estradiol 0.02 MG / norethindrone acetate 1 MG Oral Tablet) / 4 (Ferrous fumarate 75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359130",
+      "display": "Ethinyl Estradiol 0.03 MG / norethindrone acetate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359131",
+      "display": "Ethinyl Estradiol 0.035 MG / norethindrone acetate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1359132",
+      "display": "{5 (Ethinyl Estradiol 0.02 MG / norethindrone acetate 1 MG Oral Tablet) / 7 (Ethinyl Estradiol 0.03 MG / norethindrone acetate 1 MG Oral Tablet) / 9 (Ethinyl Estradiol 0.035 MG / norethindrone acetate 1 MG Oral Tablet) / 7 (Ferrous fumarate 75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1367436",
+      "display": "21 DAY Ethinyl Estradiol 0.000625 MG/HR / Etonogestrel 0.005 MG/HR Vaginal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1373501",
+      "display": "Ethinyl Estradiol 0.02 MG / Levonorgestrel 0.15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1373502",
+      "display": "Ethinyl Estradiol 0.025 MG / Levonorgestrel 0.15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1373503",
+      "display": "{7 (Ethinyl Estradiol 0.01 MG Oral Tablet) / 42 (Ethinyl Estradiol 0.02 MG / Levonorgestrel 0.15 MG Oral Tablet) / 21 (Ethinyl Estradiol 0.025 MG / Levonorgestrel 0.15 MG Oral Tablet) / 21 (Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.15 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1421459",
+      "display": "Ethinyl Estradiol 0.02 MG / norethindrone acetate 1 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1426288",
+      "display": "Ethinyl Estradiol 0.02 MG / norethindrone acetate 1 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198042",
+      "display": "Norethindrone 0.35 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198043",
+      "display": "Mestranol 0.05 MG / Norethindrone 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "238015",
+      "display": "Ethinyl Estradiol 0.035 MG / Norethindrone 0.4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "238019",
+      "display": "Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240128",
+      "display": "Ethinyl Estradiol 0.035 MG / norgestimate 0.25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "240707",
+      "display": "Desogestrel 0.15 MG / Ethinyl Estradiol 0.03 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "242297",
+      "display": "Ethinyl Estradiol 0.02 MG / Levonorgestrel 0.1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "248310",
+      "display": "Ethinyl Estradiol 0.01 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "249357",
+      "display": "Desogestrel 0.15 MG / Ethinyl Estradiol 0.02 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "259218",
+      "display": "Levonorgestrel 0.75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310228",
+      "display": "Ethinyl Estradiol 0.035 MG / Ethynodiol Diacetate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310230",
+      "display": "Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.05 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "310463",
+      "display": "Ethinyl Estradiol 0.035 MG / Norethindrone 0.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "311359",
+      "display": "Ethinyl Estradiol 0.03 MG / Norgestrel 0.3 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312033",
+      "display": "Ethinyl Estradiol 0.035 MG / Norethindrone 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "312124",
+      "display": "Ethinyl Estradiol 0.05 MG / Norethindrone 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "314146",
+      "display": "Ethinyl Estradiol 0.05 MG / Norgestrel 0.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "315096",
+      "display": "Ethinyl Estradiol 0.05 MG / Ethynodiol Diacetate 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "348804",
+      "display": "Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.125 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "348805",
+      "display": "Ethinyl Estradiol 0.04 MG / Levonorgestrel 0.075 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "389221",
+      "display": "Etonogestrel 68 MG Drug Implant"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "392662",
+      "display": "Ethinyl Estradiol 0.035 MG / Norethindrone 0.75 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "402250",
+      "display": "168 HR Estradiol 0.00188 MG/HR / Levonorgestrel 0.000625 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "406396",
+      "display": "Ethinyl Estradiol 0.035 MG / norgestimate 0.18 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "433718",
+      "display": "Ethinyl Estradiol 0.035 MG / Norethindrone 0.4 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "483325",
+      "display": "Levonorgestrel 1.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "578732",
+      "display": "Ethinyl Estradiol 0.025 MG / norgestimate 0.18 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "654353",
+      "display": "Desogestrel 0.1 MG / Ethinyl Estradiol 0.025 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "687424",
+      "display": "Ethinyl Estradiol 0.035 MG / norgestimate 0.215 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "722152",
+      "display": "Ethinyl Estradiol 0.02 MG / Levonorgestrel 0.09 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "729534",
+      "display": "Desogestrel 0.15 MG / Ethinyl Estradiol 0.025 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748798",
+      "display": "{24 (drospirenone 3 MG / Ethinyl Estradiol 0.02 MG Oral Tablet) / 4 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748800",
+      "display": "{21 (drospirenone 3 MG / Ethinyl Estradiol 0.03 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748804",
+      "display": "{21 (Ethinyl Estradiol 0.035 MG / Ethynodiol Diacetate 1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748806",
+      "display": "{21 (Ethinyl Estradiol 0.05 MG / Ethynodiol Diacetate 1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748832",
+      "display": "{6 (Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.05 MG Oral Tablet) / 10 (Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.125 MG Oral Tablet) / 5 (Ethinyl Estradiol 0.04 MG / Levonorgestrel 0.075 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748868",
+      "display": "{21 (Ethinyl Estradiol 0.02 MG / Levonorgestrel 0.1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748878",
+      "display": "{21 (Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.15 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "748961",
+      "display": "{28 (Norethindrone 0.35 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749155",
+      "display": "Ethinyl Estradiol 0.025 MG / norgestimate 0.215 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749156",
+      "display": "Ethinyl Estradiol 0.025 MG / norgestimate 0.25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749157",
+      "display": "{7 (Ethinyl Estradiol 0.025 MG / norgestimate 0.18 MG Oral Tablet) / 7 (Ethinyl Estradiol 0.025 MG / norgestimate 0.215 MG Oral Tablet) / 7 (Ethinyl Estradiol 0.025 MG / norgestimate 0.25 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749736",
+      "display": "{21 (Ethinyl Estradiol 0.035 MG / Norethindrone 0.4 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749761",
+      "display": "{7 (Ethinyl Estradiol 0.01 MG Oral Tablet) / 84 (Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.15 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749784",
+      "display": "{7 (Ethinyl Estradiol 0.035 MG / norgestimate 0.18 MG Oral Tablet) / 7 (Ethinyl Estradiol 0.035 MG / norgestimate 0.215 MG Oral Tablet) / 7 (Ethinyl Estradiol 0.035 MG / norgestimate 0.25 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749786",
+      "display": "{21 (Ethinyl Estradiol 0.03 MG / Norgestrel 0.3 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749848",
+      "display": "{21 (Desogestrel 0.15 MG / Ethinyl Estradiol 0.03 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749852",
+      "display": "{7 (Ethinyl Estradiol 0.035 MG / Norethindrone 0.5 MG Oral Tablet) / 7 (Ethinyl Estradiol 0.035 MG / Norethindrone 0.75 MG Oral Tablet) / 7 (Ethinyl Estradiol 0.035 MG / Norethindrone 1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749856",
+      "display": "{10 (Ethinyl Estradiol 0.035 MG / Norethindrone 0.5 MG Oral Tablet) / 11 (Ethinyl Estradiol 0.035 MG / Norethindrone 1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749858",
+      "display": "{21 (Ethinyl Estradiol 0.035 MG / Norethindrone 1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749860",
+      "display": "{21 (Ethinyl Estradiol 0.035 MG / norgestimate 0.25 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749869",
+      "display": "{21 (Ethinyl Estradiol 0.035 MG / Norethindrone 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "749879",
+      "display": "{21 (Ethinyl Estradiol 0.035 MG / Norethindrone 0.5 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "750242",
+      "display": "{21 (Ethinyl Estradiol 0.05 MG / Norgestrel 0.5 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "751553",
+      "display": "{28 (Ethinyl Estradiol 0.02 MG / Levonorgestrel 0.09 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "751901",
+      "display": "{84 (Ethinyl Estradiol 0.03 MG / Levonorgestrel 0.15 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "753476",
+      "display": "{21 (Ethinyl Estradiol 0.05 MG / Norethindrone 1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "759741",
+      "display": "Desogestrel 0.125 MG / Ethinyl Estradiol 0.025 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "759742",
+      "display": "{7 (Desogestrel 0.1 MG / Ethinyl Estradiol 0.025 MG Oral Tablet) / 7 (Desogestrel 0.125 MG / Ethinyl Estradiol 0.025 MG Oral Tablet) / 7 (Desogestrel 0.15 MG / Ethinyl Estradiol 0.025 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "759743",
+      "display": "{21 (Desogestrel 0.15 MG / Ethinyl Estradiol 0.02 MG Oral Tablet) / 5 (Ethinyl Estradiol 0.01 MG Oral Tablet) / 2 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "763088",
+      "display": "{2 (Levonorgestrel 0.75 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "810096",
+      "display": "{7 (Ethinyl Estradiol 0.01 MG Oral Tablet) / 84 (Ethinyl Estradiol 0.02 MG / Levonorgestrel 0.1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "823777",
+      "display": "{12 (Ethinyl Estradiol 0.035 MG / Norethindrone 0.5 MG Oral Tablet) / 9 (Ethinyl Estradiol 0.035 MG / Norethindrone 1 MG Oral Tablet) / 7 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "978949",
+      "display": "{5 (dienogest 2 MG / estradiol valerate 2 MG Oral Tablet) / 17 (dienogest 3 MG / estradiol valerate 2 MG Oral Tablet) / 2 (estradiol valerate 1 MG Oral Tablet) / 2 (estradiol valerate 3 MG Oral Tablet) / 2 (Inert Ingredients 1 MG Oral Tablet) } Pack"
+    } ]
+  }
+}

@@ -1,0 +1,375 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.195.12.1003",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.195.12.1003",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.195.12.1003"
+  } ],
+  "version": "20170504",
+  "name": "CounselingforNutrition",
+  "title": "Counseling for Nutrition",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97802",
+      "display": "Medical nutrition therapy; initial assessment and intervention, individual, face-to-face with the patient, each 15 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97803",
+      "display": "Medical nutrition therapy; re-assessment and intervention, individual, face-to-face with the patient, each 15 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "97804",
+      "display": "Medical nutrition therapy; group (2 or more individual(s)), each 30 minutes"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11816003",
+      "display": "Diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183059007",
+      "display": "High fiber diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183060002",
+      "display": "Low residue diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183061003",
+      "display": "Low fat diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183062005",
+      "display": "Low cholesterol diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183063000",
+      "display": "Low salt diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183065007",
+      "display": "Low carbohydrate diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183066008",
+      "display": "Low protein diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183067004",
+      "display": "High protein diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183070000",
+      "display": "Vegetarian diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183071001",
+      "display": "Vegan diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "226067002",
+      "display": "Food hygiene education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266724001",
+      "display": "Weight-reducing diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275919002",
+      "display": "Weight loss advised (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281085002",
+      "display": "Sugar-free diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284352003",
+      "display": "Obesity diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305849009",
+      "display": "Seen by dietetics service (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305850009",
+      "display": "Seen by community-based dietetics service (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305851008",
+      "display": "Seen by hospital-based dietetics service (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306163007",
+      "display": "Referral to dietetics service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306164001",
+      "display": "Referral to community-based dietetics service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306165000",
+      "display": "Referral to hospital-based dietetics service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306626002",
+      "display": "Discharge from dietetics service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306627006",
+      "display": "Discharge from hospital dietetics service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306628001",
+      "display": "Discharge from community dietetics service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "313210009",
+      "display": "Fluid intake education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "370847001",
+      "display": "Dietary needs education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386464006",
+      "display": "Prescribed diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "404923009",
+      "display": "Weight gain advised (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408910007",
+      "display": "Enteral feeding education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410171007",
+      "display": "Nutrition care education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410177006",
+      "display": "Special diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410200000",
+      "display": "Weight control education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428461000124101",
+      "display": "Referral to nutrition professional (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428691000124107",
+      "display": "Vitamin K dietary intake education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429095004",
+      "display": "Dietary education for weight gain (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "431482008",
+      "display": "Dietary education for competitive athlete (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441041000124100",
+      "display": "Counseling about nutrition (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441201000124108",
+      "display": "Counseling about nutrition using cognitive-behavioral theoretical approach (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441231000124100",
+      "display": "Counseling about nutrition using health belief model (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441241000124105",
+      "display": "Counseling about nutrition using social learning theory approach (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441251000124107",
+      "display": "Counseling about nutrition using transtheoretical model and stages of change approach (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441261000124109",
+      "display": "Counseling about nutrition using motivational interviewing strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441271000124102",
+      "display": "Counseling about nutrition using goal setting strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441281000124104",
+      "display": "Counseling about nutrition using self-monitoring strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441291000124101",
+      "display": "Counseling about nutrition using problem solving strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441301000124100",
+      "display": "Counseling about nutrition using social support strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441311000124102",
+      "display": "Counseling about nutrition using stress management strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441321000124105",
+      "display": "Counseling about nutrition using stimulus control strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441331000124108",
+      "display": "Counseling about nutrition using cognitive restructuring strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441341000124103",
+      "display": "Counseling about nutrition using relapse prevention strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441351000124101",
+      "display": "Counseling about nutrition using rewards and contingency management strategy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443288003",
+      "display": "Lifestyle education regarding diet (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445291000124103",
+      "display": "Nutrition-related skills education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445301000124102",
+      "display": "Content-related nutrition education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445331000124105",
+      "display": "Nutrition-related laboratory result interpretation education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445641000124105",
+      "display": "Technical nutrition education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609104008",
+      "display": "Educated about weight management (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61310001",
+      "display": "Nutrition education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698471002",
+      "display": "Patient advised about weight management (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "699827002",
+      "display": "Dietary education about fluid restriction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "699829004",
+      "display": "High energy diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "699830009",
+      "display": "Food fortification education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "699849008",
+      "display": "Healthy eating education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "700154005",
+      "display": "Seen in weight management clinic (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "700258004",
+      "display": "Dietary education about vitamin intake (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "705060005",
+      "display": "Diet education about mineral intake (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "710881000",
+      "display": "Education about eating pattern (procedure)"
+    } ]
+  }
+}

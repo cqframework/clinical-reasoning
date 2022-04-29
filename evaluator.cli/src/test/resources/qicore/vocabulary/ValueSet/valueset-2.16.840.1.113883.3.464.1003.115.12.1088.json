@@ -1,0 +1,135 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.115.12.1088",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.115.12.1088",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.115.12.1088"
+  } ],
+  "version": "20170504",
+  "name": "RetinalorDilatedEyeExam",
+  "title": "Retinal or Dilated Eye Exam",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252779009",
+      "display": "Single bright white flash electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252780007",
+      "display": "Dark adapted single bright flash electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252781006",
+      "display": "Pre-dark-adapted single bright flash electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252782004",
+      "display": "Photopic electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252783009",
+      "display": "Scotopic rod electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252784003",
+      "display": "Flicker electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252788000",
+      "display": "Chromatic electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252789008",
+      "display": "Early receptor potential electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252790004",
+      "display": "Focal electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "274795007",
+      "display": "Examination of optic disc (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "274798009",
+      "display": "Examination of retina (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308110009",
+      "display": "Direct fundoscopy following mydriatic (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314971001",
+      "display": "Camera fundoscopy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314972008",
+      "display": "Indirect fundoscopy following mydriatic (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410451008",
+      "display": "Indirect ophthalmoscopy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410452001",
+      "display": "Monocular indirect ophthalmoscopy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410453006",
+      "display": "Binocular indirect ophthalmoscopy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410455004",
+      "display": "Slit lamp fundus examination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420213007",
+      "display": "Multifocal electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425816006",
+      "display": "Ultrasonic evaluation of retina (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427478009",
+      "display": "Evaluation of retina (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6615001",
+      "display": "Electroretinography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722161008",
+      "display": "Diabetic retinal eye exam (procedure)"
+    } ]
+  }
+}

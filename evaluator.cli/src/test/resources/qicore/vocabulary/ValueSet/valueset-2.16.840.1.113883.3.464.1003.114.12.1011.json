@@ -1,0 +1,100 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.114.12.1011",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.114.12.1011",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.114.12.1011"
+  } ],
+  "version": "20170504",
+  "name": "Narcolepsy",
+  "title": "Narcolepsy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G47.411",
+      "display": "Narcolepsy with cataplexy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G47.419",
+      "display": "Narcolepsy without cataplexy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G47.421",
+      "display": "Narcolepsy in conditions classified elsewhere with cataplexy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G47.429",
+      "display": "Narcolepsy in conditions classified elsewhere without cataplexy"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "347.00",
+      "display": "Narcolepsy, without cataplexy"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "347.01",
+      "display": "Narcolepsy, with cataplexy"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "347.10",
+      "display": "Narcolepsy in conditions classified elsewhere, without cataplexy"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "347.11",
+      "display": "Narcolepsy in conditions classified elsewhere, with cataplexy"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193042000",
+      "display": "Cataplexy and narcolepsy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427426006",
+      "display": "Sleep attack (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "434241000124107",
+      "display": "Secondary narcolepsy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "434251000124109",
+      "display": "Secondary narcolepsy without cataplexy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "434261000124106",
+      "display": "Secondary narcolepsy with cataplexy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60380001",
+      "display": "Narcolepsy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735676003",
+      "display": "Narcolepsy type 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "91521000119104",
+      "display": "Narcolepsy without cataplexy (disorder)"
+    } ]
+  }
+}

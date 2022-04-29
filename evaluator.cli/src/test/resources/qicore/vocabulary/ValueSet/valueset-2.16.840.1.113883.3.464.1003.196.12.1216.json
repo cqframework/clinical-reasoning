@@ -1,0 +1,45 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1216",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1216",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1216"
+  } ],
+  "version": "20170504",
+  "name": "HepatitisBVaccine",
+  "title": "Hepatitis B Vaccine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "08",
+      "display": "hepatitis B vaccine, pediatric or pediatric/adolescent dosage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "110",
+      "display": "DTaP-hepatitis B and poliovirus vaccine"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "44",
+      "display": "hepatitis B vaccine, dialysis patient dosage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "45",
+      "display": "hepatitis B vaccine, unspecified formulation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "51",
+      "display": "Haemophilus influenzae type b conjugate and Hepatitis B vaccine"
+    } ]
+  }
+}

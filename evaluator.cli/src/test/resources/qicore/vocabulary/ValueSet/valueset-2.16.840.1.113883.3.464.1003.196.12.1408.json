@@ -1,0 +1,105 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1408",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1408",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1408"
+  } ],
+  "version": "20170504",
+  "name": "Triprolidine",
+  "title": "Triprolidine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1094434",
+      "display": "Phenylephrine Hydrochloride 2 MG/ML / Triprolidine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1099308",
+      "display": "Pseudoephedrine Hydrochloride 6 MG/ML / Triprolidine Hydrochloride 0.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1099446",
+      "display": "Pseudoephedrine Hydrochloride 60 MG / Triprolidine Hydrochloride 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1099653",
+      "display": "Dextromethorphan Hydrobromide 4 MG/ML / Pseudoephedrine Hydrochloride 10 MG/ML / Triprolidine Hydrochloride 0.938 MG/ML Oral Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1099668",
+      "display": "Pseudoephedrine Hydrochloride 10 MG/ML / Triprolidine Hydrochloride 0.938 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1099711",
+      "display": "Codeine Phosphate 20 MG / Pseudoephedrine Hydrochloride 60 MG / Triprolidine Hydrochloride 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1428927",
+      "display": "Triprolidine Hydrochloride 0.625 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1490671",
+      "display": "Triprolidine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1491649",
+      "display": "Triprolidine Hydrochloride 0.938 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1492052",
+      "display": "Dextromethorphan Hydrobromide 4 MG/ML / Phenylephrine Hydrochloride 2 MG/ML / Triprolidine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1661319",
+      "display": "Codeine Phosphate 2 MG/ML / Phenylephrine Hydrochloride 2 MG/ML / Triprolidine Hydrochloride 0.5 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1789508",
+      "display": "Triprolidine Hydrochloride 0.313 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1926926",
+      "display": "Triprolidine Hydrochloride 1.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1939354",
+      "display": "Triprolidine Hydrochloride 1.25 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2173662",
+      "display": "Acetaminophen 32.5 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Phenylephrine Hydrochloride 0.5 MG/ML / Triprolidine Hydrochloride 0.125 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2173667",
+      "display": "Acetaminophen 32.5 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / Triprolidine Hydrochloride 0.125 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "996640",
+      "display": "Codeine Phosphate 2 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML / Triprolidine Hydrochloride 0.25 MG/ML Oral Solution"
+    } ]
+  }
+}

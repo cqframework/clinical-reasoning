@@ -1,0 +1,1105 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.121.12.1006",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.121.12.1006",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.121.12.1006"
+  } ],
+  "version": "20190315",
+  "name": "ConsultantReport",
+  "title": "Consultant Report",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11488-4",
+      "display": "Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34099-2",
+      "display": "Cardiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34100-8",
+      "display": "Intensive care unit Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34101-6",
+      "display": "General medicine Outpatient Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34102-4",
+      "display": "Psychiatry Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34103-2",
+      "display": "Pulmonary Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34104-0",
+      "display": "Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34749-2",
+      "display": "Anesthesiology Outpatient Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34756-7",
+      "display": "Dentistry Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34758-3",
+      "display": "Dermatology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34760-9",
+      "display": "Diabetology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34761-7",
+      "display": "Gastroenterology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34764-1",
+      "display": "General medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34776-5",
+      "display": "Geriatric medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34777-3",
+      "display": "Obstetrics and Gynecology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34779-9",
+      "display": "Hematology+Medical oncology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34781-5",
+      "display": "Infectious disease Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34783-1",
+      "display": "Kinesiotherapy Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34785-6",
+      "display": "Mental health Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34788-0",
+      "display": "Psychiatry Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34791-4",
+      "display": "Psychology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34795-5",
+      "display": "Nephrology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34797-1",
+      "display": "Neurology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34798-9",
+      "display": "Neurological surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34800-3",
+      "display": "Nutrition and dietetics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34803-7",
+      "display": "Occupational medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34805-2",
+      "display": "Oncology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34807-8",
+      "display": "Ophthalmology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34810-2",
+      "display": "Optometry Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34812-8",
+      "display": "Oral and Maxillofacial Surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34814-4",
+      "display": "Orthopaedic surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34816-9",
+      "display": "Otolaryngology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34820-1",
+      "display": "Pharmacology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34822-7",
+      "display": "Physical medicine and rehab Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34824-3",
+      "display": "Physical therapy Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34826-8",
+      "display": "Plastic surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34828-4",
+      "display": "Podiatry Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34831-8",
+      "display": "Radiation oncology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34833-4",
+      "display": "Recreational therapy Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34837-5",
+      "display": "Respiratory therapy Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34839-1",
+      "display": "Rheumatology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34841-7",
+      "display": "Social worker Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34845-8",
+      "display": "Speech-language pathology+Audiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34847-4",
+      "display": "Surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34849-0",
+      "display": "Cardiothoracic surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34851-6",
+      "display": "Urology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34853-2",
+      "display": "Vascular surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34855-7",
+      "display": "Occupational therapy Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34879-7",
+      "display": "Endocrinology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "51845-6",
+      "display": "Outpatient Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "51846-4",
+      "display": "Emergency department Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "51854-8",
+      "display": "Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "64056-5",
+      "display": "General medicine Medical student Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "64068-0",
+      "display": "Surgery Medical student Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "64072-2",
+      "display": "Critical care medicine Medical student Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "64076-3",
+      "display": "Cardiothoracic surgery Medical student Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "64080-5",
+      "display": "Pulmonary Medical student Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68469-6",
+      "display": "Pastoral care Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68486-0",
+      "display": "Cardiology Medical student Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68551-1",
+      "display": "Dermatology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68566-9",
+      "display": "Obstetrics and Gynecology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68570-1",
+      "display": "Occupational therapy Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68575-0",
+      "display": "Ophthalmology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68586-7",
+      "display": "Pharmacology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68590-9",
+      "display": "Physical therapy Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68597-4",
+      "display": "Plastic surgery Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68619-6",
+      "display": "Adolescent medicine Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68633-7",
+      "display": "Allergy and Immunology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68639-4",
+      "display": "Audiology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68648-5",
+      "display": "Child and adolescent psychiatry Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68651-9",
+      "display": "Clinical biochemical genetics Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68661-8",
+      "display": "Clinical genetics Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68670-9",
+      "display": "Developmental-behavioral pediatrics Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68681-6",
+      "display": "Multi-specialty program Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68685-7",
+      "display": "Neonatal perinatal medicine Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68694-9",
+      "display": "Neurological surgery Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68705-3",
+      "display": "Neurology with special qualifications in child neurology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68716-0",
+      "display": "Pain medicine Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68727-7",
+      "display": "Pediatric cardiology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68746-7",
+      "display": "Pediatric gastroenterology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68757-4",
+      "display": "Pediatric hematology-oncology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68765-7",
+      "display": "Pediatric infectious diseases Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68787-1",
+      "display": "Pediatric pulmonology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68802-8",
+      "display": "Pediatric surgery Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68812-7",
+      "display": "Pediatric urology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68821-8",
+      "display": "Pediatrics Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68837-4",
+      "display": "Primary care Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68846-5",
+      "display": "Speech-language pathology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68852-3",
+      "display": "Transplant surgery Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68864-8",
+      "display": "Pediatric transplant hepatology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68869-7",
+      "display": "Pediatric nephrology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68874-7",
+      "display": "Pediatric otolaryngology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68879-6",
+      "display": "Pediatric rheumatology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68892-9",
+      "display": "Pediatric dermatology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68897-8",
+      "display": "Pediatric endocrinology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "72555-6",
+      "display": "Interventional radiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "73575-3",
+      "display": "Radiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "75424-2",
+      "display": "Audiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "75465-5",
+      "display": "Orthotics prosthetics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77403-4",
+      "display": "Anesthesiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77429-9",
+      "display": "Allergy and Immunology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78250-8",
+      "display": "Colon and rectal surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78251-6",
+      "display": "Hematology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78252-4",
+      "display": "Multi-specialty program Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78253-2",
+      "display": "Family medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78254-0",
+      "display": "Clinical genetics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78405-8",
+      "display": "Neonatal perinatal medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78406-6",
+      "display": "Nurse practitioner Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78496-7",
+      "display": "Critical care medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78498-3",
+      "display": "Cardiopulmonary Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78567-5",
+      "display": "Pain medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78568-3",
+      "display": "Palliative care Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78726-7",
+      "display": "Pediatrics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78732-5",
+      "display": "Trauma Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "78738-2",
+      "display": "Sports medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79428-9",
+      "display": "Rapid response team Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80396-5",
+      "display": "Gynecologic oncology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80575-4",
+      "display": "Cardiac surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80664-6",
+      "display": "Clinical neurophysiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80666-1",
+      "display": "Vascular neurology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80673-7",
+      "display": "Maternal and fetal medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80736-2",
+      "display": "Blood banking and transfusion medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80801-4",
+      "display": "Surgical oncology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "81191-9",
+      "display": "Chemical pathology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "81192-7",
+      "display": "Clinical pathology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "81193-5",
+      "display": "Medical microbiology - pathology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "81196-8",
+      "display": "Clinical pharmacology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "82356-7",
+      "display": "Obstetrics Midwife Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "82359-1",
+      "display": "Reproductive endocrinology and infertility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83570-2",
+      "display": "Diabetology Nurse Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83578-5",
+      "display": "Hematology+Medical oncology Nurse Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83609-8",
+      "display": "Psychiatry Nurse Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83621-3",
+      "display": "Geriatric medicine Nurse Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83653-6",
+      "display": "Pain medicine Team Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83685-8",
+      "display": "Hematology+Medical oncology Attending Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83720-3",
+      "display": "Physical medicine and rehab Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83722-9",
+      "display": "Physical medicine and rehabilitation Nurse Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83868-0",
+      "display": "Preventive medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83873-0",
+      "display": "Primary care Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83888-8",
+      "display": "Psychiatry Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83909-2",
+      "display": "Public health Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83912-6",
+      "display": "Pulmonary Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83926-6",
+      "display": "Recreational therapy Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83931-6",
+      "display": "Research Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83941-5",
+      "display": "Respiratory therapy Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83960-5",
+      "display": "Social worker Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83967-0",
+      "display": "Social worker Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83984-5",
+      "display": "Speech-language pathology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83992-8",
+      "display": "Spinal cord injury medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83996-9",
+      "display": "Spinal cord injury medicine Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84035-5",
+      "display": "Transplant surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84071-0",
+      "display": "Chiropractic medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84115-5",
+      "display": "Geriatric medicine Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84126-2",
+      "display": "Surgery of the hand Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84131-2",
+      "display": "Primary care Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84142-9",
+      "display": "Hematology+Medical oncology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84145-2",
+      "display": "Hematology+Medical oncology Outpatient Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84152-8",
+      "display": "Hepatology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84173-4",
+      "display": "Interventional cardiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84190-8",
+      "display": "Medical toxicology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84213-8",
+      "display": "Mental health Team Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84231-0",
+      "display": "Neurology Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84241-9",
+      "display": "Nurse Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84280-7",
+      "display": "Nutrition and dietetics Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84292-2",
+      "display": "Nutrition and dietetics Team Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84303-7",
+      "display": "Wound care management Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84312-8",
+      "display": "Vocational rehabilitation Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84324-3",
+      "display": "Physical therapy Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84349-0",
+      "display": "Pastoral care Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84352-4",
+      "display": "Palliative care Team Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84358-1",
+      "display": "Palliative care Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84394-6",
+      "display": "Occupational therapy Patient's home Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "84398-7",
+      "display": "Occupational therapy Long term care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85174-1",
+      "display": "Custodial care facility Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85208-7",
+      "display": "Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85222-8",
+      "display": "Case manager Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85232-7",
+      "display": "Tumor board Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85237-6",
+      "display": "Acupuncture Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85238-4",
+      "display": "Internal medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85517-1",
+      "display": "Bariatric surgery Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85519-7",
+      "display": "Child and adolescent psychology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85866-2",
+      "display": "Sleep medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85871-2",
+      "display": "Womens health Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85882-9",
+      "display": "Ophthalmology Teleimaging Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85884-5",
+      "display": "Epilepsy Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85886-0",
+      "display": "Clinical cardiac electrophysiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85890-2",
+      "display": "Neuropsychology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "85899-3",
+      "display": "Community health care Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "86451-2",
+      "display": "Ethics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "87233-3",
+      "display": "Dialysis Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "87254-9",
+      "display": "Addiction medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "87627-6",
+      "display": "Brain injury Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "88351-2",
+      "display": "Polytrauma Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "88640-8",
+      "display": "Community health care Adult day care center Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "88644-0",
+      "display": "Outpatient hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89031-9",
+      "display": "Hematology Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89032-7",
+      "display": "Nephrology Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89033-5",
+      "display": "Urology Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89216-6",
+      "display": "Gynecology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89227-3",
+      "display": "Obstetrics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89446-9",
+      "display": "Obstetrics Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89447-7",
+      "display": "Gynecology Hospital Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89551-6",
+      "display": "Environmental health Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90006-8",
+      "display": "Pharmacogenomics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90012-6",
+      "display": "Burn management Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90343-5",
+      "display": "Nuclear medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90354-2",
+      "display": "Obesity medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90709-7",
+      "display": "Adolescent medicine Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90710-5",
+      "display": "Developmental-behavioral pediatrics Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90712-1",
+      "display": "Sleep medicine Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90714-7",
+      "display": "Pain medicine Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90715-4",
+      "display": "Palliative care Telehealth Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90717-0",
+      "display": "Heart failure+Transplant cardiology Consult note"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90771-7",
+      "display": "Heart failure Consult note"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371530004",
+      "display": "Clinical consultation report (record artifact)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371531000",
+      "display": "Report of clinical encounter (record artifact)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371545006",
+      "display": "Confirmatory consultation report (record artifact)"
+    } ]
+  }
+}

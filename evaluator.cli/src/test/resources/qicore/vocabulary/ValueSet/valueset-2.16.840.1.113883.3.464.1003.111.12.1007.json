@@ -1,0 +1,170 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.111.12.1007",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1007",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.111.12.1007"
+  } ],
+  "version": "20170504",
+  "name": "LabTestsDuringPregnancy",
+  "title": "Lab Tests During Pregnancy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "15019-3",
+      "display": "Alpha-1-Fetoprotein [Moles/volume] in Amniotic fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1832-5",
+      "display": "Alpha-1-Fetoprotein [Mass/volume] in Amniotic fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1834-1",
+      "display": "Alpha-1-Fetoprotein [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19171-8",
+      "display": "Alpha-1-Fetoprotein [Units/volume] in Amniotic fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19176-7",
+      "display": "Alpha-1-Fetoprotein [Units/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19177-5",
+      "display": "Alpha-1-Fetoprotein [Moles/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20403-2",
+      "display": "Fibronectin.fetal [Mass/volume] in Vaginal fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20404-0",
+      "display": "Fibronectin.fetal [Presence] in Vaginal fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "31993-9",
+      "display": "Alpha-1-Fetoprotein [Presence] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33773-3",
+      "display": "Karyotype [Identifier] in Amniotic fluid Nominal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34493-7",
+      "display": "PRF1 gene targeted mutation analysis in Amniotic fluid by Molecular genetics method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34656-9",
+      "display": "KEL gene targeted mutation analysis in Amniotic fluid by Molecular genetics method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34718-7",
+      "display": "CFTR gene mutations found [Identifier] in Amniotic fluid by Molecular genetics method Nominal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "35457-1",
+      "display": "Maternal cell contamination [Identifier] in Amniotic fluid Nominal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "41273-4",
+      "display": "Alpha-1-Fetoprotein interpretation in Amniotic fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "41274-2",
+      "display": "Alpha-1-Fetoprotein interpretation in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42316-0",
+      "display": "RHD gene mutations found [Type] in Amniotic fluid by Molecular genetics method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "43798-8",
+      "display": "Alpha-1-Fetoprotein [Presence] in Amniotic fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "45273-0",
+      "display": "Pregnancy associated plasma protein A multiple of the median [Percentile]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "45331-6",
+      "display": "NF1 gene mutations found [Identifier] in Amniotic fluid by Molecular genetics method Nominal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "45332-4",
+      "display": "NF2 gene mutations found [Identifier] in Amniotic fluid by Molecular genetics method Nominal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "46731-6",
+      "display": "RHC gene mutations found [Type] in Amniotic fluid by Molecular genetics method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "46989-0",
+      "display": "CFTR gene targeted mutation analysis in Amniotic fluid by Molecular genetics method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "48030-1",
+      "display": "RHE gene mutations found [Type] in Amniotic fluid by Molecular genetics method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "48039-2",
+      "display": "Fibronectin.fetal [Presence] in Unspecified specimen"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "48781-9",
+      "display": "CYP21A2 gene mutations found [Identifier] in Amniotic fluid by Molecular genetics method Nominal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49246-2",
+      "display": "Alpha-1-Fetoprotein interpretation in Serum or Plasma Narrative"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49318-9",
+      "display": "Alpha-1-Fetoprotein interpretation in Amniotic fluid Narrative"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "64088-8",
+      "display": "Karyotype [Identifier] in Chorionic villus sample Narrative"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "64094-6",
+      "display": "Karyotype [Identifier] in Amniotic fluid Narrative"
+    } ]
+  }
+}

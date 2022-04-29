@@ -1,0 +1,365 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1515",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1515",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1515"
+  } ],
+  "version": "20200310",
+  "name": "Doxylamine",
+  "title": "Doxylamine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1042684",
+      "display": "Acetaminophen 33.3 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1043400",
+      "display": "Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1052647",
+      "display": "Acetaminophen 325 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1089822",
+      "display": "Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG / Pseudoephedrine Hydrochloride 30 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1094350",
+      "display": "Dextromethorphan Hydrobromide 3 MG/ML / doxylamine succinate 1.25 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1094355",
+      "display": "doxylamine succinate 1.25 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1094549",
+      "display": "Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1101439",
+      "display": "doxylamine succinate 5 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1101446",
+      "display": "doxylamine succinate 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1101457",
+      "display": "doxylamine succinate 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1112865",
+      "display": "Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1115329",
+      "display": "Dextromethorphan Hydrobromide 1.5 MG/ML / doxylamine succinate 0.625 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1233546",
+      "display": "{20 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 20 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1234386",
+      "display": "Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1236395",
+      "display": "Acetaminophen 250 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Pseudoephedrine Hydrochloride 30 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1237103",
+      "display": "Acetaminophen 33.3 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.25 MG/ML / Pseudoephedrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1237110",
+      "display": "Acetaminophen 33.3 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML / Pseudoephedrine Hydrochloride 2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1242502",
+      "display": "Acetaminophen 33.3 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1242561",
+      "display": "{1 (354 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) / 1 (354 ML) (Acetaminophen 33.3 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1242587",
+      "display": "doxylamine succinate 1.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1242618",
+      "display": "Acetaminophen 250 MG / doxylamine succinate 25 MG / salicylamide 150 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1244918",
+      "display": "Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1245233",
+      "display": "{20 (Acetaminophen 325 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 20 (Acetaminophen 325 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1297288",
+      "display": "Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1297404",
+      "display": "{8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1311150",
+      "display": "{32 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1360638",
+      "display": "{1 (355 ML) (Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML Oral Solution) / 1 (355 ML) (Dextromethorphan Hydrobromide 1 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366501",
+      "display": "{48 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 24 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1366502",
+      "display": "{16 (Acetaminophen 325 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 32 (Acetaminophen 325 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1371196",
+      "display": "Dextromethorphan Hydrobromide 3 MG/ML / doxylamine succinate 1.25 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1375948",
+      "display": "doxylamine succinate 10 MG / Pyridoxine Hydrochloride 10 MG Delayed Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1426334",
+      "display": "Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG Oral Capsule"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1431245",
+      "display": "Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / doxylamine succinate 0.417 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1441831",
+      "display": "doxylamine succinate 7.5 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1484901",
+      "display": "{1 (354 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) / 1 (354 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1487765",
+      "display": "doxylamine succinate 1.95 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1489002",
+      "display": "Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1489300",
+      "display": "{1 (295 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) / 1 (295 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 1 MG/ML / doxylamine succinate 0.417 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1492380",
+      "display": "{16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1534835",
+      "display": "Acetaminophen 650 MG / Dextromethorphan Hydrobromide 20 MG / doxylamine succinate 12.5 MG / Phenylephrine Hydrochloride 10 MG Powder for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536503",
+      "display": "Aspirin 500 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1536999",
+      "display": "Acetaminophen 250 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Effervescent Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1544175",
+      "display": "{1 (355 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / doxylamine succinate 0.417 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) / 1 (355 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / Guaifenesin 13.3 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1546881",
+      "display": "Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1648203",
+      "display": "{12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG Oral Capsule) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1657147",
+      "display": "{8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1659805",
+      "display": "{16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 32 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1730187",
+      "display": "{12 (Aspirin 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet) / 8 (Aspirin 500 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1730191",
+      "display": "{8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 4 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1730211",
+      "display": "{8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1730212",
+      "display": "{24 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) / 48 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1730213",
+      "display": "{8 (Acetaminophen 325 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 16 (Acetaminophen 325 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1795585",
+      "display": "{1 (118 ML) (Dextromethorphan Hydrobromide 2 MG/ML / Guaifenesin 40 MG/ML Oral Solution) / 1 (118 ML) (Dextromethorphan Hydrobromide 3 MG/ML / doxylamine succinate 1.25 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1798298",
+      "display": "{10 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 10 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 15 MG / doxylamine succinate 6.25 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1798548",
+      "display": "{12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1801704",
+      "display": "{10 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 10 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1804384",
+      "display": "{6 (Acetaminophen 500 MG / Dextromethorphan Hydrobromide 20 MG / Guaifenesin 400 MG / Phenylephrine Hydrochloride 10 MG Powder for Oral Solution) / 6 (Acetaminophen 650 MG / Dextromethorphan Hydrobromide 20 MG / doxylamine succinate 12.5 MG / Phenylephrine Hydrochloride 10 MG Powder for Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1805288",
+      "display": "Acetaminophen 650 MG / Dextromethorphan Hydrobromide 30 MG / doxylamine succinate 12.5 MG Powder for Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1860085",
+      "display": "{1 (240 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / doxylamine succinate 0.417 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) / 1 (240 ML) (Acetaminophen 21.7 MG/ML / Dextromethorphan Hydrobromide 0.667 MG/ML / Guaifenesin 13.3 MG/ML / Phenylephrine Hydrochloride 0.333 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1927849",
+      "display": "{12 (Acetaminophen 250 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1928005",
+      "display": "{16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 24 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1999651",
+      "display": "12 HR doxylamine succinate 20 MG / Pyridoxine Hydrochloride 20 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2048713",
+      "display": "{4 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 12 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2048714",
+      "display": "{8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2049454",
+      "display": "{16 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 32 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2056073",
+      "display": "{1 (118 ML) (Dextromethorphan Hydrobromide 1 MG/ML / Guaifenesin 20 MG/ML Oral Solution) / 1 (118 ML) (Dextromethorphan Hydrobromide 1.5 MG/ML / doxylamine succinate 0.625 MG/ML Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2119242",
+      "display": "{4 (Acetaminophen 650 MG / Dextromethorphan Hydrobromide 20 MG / Phenylephrine Hydrochloride 10 MG Granules for Oral Solution) / 4 (Acetaminophen 650 MG / Dextromethorphan Hydrobromide 30 MG / doxylamine succinate 12.5 MG Powder for Oral Solution) } Pack"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2172491",
+      "display": "doxylamine succinate 10.5 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2185293",
+      "display": "{4 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) / 8 (Acetaminophen 325 MG / Dextromethorphan Hydrobromide 10 MG / Guaifenesin 200 MG / Phenylephrine Hydrochloride 5 MG Oral Capsule) } Pack"
+    } ]
+  }
+}

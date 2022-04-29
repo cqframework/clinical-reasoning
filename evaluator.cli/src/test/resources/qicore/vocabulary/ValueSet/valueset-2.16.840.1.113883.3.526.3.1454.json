@@ -1,0 +1,355 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1454",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1454",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1454"
+  } ],
+  "version": "20200307",
+  "name": "DegenerativeDisordersofGlobe",
+  "title": "Degenerative Disorders of Globe",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.21",
+      "display": "Degenerative myopia, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.22",
+      "display": "Degenerative myopia, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.23",
+      "display": "Degenerative myopia, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2A1",
+      "display": "Degenerative myopia with choroidal neovascularization, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2A2",
+      "display": "Degenerative myopia with choroidal neovascularization, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2A3",
+      "display": "Degenerative myopia with choroidal neovascularization, bilateral eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2B1",
+      "display": "Degenerative myopia with macular hole, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2B2",
+      "display": "Degenerative myopia with macular hole, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2B3",
+      "display": "Degenerative myopia with macular hole, bilateral eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2C1",
+      "display": "Degenerative myopia with retinal detachment, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2C2",
+      "display": "Degenerative myopia with retinal detachment, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2C3",
+      "display": "Degenerative myopia with retinal detachment, bilateral eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2D1",
+      "display": "Degenerative myopia with foveoschisis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2D2",
+      "display": "Degenerative myopia with foveoschisis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2D3",
+      "display": "Degenerative myopia with foveoschisis, bilateral eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2E1",
+      "display": "Degenerative myopia with other maculopathy, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2E2",
+      "display": "Degenerative myopia with other maculopathy, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.2E3",
+      "display": "Degenerative myopia with other maculopathy, bilateral eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.311",
+      "display": "Chalcosis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.312",
+      "display": "Chalcosis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.313",
+      "display": "Chalcosis, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.321",
+      "display": "Siderosis of eye, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.322",
+      "display": "Siderosis of eye, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.323",
+      "display": "Siderosis of eye, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.391",
+      "display": "Other degenerative disorders of globe, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.392",
+      "display": "Other degenerative disorders of globe, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H44.393",
+      "display": "Other degenerative disorders of globe, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111521006",
+      "display": "Corneal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14046000",
+      "display": "Cystoid macular retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231918006",
+      "display": "Chalcosis of cornea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231919003",
+      "display": "Siderosis of cornea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232001007",
+      "display": "Snail-track retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232002000",
+      "display": "Snowflake retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "246877005",
+      "display": "Bulbar conjunctival degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "247177004",
+      "display": "Chorioretinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "247178009",
+      "display": "Intraretinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "247182006",
+      "display": "Vitreoretinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "247183001",
+      "display": "Peripheral snowflake retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25277000",
+      "display": "Siderosis of eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "264008",
+      "display": "Blind hypertensive eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "264633009",
+      "display": "Drusen stage macular degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "267611002",
+      "display": "Degeneration of macula and posterior pole (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "267612009",
+      "display": "Degeneration of macula due to cyst, hole or pseudohole (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "267718000",
+      "display": "Age-related macular degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30523006",
+      "display": "Degenerative drusen (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314427006",
+      "display": "Drusen plus pigment change stage macular degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35545005",
+      "display": "Secondary pigmentary retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3577000",
+      "display": "Retinal lattice degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37075008",
+      "display": "Microcystoid retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3712000",
+      "display": "Degenerated eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40787005",
+      "display": "Conjunctival degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414173003",
+      "display": "Exudative age-related macular degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414875008",
+      "display": "Nonexudative age-related macular degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417939004",
+      "display": "Amyloid corneal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418871005",
+      "display": "Spheroidal degeneration of conjunctiva (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428212003",
+      "display": "Photoreceptor degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54184008",
+      "display": "Senile reticular retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60189009",
+      "display": "Vitreous degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61536007",
+      "display": "Peripheral retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62585004",
+      "display": "Degenerative disorder of eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69134001",
+      "display": "Paving stone retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71047006",
+      "display": "Familial pseudoinflammatory macular degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95695004",
+      "display": "Degeneration of retina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95696003",
+      "display": "Glaucomatous retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95697007",
+      "display": "Generalized retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95699005",
+      "display": "Multifocal retinal degeneration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95700006",
+      "display": "Sudden acquired retinal degeneration (disorder)"
+    } ]
+  }
+}

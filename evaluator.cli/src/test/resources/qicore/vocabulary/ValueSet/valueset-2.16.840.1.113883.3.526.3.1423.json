@@ -1,0 +1,1495 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1423",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1423",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1423"
+  } ],
+  "version": "20200307",
+  "name": "Glaucoma",
+  "title": "Glaucoma",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.10X0",
+      "display": "Unspecified open-angle glaucoma, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.10X1",
+      "display": "Unspecified open-angle glaucoma, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.10X2",
+      "display": "Unspecified open-angle glaucoma, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.10X3",
+      "display": "Unspecified open-angle glaucoma, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.10X4",
+      "display": "Unspecified open-angle glaucoma, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1110",
+      "display": "Primary open-angle glaucoma, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1111",
+      "display": "Primary open-angle glaucoma, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1112",
+      "display": "Primary open-angle glaucoma, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1113",
+      "display": "Primary open-angle glaucoma, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1114",
+      "display": "Primary open-angle glaucoma, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1120",
+      "display": "Primary open-angle glaucoma, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1121",
+      "display": "Primary open-angle glaucoma, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1122",
+      "display": "Primary open-angle glaucoma, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1123",
+      "display": "Primary open-angle glaucoma, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1124",
+      "display": "Primary open-angle glaucoma, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1130",
+      "display": "Primary open-angle glaucoma, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1131",
+      "display": "Primary open-angle glaucoma, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1132",
+      "display": "Primary open-angle glaucoma, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1133",
+      "display": "Primary open-angle glaucoma, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1134",
+      "display": "Primary open-angle glaucoma, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1210",
+      "display": "Low-tension glaucoma, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1211",
+      "display": "Low-tension glaucoma, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1212",
+      "display": "Low-tension glaucoma, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1213",
+      "display": "Low-tension glaucoma, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1214",
+      "display": "Low-tension glaucoma, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1220",
+      "display": "Low-tension glaucoma, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1221",
+      "display": "Low-tension glaucoma, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1222",
+      "display": "Low-tension glaucoma, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1223",
+      "display": "Low-tension glaucoma, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1224",
+      "display": "Low-tension glaucoma, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1230",
+      "display": "Low-tension glaucoma, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1231",
+      "display": "Low-tension glaucoma, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1232",
+      "display": "Low-tension glaucoma, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1233",
+      "display": "Low-tension glaucoma, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1234",
+      "display": "Low-tension glaucoma, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1310",
+      "display": "Pigmentary glaucoma, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1311",
+      "display": "Pigmentary glaucoma, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1312",
+      "display": "Pigmentary glaucoma, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1313",
+      "display": "Pigmentary glaucoma, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1314",
+      "display": "Pigmentary glaucoma, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1320",
+      "display": "Pigmentary glaucoma, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1321",
+      "display": "Pigmentary glaucoma, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1322",
+      "display": "Pigmentary glaucoma, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1323",
+      "display": "Pigmentary glaucoma, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1324",
+      "display": "Pigmentary glaucoma, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1330",
+      "display": "Pigmentary glaucoma, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1331",
+      "display": "Pigmentary glaucoma, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1332",
+      "display": "Pigmentary glaucoma, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1333",
+      "display": "Pigmentary glaucoma, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1334",
+      "display": "Pigmentary glaucoma, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1410",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1411",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1412",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1413",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1414",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1420",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1421",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1422",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1423",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1424",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1430",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1431",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1432",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1433",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.1434",
+      "display": "Capsular glaucoma with pseudoexfoliation of lens, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.151",
+      "display": "Residual stage of open-angle glaucoma, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.152",
+      "display": "Residual stage of open-angle glaucoma, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.153",
+      "display": "Residual stage of open-angle glaucoma, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.20X0",
+      "display": "Unspecified primary angle-closure glaucoma, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.20X1",
+      "display": "Unspecified primary angle-closure glaucoma, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.20X2",
+      "display": "Unspecified primary angle-closure glaucoma, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.20X3",
+      "display": "Unspecified primary angle-closure glaucoma, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.20X4",
+      "display": "Unspecified primary angle-closure glaucoma, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.211",
+      "display": "Acute angle-closure glaucoma, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.212",
+      "display": "Acute angle-closure glaucoma, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.213",
+      "display": "Acute angle-closure glaucoma, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2210",
+      "display": "Chronic angle-closure glaucoma, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2211",
+      "display": "Chronic angle-closure glaucoma, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2212",
+      "display": "Chronic angle-closure glaucoma, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2213",
+      "display": "Chronic angle-closure glaucoma, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2214",
+      "display": "Chronic angle-closure glaucoma, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2220",
+      "display": "Chronic angle-closure glaucoma, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2221",
+      "display": "Chronic angle-closure glaucoma, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2222",
+      "display": "Chronic angle-closure glaucoma, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2223",
+      "display": "Chronic angle-closure glaucoma, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2224",
+      "display": "Chronic angle-closure glaucoma, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2230",
+      "display": "Chronic angle-closure glaucoma, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2231",
+      "display": "Chronic angle-closure glaucoma, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2232",
+      "display": "Chronic angle-closure glaucoma, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2233",
+      "display": "Chronic angle-closure glaucoma, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.2234",
+      "display": "Chronic angle-closure glaucoma, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.231",
+      "display": "Intermittent angle-closure glaucoma, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.232",
+      "display": "Intermittent angle-closure glaucoma, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.233",
+      "display": "Intermittent angle-closure glaucoma, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.241",
+      "display": "Residual stage of angle-closure glaucoma, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.242",
+      "display": "Residual stage of angle-closure glaucoma, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.243",
+      "display": "Residual stage of angle-closure glaucoma, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.31X0",
+      "display": "Glaucoma secondary to eye trauma, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.31X1",
+      "display": "Glaucoma secondary to eye trauma, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.31X2",
+      "display": "Glaucoma secondary to eye trauma, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.31X3",
+      "display": "Glaucoma secondary to eye trauma, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.31X4",
+      "display": "Glaucoma secondary to eye trauma, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.32X0",
+      "display": "Glaucoma secondary to eye trauma, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.32X1",
+      "display": "Glaucoma secondary to eye trauma, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.32X2",
+      "display": "Glaucoma secondary to eye trauma, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.32X3",
+      "display": "Glaucoma secondary to eye trauma, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.32X4",
+      "display": "Glaucoma secondary to eye trauma, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.33X0",
+      "display": "Glaucoma secondary to eye trauma, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.33X1",
+      "display": "Glaucoma secondary to eye trauma, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.33X2",
+      "display": "Glaucoma secondary to eye trauma, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.33X3",
+      "display": "Glaucoma secondary to eye trauma, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.33X4",
+      "display": "Glaucoma secondary to eye trauma, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.41X0",
+      "display": "Glaucoma secondary to eye inflammation, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.41X1",
+      "display": "Glaucoma secondary to eye inflammation, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.41X2",
+      "display": "Glaucoma secondary to eye inflammation, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.41X3",
+      "display": "Glaucoma secondary to eye inflammation, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.41X4",
+      "display": "Glaucoma secondary to eye inflammation, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.42X0",
+      "display": "Glaucoma secondary to eye inflammation, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.42X1",
+      "display": "Glaucoma secondary to eye inflammation, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.42X2",
+      "display": "Glaucoma secondary to eye inflammation, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.42X3",
+      "display": "Glaucoma secondary to eye inflammation, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.42X4",
+      "display": "Glaucoma secondary to eye inflammation, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.43X0",
+      "display": "Glaucoma secondary to eye inflammation, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.43X1",
+      "display": "Glaucoma secondary to eye inflammation, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.43X2",
+      "display": "Glaucoma secondary to eye inflammation, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.43X3",
+      "display": "Glaucoma secondary to eye inflammation, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.43X4",
+      "display": "Glaucoma secondary to eye inflammation, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.51X0",
+      "display": "Glaucoma secondary to other eye disorders, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.51X1",
+      "display": "Glaucoma secondary to other eye disorders, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.51X2",
+      "display": "Glaucoma secondary to other eye disorders, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.51X3",
+      "display": "Glaucoma secondary to other eye disorders, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.51X4",
+      "display": "Glaucoma secondary to other eye disorders, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.52X0",
+      "display": "Glaucoma secondary to other eye disorders, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.52X1",
+      "display": "Glaucoma secondary to other eye disorders, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.52X2",
+      "display": "Glaucoma secondary to other eye disorders, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.52X3",
+      "display": "Glaucoma secondary to other eye disorders, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.52X4",
+      "display": "Glaucoma secondary to other eye disorders, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.53X0",
+      "display": "Glaucoma secondary to other eye disorders, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.53X1",
+      "display": "Glaucoma secondary to other eye disorders, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.53X2",
+      "display": "Glaucoma secondary to other eye disorders, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.53X3",
+      "display": "Glaucoma secondary to other eye disorders, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.53X4",
+      "display": "Glaucoma secondary to other eye disorders, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.61X0",
+      "display": "Glaucoma secondary to drugs, right eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.61X1",
+      "display": "Glaucoma secondary to drugs, right eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.61X2",
+      "display": "Glaucoma secondary to drugs, right eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.61X3",
+      "display": "Glaucoma secondary to drugs, right eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.61X4",
+      "display": "Glaucoma secondary to drugs, right eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.62X0",
+      "display": "Glaucoma secondary to drugs, left eye, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.62X1",
+      "display": "Glaucoma secondary to drugs, left eye, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.62X2",
+      "display": "Glaucoma secondary to drugs, left eye, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.62X3",
+      "display": "Glaucoma secondary to drugs, left eye, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.62X4",
+      "display": "Glaucoma secondary to drugs, left eye, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.63X0",
+      "display": "Glaucoma secondary to drugs, bilateral, stage unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.63X1",
+      "display": "Glaucoma secondary to drugs, bilateral, mild stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.63X2",
+      "display": "Glaucoma secondary to drugs, bilateral, moderate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.63X3",
+      "display": "Glaucoma secondary to drugs, bilateral, severe stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.63X4",
+      "display": "Glaucoma secondary to drugs, bilateral, indeterminate stage"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.811",
+      "display": "Glaucoma with increased episcleral venous pressure, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.812",
+      "display": "Glaucoma with increased episcleral venous pressure, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.813",
+      "display": "Glaucoma with increased episcleral venous pressure, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.821",
+      "display": "Hypersecretion glaucoma, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.822",
+      "display": "Hypersecretion glaucoma, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.823",
+      "display": "Hypersecretion glaucoma, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.831",
+      "display": "Aqueous misdirection, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.832",
+      "display": "Aqueous misdirection, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.833",
+      "display": "Aqueous misdirection, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H40.89",
+      "display": "Other specified glaucoma"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q15.0",
+      "display": "Congenital glaucoma"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10100008",
+      "display": "Malignant glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111513000",
+      "display": "Advanced open-angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111514006",
+      "display": "Pseudoexfoliation glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12239301000119102",
+      "display": "Bilateral open-angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12239421000119101",
+      "display": "Bilateral glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12239461000119106",
+      "display": "Glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12239501000119106",
+      "display": "Glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15374009",
+      "display": "Secondary glaucoma due to aphakia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15633281000119103",
+      "display": "Bilateral primary open angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15633321000119108",
+      "display": "Primary open angle glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15640441000119104",
+      "display": "Primary open angle glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15673001000119103",
+      "display": "Congenital glaucoma of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15673081000119106",
+      "display": "Congenital glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736441000119108",
+      "display": "Primary angle-closure glaucoma of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736481000119103",
+      "display": "Primary angle-closure glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736521000119103",
+      "display": "Primary angle-closure glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736561000119108",
+      "display": "Neovascular glaucoma of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736601000119108",
+      "display": "Neovascular glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736641000119105",
+      "display": "Neovascular glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736681000119100",
+      "display": "Narrow-angle glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736721000119106",
+      "display": "Angle-closure glaucoma of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15736761000119101",
+      "display": "Narrow angle glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15738841000119105",
+      "display": "Glaucoma of bilateral eyes due to combination of mechanisms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15738881000119100",
+      "display": "Glaucoma of left eye due to combination of mechanisms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15738921000119107",
+      "display": "Glaucoma of right eye due to combination of mechanisms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739041000119106",
+      "display": "Glaucoma of bilateral eyes due to iris anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739081000119101",
+      "display": "Glaucoma of bilateral eyes due to anterior segment anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739121000119104",
+      "display": "Glaucoma of right eye due to anterior segment anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739161000119109",
+      "display": "Glaucoma of left eye due to anterior segment anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739201000119104",
+      "display": "Glaucoma of left eye due to ocular vascular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739241000119102",
+      "display": "Glaucoma of right eye due to ocular vascular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739281000119107",
+      "display": "Glaucoma of bilateral eyes due to ocular vascular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739321000119102",
+      "display": "Glaucoma of right eye due to chamber angle anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739361000119107",
+      "display": "Glaucoma of bilateral eyes due to chamber angle anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739401000119103",
+      "display": "Glaucoma of left eye due to chamber angle anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739441000119101",
+      "display": "Glaucoma of right eye due to trauma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739481000119106",
+      "display": "Glaucoma of left eye due to trauma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739561000119101",
+      "display": "Glaucoma of right eye due to lens disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739641000119104",
+      "display": "Glaucoma of left eye due to lens disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739681000119109",
+      "display": "Glaucoma of right eye due to systemic disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739721000119103",
+      "display": "Glaucoma of left eye due to systemic disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15739761000119108",
+      "display": "Glaucoma of bilateral eyes due to systemic disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15993671000119108",
+      "display": "Open-angle glaucoma of right eye caused by steroid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15993711000119107",
+      "display": "Open-angle glaucoma of left eye caused by steroid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15993751000119108",
+      "display": "Open-angle glaucoma of bilateral eyes caused by steroid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15996831000119101",
+      "display": "Glaucoma caused by Onchocerca volvulus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1654001",
+      "display": "Corticosteroid-induced glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19144002",
+      "display": "Absolute glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19309007",
+      "display": "Glaucoma associated with vascular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193546005",
+      "display": "Primary angle-closure glaucoma residual stage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193548006",
+      "display": "Steroid-induced glaucoma glaucomatous stage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193549003",
+      "display": "Steroid-induced glaucoma residual stage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193552006",
+      "display": "Glaucoma due to chamber angle anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193553001",
+      "display": "Glaucoma due to iris anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193555008",
+      "display": "Glaucoma due to systemic syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193561006",
+      "display": "Secondary angle-closure glaucoma with pupil block (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193562004",
+      "display": "Glaucoma due to ocular vascular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "204113001",
+      "display": "Congenital glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "206248004",
+      "display": "Traumatic glaucoma due to birth trauma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "21571006",
+      "display": "Secondary angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "21928008",
+      "display": "Secondary open-angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232081005",
+      "display": "Iatrogenic glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232082003",
+      "display": "Iatrogenic angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232083008",
+      "display": "Glaucoma and corneal anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232086000",
+      "display": "Neovascular glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232087009",
+      "display": "Glaucoma with intraocular hemorrhage (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232088004",
+      "display": "Ghost cell glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232090003",
+      "display": "Glaucoma following surgery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23986001",
+      "display": "Glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24151000119106",
+      "display": "Steroid-induced open angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "267625001",
+      "display": "Glaucoma due to ocular tumor or cyst (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275477002",
+      "display": "Glaucoma due to ocular cyst (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27735002",
+      "display": "Glaucoma associated with tumors AND/OR cysts (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29369005",
+      "display": "Hypersecretion glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30041005",
+      "display": "Acute angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314017009",
+      "display": "Acute-on-chronic glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314033007",
+      "display": "Uveitic glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314784002",
+      "display": "Secondary angle-closure glaucoma - synechial (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32893002",
+      "display": "Phacolytic glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33647009",
+      "display": "Anatomical narrow angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "336611000119109",
+      "display": "Acute angle-closure glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "336631000119104",
+      "display": "Absolute glaucoma right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "342221000119104",
+      "display": "Acute angle-closure glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "342241000119105",
+      "display": "Absolute glaucoma left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "34623005",
+      "display": "Glaucoma with increased episcleral venous pressure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "347381000119106",
+      "display": "Bilateral acute angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "347401000119106",
+      "display": "Bilateral absolute glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "367360002",
+      "display": "Ciliary block glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "37155002",
+      "display": "Glaucoma associated with ocular inflammation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "392030001",
+      "display": "Hemolytic glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "392288006",
+      "display": "Primary angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "392291006",
+      "display": "Angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "392300000",
+      "display": "Phacomorphic glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "392352004",
+      "display": "Angle recession glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "404634005",
+      "display": "Glaucoma associated with iridocorneal endothelial syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "404648005",
+      "display": "Lens particle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415176004",
+      "display": "Primary congenital glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41911000119107",
+      "display": "Glaucoma due to type 2 diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444863008",
+      "display": "Anatomical narrow angle glaucoma with borderline intraocular pressure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45623002",
+      "display": "Glaucoma associated with anterior segment anomaly (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46168003",
+      "display": "Pigmentary glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50485007",
+      "display": "Low tension glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53667005",
+      "display": "Glaucoma associated with systemic syndromes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55129006",
+      "display": "Residual stage angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60981000119103",
+      "display": "Glaucoma due to diabetes mellitus type 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65460003",
+      "display": "Intermittent angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66725002",
+      "display": "Glaucoma due to perforating injury (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66747002",
+      "display": "Glaucoma associated with ocular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66990007",
+      "display": "Residual stage of open angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68241007",
+      "display": "Glaucoma associated with ocular trauma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698840003",
+      "display": "Neovascular glaucoma due to hyphema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713457002",
+      "display": "Neovascular glaucoma co-occurrent and due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "715144004",
+      "display": "Glaucoma caused by silicone oil (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "716166002",
+      "display": "Microcornea with glaucoma and absent frontal sinus syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721898008",
+      "display": "Corticosteroid-induced glaucoma of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722321001",
+      "display": "Corticosteroid-induced glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722329004",
+      "display": "Corticosteroid-induced glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77075001",
+      "display": "Primary open angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "787051000",
+      "display": "Open-angle glaucoma of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "787052007",
+      "display": "Open-angle glaucoma of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84333006",
+      "display": "Glaucoma associated with lens disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84494001",
+      "display": "Open-angle glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89215000",
+      "display": "Postoperative angle-closure glaucoma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "92829008",
+      "display": "Glaucoma due to combination of mechanisms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95213001",
+      "display": "Primary glaucoma due to combination of mechanisms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95250000",
+      "display": "Secondary glaucoma due to combination mechanisms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95717004",
+      "display": "Secondary glaucoma (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.2390",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.2390",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.2390"
+  } ],
+  "version": "20160331",
+  "name": "CurrentTobaccoSmoker",
+  "title": "Current Tobacco Smoker",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "160603005",
+      "display": "Light cigarette smoker (1-9 cigs/day) (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "160604004",
+      "display": "Moderate cigarette smoker (10-19 cigs/day) (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "160605003",
+      "display": "Heavy cigarette smoker (20-39 cigs/day) (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "160606002",
+      "display": "Very heavy cigarette smoker (40+ cigs/day) (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "160619003",
+      "display": "Rolls own cigarettes (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230059006",
+      "display": "Occasional cigarette smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230060001",
+      "display": "Light cigarette smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230062009",
+      "display": "Moderate cigarette smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230063004",
+      "display": "Heavy cigarette smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230064005",
+      "display": "Very heavy cigarette smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230065006",
+      "display": "Chain smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266920004",
+      "display": "Trivial cigarette smoker (less than one cigarette/day) (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "365981007",
+      "display": "Finding of tobacco smoking behavior (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "365982000",
+      "display": "Finding of tobacco smoking consumption (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428041000124106",
+      "display": "Occasional tobacco smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428061000124105",
+      "display": "Light tobacco smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428071000124103",
+      "display": "Heavy tobacco smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "449868002",
+      "display": "Smokes tobacco daily (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56578002",
+      "display": "Moderate smoker (20 or less per day) (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56771006",
+      "display": "Heavy smoker (over 20 per day) (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59978006",
+      "display": "Cigar smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65568007",
+      "display": "Cigarette smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77176002",
+      "display": "Smoker (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82302008",
+      "display": "Pipe smoker (finding)"
+    } ]
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1463",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1463",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1463"
+  } ],
+  "version": "20200307",
+  "name": "HereditaryRetinalDystrophies",
+  "title": "Hereditary Retinal Dystrophies",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.50",
+      "display": "Unspecified hereditary retinal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.51",
+      "display": "Vitreoretinal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.52",
+      "display": "Pigmentary retinal dystrophy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.53",
+      "display": "Other dystrophies primarily involving the sensory retina"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.54",
+      "display": "Dystrophies primarily involving the retinal pigment epithelium"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H36",
+      "display": "Retinal disorders in diseases classified elsewhere"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15059000",
+      "display": "Retinal dystrophy in systemic lipidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "192788009",
+      "display": "Retinal dystrophy in cerebroretinal lipidosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193400007",
+      "display": "Hereditary retinal dystrophies in lipidoses (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193409008",
+      "display": "Hyaline retinal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193415008",
+      "display": "Tapetoretinal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232052009",
+      "display": "Autosomal dominant retinitis pigmentosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232053004",
+      "display": "Autosomal recessive retinitis pigmentosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232056007",
+      "display": "Progressive rod dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232057003",
+      "display": "Usher syndrome type 1 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232058008",
+      "display": "Usher syndrome type 2 (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "267613004",
+      "display": "Progressive cone dystrophy (without rod involvement) (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28835009",
+      "display": "Retinitis pigmentosa (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312917007",
+      "display": "Cone dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "313003009",
+      "display": "Rod dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41799005",
+      "display": "Hereditary retinal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57838006",
+      "display": "Retinitis pigmentosa-deafness syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "764939004",
+      "display": "Fundus albipunctatus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79556007",
+      "display": "Vitreoretinal dystrophy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "80328002",
+      "display": "Progressive cone-rod dystrophy (disorder)"
+    } ]
+  }
+}

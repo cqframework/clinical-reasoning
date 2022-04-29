@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1257",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1257",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1257"
+  } ],
+  "version": "20170504",
+  "name": "IntolerancetoInfluenzaVaccine",
+  "title": "Intolerance to Influenza Vaccine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293112000",
+      "display": "Influenza split virion vaccine adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293113005",
+      "display": "Influenza surface antigen vaccine adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "390796006",
+      "display": "Influenza vaccination contraindicated (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420113004",
+      "display": "Influenza virus vaccine adverse reaction (disorder)"
+    } ]
+  }
+}

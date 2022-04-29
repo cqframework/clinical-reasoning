@@ -342,4 +342,91 @@ public class CliTest {
         assertTrue(output.contains("TestConditionsViaFunction=[Condition(id=Condition-17-94)]"));
         assertTrue(output.contains("TestConditionsDirectly=[Condition(id=Condition-17-94)]"));
     }
+
+    @Test
+    public void testQICoreEXM124Example() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/qicore",
+                "-ln=EXM124_QICore4",
+                "-lv=8.2.000",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/qicore",
+                "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("SDE Ethnicity=[Code { code: 2184-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Dominican }, Code { code: 2148-5, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Mexican }]"));
+        assertTrue(output.contains("SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
+        assertTrue(output.contains("SDE Payer=[Tuple {\n" +
+                "\t\"code\": Concept {\n" +
+                "\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n" +
+                "}\n" +
+                "\t\"period\": Interval[2011-05-23, 2012-05-23]\n" +
+                "}]"));
+        assertTrue(output.contains("SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));
+        assertTrue(output.contains("Initial Population=false"));
+        assertTrue(output.contains("Denominator=false"));
+        assertTrue(output.contains("Denominator Exclusion=false"));
+        assertTrue(output.contains("Numerator=false"));
+    }
+
+    @Test
+    public void testQICoreEXM124Denom() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/qicore",
+                "-ln=EXM124_QICore4",
+                "-lv=8.2.000",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/qicore",
+                "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=denom-EXM124"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=denom-EXM124)"));
+        assertTrue(output.contains("SDE Sex=Code { code: F, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Female }"));
+        assertTrue(output.contains("Initial Population=true"));
+        assertTrue(output.contains("Denominator=true"));
+        assertTrue(output.contains("Denominator Exclusion=false"));
+        assertTrue(output.contains("Numerator=false"));
+    }
+
+    @Test
+    public void testQICoreEXM124Numer() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/qicore",
+                "-ln=EXM124_QICore4",
+                "-lv=8.2.000",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/qicore",
+                "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=numer-EXM124"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=numer-EXM124)"));
+        assertTrue(output.contains("SDE Sex=Code { code: F, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Female }"));
+        assertTrue(output.contains("Initial Population=true"));
+        assertTrue(output.contains("Denominator=true"));
+        assertTrue(output.contains("Denominator Exclusion=false"));
+        assertTrue(output.contains("Numerator=true"));
+    }
+
 }

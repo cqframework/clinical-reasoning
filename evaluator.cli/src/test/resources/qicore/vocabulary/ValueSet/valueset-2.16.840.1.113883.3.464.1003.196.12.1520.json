@@ -1,0 +1,100 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1520",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1520",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1520"
+  } ],
+  "version": "20200310",
+  "name": "Scopolamine",
+  "title": "Scopolamine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046787",
+      "display": "Atropine Sulfate 0.00388 MG/ML / Hyoscyamine Sulfate 0.0207 MG/ML / Phenobarbital 3.24 MG/ML / Scopolamine Hydrobromide 0.0013 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046815",
+      "display": "Atropine Sulfate 0.0194 MG / Hyoscyamine Sulfate 0.1037 MG / Phenobarbital 16.2 MG / Scopolamine Hydrobromide 0.0065 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1046997",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.311 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048078",
+      "display": "Atropine Sulfate 0.0194 MG / Hyoscyamine Sulfate 0.1037 MG / Scopolamine Hydrobromide 0.0065 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048124",
+      "display": "12 HR Atropine Sulfate 0.04 MG / Chlorpheniramine Maleate 8 MG / Hyoscyamine Sulfate 0.19 MG / Pseudoephedrine Hydrochloride 90 MG / Scopolamine Hydrobromide 0.01 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1048147",
+      "display": "Atropine Sulfate 0.0582 MG / Hyoscyamine Sulfate 0.3111 MG / Phenobarbital 48.6 MG / Scopolamine Hydrobromide 0.0195 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "106507",
+      "display": "Papaveretum 15.4 MG/ML / Scopolamine 0.4 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "198207",
+      "display": "Scopolamine 0.4 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "199442",
+      "display": "butylscopolamine bromide 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "200059",
+      "display": "Scopolamine 0.4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "226552",
+      "display": "72 HR Scopolamine 0.0139 MG/HR Transdermal System"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "245350",
+      "display": "Scopolamine 0.6 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "250536",
+      "display": "Scopolamine 0.3 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "250537",
+      "display": "Scopolamine 0.15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "412723",
+      "display": "Scopolamine 20 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "429720",
+      "display": "Caffeine 20 MG / Dimenhydrinate 50 MG / Scopolamine 0.2 MG Oral Tablet"
+    } ]
+  }
+}

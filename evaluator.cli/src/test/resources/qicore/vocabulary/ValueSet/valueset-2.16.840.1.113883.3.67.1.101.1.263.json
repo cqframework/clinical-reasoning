@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.67.1.101.1.263",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.67.1.101.1.263",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.67.1.101.1.263"
+  } ],
+  "version": "20190302",
+  "name": "PHQ9andPHQ9MTools",
+  "title": "PHQ 9 and PHQ 9M Tools",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44261-6",
+      "display": "Patient Health Questionnaire 9 item (PHQ-9) total score [Reported]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "89204-2",
+      "display": "Patient Health Questionnaire-9: Modified for Teens total score [Reported.PHQ.Teen]"
+    } ]
+  }
+}

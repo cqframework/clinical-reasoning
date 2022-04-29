@@ -1,0 +1,75 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.114",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.114",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1045.114"
+  } ],
+  "version": "20200307",
+  "name": "Hematocritlabtest",
+  "title": "Hematocrit lab test",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20570-8",
+      "display": "Hematocrit [Volume Fraction] of Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "31100-1",
+      "display": "Hematocrit [Volume Fraction] of Blood by Impedance"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32354-3",
+      "display": "Hematocrit [Volume Fraction] of Arterial blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "41654-5",
+      "display": "Hematocrit [Volume Fraction] of Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "41655-2",
+      "display": "Hematocrit [Volume Fraction] of Mixed venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "4544-3",
+      "display": "Hematocrit [Volume Fraction] of Blood by Automated count"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "4545-0",
+      "display": "Hematocrit [Volume Fraction] of Blood by Centrifugation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "71829-6",
+      "display": "Hematocrit [Pure volume fraction] of Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "71830-4",
+      "display": "Hematocrit [Pure volume fraction] of Mixed venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "71832-0",
+      "display": "Hematocrit [Pure volume fraction] of Arterial blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "71833-8",
+      "display": "Hematocrit [Pure volume fraction] of Blood by Automated count"
+    } ]
+  }
+}

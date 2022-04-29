@@ -1,0 +1,100 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1045",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1045",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1045"
+  } ],
+  "version": "20170504",
+  "name": "InactivatedPolioVaccine(IPV)Administered",
+  "title": "Inactivated Polio Vaccine (IPV) Administered",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90698",
+      "display": "Diphtheria, tetanus toxoids, acellular pertussis vaccine, Haemophilus influenzae type b, and inactivated poliovirus vaccine, (DTaP-IPV/Hib), for intramuscular use"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90713",
+      "display": "Poliovirus vaccine, inactivated (IPV), for subcutaneous or intramuscular use"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90723",
+      "display": "Diphtheria, tetanus toxoids, acellular pertussis vaccine, hepatitis B, and inactivated poliovirus vaccine (DTaP-HepB-IPV), for intramuscular use"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "396456003",
+      "display": "Diphtheria, acellular pertussis, hepatitis B and inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "412762002",
+      "display": "First diphtheria, tetanus, acellular pertussis and polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414001002",
+      "display": "Diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414259000",
+      "display": "First diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414619005",
+      "display": "Low dose diphtheria, tetanus and inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414620004",
+      "display": "Low dose diphtheria, tetanus, five component acellular pertussis and inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415507003",
+      "display": "Second diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415712004",
+      "display": "Third diphtheria tetanus and five component acellular pertussis, haemophilus influenzae type b, inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416144004",
+      "display": "Third low dose diphtheria, tetanus and inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416591003",
+      "display": "First low dose diphtheria, tetanus and inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417211006",
+      "display": "First booster low dose diphtheria, tetanus and inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417384007",
+      "display": "Second booster low dose diphtheria, tetanus and inactivated polio vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417615007",
+      "display": "Second low dose diphtheria, tetanus and inactivated polio vaccination (procedure)"
+    } ]
+  }
+}

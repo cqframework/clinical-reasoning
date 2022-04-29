@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1084",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1084",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1084"
+  } ],
+  "version": "20190315",
+  "name": "HibVaccine(3doseschedule)Administered",
+  "title": "Hib Vaccine (3 dose schedule) Administered",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90647",
+      "display": "Haemophilus influenzae type b vaccine (Hib), PRP-OMP conjugate, 3 dose schedule, for intramuscular use"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "127787002",
+      "display": "Haemophilus influenzae type b vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170343007",
+      "display": "First haemophilus B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170344001",
+      "display": "Second haemophilus B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170345000",
+      "display": "Third haemophilus B vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170346004",
+      "display": "Booster haemophilus B vaccination (procedure)"
+    } ]
+  }
+}

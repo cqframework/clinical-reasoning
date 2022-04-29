@@ -1,0 +1,45 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1085",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1085",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1085"
+  } ],
+  "version": "20190315",
+  "name": "HibVaccine(4doseschedule)",
+  "title": "Hib Vaccine (4 dose schedule)",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "120",
+      "display": "diphtheria, tetanus toxoids and acellular pertussis vaccine, Haemophilus influenzae type b conjugate, and poliovirus vaccine, inactivated (DTaP-Hib-IPV)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "148",
+      "display": "Meningococcal Groups C and Y and Haemophilus b Tetanus Toxoid Conjugate Vaccine"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "48",
+      "display": "Haemophilus influenzae type b vaccine, PRP-T conjugate"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "50",
+      "display": "DTaP-Haemophilus influenzae type b conjugate vaccine"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "51",
+      "display": "Haemophilus influenzae type b conjugate and Hepatitis B vaccine"
+    } ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.1482",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.1482",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.1482"
+  } ],
+  "version": "20170504",
+  "name": "LaboratoryTestsforHypertension",
+  "title": "Laboratory Tests for Hypertension",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24320-4",
+      "display": "Basic metabolic 1998 panel - Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24321-2",
+      "display": "Basic metabolic 2000 panel - Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24323-8",
+      "display": "Comprehensive metabolic 2000 panel - Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24356-8",
+      "display": "Urinalysis complete panel - Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24357-6",
+      "display": "Urinalysis macro (dipstick) panel - Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24362-6",
+      "display": "Renal function 2000 panel - Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2888-6",
+      "display": "Protein [Mass/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "57021-8",
+      "display": "CBC W Auto Differential panel - Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "57782-5",
+      "display": "CBC with Ordered Manual Differential panel - Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "58410-2",
+      "display": "Complete blood count (hemogram) panel - Blood by Automated count"
+    } ]
+  }
+}

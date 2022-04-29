@@ -1,0 +1,170 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.112.12.1003",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.112.12.1003",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.112.12.1003"
+  } ],
+  "version": "20180310",
+  "name": "Chlamydia",
+  "title": "Chlamydia",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A56.00",
+      "display": "Chlamydial infection of lower genitourinary tract, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A56.01",
+      "display": "Chlamydial cystitis and urethritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A56.09",
+      "display": "Other chlamydial infection of lower genitourinary tract"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105629000",
+      "display": "Chlamydial infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "179101003",
+      "display": "Urethritis caused by Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186729003",
+      "display": "Chlamydial infection of lower genitourinary tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186731007",
+      "display": "Chlamydial infection of anus and rectum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "188463006",
+      "display": "Chlamydial pelvic inflammatory disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "189312004",
+      "display": "Pelvic inflammation with female sterility caused by Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197172005",
+      "display": "Chlamydial peritonitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198176005",
+      "display": "Female chlamydial pelvic inflammatory disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236683007",
+      "display": "Chlamydial urethritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237039009",
+      "display": "Chlamydial salpingitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237043008",
+      "display": "Chlamydial perihepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237084006",
+      "display": "Chlamydial cervicitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237097008",
+      "display": "Chlamydial vulvovaginitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237106009",
+      "display": "Chlamydial bartholinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240589008",
+      "display": "Chlamydia trachomatis infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312099009",
+      "display": "Genitourinary chlamydia infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "367504009",
+      "display": "Pelvic inflammatory disease with female sterility due to Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420910002",
+      "display": "Chlamydia trachomatis infection of anus and rectum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426165006",
+      "display": "Acute genitourinary chlamydia infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426247003",
+      "display": "Acute genitourinary Chlamydia trachomatis infection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428015005",
+      "display": "Chlamydia trachomatis infection of genital structure (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446642005",
+      "display": "Infection of anus caused by Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "446752000",
+      "display": "Infection of peritoneum caused by Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "447353001",
+      "display": "Infection of cervix caused by Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "447372001",
+      "display": "Infection of rectum caused by Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "447386002",
+      "display": "Infection of vulva caused by Chlamydia trachomatis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "447402003",
+      "display": "Infection of vagina caused by Chlamydia trachomatis (disorder)"
+    } ]
+  }
+}

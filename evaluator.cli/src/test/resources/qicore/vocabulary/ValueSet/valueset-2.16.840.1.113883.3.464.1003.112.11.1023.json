@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.112.11.1023",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.112.11.1023",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.112.11.1023"
+  } ],
+  "version": "20180310",
+  "name": "CarrierofPredominantlySexuallyTransmittedInfection",
+  "title": "Carrier of Predominantly Sexually Transmitted Infection",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Z20.2",
+      "display": "Contact with and (suspected) exposure to infections with a predominantly sexual mode of transmission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Z22.4",
+      "display": "Carrier of infections with a predominantly sexual mode of transmission"
+    } ]
+  }
+}

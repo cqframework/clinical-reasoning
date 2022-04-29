@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1560",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1560",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1560"
+  } ],
+  "version": "20190920",
+  "name": "BestCorrectedVisualAcuityExamUsingSnellenChart",
+  "title": "Best Corrected Visual Acuity Exam Using Snellen Chart",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79880-1",
+      "display": "Visual acuity best corrected Right eye by Snellen eye chart"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79881-9",
+      "display": "Visual acuity best corrected Left eye by Snellen eye chart"
+    } ]
+  }
+}

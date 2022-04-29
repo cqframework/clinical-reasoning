@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.118.12.1028",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1028",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.118.12.1028"
+  } ],
+  "version": "20190315",
+  "name": "FallsScreening",
+  "title": "Falls Screening",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "52552-7",
+      "display": "Falls in the past year [CMS Assessment]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "57254-5",
+      "display": "Standardized fall risk assessment was conducted [CMS Assessment]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59454-9",
+      "display": "History of falling; immediate or within 3 months [Morse Fall Scale]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "73830-2",
+      "display": "Fall risk assessment"
+    } ]
+  }
+}

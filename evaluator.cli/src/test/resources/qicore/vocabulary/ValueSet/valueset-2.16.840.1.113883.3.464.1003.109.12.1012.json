@@ -1,0 +1,510 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.109.12.1012",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.109.12.1012",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.109.12.1012"
+  } ],
+  "version": "20190315",
+  "name": "KidneyTransplant",
+  "title": "Kidney Transplant",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50300",
+      "display": "Donor nephrectomy (including cold preservation); from cadaver donor, unilateral or bilateral"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50320",
+      "display": "Donor nephrectomy (including cold preservation); open, from living donor"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50340",
+      "display": "Recipient nephrectomy (separate procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50360",
+      "display": "Renal allotransplantation, implantation of graft; without recipient nephrectomy"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50365",
+      "display": "Renal allotransplantation, implantation of graft; with recipient nephrectomy"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50370",
+      "display": "Removal of transplanted renal allograft"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50380",
+      "display": "Renal autotransplantation, reimplantation of kidney"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S2065",
+      "display": "Simultaneous pancreas kidney transplantation"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY00Z0",
+      "display": "Transplantation of Right Kidney, Allogeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY00Z1",
+      "display": "Transplantation of Right Kidney, Syngeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY00Z2",
+      "display": "Transplantation of Right Kidney, Zooplastic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY10Z0",
+      "display": "Transplantation of Left Kidney, Allogeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY10Z1",
+      "display": "Transplantation of Left Kidney, Syngeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY10Z2",
+      "display": "Transplantation of Left Kidney, Zooplastic, Open Approach"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "122531000119108",
+      "display": "Lymphoproliferative disorder following kidney transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128631000119109",
+      "display": "Chronic graft-versus-host disease following kidney transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197747000",
+      "display": "Renal tubulo-interstitial disorders in transplant rejection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "213150003",
+      "display": "Kidney transplant failure and rejection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236436003",
+      "display": "End stage renal failure with renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236569000",
+      "display": "Primary non-function of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236570004",
+      "display": "Renal transplant rejection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236571000",
+      "display": "Hyperacute rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236572007",
+      "display": "Accelerated rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236573002",
+      "display": "Very mild acute rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236574008",
+      "display": "Acute rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236575009",
+      "display": "Acute rejection of renal transplant - grade I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236576005",
+      "display": "Acute rejection of renal transplant - grade II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236577001",
+      "display": "Acute rejection of renal transplant - grade III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236578006",
+      "display": "Chronic rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236579003",
+      "display": "Chronic rejection of renal transplant - grade I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236580000",
+      "display": "Chronic rejection of renal transplant - grade II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236581001",
+      "display": "Chronic rejection of renal transplant - grade III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236582008",
+      "display": "Acute-on-chronic rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236583003",
+      "display": "Failed renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236584009",
+      "display": "Perfusion injury of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236587002",
+      "display": "Transplant glomerulopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236588007",
+      "display": "Transplant glomerulopathy - early form (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236589004",
+      "display": "Transplant glomerulopathy - late form (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236614007",
+      "display": "Perirenal and periureteric post-transplant lymphocele (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "277010001",
+      "display": "Unexplained episode of renal transplant dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "277011002",
+      "display": "Pre-existing disease in renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426136000",
+      "display": "Delayed renal graft function (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428575007",
+      "display": "Hypertension secondary to kidney transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429451003",
+      "display": "Disorder related to renal transplantation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "473195006",
+      "display": "Normal renal function of transplanted kidney (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58797008",
+      "display": "Complication of transplanted kidney (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703048006",
+      "display": "Vesicoureteric reflux after renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707148007",
+      "display": "Recurrent post-transplant renal disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713825007",
+      "display": "Renal artery stenosis of transplanted kidney (disorder)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50300",
+      "display": "Donor nephrectomy (including cold preservation); from cadaver donor, unilateral or bilateral"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50320",
+      "display": "Donor nephrectomy (including cold preservation); open, from living donor"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50340",
+      "display": "Recipient nephrectomy (separate procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50360",
+      "display": "Renal allotransplantation, implantation of graft; without recipient nephrectomy"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50365",
+      "display": "Renal allotransplantation, implantation of graft; with recipient nephrectomy"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50370",
+      "display": "Removal of transplanted renal allograft"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "50380",
+      "display": "Renal autotransplantation, reimplantation of kidney"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S2065",
+      "display": "Simultaneous pancreas kidney transplantation"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY00Z0",
+      "display": "Transplantation of Right Kidney, Allogeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY00Z1",
+      "display": "Transplantation of Right Kidney, Syngeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY00Z2",
+      "display": "Transplantation of Right Kidney, Zooplastic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY10Z0",
+      "display": "Transplantation of Left Kidney, Allogeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY10Z1",
+      "display": "Transplantation of Left Kidney, Syngeneic, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0TY10Z2",
+      "display": "Transplantation of Left Kidney, Zooplastic, Open Approach"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "122531000119108",
+      "display": "Lymphoproliferative disorder following kidney transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128631000119109",
+      "display": "Chronic graft-versus-host disease following kidney transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197747000",
+      "display": "Renal tubulo-interstitial disorders in transplant rejection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "213150003",
+      "display": "Kidney transplant failure and rejection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236436003",
+      "display": "End stage renal failure with renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236569000",
+      "display": "Primary non-function of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236570004",
+      "display": "Renal transplant rejection (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236571000",
+      "display": "Hyperacute rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236572007",
+      "display": "Accelerated rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236573002",
+      "display": "Very mild acute rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236574008",
+      "display": "Acute rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236575009",
+      "display": "Acute rejection of renal transplant - grade I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236576005",
+      "display": "Acute rejection of renal transplant - grade II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236577001",
+      "display": "Acute rejection of renal transplant - grade III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236578006",
+      "display": "Chronic rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236579003",
+      "display": "Chronic rejection of renal transplant - grade I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236580000",
+      "display": "Chronic rejection of renal transplant - grade II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236581001",
+      "display": "Chronic rejection of renal transplant - grade III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236582008",
+      "display": "Acute-on-chronic rejection of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236583003",
+      "display": "Failed renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236584009",
+      "display": "Perfusion injury of renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236587002",
+      "display": "Transplant glomerulopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236588007",
+      "display": "Transplant glomerulopathy - early form (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236589004",
+      "display": "Transplant glomerulopathy - late form (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236614007",
+      "display": "Perirenal and periureteric post-transplant lymphocele (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "277010001",
+      "display": "Unexplained episode of renal transplant dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "277011002",
+      "display": "Pre-existing disease in renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426136000",
+      "display": "Delayed renal graft function (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428575007",
+      "display": "Hypertension secondary to kidney transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429451003",
+      "display": "Disorder related to renal transplantation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "473195006",
+      "display": "Normal renal function of transplanted kidney (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58797008",
+      "display": "Complication of transplanted kidney (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703048006",
+      "display": "Vesicoureteric reflux after renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707148007",
+      "display": "Recurrent post-transplant renal disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713825007",
+      "display": "Renal artery stenosis of transplanted kidney (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1438",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1438",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1438"
+  } ],
+  "version": "20200307",
+  "name": "RetrolentalFibroplasias",
+  "title": "Retrolental Fibroplasias",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.171",
+      "display": "Retrolental fibroplasia, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.172",
+      "display": "Retrolental fibroplasia, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.173",
+      "display": "Retrolental fibroplasia, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332371000119107",
+      "display": "Retinopathy of prematurity of right eye stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332381000119105",
+      "display": "Retinopathy of prematurity of right eye stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332391000119108",
+      "display": "Retinopathy of prematurity of right eye stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332411000119108",
+      "display": "Retinopathy of prematurity of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "337981000119108",
+      "display": "Retinopathy of prematurity of left eye stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "337991000119106",
+      "display": "Retinopathy of prematurity of left eye stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "338001000119102",
+      "display": "Retinopathy of prematurity of left eye stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "338021000119106",
+      "display": "Retinopathy of prematurity of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343751000119106",
+      "display": "Retinopathy of prematurity of bilateral eyes stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343761000119108",
+      "display": "Retinopathy of prematurity of bilateral eyes stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343771000119102",
+      "display": "Retinopathy of prematurity of bilateral eyes stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343791000119101",
+      "display": "Retinopathy of prematurity of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408847006",
+      "display": "Retinopathy of prematurity stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408848001",
+      "display": "Retinopathy of prematurity stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408849009",
+      "display": "Retinopathy of prematurity stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408850009",
+      "display": "Retinopathy of prematurity stage 4 - subtotal retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408851008",
+      "display": "Retinopathy of prematurity stage 5 - total retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415297005",
+      "display": "Retinopathy of prematurity (disorder)"
+    } ]
+  }
+}

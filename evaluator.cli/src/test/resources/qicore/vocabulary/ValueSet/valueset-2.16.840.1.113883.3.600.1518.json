@@ -1,0 +1,65 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.1518",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.1518",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.1518"
+  } ],
+  "version": "20190313",
+  "name": "RecommendationtoIncreasePhysicalActivity",
+  "title": "Recommendation to Increase Physical Activity",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S9451",
+      "display": "Exercise classes, non-physician provider, per session"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281090004",
+      "display": "Recommendation to exercise (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304507003",
+      "display": "Exercise education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304549008",
+      "display": "Giving encouragement to exercise (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386291006",
+      "display": "Exercise promotion: strength training (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386292004",
+      "display": "Exercise promotion: stretching (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386373004",
+      "display": "Nutrition therapy (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386463000",
+      "display": "Prescribed activity/exercise education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410289001",
+      "display": "Exercises education, guidance, and counseling (procedure)"
+    } ]
+  }
+}

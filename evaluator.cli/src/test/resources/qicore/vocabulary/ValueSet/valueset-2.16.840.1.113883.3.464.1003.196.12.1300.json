@@ -1,0 +1,110 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1300",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1300",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1300"
+  } ],
+  "version": "20170504",
+  "name": "Dexchlorpheniramine",
+  "title": "Dexchlorpheniramine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1293239",
+      "display": "Dexchlorpheniramine maleate 2 MG / Pseudoephedrine Hydrochloride 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1298226",
+      "display": "Dexchlorpheniramine maleate 0.2 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1298433",
+      "display": "Dexchlorpheniramine maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 3 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1305775",
+      "display": "dexchlorpheniramine tannate 0.7 MG/ML / DEXTROMETHORPHAN TANNATE 6 MG/ML / PSEUDOEPHEDRINE TANNATE 9 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1357940",
+      "display": "Dexchlorpheniramine maleate 0.4 MG/ML / Hydrocodone Bitartrate 0.8 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1369424",
+      "display": "chlophedianol hydrochloride 2.5 MG/ML / Dexchlorpheniramine maleate 0.2 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1369971",
+      "display": "chlophedianol hydrochloride 6.25 MG/ML / Dexchlorpheniramine maleate 0.5 MG/ML / Pseudoephedrine Hydrochloride 15 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1369972",
+      "display": "chlophedianol hydrochloride 5 MG/ML / Dexchlorpheniramine maleate 0.4 MG/ML / Pseudoephedrine Hydrochloride 12 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1370680",
+      "display": "Dexchlorpheniramine maleate 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1440003",
+      "display": "Codeine Phosphate 1.8 MG/ML / Dexchlorpheniramine maleate 0.2 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1990881",
+      "display": "Dexchlorpheniramine maleate 0.2 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2168002",
+      "display": "dexchlorpheniramine tannate 0.6 MG/ML / DEXTROMETHORPHAN TANNATE 5.5 MG/ML / PSEUDOEPHEDRINE TANNATE 10 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2181304",
+      "display": "12 HR Dexchlorpheniramine maleate 6 MG / Phenylephrine Hydrochloride 40 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2183907",
+      "display": "Dexchlorpheniramine maleate 0.4 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2184088",
+      "display": "dexchlorpheniramine tannate 0.6 MG/ML / PSEUDOEPHEDRINE TANNATE 10 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2184108",
+      "display": "Dexchlorpheniramine maleate 2 MG / Phenylephrine Hydrochloride 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2184127",
+      "display": "Dexchlorpheniramine maleate 6 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "2184130",
+      "display": "Dexchlorpheniramine maleate 6 MG Oral Tablet"
+    } ]
+  }
+}

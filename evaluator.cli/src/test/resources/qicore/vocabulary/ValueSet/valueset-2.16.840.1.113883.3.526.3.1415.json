@@ -1,0 +1,175 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1415",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1415",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1415"
+  } ],
+  "version": "20200307",
+  "name": "CertainTypesofIridocyclitis",
+  "title": "Certain Types of Iridocyclitis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.21",
+      "display": "Lens-induced iridocyclitis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.22",
+      "display": "Lens-induced iridocyclitis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.23",
+      "display": "Lens-induced iridocyclitis, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.811",
+      "display": "Fuchs' heterochromic cyclitis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.812",
+      "display": "Fuchs' heterochromic cyclitis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.813",
+      "display": "Fuchs' heterochromic cyclitis, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.821",
+      "display": "Vogt-Koyanagi syndrome, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.822",
+      "display": "Vogt-Koyanagi syndrome, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.823",
+      "display": "Vogt-Koyanagi syndrome, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H20.9",
+      "display": "Unspecified iridocyclitis"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10698009",
+      "display": "Herpes zoster iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11226001",
+      "display": "Fuchs' heterochromic cyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12630008",
+      "display": "Primary iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13608004",
+      "display": "Herpes simplex iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15678641000119101",
+      "display": "Iridocyclitis of right eye caused by human herpes simplex virus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15678681000119106",
+      "display": "Iridocyclitis of left eye caused by human herpes simplex virus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15678761000119105",
+      "display": "Iridocyclitis of right eye due to herpes zoster (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15678801000119102",
+      "display": "Iridocyclitis of left eye due to herpes zoster (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193487008",
+      "display": "Secondary infected iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193488003",
+      "display": "Secondary non-infected iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23798003",
+      "display": "Translucency of iris (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "267619000",
+      "display": "Non-infectious anterior uveitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29538005",
+      "display": "Glaucomatocyclitic crisis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30080002",
+      "display": "Secondary syphilitic iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420485005",
+      "display": "Herpetic iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46916006",
+      "display": "Noninfectious secondary iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6869001",
+      "display": "Recurrent iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70461003",
+      "display": "Lens-induced iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77971008",
+      "display": "Iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89114005",
+      "display": "Infectious secondary iridocyclitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9091006",
+      "display": "Gonococcal iridocyclitis (disorder)"
+    } ]
+  }
+}

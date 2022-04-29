@@ -1,0 +1,85 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1364",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1364",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1364"
+  } ],
+  "version": "20170504",
+  "name": "KetorolacTromethamine",
+  "title": "Ketorolac Tromethamine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665459",
+      "display": "2 ML Ketorolac Tromethamine 30 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665461",
+      "display": "1 ML Ketorolac Tromethamine 30 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665675",
+      "display": "1 ML Ketorolac Tromethamine 15 MG/ML Cartridge"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665679",
+      "display": "1 ML Ketorolac Tromethamine 30 MG/ML Cartridge"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1665682",
+      "display": "2 ML Ketorolac Tromethamine 30 MG/ML Cartridge"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1797855",
+      "display": "Ketorolac Tromethamine 15.8 MG/ACTUAT Metered Dose Nasal Spray"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "834022",
+      "display": "Ketorolac Tromethamine 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "860092",
+      "display": "1 ML Ketorolac Tromethamine 15 MG/ML Injection"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "860096",
+      "display": "Ketorolac Tromethamine 30 MG/ML Injectable Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "860113",
+      "display": "1 ML Ketorolac Tromethamine 15 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "860114",
+      "display": "1 ML Ketorolac Tromethamine 30 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "860115",
+      "display": "2 ML Ketorolac Tromethamine 30 MG/ML Prefilled Syringe"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "861846",
+      "display": "Ketorolac Tromethamine 10 MG/ML Injectable Solution"
+    } ]
+  }
+}

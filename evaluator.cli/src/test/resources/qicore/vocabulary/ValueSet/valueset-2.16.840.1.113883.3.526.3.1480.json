@@ -1,0 +1,230 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1480",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1480",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1480"
+  } ],
+  "version": "20200307",
+  "name": "OtherProliferativeRetinopathy",
+  "title": "Other Proliferative Retinopathy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.101",
+      "display": "Retinopathy of prematurity, unspecified, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.102",
+      "display": "Retinopathy of prematurity, unspecified, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.103",
+      "display": "Retinopathy of prematurity, unspecified, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.111",
+      "display": "Retinopathy of prematurity, stage 0, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.112",
+      "display": "Retinopathy of prematurity, stage 0, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.113",
+      "display": "Retinopathy of prematurity, stage 0, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.121",
+      "display": "Retinopathy of prematurity, stage 1, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.122",
+      "display": "Retinopathy of prematurity, stage 1, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.123",
+      "display": "Retinopathy of prematurity, stage 1, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.131",
+      "display": "Retinopathy of prematurity, stage 2, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.132",
+      "display": "Retinopathy of prematurity, stage 2, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.133",
+      "display": "Retinopathy of prematurity, stage 2, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.141",
+      "display": "Retinopathy of prematurity, stage 3, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.142",
+      "display": "Retinopathy of prematurity, stage 3, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.143",
+      "display": "Retinopathy of prematurity, stage 3, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.151",
+      "display": "Retinopathy of prematurity, stage 4, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.152",
+      "display": "Retinopathy of prematurity, stage 4, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.153",
+      "display": "Retinopathy of prematurity, stage 4, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.161",
+      "display": "Retinopathy of prematurity, stage 5, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.162",
+      "display": "Retinopathy of prematurity, stage 5, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.163",
+      "display": "Retinopathy of prematurity, stage 5, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.171",
+      "display": "Retrolental fibroplasia, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.172",
+      "display": "Retrolental fibroplasia, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.173",
+      "display": "Retrolental fibroplasia, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332371000119107",
+      "display": "Retinopathy of prematurity of right eye stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332381000119105",
+      "display": "Retinopathy of prematurity of right eye stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332391000119108",
+      "display": "Retinopathy of prematurity of right eye stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "332411000119108",
+      "display": "Retinopathy of prematurity of right eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "337981000119108",
+      "display": "Retinopathy of prematurity of left eye stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "337991000119106",
+      "display": "Retinopathy of prematurity of left eye stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "338001000119102",
+      "display": "Retinopathy of prematurity of left eye stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "338021000119106",
+      "display": "Retinopathy of prematurity of left eye (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343751000119106",
+      "display": "Retinopathy of prematurity of bilateral eyes stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343761000119108",
+      "display": "Retinopathy of prematurity of bilateral eyes stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343771000119102",
+      "display": "Retinopathy of prematurity of bilateral eyes stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "343791000119101",
+      "display": "Retinopathy of prematurity of bilateral eyes (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408847006",
+      "display": "Retinopathy of prematurity stage 1 - demarcation line (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408848001",
+      "display": "Retinopathy of prematurity stage 2 - intraretinal ridge (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408849009",
+      "display": "Retinopathy of prematurity stage 3 - ridge with extraretinal fibrovascular proliferation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408850009",
+      "display": "Retinopathy of prematurity stage 4 - subtotal retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408851008",
+      "display": "Retinopathy of prematurity stage 5 - total retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415297005",
+      "display": "Retinopathy of prematurity (disorder)"
+    } ]
+  }
+}

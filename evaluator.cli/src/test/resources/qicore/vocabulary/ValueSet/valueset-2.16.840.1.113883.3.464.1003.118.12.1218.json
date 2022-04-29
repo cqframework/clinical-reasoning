@@ -1,0 +1,25 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.118.12.1218",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1218",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.118.12.1218"
+  } ],
+  "version": "20180310",
+  "name": "KneeInjuryandOsteoarthritisOutcomeScoreforJointReplacement[KOOSJR]",
+  "title": "Knee Injury and Osteoarthritis Outcome Score for Joint Replacement [KOOSJR]",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "82324-5",
+      "display": "Knee injury and osteoarthritis outcome score for joint replacement [KOOSJR]"
+    } ]
+  }
+}

@@ -1,0 +1,3005 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.111.12.1008",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1008",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.111.12.1008"
+  } ],
+  "version": "20170504",
+  "name": "DiagnosticStudiesDuringPregnancy",
+  "title": "Diagnostic Studies During Pregnancy",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11615-2",
+      "display": "Fetal Heart Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11616-0",
+      "display": "Fetal Heart Narrative Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11617-8",
+      "display": "Fetal Limbs Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11618-6",
+      "display": "Fetal Limbs Narrative Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11619-4",
+      "display": "Fetal Respiratory Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11620-2",
+      "display": "Fetal Respiratory Narrative Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11621-0",
+      "display": "Fetal Trunk Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11622-8",
+      "display": "Fetal Trunk Narrative Activity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11623-6",
+      "display": "Fetal Quadrant four Amniotic fluid index derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11624-4",
+      "display": "Fetal Quadrant four one Amniotic fluid index derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11625-1",
+      "display": "Fetal Quadrant three Amniotic fluid index derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11626-9",
+      "display": "Fetal Quadrant two Amniotic fluid index derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11627-7",
+      "display": "Fetal Amniotic fluid index.sum derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11628-5",
+      "display": "Fetal Head Binocular distance estimated from Biparietal diameter on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11629-3",
+      "display": "Fetal Head Binocular distance US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11630-1",
+      "display": "Fetal Biophysical profile.amniotic fluid volume US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11631-9",
+      "display": "Fetal Biophysical profile.body movement US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11632-7",
+      "display": "Fetal Biophysical profile.breathing movement US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11633-5",
+      "display": "Fetal Biophysical profile.heart rate reactivity US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11634-3",
+      "display": "Fetal Biophysical profile.sum Derived"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11635-0",
+      "display": "Fetal Biophysical profile.tone US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11641-8",
+      "display": "Fetal Mitral valve Peak A wave US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11643-4",
+      "display": "Fetal Tricuspid valve Peak A wave US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11645-9",
+      "display": "Fetal Mitral valve Peak E wave US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11647-5",
+      "display": "Fetal Tricuspid valve Peak E wave US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11649-1",
+      "display": "Fetal Mitral valve E-wave/A-wave US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11651-7",
+      "display": "Fetal Tricuspid valve E-wave/A-wave US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11654-1",
+      "display": "Fetal Cerebral artery anterior Minimal flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11656-6",
+      "display": "Fetal Cerebral artery middle Minimal flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11660-8",
+      "display": "Fetal Umbilical artery at fetus Minimal flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11661-6",
+      "display": "Fetal Umbilical artery at placenta Minimal flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11662-4",
+      "display": "Fetal Umbilical artery between fetus and placenta Minimal flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11666-5",
+      "display": "Fetal Aorta ascending Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11668-1",
+      "display": "Fetal Aorta descending Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11670-7",
+      "display": "Fetal Aortic arch Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11672-3",
+      "display": "Fetal Cerebral artery anterior Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11675-6",
+      "display": "Fetal Ductus arteriosus Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11677-2",
+      "display": "Fetal Pulmonic valve Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11679-8",
+      "display": "Fetal Left ventricular outflow tract Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11681-4",
+      "display": "Fetal Right ventricular outflow tract Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11685-5",
+      "display": "Fetal Main pulmonary artery Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11687-1",
+      "display": "Fetal Umbilical artery at fetus Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11688-9",
+      "display": "Fetal Umbilical artery at placenta Mean blood flow US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11689-7",
+      "display": "Fetal Umbilical artery between fetus and placenta Mean blood flow US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11693-9",
+      "display": "Fetal Aorta ascending Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11695-4",
+      "display": "Fetal Aorta descending Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11697-0",
+      "display": "Fetal Aortic arch Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11699-6",
+      "display": "Fetal Cerebral artery anterior Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11701-0",
+      "display": "Fetal Cerebral artery middle Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11703-6",
+      "display": "Fetal Ductus arteriosus Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11705-1",
+      "display": "Fetal Aortic valve Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11707-7",
+      "display": "Fetal Mitral valve Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11709-3",
+      "display": "Fetal Pulmonic valve Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11711-9",
+      "display": "Fetal Tricuspid valve Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11713-5",
+      "display": "Fetal Left ventricular outflow tract Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11715-0",
+      "display": "Fetal Right ventricular outflow tract Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11719-2",
+      "display": "Fetal Main pulmonary artery Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11721-8",
+      "display": "Fetal Umbilical artery at fetus Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11722-6",
+      "display": "Fetal Umbilical artery at placenta Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11723-4",
+      "display": "Fetal Umbilical artery between fetus and placenta Peak systolic flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11727-5",
+      "display": "Fetal Body weight estimated by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11728-3",
+      "display": "Fetal Body weight estimated from Abdominal circumference on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11729-1",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11730-9",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter and Femur length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11731-7",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter and Femur length and Head circumference on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11732-5",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter and Femur length and Head circumference on US by Hadlock 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11733-3",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter and Femur length and Head circumference on US by Roberts 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11734-1",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter and Femur length on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11735-8",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter and Femur length on US by Hadlock 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11736-6",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter and Femur length on US by Woo 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11737-4",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter on US by Eik-Nes 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11738-2",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11739-0",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter on US by Shepard 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11740-8",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter on US by Thurnau 1983 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11741-6",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter on US by Warsof 1977 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11742-4",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Biparietal diameter on US by Weinberger 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11743-2",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11744-0",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length and Head circumference on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11745-7",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length and Head circumference on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11746-5",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length and Head circumference on US by Hadlock 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11747-3",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length and Head circumference on US by Ott 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11748-1",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length and Head circumference on US by Vintzileos 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11749-9",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length and Head circumference on US by Weiner 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11750-7",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11751-5",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length on US by Hadlock 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11752-3",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Femur length on US by Woo 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11753-1",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Head circumference on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11754-9",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Head circumference on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11755-6",
+      "display": "Fetal Body weight estimated from Abdominal circumference and Head circumference on US by Jordaan 1983 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11756-4",
+      "display": "Fetal Body weight estimated from Abdominal circumference on US by Campbell 1975 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11757-2",
+      "display": "Fetal Body weight estimated from Abdominal circumference on US by Vintzileos 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11758-0",
+      "display": "Fetal Body weight estimated from Abdominal circumference on US by Warsof 1977 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11759-8",
+      "display": "Fetal Body weight estimated from Abdominal diameter and Biparietal diameter on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11760-6",
+      "display": "Fetal Body weight estimated from Abdominal diameter and Biparietal diameter and Femur length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11761-4",
+      "display": "Fetal Body weight estimated from Abdominal diameter and Biparietal diameter and Femur length on US by Rose 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11762-2",
+      "display": "Fetal Body weight estimated from Abdominal diameter and Biparietal diameter on US by Rose 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11763-0",
+      "display": "Fetal Body weight estimated from Abdominal diameter and Biparietal diameter on US by Vintzileos 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11764-8",
+      "display": "Fetal Body weight estimated from Abdominal diameter and Femur length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11765-5",
+      "display": "Fetal Body weight estimated from Abdominal diameter and Femur length on US by Rose 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11766-3",
+      "display": "Fetal Body weight percentile Comparison of estimated fetal weight with standard population distribution at same estimated gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11767-1",
+      "display": "Body weight percentile Comparison of estimated fetal weight with standard population distribution at same estimated gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11768-9",
+      "display": "Fetal Body weight percentile range Categorization by comparison with standards"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11775-4",
+      "display": "Fetal body weight estimation formula Narrative [Bibliographic Citation] Citation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11777-0",
+      "display": "Fetal Abdomen [Area] Cross section derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11782-0",
+      "display": "Fetal Bowel Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11790-3",
+      "display": "Fetal Colon lumen Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11792-9",
+      "display": "Fetal Eye Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11794-5",
+      "display": "Fetal Aortic valve Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11796-0",
+      "display": "Fetal Mitral valve Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11798-6",
+      "display": "Fetal Pulmonic valve Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11800-0",
+      "display": "Fetal Tricuspid valve Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11802-6",
+      "display": "Fetal Left ventricular outflow tract Diameter US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11804-2",
+      "display": "Fetal Right ventricular outflow tract Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11806-7",
+      "display": "Fetal Pulmonary artery Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11808-3",
+      "display": "Fetal Renal pelvis - left Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11810-9",
+      "display": "Fetal Renal pelvis - right Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11812-5",
+      "display": "Fetal Small bowel Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11814-1",
+      "display": "Fetal Umbilical vein Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11815-8",
+      "display": "Fetal Urinary bladder Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11816-6",
+      "display": "Fetal Yolk sac Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11817-4",
+      "display": "Fetal Amniotic fluid space Diameter largest pocket US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11818-2",
+      "display": "Fetal Abdomen Diameter.anterior-posterior US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11819-0",
+      "display": "Fetal Thorax Diameter.anterior-posterior US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11820-8",
+      "display": "Fetal Head Diameter.biparietal US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11821-6",
+      "display": "Fetal Head Mean biparietal diameter Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11822-4",
+      "display": "Fetal Head Mean biparietal diameter estimated from Cerebellar diameter (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11823-2",
+      "display": "Fetal Head Diameter.biparietal/Diameter.occipital derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11824-0",
+      "display": "Fetal Head Diameter.BPD.area-corrected derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11825-7",
+      "display": "Fetal Kidney - left Hilum-cortex diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11827-3",
+      "display": "Fetal Kidney - right Hilum-cortex diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11831-5",
+      "display": "Fetal Kidney Mean width Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11832-3",
+      "display": "Fetal Amniotic fluid space Maximum diameter largest pocket US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11833-1",
+      "display": "Fetal Amniotic fluid space Mean diameter largest pocket US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11834-9",
+      "display": "Fetal Kidney - left Longitudinal diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11836-4",
+      "display": "Fetal Kidney - right Longitudinal diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11838-0",
+      "display": "Fetal Liver Longitudinal diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11843-0",
+      "display": "Fetal Kidney Mean longitudinal diameter Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11844-8",
+      "display": "Fetal Liver Mean longitudinal diameter Estimated from abdominal circumference"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11845-5",
+      "display": "Fetal Liver Mean longitudinal diameter Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11849-7",
+      "display": "Fetal Abdomen Mean diameter Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11851-3",
+      "display": "Fetal Head Diameter.occipito-frontal US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11852-1",
+      "display": "Fetal Head Diameter.outer to outer US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11853-9",
+      "display": "Fetal Kidney - left Thickeness US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11855-4",
+      "display": "Fetal Kidney - right Thickeness US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11860-4",
+      "display": "Fetal Cisterna magna Diameter.sagittal US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11861-2",
+      "display": "Fetal Cisterna magna Mean sagittal diameter Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11862-0",
+      "display": "Fetal Abdomen Diameter transverse US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11863-8",
+      "display": "Fetal Cerebellum Diameter transverse US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11864-6",
+      "display": "Fetal Thorax Diameter transverse US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11866-1",
+      "display": "Fetal Cerebellum Mean transverse diameter Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11868-7",
+      "display": "Fetal body weight estimation formula Narrative [Equation] Equation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11871-1",
+      "display": "Fetal Femur length/Abdominal circumference derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11872-9",
+      "display": "Fetal Femur length/Biparietal diameter derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11873-7",
+      "display": "Fetal Femur length/Head circumference derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11874-5",
+      "display": "Fetal position palpation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11875-2",
+      "display": "Fetal position US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11876-0",
+      "display": "Fetal presentation palpation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11877-8",
+      "display": "Fetal presentation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11878-6",
+      "display": "Number of fetuses by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11882-8",
+      "display": "Fetal Sex US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11883-6",
+      "display": "Fetal Narrative Sex US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11884-4",
+      "display": "Gestational age Estimated"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11885-1",
+      "display": "Gestational age Estimated from last menstrual period"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11886-9",
+      "display": "Gestational age Estimated from ovulation date"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11887-7",
+      "display": "Gestational age Estimated from selected delivery date"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11888-5",
+      "display": "Gestational age US composite estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11889-3",
+      "display": "Gestational age estimated from Abdominal circumference on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11890-1",
+      "display": "Gestational age estimated from Abdominal circumference on US by Campbell 1975 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11891-9",
+      "display": "Gestational age estimated from Abdominal circumference on US by Hadlock 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11892-7",
+      "display": "Gestational age estimated from Abdominal circumference on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11893-5",
+      "display": "Gestational age estimated from Abdominal circumference on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11894-3",
+      "display": "Gestational age estimated from area corrected Biparietal circumference (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11895-0",
+      "display": "Gestational age estimated from Binocular distance on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11896-8",
+      "display": "Gestational age estimated from Binocular distance on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11897-6",
+      "display": "Gestational age estimated from Biparietal circumference (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11898-4",
+      "display": "Gestational age estimated from Biparietal diameter on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11899-2",
+      "display": "Gestational age estimated from Biparietal diameter on US by Campbell 1975 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11900-8",
+      "display": "Gestational age estimated from Biparietal diameter on US by Doubilet 1993 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11901-6",
+      "display": "Gestational age estimated from Biparietal diameter on US by Hadlock 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11902-4",
+      "display": "Gestational age estimated from Biparietal diameter on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11903-2",
+      "display": "Gestational age estimated from Biparietal diameter on US by Hansmann 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11904-0",
+      "display": "Gestational age estimated from Biparietal diameter on US by Hobbins 1983 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11905-7",
+      "display": "Gestational age estimated from Biparietal diameter on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11906-5",
+      "display": "Gestational age estimated from Biparietal diameter on US by Kurtz 1980 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11907-3",
+      "display": "Gestational age estimated from Biparietal diameter on US by Sabbagha 1978 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11908-1",
+      "display": "Gestational age estimated from Cerebellar diameter by method of Goldstein 1987 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11909-9",
+      "display": "Gestational age estimated from Crown rump length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11910-7",
+      "display": "Gestational age estimated from Crown rump length on US by Hadlock 1992 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11911-5",
+      "display": "Gestational age estimated from Crown rump length on US by Hansmann 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11912-3",
+      "display": "Gestational age estimated from Crown rump length on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11913-1",
+      "display": "Gestational age estimated from Crown rump length on US by Nelson 1981 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11914-9",
+      "display": "Gestational age estimated from Crown rump length on US by Robinson 1975 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11915-6",
+      "display": "Gestational age estimated from Crown rump length on US by Yeh 1988 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11916-4",
+      "display": "Gestational age estimated from Fibula length (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11917-2",
+      "display": "Gestational age estimated from Fibula length by method of Jeanty 1984 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11918-0",
+      "display": "Gestational age estimated from Fibula length by method of Merz 1987 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11919-8",
+      "display": "Gestational age estimated from Femur length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11920-6",
+      "display": "Gestational age estimated from Femur length on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11921-4",
+      "display": "Gestational age estimated from Femur length on US by Hansmann 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11922-2",
+      "display": "Gestational age estimated from Femur length on US by Hohler 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11923-0",
+      "display": "Gestational age estimated from Femur length on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11924-8",
+      "display": "Gestational age estimated from Femur length on US by Merz 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11925-5",
+      "display": "Gestational age estimated from Femur length on US by Obrien 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11926-3",
+      "display": "Gestational age estimated from Foot length on US by Mercer 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11927-1",
+      "display": "Gestational age estimated from Gestational sac diameter on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11928-9",
+      "display": "Gestational age estimated from Gestational sac diameter on US by Hellman 1969 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11929-7",
+      "display": "Gestational age estimated from Gestational sac diameter on US by Rempen 1991 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11930-5",
+      "display": "Gestational age estimated from Head circumference on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11931-3",
+      "display": "Gestational age estimated from Head circumference on US by Hadlock 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11932-1",
+      "display": "Gestational age estimated from Head circumference on US by Hadlock 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11933-9",
+      "display": "Gestational age estimated from Head circumference on US by Hoffbauer 1979 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11934-7",
+      "display": "Gestational age estimated from Head circumference on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11935-4",
+      "display": "Gestational age estimated from Humerus length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11936-2",
+      "display": "Gestational age estimated from Humerus length on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11937-0",
+      "display": "Gestational age estimated from Humerus length on US by Merz 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11938-8",
+      "display": "Gestational age estimated from Radius length (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11939-6",
+      "display": "Gestational age estimated from Radius length by method of Merz 1987 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11940-4",
+      "display": "Gestational age estimated from Tibia length on US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11941-2",
+      "display": "Gestational age estimated from Tibia length on US by Jeanty 1984 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11942-0",
+      "display": "Gestational age estimated from Tibia length on US by Merz 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11943-8",
+      "display": "Gestational age estimated from Ulna length (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11944-6",
+      "display": "Gestational age estimated from Ulna length by method of Jeanty 1984 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11945-3",
+      "display": "Gestational age estimated from Ulna length by method of Merz 1987 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11946-1",
+      "display": "Fetal Placenta Grade US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11947-9",
+      "display": "Head circumference/Abdominal circumference derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11948-7",
+      "display": "Fetal Heart rate US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11949-5",
+      "display": "Fetal Identification criteria US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11950-3",
+      "display": "Fetal Narrative Identification criteria US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11951-1",
+      "display": "Fetal [Identifier] Identifier"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11952-9",
+      "display": "Fetal Umbilical cord.placenta Narrative Insertion site US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11954-5",
+      "display": "Fetal Kidney length/Abdominal circumference derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11956-0",
+      "display": "Fetal Head Lateral ventricular body width/Hemispheric width derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11957-8",
+      "display": "Fetal Crown Rump length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11962-8",
+      "display": "Fetal Clavicle diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11963-6",
+      "display": "Fetal Femur diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11964-4",
+      "display": "Fetal Fibula diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11965-1",
+      "display": "Fetal Foot [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11966-9",
+      "display": "Fetal Humerus diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11967-7",
+      "display": "Fetal Radius diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11968-5",
+      "display": "Fetal Tibia diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11969-3",
+      "display": "Fetal Ulna diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11970-1",
+      "display": "Fetal Femur diaphysis [Length] mean Estimated from gestational age.Merz. 1987"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11971-9",
+      "display": "Fetal Fibula diaphysis [Length] mean Estimated from gestational age.Merz. 1987"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11972-7",
+      "display": "Fetal Humerus diaphysis [Length] mean Estimated from gestational age.Merz. 1987"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11973-5",
+      "display": "Fetal Radius diaphysis [Length] mean Estimated from gestational age.Merz. 1987"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11974-3",
+      "display": "Fetal Tibia diaphysis [Length] mean Estimated from gestational age.Merz. 1987"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11975-0",
+      "display": "Fetal Ulna diaphysis [Length] mean Estimated from gestational age.Merz. 1987"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11978-4",
+      "display": "Fetal Abdomen Circumference derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11979-2",
+      "display": "Fetal Abdomen Circumference US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11980-0",
+      "display": "Fetal Abdomen Circumference measured by ellipse overlay (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11981-8",
+      "display": "Fetal Abdomen Circumference US.traced"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11982-6",
+      "display": "Fetal Head Circumference derived from occipital-frontal diameter and outer-outer transaxial diameter (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11983-4",
+      "display": "Fetal Head Circumference derived from occipital-frontal diameter and outer-inner biparietal diameter (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11984-2",
+      "display": "Fetal Head Circumference US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11985-9",
+      "display": "Fetal Head Circumference measured by ellipse overlay (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11986-7",
+      "display": "Fetal Head Circumference US.traced"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11987-5",
+      "display": "Fetal Thorax Circumference derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11988-3",
+      "display": "Fetal Thorax Circumference US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11989-1",
+      "display": "Fetal Thorax Circumference measured by ellipse overlay (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11990-9",
+      "display": "Fetal Thorax Circumference US.traced"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11991-7",
+      "display": "Fetal Abdomen Mean perimeter Estimated from gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11992-5",
+      "display": "Fetal Heart position US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11993-3",
+      "display": "Fetal Narrative Heart position US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11997-4",
+      "display": "Fetal Cerebral artery anterior Pulsatility index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11999-0",
+      "display": "Fetal Cerebral artery middle Pulsatility index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12003-0",
+      "display": "Fetal Umbilical artery at fetus Pulsatility index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12004-8",
+      "display": "Fetal Umbilical artery at placenta Pulsatility index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12005-5",
+      "display": "Fetal Umbilical artery between fetus and placenta Pulsatility index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12009-7",
+      "display": "Fetal Heart R-R duration US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12012-1",
+      "display": "Fetal Cerebral artery anterior Resistivity index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12018-8",
+      "display": "Fetal Umbilical artery at fetus Resistivity index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12019-6",
+      "display": "Fetal Umbilical artery at placenta Resistivity index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12020-4",
+      "display": "Fetal Umbilical artery between fetus and placenta Resistivity index US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12028-7",
+      "display": "Fetal Abdomen Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12029-5",
+      "display": "Fetal Abdomen Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12030-3",
+      "display": "Fetal Abdominal wall Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12031-1",
+      "display": "Fetal Abdominal wall Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12032-9",
+      "display": "Fetal Aorta ascending Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12033-7",
+      "display": "Fetal Aorta ascending Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12034-5",
+      "display": "Fetal Aorta descending Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12035-2",
+      "display": "Fetal Aorta descending Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12036-0",
+      "display": "Fetal Aorta Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12037-8",
+      "display": "Fetal Aorta Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12038-6",
+      "display": "Fetal Aortic arch Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12039-4",
+      "display": "Fetal Aortic arch Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12040-2",
+      "display": "Fetal Cerebellum Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12041-0",
+      "display": "Fetal Cerebellum Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12042-8",
+      "display": "Fetal Cerebrum Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12043-6",
+      "display": "Fetal Cerebrum Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12047-7",
+      "display": "Fetal Colon Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12048-5",
+      "display": "Fetal Colon Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12049-3",
+      "display": "Fetal Cranium Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12050-1",
+      "display": "Fetal Cranium Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12051-9",
+      "display": "Fetal Diaphragm Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12052-7",
+      "display": "Fetal Diaphragm Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12053-5",
+      "display": "Fetal ductal arch Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12054-3",
+      "display": "Fetal ductal arch Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12055-0",
+      "display": "Fetal Face Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12056-8",
+      "display": "Fetal Face Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12057-6",
+      "display": "Fetal Choroid plexus Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12058-4",
+      "display": "Fetal Choroid plexus Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12059-2",
+      "display": "Fetal Fourth ventricle Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12060-0",
+      "display": "Fetal Fourth ventricle Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12061-8",
+      "display": "Fetal Intracranial anatomy Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12062-6",
+      "display": "Fetal Intracranial anatomy Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12063-4",
+      "display": "Fetal Lateral cerebral ventricles Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12064-2",
+      "display": "Fetal Lateral cerebral ventricles Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12065-9",
+      "display": "Fetal Posterior fossa Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12066-7",
+      "display": "Fetal Posterior fossa Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12067-5",
+      "display": "Fetal Head Third Ventricle Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12068-3",
+      "display": "Fetal Head Third Ventricle Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12069-1",
+      "display": "Fetal Head Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12070-9",
+      "display": "Fetal Head Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12071-7",
+      "display": "Fetal Aortic valve Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12072-5",
+      "display": "Fetal Aortic valve Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12073-3",
+      "display": "Fetal Atrium Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12074-1",
+      "display": "Fetal Atrium Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12075-8",
+      "display": "Fetal Heart chambers Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12076-6",
+      "display": "Fetal Heart chambers Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12077-4",
+      "display": "Fetal Heart great vessels Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12078-2",
+      "display": "Fetal Heart great vessels Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12079-0",
+      "display": "Fetal Interventricular septum Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12080-8",
+      "display": "Fetal Interventricular septum Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12081-6",
+      "display": "Fetal Mitral valve Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12082-4",
+      "display": "Fetal Mitral valve Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12083-2",
+      "display": "Fetal Pulmonic valve Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12084-0",
+      "display": "Fetal Tricuspid valve Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12085-7",
+      "display": "Fetal Tricuspid valve Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12086-5",
+      "display": "Fetal Heart valves Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12087-3",
+      "display": "Fetal Heart valves Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12088-1",
+      "display": "Fetal Left ventricular outflow tract Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12089-9",
+      "display": "Fetal Left ventricular outflow tract Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12090-7",
+      "display": "Fetal Right ventricular outflow tract Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12091-5",
+      "display": "Fetal Right ventricular outflow tract Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12092-3",
+      "display": "Fetal Intestine Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12093-1",
+      "display": "Fetal Intestine Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12094-9",
+      "display": "Fetal Kidney - left Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12095-6",
+      "display": "Fetal Kidney - left Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12096-4",
+      "display": "Fetal Kidney - right Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12097-2",
+      "display": "Fetal Kidney - right Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12098-0",
+      "display": "Fetal Kidney Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12099-8",
+      "display": "Fetal Kidney Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12100-4",
+      "display": "Fetal Limbs Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12101-2",
+      "display": "Fetal Limbs Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12102-0",
+      "display": "Fetal Nuchal fold Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12103-8",
+      "display": "Fetal Nuchal fold Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12104-6",
+      "display": "Fetal Pulmonary artery Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12105-3",
+      "display": "Fetal Pulmonary artery Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12106-1",
+      "display": "Fetal Pulmonary vein Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12107-9",
+      "display": "Fetal Pulmonary vein Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12108-7",
+      "display": "Fetal Small bowel Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12109-5",
+      "display": "Fetal Small bowel Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12110-3",
+      "display": "Fetal Spine Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12111-1",
+      "display": "Fetal Spine Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12112-9",
+      "display": "Fetal Stomach Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12113-7",
+      "display": "Fetal Stomach Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12114-5",
+      "display": "Fetal Thorax Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12115-2",
+      "display": "Fetal Thorax Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12116-0",
+      "display": "Fetal Umbilical cord Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12117-8",
+      "display": "Fetal Umbilical cord Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12118-6",
+      "display": "Fetal Urinary bladder Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12119-4",
+      "display": "Fetal Urinary bladder Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12120-2",
+      "display": "Fetal Inferior vena cava Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12121-0",
+      "display": "Fetal Inferior vena cava Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12122-8",
+      "display": "Fetal Superior vena cava Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12123-6",
+      "display": "Fetal Superior vena cava Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12124-4",
+      "display": "Fetal Vena cava Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12125-1",
+      "display": "Fetal Vena cava Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12128-5",
+      "display": "Fetal Yolk sac Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12129-3",
+      "display": "Fetal [Interpretation] Study observation general US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12130-1",
+      "display": "Fetal Narrative [Interpretation] Study observation general US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12133-5",
+      "display": "Fetal Cerebral artery anterior Systolic flow/Diastolic flow US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12135-0",
+      "display": "Fetal Cerebral artery middle Systolic flow/Diastolic flow US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12139-2",
+      "display": "Fetal Umbilical artery at fetus Systolic flow/Diastolic flow US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12140-0",
+      "display": "Fetal Umbilical artery at placenta Systolic flow/Diastolic flow US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12141-8",
+      "display": "Fetal Umbilical artery between fetus and placenta Systolic flow/Diastolic flow US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12146-7",
+      "display": "Fetal Nuchal fold Thickness US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12147-5",
+      "display": "Fetal Placenta Thickness US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12148-3",
+      "display": "Fetal Interventricular septum Thickness diastolic US.M-mode+Measured"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12149-1",
+      "display": "Fetal Interventricular septum Thickness diastolic Measured by real time two dimension US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12150-9",
+      "display": "Fetal Left ventricular posterior wall Thickness diastolic US.M-mode+Measured"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12151-7",
+      "display": "Fetal Left ventricular posterior wall Thickness diastolic Measured by real time two dimension US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12152-5",
+      "display": "Fetal Interventricular septum Thickness.systolic US.M-mode+Measured"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12153-3",
+      "display": "Fetal Interventricular septum Thickness.systolic Measured by real time two dimension US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12154-1",
+      "display": "Fetal Left ventricular posterior wall Thickness.systolic US.M-mode+Measured"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12155-8",
+      "display": "Fetal Left ventricular posterior wall Thickness.systolic Measured by real time two dimension US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12162-4",
+      "display": "Fetal Kidney - left Volume derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12163-2",
+      "display": "Fetal Kidney - right Volume derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12166-5",
+      "display": "Fetal Yolk sac Volume US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12167-3",
+      "display": "Fetal Amniotic fluid space [Interpretation] Volume.amniotic fluid US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12168-1",
+      "display": "Fetal Urinary bladder Volume post void US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12169-9",
+      "display": "Fetal Urinary bladder Volume.pre void US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12170-7",
+      "display": "Fetal Head Hemisphere width US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12171-5",
+      "display": "Fetal Lateral cerebral ventricles Transverse width US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18185-9",
+      "display": "Gestational age"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18847-4",
+      "display": "Narrative Fetal position palpation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18848-2",
+      "display": "Narrative Fetal position US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18849-0",
+      "display": "Narrative Fetal presentation palpation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18850-8",
+      "display": "Narrative Fetal presentation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18851-6",
+      "display": "Fetal Placenta Grade US (narrative)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21299-3",
+      "display": "Gestational age method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "24537-3",
+      "display": "US Guidance for aspiration of amniotic fluid of Uterus"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "30707-4",
+      "display": "Fetal Narrative [Interpretation] Study observation.general.follow-up US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "30708-2",
+      "display": "Fetal Narrative [Interpretation] Study observation.general.limited US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33068-8",
+      "display": "Fetal Thoracic area US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33069-6",
+      "display": "Fetal nuchal translucency measured by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33070-4",
+      "display": "Fetal Orbit - bilateral Diameter.inner orbital US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33071-2",
+      "display": "Fetal Spine Length from T6 to L3 US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33072-0",
+      "display": "Gestational age estimated from Abdominal circumference on US by Australian Society of Ultrasound Medicine 2000 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33073-8",
+      "display": "Gestational age estimated from Abdominal circumference on US by Hansmann 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33074-6",
+      "display": "Gestational age estimated from Abdominal circumference on US by Lessoway 1998 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33075-3",
+      "display": "Gestational age estimated from Abdominal circumference on US by Merz 1988 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33076-1",
+      "display": "Gestational age estimated from Abdominal circumference on US by Shinozuka 1996 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33077-9",
+      "display": "Gestational age estimated from Anterior-posterior diameter of the abdomen by method of Lessoway 1998 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33078-7",
+      "display": "Gestational age estimated from AXT by method of Shinozuka 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33079-5",
+      "display": "Gestational age estimated from Biparietal diameter on US by Australian Society of Ultrasound Medicine 1989 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33080-3",
+      "display": "Gestational age estimated from Biparietal diameter on US by Lessoway 1998 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33081-1",
+      "display": "Gestational age estimated from Biparietal diameter on US by Merz 1988 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33082-9",
+      "display": "Gestational age estimated from Biparietal diameter on US by Osaka 1989 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33083-7",
+      "display": "Gestational age estimated from Biparietal diameter on US by Rempen 1991 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33084-5",
+      "display": "Gestational age estimated from Biparietal diameter on US by Shinozuka 1996 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33085-2",
+      "display": "Gestational age estimated from Biparietal diameter on US by Tokyo 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33086-0",
+      "display": "Gestational age estimated from Outer-Inner Biparietal diameter on US by Chitty 1997 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33087-8",
+      "display": "Gestational age estimated from Outer-Outer Biparietal diameter on US by Chitty 1997 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33088-6",
+      "display": "Gestational age estimated from clavicle length by method of Yarkoni 1985 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33089-4",
+      "display": "Gestational age estimated from Crown rump length on US by Australian Society of Ultrasound Medicine 1991 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33090-2",
+      "display": "Gestational age estimated from Crown rump length on US by Australian Society of Ultrasound Medicine 2000 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33091-0",
+      "display": "Gestational age estimated from Crown rump length on US by Daya 1993 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33092-8",
+      "display": "Gestational age estimated from Crown rump length on US by Jeanty 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33093-6",
+      "display": "Gestational age estimated from Crown rump length on US by Osaka 1989 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33094-4",
+      "display": "Gestational age estimated from Crown rump length on US by Rempen 1991 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33095-1",
+      "display": "Gestational age estimated from Crown rump length on US by Shinozuka 1996 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33096-9",
+      "display": "Gestational age estimated from Crown rump length on US by Tokyo 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33097-7",
+      "display": "Gestational age estimated from Fibula length by method of Jeanty 1983 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33098-5",
+      "display": "Gestational age estimated from Femur length on US by Chitty 1997 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33099-3",
+      "display": "Gestational age estimated from Femur length on US by Jeanty 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33100-9",
+      "display": "Gestational age estimated from Femur length on US by Lessoway 1998 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33101-7",
+      "display": "Gestational age estimated from Femur length on US by Osaka 1989 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33102-5",
+      "display": "Gestational age estimated from Femur length on US by Shinozuka 1996 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33103-3",
+      "display": "Gestational age estimated from Femur length on US by Tokyo 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33104-1",
+      "display": "Gestational age estimated from Gestational sac diameter on US by Daya 1991 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33105-8",
+      "display": "Gestational age estimated from Gestational sac length on US by Hansmann 1979 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33106-6",
+      "display": "Gestational age estimated from Gestational sac diameter on US by Hansmann 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33107-4",
+      "display": "Gestational age estimated from Gestational sac length on US by Nyberg 1992 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33108-2",
+      "display": "Gestational age estimated from Gestational sac diameter on US by Tokyo 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33109-0",
+      "display": "Gestational age estimated from Head circumference on US by Australian Society of Ultrasound Medicine 2000 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33110-8",
+      "display": "Gestational age estimated from Head circumference measured on US by Chitty 1997 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33111-6",
+      "display": "Gestational age estimated from Head circumference derived on US by Chitty 1997 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33112-4",
+      "display": "Gestational age estimated from Head circumference on US by Hansmann 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33113-2",
+      "display": "Gestational age estimated from Head circumference on US by Jeanty 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33114-0",
+      "display": "Gestational age estimated from Head circumference on US by Lessoway 1998 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33115-7",
+      "display": "Gestational age estimated from Head circumference on US by Merz 1988 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33116-5",
+      "display": "Gestational age estimated from Humerus length on US by Australian Society of Ultrasound Medicine 2000 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33117-3",
+      "display": "Gestational age estimated from Humerus length on US by Osaka 1989 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33118-1",
+      "display": "Gestational age estimated from length of vertebra by method of Tokyo 1986 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33119-9",
+      "display": "Gestational age estimated from Occipital-frontal diameter on US by Australian Society of Ultrasound Medicine 2000 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33120-7",
+      "display": "Gestational age estimated from Occipital-frontal diameter on US by Hansmann 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33121-5",
+      "display": "Gestational age estimated from Occipital-frontal diameter on US by Lessoway 1998 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33122-3",
+      "display": "Gestational age estimated from Inter ocular distance on US by Mayden 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33123-1",
+      "display": "Gestational age estimated from Inter ocular distance on US by Trout 1994 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33124-9",
+      "display": "Gestational age estimated from Outer orbital distance on US by Mayden 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33125-6",
+      "display": "Gestational age estimated from Outer orbital distance on US by Trout 1994 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33126-4",
+      "display": "Gestational age estimated from Radius length by method of Jeanty 1983 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33127-2",
+      "display": "Gestational age estimated from Spine length by method of Tokyo 1989 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33128-0",
+      "display": "Gestational age estimated from Transverse abdominal diameter on US by Eriksen 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33129-8",
+      "display": "Gestational age estimated from Transverse abdominal diameter on US by Hansmann 1979 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33130-6",
+      "display": "Gestational age estimated from Transverse abdominal diameter on US by Tokyo 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33131-4",
+      "display": "Gestational age estimated from Thoracic circumference on US by Chitkara 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33132-2",
+      "display": "Gestational age estimated from Transverse cerebral diameter on US by Chitty 1994 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33133-0",
+      "display": "Gestational age estimated from Transverse cerebral diameter on US by Goldstein 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33134-8",
+      "display": "Gestational age estimated from Transverse cerebral diameter on US by Hill 1990 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33135-5",
+      "display": "Gestational age estimated from Thoracic circumference on US by Nimrod 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33136-3",
+      "display": "Gestational age estimated from Transverse abdominal diameter on US by Hansmann 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33137-1",
+      "display": "Gestational age estimated from Transverse abdominal diameter on US by Lessoway 1998 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33138-9",
+      "display": "Gestational age estimated from Fetal trunk area by method of Osaka 1989 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33139-7",
+      "display": "Fetal Body weight estimated from Biparietal diameter and Transverse thoracic diameter on US by Hansmann 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33140-5",
+      "display": "Fetal Body weight estimated from Biparietal diameter and Fetal trunk area and Femur length on US by Osaka 1990 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33141-3",
+      "display": "Fetal weight estimated by method of Shinozuka formula 1 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33142-1",
+      "display": "Fetal weight estimated by method of Shinozuka formula 2 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33143-9",
+      "display": "Fetal weight estimated by method of Shinozuka formula 3 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33144-7",
+      "display": "Fetal Body weight estimated on US by Tokyo 1987 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33145-4",
+      "display": "Fetal Abdomen Circumference estimated from gestational age by method of Australian Society of Ultrasound Medicine 2000 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33146-2",
+      "display": "Fetal Abdomen Circumference estimated from gestational age by method of Hadlock 1984 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33147-0",
+      "display": "Fetal Abdomen Circumference measured by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33148-8",
+      "display": "Fetal Abdomen Circumference estimated from gestational age by method of Merz 1988 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33149-6",
+      "display": "Fetal Abdomen Circumference estimated from gestational age by method of Shinozuka 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33150-4",
+      "display": "Fetal Abdomen Diameter product estimated from gestational age by method of Shinozuka 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33151-2",
+      "display": "Fetal Head Diameter.biparietal estimated from gestational age by method of Australian Society of Ultrasound Medicine 2000 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33152-0",
+      "display": "Fetal Head Diameter.biparietal outer to outer estimated from gestational age by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33153-8",
+      "display": "Fetal Head Diameter.biparietal estimated from gestational age by method of Jeanty 1982 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33154-6",
+      "display": "Fetal Head Diameter.biparietal estimated from gestational age by method of Merz 1988 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33155-3",
+      "display": "Fetal Head Diameter.biparietal estimated from gestational age by method of Rempen 1991 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33156-1",
+      "display": "Fetal Head Diameter.biparietal estimated from gestational age by method of Shinozuka 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33157-9",
+      "display": "Fetal Head Diameter.biparietal/Diameter.occipital estimated from gestational age by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33158-7",
+      "display": "Fetal Head Diameter.biparietal/Diameter.occipital estimated from gestational age by method of Hadlock 1981 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33159-5",
+      "display": "Fetal Crown Rump length estimated from gestational age by method of Australian Society of Ultrasound Medicine 2000 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33160-3",
+      "display": "Fetal Crown Rump length estimated from gestational age by method of Rempen 1991 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33161-1",
+      "display": "Fetal Crown Rump length estimated from gestational age by method of Shinozuka 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33162-9",
+      "display": "Fetal Body weight US+Estimated from Hadlock 1991"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33163-7",
+      "display": "Fetal weight estimated from gestational age by method of Hansmann 1986 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33164-5",
+      "display": "Fetal Fibula diaphysis [Length] estimated from gestational age by method of Jeanty 1983 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33165-2",
+      "display": "Fetal Femur diaphysis [Length] estimated from gestational age by method of Australian Society of Ultrasound Medicine 2000 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33166-0",
+      "display": "Fetal Femur diaphysis [Length] estimated from gestational age by method of Hadlock 1984 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33167-8",
+      "display": "Fetal Femur diaphysis [Length] estimated from gestational age by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33168-6",
+      "display": "Fetal Femur diaphysis [Length] estimated from gestational age by method of Jeanty 1982 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33169-4",
+      "display": "Fetal Femur diaphysis [Length] estimated from gestational age by method of Merz 1988 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33170-2",
+      "display": "Fetal Femur diaphysis [Length] estimated from gestational age by method of Shinozuka 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33172-8",
+      "display": "Fetal Head Circumference estimated from gestational age by method of Australian Society of Ultrasound Medicine 2000 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33173-6",
+      "display": "Fetal Head Circumference estimated from gestational age by method of Hadlock 1984 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33174-4",
+      "display": "Fetal Head Circumference estimated from gestational age by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33175-1",
+      "display": "Fetal Head Circumference estimated from gestational age by method of Jeanty 1982 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33176-9",
+      "display": "Fetal Head Circumference estimated from gestational age by method of Merz 1988 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33177-7",
+      "display": "Fetal Humerus diaphysis [Length] estimated from gestational age by method of Australian Society of Ultrasound Medicine 2000 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33178-5",
+      "display": "Occipital frontal diameter estimated from gestational age by method of Australian Society of Ultrasound Medicine 2000 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33179-3",
+      "display": "Occipital frontal diameter estimated from gestational age by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33180-1",
+      "display": "Fetal Radius diaphysis [Length] estimated from gestational age by method of Jeanty 1983 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33181-9",
+      "display": "Fetal Cerebellum Diameter transverse estimated from gestational age by method of Goldstein 1987 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33184-3",
+      "display": "Fetal body weight growth percentile estimated from gestational age by method of Williams 1982 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33185-0",
+      "display": "Fetal body weight growth percentile estimated from gestational age by method of Alexander 1996 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33186-8",
+      "display": "Fetal body weight growth percentile by method of Arbuckle 1993 male singleton (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33187-6",
+      "display": "Fetal body weight growth percentile by method of Arbuckle 1993 female singleton (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33188-4",
+      "display": "Fetal body weight growth percentile by method of Arbuckle 1993 female twins (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33189-2",
+      "display": "Fetal body weight growth percentile estimated from gestational age by method of Brenner 1976 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33190-0",
+      "display": "Fetal body weight growth percentile estimated from gestational age by method of Hadlock 1985 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33191-8",
+      "display": "Fetal Thorax Diameter product derived by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33196-7",
+      "display": "Fetal Lateral cerebral ventricles Posterior horn width US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33197-5",
+      "display": "Fetal Lateral cerebral ventricles Anterior horn width US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33198-3",
+      "display": "Fetal Head Diameter.biparietal estimated from gestational age by method of Hadlock 1984 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33199-1",
+      "display": "Fetal body weight growth percentile by method of Arbuckle 1993 male twins (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33537-2",
+      "display": "Gestational age estimated from Abdominal circumference on US by Jeanty 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33538-0",
+      "display": "Gestational age estimated from Biparietal diameter on US by Hansmann 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33539-8",
+      "display": "Gestational age estimated from Biparietal diameter on US by Jeanty 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33540-6",
+      "display": "Gestational age estimated from Crown rump length on US by Hansmann 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33541-4",
+      "display": "Gestational age estimated from Femur length on US by Hansmann 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33542-2",
+      "display": "Gestational age Estimated from FL.Merz 1988"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33543-0",
+      "display": "Gestational age estimated from Head circumference on US by Hansmann 1986 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33544-8",
+      "display": "Gestational age estimated from Occipital-frontal diameter on US by Hansmann 1985 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33545-5",
+      "display": "Gestational age estimated from Binocular distance on US by Jeanty 1982 method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33546-3",
+      "display": "Fetal Abdomen Circumference derived by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "33556-2",
+      "display": "Fetal Head Diameter.biparietal outer to inner estimated from gestational age by method of Chitty 1994 (US)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42451-5",
+      "display": "Fetal Narrative [Interpretation] Study observation.general transvaginal 1st trimester US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42452-3",
+      "display": "Fetal Narrative [Interpretation] Study observation.general 1st trimester US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42454-9",
+      "display": "Fetal Narrative [Interpretation] Study observation.general 3rd trimester US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42464-8",
+      "display": "Fetal Narrative [Interpretation] Study observation.general 1st trimester, multiple fetuses US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42465-5",
+      "display": "Fetal Narrative [Interpretation] Study observation.general 2nd trimester, multiple fetuses US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42466-3",
+      "display": "Fetal Narrative [Interpretation] Study observation.general 3rd trimester, multiple fetuses US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42467-1",
+      "display": "Fetal Narrative [Interpretation] Study observation.general.limited, multiple fetuses US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "42479-6",
+      "display": "Fetal Narrative [Interpretation] Study observation general, multiple fetuses US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49035-9",
+      "display": "Fetal Nuchal fold [Multiple of the median] Thickness US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49051-6",
+      "display": "Gestational age in weeks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49052-4",
+      "display": "Gestational age in days"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49508-5",
+      "display": "Fetal Narrative [Interpretation] Study observation general US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49513-5",
+      "display": "Fetal Abdomen Narrative Study observation, multiple fetuses US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53655-7",
+      "display": "Fetal Heart Diameter transverse US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53656-5",
+      "display": "Fetal Heart Diameter.anterior-posterior US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53657-3",
+      "display": "Fetal Heart Circumference US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53658-1",
+      "display": "Fetal Aorta Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53659-9",
+      "display": "Fetal Cerebral artery middle Mean blood flow velocity US.doppler"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53660-7",
+      "display": "Fetal Heart Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53667-2",
+      "display": "Method of best overall fetal weight estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53668-0",
+      "display": "Fetal Ear - right Maximum length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53669-8",
+      "display": "Fetal Right eye Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53670-6",
+      "display": "Fetal Mandible Maximum length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53671-4",
+      "display": "Fetal Lung - left Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53672-2",
+      "display": "Fetal Lung - right Diameter US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53673-0",
+      "display": "Fetal Right ventricle Diameter during diastole US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53674-8",
+      "display": "Fetal Finger fifth - right Length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53675-5",
+      "display": "Fetal Scapula - left Maximum length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53676-3",
+      "display": "Fetal Scapula - right Maximum length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53677-1",
+      "display": "Fetal Clavicle.diaphysis - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53678-9",
+      "display": "Fetal Tibia diaphysis - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53679-7",
+      "display": "Fetal Fibula.diaphysis - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53680-5",
+      "display": "Fetal Lateral cerebral ventricle - right Transverse width US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53681-3",
+      "display": "Fetal Foot - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53682-1",
+      "display": "Fetal Third cerebral ventricle Diameter transverse US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53683-9",
+      "display": "Fetal Head.fourth cerebral ventricle Diameter.anterior-posterior US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53684-7",
+      "display": "Fetal Ear - left Maximum length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53685-4",
+      "display": "Fetal Left ventricle Diameter during diastole US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53686-2",
+      "display": "Fetal Neck Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53687-0",
+      "display": "Fetal Gastrointestinal tract Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53688-8",
+      "display": "Fetal Genitalia Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53689-6",
+      "display": "Fetal Extremities Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53690-4",
+      "display": "Fetal Skeletal system Narrative Study observation US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53691-2",
+      "display": "Gestational age Estimated from patient reported estimated date of conception"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53693-8",
+      "display": "Gestational age Estimated from conception date"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53695-3",
+      "display": "Gestational age Estimated from prior assessment"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53696-1",
+      "display": "Fetal Femur.diaphysis - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53697-9",
+      "display": "Fetal Nasal bone diaphysis [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53698-7",
+      "display": "Fetal Humerus diaphysis - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53699-5",
+      "display": "Fetal Radius.diaphysis - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53700-1",
+      "display": "Fetal Ulna diaphysis - right [Length] US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53701-9",
+      "display": "Fetal Finger fifth - left Length US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "57067-1",
+      "display": "Fetal Body weight Estimated by palpation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "60477-7",
+      "display": "Fetal Nuchal fold [Multiple of the median] Thickness adjusted for maternal weight"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "69391-1",
+      "display": "US Guidance for cordocentesis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "69400-0",
+      "display": "US Guidance for chorionic villus sampling"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "72221-5",
+      "display": "Fetal Yolk sac Study observation US"
+    } ]
+  }
+}

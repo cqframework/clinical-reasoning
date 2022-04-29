@@ -1,0 +1,170 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.258",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.258",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.258"
+  } ],
+  "version": "20170801",
+  "name": "HipFractureSurgery",
+  "title": "Hip Fracture Surgery",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQ90ZZ",
+      "display": "Repair Right Hip Joint, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQ9XZZ",
+      "display": "Repair Right Hip Joint, External Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQB0ZZ",
+      "display": "Repair Left Hip Joint, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQBXZZ",
+      "display": "Repair Left Hip Joint, External Approach"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16174006",
+      "display": "Acetabuloplasty with use of methyl methacrylate (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239499008",
+      "display": "Excision arthroplasty of the hip (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239500004",
+      "display": "Interposition arthroplasty of the hip (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265745003",
+      "display": "Secondary arthroplasty of hip for correction of congenital deformity (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32972004",
+      "display": "Acetabuloplasty, Whitman type procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44167006",
+      "display": "Shelf operation, arthroplasty of hip (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "47458005",
+      "display": "Repair of hip joint (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61509005",
+      "display": "Acetabuloplasty, Colonna type procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73764009",
+      "display": "Repair of acetabulum (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83381006",
+      "display": "Arthroplasty of hip with bone graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87618002",
+      "display": "Acetabuloplasty with resection of femoral head (procedure)"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQ90ZZ",
+      "display": "Repair Right Hip Joint, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQ9XZZ",
+      "display": "Repair Right Hip Joint, External Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQB0ZZ",
+      "display": "Repair Left Hip Joint, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0SQBXZZ",
+      "display": "Repair Left Hip Joint, External Approach"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16174006",
+      "display": "Acetabuloplasty with use of methyl methacrylate (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239499008",
+      "display": "Excision arthroplasty of the hip (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239500004",
+      "display": "Interposition arthroplasty of the hip (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265745003",
+      "display": "Secondary arthroplasty of hip for correction of congenital deformity (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32972004",
+      "display": "Acetabuloplasty, Whitman type procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44167006",
+      "display": "Shelf operation, arthroplasty of hip (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "47458005",
+      "display": "Repair of hip joint (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61509005",
+      "display": "Acetabuloplasty, Colonna type procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73764009",
+      "display": "Repair of acetabulum (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83381006",
+      "display": "Arthroplasty of hip with bone graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87618002",
+      "display": "Acetabuloplasty with resection of femoral head (procedure)"
+    } ]
+  }
+}

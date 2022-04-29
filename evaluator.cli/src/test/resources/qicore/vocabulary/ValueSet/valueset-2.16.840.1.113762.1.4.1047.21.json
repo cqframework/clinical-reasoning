@@ -1,0 +1,1760 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1047.21",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1047.21",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1047.21"
+  } ],
+  "version": "20170504",
+  "name": "AtherosclerosisandPeripheralArterialDisease",
+  "title": "Atherosclerosis and Peripheral Arterial Disease",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E08.51",
+      "display": "Diabetes mellitus due to underlying condition with diabetic peripheral angiopathy without gangrene"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E08.52",
+      "display": "Diabetes mellitus due to underlying condition with diabetic peripheral angiopathy with gangrene"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E09.51",
+      "display": "Drug or chemical induced diabetes mellitus with diabetic peripheral angiopathy without gangrene"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E09.52",
+      "display": "Drug or chemical induced diabetes mellitus with diabetic peripheral angiopathy with gangrene"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.10",
+      "display": "Atherosclerotic heart disease of native coronary artery without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.110",
+      "display": "Atherosclerotic heart disease of native coronary artery with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.111",
+      "display": "Atherosclerotic heart disease of native coronary artery with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.118",
+      "display": "Atherosclerotic heart disease of native coronary artery with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.119",
+      "display": "Atherosclerotic heart disease of native coronary artery with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.700",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.701",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.708",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.709",
+      "display": "Atherosclerosis of coronary artery bypass graft(s), unspecified, with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.710",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.711",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.718",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.719",
+      "display": "Atherosclerosis of autologous vein coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.720",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.721",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.728",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.729",
+      "display": "Atherosclerosis of autologous artery coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.730",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.731",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.738",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.739",
+      "display": "Atherosclerosis of nonautologous biological coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.750",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with unstable angina"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.751",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.758",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.759",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.760",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with unstable angina"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.761",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.768",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.769",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.790",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with unstable angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.791",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with angina pectoris with documented spasm"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.798",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with other forms of angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.799",
+      "display": "Atherosclerosis of other coronary artery bypass graft(s) with unspecified angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.810",
+      "display": "Atherosclerosis of coronary artery bypass graft(s) without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.811",
+      "display": "Atherosclerosis of native coronary artery of transplanted heart without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.812",
+      "display": "Atherosclerosis of bypass graft of coronary artery of transplanted heart without angina pectoris"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.83",
+      "display": "Coronary atherosclerosis due to lipid rich plaque"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.84",
+      "display": "Coronary atherosclerosis due to calcified coronary lesion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I25.89",
+      "display": "Other forms of chronic ischemic heart disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I67.2",
+      "display": "Cerebral atherosclerosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.0",
+      "display": "Atherosclerosis of aorta"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.1",
+      "display": "Atherosclerosis of renal artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.201",
+      "display": "Unspecified atherosclerosis of native arteries of extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.202",
+      "display": "Unspecified atherosclerosis of native arteries of extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.203",
+      "display": "Unspecified atherosclerosis of native arteries of extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.208",
+      "display": "Unspecified atherosclerosis of native arteries of extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.209",
+      "display": "Unspecified atherosclerosis of native arteries of extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.211",
+      "display": "Atherosclerosis of native arteries of extremities with intermittent claudication, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.212",
+      "display": "Atherosclerosis of native arteries of extremities with intermittent claudication, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.213",
+      "display": "Atherosclerosis of native arteries of extremities with intermittent claudication, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.218",
+      "display": "Atherosclerosis of native arteries of extremities with intermittent claudication, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.219",
+      "display": "Atherosclerosis of native arteries of extremities with intermittent claudication, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.221",
+      "display": "Atherosclerosis of native arteries of extremities with rest pain, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.222",
+      "display": "Atherosclerosis of native arteries of extremities with rest pain, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.223",
+      "display": "Atherosclerosis of native arteries of extremities with rest pain, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.228",
+      "display": "Atherosclerosis of native arteries of extremities with rest pain, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.229",
+      "display": "Atherosclerosis of native arteries of extremities with rest pain, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.231",
+      "display": "Atherosclerosis of native arteries of right leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.232",
+      "display": "Atherosclerosis of native arteries of right leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.233",
+      "display": "Atherosclerosis of native arteries of right leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.234",
+      "display": "Atherosclerosis of native arteries of right leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.235",
+      "display": "Atherosclerosis of native arteries of right leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.238",
+      "display": "Atherosclerosis of native arteries of right leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.239",
+      "display": "Atherosclerosis of native arteries of right leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.241",
+      "display": "Atherosclerosis of native arteries of left leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.242",
+      "display": "Atherosclerosis of native arteries of left leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.243",
+      "display": "Atherosclerosis of native arteries of left leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.244",
+      "display": "Atherosclerosis of native arteries of left leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.245",
+      "display": "Atherosclerosis of native arteries of left leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.248",
+      "display": "Atherosclerosis of native arteries of left leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.249",
+      "display": "Atherosclerosis of native arteries of left leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.25",
+      "display": "Atherosclerosis of native arteries of other extremities with ulceration"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.261",
+      "display": "Atherosclerosis of native arteries of extremities with gangrene, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.262",
+      "display": "Atherosclerosis of native arteries of extremities with gangrene, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.263",
+      "display": "Atherosclerosis of native arteries of extremities with gangrene, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.268",
+      "display": "Atherosclerosis of native arteries of extremities with gangrene, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.269",
+      "display": "Atherosclerosis of native arteries of extremities with gangrene, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.291",
+      "display": "Other atherosclerosis of native arteries of extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.292",
+      "display": "Other atherosclerosis of native arteries of extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.293",
+      "display": "Other atherosclerosis of native arteries of extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.298",
+      "display": "Other atherosclerosis of native arteries of extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.299",
+      "display": "Other atherosclerosis of native arteries of extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.301",
+      "display": "Unspecified atherosclerosis of unspecified type of bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.302",
+      "display": "Unspecified atherosclerosis of unspecified type of bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.303",
+      "display": "Unspecified atherosclerosis of unspecified type of bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.308",
+      "display": "Unspecified atherosclerosis of unspecified type of bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.309",
+      "display": "Unspecified atherosclerosis of unspecified type of bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.311",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with intermittent claudication, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.312",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with intermittent claudication, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.313",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with intermittent claudication, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.318",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with intermittent claudication, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.319",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with intermittent claudication, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.321",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with rest pain, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.322",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with rest pain, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.323",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with rest pain, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.328",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with rest pain, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.329",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with rest pain, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.331",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the right leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.332",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the right leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.333",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the right leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.334",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the right leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.335",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the right leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.338",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the right leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.339",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the right leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.341",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the left leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.342",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the left leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.343",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the left leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.344",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the left leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.345",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the left leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.348",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the left leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.349",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the left leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.35",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of other extremity with ulceration"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.361",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with gangrene, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.362",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with gangrene, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.363",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with gangrene, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.368",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with gangrene, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.369",
+      "display": "Atherosclerosis of unspecified type of bypass graft(s) of the extremities with gangrene, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.391",
+      "display": "Other atherosclerosis of unspecified type of bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.392",
+      "display": "Other atherosclerosis of unspecified type of bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.393",
+      "display": "Other atherosclerosis of unspecified type of bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.398",
+      "display": "Other atherosclerosis of unspecified type of bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.399",
+      "display": "Other atherosclerosis of unspecified type of bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.401",
+      "display": "Unspecified atherosclerosis of autologous vein bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.402",
+      "display": "Unspecified atherosclerosis of autologous vein bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.403",
+      "display": "Unspecified atherosclerosis of autologous vein bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.408",
+      "display": "Unspecified atherosclerosis of autologous vein bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.409",
+      "display": "Unspecified atherosclerosis of autologous vein bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.411",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with intermittent claudication, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.412",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with intermittent claudication, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.413",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with intermittent claudication, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.418",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with intermittent claudication, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.419",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with intermittent claudication, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.421",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with rest pain, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.422",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with rest pain, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.423",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with rest pain, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.428",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with rest pain, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.429",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with rest pain, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.431",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.432",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.433",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.434",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.435",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.438",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.439",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.441",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the left leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.442",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the left leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.443",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the left leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.444",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the left leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.445",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the left leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.448",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the left leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.449",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the left leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.45",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of other extremity with ulceration"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.461",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with gangrene, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.462",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with gangrene, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.463",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with gangrene, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.468",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with gangrene, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.469",
+      "display": "Atherosclerosis of autologous vein bypass graft(s) of the extremities with gangrene, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.491",
+      "display": "Other atherosclerosis of autologous vein bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.492",
+      "display": "Other atherosclerosis of autologous vein bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.493",
+      "display": "Other atherosclerosis of autologous vein bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.498",
+      "display": "Other atherosclerosis of autologous vein bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.499",
+      "display": "Other atherosclerosis of autologous vein bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.501",
+      "display": "Unspecified atherosclerosis of nonautologous biological bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.502",
+      "display": "Unspecified atherosclerosis of nonautologous biological bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.503",
+      "display": "Unspecified atherosclerosis of nonautologous biological bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.508",
+      "display": "Unspecified atherosclerosis of nonautologous biological bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.509",
+      "display": "Unspecified atherosclerosis of nonautologous biological bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.511",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with intermittent claudication, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.512",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with intermittent claudication, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.513",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with intermittent claudication, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.518",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with intermittent claudication, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.519",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with intermittent claudication, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.521",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with rest pain, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.522",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with rest pain, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.523",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with rest pain, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.528",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with rest pain, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.529",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with rest pain, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.531",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the right leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.532",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the right leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.533",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the right leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.534",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the right leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.535",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the right leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.538",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the right leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.539",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the right leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.541",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the left leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.542",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the left leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.543",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the left leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.544",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the left leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.545",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the left leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.548",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the left leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.549",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the left leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.55",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of other extremity with ulceration"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.561",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with gangrene, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.562",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with gangrene, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.563",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with gangrene, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.568",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with gangrene, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.569",
+      "display": "Atherosclerosis of nonautologous biological bypass graft(s) of the extremities with gangrene, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.591",
+      "display": "Other atherosclerosis of nonautologous biological bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.592",
+      "display": "Other atherosclerosis of nonautologous biological bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.593",
+      "display": "Other atherosclerosis of nonautologous biological bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.598",
+      "display": "Other atherosclerosis of nonautologous biological bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.599",
+      "display": "Other atherosclerosis of nonautologous biological bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.601",
+      "display": "Unspecified atherosclerosis of nonbiological bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.602",
+      "display": "Unspecified atherosclerosis of nonbiological bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.603",
+      "display": "Unspecified atherosclerosis of nonbiological bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.608",
+      "display": "Unspecified atherosclerosis of nonbiological bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.609",
+      "display": "Unspecified atherosclerosis of nonbiological bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.611",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with intermittent claudication, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.612",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with intermittent claudication, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.613",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with intermittent claudication, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.618",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with intermittent claudication, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.619",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with intermittent claudication, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.621",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with rest pain, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.622",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with rest pain, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.623",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with rest pain, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.628",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with rest pain, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.629",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with rest pain, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.631",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the right leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.632",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the right leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.633",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the right leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.634",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the right leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.635",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the right leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.638",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the right leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.639",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the right leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.641",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the left leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.642",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the left leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.643",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the left leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.644",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the left leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.645",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the left leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.648",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the left leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.649",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the left leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.65",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of other extremity with ulceration"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.661",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with gangrene, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.662",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with gangrene, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.663",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with gangrene, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.668",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with gangrene, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.669",
+      "display": "Atherosclerosis of nonbiological bypass graft(s) of the extremities with gangrene, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.691",
+      "display": "Other atherosclerosis of nonbiological bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.692",
+      "display": "Other atherosclerosis of nonbiological bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.693",
+      "display": "Other atherosclerosis of nonbiological bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.698",
+      "display": "Other atherosclerosis of nonbiological bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.699",
+      "display": "Other atherosclerosis of nonbiological bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.701",
+      "display": "Unspecified atherosclerosis of other type of bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.702",
+      "display": "Unspecified atherosclerosis of other type of bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.703",
+      "display": "Unspecified atherosclerosis of other type of bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.708",
+      "display": "Unspecified atherosclerosis of other type of bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.709",
+      "display": "Unspecified atherosclerosis of other type of bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.711",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with intermittent claudication, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.712",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with intermittent claudication, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.713",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with intermittent claudication, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.718",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with intermittent claudication, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.719",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with intermittent claudication, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.721",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with rest pain, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.722",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with rest pain, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.723",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with rest pain, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.728",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with rest pain, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.729",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with rest pain, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.731",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the right leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.732",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the right leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.733",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the right leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.734",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the right leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.735",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the right leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.738",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the right leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.739",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the right leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.741",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of thigh"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.742",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of calf"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.743",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.744",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of heel and midfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.745",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of other part of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.748",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of other part of lower leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.749",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.75",
+      "display": "Atherosclerosis of other type of bypass graft(s) of other extremity with ulceration"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.761",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with gangrene, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.762",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with gangrene, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.763",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with gangrene, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.768",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with gangrene, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.769",
+      "display": "Atherosclerosis of other type of bypass graft(s) of the extremities with gangrene, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.791",
+      "display": "Other atherosclerosis of other type of bypass graft(s) of the extremities, right leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.792",
+      "display": "Other atherosclerosis of other type of bypass graft(s) of the extremities, left leg"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.793",
+      "display": "Other atherosclerosis of other type of bypass graft(s) of the extremities, bilateral legs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.798",
+      "display": "Other atherosclerosis of other type of bypass graft(s) of the extremities, other extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.799",
+      "display": "Other atherosclerosis of other type of bypass graft(s) of the extremities, unspecified extremity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.8",
+      "display": "Atherosclerosis of other arteries"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.90",
+      "display": "Unspecified atherosclerosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.91",
+      "display": "Generalized atherosclerosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I70.92",
+      "display": "Chronic total occlusion of artery of the extremities"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.00",
+      "display": "Coronary atherosclerosis of unspecified type of vessel, native or graft"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.01",
+      "display": "Coronary atherosclerosis of native coronary artery"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.02",
+      "display": "Coronary atherosclerosis of autologous vein bypass graft"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.03",
+      "display": "Coronary atherosclerosis of nonautologous biological bypass graft"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.04",
+      "display": "Coronary atherosclerosis of artery bypass graft"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.05",
+      "display": "Coronary atherosclerosis of unspecified bypass graft"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.06",
+      "display": "Coronary atherosclerosis of native coronary artery of transplanted heart"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.07",
+      "display": "Coronary atherosclerosis of bypass graft (artery) (vein) of transplanted heart"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.3",
+      "display": "Coronary atherosclerosis due to lipid rich plaque"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "414.4",
+      "display": "Coronary atherosclerosis due to calcified coronary lesion"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "437.0",
+      "display": "Cerebral atherosclerosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.0",
+      "display": "Atherosclerosis of aorta"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.1",
+      "display": "Atherosclerosis of renal artery"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.20",
+      "display": "Atherosclerosis of native arteries of the extremities, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.21",
+      "display": "Atherosclerosis of native arteries of the extremities with intermittent claudication"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.22",
+      "display": "Atherosclerosis of native arteries of the extremities with rest pain"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.23",
+      "display": "Atherosclerosis of native arteries of the extremities with ulceration"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.24",
+      "display": "Atherosclerosis of native arteries of the extremities with gangrene"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.29",
+      "display": "Other atherosclerosis of native arteries of the extremities"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.30",
+      "display": "Atherosclerosis of unspecified bypass graft of the extremities"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.31",
+      "display": "Atherosclerosis of autologous vein bypass graft of the extremities"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.32",
+      "display": "Atherosclerosis of nonautologous biological bypass graft of the extremities"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.4",
+      "display": "Chronic total occlusion of artery of the extremities"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.8",
+      "display": "Atherosclerosis of other specified arteries"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "440.9",
+      "display": "Generalized and unspecified atherosclerosis"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "127014009",
+      "display": "Peripheral angiopathy due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13954005",
+      "display": "Ischemic ulcer (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "145891000119104",
+      "display": "Atherosclerosis of native arteries of the extremities (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "149841000119109",
+      "display": "Limb pain at rest due to atherosclerosis of native artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233955003",
+      "display": "Abdominal aortic atherosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233956002",
+      "display": "Aortoiliac atherosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238794007",
+      "display": "Ischemic foot ulcer (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284871000119105",
+      "display": "Atherosclerosis of left carotid artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284881000119108",
+      "display": "Atherosclerosis of right carotid artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300920004",
+      "display": "Carotid atherosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39823006",
+      "display": "Generalized atherosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "399957001",
+      "display": "Peripheral arterial occlusive disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413838009",
+      "display": "Chronic ischemic heart disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "421365002",
+      "display": "Peripheral circulatory disorder associated with type I diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "421895002",
+      "display": "Peripheral vascular disorder co-occurrent and due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "422166005",
+      "display": "Peripheral circulatory disorder associated with type II diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429768000",
+      "display": "Ischemic ulcer of toe (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441574008",
+      "display": "Atherosclerosis of artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442439008",
+      "display": "Atherosclerosis of bypass graft of limb (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442693003",
+      "display": "Atherosclerosis of autologous vein bypass graft of limb (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442701004",
+      "display": "Atherosclerosis of nonautologous biological bypass graft of limb (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442735001",
+      "display": "Atherosclerosis of nonautologous bypass graft of limb (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443502000",
+      "display": "Atherosclerosis of coronary artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45281005",
+      "display": "Atherosclerosis of renal artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5111000119102",
+      "display": "Gangrene due to atherosclerosis of native artery of limb (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51274000",
+      "display": "Atherosclerosis of arteries of the extremities (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55382008",
+      "display": "Cerebral atherosclerosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5561000119107",
+      "display": "Intermittent claudication due to atherosclerosis of native artery of limb (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63491006",
+      "display": "Intermittent claudication (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "709584004",
+      "display": "Atherosclerosis of bypass graft of lower limb (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "709585003",
+      "display": "Atherosclerosis of nonautologous biological bypass graft of lower limb (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8001000119106",
+      "display": "Atherosclerosis of aortoiliac bypass graft (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81817003",
+      "display": "Atherosclerosis of aorta (disorder)"
+    } ]
+  }
+}

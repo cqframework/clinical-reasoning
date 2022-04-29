@@ -1,0 +1,60 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1278",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1278",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1278"
+  } ],
+  "version": "20170504",
+  "name": "TobaccoUseScreening",
+  "title": "Tobacco Use Screening",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "39240-7",
+      "display": "Tobacco use status CPHS"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68535-4",
+      "display": "Have you used tobacco in the last 30 days [SAMHSA]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68536-2",
+      "display": "Have you used smokeless tobacco product in the last 30 days [SAMHSA]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "72166-2",
+      "display": "Tobacco smoking status"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "39240-7",
+      "display": "Tobacco use status CPHS"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68535-4",
+      "display": "Have you used tobacco in the last 30 days [SAMHSA]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "68536-2",
+      "display": "Have you used smokeless tobacco product in the last 30 days [SAMHSA]"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "72166-2",
+      "display": "Tobacco smoking status"
+    } ]
+  }
+}

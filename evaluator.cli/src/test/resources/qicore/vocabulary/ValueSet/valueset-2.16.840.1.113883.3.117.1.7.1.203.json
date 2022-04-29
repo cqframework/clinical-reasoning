@@ -1,0 +1,115 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.203",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.203",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.203"
+  } ],
+  "version": "20170727",
+  "name": "AtrialAblation",
+  "title": "Atrial Ablation",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02560ZZ",
+      "display": "Destruction of Right Atrium, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02563ZZ",
+      "display": "Destruction of Right Atrium, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02564ZZ",
+      "display": "Destruction of Right Atrium, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02580ZZ",
+      "display": "Destruction of Conduction Mechanism, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02583ZZ",
+      "display": "Destruction of Conduction Mechanism, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02584ZZ",
+      "display": "Destruction of Conduction Mechanism, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175095005",
+      "display": "Open ablation of atrioventricular node (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175125003",
+      "display": "Percutaneous transluminal ablation of atrioventricular node (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233159005",
+      "display": "Ablation operation for arrhythmia (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233160000",
+      "display": "Diathermy ablation operation for arrhythmia (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233161001",
+      "display": "Cryoablation operation for arrhythmia (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233162008",
+      "display": "Laser ablation operation for arrhythmia (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233163003",
+      "display": "Radiofrequency ablation operation for arrhythmia (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428290007",
+      "display": "Percutaneous transluminal ablation of wall of atrium (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428663009",
+      "display": "Ablation of atrioventricular node (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429211003",
+      "display": "Maze procedure for atrial fibrillation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440619008",
+      "display": "Ablation of ventricular arrhythmogenic focus with cardiopulmonary bypass (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "473229000",
+      "display": "Catheter ablation of arrhythmogenic focus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707832008",
+      "display": "Percutaneous transluminal ablation of atrial wall for atrial flutter (procedure)"
+    } ]
+  }
+}

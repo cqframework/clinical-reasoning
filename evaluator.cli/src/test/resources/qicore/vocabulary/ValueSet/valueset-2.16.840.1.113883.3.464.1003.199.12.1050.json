@@ -1,0 +1,1095 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.199.12.1050",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.199.12.1050",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.199.12.1050"
+  } ],
+  "version": "20180310",
+  "name": "MalabsorptionSyndromes",
+  "title": "Malabsorption Syndromes",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E84.0",
+      "display": "Cystic fibrosis with pulmonary manifestations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E84.11",
+      "display": "Meconium ileus in cystic fibrosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E84.19",
+      "display": "Cystic fibrosis with other intestinal manifestations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E84.8",
+      "display": "Cystic fibrosis with other manifestations"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E84.9",
+      "display": "Cystic fibrosis, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.011",
+      "display": "Crohn's disease of small intestine with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.012",
+      "display": "Crohn's disease of small intestine with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.013",
+      "display": "Crohn's disease of small intestine with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.014",
+      "display": "Crohn's disease of small intestine with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.018",
+      "display": "Crohn's disease of small intestine with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.019",
+      "display": "Crohn's disease of small intestine with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.10",
+      "display": "Crohn's disease of large intestine without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.111",
+      "display": "Crohn's disease of large intestine with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.112",
+      "display": "Crohn's disease of large intestine with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.113",
+      "display": "Crohn's disease of large intestine with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.114",
+      "display": "Crohn's disease of large intestine with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.118",
+      "display": "Crohn's disease of large intestine with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.119",
+      "display": "Crohn's disease of large intestine with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.80",
+      "display": "Crohn's disease of both small and large intestine without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.811",
+      "display": "Crohn's disease of both small and large intestine with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.812",
+      "display": "Crohn's disease of both small and large intestine with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.813",
+      "display": "Crohn's disease of both small and large intestine with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.814",
+      "display": "Crohn's disease of both small and large intestine with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.818",
+      "display": "Crohn's disease of both small and large intestine with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.819",
+      "display": "Crohn's disease of both small and large intestine with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.90",
+      "display": "Crohn's disease, unspecified, without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.911",
+      "display": "Crohn's disease, unspecified, with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.912",
+      "display": "Crohn's disease, unspecified, with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.913",
+      "display": "Crohn's disease, unspecified, with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.914",
+      "display": "Crohn's disease, unspecified, with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.918",
+      "display": "Crohn's disease, unspecified, with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K50.919",
+      "display": "Crohn's disease, unspecified, with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.012",
+      "display": "Ulcerative (chronic) pancolitis with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.013",
+      "display": "Ulcerative (chronic) pancolitis with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.014",
+      "display": "Ulcerative (chronic) pancolitis with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.018",
+      "display": "Ulcerative (chronic) pancolitis with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.019",
+      "display": "Ulcerative (chronic) pancolitis with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.20",
+      "display": "Ulcerative (chronic) proctitis without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.211",
+      "display": "Ulcerative (chronic) proctitis with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.212",
+      "display": "Ulcerative (chronic) proctitis with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.213",
+      "display": "Ulcerative (chronic) proctitis with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.214",
+      "display": "Ulcerative (chronic) proctitis with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.218",
+      "display": "Ulcerative (chronic) proctitis with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.219",
+      "display": "Ulcerative (chronic) proctitis with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.30",
+      "display": "Ulcerative (chronic) rectosigmoiditis without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.311",
+      "display": "Ulcerative (chronic) rectosigmoiditis with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.312",
+      "display": "Ulcerative (chronic) rectosigmoiditis with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.313",
+      "display": "Ulcerative (chronic) rectosigmoiditis with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.314",
+      "display": "Ulcerative (chronic) rectosigmoiditis with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.318",
+      "display": "Ulcerative (chronic) rectosigmoiditis with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.319",
+      "display": "Ulcerative (chronic) rectosigmoiditis with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.40",
+      "display": "Inflammatory polyps of colon without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.411",
+      "display": "Inflammatory polyps of colon with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.412",
+      "display": "Inflammatory polyps of colon with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.413",
+      "display": "Inflammatory polyps of colon with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.414",
+      "display": "Inflammatory polyps of colon with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.418",
+      "display": "Inflammatory polyps of colon with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.419",
+      "display": "Inflammatory polyps of colon with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.50",
+      "display": "Left sided colitis without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.511",
+      "display": "Left sided colitis with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.512",
+      "display": "Left sided colitis with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.513",
+      "display": "Left sided colitis with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.514",
+      "display": "Left sided colitis with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.518",
+      "display": "Left sided colitis with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.519",
+      "display": "Left sided colitis with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.80",
+      "display": "Other ulcerative colitis without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.811",
+      "display": "Other ulcerative colitis with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.812",
+      "display": "Other ulcerative colitis with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.813",
+      "display": "Other ulcerative colitis with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.814",
+      "display": "Other ulcerative colitis with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.818",
+      "display": "Other ulcerative colitis with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.819",
+      "display": "Other ulcerative colitis with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.90",
+      "display": "Ulcerative colitis, unspecified, without complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.911",
+      "display": "Ulcerative colitis, unspecified with rectal bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.912",
+      "display": "Ulcerative colitis, unspecified with intestinal obstruction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.913",
+      "display": "Ulcerative colitis, unspecified with fistula"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.914",
+      "display": "Ulcerative colitis, unspecified with abscess"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.918",
+      "display": "Ulcerative colitis, unspecified with other complication"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K51.919",
+      "display": "Ulcerative colitis, unspecified with unspecified complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K63.89",
+      "display": "Other specified diseases of intestine"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K90.0",
+      "display": "Celiac disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K90.2",
+      "display": "Blind loop syndrome, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K90.3",
+      "display": "Pancreatic steatorrhea"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K90.4",
+      "display": "Other malabsorption due to intolerance"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K90.81",
+      "display": "Whipple's disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K90.89",
+      "display": "Other intestinal malabsorption"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K90.9",
+      "display": "Intestinal malabsorption, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "040.2",
+      "display": "Whipple's disease"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "277.00",
+      "display": "Cystic fibrosis without mention of meconium ileus"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "277.01",
+      "display": "Cystic fibrosis with meconium ileus"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "277.02",
+      "display": "Cystic fibrosis with pulmonary manifestations"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "277.03",
+      "display": "Cystic fibrosis with gastrointestinal manifestations"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "277.09",
+      "display": "Cystic fibrosis with other manifestations"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "555.0",
+      "display": "Regional enteritis of small intestine"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "555.1",
+      "display": "Regional enteritis of large intestine"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "555.2",
+      "display": "Regional enteritis of small intestine with large intestine"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "555.9",
+      "display": "Regional enteritis of unspecified site"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.0",
+      "display": "Ulcerative (chronic) enterocolitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.1",
+      "display": "Ulcerative (chronic) ileocolitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.2",
+      "display": "Ulcerative (chronic) proctitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.3",
+      "display": "Ulcerative (chronic) proctosigmoiditis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.4",
+      "display": "Pseudopolyposis of colon"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.5",
+      "display": "Left-sided ulcerative (chronic) colitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.6",
+      "display": "Universal ulcerative (chronic) colitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.8",
+      "display": "Other ulcerative colitis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "556.9",
+      "display": "Ulcerative colitis, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "569.89",
+      "display": "Other specified disorders of intestine"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "579.0",
+      "display": "Celiac disease"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "579.1",
+      "display": "Tropical sprue"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "579.2",
+      "display": "Blind loop syndrome"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "579.3",
+      "display": "Other and unspecified postsurgical nonabsorption"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "579.4",
+      "display": "Pancreatic steatorrhea"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "579.8",
+      "display": "Other specified intestinal malabsorption"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "579.9",
+      "display": "Unspecified intestinal malabsorption"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-03",
+      "code": "65328007",
+      "display": "Hill diarrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-09",
+      "code": "190753003",
+      "display": "Sucrose intolerance (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128600008",
+      "display": "Acute ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14311001",
+      "display": "Severe chronic ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190905008",
+      "display": "Cystic fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190909002",
+      "display": "Cystic fibrosis with intestinal manifestations (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "196578009",
+      "display": "Crohn's disease of oral soft tissues (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "196977009",
+      "display": "Crohn's disease of terminal ileum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197476001",
+      "display": "Intestinal malabsorption (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197479008",
+      "display": "Acquired celiac disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197484002",
+      "display": "Post-gastrointestinal tract surgery malnutrition (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197490003",
+      "display": "Intestinal malabsorption of protein (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197491004",
+      "display": "Intestinal malabsorption of carbohydrate (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197493001",
+      "display": "Malabsorption caused by intolerance to soy protein (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197494007",
+      "display": "Intestinal malabsorption of fat (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197495008",
+      "display": "Malabsorption - iron (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201727001",
+      "display": "Arthropathy in ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201728006",
+      "display": "Arthropathy in Crohn's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201805000",
+      "display": "Juvenile arthritis in Crohn's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201807008",
+      "display": "Juvenile arthritis in ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22169002",
+      "display": "Intestinal disaccharidase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22207007",
+      "display": "Chronic proliferative enteritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234999001",
+      "display": "Crohn's disease of gingivae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235607002",
+      "display": "Crohn's disease of esophagus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235664007",
+      "display": "Crohn's disease of stomach (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235720008",
+      "display": "Malabsorption due to intolerance to carbohydrate (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235723005",
+      "display": "Chemically-induced malabsorption (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235724004",
+      "display": "Acquired short bowel syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235725003",
+      "display": "Malabsorption caused by infective agent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235727006",
+      "display": "Post-infective malabsorption (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235728001",
+      "display": "Autoimmune enteropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235731000",
+      "display": "Postprocedural steatorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235732007",
+      "display": "Postprocedural intestinal steatorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235733002",
+      "display": "Postprocedural pancreatic steatorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235796008",
+      "display": "Perianal Crohn's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "235978006",
+      "display": "Cystic fibrosis of pancreas (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24526004",
+      "display": "Inflammatory bowel disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24829000",
+      "display": "Eosinophilic ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26629001",
+      "display": "Short bowel syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266480006",
+      "display": "Post-surgical malabsorption (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27868004",
+      "display": "Chronic steatorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302920007",
+      "display": "Pancreatic malabsorption (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302921006",
+      "display": "Malabsorption due to intolerance to protein (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32230006",
+      "display": "Malabsorption syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "34000006",
+      "display": "Crohn's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359656003",
+      "display": "Idiopathic diffuse ulcerative nongranulomatous enteritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359664009",
+      "display": "Idiopathic chronic inflammatory bowel disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36261000",
+      "display": "Drug-induced malabsorption (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38032004",
+      "display": "Nonpersistence of intestinal lactase (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38106008",
+      "display": "Crohn's disease of ileum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3815005",
+      "display": "Crohn's disease of rectum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "396330006",
+      "display": "Celiac crisis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "396331005",
+      "display": "Celiac disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "397172008",
+      "display": "Gastrointestinal Crohn's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "397173003",
+      "display": "Crohn's disease of intestine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "399946006",
+      "display": "Crohn's disease of skin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402375009",
+      "display": "Crohn's disease of vulva (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402376005",
+      "display": "Crohn's disease of penis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402377001",
+      "display": "Crohn's disease of scrotum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402378006",
+      "display": "Metastatic Crohn's disease of skin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "404908004",
+      "display": "Toxic megacolon due to ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410484008",
+      "display": "Iritis with ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410485009",
+      "display": "Iritis with Crohn's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414153008",
+      "display": "Exacerbation of Crohn's disease of large intestine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414156000",
+      "display": "Exacerbation of ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41545003",
+      "display": "Whipple's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "420321004",
+      "display": "Intestinal malabsorption associated with acquired immunodeficiency syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441971007",
+      "display": "Chronic left-sided ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44332000",
+      "display": "Bile acid malabsorption syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444546002",
+      "display": "Chronic ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "445243001",
+      "display": "Left sided ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52231000",
+      "display": "Chronic ulcerative proctitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52506002",
+      "display": "Chronic ulcerative rectosigmoiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53156005",
+      "display": "Postcholecystectomy diarrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54576000",
+      "display": "Pancreatic steatorrhea (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54883000",
+      "display": "Postoperative blind loop syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56661000",
+      "display": "Intestinal enteropeptidase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59285001",
+      "display": "Bile acid malabsorption syndrome type II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "60414003",
+      "display": "Acquired lactase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61715008",
+      "display": "Celiac disease with diffuse intestinal ulceration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61738006",
+      "display": "Non-gluten sensitive enteropathy syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64766004",
+      "display": "Ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66972006",
+      "display": "Protein-losing enteropathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69478001",
+      "display": "Pancreatic colipase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735718000",
+      "display": "Neonatal malabsorption co-occurrent and due to gastrointestinal hormone-secreting endocrine tumor (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "737195007",
+      "display": "Crohn disease of upper gastrointestinal tract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762269004",
+      "display": "Classical cystic fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762270003",
+      "display": "Atypical cystic fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "762271004",
+      "display": "Subclinical cystic fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77225009",
+      "display": "Blind loop syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78324009",
+      "display": "Mild chronic ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78373000",
+      "display": "Sucrase-isomaltase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78712000",
+      "display": "Moderate chronic ulcerative colitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78960005",
+      "display": "Pancreatic triacylglycerol lipase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81423003",
+      "display": "Cystic fibrosis without meconium ileus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82047000",
+      "display": "Diarrhea caused by alcohol intake (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86092005",
+      "display": "Cystic fibrosis with meconium ileus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86555001",
+      "display": "Cystic fibrosis of the lung (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86941000",
+      "display": "Bile acid malabsorption syndrome type I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "91465007",
+      "display": "Bile acid malabsorption syndrome type III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "91867008",
+      "display": "Adult form of celiac disease (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1478",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1478",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1478"
+  } ],
+  "version": "20200307",
+  "name": "RetinalDetachmentwithRetinalDefect",
+  "title": "Retinal Detachment with Retinal Defect",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.001",
+      "display": "Unspecified retinal detachment with retinal break, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.002",
+      "display": "Unspecified retinal detachment with retinal break, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.003",
+      "display": "Unspecified retinal detachment with retinal break, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.011",
+      "display": "Retinal detachment with single break, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.012",
+      "display": "Retinal detachment with single break, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.013",
+      "display": "Retinal detachment with single break, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.021",
+      "display": "Retinal detachment with multiple breaks, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.022",
+      "display": "Retinal detachment with multiple breaks, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.023",
+      "display": "Retinal detachment with multiple breaks, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.031",
+      "display": "Retinal detachment with giant retinal tear, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.032",
+      "display": "Retinal detachment with giant retinal tear, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.033",
+      "display": "Retinal detachment with giant retinal tear, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.041",
+      "display": "Retinal detachment with retinal dialysis, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.042",
+      "display": "Retinal detachment with retinal dialysis, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.043",
+      "display": "Retinal detachment with retinal dialysis, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.051",
+      "display": "Total retinal detachment, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.052",
+      "display": "Total retinal detachment, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.053",
+      "display": "Total retinal detachment, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H33.8",
+      "display": "Other retinal detachments"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193319001",
+      "display": "New partial retinal detachment with single defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193320007",
+      "display": "New partial retinal detachment with multiple defects (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193322004",
+      "display": "New partial retinal detachment with retinal dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193323009",
+      "display": "Recent total retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193324003",
+      "display": "Recent subtotal retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193325002",
+      "display": "Old partial retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193326001",
+      "display": "Old total retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193327005",
+      "display": "Old subtotal retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19620000",
+      "display": "Rhegmatogenous retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232008001",
+      "display": "Rhegmatogenous retinal detachment - macula on (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232009009",
+      "display": "Rhegmatogenous retinal detachment - macula off (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232010004",
+      "display": "Traction retinal detachment involving macula (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232011000",
+      "display": "Traction retinal detachment sparing macula (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232023006",
+      "display": "Traction retinal detachment co-occurrent and due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "247165009",
+      "display": "Retinal detachment - subretinal fluid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314494006",
+      "display": "Pseudophakic retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "34711008",
+      "display": "Traction detachment of retina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3598000",
+      "display": "Partial recent retinal detachment with single defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38579007",
+      "display": "Partial recent retinal detachment with retinal dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38599001",
+      "display": "Serous retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4178006",
+      "display": "Partial recent retinal detachment with multiple defects (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42059000",
+      "display": "Retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56202001",
+      "display": "Retinal detachment with retinal defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "7219007",
+      "display": "Traction detachment with vitreoretinal organization (disorder)"
+    } ]
+  }
+}

@@ -43,7 +43,14 @@ public abstract class BaseMeasureProcessorTest {
         this.endpoint = new Endpoint().setAddress(bundleName)
         .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
         this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-        this.setup();
+        this.setup(false, 200);
+    }
+
+    public BaseMeasureProcessorTest(String bundleName, boolean parallelEnabled, int parallelThreshold) {
+        this.endpoint = new Endpoint().setAddress(bundleName)
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+        this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+        this.setup(parallelEnabled, parallelThreshold);
     }
 
     protected FhirContext fhirContext = null;
@@ -71,7 +78,7 @@ public abstract class BaseMeasureProcessorTest {
     }
 
     @SuppressWarnings("serial")
-    protected void setup() {
+    protected void setup(boolean parallelEnabled, int threshold) {
         // TODO: Mockito a good solid chunk of this setup...
 
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
@@ -169,6 +176,10 @@ public abstract class BaseMeasureProcessorTest {
 
         MeasureEvalConfig config = MeasureEvalConfig.defaultConfig();
         config.setDebugLoggingEnabled(true);
+
+        if(parallelEnabled) {
+            config = config.withParallelEnabled(true).withParallelThreshold(threshold);
+        }
 
         this.measureProcessor = new R4MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
                 libraryContentProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null);

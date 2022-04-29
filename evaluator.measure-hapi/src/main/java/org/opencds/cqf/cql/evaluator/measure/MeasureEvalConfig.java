@@ -67,8 +67,18 @@ public class MeasureEvalConfig {
         this.parallelEnabled = value;
     }
 
+    public MeasureEvalConfig withParallelEnabled(Boolean value) {
+        this.parallelEnabled = value;
+        return this;
+    }
+
     public Integer getParallelThreshold() {
         return this.parallelThreshold;
+    }
+
+    public MeasureEvalConfig withParallelThreshold(int threshold) {
+        this.parallelThreshold = threshold;
+        return this;
     }
 
     public void setParallelThreshold(Integer value) {

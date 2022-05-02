@@ -2,6 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf.cql/evaluator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf.cql/evaluator) [![Build Status](https://www.travis-ci.com/DBCG/cql-evaluator.svg?branch=master)](https://www.travis-ci.com/DBCG/cql-evaluator) [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
 
+
 This project provides a Java-based [CQL](https://cql.hl7.org/) evaluation environment and related components.
 
 The front-end of the evaluator is the [cql-to-elm translator](https://github.com/cqframework/clinical_quality_language/tree/master/Src/java) (which provides translation of CQL to [ELM](https://cql.hl7.org/elm.html)) and the backend is the [cql-engine](https://github.com/DBCG/cql_engine) (which provides ELM execution). The evaluator glues those two components together and provides DataProvider and TerminologyProvider implementations that allow execution of CQL against a filesystem, FHIR server, and in-process FHIR resources.

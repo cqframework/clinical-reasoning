@@ -9,9 +9,6 @@ public class MeasureEvalConfig {
         return new MeasureEvalConfig();
     }
 
-    private Boolean asyncEnabled = false;
-    private Integer asyncThreshold = 1000;
-
     private Boolean parallelEnabled = false;
     private Integer parallelThreshold = 200;
     private Integer parallelThreads = null;
@@ -38,22 +35,6 @@ public class MeasureEvalConfig {
 
     public void setDebugLoggingEnabled(Boolean value) {
         this.debugLoggingEnabled = value;
-    }
-
-    public Boolean getAsyncEnabled() {
-        return this.asyncEnabled;
-    }
-
-    public void setAsyncEnabled(Boolean value) {
-        this.asyncEnabled = value;
-    }
-
-    public Integer getAsyncThreshold() {
-        return this.asyncThreshold;
-    }
-
-    public void setAsyncThreshold(Integer value) {
-        this.asyncThreshold = value;
     }
 
     public Boolean getParallelEnabled() {

@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>1.4.3</version>
+    <version>1.4.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>evaluator.shared</name>
@@ -19,7 +19,7 @@
 
         <cql-translator.version>1.5.8</cql-translator.version>
         <cql-engine.version>1.5.5</cql-engine.version>
-        <spring.version>5.3.6</spring.version>
+        <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>5.6.3</hapi.version>
         <picocli.version>4.6.1</picocli.version>
@@ -486,7 +486,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.2</version>
+                    <version>0.8.8</version>
                     <executions>
                         <execution>
                             <goals>

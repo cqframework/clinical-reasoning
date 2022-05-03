@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -14,12 +13,11 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
+import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
@@ -137,7 +135,7 @@ public class CqlCommand implements Callable<Integer> {
                 cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
             }
 
-            Triple<String, ModelResolver, RetrieveProvider> dataProvider = null;
+            DataProviderComponents dataProvider = null;
             DataProviderFactory dataProviderFactory = cqlEvaluatorComponent.createDataProviderFactory();
             if (library.model != null) {
                 dataProvider = dataProviderFactory.create(new EndpointInfo().setAddress(library.model.modelUrl));
@@ -147,8 +145,8 @@ public class CqlCommand implements Callable<Integer> {
                 dataProvider = dataProviderFactory.create(new EndpointInfo().setType(Constants.HL7_FHIR_FILES_CODE));
             }
 
-            cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider.getLeft(), dataProvider.getMiddle(),
-                    dataProvider.getRight());
+            cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider.getModelUri(), dataProvider.getModelResolver(),
+                    dataProvider.getRetrieveProvider());
 
             CqlEvaluator evaluator = cqlEvaluatorBuilder.build();
 

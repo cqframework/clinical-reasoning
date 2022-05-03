@@ -16,9 +16,6 @@ public class MeasureEvalConfig {
     private Integer parallelThreshold = 200;
     private Integer parallelThreads = null;
 
-    // private Boolean distributedEnabled = false;
-    // private Integer distributedThreshold = 5000;
-
     private Boolean debugLoggingEnabled = false;
 
     private EnumSet<CqlEngine.Options> cqlEngineOptions;
@@ -96,21 +93,4 @@ public class MeasureEvalConfig {
     public void setParallelThreads(Integer value) {
         this.parallelThreads = value;
     }
-
-    // TODO: This probably something that's implemented at the platform level
-    // public Boolean getDistributedEnabled() {
-    //     return this.distributedEnabled;
-    // }
-
-    // public void setDistributedEnabled(Boolean value) {
-    //     this.distributedEnabled = value;
-    // }
-
-    // public Integer getDistributedThreshold() {
-    //     return this.distributedThreshold;
-    // }
-
-    // public void setDistributedThreshold(Integer value) {
-    //     this.distributedThreshold = value;
-    // }
 }

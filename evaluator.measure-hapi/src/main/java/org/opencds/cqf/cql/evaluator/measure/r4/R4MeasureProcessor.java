@@ -1,11 +1,13 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -70,14 +72,13 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     protected LibraryContentProviderFactory libraryContentProviderFactory;
     protected FhirDalFactory fhirDalFactory;
 
-    private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new HashMap<>();
+    private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
     private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     private MeasureEvalConfig measureEvalConfig = MeasureEvalConfig.defaultConfig();
-    private MeasureScoring measureScoring;
 
     // TODO: This should all be collapsed down to FhirDal
     protected LibraryContentProvider localLibraryContentProvider;
@@ -129,10 +130,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
         if (lastReceivedOn != null) {
-            logger.warn("the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
+            logger.warn(
+                    "the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
         }
-        
-        // TODO: Need a fedrated FhirDal..
+
+        // TODO: Need a federated FhirDal..
         FhirDal fhirDal = contentEndpoint != null
                 ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
                 : localFhirDal;
@@ -145,51 +147,33 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         List<String> subjectIds = this.getSubjects(measureEvalType,
                 subject != null ? subject : practitioner, dataEndpoint);
 
-        if (this.measureEvalConfig.getParallelEnabled()
-                && subjectIds.size() > this.measureEvalConfig.getParallelThreshold()) {
-            return parallelEvaluateMeasure(url, periodStart, periodEnd, reportType, subjectIds, fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
-        } else {
-
-            return evaluateMeasure(url, periodStart, periodEnd, reportType, subjectIds, fhirDal, contentEndpoint,
-                    terminologyEndpoint, dataEndpoint, additionalData);
-
+        Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
+        Iterator<IBaseResource> measureIter = measures.iterator();
+        if (!measureIter.hasNext()) {
+            throw new IllegalArgumentException(String.format("Unable to locate Measure with url %s", url));
         }
 
-    }
-
-    protected MeasureReport parallelEvaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
-    List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-    Endpoint dataEndpoint, Bundle additionalData) {
-        List<List<String>> batches = getBatches(subjectIds, this.measureEvalConfig.getParallelThreshold());
-
-        List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
-        for (List<String> idBatch : batches) {
-            futures.add(CompletableFuture.supplyAsync(() -> this.evaluateMeasure(url, periodStart, periodEnd, reportType, idBatch, fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData)));
-        }
-
-        List<MeasureReport> reports = new ArrayList<>();
-        futures.forEach(x -> reports.add(x.join()));
-
-        R4MeasureReportAggregator reportAggregator = new R4MeasureReportAggregator();
-
-        MeasureReport aggregatedReport = reportAggregator.aggregate(reports);
-
+        Measure measure = (Measure) measureIter.next();
+        MeasureReport measureReport = this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+        MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoring, aggregatedReport);
+        scorer.score(measureScoring, measureReport);
 
-        return reportAggregator.aggregate(reports);
+        return measureReport;
+
     }
 
-    public static <T> List<List<T>> getBatches(List<T> collection,int batchSize){
+    public static <T> List<List<T>> getBatches(List<T> collection, int batchSize) {
         int i = 0;
         List<List<T>> batches = new ArrayList<>();
-        while(i<collection.size()){
-            int nextInc = Math.min(collection.size()-i,batchSize);
-            List<T> batch = collection.subList(i,i+nextInc);
+        while (i < collection.size()) {
+            int nextInc = Math.min(collection.size() - i, batchSize);
+            List<T> batch = collection.subList(i, i + nextInc);
             batches.add(batch);
             i = i + nextInc;
         }
-    
+
         return batches;
     }
 
@@ -203,34 +187,63 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
 
     public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint) {
-        FhirDal fhirDal = dataEndpoint != null ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint)) : localFhirDal;
+        FhirDal fhirDal = dataEndpoint != null
+                ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint))
+                : localFhirDal;
         SubjectProvider subjectProvider = new R4FhirDalSubjectProvider(fhirDal);
         return subjectProvider.getSubjects(measureEvalType, subjectId);
-        
+
     }
 
     public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
         return this.getSubjects(measureEvalType, subjectId, null);
     }
 
-    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
+    protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
             List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
-        Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
-        Iterator<IBaseResource> measureIter = measures.iterator();
-        if (!measureIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate Measure with url %s", url));
+        if (this.measureEvalConfig.getParallelEnabled()
+                && subjectIds.size() > this.measureEvalConfig.getParallelThreshold()) {
+            return parallelMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+        } else {
+            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+                    contentEndpoint,
+                    terminologyEndpoint, dataEndpoint, additionalData);
+
         }
 
-        Measure measure = (Measure) measureIter.next();
+    }
+
+    protected MeasureReport parallelMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
+            String reportType,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint, Bundle additionalData) {
+        List<List<String>> batches = getBatches(subjectIds, this.measureEvalConfig.getParallelThreshold());
+        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvalConfig.getParallelThreads());
+        List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
+        for (List<String> idBatch : batches) {
+            futures.add(
+                    CompletableFuture.supplyAsync(
+                            () -> this.evaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
+                                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
+                            executor));
+        }
+
+        List<MeasureReport> reports = new ArrayList<>();
+        futures.forEach(x -> reports.add(x.join()));
+        R4MeasureReportAggregator reportAggregator = new R4MeasureReportAggregator();
+        return reportAggregator.aggregate(reports);
+    }
+
+    protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd,
+            String reportType,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint, Bundle additionalData) {
 
         if (!measure.hasLibrary()) {
             throw new IllegalArgumentException(
-                    String.format("Measure %s does not have a primary library specified", url));
-        }
-
-        if(measureScoring == null) {
-            measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
+                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
         }
 
         CanonicalType libraryUrl = measure.getLibrary().get(0);
@@ -238,7 +251,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         Iterable<IBaseResource> libraries = fhirDal.searchByUrl("Library", libraryUrl.getValue());
         Iterator<IBaseResource> libraryIter = libraries.iterator();
         if (!libraryIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate primary Library with url %s", libraryUrl.getValue()));
+            throw new IllegalArgumentException(
+                    String.format("Unable to locate primary Library with url %s", libraryUrl.getValue()));
         }
 
         org.hl7.fhir.r4.model.Library primaryLibrary = (org.hl7.fhir.r4.model.Library) libraryIter.next();
@@ -248,7 +262,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 : localLibraryContentProvider;
 
         if (libraryContentProvider == null) {
-            throw new IllegalStateException("a libraryContentProvider was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a libraryContentProvider was not provided and one could not be constructed");
         }
 
         LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
@@ -280,17 +295,17 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
         switch (measureEvalType) {
-        case PATIENT:
-        case SUBJECT:
-            return MeasureReportType.INDIVIDUAL;
-        case PATIENTLIST:
-        case SUBJECTLIST:
-            return MeasureReportType.PATIENTLIST;
-        case POPULATION:
-            return MeasureReportType.SUMMARY;
-        default:
-            throw new IllegalArgumentException(
-                    String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+            case PATIENT:
+            case SUBJECT:
+                return MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST:
+            case SUBJECTLIST:
+                return MeasureReportType.PATIENTLIST;
+            case POPULATION:
+                return MeasureReportType.SUMMARY;
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
         }
     }
 
@@ -366,7 +381,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
 
         if (this.measureEvalConfig.getDebugLoggingEnabled()) {
-            context.getDebugMap().setIsLoggingEnabled(true);
+        context.getDebugMap().setIsLoggingEnabled(true);
         }
 
         return context;

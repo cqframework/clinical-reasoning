@@ -112,6 +112,11 @@ public class TranslatorOptionsUtil {
         }
 
         EnumSet<CqlTranslator.Options> optionSet = EnumSet.noneOf(CqlTranslator.Options.class);
+
+        if (translatorOptions.trim().isEmpty()) {
+            return optionSet;
+        }
+
         String[] options = translatorOptions.trim().split(",");
 
         for (String option : options) {

@@ -29,37 +29,27 @@
       "entry": [
         {
           "item": {
-            "reference": "Patient/denom-EXM74-strat1-case2"
-          }
-        },
-        {
-          "item": {
-            "reference": "Patient/numer-EXM74-strat2-case10"
-          }
-        },
-        {
-          "item": {
-            "reference": "Patient/numer-EXM74-strat1-case8"
-          }
-        },
-        {
-          "item": {
-            "reference": "Patient/numer-EXM74-strat1-case7"
-          }
-        },
-        {
-          "item": {
             "reference": "Patient/denom-EXM74-strat1-case1"
           }
         },
         {
           "item": {
-            "reference": "Patient/denom-EXM74-strat3-case5"
+            "reference": "Patient/numer-EXM74-strat2-case2"
           }
         },
         {
           "item": {
-            "reference": "Patient/numer-EXM74-strat2-case9"
+            "reference": "Patient/numer-EXM74-strat1-case3"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat1-case4"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case5"
           }
         },
         {
@@ -69,17 +59,27 @@
         },
         {
           "item": {
-            "reference": "Patient/denom-EXM74-strat2-case4"
+            "reference": "Patient/numer-EXM74-strat2-case7"
           }
         },
         {
           "item": {
-            "reference": "Patient/numer-EXM74-strat3-case11"
+            "reference": "Patient/denom-EXM74-strat3-case8"
           }
         },
         {
           "item": {
-            "reference": "Patient/denom-EXM74-strat2-case3"
+            "reference": "Patient/denom-EXM74-strat2-case9"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/numer-EXM74-strat3-case10"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat2-case11"
           }
         },
         {

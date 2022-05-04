@@ -1,0 +1,535 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.111.12.1006",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1006",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.111.12.1006"
+  } ],
+  "version": "20180310",
+  "name": "OtherFemaleReproductiveConditions",
+  "title": "Other Female Reproductive Conditions",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A63.0",
+      "display": "Anogenital (venereal) warts"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B97.7",
+      "display": "Papillomavirus as the cause of diseases classified elsewhere"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "G44.82",
+      "display": "Headache associated with sexual activity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N88.1",
+      "display": "Old laceration of cervix uteri"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N88.3",
+      "display": "Incompetence of cervix uteri"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N89.8",
+      "display": "Other specified noninflammatory disorders of vagina"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N93.0",
+      "display": "Postcoital and contact bleeding"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N97.0",
+      "display": "Female infertility associated with anovulation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N97.1",
+      "display": "Female infertility of tubal origin"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N97.2",
+      "display": "Female infertility of uterine origin"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N97.8",
+      "display": "Female infertility of other origin"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N97.9",
+      "display": "Female infertility, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.31XA",
+      "display": "Breakdown (mechanical) of intrauterine contraceptive device, initial encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.31XD",
+      "display": "Breakdown (mechanical) of intrauterine contraceptive device, subsequent encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.31XS",
+      "display": "Breakdown (mechanical) of intrauterine contraceptive device, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.32XA",
+      "display": "Displacement of intrauterine contraceptive device, initial encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.32XD",
+      "display": "Displacement of intrauterine contraceptive device, subsequent encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.32XS",
+      "display": "Displacement of intrauterine contraceptive device, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.39XA",
+      "display": "Other mechanical complication of intrauterine contraceptive device, initial encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.39XD",
+      "display": "Other mechanical complication of intrauterine contraceptive device, subsequent encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T83.39XS",
+      "display": "Other mechanical complication of intrauterine contraceptive device, sequela"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103010005",
+      "display": "Headache associated with sexual activity (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "125157000",
+      "display": "Satisfactory for evaluation but limited by absence of an endocervical/transformation zone component from a patient with a cervix (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "168407000",
+      "display": "Cannot exclude glandular neoplasia on cervical smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "168472007",
+      "display": "Vaginal vault smear abnormal (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198445009",
+      "display": "Primary anovulatory infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198446005",
+      "display": "Secondary anovulatory infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198448006",
+      "display": "Female infertility of pituitary - hypothalamic origin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198449003",
+      "display": "Primary pituitary - hypothalamic infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198450003",
+      "display": "Secondary pituitary - hypothalamic infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198452006",
+      "display": "Primary tubal infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198453001",
+      "display": "Secondary tubal infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198456009",
+      "display": "Primary uterine infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198457000",
+      "display": "Secondary uterine infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198459002",
+      "display": "Primary cervical infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198460007",
+      "display": "Secondary cervical infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198464003",
+      "display": "Primary vaginal infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "198465002",
+      "display": "Secondary vaginal infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "227561004",
+      "display": "Female infertility associated with anovulation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237110007",
+      "display": "Condyloma acuminata of vulva (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237139007",
+      "display": "Female infertility due to ovulatory disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237141008",
+      "display": "Luteal phase defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237142001",
+      "display": "Luteinized unruptured follicle syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237800001",
+      "display": "Endocrine female infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240542006",
+      "display": "Anogenital warts (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266609001",
+      "display": "Female infertility of anovulatory origin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26899006",
+      "display": "Female infertility of uterine origin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "286995008",
+      "display": "Female infertility - cervical/vaginal (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30238006",
+      "display": "Secondary female infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30826006",
+      "display": "Female infertility of vaginal origin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3160009",
+      "display": "Female infertility of cervical origin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35308000",
+      "display": "Female infertility due to nonimplantation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "373877006",
+      "display": "Insufficient endocervical / transformation zone component in a cervical specimen (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39446004",
+      "display": "Female infertility of tubal origin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "395688005",
+      "display": "Benign coital headache (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39591000119109",
+      "display": "Female infertility due to disorder of pituitary gland (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "399599006",
+      "display": "Condyloma acuminata of vagina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414238007",
+      "display": "Female infertility due to antisperm antibody (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414239004",
+      "display": "Female infertility due to cervical mucus dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415149004",
+      "display": "Postmenopausal postcoital bleeding (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416030007",
+      "display": "Cervicovaginal cytology: Low grade squamous intraepithelial lesion (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416031006",
+      "display": "Cervicovaginal cytology specimen unsatisfactory (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416033009",
+      "display": "Cervicovaginal cytology: High grade squamous intraepithelial lesion or carcinoma (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419266001",
+      "display": "Condyloma acuminata of cervix (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426488001",
+      "display": "Female infertility due to oligo-ovulation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427547007",
+      "display": "Female infertility due to diminished ovarian reserve (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428008002",
+      "display": "Female infertility due to advanced maternal age (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428017002",
+      "display": "Condyloma acuminata of vulva in pregnancy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439776006",
+      "display": "Cervical Papanicolaou smear positive for malignant neoplasm (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439855007",
+      "display": "Abnormal anal Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439856008",
+      "display": "Abnormal vaginal Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439888000",
+      "display": "Abnormal cervical Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439890004",
+      "display": "Vaginal Papanicolaou smear positive for malignant neoplasm (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "439891000",
+      "display": "Anal Papanicolaou smear positive for malignant neoplasm (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441072002",
+      "display": "Atypical glandular cells on vaginal Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441086003",
+      "display": "Atypical squamous cells of undetermined significance on anal Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441087007",
+      "display": "Atypical squamous cells of undetermined significance on cervical Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441088002",
+      "display": "Atypical squamous cells on cervical Papanicolaou smear cannot exclude high grade squamous intraepithelial lesion (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441094005",
+      "display": "Atypical endocervical cells on cervical Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441098008",
+      "display": "Atypical endocervical cells on vaginal Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441099000",
+      "display": "Atypical squamous cells of undetermined significance on vaginal Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441114008",
+      "display": "Atypical squamous cells on anal Papanicolaou smear cannot exclude high grade squamous intraepithelial lesion (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441115009",
+      "display": "Atypical squamous cells on vaginal Papanicolaou smear cannot exclude high grade squamous intraepithelial lesion (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441219009",
+      "display": "Atypical glandular cells on cervical Papanicolaou smear (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "441667007",
+      "display": "Abnormal cervical Papanicolaou smear with positive human papillomavirus deoxyribonucleic acid test (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4667004",
+      "display": "Female infertility due to structural congenital anomaly of vagina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48880000",
+      "display": "Postcoital bleeding (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5084002",
+      "display": "Primary female infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52937008",
+      "display": "Infertility due to infection (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53821008",
+      "display": "Infertility caused by radiation (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58423003",
+      "display": "Infertility due to systemic disease (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6303009",
+      "display": "Old vaginal laceration (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65370002",
+      "display": "Old laceration of cervix (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65454003",
+      "display": "Female infertility associated with congenital anomaly of uterus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6738008",
+      "display": "Female infertility (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707577004",
+      "display": "Female infertility due to cystic fibrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "712584009",
+      "display": "Female infertility due to endometriosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "712585005",
+      "display": "Female infertility due to pelvic peritoneal adhesion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74294009",
+      "display": "Female infertility due to structural congenital anomaly of cervix (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "80330000",
+      "display": "Infertility due to drug therapy (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82593008",
+      "display": "Female infertility due to congenital anomaly of fallopian tube (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84785006",
+      "display": "Female infertility due to acquired stenosis of fallopian tube (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85078005",
+      "display": "Female infertility due to occlusion of fallopian tube (disorder)"
+    } ]
+  }
+}

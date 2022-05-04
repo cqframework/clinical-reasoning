@@ -1,0 +1,45 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.119",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.119",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1045.119"
+  } ],
+  "version": "20200307",
+  "name": "Sodiumlabtest",
+  "title": "Sodium lab test",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2947-0",
+      "display": "Sodium [Moles/volume] in Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2951-2",
+      "display": "Sodium [Moles/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32717-1",
+      "display": "Sodium [Moles/volume] in Arterial blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "39791-9",
+      "display": "Sodium [Moles/volume] in Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "41657-8",
+      "display": "Sodium [Moles/volume] in Mixed venous blood"
+    } ]
+  }
+}

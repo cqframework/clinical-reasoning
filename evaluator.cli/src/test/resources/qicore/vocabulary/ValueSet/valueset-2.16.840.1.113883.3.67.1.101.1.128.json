@@ -1,0 +1,965 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.67.1.101.1.128",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.67.1.101.1.128",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.67.1.101.1.128"
+  } ],
+  "version": "20170504",
+  "name": "BipolarDisorder",
+  "title": "Bipolar Disorder",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.10",
+      "display": "Manic episode without psychotic symptoms, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.11",
+      "display": "Manic episode without psychotic symptoms, mild"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.12",
+      "display": "Manic episode without psychotic symptoms, moderate"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.13",
+      "display": "Manic episode, severe, without psychotic symptoms"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.2",
+      "display": "Manic episode, severe with psychotic symptoms"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.3",
+      "display": "Manic episode in partial remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.4",
+      "display": "Manic episode in full remission"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.8",
+      "display": "Other manic episodes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F30.9",
+      "display": "Manic episode, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.0",
+      "display": "Bipolar disorder, current episode hypomanic"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.10",
+      "display": "Bipolar disorder, current episode manic without psychotic features, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.11",
+      "display": "Bipolar disorder, current episode manic without psychotic features, mild"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.12",
+      "display": "Bipolar disorder, current episode manic without psychotic features, moderate"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.13",
+      "display": "Bipolar disorder, current episode manic without psychotic features, severe"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.2",
+      "display": "Bipolar disorder, current episode manic severe with psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.30",
+      "display": "Bipolar disorder, current episode depressed, mild or moderate severity, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.31",
+      "display": "Bipolar disorder, current episode depressed, mild"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.32",
+      "display": "Bipolar disorder, current episode depressed, moderate"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.4",
+      "display": "Bipolar disorder, current episode depressed, severe, without psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.5",
+      "display": "Bipolar disorder, current episode depressed, severe, with psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.60",
+      "display": "Bipolar disorder, current episode mixed, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.61",
+      "display": "Bipolar disorder, current episode mixed, mild"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.62",
+      "display": "Bipolar disorder, current episode mixed, moderate"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.63",
+      "display": "Bipolar disorder, current episode mixed, severe, without psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.64",
+      "display": "Bipolar disorder, current episode mixed, severe, with psychotic features"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.70",
+      "display": "Bipolar disorder, currently in remission, most recent episode unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.71",
+      "display": "Bipolar disorder, in partial remission, most recent episode hypomanic"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.72",
+      "display": "Bipolar disorder, in full remission, most recent episode hypomanic"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.73",
+      "display": "Bipolar disorder, in partial remission, most recent episode manic"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.74",
+      "display": "Bipolar disorder, in full remission, most recent episode manic"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.75",
+      "display": "Bipolar disorder, in partial remission, most recent episode depressed"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.76",
+      "display": "Bipolar disorder, in full remission, most recent episode depressed"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.77",
+      "display": "Bipolar disorder, in partial remission, most recent episode mixed"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.78",
+      "display": "Bipolar disorder, in full remission, most recent episode mixed"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.81",
+      "display": "Bipolar II disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.89",
+      "display": "Other bipolar disorder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "F31.9",
+      "display": "Bipolar disorder, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.00",
+      "display": "Bipolar I disorder, single manic episode, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.01",
+      "display": "Bipolar I disorder, single manic episode, mild"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.02",
+      "display": "Bipolar I disorder, single manic episode, moderate"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.03",
+      "display": "Bipolar I disorder, single manic episode, severe, without mention of psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.04",
+      "display": "Bipolar I disorder, single manic episode, severe, specified as with psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.05",
+      "display": "Bipolar I disorder, single manic episode, in partial or unspecified remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.06",
+      "display": "Bipolar I disorder, single manic episode, in full remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.10",
+      "display": "Manic affective disorder, recurrent episode, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.11",
+      "display": "Manic affective disorder, recurrent episode, mild"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.12",
+      "display": "Manic affective disorder, recurrent episode, moderate"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.13",
+      "display": "Manic affective disorder, recurrent episode, severe, without mention of psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.14",
+      "display": "Manic affective disorder, recurrent episode, severe, specified as with psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.15",
+      "display": "Manic affective disorder, recurrent episode, in partial or unspecified remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.16",
+      "display": "Manic affective disorder, recurrent episode, in full remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.40",
+      "display": "Bipolar I disorder, most recent episode (or current) manic, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.41",
+      "display": "Bipolar I disorder, most recent episode (or current) manic, mild"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.42",
+      "display": "Bipolar I disorder, most recent episode (or current) manic, moderate"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.43",
+      "display": "Bipolar I disorder, most recent episode (or current) manic, severe, without mention of psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.44",
+      "display": "Bipolar I disorder, most recent episode (or current) manic, severe, specified as with psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.45",
+      "display": "Bipolar I disorder, most recent episode (or current) manic, in partial or unspecified remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.46",
+      "display": "Bipolar I disorder, most recent episode (or current) manic, in full remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.50",
+      "display": "Bipolar I disorder, most recent episode (or current) depressed, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.51",
+      "display": "Bipolar I disorder, most recent episode (or current) depressed, mild"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.52",
+      "display": "Bipolar I disorder, most recent episode (or current) depressed, moderate"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.53",
+      "display": "Bipolar I disorder, most recent episode (or current) depressed, severe, without mention of psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.54",
+      "display": "Bipolar I disorder, most recent episode (or current) depressed, severe, specified as with psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.55",
+      "display": "Bipolar I disorder, most recent episode (or current) depressed, in partial or unspecified remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.56",
+      "display": "Bipolar I disorder, most recent episode (or current) depressed, in full remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.60",
+      "display": "Bipolar I disorder, most recent episode (or current) mixed, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.61",
+      "display": "Bipolar I disorder, most recent episode (or current) mixed, mild"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.62",
+      "display": "Bipolar I disorder, most recent episode (or current) mixed, moderate"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.63",
+      "display": "Bipolar I disorder, most recent episode (or current) mixed, severe, without mention of psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.64",
+      "display": "Bipolar I disorder, most recent episode (or current) mixed, severe, specified as with psychotic behavior"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.65",
+      "display": "Bipolar I disorder, most recent episode (or current) mixed, in partial or unspecified remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.66",
+      "display": "Bipolar I disorder, most recent episode (or current) mixed, in full remission"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.7",
+      "display": "Bipolar I disorder, most recent episode (or current) unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.80",
+      "display": "Bipolar disorder, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.81",
+      "display": "Atypical manic disorder"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.82",
+      "display": "Atypical depressive disorder"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "296.89",
+      "display": "Other bipolar disorders"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-03",
+      "code": "191632009",
+      "display": "Bipolar affective disorder, currently depressed, severe, with psychosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10875004",
+      "display": "Severe mixed bipolar I disorder with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10981006",
+      "display": "Severe mixed bipolar I disorder with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111485001",
+      "display": "Mixed bipolar I disorder in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1196001",
+      "display": "Chronic bipolar II disorder, most recent episode major depressive (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "12969000",
+      "display": "Severe bipolar II disorder, most recent episode major depressive, in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "133091000119105",
+      "display": "Rapid cycling bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13313007",
+      "display": "Mild bipolar disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13581000",
+      "display": "Severe bipolar I disorder, single manic episode with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13746004",
+      "display": "Bipolar disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14495005",
+      "display": "Severe bipolar I disorder, single manic episode without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1499003",
+      "display": "Bipolar I disorder, single manic episode with postpartum onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "162004",
+      "display": "Severe manic bipolar I disorder without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16295005",
+      "display": "Bipolar II disorder, most recent episode major depressive (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16506000",
+      "display": "Mixed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "17782008",
+      "display": "Bipolar I disorder, most recent episode manic with catatonic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191618007",
+      "display": "Bipolar affective disorder, current episode manic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191620005",
+      "display": "Bipolar affective disorder, currently manic, mild (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191621009",
+      "display": "Bipolar affective disorder, currently manic, moderate (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191623007",
+      "display": "Bipolar affective disorder, currently manic, severe, with psychosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191625000",
+      "display": "Bipolar affective disorder, currently manic, in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191627008",
+      "display": "Bipolar affective disorder, current episode depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191629006",
+      "display": "Bipolar affective disorder, currently depressed, mild (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191630001",
+      "display": "Bipolar affective disorder, currently depressed, moderate (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191634005",
+      "display": "Bipolar affective disorder, currently depressed, in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191636007",
+      "display": "Mixed bipolar affective disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191638008",
+      "display": "Mixed bipolar affective disorder, mild (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191639000",
+      "display": "Mixed bipolar affective disorder, moderate (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191641004",
+      "display": "Mixed bipolar affective disorder, severe, with psychosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191643001",
+      "display": "Mixed bipolar affective disorder, in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "192362008",
+      "display": "Bipolar affective disorder, current episode mixed (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19300006",
+      "display": "Severe bipolar II disorder, most recent episode major depressive with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "20960007",
+      "display": "Severe bipolar II disorder, most recent episode major depressive with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "21900002",
+      "display": "Bipolar I disorder, most recent episode depressed with catatonic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22121000",
+      "display": "Depressed bipolar I disorder in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22407005",
+      "display": "Bipolar II disorder, most recent episode major depressive with catatonic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231444002",
+      "display": "Organic bipolar disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23741000119105",
+      "display": "Severe manic bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "261000119107",
+      "display": "Severe depressed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26203008",
+      "display": "Severe depressed bipolar I disorder with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26530004",
+      "display": "Severe bipolar disorder with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "271000119101",
+      "display": "Severe mixed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28663008",
+      "display": "Severe manic bipolar I disorder with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28884001",
+      "display": "Moderate bipolar I disorder, single manic episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29929003",
+      "display": "Bipolar I disorder, most recent episode depressed with atypical features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30520009",
+      "display": "Severe bipolar II disorder, most recent episode major depressive with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30687003",
+      "display": "Bipolar II disorder, most recent episode major depressive with postpartum onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30935000",
+      "display": "Manic bipolar I disorder in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "31446002",
+      "display": "Bipolar I disorder, most recent episode hypomanic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33380008",
+      "display": "Severe manic bipolar I disorder with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "34315001",
+      "display": "Bipolar II disorder, most recent episode major depressive with melancholic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3530005",
+      "display": "Bipolar I disorder, single manic episode, in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35481005",
+      "display": "Mixed bipolar I disorder in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35722002",
+      "display": "Severe bipolar II disorder, most recent episode major depressive, in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35846004",
+      "display": "Moderate bipolar II disorder, most recent episode major depressive (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36583000",
+      "display": "Mixed bipolar I disorder in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371596008",
+      "display": "Bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371599001",
+      "display": "Severe bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371600003",
+      "display": "Severe bipolar disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371604007",
+      "display": "Severe bipolar II disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40926005",
+      "display": "Moderate mixed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41552001",
+      "display": "Mild bipolar I disorder, single manic episode (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41832009",
+      "display": "Severe bipolar I disorder, single manic episode with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41836007",
+      "display": "Bipolar disorder in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43568002",
+      "display": "Bipolar II disorder, most recent episode major depressive with atypical features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "43769008",
+      "display": "Mild mixed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4441000",
+      "display": "Severe bipolar disorder with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45479006",
+      "display": "Manic bipolar I disorder in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46229002",
+      "display": "Severe mixed bipolar I disorder without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48937005",
+      "display": "Bipolar II disorder, most recent episode hypomanic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49468007",
+      "display": "Depressed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49512000",
+      "display": "Depressed bipolar I disorder in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51637008",
+      "display": "Chronic bipolar I disorder, most recent episode depressed (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53049002",
+      "display": "Severe bipolar disorder without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53607008",
+      "display": "Depressed bipolar I disorder in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54761006",
+      "display": "Severe depressed bipolar I disorder with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55516002",
+      "display": "Bipolar I disorder, most recent episode manic with postpartum onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5703000",
+      "display": "Bipolar disorder in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "59617007",
+      "display": "Severe depressed bipolar I disorder with psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61403008",
+      "display": "Severe depressed bipolar I disorder without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63249007",
+      "display": "Manic bipolar I disorder in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64731001",
+      "display": "Severe mixed bipolar I disorder with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65042007",
+      "display": "Bipolar I disorder, most recent episode mixed with postpartum onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "66631006",
+      "display": "Moderate depressed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67002003",
+      "display": "Severe bipolar II disorder, most recent episode major depressive, in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68569003",
+      "display": "Manic bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70546001",
+      "display": "Severe bipolar disorder with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71294008",
+      "display": "Mild bipolar II disorder, most recent episode major depressive (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71984005",
+      "display": "Mild manic bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "723903001",
+      "display": "Bipolar type I disorder currently in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "723905008",
+      "display": "Bipolar type II disorder currently in full remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73471000",
+      "display": "Bipolar I disorder, most recent episode mixed with catatonic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74686005",
+      "display": "Mild depressed bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75360000",
+      "display": "Bipolar I disorder, single manic episode, in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75752004",
+      "display": "Bipolar I disorder, most recent episode depressed with melancholic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "765176007",
+      "display": "Psychosis and severe depression co-occurrent and due to bipolar affective disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "767631007",
+      "display": "Bipolar disorder, most recent episode depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "767632000",
+      "display": "Bipolar disorder, most recent episode manic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "767633005",
+      "display": "Bipolar affective disorder, most recent episode mixed (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "767635003",
+      "display": "Bipolar I disorder, most recent episode manic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "767636002",
+      "display": "Bipolar I disorder, most recent episode depression (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78269000",
+      "display": "Bipolar I disorder, single manic episode, in partial remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78640000",
+      "display": "Severe manic bipolar I disorder with psychotic features, mood-congruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79584002",
+      "display": "Moderate bipolar disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81319007",
+      "display": "Severe bipolar II disorder, most recent episode major depressive without psychotic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82998009",
+      "display": "Moderate manic bipolar I disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "83225003",
+      "display": "Bipolar II disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85248005",
+      "display": "Bipolar disorder in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86058007",
+      "display": "Severe bipolar I disorder, single manic episode with psychotic features, mood-incongruent (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87203005",
+      "display": "Bipolar I disorder, most recent episode depressed with postpartum onset (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87950005",
+      "display": "Bipolar I disorder, single manic episode with catatonic features (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9340000",
+      "display": "Bipolar I disorder, single manic episode (disorder)"
+    } ]
+  }
+}

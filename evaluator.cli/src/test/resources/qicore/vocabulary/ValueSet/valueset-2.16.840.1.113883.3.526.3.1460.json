@@ -1,0 +1,150 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1460",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1460",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1460"
+  } ],
+  "version": "20200307",
+  "name": "FocalChorioretinitisandFocalRetinochoroiditis",
+  "title": "Focal Chorioretinitis and Focal Retinochoroiditis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.001",
+      "display": "Unspecified focal chorioretinal inflammation, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.002",
+      "display": "Unspecified focal chorioretinal inflammation, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.003",
+      "display": "Unspecified focal chorioretinal inflammation, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.011",
+      "display": "Focal chorioretinal inflammation, juxtapapillary, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.012",
+      "display": "Focal chorioretinal inflammation, juxtapapillary, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.013",
+      "display": "Focal chorioretinal inflammation, juxtapapillary, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.021",
+      "display": "Focal chorioretinal inflammation of posterior pole, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.022",
+      "display": "Focal chorioretinal inflammation of posterior pole, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.023",
+      "display": "Focal chorioretinal inflammation of posterior pole, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.031",
+      "display": "Focal chorioretinal inflammation, peripheral, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.032",
+      "display": "Focal chorioretinal inflammation, peripheral, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.033",
+      "display": "Focal chorioretinal inflammation, peripheral, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.041",
+      "display": "Focal chorioretinal inflammation, macular or paramacular, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.042",
+      "display": "Focal chorioretinal inflammation, macular or paramacular, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.043",
+      "display": "Focal chorioretinal inflammation, macular or paramacular, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15847003",
+      "display": "Focal chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193434008",
+      "display": "Focal juxtapapillary choroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193436005",
+      "display": "Juxtapapillary focal chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193438006",
+      "display": "Peripheral focal retinochoroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36535003",
+      "display": "Peripheral focal retinitis AND retinochoroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42031001",
+      "display": "Macular focal retinitis AND retinochoroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "44674000",
+      "display": "Focal choroiditis AND chorioretinitis of other posterior pole (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46497009",
+      "display": "Juxtapapillary focal retinitis AND retinochoroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56787009",
+      "display": "Peripheral focal choroiditis AND chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "6313001",
+      "display": "Juxtapapillary focal choroiditis AND chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88290000",
+      "display": "Focal chorioretinitis caused by acquired toxoplasmosis (disorder)"
+    } ]
+  }
+}

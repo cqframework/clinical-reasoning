@@ -1,0 +1,245 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.113.12.1038",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1038",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.113.12.1038"
+  } ],
+  "version": "20171219",
+  "name": "Osteoporosis",
+  "title": "Osteoporosis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M81.0",
+      "display": "Age-related osteoporosis without current pathological fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M81.6",
+      "display": "Localized osteoporosis [Lequesne]"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M81.8",
+      "display": "Other osteoporosis without current pathological fracture"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "733.01",
+      "display": "Senile osteoporosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "733.02",
+      "display": "Idiopathic osteoporosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "733.03",
+      "display": "Disuse osteoporosis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "733.09",
+      "display": "Other osteoporosis"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "203436008",
+      "display": "Osteoporosis in multiple myelomatosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "102447009",
+      "display": "Postmenopausal osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "109346000",
+      "display": "Osteoporotic bone marrow defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14651005",
+      "display": "Drug-induced osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1515008",
+      "display": "Gorham's disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "18040001",
+      "display": "Senile osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203429007",
+      "display": "Idiopathic generalized osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203433000",
+      "display": "Postoophorectomy osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203434006",
+      "display": "Post-surgical malabsorption osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203435007",
+      "display": "Localized osteoporosis - Lequesne (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203437004",
+      "display": "Osteoporosis in endocrine disorders (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203438009",
+      "display": "Vertebral osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203444008",
+      "display": "Postoophorectomy osteoporosis with pathological fracture (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203446005",
+      "display": "Pathological fracture co-occurrent and due to post-surgical malabsorption osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203657009",
+      "display": "Osteoporotic kyphosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240155001",
+      "display": "Adult idiopathic generalized osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240157009",
+      "display": "Secondary generalized osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240158004",
+      "display": "Regional migrating osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240159007",
+      "display": "Transient osteoporosis of hip (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240161003",
+      "display": "Disappearing bone disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240162005",
+      "display": "Secondary localized osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240164006",
+      "display": "Post-irradiation osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240198002",
+      "display": "Osteoporotic vertebral collapse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268028001",
+      "display": "Localized disuse osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "276661002",
+      "display": "Primary osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "281387004",
+      "display": "Regional osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309745002",
+      "display": "Osteoporosis localized to spine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "311806008",
+      "display": "Collapse of cervical vertebra due to osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32369003",
+      "display": "Menopausal osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3345002",
+      "display": "Idiopathic osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "390833005",
+      "display": "Osteoporosis caused by corticosteroid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "53174001",
+      "display": "Disuse osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64859006",
+      "display": "Osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "699528002",
+      "display": "Transient osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "703264005",
+      "display": "Secondary osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735617003",
+      "display": "Premenopausal idiopathic osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735618008",
+      "display": "Osteoporosis due to malabsorption (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "739301006",
+      "display": "Osteoporosis co-occurrent and due to multiple myeloma (disorder)"
+    } ]
+  }
+}

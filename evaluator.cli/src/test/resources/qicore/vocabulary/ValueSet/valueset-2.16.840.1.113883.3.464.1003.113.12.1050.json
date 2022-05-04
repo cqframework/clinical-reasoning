@@ -1,0 +1,1485 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.113.12.1050",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1050",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.113.12.1050"
+  } ],
+  "version": "20180310",
+  "name": "OsteoporoticFractures",
+  "title": "Osteoporotic Fractures",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.00XA",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified site, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.00XD",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.00XG",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.00XK",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.00XP",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.00XS",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified site, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.011A",
+      "display": "Age-related osteoporosis with current pathological fracture, right shoulder, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.011D",
+      "display": "Age-related osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.011G",
+      "display": "Age-related osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.011K",
+      "display": "Age-related osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.011P",
+      "display": "Age-related osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.011S",
+      "display": "Age-related osteoporosis with current pathological fracture, right shoulder, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.012A",
+      "display": "Age-related osteoporosis with current pathological fracture, left shoulder, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.012D",
+      "display": "Age-related osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.012G",
+      "display": "Age-related osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.012K",
+      "display": "Age-related osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.012P",
+      "display": "Age-related osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.012S",
+      "display": "Age-related osteoporosis with current pathological fracture, left shoulder, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.019A",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified shoulder, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.019D",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.019G",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.019K",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.019P",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.019S",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified shoulder, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.021A",
+      "display": "Age-related osteoporosis with current pathological fracture, right humerus, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.021D",
+      "display": "Age-related osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.021G",
+      "display": "Age-related osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.021K",
+      "display": "Age-related osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.021P",
+      "display": "Age-related osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.021S",
+      "display": "Age-related osteoporosis with current pathological fracture, right humerus, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.022A",
+      "display": "Age-related osteoporosis with current pathological fracture, left humerus, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.022D",
+      "display": "Age-related osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.022G",
+      "display": "Age-related osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.022K",
+      "display": "Age-related osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.022P",
+      "display": "Age-related osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.022S",
+      "display": "Age-related osteoporosis with current pathological fracture, left humerus, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.029A",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified humerus, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.029D",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.029G",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.029K",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.029P",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.029S",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified humerus, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.031A",
+      "display": "Age-related osteoporosis with current pathological fracture, right forearm, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.031D",
+      "display": "Age-related osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.031G",
+      "display": "Age-related osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.031K",
+      "display": "Age-related osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.031P",
+      "display": "Age-related osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.031S",
+      "display": "Age-related osteoporosis with current pathological fracture, right forearm, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.032A",
+      "display": "Age-related osteoporosis with current pathological fracture, left forearm, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.032D",
+      "display": "Age-related osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.032G",
+      "display": "Age-related osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.032K",
+      "display": "Age-related osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.032P",
+      "display": "Age-related osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.032S",
+      "display": "Age-related osteoporosis with current pathological fracture, left forearm, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.039A",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified forearm, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.039D",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.039G",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.039K",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.039P",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.039S",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified forearm, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.041A",
+      "display": "Age-related osteoporosis with current pathological fracture, right hand, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.041D",
+      "display": "Age-related osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.041G",
+      "display": "Age-related osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.041K",
+      "display": "Age-related osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.041P",
+      "display": "Age-related osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.041S",
+      "display": "Age-related osteoporosis with current pathological fracture, right hand, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.042A",
+      "display": "Age-related osteoporosis with current pathological fracture, left hand, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.042D",
+      "display": "Age-related osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.042G",
+      "display": "Age-related osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.042K",
+      "display": "Age-related osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.042P",
+      "display": "Age-related osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.042S",
+      "display": "Age-related osteoporosis with current pathological fracture, left hand, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.049A",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified hand, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.049D",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.049G",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.049K",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.049P",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.049S",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified hand, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.051A",
+      "display": "Age-related osteoporosis with current pathological fracture, right femur, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.051D",
+      "display": "Age-related osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.051G",
+      "display": "Age-related osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.051K",
+      "display": "Age-related osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.051P",
+      "display": "Age-related osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.051S",
+      "display": "Age-related osteoporosis with current pathological fracture, right femur, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.052A",
+      "display": "Age-related osteoporosis with current pathological fracture, left femur, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.052D",
+      "display": "Age-related osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.052G",
+      "display": "Age-related osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.052K",
+      "display": "Age-related osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.052P",
+      "display": "Age-related osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.052S",
+      "display": "Age-related osteoporosis with current pathological fracture, left femur, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.059A",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified femur, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.059D",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.059G",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.059K",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.059P",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.059S",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified femur, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.061A",
+      "display": "Age-related osteoporosis with current pathological fracture, right lower leg, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.061D",
+      "display": "Age-related osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.061G",
+      "display": "Age-related osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.061K",
+      "display": "Age-related osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.061P",
+      "display": "Age-related osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.061S",
+      "display": "Age-related osteoporosis with current pathological fracture, right lower leg, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.062A",
+      "display": "Age-related osteoporosis with current pathological fracture, left lower leg, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.062D",
+      "display": "Age-related osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.062G",
+      "display": "Age-related osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.062K",
+      "display": "Age-related osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.062P",
+      "display": "Age-related osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.062S",
+      "display": "Age-related osteoporosis with current pathological fracture, left lower leg, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.069A",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified lower leg, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.069D",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.069G",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.069K",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.069P",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.069S",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified lower leg, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.071A",
+      "display": "Age-related osteoporosis with current pathological fracture, right ankle and foot, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.071D",
+      "display": "Age-related osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.071G",
+      "display": "Age-related osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.071K",
+      "display": "Age-related osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.071P",
+      "display": "Age-related osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.071S",
+      "display": "Age-related osteoporosis with current pathological fracture, right ankle and foot, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.072A",
+      "display": "Age-related osteoporosis with current pathological fracture, left ankle and foot, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.072D",
+      "display": "Age-related osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.072G",
+      "display": "Age-related osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.072K",
+      "display": "Age-related osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.072P",
+      "display": "Age-related osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.072S",
+      "display": "Age-related osteoporosis with current pathological fracture, left ankle and foot, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.079A",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified ankle and foot, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.079D",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.079G",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.079K",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.079P",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.079S",
+      "display": "Age-related osteoporosis with current pathological fracture, unspecified ankle and foot, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.08XA",
+      "display": "Age-related osteoporosis with current pathological fracture, vertebra(e), initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.08XD",
+      "display": "Age-related osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.08XG",
+      "display": "Age-related osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.08XK",
+      "display": "Age-related osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.08XP",
+      "display": "Age-related osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.08XS",
+      "display": "Age-related osteoporosis with current pathological fracture, vertebra(e), sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.80XA",
+      "display": "Other osteoporosis with current pathological fracture, unspecified site, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.80XD",
+      "display": "Other osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.80XG",
+      "display": "Other osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.80XK",
+      "display": "Other osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.80XP",
+      "display": "Other osteoporosis with current pathological fracture, unspecified site, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.80XS",
+      "display": "Other osteoporosis with current pathological fracture, unspecified site, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.811A",
+      "display": "Other osteoporosis with current pathological fracture, right shoulder, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.811D",
+      "display": "Other osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.811G",
+      "display": "Other osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.811K",
+      "display": "Other osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.811P",
+      "display": "Other osteoporosis with current pathological fracture, right shoulder, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.811S",
+      "display": "Other osteoporosis with current pathological fracture, right shoulder, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.812A",
+      "display": "Other osteoporosis with current pathological fracture, left shoulder, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.812D",
+      "display": "Other osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.812G",
+      "display": "Other osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.812K",
+      "display": "Other osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.812P",
+      "display": "Other osteoporosis with current pathological fracture, left shoulder, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.812S",
+      "display": "Other osteoporosis with current pathological fracture, left shoulder, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.819A",
+      "display": "Other osteoporosis with current pathological fracture, unspecified shoulder, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.819D",
+      "display": "Other osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.819G",
+      "display": "Other osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.819K",
+      "display": "Other osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.819P",
+      "display": "Other osteoporosis with current pathological fracture, unspecified shoulder, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.819S",
+      "display": "Other osteoporosis with current pathological fracture, unspecified shoulder, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.821A",
+      "display": "Other osteoporosis with current pathological fracture, right humerus, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.821D",
+      "display": "Other osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.821G",
+      "display": "Other osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.821K",
+      "display": "Other osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.821P",
+      "display": "Other osteoporosis with current pathological fracture, right humerus, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.821S",
+      "display": "Other osteoporosis with current pathological fracture, right humerus, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.822A",
+      "display": "Other osteoporosis with current pathological fracture, left humerus, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.822D",
+      "display": "Other osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.822G",
+      "display": "Other osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.822K",
+      "display": "Other osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.822P",
+      "display": "Other osteoporosis with current pathological fracture, left humerus, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.822S",
+      "display": "Other osteoporosis with current pathological fracture, left humerus, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.829A",
+      "display": "Other osteoporosis with current pathological fracture, unspecified humerus, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.829D",
+      "display": "Other osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.829G",
+      "display": "Other osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.829K",
+      "display": "Other osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.829P",
+      "display": "Other osteoporosis with current pathological fracture, unspecified humerus, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.829S",
+      "display": "Other osteoporosis with current pathological fracture, unspecified humerus, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.831A",
+      "display": "Other osteoporosis with current pathological fracture, right forearm, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.831D",
+      "display": "Other osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.831G",
+      "display": "Other osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.831K",
+      "display": "Other osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.831P",
+      "display": "Other osteoporosis with current pathological fracture, right forearm, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.831S",
+      "display": "Other osteoporosis with current pathological fracture, right forearm, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.832A",
+      "display": "Other osteoporosis with current pathological fracture, left forearm, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.832D",
+      "display": "Other osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.832G",
+      "display": "Other osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.832K",
+      "display": "Other osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.832P",
+      "display": "Other osteoporosis with current pathological fracture, left forearm, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.832S",
+      "display": "Other osteoporosis with current pathological fracture, left forearm, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.839A",
+      "display": "Other osteoporosis with current pathological fracture, unspecified forearm, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.839D",
+      "display": "Other osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.839G",
+      "display": "Other osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.839K",
+      "display": "Other osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.839P",
+      "display": "Other osteoporosis with current pathological fracture, unspecified forearm, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.839S",
+      "display": "Other osteoporosis with current pathological fracture, unspecified forearm, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.841A",
+      "display": "Other osteoporosis with current pathological fracture, right hand, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.841D",
+      "display": "Other osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.841G",
+      "display": "Other osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.841K",
+      "display": "Other osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.841P",
+      "display": "Other osteoporosis with current pathological fracture, right hand, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.841S",
+      "display": "Other osteoporosis with current pathological fracture, right hand, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.842A",
+      "display": "Other osteoporosis with current pathological fracture, left hand, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.842D",
+      "display": "Other osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.842G",
+      "display": "Other osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.842K",
+      "display": "Other osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.842P",
+      "display": "Other osteoporosis with current pathological fracture, left hand, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.842S",
+      "display": "Other osteoporosis with current pathological fracture, left hand, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.849A",
+      "display": "Other osteoporosis with current pathological fracture, unspecified hand, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.849D",
+      "display": "Other osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.849G",
+      "display": "Other osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.849K",
+      "display": "Other osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.849P",
+      "display": "Other osteoporosis with current pathological fracture, unspecified hand, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.849S",
+      "display": "Other osteoporosis with current pathological fracture, unspecified hand, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.851A",
+      "display": "Other osteoporosis with current pathological fracture, right femur, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.851D",
+      "display": "Other osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.851G",
+      "display": "Other osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.851K",
+      "display": "Other osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.851P",
+      "display": "Other osteoporosis with current pathological fracture, right femur, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.851S",
+      "display": "Other osteoporosis with current pathological fracture, right femur, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.852A",
+      "display": "Other osteoporosis with current pathological fracture, left femur, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.852D",
+      "display": "Other osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.852G",
+      "display": "Other osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.852K",
+      "display": "Other osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.852P",
+      "display": "Other osteoporosis with current pathological fracture, left femur, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.852S",
+      "display": "Other osteoporosis with current pathological fracture, left femur, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.859A",
+      "display": "Other osteoporosis with current pathological fracture, unspecified femur, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.859D",
+      "display": "Other osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.859G",
+      "display": "Other osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.859K",
+      "display": "Other osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.859P",
+      "display": "Other osteoporosis with current pathological fracture, unspecified femur, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.859S",
+      "display": "Other osteoporosis with current pathological fracture, unspecified femur, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.861A",
+      "display": "Other osteoporosis with current pathological fracture, right lower leg, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.861D",
+      "display": "Other osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.861G",
+      "display": "Other osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.861K",
+      "display": "Other osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.861P",
+      "display": "Other osteoporosis with current pathological fracture, right lower leg, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.861S",
+      "display": "Other osteoporosis with current pathological fracture, right lower leg, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.862A",
+      "display": "Other osteoporosis with current pathological fracture, left lower leg, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.862D",
+      "display": "Other osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.862G",
+      "display": "Other osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.862K",
+      "display": "Other osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.862P",
+      "display": "Other osteoporosis with current pathological fracture, left lower leg, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.862S",
+      "display": "Other osteoporosis with current pathological fracture, left lower leg, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.869A",
+      "display": "Other osteoporosis with current pathological fracture, unspecified lower leg, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.869D",
+      "display": "Other osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.869G",
+      "display": "Other osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.869K",
+      "display": "Other osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.869P",
+      "display": "Other osteoporosis with current pathological fracture, unspecified lower leg, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.869S",
+      "display": "Other osteoporosis with current pathological fracture, unspecified lower leg, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.871A",
+      "display": "Other osteoporosis with current pathological fracture, right ankle and foot, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.871D",
+      "display": "Other osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.871G",
+      "display": "Other osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.871K",
+      "display": "Other osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.871P",
+      "display": "Other osteoporosis with current pathological fracture, right ankle and foot, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.871S",
+      "display": "Other osteoporosis with current pathological fracture, right ankle and foot, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.872A",
+      "display": "Other osteoporosis with current pathological fracture, left ankle and foot, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.872D",
+      "display": "Other osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.872G",
+      "display": "Other osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.872K",
+      "display": "Other osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.872P",
+      "display": "Other osteoporosis with current pathological fracture, left ankle and foot, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.872S",
+      "display": "Other osteoporosis with current pathological fracture, left ankle and foot, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.879A",
+      "display": "Other osteoporosis with current pathological fracture, unspecified ankle and foot, initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.879D",
+      "display": "Other osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.879G",
+      "display": "Other osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.879K",
+      "display": "Other osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.879P",
+      "display": "Other osteoporosis with current pathological fracture, unspecified ankle and foot, subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.879S",
+      "display": "Other osteoporosis with current pathological fracture, unspecified ankle and foot, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.88XA",
+      "display": "Other osteoporosis with current pathological fracture, vertebra(e), initial encounter for fracture"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.88XD",
+      "display": "Other osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with routine healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.88XG",
+      "display": "Other osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with delayed healing"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.88XK",
+      "display": "Other osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with nonunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.88XP",
+      "display": "Other osteoporosis with current pathological fracture, vertebra(e), subsequent encounter for fracture with malunion"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M80.88XS",
+      "display": "Other osteoporosis with current pathological fracture, vertebra(e), sequela"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-03",
+      "code": "431030000",
+      "display": "Pathologic fracture of femur associated with osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203444008",
+      "display": "Postoophorectomy osteoporosis with pathological fracture (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203445009",
+      "display": "Osteoporosis of disuse with pathological fracture (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203446005",
+      "display": "Pathological fracture co-occurrent and due to post-surgical malabsorption osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203447001",
+      "display": "Pathological fracture co-occurrent and due to drug-induced osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203448006",
+      "display": "Idiopathic osteoporosis with pathological fracture (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203449003",
+      "display": "Fracture of bone in neoplastic disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203450003",
+      "display": "Osteoporosis with pathological fracture of lumbar vertebrae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203451004",
+      "display": "Osteoporosis with pathological fracture of thoracic vertebrae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203452006",
+      "display": "Osteoporosis with pathological fracture of cervical vertebrae (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "203453001",
+      "display": "Postmenopausal osteoporosis with pathological fracture (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240198002",
+      "display": "Osteoporotic vertebral collapse (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "311806008",
+      "display": "Collapse of cervical vertebra due to osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "311890007",
+      "display": "Collapse of lumbar vertebra due to osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "311891006",
+      "display": "Collapse of thoracic vertebra due to osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "431031001",
+      "display": "Pathological fracture of neck of femur associated with osteoporosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443165006",
+      "display": "Pathological fracture due to osteoporosis (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,250 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1482",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1482",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1482"
+  } ],
+  "version": "20200307",
+  "name": "SeparationofRetinalLayers",
+  "title": "Separation of Retinal Layers",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.711",
+      "display": "Central serous chorioretinopathy, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.712",
+      "display": "Central serous chorioretinopathy, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.713",
+      "display": "Central serous chorioretinopathy, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.721",
+      "display": "Serous detachment of retinal pigment epithelium, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.722",
+      "display": "Serous detachment of retinal pigment epithelium, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.723",
+      "display": "Serous detachment of retinal pigment epithelium, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.731",
+      "display": "Hemorrhagic detachment of retinal pigment epithelium, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.732",
+      "display": "Hemorrhagic detachment of retinal pigment epithelium, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H35.733",
+      "display": "Hemorrhagic detachment of retinal pigment epithelium, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193319001",
+      "display": "New partial retinal detachment with single defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193320007",
+      "display": "New partial retinal detachment with multiple defects (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193322004",
+      "display": "New partial retinal detachment with retinal dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193323009",
+      "display": "Recent total retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193324003",
+      "display": "Recent subtotal retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193325002",
+      "display": "Old partial retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193326001",
+      "display": "Old total retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193327005",
+      "display": "Old subtotal retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19620000",
+      "display": "Rhegmatogenous retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232004004",
+      "display": "Giant retinal tear (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232008001",
+      "display": "Rhegmatogenous retinal detachment - macula on (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232009009",
+      "display": "Rhegmatogenous retinal detachment - macula off (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232010004",
+      "display": "Traction retinal detachment involving macula (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232011000",
+      "display": "Traction retinal detachment sparing macula (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232012007",
+      "display": "Combined traction and rhegmatogenous retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232015009",
+      "display": "Solid retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232023006",
+      "display": "Traction retinal detachment co-occurrent and due to diabetes mellitus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232034009",
+      "display": "Central serous retinopathy with pit of optic disc (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "247165009",
+      "display": "Retinal detachment - subretinal fluid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312923002",
+      "display": "Chronic central serous chorioretinopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312924008",
+      "display": "Inactive central serous chorioretinopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312947009",
+      "display": "Acute central serous chorioretinopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312956001",
+      "display": "Central serous chorioretinopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312957005",
+      "display": "Variant central serous chorioretinopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314006008",
+      "display": "Acute central serous retinopathy with subretinal fluid (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314007004",
+      "display": "Chronic central serous retinopathy with diffuse retinal pigment epithelial detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314008009",
+      "display": "Inactive central serous retinopathy with focal retinal pigment epithelial detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314009001",
+      "display": "Central serous retinopathy with small retinal pigment epithelial detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "34711008",
+      "display": "Traction detachment of retina (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3598000",
+      "display": "Partial recent retinal detachment with single defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38579007",
+      "display": "Partial recent retinal detachment with retinal dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38599001",
+      "display": "Serous retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4178006",
+      "display": "Partial recent retinal detachment with multiple defects (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42059000",
+      "display": "Retinal detachment (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51987004",
+      "display": "Retinal detachment without retinal defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56202001",
+      "display": "Retinal detachment with retinal defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "7219007",
+      "display": "Traction detachment with vitreoretinal organization (disorder)"
+    } ]
+  }
+}

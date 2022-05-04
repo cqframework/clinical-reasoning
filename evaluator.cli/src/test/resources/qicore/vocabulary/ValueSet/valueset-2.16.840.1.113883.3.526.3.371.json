@@ -1,0 +1,450 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.371",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.371",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.371"
+  } ],
+  "version": "20170504",
+  "name": "CardiacSurgery",
+  "title": "Cardiac Surgery",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2012",
+      "code": "92980",
+      "display": "Transcatheter placement of an intracoronary stent(s), percutaneous, with or without other therapeutic intervention, any method; single vessel"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2012",
+      "code": "92981",
+      "display": "Transcatheter placement of an intracoronary stent(s), percutaneous, with or without other therapeutic intervention, any method; each additional vessel (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2012",
+      "code": "92982",
+      "display": "Percutaneous transluminal coronary balloon angioplasty; single vessel"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2012",
+      "code": "92984",
+      "display": "Percutaneous transluminal coronary balloon angioplasty; each additional vessel (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2012",
+      "code": "92995",
+      "display": "Percutaneous transluminal coronary atherectomy, by mechanical or other method, with or without balloon angioplasty; single vessel"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2012",
+      "code": "92996",
+      "display": "Percutaneous transluminal coronary atherectomy, by mechanical or other method, with or without balloon angioplasty; each additional vessel (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33140",
+      "display": "Transmyocardial laser revascularization, by thoracotomy; (separate procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33510",
+      "display": "Coronary artery bypass, vein only; single coronary venous graft"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33511",
+      "display": "Coronary artery bypass, vein only; 2 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33512",
+      "display": "Coronary artery bypass, vein only; 3 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33513",
+      "display": "Coronary artery bypass, vein only; 4 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33514",
+      "display": "Coronary artery bypass, vein only; 5 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33516",
+      "display": "Coronary artery bypass, vein only; 6 or more coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33533",
+      "display": "Coronary artery bypass, using arterial graft(s); single arterial graft"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33534",
+      "display": "Coronary artery bypass, using arterial graft(s); 2 coronary arterial grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33535",
+      "display": "Coronary artery bypass, using arterial graft(s); 3 coronary arterial grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33536",
+      "display": "Coronary artery bypass, using arterial graft(s); 4 or more coronary arterial grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92920",
+      "display": "Percutaneous transluminal coronary angioplasty; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92924",
+      "display": "Percutaneous transluminal coronary atherectomy, with coronary angioplasty when performed; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92928",
+      "display": "Percutaneous transcatheter placement of intracoronary stent(s), with coronary angioplasty when performed; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92933",
+      "display": "Percutaneous transluminal coronary atherectomy, with intracoronary stent, with coronary angioplasty when performed; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92937",
+      "display": "Percutaneous transluminal revascularization of or through coronary artery bypass graft (internal mammary, free arterial, venous), any combination of intracoronary stent, atherectomy and angioplasty, including distal protection when performed; single vessel"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92941",
+      "display": "Percutaneous transluminal revascularization of acute total/subtotal occlusion during acute myocardial infarction, coronary artery or coronary artery bypass graft, any combination of intracoronary stent, atherectomy and angioplasty, including aspiration thrombectomy when performed, single vessel"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92943",
+      "display": "Percutaneous transluminal revascularization of chronic total occlusion, coronary artery, coronary artery branch, or coronary artery bypass graft, any combination of intracoronary stent, atherectomy and angioplasty; single vessel"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175007008",
+      "display": "Saphenous vein graft replacement of one coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175008003",
+      "display": "Saphenous vein graft replacement of two coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175009006",
+      "display": "Saphenous vein graft replacement of three coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175011002",
+      "display": "Saphenous vein graft replacement of four or more coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175022003",
+      "display": "Allograft replacement of one coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175024002",
+      "display": "Allograft replacement of two coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175025001",
+      "display": "Allograft replacement of three coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2017-09",
+      "code": "175026000",
+      "display": "Allograft replacement of four or more coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10326007",
+      "display": "Coronary artery bypass with autogenous graft, three grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "119564002",
+      "display": "Internal mammary-coronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "119565001",
+      "display": "Coronary artery bypass graft, anastomosis of artery of thorax to coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15256002",
+      "display": "Transmyocardial revascularization by laser technique (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "174911007",
+      "display": "Revascularization of wall of heart (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175021005",
+      "display": "Allograft bypass of coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175036008",
+      "display": "Revision of bypass for coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175037004",
+      "display": "Revision of bypass for one coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175038009",
+      "display": "Revision of bypass for two coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175039001",
+      "display": "Revision of bypass for three coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175040004",
+      "display": "Revision of bypass for four or more coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175041000",
+      "display": "Revision of connection of thoracic artery to coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175045009",
+      "display": "Connection of mammary artery to coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175047001",
+      "display": "Double implantation of mammary arteries into coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175048006",
+      "display": "Single anastomosis of mammary artery to left anterior descending coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175050003",
+      "display": "Single implantation of mammary artery into coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232717009",
+      "display": "Coronary artery bypass grafting (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232719007",
+      "display": "Coronary artery bypass graft x 1 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232720001",
+      "display": "Coronary artery bypass grafts x 2 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232721002",
+      "display": "Coronary artery bypass grafts x 3 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232722009",
+      "display": "Coronary artery bypass grafts x 4 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232723004",
+      "display": "Coronary artery bypass grafts x 5 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232724005",
+      "display": "Coronary artery bypass grafts greater than 5 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265481001",
+      "display": "Double anastomosis of mammary arteries to coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275215001",
+      "display": "Left internal mammary artery single anastomosis (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275216000",
+      "display": "Right internal mammary artery single anastomosis (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275227003",
+      "display": "Myocardial revascularization (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275252001",
+      "display": "Left internal mammary artery sequential anastomosis (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275253006",
+      "display": "Right internal mammary artery sequential anastomosis (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287277008",
+      "display": "Indirect heart revascularization (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30670000",
+      "display": "Anastomosis of thoracic artery to coronary artery, double (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309814006",
+      "display": "Aortocoronary bypass grafting (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3546002",
+      "display": "Aortocoronary artery bypass graft with saphenous vein graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359597003",
+      "display": "Single internal mammary-coronary artery bypass (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359601003",
+      "display": "Coronary artery bypass with autogenous graft of internal mammary artery, single graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39202005",
+      "display": "Coronary artery bypass with autogenous graft, four grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39724006",
+      "display": "Anastomosis of internal mammary artery to coronary artery, double vessel (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414088005",
+      "display": "Emergency coronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418551006",
+      "display": "Laparoscopic coronary artery bypass using robotic assistance (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418824004",
+      "display": "Off-pump coronary artery bypass (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419132001",
+      "display": "Minimally invasive direct coronary artery bypass (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48431000",
+      "display": "Anastomosis of thoracic artery to coronary artery, single (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736966005",
+      "display": "Aortocoronary artery bypass of four or more coronary arteries with saphenous vein graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736967001",
+      "display": "Aortocoronary artery bypass of one coronary artery with saphenous vein graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736968006",
+      "display": "Aortocoronary artery bypass of three coronary arteries with saphenous vein graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736969003",
+      "display": "Aortocoronary artery bypass of two coronary arteries with saphenous vein graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736970002",
+      "display": "Allograft bypass of four or more coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736971003",
+      "display": "Allograft bypass of one coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736972005",
+      "display": "Allograft bypass of three coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736973000",
+      "display": "Allograft bypass of two coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74371005",
+      "display": "Coronary artery bypass with autogenous graft, two grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81266008",
+      "display": "Heart revascularization (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82247006",
+      "display": "Coronary artery bypass with autogenous graft, five grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90205004",
+      "display": "Cardiac revascularization with bypass anastomosis (procedure)"
+    } ]
+  }
+}

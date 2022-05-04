@@ -1,0 +1,155 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1459",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1459",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1459"
+  } ],
+  "version": "20200307",
+  "name": "DisseminatedChorioretinitisandDisseminatedRetinochoroiditis",
+  "title": "Disseminated Chorioretinitis and Disseminated Retinochoroiditis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "A18.53",
+      "display": "Tuberculous chorioretinitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.101",
+      "display": "Unspecified disseminated chorioretinal inflammation, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.102",
+      "display": "Unspecified disseminated chorioretinal inflammation, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.103",
+      "display": "Unspecified disseminated chorioretinal inflammation, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.111",
+      "display": "Disseminated chorioretinal inflammation of posterior pole, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.112",
+      "display": "Disseminated chorioretinal inflammation of posterior pole, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.113",
+      "display": "Disseminated chorioretinal inflammation of posterior pole, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.121",
+      "display": "Disseminated chorioretinal inflammation, peripheral right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.122",
+      "display": "Disseminated chorioretinal inflammation, peripheral, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.123",
+      "display": "Disseminated chorioretinal inflammation, peripheral, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.131",
+      "display": "Disseminated chorioretinal inflammation, generalized, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.132",
+      "display": "Disseminated chorioretinal inflammation, generalized, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.133",
+      "display": "Disseminated chorioretinal inflammation, generalized, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.141",
+      "display": "Acute posterior multifocal placoid pigment epitheliopathy, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.142",
+      "display": "Acute posterior multifocal placoid pigment epitheliopathy, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H30.143",
+      "display": "Acute posterior multifocal placoid pigment epitheliopathy, bilateral"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14894002",
+      "display": "Generalized disseminated choroiditis AND chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193442009",
+      "display": "Disseminated posterior pole chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193443004",
+      "display": "Disseminated peripheral chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "193444005",
+      "display": "General disseminated chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371099005",
+      "display": "Generalized disseminated choroiditis AND chorioretinitis with acute necrosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48225000",
+      "display": "Tuberculous disseminated chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51579006",
+      "display": "Disseminated choroiditis AND chorioretinitis, posterior pole (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61517002",
+      "display": "Metastatic disseminated retinitis AND retinochoroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69811008",
+      "display": "Peripheral disseminated choroiditis AND chorioretinitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77939001",
+      "display": "Syphilitic disseminated retinochoroiditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "78769001",
+      "display": "Disseminated chorioretinitis (disorder)"
+    } ]
+  }
+}

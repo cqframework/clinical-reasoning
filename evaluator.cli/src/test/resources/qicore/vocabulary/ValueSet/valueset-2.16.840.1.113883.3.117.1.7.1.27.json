@@ -1,0 +1,210 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.27",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.27",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.27"
+  } ],
+  "version": "20190301",
+  "name": "DietaryIntakeOtherthanBreastMilk",
+  "title": "Dietary Intake Other than Breast Milk",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11713004",
+      "display": "Water (substance)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284458003",
+      "display": "Casein-based baby milk (substance)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284459006",
+      "display": "Low birth weight baby milk (substance)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "284461002",
+      "display": "Whey-based baby milk (substance)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "346712003",
+      "display": "Product containing water (medicinal product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "386127005",
+      "display": "Formula milk (substance)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "412413001",
+      "display": "Infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "412414007",
+      "display": "Infant formula + iron (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443141000124102",
+      "display": "Soy-based infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443151000124100",
+      "display": "Sterilized water infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443161000124103",
+      "display": "Soy-based infant weaning formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443171000124105",
+      "display": "Soy-based no added carbohydrate infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443181000124108",
+      "display": "Standard infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443191000124106",
+      "display": "Soy-based standard infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443201000124109",
+      "display": "Standard infant organic formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443211000124107",
+      "display": "Standard infant formula with fiber (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443221000124104",
+      "display": "Standard weaning infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443231000124101",
+      "display": "Premature infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443241000124106",
+      "display": "Modified amino acid composition infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443251000124108",
+      "display": "Hypoallergenic infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443261000124105",
+      "display": "Elemental infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443271000124103",
+      "display": "Hydrolyzed protein infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443281000124100",
+      "display": "Leucine-free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443291000124102",
+      "display": "Methionine-free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443301000124101",
+      "display": "Phenylalanine-free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443311000124103",
+      "display": "Lysine and tryptophan-free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443321000124106",
+      "display": "Non-essential amino acid free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443331000124109",
+      "display": "Phenylalanine and tyrosine-free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443341000124104",
+      "display": "Modular amino acid-free infant formula component (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443511000124109",
+      "display": "Low calcium and vitamin D-free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443521000124101",
+      "display": "Reduced lactose infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443531000124103",
+      "display": "Methionine and valine-free and low in isoleucine and threonine infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443541000124108",
+      "display": "Renal infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443551000124105",
+      "display": "Modular infant formula component (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444261000124107",
+      "display": "Isoleucine, leucine and valine-free infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444281000124102",
+      "display": "Glucose water infant formula (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444311000124100",
+      "display": "Modular hydrolyzed protein infant formula component (product)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67079006",
+      "display": "Glucose (substance)"
+    } ]
+  }
+}

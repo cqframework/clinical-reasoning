@@ -1,0 +1,80 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1458",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1458",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1458"
+  } ],
+  "version": "20200307",
+  "name": "DisordersofVisualCortex",
+  "title": "Disorders of Visual Cortex",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H47.611",
+      "display": "Cortical blindness, right side of brain"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H47.612",
+      "display": "Cortical blindness, left side of brain"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128329001",
+      "display": "Disorder of visual cortex (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194068002",
+      "display": "Visual cortex disorder due to neoplasm (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194069005",
+      "display": "Visual cortex disorder due to vascular disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194070006",
+      "display": "Inflammatory disorder of visual cortex (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "230526001",
+      "display": "Compression of visual cortex (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302904002",
+      "display": "Infarction of visual cortex (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "342741000119103",
+      "display": "Cortical blindness of right side of brain (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "342751000119101",
+      "display": "Cortical blindness of left side of brain (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68574006",
+      "display": "Cortical blindness (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "732251003",
+      "display": "Cortical blindness, intellectual disability, polydactyly syndrome (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1375",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1375",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1375"
+  } ],
+  "version": "20170504",
+  "name": "Dexbrompheniramine",
+  "title": "Dexbrompheniramine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190580",
+      "display": "Codeine Phosphate 1.2 MG/ML / Dexbrompheniramine maleate 0.133 MG/ML / Pseudoephedrine Hydrochloride 4 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1190600",
+      "display": "Dexbrompheniramine maleate 0.133 MG/ML / Dextromethorphan Hydrobromide 2 MG/ML / Pseudoephedrine Hydrochloride 4 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1251806",
+      "display": "12 HR Acetaminophen 500 MG / Dexbrompheniramine maleate 3 MG / Pseudoephedrine Hydrochloride 60 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1305588",
+      "display": "12 HR Dexbrompheniramine maleate 6 MG / Pseudoephedrine Hydrochloride 120 MG Extended Release Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1369403",
+      "display": "chlophedianol hydrochloride 2.5 MG/ML / Dexbrompheniramine maleate 0.2 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1441376",
+      "display": "chlophedianol hydrochloride 2.5 MG/ML / Dexbrompheniramine maleate 0.2 MG/ML / Pseudoephedrine Hydrochloride 6 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1491637",
+      "display": "Dexbrompheniramine maleate 1 MG / Phenylephrine Hydrochloride 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1539185",
+      "display": "Dexbrompheniramine maleate 0.2 MG/ML / Phenylephrine Hydrochloride 1 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1545306",
+      "display": "Dexbrompheniramine maleate 1 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1545309",
+      "display": "Dexbrompheniramine maleate 0.4 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1551286",
+      "display": "chlophedianol hydrochloride 2.5 MG/ML / Dexbrompheniramine maleate 0.2 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1798453",
+      "display": "Acetaminophen 500 MG / Dexbrompheniramine maleate 1 MG Oral Tablet"
+    } ]
+  }
+}

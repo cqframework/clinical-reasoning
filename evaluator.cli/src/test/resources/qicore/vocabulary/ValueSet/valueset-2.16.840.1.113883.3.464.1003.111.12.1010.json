@@ -1,0 +1,145 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.111.12.1010",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1010",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.111.12.1010"
+  } ],
+  "version": "20170504",
+  "name": "ProceduresInvolvingContraceptiveDevices",
+  "title": "Procedures Involving Contraceptive Devices",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "11976",
+      "display": "Removal, implantable contraceptive capsules"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "57170",
+      "display": "Diaphragm or cervical cap fitting with instructions"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "58300",
+      "display": "Insertion of intrauterine device (IUD)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "58301",
+      "display": "Removal of intrauterine device (IUD)"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S4981",
+      "display": "Insertion of levonorgestrel-releasing intrauterine system"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "169553002",
+      "display": "Insertion of subcutaneous contraceptive (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176749004",
+      "display": "Removal of intrauterine contraceptive device from pouch of Douglas (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "176839005",
+      "display": "Removal of displaced intrauterine contraceptive device (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225251006",
+      "display": "Fitting of cervical cap (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225256001",
+      "display": "Removal of cervical cap (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225257005",
+      "display": "Insertion of cervical cap (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236892008",
+      "display": "Removal of displaced intrauterine contraceptive device from peritoneal cavity (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "274042004",
+      "display": "Transvaginal removal of coil (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275811000",
+      "display": "Diaphragm fit (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "301806003",
+      "display": "Insertion of subcutaneous contraceptive in arm (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "301807007",
+      "display": "Removal of subcutaneous contraceptive (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440668008",
+      "display": "Replacement of implantable contraceptive capsule (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442490009",
+      "display": "Removal of etonogestrel implant (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "450836008",
+      "display": "Removal of etonogestrel radiopaque contraceptive implant (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46706006",
+      "display": "Replacement of contraceptive intrauterine device (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "472837007",
+      "display": "Insertion of hormone releasing intrauterine contraceptive device (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "472838002",
+      "display": "Removal of hormone releasing intrauterine contraceptive device (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58391006",
+      "display": "Diaphragm fitting with education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65200003",
+      "display": "Insertion of intrauterine contraceptive device (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68254000",
+      "display": "Removal of intrauterine device (procedure)"
+    } ]
+  }
+}

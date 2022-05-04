@@ -1,0 +1,65 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.35",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.35",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.35"
+  } ],
+  "version": "20170725",
+  "name": "Galactosemia",
+  "title": "Galactosemia",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E74.20",
+      "display": "Disorders of galactose metabolism, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E74.21",
+      "display": "Galactosemia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E74.29",
+      "display": "Other disorders of galactose metabolism"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "124354006",
+      "display": "Deficiency of uridine diphosphate-glucose-hexose-1-phosphate uridylyltransferase (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190745006",
+      "display": "Galactosemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237963003",
+      "display": "Disorder of galactose metabolism (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "297237003",
+      "display": "Generalized uridine diphosphate galactose-4-epimerase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "297238008",
+      "display": "Erythrocyte uridine diphosphate galactose-4-epimerase deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8849004",
+      "display": "Uridine diphosphate glucose-4-epimerase deficiency (disorder)"
+    } ]
+  }
+}

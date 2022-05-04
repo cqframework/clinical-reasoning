@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1253",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1253",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1253"
+  } ],
+  "version": "20200306",
+  "name": "AllergytoEggs",
+  "title": "Allergy to Eggs",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T78.08XA",
+      "display": "Anaphylactic reaction due to eggs, initial encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T78.08XD",
+      "display": "Anaphylactic reaction due to eggs, subsequent encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T78.08XS",
+      "display": "Anaphylactic reaction due to eggs, sequela"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Z91.012",
+      "display": "Allergy to eggs"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "213020009",
+      "display": "Allergy to egg protein (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "91930004",
+      "display": "Allergy to edible egg (finding)"
+    } ]
+  }
+}

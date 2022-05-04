@@ -1,0 +1,80 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1029.67",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1029.67",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1029.67"
+  } ],
+  "version": "20180302",
+  "name": "OtherHealthCareFacility",
+  "title": "Other Health Care Facility",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16384001",
+      "display": "Skilled nursing facility, level 2 care (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "18095007",
+      "display": "Intermediate care hospital for mentally retarded (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22357001",
+      "display": "Skilled nursing facility, level 1 care (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "224881003",
+      "display": "Charitable nursing home (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "310206007",
+      "display": "Private nursing home (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32074000",
+      "display": "Long term care hospital (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "35313001",
+      "display": "Skilled nursing facility, level 4 care (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42665001",
+      "display": "Nursing home (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45618002",
+      "display": "Skilled nursing facility (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "56109004",
+      "display": "Intermediate care hospital (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62480006",
+      "display": "Psychiatric hospital (environment)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "63997002",
+      "display": "Skilled nursing facility, level 3 care (environment)"
+    } ]
+  }
+}

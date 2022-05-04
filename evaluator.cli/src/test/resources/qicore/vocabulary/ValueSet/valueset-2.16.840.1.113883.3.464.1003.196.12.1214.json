@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1214",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1214",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1214"
+  } ],
+  "version": "20170504",
+  "name": "DTaPVaccine",
+  "title": "DTaP Vaccine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "106",
+      "display": "diphtheria, tetanus toxoids and acellular pertussis vaccine, 5 pertussis antigens"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "107",
+      "display": "diphtheria, tetanus toxoids and acellular pertussis vaccine, unspecified formulation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "110",
+      "display": "DTaP-hepatitis B and poliovirus vaccine"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "120",
+      "display": "diphtheria, tetanus toxoids and acellular pertussis vaccine, Haemophilus influenzae type b conjugate, and poliovirus vaccine, inactivated (DTaP-Hib-IPV)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "20",
+      "display": "diphtheria, tetanus toxoids and acellular pertussis vaccine"
+    }, {
+      "system": "http://hl7.org/fhir/sid/cvx",
+      "version": "2020-01",
+      "code": "50",
+      "display": "DTaP-Haemophilus influenzae type b conjugate vaccine"
+    } ]
+  }
+}

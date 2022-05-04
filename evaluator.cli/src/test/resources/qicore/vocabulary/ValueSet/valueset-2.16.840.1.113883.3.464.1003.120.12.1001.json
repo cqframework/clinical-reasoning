@@ -1,0 +1,665 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.120.12.1001",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.120.12.1001",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.120.12.1001"
+  } ],
+  "version": "20170504",
+  "name": "DisordersoftheImmuneSystem",
+  "title": "Disorders of the Immune System",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.0",
+      "display": "Hereditary hypogammaglobulinemia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.1",
+      "display": "Nonfamilial hypogammaglobulinemia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.2",
+      "display": "Selective deficiency of immunoglobulin A [IgA]"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.3",
+      "display": "Selective deficiency of immunoglobulin G [IgG] subclasses"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.4",
+      "display": "Selective deficiency of immunoglobulin M [IgM]"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.5",
+      "display": "Immunodeficiency with increased immunoglobulin M [IgM]"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.6",
+      "display": "Antibody deficiency with near-normal immunoglobulins or with hyperimmunoglobulinemia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.7",
+      "display": "Transient hypogammaglobulinemia of infancy"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.8",
+      "display": "Other immunodeficiencies with predominantly antibody defects"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D80.9",
+      "display": "Immunodeficiency with predominantly antibody defects, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.0",
+      "display": "Severe combined immunodeficiency [SCID] with reticular dysgenesis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.1",
+      "display": "Severe combined immunodeficiency [SCID] with low T- and B-cell numbers"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.2",
+      "display": "Severe combined immunodeficiency [SCID] with low or normal B-cell numbers"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.4",
+      "display": "Nezelof's syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.6",
+      "display": "Major histocompatibility complex class I deficiency"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.7",
+      "display": "Major histocompatibility complex class II deficiency"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.89",
+      "display": "Other combined immunodeficiencies"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D81.9",
+      "display": "Combined immunodeficiency, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D82.0",
+      "display": "Wiskott-Aldrich syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D82.1",
+      "display": "Di George's syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D82.2",
+      "display": "Immunodeficiency with short-limbed stature"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D82.3",
+      "display": "Immunodeficiency following hereditary defective response to Epstein-Barr virus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D82.4",
+      "display": "Hyperimmunoglobulin E [IgE] syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D82.8",
+      "display": "Immunodeficiency associated with other specified major defects"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D82.9",
+      "display": "Immunodeficiency associated with major defect, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D83.0",
+      "display": "Common variable immunodeficiency with predominant abnormalities of B-cell numbers and function"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D83.1",
+      "display": "Common variable immunodeficiency with predominant immunoregulatory T-cell disorders"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D83.2",
+      "display": "Common variable immunodeficiency with autoantibodies to B- or T-cells"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D83.8",
+      "display": "Other common variable immunodeficiencies"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D83.9",
+      "display": "Common variable immunodeficiency, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D84.0",
+      "display": "Lymphocyte function antigen-1 [LFA-1] defect"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D84.1",
+      "display": "Defects in the complement system"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D84.8",
+      "display": "Other specified immunodeficiencies"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D84.9",
+      "display": "Immunodeficiency, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.3",
+      "display": "Immune reconstitution syndrome"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.810",
+      "display": "Acute graft-versus-host disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.811",
+      "display": "Chronic graft-versus-host disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.812",
+      "display": "Acute on chronic graft-versus-host disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.813",
+      "display": "Graft-versus-host disease, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.82",
+      "display": "Autoimmune lymphoproliferative syndrome [ALPS]"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.89",
+      "display": "Other specified disorders involving the immune mechanism, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "D89.9",
+      "display": "Disorder involving the immune mechanism, unspecified"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "121121000119106",
+      "display": "Acute graft-versus-host reaction following bone marrow transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "121131000119109",
+      "display": "Chronic graft versus host disease after transplantation of bone marrow (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128631000119109",
+      "display": "Chronic graft-versus-host disease following kidney transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "18827005",
+      "display": "Complement abnormality (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190979003",
+      "display": "Selective immunoglobulin A deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190980000",
+      "display": "Selective immunoglobulin M deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190981001",
+      "display": "Selective immunoglobulin G deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190996002",
+      "display": "Severe combined immunodeficiency with reticular dysgenesis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190997006",
+      "display": "Severe combined immunodeficiency with low T- and B-cell numbers (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "190998001",
+      "display": "Severe combined immunodeficiency with low or normal B-cell numbers (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191001007",
+      "display": "Major histocompatibility complex class I deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191002000",
+      "display": "Major histocompatibility complex class II deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191011000",
+      "display": "Common variable immunodeficiency with predominant abnormalities of B-cell numbers and functions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191012007",
+      "display": "Common variable immunodeficiency with predominant immunoregulatory T-cell disorders (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191013002",
+      "display": "Common variable immunodeficiency with autoantibodies to B- or T-cells (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "191018006",
+      "display": "Lymphocyte function antigen-1 defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23238000",
+      "display": "Common variable agammaglobulinemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234416002",
+      "display": "X-linked hypogammaglobulinemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234532001",
+      "display": "Immunodeficiency disorder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234562007",
+      "display": "Anti-protein antibody deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234593008",
+      "display": "Classical complement pathway abnormality (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234594002",
+      "display": "Complement 1q deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234595001",
+      "display": "Complement 1q beta chain deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234596000",
+      "display": "Complement 1q dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234597009",
+      "display": "Complement 1r deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234598004",
+      "display": "Complement 1s deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234599007",
+      "display": "Complement 2 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234600005",
+      "display": "Complement 4 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234601009",
+      "display": "Complement 4A deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234602002",
+      "display": "Complement 4B deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234603007",
+      "display": "Complement 3 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234604001",
+      "display": "Alternative pathway deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234605000",
+      "display": "Factor B deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234607008",
+      "display": "Factor D deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234608003",
+      "display": "Terminal component deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234609006",
+      "display": "Complement 5 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234611002",
+      "display": "Complement 6 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234612009",
+      "display": "Complement 7 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234613004",
+      "display": "Combined complement 6 and 7 deficiencies (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234614005",
+      "display": "Complement 8 beta chain deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234615006",
+      "display": "Complement 8 beta chain dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234616007",
+      "display": "Complement 8 alpha-gamma deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234617003",
+      "display": "Complement 9 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234618008",
+      "display": "Complement regulatory factor defect (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234619000",
+      "display": "Hereditary C1 esterase inhibitor deficiency - deficient factor (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234620006",
+      "display": "Hereditary C1 esterase inhibitor deficiency - dysfunctional factor (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234621005",
+      "display": "Factor I deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234622003",
+      "display": "Factor H deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234623008",
+      "display": "Complement 4 binding protein deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234624002",
+      "display": "Decay accelerating factor deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234625001",
+      "display": "Homologous restriction factor deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234626000",
+      "display": "Complement 5a inhibitor deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234627009",
+      "display": "Anaphylotoxin inactivator deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234628004",
+      "display": "Complement receptor deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234629007",
+      "display": "Complement receptor 1 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234630002",
+      "display": "Complement receptor 3 deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234631003",
+      "display": "Immunodeficiency with major anomalies (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "234646005",
+      "display": "Graft-versus-host disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24419001",
+      "display": "Disorder of complement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24743004",
+      "display": "Complement deficiency disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25109007",
+      "display": "Lymphopenic agammaglobulinemia - short-limbed dwarfism syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "263661007",
+      "display": "Complement 5 dysfunction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36070007",
+      "display": "Wiskott-Aldrich syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39674000",
+      "display": "Familial C3B inhibitor deficiency syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402355000",
+      "display": "Acute graft-versus-host disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402356004",
+      "display": "Chronic graft-versus-host disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402357008",
+      "display": "Lichenoid chronic graft-versus-host disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402358003",
+      "display": "Sclerodermoid chronic graft-versus-host disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402360001",
+      "display": "Materno-fetal graft-versus-host disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403835002",
+      "display": "X-linked hyper-immunoglobulin M syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403836001",
+      "display": "Autosomal recessive hyperimmunoglobulin M syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403837005",
+      "display": "Wiskott-Aldrich autosomal dominant variant syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414029004",
+      "display": "Disorder of immune function (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426202004",
+      "display": "Immune reconstitution syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427167008",
+      "display": "Hereditary angioedema with normal C1 esterase inhibitor activity (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "442459007",
+      "display": "Combined immunodeficiency disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "444547006",
+      "display": "Graft versus host disease of skin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "449187006",
+      "display": "Kappa light chain deficiency (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55602000",
+      "display": "Nezelof's syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "702444009",
+      "display": "Autoimmune lymphoproliferative syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "719156006",
+      "display": "X-linked intellectual disability with hypogammaglobulinemia and progressive neurological deterioration syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720853005",
+      "display": "Severe combined immunodeficiency, microcephaly, growth retardation, sensitivity to ionizing radiation syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "722067005",
+      "display": "Severe combined immunodeficiency with hypereosinophilia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "81166004",
+      "display": "Properdin deficiency disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82286005",
+      "display": "Hyperimmunoglobulin M syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82966003",
+      "display": "Hereditary angioedema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "88714009",
+      "display": "Transient hypogammaglobulinemia of infancy (disorder)"
+    } ]
+  }
+}

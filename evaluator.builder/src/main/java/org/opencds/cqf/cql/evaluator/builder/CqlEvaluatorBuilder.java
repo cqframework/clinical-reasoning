@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -193,18 +192,17 @@ public class CqlEvaluatorBuilder {
 
     /**
      * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation
-     * context. There may only be one ModelResolver for a given model. This function
+     * context from the supplied DataProviderComponents  There may only be one ModelResolver for a given model. This function
      * uses FILO semantics. The first RetrieveProvider added is the last to be used
      * for retrieves.
      * 
-     * @param modelTriple the model with a uri, modelResolver, and RetrieveProvider
+     * @param dataProviderComponents the model with a uri, ModelResolver, and RetrieveProvider
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withModelResolverAndRetrieveProvider(
-            Triple<String, ModelResolver, RetrieveProvider> modelTriple) {
-        requireNonNull(modelTriple, "modelTriple can not be null");
-        this.withModelResolverAndRetrieveProvider(modelTriple.getLeft(), modelTriple.getMiddle(),
-                modelTriple.getRight());
+    public CqlEvaluatorBuilder withDataProviderComponents(
+            DataProviderComponents dataProviderComponents) {
+        requireNonNull(dataProviderComponents, "dataProviderComponents can not be null");
+        this.withModelResolverAndRetrieveProvider(dataProviderComponents.getModelUri(), dataProviderComponents.getModelResolver(), dataProviderComponents.getRetrieveProvider());
         return this;
     }
 

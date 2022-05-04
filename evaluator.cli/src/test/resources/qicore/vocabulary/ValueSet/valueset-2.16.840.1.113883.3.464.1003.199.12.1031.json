@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.199.12.1031",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.199.12.1031",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.199.12.1031"
+  } ],
+  "version": "20170504",
+  "name": "AnaphylacticReactiontoDTaPVaccine",
+  "title": "Anaphylactic Reaction to DTaP Vaccine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "219084006",
+      "display": "Adverse reaction caused by tetanus vaccine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "293108006",
+      "display": "Diphtheria and tetanus vaccine adverse reaction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428281000124107",
+      "display": "Anaphylaxis due to diphtheria and tetanus vaccine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428291000124105",
+      "display": "Anaphylaxis due to tetanus, diphtheria and acellular pertussis vaccine (disorder)"
+    } ]
+  }
+}

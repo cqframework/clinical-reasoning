@@ -1,0 +1,39 @@
+{
+    "resourceType": "Bundle",
+    "id": "test-expansion-logic-valuesets",
+    "type": "collection",
+    "entry": [
+        {
+            "resource": {
+                "resourceType": "ValueSet",
+                "id": "expansion-logic-valueset",
+                "url": "http://localhost/fhir/ValueSet/expansion-logic-valueset",
+                "name": "ExpansionLogicValueSet",
+                "title": "Expansion Logic ValueSet",
+                "status": "active",
+                "compose": {
+                    "include": [
+                        {
+                            "system": "http://localhost/unit-test",
+                            "version": "2018-03",
+                            "filter": [{
+                                "property": "parent",
+                                "op": "=",
+                                "value": "000"
+                            }]
+                        },
+                        {
+                            "system": "http://localhost/unit-test-2",
+                            "version": "2018-03",
+                            "filter": [{
+                                "property": "parent",
+                                "op": "=",
+                                "value": "333"
+                            }]
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

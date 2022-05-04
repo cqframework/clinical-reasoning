@@ -1,15 +1,17 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
@@ -26,12 +28,11 @@ import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
+import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.FhirDalFactory;
@@ -48,9 +49,11 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibra
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvalOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureScoring;
+import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +72,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     protected LibraryContentProviderFactory libraryContentProviderFactory;
     protected FhirDalFactory fhirDalFactory;
 
-    private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new HashMap<>();
+    private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
@@ -95,7 +98,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
             TerminologyProvider localTerminologyProvider, LibraryContentProvider localLibraryContentProvider,
-            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
+            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig,
+            Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
         this.libraryContentProviderFactory = libraryContentProviderFactory;
@@ -130,6 +134,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                     "the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
         }
 
+        // TODO: Need a federated FhirDal..
         FhirDal fhirDal = contentEndpoint != null
                 ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
                 : localFhirDal;
@@ -138,6 +143,10 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
         }
 
+        MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
+        List<String> subjectIds = this.getSubjects(measureEvalType,
+                subject != null ? subject : practitioner, dataEndpoint);
+
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
         Iterator<IBaseResource> measureIter = measures.iterator();
         if (!measureIter.hasNext()) {
@@ -145,10 +154,96 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
 
         Measure measure = (Measure) measureIter.next();
+        MeasureReport measureReport = this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+        MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
+        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+        scorer.score(measureScoring, measureReport);
+
+        return measureReport;
+
+    }
+
+    public static <T> List<List<T>> getBatches(List<T> collection, int batchSize) {
+        int i = 0;
+        List<List<T>> batches = new ArrayList<>();
+        while (i < collection.size()) {
+            int nextInc = Math.min(collection.size() - i, batchSize);
+            List<T> batch = collection.subList(i, i + nextInc);
+            batches.add(batch);
+            i = i + nextInc;
+        }
+
+        return batches;
+    }
+
+    public List<String> getSubjects(String reportType, String subjectId) {
+        return this.getSubjects(reportType, subjectId, null);
+    }
+
+    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint) {
+        MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
+        return getSubjects(measureEvalType, subjectId, dataEndpoint);
+    }
+
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint) {
+        FhirDal fhirDal = dataEndpoint != null
+                ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint))
+                : localFhirDal;
+        SubjectProvider subjectProvider = new R4FhirDalSubjectProvider(fhirDal);
+        return subjectProvider.getSubjects(measureEvalType, subjectId);
+
+    }
+
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
+        return this.getSubjects(measureEvalType, subjectId, null);
+    }
+
+    protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint, Bundle additionalData) {
+        if (this.measureEvalConfig.getParallelEnabled()
+                && subjectIds.size() > this.measureEvalConfig.getParallelThreshold()) {
+            return parallelMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+        } else {
+            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+                    contentEndpoint,
+                    terminologyEndpoint, dataEndpoint, additionalData);
+
+        }
+
+    }
+
+    protected MeasureReport parallelMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
+            String reportType,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint, Bundle additionalData) {
+        List<List<String>> batches = getBatches(subjectIds, this.measureEvalConfig.getParallelThreshold());
+        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvalConfig.getParallelThreads());
+        List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
+        for (List<String> idBatch : batches) {
+            futures.add(
+                    CompletableFuture.supplyAsync(
+                            () -> this.evaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
+                                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
+                            executor));
+        }
+
+        List<MeasureReport> reports = new ArrayList<>();
+        futures.forEach(x -> reports.add(x.join()));
+        R4MeasureReportAggregator reportAggregator = new R4MeasureReportAggregator();
+        return reportAggregator.aggregate(reports);
+    }
+
+    protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd,
+            String reportType,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint, Bundle additionalData) {
 
         if (!measure.hasLibrary()) {
             throw new IllegalArgumentException(
-                    String.format("Measure %s does not have a primary library specified", url));
+                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
         }
 
         CanonicalType libraryUrl = measure.getLibrary().get(0);
@@ -156,7 +251,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         Iterable<IBaseResource> libraries = fhirDal.searchByUrl("Library", libraryUrl.getValue());
         Iterator<IBaseResource> libraryIter = libraries.iterator();
         if (!libraryIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate primary Library with url %s", libraryUrl.getValue()));
+            throw new IllegalArgumentException(
+                    String.format("Unable to locate primary Library with url %s", libraryUrl.getValue()));
         }
 
         org.hl7.fhir.r4.model.Library primaryLibrary = (org.hl7.fhir.r4.model.Library) libraryIter.next();
@@ -166,7 +262,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 : localLibraryContentProvider;
 
         if (libraryContentProvider == null) {
-            throw new IllegalStateException("a libraryContentProvider was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a libraryContentProvider was not provided and one could not be constructed");
         }
 
         LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
@@ -192,10 +289,24 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
+        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
+        return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds, measurementPeriod);
+    }
 
-        R4MeasureEvaluation measureEvaluation = new R4MeasureEvaluation(context, measure);
-
-        return measureEvaluation.evaluate(MeasureEvalType.fromCode(reportType), subject, measurementPeriod);
+    protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
+        switch (measureEvalType) {
+            case PATIENT:
+            case SUBJECT:
+                return MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST:
+            case SUBJECTLIST:
+                return MeasureReportType.PATIENTLIST;
+            case POPULATION:
+                return MeasureReportType.SUMMARY;
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+        }
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -231,7 +342,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         if (dataEndpoint == null && additionalData == null) {
             throw new IllegalArgumentException("Either dataEndpoint or additionalData must be specified");
         }
-        Triple<String, ModelResolver, RetrieveProvider> dataProvider = null;
+
+        DataProviderComponents dataProvider = null;
         if (dataEndpoint != null) {
             dataProvider = this.dataProviderFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint));
         } else {
@@ -240,9 +352,9 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         RetrieveProviderConfigurer retrieveProviderConfigurer = new RetrieveProviderConfigurer(retrieveProviderConfig);
 
-        retrieveProviderConfigurer.configure(dataProvider.getRight(), terminologyProvider);
+        retrieveProviderConfigurer.configure(dataProvider.getRetrieveProvider(), terminologyProvider);
 
-        return new CompositeDataProvider(dataProvider.getMiddle(), dataProvider.getRight());
+        return new CompositeDataProvider(dataProvider.getModelResolver(), dataProvider.getRetrieveProvider());
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -268,8 +380,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             context.setExpressionCaching(true);
         }
 
-        if (this.measureEvalConfig.getMeasureEvalOptions().contains(MeasureEvalOptions.ENABLE_DEBUG_LOGGING)) {
-            context.getDebugMap().setIsLoggingEnabled(true);
+        if (this.measureEvalConfig.getDebugLoggingEnabled()) {
+        context.getDebugMap().setIsLoggingEnabled(true);
         }
 
         return context;

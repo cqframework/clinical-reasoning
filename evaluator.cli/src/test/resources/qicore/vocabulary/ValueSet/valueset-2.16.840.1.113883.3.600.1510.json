@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.1510",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.1510",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.1510"
+  } ],
+  "version": "20170504",
+  "name": "WeightReductionRecommended",
+  "title": "Weight Reduction Recommended",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S9449",
+      "display": "Weight management classes, non-physician provider, per session"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170795002",
+      "display": "Follow-up obesity assessment (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "266724001",
+      "display": "Weight-reducing diet education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "268523001",
+      "display": "Target weight discussed (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "408289007",
+      "display": "Refer to weight management program (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "410200000",
+      "display": "Weight control education (procedure)"
+    } ]
+  }
+}

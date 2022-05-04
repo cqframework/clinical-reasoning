@@ -1,0 +1,75 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1433",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1433",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1433"
+  } ],
+  "version": "20200307",
+  "name": "PosteriorLenticonus",
+  "title": "Posterior Lenticonus",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q12.2",
+      "display": "Coloboma of lens"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q12.4",
+      "display": "Spherophakia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "Q12.8",
+      "display": "Other congenital lens malformations"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "204134008",
+      "display": "Coloboma of lens (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33521009",
+      "display": "Congenital anomaly of lens shape (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416671000",
+      "display": "Microspherophakia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418653000",
+      "display": "Secondary lens coloboma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419544009",
+      "display": "Primary lens coloboma (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "773690008",
+      "display": "Microcornea, posterior megalolenticonus, persistent fetal vasculature, coloboma syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95482000",
+      "display": "Posterior lenticonus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95483005",
+      "display": "Posterior lentiglobus (disorder)"
+    } ]
+  }
+}

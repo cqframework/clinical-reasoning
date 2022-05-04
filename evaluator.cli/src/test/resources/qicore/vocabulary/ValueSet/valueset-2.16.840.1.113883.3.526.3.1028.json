@@ -1,0 +1,45 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1028",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1028",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1028"
+  } ],
+  "version": "20170504",
+  "name": "StandardizedPainAssessmentTool",
+  "title": "Standardized Pain Assessment Tool",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38208-5",
+      "display": "Pain severity - Reported"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38214-3",
+      "display": "Pain severity [Score] Visual analog score"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "38221-8",
+      "display": "Pain severity Wong-Baker FACES pain rating scale"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "72514-3",
+      "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77565-0",
+      "display": "Pain interference score [BPI Short Form]"
+    } ]
+  }
+}

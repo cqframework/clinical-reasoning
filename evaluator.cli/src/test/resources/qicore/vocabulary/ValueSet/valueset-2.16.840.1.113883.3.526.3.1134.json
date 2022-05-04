@@ -1,0 +1,365 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1134",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1134",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1134"
+  } ],
+  "version": "20170504",
+  "name": "EjectionFraction",
+  "title": "Ejection Fraction",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "10230-1",
+      "display": "Left ventricular Ejection fraction"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18043-0",
+      "display": "Left ventricular Ejection fraction by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18044-8",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by single-plane ellipse method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18045-5",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by biplane ellipse method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18046-3",
+      "display": "Left ventricular Ejection fraction by US 2D modified"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18047-1",
+      "display": "Left ventricular Ejection fraction by US 2D modified biplane"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18048-9",
+      "display": "Left ventricular Ejection fraction by US 2D modified single-plane"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18049-7",
+      "display": "Left ventricular Ejection fraction by US.M-mode+Calculated by Teichholz method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77889-4",
+      "display": "Left ventricular Ejection fraction by US.M-mode+Calculated by cube method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77890-2",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by cube method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77891-0",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by Teichholz method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77892-8",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by modified Simpson method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79990-8",
+      "display": "Left ventricular Ejection fraction by US.3D.segmentation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79991-6",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by biplane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79992-4",
+      "display": "Left ventricular Ejection fraction by US.2D.A2C+Calculated by single plane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79993-2",
+      "display": "Left ventricular Ejection fraction by US.2D.A4C+Calculated by single plane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8806-2",
+      "display": "Left ventricular Ejection fraction by 2D echo"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8807-0",
+      "display": "Left ventricular Ejection fraction by 2D echo.visual estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8808-8",
+      "display": "Left ventricular Ejection fraction by Cardiac angiogram"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8809-6",
+      "display": "Left ventricular Ejection fraction by Cardiac angiogram.visual estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8810-4",
+      "display": "Left ventricular Ejection fraction by Spiral CT"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8811-2",
+      "display": "Left ventricular Ejection fraction by MR"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8812-0",
+      "display": "Left ventricular Ejection fraction by Nuclear blood pool"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "10230-1",
+      "display": "Left ventricular Ejection fraction"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18043-0",
+      "display": "Left ventricular Ejection fraction by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18044-8",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by single-plane ellipse method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18045-5",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by biplane ellipse method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18046-3",
+      "display": "Left ventricular Ejection fraction by US 2D modified"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18047-1",
+      "display": "Left ventricular Ejection fraction by US 2D modified biplane"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18048-9",
+      "display": "Left ventricular Ejection fraction by US 2D modified single-plane"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18049-7",
+      "display": "Left ventricular Ejection fraction by US.M-mode+Calculated by Teichholz method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77889-4",
+      "display": "Left ventricular Ejection fraction by US.M-mode+Calculated by cube method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77890-2",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by cube method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77891-0",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by Teichholz method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77892-8",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by modified Simpson method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79990-8",
+      "display": "Left ventricular Ejection fraction by US.3D.segmentation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79991-6",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by biplane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79992-4",
+      "display": "Left ventricular Ejection fraction by US.2D.A2C+Calculated by single plane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79993-2",
+      "display": "Left ventricular Ejection fraction by US.2D.A4C+Calculated by single plane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8806-2",
+      "display": "Left ventricular Ejection fraction by 2D echo"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8807-0",
+      "display": "Left ventricular Ejection fraction by 2D echo.visual estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8808-8",
+      "display": "Left ventricular Ejection fraction by Cardiac angiogram"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8809-6",
+      "display": "Left ventricular Ejection fraction by Cardiac angiogram.visual estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8810-4",
+      "display": "Left ventricular Ejection fraction by Spiral CT"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8811-2",
+      "display": "Left ventricular Ejection fraction by MR"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8812-0",
+      "display": "Left ventricular Ejection fraction by Nuclear blood pool"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "10230-1",
+      "display": "Left ventricular Ejection fraction"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18043-0",
+      "display": "Left ventricular Ejection fraction by US"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18044-8",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by single-plane ellipse method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18045-5",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by biplane ellipse method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18046-3",
+      "display": "Left ventricular Ejection fraction by US 2D modified"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18047-1",
+      "display": "Left ventricular Ejection fraction by US 2D modified biplane"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18048-9",
+      "display": "Left ventricular Ejection fraction by US 2D modified single-plane"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18049-7",
+      "display": "Left ventricular Ejection fraction by US.M-mode+Calculated by Teichholz method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77889-4",
+      "display": "Left ventricular Ejection fraction by US.M-mode+Calculated by cube method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77890-2",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by cube method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77891-0",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by Teichholz method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77892-8",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by modified Simpson method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79990-8",
+      "display": "Left ventricular Ejection fraction by US.3D.segmentation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79991-6",
+      "display": "Left ventricular Ejection fraction by US.2D+Calculated by biplane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79992-4",
+      "display": "Left ventricular Ejection fraction by US.2D.A2C+Calculated by single plane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "79993-2",
+      "display": "Left ventricular Ejection fraction by US.2D.A4C+Calculated by single plane method of disks"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8806-2",
+      "display": "Left ventricular Ejection fraction by 2D echo"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8807-0",
+      "display": "Left ventricular Ejection fraction by 2D echo.visual estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8808-8",
+      "display": "Left ventricular Ejection fraction by Cardiac angiogram"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8809-6",
+      "display": "Left ventricular Ejection fraction by Cardiac angiogram.visual estimate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8810-4",
+      "display": "Left ventricular Ejection fraction by Spiral CT"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8811-2",
+      "display": "Left ventricular Ejection fraction by MR"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "8812-0",
+      "display": "Left ventricular Ejection fraction by Nuclear blood pool"
+    } ]
+  }
+}

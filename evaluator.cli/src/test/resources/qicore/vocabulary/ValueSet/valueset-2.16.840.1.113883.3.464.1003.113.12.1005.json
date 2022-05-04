@@ -1,0 +1,1845 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.113.12.1005",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1005",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.113.12.1005"
+  } ],
+  "version": "20180310",
+  "name": "RheumatoidArthritis",
+  "title": "Rheumatoid Arthritis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.00",
+      "display": "Felty's syndrome, unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.011",
+      "display": "Felty's syndrome, right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.012",
+      "display": "Felty's syndrome, left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.019",
+      "display": "Felty's syndrome, unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.021",
+      "display": "Felty's syndrome, right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.022",
+      "display": "Felty's syndrome, left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.029",
+      "display": "Felty's syndrome, unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.031",
+      "display": "Felty's syndrome, right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.032",
+      "display": "Felty's syndrome, left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.039",
+      "display": "Felty's syndrome, unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.041",
+      "display": "Felty's syndrome, right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.042",
+      "display": "Felty's syndrome, left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.049",
+      "display": "Felty's syndrome, unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.051",
+      "display": "Felty's syndrome, right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.052",
+      "display": "Felty's syndrome, left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.059",
+      "display": "Felty's syndrome, unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.061",
+      "display": "Felty's syndrome, right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.062",
+      "display": "Felty's syndrome, left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.069",
+      "display": "Felty's syndrome, unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.071",
+      "display": "Felty's syndrome, right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.072",
+      "display": "Felty's syndrome, left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.079",
+      "display": "Felty's syndrome, unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.09",
+      "display": "Felty's syndrome, multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.10",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.111",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.112",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.119",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.121",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.122",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.129",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.131",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.132",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.139",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.141",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.142",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.149",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.151",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.152",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.159",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.161",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.162",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.169",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.171",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.172",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.179",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.19",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis of multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.20",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.211",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.212",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.219",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.221",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.222",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.229",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.231",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.232",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.239",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.241",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.242",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.249",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.251",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.252",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.259",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.261",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.262",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.269",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.271",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.272",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.279",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.29",
+      "display": "Rheumatoid vasculitis with rheumatoid arthritis of multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.30",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.311",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.312",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.319",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.321",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.322",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.329",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.331",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.332",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.339",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.341",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.342",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.349",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.351",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.352",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.359",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.361",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.362",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.369",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.371",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.372",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.379",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.39",
+      "display": "Rheumatoid heart disease with rheumatoid arthritis of multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.40",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.411",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.412",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.419",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.421",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.422",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.429",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.431",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.432",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.439",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.441",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.442",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.449",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.451",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.452",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.459",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.461",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.462",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.469",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.471",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.472",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.479",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.49",
+      "display": "Rheumatoid myopathy with rheumatoid arthritis of multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.50",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.511",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.512",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.519",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.521",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.522",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.529",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.531",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.532",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.539",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.541",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.542",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.549",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.551",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.552",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.559",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.561",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.562",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.569",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.571",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.572",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.579",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.59",
+      "display": "Rheumatoid polyneuropathy with rheumatoid arthritis of multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.60",
+      "display": "Rheumatoid arthritis of unspecified site with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.611",
+      "display": "Rheumatoid arthritis of right shoulder with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.612",
+      "display": "Rheumatoid arthritis of left shoulder with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.619",
+      "display": "Rheumatoid arthritis of unspecified shoulder with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.621",
+      "display": "Rheumatoid arthritis of right elbow with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.622",
+      "display": "Rheumatoid arthritis of left elbow with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.629",
+      "display": "Rheumatoid arthritis of unspecified elbow with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.631",
+      "display": "Rheumatoid arthritis of right wrist with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.632",
+      "display": "Rheumatoid arthritis of left wrist with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.639",
+      "display": "Rheumatoid arthritis of unspecified wrist with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.641",
+      "display": "Rheumatoid arthritis of right hand with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.642",
+      "display": "Rheumatoid arthritis of left hand with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.649",
+      "display": "Rheumatoid arthritis of unspecified hand with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.651",
+      "display": "Rheumatoid arthritis of right hip with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.652",
+      "display": "Rheumatoid arthritis of left hip with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.659",
+      "display": "Rheumatoid arthritis of unspecified hip with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.661",
+      "display": "Rheumatoid arthritis of right knee with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.662",
+      "display": "Rheumatoid arthritis of left knee with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.669",
+      "display": "Rheumatoid arthritis of unspecified knee with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.671",
+      "display": "Rheumatoid arthritis of right ankle and foot with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.672",
+      "display": "Rheumatoid arthritis of left ankle and foot with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.679",
+      "display": "Rheumatoid arthritis of unspecified ankle and foot with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.69",
+      "display": "Rheumatoid arthritis of multiple sites with involvement of other organs and systems"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.70",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified site without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.711",
+      "display": "Rheumatoid arthritis with rheumatoid factor of right shoulder without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.712",
+      "display": "Rheumatoid arthritis with rheumatoid factor of left shoulder without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.719",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified shoulder without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.721",
+      "display": "Rheumatoid arthritis with rheumatoid factor of right elbow without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.722",
+      "display": "Rheumatoid arthritis with rheumatoid factor of left elbow without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.729",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified elbow without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.731",
+      "display": "Rheumatoid arthritis with rheumatoid factor of right wrist without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.732",
+      "display": "Rheumatoid arthritis with rheumatoid factor of left wrist without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.739",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified wrist without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.741",
+      "display": "Rheumatoid arthritis with rheumatoid factor of right hand without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.742",
+      "display": "Rheumatoid arthritis with rheumatoid factor of left hand without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.749",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified hand without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.751",
+      "display": "Rheumatoid arthritis with rheumatoid factor of right hip without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.752",
+      "display": "Rheumatoid arthritis with rheumatoid factor of left hip without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.759",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified hip without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.761",
+      "display": "Rheumatoid arthritis with rheumatoid factor of right knee without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.762",
+      "display": "Rheumatoid arthritis with rheumatoid factor of left knee without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.769",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified knee without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.771",
+      "display": "Rheumatoid arthritis with rheumatoid factor of right ankle and foot without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.772",
+      "display": "Rheumatoid arthritis with rheumatoid factor of left ankle and foot without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.779",
+      "display": "Rheumatoid arthritis with rheumatoid factor of unspecified ankle and foot without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.79",
+      "display": "Rheumatoid arthritis with rheumatoid factor of multiple sites without organ or systems involvement"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.80",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.811",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.812",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.819",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.821",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.822",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.829",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.831",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.832",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.839",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.841",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.842",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.849",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.851",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.852",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.859",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.861",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.862",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.869",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.871",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.872",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.879",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.89",
+      "display": "Other rheumatoid arthritis with rheumatoid factor of multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M05.9",
+      "display": "Rheumatoid arthritis with rheumatoid factor, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.00",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.011",
+      "display": "Rheumatoid arthritis without rheumatoid factor, right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.012",
+      "display": "Rheumatoid arthritis without rheumatoid factor, left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.019",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.021",
+      "display": "Rheumatoid arthritis without rheumatoid factor, right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.022",
+      "display": "Rheumatoid arthritis without rheumatoid factor, left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.029",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.031",
+      "display": "Rheumatoid arthritis without rheumatoid factor, right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.032",
+      "display": "Rheumatoid arthritis without rheumatoid factor, left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.039",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.041",
+      "display": "Rheumatoid arthritis without rheumatoid factor, right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.042",
+      "display": "Rheumatoid arthritis without rheumatoid factor, left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.049",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.051",
+      "display": "Rheumatoid arthritis without rheumatoid factor, right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.052",
+      "display": "Rheumatoid arthritis without rheumatoid factor, left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.059",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.061",
+      "display": "Rheumatoid arthritis without rheumatoid factor, right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.062",
+      "display": "Rheumatoid arthritis without rheumatoid factor, left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.069",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.071",
+      "display": "Rheumatoid arthritis without rheumatoid factor, right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.072",
+      "display": "Rheumatoid arthritis without rheumatoid factor, left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.079",
+      "display": "Rheumatoid arthritis without rheumatoid factor, unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.08",
+      "display": "Rheumatoid arthritis without rheumatoid factor, vertebrae"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.09",
+      "display": "Rheumatoid arthritis without rheumatoid factor, multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.1",
+      "display": "Adult-onset Still's disease"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.20",
+      "display": "Rheumatoid bursitis, unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.211",
+      "display": "Rheumatoid bursitis, right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.212",
+      "display": "Rheumatoid bursitis, left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.219",
+      "display": "Rheumatoid bursitis, unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.221",
+      "display": "Rheumatoid bursitis, right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.222",
+      "display": "Rheumatoid bursitis, left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.229",
+      "display": "Rheumatoid bursitis, unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.231",
+      "display": "Rheumatoid bursitis, right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.232",
+      "display": "Rheumatoid bursitis, left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.239",
+      "display": "Rheumatoid bursitis, unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.241",
+      "display": "Rheumatoid bursitis, right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.242",
+      "display": "Rheumatoid bursitis, left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.249",
+      "display": "Rheumatoid bursitis, unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.251",
+      "display": "Rheumatoid bursitis, right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.252",
+      "display": "Rheumatoid bursitis, left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.259",
+      "display": "Rheumatoid bursitis, unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.261",
+      "display": "Rheumatoid bursitis, right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.262",
+      "display": "Rheumatoid bursitis, left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.269",
+      "display": "Rheumatoid bursitis, unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.271",
+      "display": "Rheumatoid bursitis, right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.272",
+      "display": "Rheumatoid bursitis, left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.279",
+      "display": "Rheumatoid bursitis, unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.28",
+      "display": "Rheumatoid bursitis, vertebrae"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.29",
+      "display": "Rheumatoid bursitis, multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.30",
+      "display": "Rheumatoid nodule, unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.311",
+      "display": "Rheumatoid nodule, right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.312",
+      "display": "Rheumatoid nodule, left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.319",
+      "display": "Rheumatoid nodule, unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.321",
+      "display": "Rheumatoid nodule, right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.322",
+      "display": "Rheumatoid nodule, left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.329",
+      "display": "Rheumatoid nodule, unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.331",
+      "display": "Rheumatoid nodule, right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.332",
+      "display": "Rheumatoid nodule, left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.339",
+      "display": "Rheumatoid nodule, unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.341",
+      "display": "Rheumatoid nodule, right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.342",
+      "display": "Rheumatoid nodule, left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.349",
+      "display": "Rheumatoid nodule, unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.351",
+      "display": "Rheumatoid nodule, right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.352",
+      "display": "Rheumatoid nodule, left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.359",
+      "display": "Rheumatoid nodule, unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.361",
+      "display": "Rheumatoid nodule, right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.362",
+      "display": "Rheumatoid nodule, left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.369",
+      "display": "Rheumatoid nodule, unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.371",
+      "display": "Rheumatoid nodule, right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.372",
+      "display": "Rheumatoid nodule, left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.379",
+      "display": "Rheumatoid nodule, unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.38",
+      "display": "Rheumatoid nodule, vertebrae"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.39",
+      "display": "Rheumatoid nodule, multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.80",
+      "display": "Other specified rheumatoid arthritis, unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.811",
+      "display": "Other specified rheumatoid arthritis, right shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.812",
+      "display": "Other specified rheumatoid arthritis, left shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.819",
+      "display": "Other specified rheumatoid arthritis, unspecified shoulder"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.821",
+      "display": "Other specified rheumatoid arthritis, right elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.822",
+      "display": "Other specified rheumatoid arthritis, left elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.829",
+      "display": "Other specified rheumatoid arthritis, unspecified elbow"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.831",
+      "display": "Other specified rheumatoid arthritis, right wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.832",
+      "display": "Other specified rheumatoid arthritis, left wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.839",
+      "display": "Other specified rheumatoid arthritis, unspecified wrist"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.841",
+      "display": "Other specified rheumatoid arthritis, right hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.842",
+      "display": "Other specified rheumatoid arthritis, left hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.849",
+      "display": "Other specified rheumatoid arthritis, unspecified hand"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.851",
+      "display": "Other specified rheumatoid arthritis, right hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.852",
+      "display": "Other specified rheumatoid arthritis, left hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.859",
+      "display": "Other specified rheumatoid arthritis, unspecified hip"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.861",
+      "display": "Other specified rheumatoid arthritis, right knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.862",
+      "display": "Other specified rheumatoid arthritis, left knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.869",
+      "display": "Other specified rheumatoid arthritis, unspecified knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.871",
+      "display": "Other specified rheumatoid arthritis, right ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.872",
+      "display": "Other specified rheumatoid arthritis, left ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.879",
+      "display": "Other specified rheumatoid arthritis, unspecified ankle and foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.88",
+      "display": "Other specified rheumatoid arthritis, vertebrae"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.89",
+      "display": "Other specified rheumatoid arthritis, multiple sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M06.9",
+      "display": "Rheumatoid arthritis, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "714.0",
+      "display": "Rheumatoid arthritis"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "714.1",
+      "display": "Felty's syndrome"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "714.2",
+      "display": "Other rheumatoid arthritis with visceral or systemic involvement"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "714.81",
+      "display": "Rheumatoid lung"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "239793008",
+      "display": "Rheumatoid arthritis with organ / system involvement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1073711000119105",
+      "display": "Rheumatoid arthritis of left hand (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1073721000119103",
+      "display": "Rheumatoid arthritis of left hip (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1073731000119100",
+      "display": "Rheumatoid arthritis of left knee (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1073791000119101",
+      "display": "Rheumatoid arthritis of right hand (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1073801000119100",
+      "display": "Rheumatoid arthritis of right hip (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1073811000119102",
+      "display": "Rheumatoid arthritis of right knee (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11055151000119108",
+      "display": "Seropositive rheumatoid arthritis of multiple joints (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "143441000119108",
+      "display": "Rheumatoid arthritis in remission (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201764007",
+      "display": "Rheumatoid arthritis of cervical spine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201766009",
+      "display": "Rheumatoid arthritis of shoulder (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201767000",
+      "display": "Rheumatoid arthritis of sternoclavicular joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201768005",
+      "display": "Rheumatoid arthritis of acromioclavicular joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201769002",
+      "display": "Rheumatoid arthritis of elbow (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201770001",
+      "display": "Rheumatoid arthritis of distal radioulnar joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201771002",
+      "display": "Rheumatoid arthritis of wrist (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201772009",
+      "display": "Rheumatoid arthritis of metacarpophalangeal joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201773004",
+      "display": "Rheumatoid arthritis of proximal interphalangeal joint of finger (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201774005",
+      "display": "Rheumatoid arthritis of distal interphalangeal joint of finger (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201775006",
+      "display": "Rheumatoid arthritis of hip (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201776007",
+      "display": "Rheumatoid arthritis of sacroiliac joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201777003",
+      "display": "Rheumatoid arthritis of knee (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201778008",
+      "display": "Rheumatoid arthritis of tibiofibular joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201779000",
+      "display": "Rheumatoid arthritis of ankle (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201780002",
+      "display": "Rheumatoid arthritis of subtalar joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201781003",
+      "display": "Rheumatoid arthritis of talonavicular joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201783000",
+      "display": "Rheumatoid arthritis of first metatarsophalangeal joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201784006",
+      "display": "Rheumatoid arthritis of lesser metatarsophalangeal joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201785007",
+      "display": "Rheumatoid arthritis of interphalangeal joint of toe (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201791009",
+      "display": "Flare of rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239791005",
+      "display": "Seropositive rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239792003",
+      "display": "Seronegative rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239795001",
+      "display": "Rheumatoid arthritis with multisystem involvement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239941000",
+      "display": "Nailfold rheumatoid vasculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239943002",
+      "display": "Necrotizing rheumatoid vasculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287006005",
+      "display": "Rheumatoid arthritis of multiple joints (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287007001",
+      "display": "Rheumatoid arthritis of hand joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "287008006",
+      "display": "Rheumatoid arthritis of ankle and/or foot (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28880005",
+      "display": "Rheumatoid carditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "308143008",
+      "display": "Seropositive erosive rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "319841000119107",
+      "display": "Rheumatoid lung disease with rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "398640008",
+      "display": "Rheumatoid pneumoconiosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "399923009",
+      "display": "Rheumatoid arteritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "400054000",
+      "display": "Rheumatoid vasculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "402433007",
+      "display": "Nailfold/finger-pulp infarcts in rheumatoid disease (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427770001",
+      "display": "Rheumatoid arthritis of temporomandibular joint (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429192004",
+      "display": "Rheumatoid arthritis of foot (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "433228003",
+      "display": "Deformity of foot due to rheumatoid arthritis (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52661003",
+      "display": "Extra-articular rheumatoid process (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57160007",
+      "display": "Felty's syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69896004",
+      "display": "Rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735599007",
+      "display": "Erosion of joint surface co-occurrent and due to rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "735600005",
+      "display": "Rheumatoid arthritis without erosion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "7607008",
+      "display": "Pericarditis co-occurrent with extraarticular rheumatoid arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "86219005",
+      "display": "Uveitis-rheumatoid arthritis syndrome (disorder)"
+    } ]
+  }
+}

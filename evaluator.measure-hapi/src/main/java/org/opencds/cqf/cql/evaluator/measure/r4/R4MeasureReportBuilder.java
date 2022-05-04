@@ -413,7 +413,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     protected MeasureReport createMeasureReport(Measure measure, MeasureReportType type, List<String> subjectIds,
             Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
-        report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
+        report.setStatus(MeasureReport.MeasureReportStatus.COMPLETE);
         report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
         ;
         if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {

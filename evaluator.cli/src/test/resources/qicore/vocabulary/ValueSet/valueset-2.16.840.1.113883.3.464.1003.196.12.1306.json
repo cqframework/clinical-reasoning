@@ -1,0 +1,70 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.196.12.1306",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1306",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.196.12.1306"
+  } ],
+  "version": "20170504",
+  "name": "Carbinoxamine",
+  "title": "Carbinoxamine",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1010696",
+      "display": "Carbinoxamine maleate 0.8 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1010946",
+      "display": "Carbinoxamine maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 3 MG/ML / Pseudoephedrine Hydrochloride 12 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1010980",
+      "display": "Carbinoxamine maleate 1 MG/ML / Dextromethorphan Hydrobromide 4 MG/ML / Pseudoephedrine Hydrochloride 15 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1012681",
+      "display": "Carbinoxamine maleate 4 MG / Pseudoephedrine Hydrochloride 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1012904",
+      "display": "Carbinoxamine maleate 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1012956",
+      "display": "Carbinoxamine maleate 1 MG/ML / Pseudoephedrine Hydrochloride 15 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1012984",
+      "display": "Carbinoxamine maleate 0.8 MG/ML / Dextromethorphan Hydrobromide 2.5 MG/ML / Pseudoephedrine Hydrochloride 12 MG/ML Oral Solution"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1374770",
+      "display": "12 HR Carbinoxamine maleate 0.8 MG/ML Extended Release Suspension"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1424307",
+      "display": "Carbinoxamine maleate 4 MG / Pseudoephedrine Hydrochloride 60 MG Chewable Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "2020-01",
+      "code": "1795581",
+      "display": "Carbinoxamine maleate 6 MG Oral Tablet"
+    } ]
+  }
+}

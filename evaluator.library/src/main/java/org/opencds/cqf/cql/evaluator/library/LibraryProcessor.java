@@ -10,16 +10,15 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
+import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
@@ -185,15 +184,15 @@ public class LibraryProcessor {
 
     protected void addDataProviders(IBaseResource dataEndpoint, IBaseBundle additionalData) {
         if (dataEndpoint != null) {
-            Triple<String, ModelResolver, RetrieveProvider> dataProvider = this.dataProviderFactory
+           DataProviderComponents dataProvider = this.dataProviderFactory
                     .create(endpointConverter.getEndpointInfo(dataEndpoint));
-            this.cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider);
+            this.cqlEvaluatorBuilder.withDataProviderComponents(dataProvider);
         }
 
         if (additionalData != null) {
-            Triple<String, ModelResolver, RetrieveProvider> dataProvider = this.dataProviderFactory
+            DataProviderComponents dataProvider = this.dataProviderFactory
                     .create(additionalData);
-            this.cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider);
+            this.cqlEvaluatorBuilder.withDataProviderComponents(dataProvider);
         }
 
         if (additionalData == null && dataEndpoint == null) {

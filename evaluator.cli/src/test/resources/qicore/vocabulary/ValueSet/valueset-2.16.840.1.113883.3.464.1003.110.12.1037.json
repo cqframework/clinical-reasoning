@@ -1,0 +1,175 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1037",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1037",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1037"
+  } ],
+  "version": "20170504",
+  "name": "Rubella",
+  "title": "Rubella",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.00",
+      "display": "Rubella with neurological complication, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.01",
+      "display": "Rubella encephalitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.02",
+      "display": "Rubella meningitis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.09",
+      "display": "Other neurological complications of rubella"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.81",
+      "display": "Rubella pneumonia"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.82",
+      "display": "Rubella arthritis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.89",
+      "display": "Other rubella complications"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "B06.9",
+      "display": "Rubella without complication"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-03",
+      "code": "111867004",
+      "display": "Rubella without complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-03",
+      "code": "84611003",
+      "display": "Rubella with complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10082001",
+      "display": "Progressive rubella panencephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10759761000119100",
+      "display": "Rubella in mother complicating childbirth (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "1092361000119109",
+      "display": "Rubella pneumonia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "128191000",
+      "display": "Encephalomyelitis co-occurrent and due to rubella (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13225007",
+      "display": "Rubella meningoencephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "161421005",
+      "display": "History of rubella (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "165792000",
+      "display": "Rubella antibody present - immune (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186567003",
+      "display": "Rubella with neurological complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "186570004",
+      "display": "Rubella deafness (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "192689006",
+      "display": "Rubella encephalitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19431000",
+      "display": "Arthritis co-occurrent and due to rubella (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "231985001",
+      "display": "Rubella retinopathy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232312000",
+      "display": "Endocochlear rubella (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240485004",
+      "display": "Hemorrhagic rubella (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "253227001",
+      "display": "Rubella cataract (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36653000",
+      "display": "Rubella (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406112006",
+      "display": "Rubella enzyme-linked immunosorbent assay test result, greater than 10iu/ml rubella specific immunoglobulin G detected (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406113001",
+      "display": "Rubella enzyme-linked immunosorbent assay test result, greater than 15iu/ml rubella specific immunoglobulin G detected (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "51490003",
+      "display": "Disease caused by Rubivirus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "64190005",
+      "display": "Rubella myocarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79303006",
+      "display": "Expanded rubella syndrome (disorder)"
+    } ]
+  }
+}

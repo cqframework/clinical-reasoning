@@ -1,0 +1,55 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1104.10",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1104.10",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1104.10"
+  } ],
+  "version": "20200307",
+  "name": "Medicarepayer",
+  "title": "Medicare payer",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "urn:oid:2.16.840.1.113883.3.221.5",
+      "version": "9.0",
+      "code": "1",
+      "display": "MEDICARE"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.3.221.5",
+      "version": "9.0",
+      "code": "12",
+      "display": "Medicare (Non-managed Care)"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.3.221.5",
+      "version": "9.0",
+      "code": "121",
+      "display": "Medicare FFS"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.3.221.5",
+      "version": "9.0",
+      "code": "122",
+      "display": "Medicare Drug Benefit"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.3.221.5",
+      "version": "9.0",
+      "code": "123",
+      "display": "Medicare Medical Savings Account (MSA)"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.3.221.5",
+      "version": "9.0",
+      "code": "129",
+      "display": "Medicare Non-managed Care Other"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.3.221.5",
+      "version": "9.0",
+      "code": "14",
+      "display": "Dual Eligibility Medicare/Medicaid Organization"
+    } ]
+  }
+}

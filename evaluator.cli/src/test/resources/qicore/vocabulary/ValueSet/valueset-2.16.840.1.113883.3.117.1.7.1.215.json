@@ -1,0 +1,105 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.215",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.215",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.215"
+  } ],
+  "version": "20190314",
+  "name": "LDL-c",
+  "title": "LDL-c",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "13457-7",
+      "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by calculation"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18261-8",
+      "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma ultracentrifugate"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18262-6",
+      "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by Direct assay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2089-1",
+      "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "43394-6",
+      "display": "Cholesterol in LDL acylated [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49132-4",
+      "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by Electrophoresis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "50193-2",
+      "display": "Cholesterol in LDL.narrow density [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "55440-2",
+      "display": "Cholesterol.in LDL (real) [Mass/volume] in Serum or Plasma by VAP"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "86911-5",
+      "display": "Cholesterol in LDL goal [Mass/volume] Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "90364-1",
+      "display": "Cholesterol.in LDL.small dense [Mass/volume] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "91105-7",
+      "display": "Cholesterol in LDL 1 [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "91106-5",
+      "display": "Cholesterol in LDL 2 [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "91107-3",
+      "display": "Cholesterol in LDL 3 [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "91108-1",
+      "display": "Cholesterol in LDL 4 [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "91109-9",
+      "display": "Cholesterol in LDL 5 [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "91110-7",
+      "display": "Cholesterol in LDL 6 [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "91111-5",
+      "display": "Cholesterol in LDL 7 [Mass/volume] in Serum or Plasma"
+    } ]
+  }
+}

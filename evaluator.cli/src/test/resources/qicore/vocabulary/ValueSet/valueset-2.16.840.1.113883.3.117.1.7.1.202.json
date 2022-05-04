@@ -1,0 +1,470 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.202",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.202",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.202"
+  } ],
+  "version": "20170727",
+  "name": "AtrialFibrillation_Flutter",
+  "title": "Atrial Fibrillation/Flutter",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.0",
+      "display": "Paroxysmal atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.11",
+      "display": "Longstanding persistent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.19",
+      "display": "Other persistent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.20",
+      "display": "Chronic atrial fibrillation, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.21",
+      "display": "Permanent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.3",
+      "display": "Typical atrial flutter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.4",
+      "display": "Atypical atrial flutter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.91",
+      "display": "Unspecified atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.92",
+      "display": "Unspecified atrial flutter"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "427.31",
+      "display": "Atrial fibrillation"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "427.32",
+      "display": "Atrial flutter"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120041000119109",
+      "display": "Atrial fibrillation with rapid ventricular response (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15964901000119107",
+      "display": "Atypical atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195080001",
+      "display": "Atrial fibrillation and flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233910005",
+      "display": "Lone atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233911009",
+      "display": "Non-rheumatic atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "282825002",
+      "display": "Paroxysmal atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300996004",
+      "display": "Controlled atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314208002",
+      "display": "Rapid atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425615007",
+      "display": "Chronic atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426749004",
+      "display": "Chronic atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426814001",
+      "display": "Transient cerebral ischemia due to atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427665004",
+      "display": "Paroxysmal atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440028005",
+      "display": "Permanent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440059007",
+      "display": "Persistent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49436004",
+      "display": "Atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5370000",
+      "display": "Atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "706923002",
+      "display": "Longstanding persistent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "715395008",
+      "display": "Familial atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720448006",
+      "display": "Typical atrial flutter (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.0",
+      "display": "Paroxysmal atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.11",
+      "display": "Longstanding persistent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.19",
+      "display": "Other persistent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.20",
+      "display": "Chronic atrial fibrillation, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.21",
+      "display": "Permanent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.3",
+      "display": "Typical atrial flutter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.4",
+      "display": "Atypical atrial flutter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.91",
+      "display": "Unspecified atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.92",
+      "display": "Unspecified atrial flutter"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "427.31",
+      "display": "Atrial fibrillation"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "427.32",
+      "display": "Atrial flutter"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120041000119109",
+      "display": "Atrial fibrillation with rapid ventricular response (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15964901000119107",
+      "display": "Atypical atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195080001",
+      "display": "Atrial fibrillation and flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233910005",
+      "display": "Lone atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233911009",
+      "display": "Non-rheumatic atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "282825002",
+      "display": "Paroxysmal atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300996004",
+      "display": "Controlled atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314208002",
+      "display": "Rapid atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425615007",
+      "display": "Chronic atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426749004",
+      "display": "Chronic atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426814001",
+      "display": "Transient cerebral ischemia due to atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427665004",
+      "display": "Paroxysmal atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440028005",
+      "display": "Permanent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440059007",
+      "display": "Persistent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49436004",
+      "display": "Atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5370000",
+      "display": "Atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "706923002",
+      "display": "Longstanding persistent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "715395008",
+      "display": "Familial atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720448006",
+      "display": "Typical atrial flutter (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.0",
+      "display": "Paroxysmal atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.11",
+      "display": "Longstanding persistent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.19",
+      "display": "Other persistent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.20",
+      "display": "Chronic atrial fibrillation, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.21",
+      "display": "Permanent atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.3",
+      "display": "Typical atrial flutter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.4",
+      "display": "Atypical atrial flutter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.91",
+      "display": "Unspecified atrial fibrillation"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I48.92",
+      "display": "Unspecified atrial flutter"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "427.31",
+      "display": "Atrial fibrillation"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "427.32",
+      "display": "Atrial flutter"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "120041000119109",
+      "display": "Atrial fibrillation with rapid ventricular response (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15964901000119107",
+      "display": "Atypical atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "195080001",
+      "display": "Atrial fibrillation and flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233910005",
+      "display": "Lone atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233911009",
+      "display": "Non-rheumatic atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "282825002",
+      "display": "Paroxysmal atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "300996004",
+      "display": "Controlled atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314208002",
+      "display": "Rapid atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "425615007",
+      "display": "Chronic atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426749004",
+      "display": "Chronic atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "426814001",
+      "display": "Transient cerebral ischemia due to atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "427665004",
+      "display": "Paroxysmal atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440028005",
+      "display": "Permanent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440059007",
+      "display": "Persistent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49436004",
+      "display": "Atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5370000",
+      "display": "Atrial flutter (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "706923002",
+      "display": "Longstanding persistent atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "715395008",
+      "display": "Familial atrial fibrillation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "720448006",
+      "display": "Typical atrial flutter (disorder)"
+    } ]
+  }
+}

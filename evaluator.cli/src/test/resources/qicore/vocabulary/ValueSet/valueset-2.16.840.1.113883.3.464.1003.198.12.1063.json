@@ -1,0 +1,30 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1063",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1063",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.198.12.1063"
+  } ],
+  "version": "20170504",
+  "name": "RubellaAntibodyTest(IgGAntibodyTiter)",
+  "title": "Rubella Antibody Test (IgG Antibody Titer)",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "41763-4",
+      "display": "Rubella virus IgG Ab [Titer] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "46110-3",
+      "display": "Rubella virus IgG Ab [Titer] in Cerebral spinal fluid"
+    } ]
+  }
+}

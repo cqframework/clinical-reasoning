@@ -1,0 +1,225 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.117.12.1010",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.117.12.1010",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.117.12.1010"
+  } ],
+  "version": "20180310",
+  "name": "Lupus",
+  "title": "Lupus",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.0",
+      "display": "Drug-induced systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.10",
+      "display": "Systemic lupus erythematosus, organ or system involvement unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.11",
+      "display": "Endocarditis in systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.12",
+      "display": "Pericarditis in systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.13",
+      "display": "Lung involvement in systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.14",
+      "display": "Glomerular disease in systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.15",
+      "display": "Tubulo-interstitial nephropathy in systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.19",
+      "display": "Other organ or system involvement in systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.8",
+      "display": "Other forms of systemic lupus erythematosus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M32.9",
+      "display": "Systemic lupus erythematosus, unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "710.0",
+      "display": "Systemic lupus erythematosus"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "95408003",
+      "display": "Systemic lupus erythematosus arthritis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11013005",
+      "display": "Systemic lupus erythematosus glomerulonephritis syndrome, World Health Organization class VI (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "196138005",
+      "display": "Lung disease with systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19682006",
+      "display": "Lupus hepatitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "200936003",
+      "display": "Lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "201436003",
+      "display": "Drug-induced systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22888007",
+      "display": "Drug-induced lupus erythematosus caused by procainamide (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239886003",
+      "display": "Limited lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239887007",
+      "display": "Systemic lupus erythematosus with organ/system involvement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239888002",
+      "display": "Lupus panniculitis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239889005",
+      "display": "Bullous systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239890001",
+      "display": "Systemic lupus erythematosus with multisystem involvement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25380002",
+      "display": "Pericarditis co-occurrent and due to systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309762007",
+      "display": "Systemic lupus erythematosus with pericarditis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36402006",
+      "display": "Systemic lupus erythematosus glomerulonephritis syndrome, World Health Organization class IV (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403486000",
+      "display": "Acute systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403487009",
+      "display": "Fulminating systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4676006",
+      "display": "Systemic lupus erythematosus glomerulonephritis syndrome, World Health Organization class II (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52042003",
+      "display": "Systemic lupus erythematosus glomerulonephritis syndrome, World Health Organization class V (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54072008",
+      "display": "Nonbacterial verrucal endocardiosis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54912002",
+      "display": "Drug-induced lupus erythematosus caused by hydralazine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "55464009",
+      "display": "Systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61458006",
+      "display": "Drug-induced lupus erythematosus caused by diphenylhydantoin (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68815009",
+      "display": "Systemic lupus erythematosus glomerulonephritis syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73286009",
+      "display": "Systemic lupus erythematosus glomerulonephritis syndrome, World Health Organization class I (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "76521009",
+      "display": "Systemic lupus erythematosus glomerulonephritis syndrome, World Health Organization class III (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "77753005",
+      "display": "Lupus disease of the lung (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "80258006",
+      "display": "Drug-induced lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95332009",
+      "display": "Rash of systemic lupus erythematosus (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "95644001",
+      "display": "Systemic lupus erythematosus encephalitis (disorder)"
+    } ]
+  }
+}

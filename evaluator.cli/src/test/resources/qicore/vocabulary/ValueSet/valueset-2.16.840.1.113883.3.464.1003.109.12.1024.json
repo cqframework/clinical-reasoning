@@ -1,0 +1,370 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.109.12.1024",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.109.12.1024",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.109.12.1024"
+  } ],
+  "version": "20170504",
+  "name": "UrineProteinTests",
+  "title": "Urine Protein Tests",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "11218-5",
+      "display": "Microalbumin [Mass/volume] in Urine by Test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "12842-1",
+      "display": "Protein [Mass/volume] in 12 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "13705-9",
+      "display": "Albumin/Creatinine [Mass Ratio] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "13801-6",
+      "display": "Protein/Creatinine [Mass Ratio] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "13986-5",
+      "display": "Albumin/Protein.total in 24 hour Urine by Electrophoresis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "13992-3",
+      "display": "Albumin/Protein.total in Urine by Electrophoresis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14956-7",
+      "display": "Microalbumin [Mass/time] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14957-5",
+      "display": "Microalbumin [Mass/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14958-3",
+      "display": "Microalbumin/Creatinine [Mass Ratio] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "14959-1",
+      "display": "Microalbumin/Creatinine [Mass Ratio] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1753-3",
+      "display": "Albumin [Presence] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1754-1",
+      "display": "Albumin [Mass/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1755-8",
+      "display": "Albumin [Mass/time] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "1757-4",
+      "display": "Albumin renal clearance in 24 hour Urine and Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "17819-4",
+      "display": "Albumin/Protein.total by Electrophoresis in Urine collected for unspecified duration"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "18373-1",
+      "display": "Protein [Mass/time] in 6 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20454-5",
+      "display": "Protein [Presence] in Urine by Test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20621-9",
+      "display": "Albumin/Creatinine [Presence] in Urine by Test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21059-1",
+      "display": "Albumin [Mass/volume] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21482-5",
+      "display": "Protein [Mass/volume] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "26801-1",
+      "display": "Protein [Mass/time] in 12 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "27298-9",
+      "display": "Protein [Units/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2887-8",
+      "display": "Protein [Presence] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2888-6",
+      "display": "Protein [Mass/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2889-4",
+      "display": "Protein [Mass/time] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2890-2",
+      "display": "Protein/Creatinine [Mass Ratio] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "29946-1",
+      "display": "Albumin [Presence] in 24 hour Urine by Electrophoresis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "30000-4",
+      "display": "Microalbumin/Creatinine [Ratio] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "30001-2",
+      "display": "Microalbumin/Creatinine [Ratio] in Urine by Test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "30003-8",
+      "display": "Microalbumin [Mass/volume] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32209-9",
+      "display": "Protein [Presence] in 24 hour Urine by Test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32294-1",
+      "display": "Albumin/Creatinine [Ratio] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "32551-4",
+      "display": "Protein [Mass] in Urine collected for unspecified duration"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34366-5",
+      "display": "Protein/Creatinine [Ratio] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "35663-4",
+      "display": "Protein [Mass/volume] in Urine collected for unspecified duration"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "40486-3",
+      "display": "Protein/Creatinine [Ratio] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "40662-9",
+      "display": "Protein [Mass/time] in 12 hour Urine --resting"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "40663-7",
+      "display": "Protein [Mass/time] in 12 hour Urine --upright"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "43605-5",
+      "display": "Microalbumin [Mass/volume] in 4 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "43606-3",
+      "display": "Microalbumin [Mass/time] in 4 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "43607-1",
+      "display": "Microalbumin [Mass/time] in 12 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "44292-1",
+      "display": "Microalbumin/Creatinine [Mass Ratio] in 12 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "47558-2",
+      "display": "Microalbumin/Protein.total in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49002-9",
+      "display": "Albumin [Mass/time] in Urine collected for unspecified duration"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49023-5",
+      "display": "Microalbumin [Mass/time] in Urine collected for unspecified duration"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "50209-6",
+      "display": "Albumin [Mass/time] in Urine collected for unspecified duration --supine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "50561-0",
+      "display": "Protein [Mass/volume] in Urine by Automated test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "50949-7",
+      "display": "Albumin [Presence] in Urine by Test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "51190-7",
+      "display": "Albumin [Mass/volume] in 24 hour Urine by Electrophoresis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53121-0",
+      "display": "Protein [Mass/time] in 1 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53525-2",
+      "display": "Protein [Presence] in Urine by SSA method"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53530-2",
+      "display": "Microalbumin [Mass/volume] in 24 hour Urine by Detection limit <= 1.0 mg/L"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53531-0",
+      "display": "Microalbumin [Mass/volume] in Urine by Detection limit <= 1.0 mg/L"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "53532-8",
+      "display": "Microalbumin [Mass/time] in 24 hour Urine by Detection limit <= 1.0 mg/L"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "56553-1",
+      "display": "Microalbumin [Mass/time] in 8 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "57369-1",
+      "display": "Microalbumin [Mass/volume] in 12 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "57735-3",
+      "display": "Protein [Presence] in Urine by Automated test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "5804-0",
+      "display": "Protein [Mass/volume] in Urine by Test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "58448-2",
+      "display": "Microalbumin ug/min [Mass/time] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "58992-9",
+      "display": "Protein [Mass/time] in 18 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "59159-4",
+      "display": "Microalbumin/Creatinine [Ratio] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "60678-0",
+      "display": "Protein/Creatinine [Mass Ratio] in 12 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "63474-1",
+      "display": "Microalbumin [Mass/time] in 18 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6941-9",
+      "display": "Albumin [Mass/time] in 24 hour Urine by Electrophoresis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "6942-7",
+      "display": "Albumin [Mass/volume] in Urine by Electrophoresis"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "76401-9",
+      "display": "Albumin/Creatinine [Ratio] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77253-3",
+      "display": "Microalbumin/Creatinine [Ratio] in Urine by Detection limit <= 1.0 mg/L"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77254-1",
+      "display": "Microalbumin/Creatinine [Ratio] in 24 hour Urine by Detection limit <= 1.0 mg/L"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "77940-5",
+      "display": "Albumin [Mass/volume] by Electrophoresis in Urine collected for unspecified duration"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "9318-7",
+      "display": "Albumin/Creatinine [Mass Ratio] in Urine"
+    } ]
+  }
+}

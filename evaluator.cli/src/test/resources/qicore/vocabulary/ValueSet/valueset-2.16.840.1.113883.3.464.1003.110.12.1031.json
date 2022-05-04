@@ -1,0 +1,55 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.110.12.1031",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1031",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.110.12.1031"
+  } ],
+  "version": "20170504",
+  "name": "Measles,MumpsandRubella(MMR)VaccineAdministered",
+  "title": "Measles, Mumps and Rubella (MMR) Vaccine Administered",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90707",
+      "display": "Measles, mumps and rubella virus vaccine (MMR), live, for subcutaneous use"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "90710",
+      "display": "Measles, mumps, rubella, and varicella vaccine (MMRV), live, for subcutaneous use"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "150971000119104",
+      "display": "Measles, mumps and rubella vaccination given (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "170433008",
+      "display": "Measles mumps and rubella vaccination - second dose (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38598009",
+      "display": "Measles-mumps-rubella vaccination (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "432636005",
+      "display": "Administration of measles, mumps, rubella, and varicella vaccine (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "433733003",
+      "display": "Administration of second measles, mumps, rubella, and varicella vaccine (procedure)"
+    } ]
+  }
+}

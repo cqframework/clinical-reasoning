@@ -1,0 +1,115 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.509",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.509",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.509"
+  } ],
+  "version": "20170504",
+  "name": "TobaccoUseCessationCounseling",
+  "title": "Tobacco Use Cessation Counseling",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99406",
+      "display": "Smoking and tobacco use cessation counseling visit; intermediate, greater than 3 minutes up to 10 minutes"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "99407",
+      "display": "Smoking and tobacco use cessation counseling visit; intensive, greater than 10 minutes"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "171055003",
+      "display": "Pregnancy smoking education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185795007",
+      "display": "Stop smoking monitoring verbal invite (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "185796008",
+      "display": "Stop smoking monitoring telephone invite (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225323000",
+      "display": "Smoking cessation education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "225324006",
+      "display": "Smoking effects education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "310429001",
+      "display": "Smoking monitoring invitation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "315232003",
+      "display": "Referral to stop-smoking clinic (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "384742004",
+      "display": "Smoking cessation assistance (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "395700008",
+      "display": "Referral to smoking cessation advisor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "449841000124108",
+      "display": "Referral to tobacco use cessation clinic (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "449851000124105",
+      "display": "Referral to tobacco use cessation counselor (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "449861000124107",
+      "display": "Referral to tobacco use cessation counseling program (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "449871000124100",
+      "display": "Referral to tobacco use quit line (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "702388001",
+      "display": "Tobacco use cessation education (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "710081004",
+      "display": "Smoking cessation therapy (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "711028002",
+      "display": "Counseling about tobacco use (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "713700008",
+      "display": "Smoking cessation drug therapy (regime/therapy)"
+    } ]
+  }
+}

@@ -1,0 +1,675 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.111.12.1015",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1015",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.111.12.1015"
+  } ],
+  "version": "20190315",
+  "name": "DeliveryLiveBirths",
+  "title": "Delivery Live Births",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59400",
+      "display": "Routine obstetric care including antepartum care, vaginal delivery (with or without episiotomy, and/or forceps) and postpartum care"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59409",
+      "display": "Vaginal delivery only (with or without episiotomy and/or forceps)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59410",
+      "display": "Vaginal delivery only (with or without episiotomy and/or forceps); including postpartum care"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59510",
+      "display": "Routine obstetric care including antepartum care, cesarean delivery, and postpartum care"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59514",
+      "display": "Cesarean delivery only"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59515",
+      "display": "Cesarean delivery only; including postpartum care"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59610",
+      "display": "Routine obstetric care including antepartum care, vaginal delivery (with or without episiotomy, and/or forceps) and postpartum care, after previous cesarean delivery"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59612",
+      "display": "Vaginal delivery only, after previous cesarean delivery (with or without episiotomy and/or forceps)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59614",
+      "display": "Vaginal delivery only, after previous cesarean delivery (with or without episiotomy and/or forceps); including postpartum care"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59618",
+      "display": "Routine obstetric care including antepartum care, cesarean delivery, and postpartum care, following attempted vaginal delivery after previous cesarean delivery"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59620",
+      "display": "Cesarean delivery only, following attempted vaginal delivery after previous cesarean delivery"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "59622",
+      "display": "Cesarean delivery only, following attempted vaginal delivery after previous cesarean delivery; including postpartum care"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D00Z0",
+      "display": "Extraction of Products of Conception, High, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D00Z1",
+      "display": "Extraction of Products of Conception, Low, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D00Z2",
+      "display": "Extraction of Products of Conception, Extraperitoneal, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D07Z3",
+      "display": "Extraction of Products of Conception, Low Forceps, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D07Z4",
+      "display": "Extraction of Products of Conception, Mid Forceps, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D07Z5",
+      "display": "Extraction of Products of Conception, High Forceps, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D07Z6",
+      "display": "Extraction of Products of Conception, Vacuum, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D07Z7",
+      "display": "Extraction of Products of Conception, Internal Version, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10D07Z8",
+      "display": "Extraction of Products of Conception, Other, Via Natural or Artificial Opening"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "10E0XZZ",
+      "display": "Delivery of Products of Conception, External Approach"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "287976008",
+      "display": "Breech/instrumental delivery operations (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10745001",
+      "display": "Delivery of transverse presentation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11466000",
+      "display": "Cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14119008",
+      "display": "Braxton Hicks obstetrical version with extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15413009",
+      "display": "High forceps delivery with episiotomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "16819009",
+      "display": "Delivery of face presentation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177141003",
+      "display": "Elective cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177142005",
+      "display": "Elective upper segment cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177143000",
+      "display": "Elective lower segment cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177152009",
+      "display": "Breech extraction delivery with version (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177157003",
+      "display": "Spontaneous breech delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177158008",
+      "display": "Assisted breech delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177161009",
+      "display": "Forceps cephalic delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177162002",
+      "display": "High forceps cephalic delivery with rotation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177164001",
+      "display": "Midforceps cephalic delivery with rotation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177167008",
+      "display": "Barton forceps cephalic delivery with rotation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177168003",
+      "display": "DeLee forceps cephalic delivery with rotation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177170007",
+      "display": "Piper forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177173009",
+      "display": "High vacuum delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177174003",
+      "display": "Low vacuum delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177175002",
+      "display": "Vacuum delivery before full dilation of cervix (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177176001",
+      "display": "Trial of vacuum delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177179008",
+      "display": "Cephalic vaginal delivery with abnormal presentation of head at delivery without instrument (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177180006",
+      "display": "Manipulative cephalic vaginal delivery with abnormal presentation of head at delivery without instrument (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177181005",
+      "display": "Non-manipulative cephalic vaginal delivery with abnormal presentation of head at delivery without instrument (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177184002",
+      "display": "Normal delivery procedure (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "177185001",
+      "display": "Water birth delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "17860005",
+      "display": "Low forceps delivery with episiotomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "18625004",
+      "display": "Low forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "19390001",
+      "display": "Partial breech delivery with forceps to aftercoming head (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22633006",
+      "display": "Vaginal delivery, medical personnel present (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236974004",
+      "display": "Instrumental delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236975003",
+      "display": "Nonrotational forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236976002",
+      "display": "Outlet forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236977006",
+      "display": "Forceps delivery, face to pubes (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236978001",
+      "display": "Forceps delivery to the aftercoming head (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236980007",
+      "display": "Groin traction at breech delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236981006",
+      "display": "Lovset's maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236982004",
+      "display": "Delivery of the after coming head (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236983009",
+      "display": "Burns Marshall maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236984003",
+      "display": "Mauriceau Smellie Veit maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236985002",
+      "display": "Emergency lower segment cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236986001",
+      "display": "Emergency upper segment cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236987005",
+      "display": "Emergency cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236988000",
+      "display": "Elective cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236989008",
+      "display": "Abdominal delivery for shoulder dystocia (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236990004",
+      "display": "Postmortem cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "237311001",
+      "display": "Breech delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25296001",
+      "display": "Delivery by Scanzoni maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "25828002",
+      "display": "Mid forceps delivery with episiotomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "26313002",
+      "display": "Delivery by vacuum extraction with episiotomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "265639000",
+      "display": "Midforceps delivery without rotation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "274130007",
+      "display": "Emergency cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275168001",
+      "display": "Neville-Barnes forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275169009",
+      "display": "Simpson's forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28542003",
+      "display": "Wigand-Martin maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "288042004",
+      "display": "Hysterectomy and fetus removal (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "288193006",
+      "display": "Supervision - normal delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "28860009",
+      "display": "Prague maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29613008",
+      "display": "Delivery by double application of forceps (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302382009",
+      "display": "Breech extraction with internal podalic version (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "302383004",
+      "display": "Forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30476003",
+      "display": "Barton's forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306727001",
+      "display": "Breech presentation, delivery, no version (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "33807004",
+      "display": "Internal and combined version with extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359940006",
+      "display": "Partial breech extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359943008",
+      "display": "Partial breech delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "384729004",
+      "display": "Delivery of vertex presentation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "384730009",
+      "display": "Delivery of cephalic presentation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38479009",
+      "display": "Frank breech delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "398307005",
+      "display": "Low cervical cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40219000",
+      "display": "Delivery by Malstrom's extraction with episiotomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40704000",
+      "display": "Wright's obstetrical version with extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "40792007",
+      "display": "Kristeller maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "41059002",
+      "display": "Cesarean hysterectomy (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416055001",
+      "display": "Total breech extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "417121007",
+      "display": "Breech extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "4504004",
+      "display": "Potter's obstetrical version with extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "450483001",
+      "display": "Cesarean section through inverted T shaped incision of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "450484007",
+      "display": "Cesarean section through J shaped incision of uterus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "450798003",
+      "display": "Delivery of occipitoposterior presentation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "45718005",
+      "display": "Vaginal delivery with forceps including postpartum care (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "48204000",
+      "display": "Spontaneous unassisted delivery, medical personnel present (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54973000",
+      "display": "Total breech delivery with forceps to aftercoming head (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "5556001",
+      "display": "Manually assisted spontaneous delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57271003",
+      "display": "Extraperitoneal cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58705005",
+      "display": "Bracht maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "61586001",
+      "display": "Delivery by vacuum extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62508004",
+      "display": "Mid forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65243006",
+      "display": "Delivery by midwife (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "69422002",
+      "display": "Trial forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "699999008",
+      "display": "Obstetrical version with extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "700000006",
+      "display": "Vaginal delivery of fetus (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "709004006",
+      "display": "Emergency lower segment cesarean section with inverted T incision (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "71166009",
+      "display": "Forceps delivery with rotation of fetal head (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72492007",
+      "display": "Footling breech delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "734275002",
+      "display": "Delivery by outlet vacuum extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "734276001",
+      "display": "Delivery by mid-vacuum extraction (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736018001",
+      "display": "Elective upper segment cesarean section with bilateral tubal ligation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736020003",
+      "display": "Emergency upper segment cesarean section with bilateral tubal ligation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736026009",
+      "display": "Elective lower segment cesarean section with bilateral tubal ligation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736118004",
+      "display": "Emergency lower segment cesarean section with bilateral tubal ligation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "75928003",
+      "display": "Pinard maneuver (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "84195007",
+      "display": "Classical cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85403009",
+      "display": "Delivery, medical personnel present (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89053004",
+      "display": "Vaginal cesarean section (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89346004",
+      "display": "Delivery by Kielland rotation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "89849000",
+      "display": "High forceps delivery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90438006",
+      "display": "Delivery by Malstrom's extraction (procedure)"
+    } ]
+  }
+}

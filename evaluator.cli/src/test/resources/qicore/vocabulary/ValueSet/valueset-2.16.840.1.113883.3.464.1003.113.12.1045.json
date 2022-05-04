@@ -1,0 +1,100 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.113.12.1045",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1045",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.113.12.1045"
+  } ],
+  "version": "20180310",
+  "name": "AnkylosingSpondylitis",
+  "title": "Ankylosing Spondylitis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.0",
+      "display": "Ankylosing spondylitis of multiple sites in spine"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.1",
+      "display": "Ankylosing spondylitis of occipito-atlanto-axial region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.2",
+      "display": "Ankylosing spondylitis of cervical region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.3",
+      "display": "Ankylosing spondylitis of cervicothoracic region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.4",
+      "display": "Ankylosing spondylitis of thoracic region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.5",
+      "display": "Ankylosing spondylitis of thoracolumbar region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.6",
+      "display": "Ankylosing spondylitis lumbar region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.7",
+      "display": "Ankylosing spondylitis of lumbosacral region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.8",
+      "display": "Ankylosing spondylitis sacral and sacrococcygeal region"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M45.9",
+      "display": "Ankylosing spondylitis of unspecified sites in spine"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "720.0",
+      "display": "Ankylosing spondylitis"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-03",
+      "code": "129564003",
+      "display": "Ankylosing spondylarthritis and eye lesions (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "162930007",
+      "display": "On examination - ankylosing spondylitis chest deformity (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239810002",
+      "display": "Ankylosing spondylitis with organ / system involvement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "239811003",
+      "display": "Ankylosing spondylitis with multisystem involvement (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "9631008",
+      "display": "Ankylosing spondylitis (disorder)"
+    } ]
+  }
+}

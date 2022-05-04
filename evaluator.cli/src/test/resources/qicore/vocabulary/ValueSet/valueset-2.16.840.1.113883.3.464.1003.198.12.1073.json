@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1073",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1073",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.198.12.1073"
+  } ],
+  "version": "20170504",
+  "name": "AntiHepatitisBVirusSurfaceAb",
+  "title": "Anti Hepatitis B Virus Surface Ab",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "10900-9",
+      "display": "Hepatitis B virus surface Ab [Presence] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "22322-2",
+      "display": "Hepatitis B virus surface Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "39535-0",
+      "display": "Hepatitis B virus surface Ab [Presence] in Serum by Radioimmunoassay (RIA)"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "48070-7",
+      "display": "Hepatitis B virus surface IgG Ab [Presence] in Serum by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "49177-9",
+      "display": "Hepatitis B virus surface IgG Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "75409-3",
+      "display": "Hepatitis B virus surface Ab [Presence] in Serum, Plasma or Blood by Rapid immunoassay"
+    } ]
+  }
+}

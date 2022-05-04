@@ -1,0 +1,140 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.111.12.1011",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1011",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.111.12.1011"
+  } ],
+  "version": "20170504",
+  "name": "PregnancyTest",
+  "title": "Pregnancy Test",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19080-1",
+      "display": "Choriogonadotropin [Units/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "19180-9",
+      "display": "Choriogonadotropin.beta subunit free [Units/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20415-6",
+      "display": "Choriogonadotropin.beta subunit [Units/volume] in Serum or Plasma by Immunoassay (EIA) 3rd IS"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "20994-0",
+      "display": "Choriogonadotropin [Interpretation] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2106-3",
+      "display": "Choriogonadotropin (pregnancy test) [Presence] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2107-1",
+      "display": "Choriogonadotropin [Moles/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2110-5",
+      "display": "Choriogonadotropin.beta subunit (pregnancy test) [Presence] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2111-3",
+      "display": "Choriogonadotropin.beta subunit [Moles/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2112-1",
+      "display": "Choriogonadotropin.beta subunit (pregnancy test) [Presence] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2113-9",
+      "display": "Choriogonadotropin.beta subunit [Mass/time] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2114-7",
+      "display": "Choriogonadotropin.beta subunit [Moles/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2115-4",
+      "display": "Choriogonadotropin.beta subunit free [Moles/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2118-8",
+      "display": "Choriogonadotropin (pregnancy test) [Presence] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "2119-6",
+      "display": "Choriogonadotropin [Moles/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "21198-7",
+      "display": "Choriogonadotropin.beta subunit [Units/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "25372-4",
+      "display": "Choriogonadotropin [Units/volume] in Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "25373-2",
+      "display": "Choriogonadotropin.beta subunit free [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "34670-0",
+      "display": "Choriogonadotropin [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "45194-8",
+      "display": "Choriogonadotropin.intact+Beta subunit [Units/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "55869-2",
+      "display": "Choriogonadotropin.beta subunit [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "55870-0",
+      "display": "Choriogonadotropin [Units/volume] in Cord blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "56497-1",
+      "display": "Choriogonadotropin.beta subunit [Units] in 24 hour Urine"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "80384-1",
+      "display": "Choriogonadotropin (pregnancy test) [Presence] in Urine by Rapid immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "83086-9",
+      "display": "Choriogonadotropin [Units/volume] in Serum or Plasma by Immunoassay"
+    } ]
+  }
+}

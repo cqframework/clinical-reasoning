@@ -1,0 +1,50 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1064",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1064",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.198.12.1064"
+  } ],
+  "version": "20170504",
+  "name": "RubellaAntibodyTest(IgGAntibodypresence)",
+  "title": "Rubella Antibody Test (IgG Antibody presence)",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "25514-1",
+      "display": "Rubella virus IgG Ab [Presence] in Serum"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "39013-8",
+      "display": "Rubella virus IgG Ab [Presence] in Cerebral spinal fluid"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "40667-8",
+      "display": "Rubella virus IgG Ab [Presence] in Serum or Plasma by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "40668-6",
+      "display": "Rubella virus IgG Ab [Presence] in Cerebral spinal fluid by Immunoassay"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "63462-6",
+      "display": "Rubella virus IgG Ab [Presence] in Serum by Latex agglutination"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.67",
+      "code": "74415-1",
+      "display": "Rubella virus IgG Ab [Presence] in Body fluid by Immunoassay"
+    } ]
+  }
+}

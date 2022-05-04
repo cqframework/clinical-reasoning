@@ -1,0 +1,130 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.199.12.1056",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.199.12.1056",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.199.12.1056"
+  } ],
+  "version": "20170504",
+  "name": "Intussusception",
+  "title": "Intussusception",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "K56.1",
+      "display": "Intussusception"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2018-03",
+      "code": "197048002",
+      "display": "Enteric intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "111361008",
+      "display": "Intussusception of cecum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11578004",
+      "display": "Intussusception of rectum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "17186003",
+      "display": "Ileocolic intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197046003",
+      "display": "Gastroduodenal intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197047007",
+      "display": "Jejunogastric intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197049005",
+      "display": "Ileocecal intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197050005",
+      "display": "Chronic intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197051009",
+      "display": "Compound intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197052002",
+      "display": "Multiple intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197053007",
+      "display": "Retrograde intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "197054001",
+      "display": "Secondary intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24610009",
+      "display": "Sigmoidorectal intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "27673007",
+      "display": "Intussusception of colon (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "313326008",
+      "display": "Internal intussusception of rectum (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "313327004",
+      "display": "Inflammatory cloacogenic polyp (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38397000",
+      "display": "Gastroesophageal intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "405558008",
+      "display": "Ileal intussusception (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "49723003",
+      "display": "Intussusception of intestine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721651002",
+      "display": "Intussusception of small intestine (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "721676001",
+      "display": "Intussusception of large intestine (disorder)"
+    } ]
+  }
+}

@@ -1,0 +1,290 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1479",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1479",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1479"
+  } ],
+  "version": "20200307",
+  "name": "RetinalVascularOcclusion",
+  "title": "Retinal Vascular Occlusion",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.11",
+      "display": "Central retinal artery occlusion, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.12",
+      "display": "Central retinal artery occlusion, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.13",
+      "display": "Central retinal artery occlusion, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.231",
+      "display": "Retinal artery branch occlusion, right eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.232",
+      "display": "Retinal artery branch occlusion, left eye"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.233",
+      "display": "Retinal artery branch occlusion, bilateral"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8110",
+      "display": "Central retinal vein occlusion, right eye, with macular edema"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8111",
+      "display": "Central retinal vein occlusion, right eye, with retinal neovascularization"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8112",
+      "display": "Central retinal vein occlusion, right eye, stable"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8120",
+      "display": "Central retinal vein occlusion, left eye, with macular edema"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8121",
+      "display": "Central retinal vein occlusion, left eye, with retinal neovascularization"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8122",
+      "display": "Central retinal vein occlusion, left eye, stable"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8130",
+      "display": "Central retinal vein occlusion, bilateral, with macular edema"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8131",
+      "display": "Central retinal vein occlusion, bilateral, with retinal neovascularization"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8132",
+      "display": "Central retinal vein occlusion, bilateral, stable"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8310",
+      "display": "Tributary (branch) retinal vein occlusion, right eye, with macular edema"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8311",
+      "display": "Tributary (branch) retinal vein occlusion, right eye, with retinal neovascularization"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8312",
+      "display": "Tributary (branch) retinal vein occlusion, right eye, stable"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8320",
+      "display": "Tributary (branch) retinal vein occlusion, left eye, with macular edema"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8321",
+      "display": "Tributary (branch) retinal vein occlusion, left eye, with retinal neovascularization"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8322",
+      "display": "Tributary (branch) retinal vein occlusion, left eye, stable"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8330",
+      "display": "Tributary (branch) retinal vein occlusion, bilateral, with macular edema"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8331",
+      "display": "Tributary (branch) retinal vein occlusion, bilateral, with retinal neovascularization"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "H34.8332",
+      "display": "Tributary (branch) retinal vein occlusion, bilateral, stable"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232035005",
+      "display": "Retinal artery occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232037002",
+      "display": "Branch macular artery occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232038007",
+      "display": "Central retinal vein occlusion with neovascularization (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232039004",
+      "display": "Central retinal vein occlusion with macular edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232040002",
+      "display": "Central retinal vein occlusion - juvenile (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232041003",
+      "display": "Central retinal vein occlusion - juvenile with neovascularization (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232042005",
+      "display": "Central retinal vein occlusion - juvenile with macular edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232043000",
+      "display": "Hemispheric retinal vein occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232044006",
+      "display": "Hemispheric retinal vein occlusion with neovascularization (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232045007",
+      "display": "Hemispheric retinal vein occlusion with macular edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232046008",
+      "display": "Branch retinal vein occlusion with neovascularization (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232048009",
+      "display": "Branch retinal vein occlusion with macular edema (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "24596005",
+      "display": "Venous retinal branch occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "247121001",
+      "display": "Macular branch retinal vein occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312997008",
+      "display": "Central retinal vein occlusion - ischemic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "312998003",
+      "display": "Central retinal vein occlusion - non-ischemic (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314000002",
+      "display": "Branch retinal vein occlusion with no neovascularization (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "336191000119105",
+      "display": "Occlusion of right central retinal artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "341801000119101",
+      "display": "Occlusion of left central retinal artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "38742007",
+      "display": "Central retinal artery occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "50821009",
+      "display": "Arterial retinal branch occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65593009",
+      "display": "Partial occlusion of retinal vein (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "677781000119104",
+      "display": "Occlusion of left branch retinal artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "677791000119101",
+      "display": "Occlusion of right branch retinal artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "677821000119109",
+      "display": "Partial occlusion of left retinal vein (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "677831000119107",
+      "display": "Partial occlusion of right retinal vein (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68478007",
+      "display": "Central retinal vein occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73757007",
+      "display": "Retinal vascular occlusion (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "776009",
+      "display": "Partial occlusion of retinal artery (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "87224000",
+      "display": "Transient arterial retinal occlusion (disorder)"
+    } ]
+  }
+}

@@ -5,11 +5,11 @@ public class MeasureEvaluationOptions {
         return new MeasureEvaluationOptions();
     }
 
-    private Boolean isThreadedEnabled = false;
+    private boolean isThreadedEnabled = false;
     private Integer threadedBatchSize = 200;
     private Integer numThreads = null;
 
-    public Boolean isThreadedEnabled() {
+    public boolean isThreadedEnabled() {
         return this.isThreadedEnabled;
     }
 

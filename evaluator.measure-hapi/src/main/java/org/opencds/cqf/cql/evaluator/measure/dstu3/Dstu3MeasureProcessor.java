@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -30,6 +29,7 @@ import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
@@ -47,7 +47,7 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
@@ -73,9 +73,9 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
-    private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
+    private CqlOptions cqlOptions = CqlOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
-    private MeasureEvalConfig measureEvalConfig = MeasureEvalConfig.defaultConfig();
+    private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
     // TODO: This should all be collapsed down to FhirDal
     protected LibraryContentProvider localLibraryContentProvider;
@@ -88,14 +88,14 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
         this(terminologyProviderFactory, dataProviderFactory, libraryContentProviderFactory, fhirDalFactory,
-                endpointConverter, null, null, null, null, null, null);
+                endpointConverter, null, null, null, null, null, null, null);
     }
 
     public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
             TerminologyProvider localTerminologyProvider, LibraryContentProvider localLibraryContentProvider,
-            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
+            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvaluationOptions measureEvaluationOptions, CqlOptions cqlOptions, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
         this.libraryContentProviderFactory = libraryContentProviderFactory;
@@ -109,16 +109,19 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
         this.libraryCache = libraryCache;
 
-        if (measureEvalConfig != null) {
-            this.measureEvalConfig = measureEvalConfig;
+        if (measureEvaluationOptions != null) {
+            this.measureEvaluationOptions = measureEvaluationOptions;
         }
 
+        if (cqlOptions != null) {
+            this.cqlOptions = cqlOptions;
+        }
     }
 
     public Dstu3MeasureProcessor(TerminologyProvider localTerminologyProvider,
             LibraryContentProvider localLibraryContentProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
         this(null, null, null, null, null, localTerminologyProvider, localLibraryContentProvider, localDataProvider,
-                localFhirDal, null, null);
+                localFhirDal, null, null, null);
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
@@ -225,10 +228,12 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     private LibraryLoader buildLibraryLoader(LibraryContentProvider libraryContentProvider) {
         List<LibraryContentProvider> libraryContentProviders = new ArrayList<>();
         libraryContentProviders.add(libraryContentProvider);
-        libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+        if (this.cqlOptions.useEmbeddedLibraries()) {
+            libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+        }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlTranslatorOptions);
+                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlOptions.getCqlTranslatorOptions());
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
@@ -288,11 +293,11 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
         context.setDebugMap(new DebugMap());
 
-        if (this.measureEvalConfig.getCqlEngineOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
+        if (this.cqlOptions.getCqlEngineOptions().getOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
             context.setExpressionCaching(true);
         }
 
-        if (this.measureEvalConfig.getDebugLoggingEnabled()) {
+        if (this.cqlOptions.getCqlEngineOptions().isDebugLoggingEnabled()) {
             context.getDebugMap().setIsLoggingEnabled(true);
         }
 

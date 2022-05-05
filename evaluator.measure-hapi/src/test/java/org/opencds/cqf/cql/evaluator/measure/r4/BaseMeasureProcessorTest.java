@@ -33,7 +33,7 @@ import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvide
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -47,11 +47,11 @@ public abstract class BaseMeasureProcessorTest {
         this.setup(false, 200);
     }
 
-    public BaseMeasureProcessorTest(String bundleName, boolean parallelEnabled, int parallelThreshold) {
+    public BaseMeasureProcessorTest(String bundleName, boolean threadedEnabled, int threadedBatchSize) {
         this.endpoint = new Endpoint().setAddress(bundleName)
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
         this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-        this.setup(parallelEnabled, parallelThreshold);
+        this.setup(threadedEnabled, threadedBatchSize);
     }
 
     protected FhirContext fhirContext = null;
@@ -79,7 +79,7 @@ public abstract class BaseMeasureProcessorTest {
     }
 
     @SuppressWarnings("serial")
-    protected void setup(boolean parallelEnabled, int threshold) {
+    protected void setup(boolean threadedEnabled, int threadedBatchSize) {
         // TODO: Mockito a good solid chunk of this setup...
 
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
@@ -175,15 +175,15 @@ public abstract class BaseMeasureProcessorTest {
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        MeasureEvalConfig config = MeasureEvalConfig.defaultConfig();
-        config.setDebugLoggingEnabled(true);
+        MeasureEvaluationOptions config = MeasureEvaluationOptions.defaultOptions();
 
-        if(parallelEnabled) {
-            config = config.withParallelEnabled(true).withParallelThreshold(threshold);
+        if(threadedEnabled) {
+            config.setThreadedEnabled(true);
+            config.setThreadedBatchSize(threadedBatchSize);
         }
 
         this.measureProcessor = new R4MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
-                libraryContentProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null);
+                libraryContentProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null, null);
 
     }
 }

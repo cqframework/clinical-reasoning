@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
+import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
@@ -101,18 +102,15 @@ public class CqlCommand implements Callable<Integer> {
         CqlEvaluatorComponent cqlEvaluatorComponent = DaggerCqlEvaluatorComponent.builder()
                 .fhirContext(fhirVersionEnum.newContext()).build();
 
-        CqlTranslatorOptions options = null;
+        CqlOptions cqlOptions = CqlOptions.defaultOptions();
+
         if (optionsPath != null) {
-            options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
+            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
+            cqlOptions.setCqlTranslatorOptions(options);
         }
 
         for (LibraryParameter library : libraries) {
-
-            CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder();
-
-            if (options != null) {
-                cqlEvaluatorBuilder.withCqlTranslatorOptions(options);
-            }
+            CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder().withCqlOptions(cqlOptions);
 
             LibraryContentProvider libraryContentProvider = libraryContentProviderIndex.get(library.libraryUrl);
 

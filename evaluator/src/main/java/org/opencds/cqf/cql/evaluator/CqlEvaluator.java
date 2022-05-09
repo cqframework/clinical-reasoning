@@ -51,9 +51,9 @@ public class CqlEvaluator {
 
     public CqlEvaluator(LibraryLoader libraryLoader,
             Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider,
-            EnumSet<Options> engineOptions) {
+            Set<Options> engineOptions) {
         this.libraryLoader = requireNonNull(libraryLoader, "libraryLoader can not be null.");
-        this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, engineOptions);
+        this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, EnumSet.copyOf(engineOptions));
     }
 
     public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier) {

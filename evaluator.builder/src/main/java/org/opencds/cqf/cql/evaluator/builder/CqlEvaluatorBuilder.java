@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,19 +12,17 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
+import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryContentProvider;
@@ -62,13 +59,9 @@ public class CqlEvaluatorBuilder {
 
     private Map<String, Pair<ModelResolver, List<RetrieveProvider>>> dataProviderParts;
 
-    private EnumSet<CqlEngine.Options> engineOptions;
-
-    private CqlTranslatorOptions cqlTranslatorOptions;
+    private CqlOptions cqlOptions;
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
-
-    private Boolean useEmbeddedLibraries = true;
 
     private RetrieveProviderConfig retrieveProviderConfig;
 
@@ -84,7 +77,7 @@ public class CqlEvaluatorBuilder {
         this.dataProviderParts = new HashMap<>();
         this.libraryCache = new HashMap<>();
         this.retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
-        this.engineOptions = EnumSet.of(CqlEngine.Options.EnableExpressionCaching);
+        this.cqlOptions = CqlOptions.defaultOptions();
     }
 
     /**
@@ -207,27 +200,13 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Sets whether or not the CqlTranslator should use the embedded libraries that
-     * are included in the translator package. If useEmbeddedLibraries is set to
-     * true the embedded libraries are used as a content source, but are always
-     * considered last
+     * Sets the CqlOptions to use
      * 
-     * @param useEmbeddedLibraries whether to include the embedded libraries
+     * @param cqlOptions the cql options to use
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withUseEmbeddedLibraries(Boolean useEmbeddedLibraries) {
-        this.useEmbeddedLibraries = useEmbeddedLibraries;
-        return this;
-    }
-
-    /**
-     * Sets the CqlTranslatorOptions to use for Cql translation when loading content
-     * 
-     * @param cqlTranslatorOptions the translator options to use
-     * @return this CqlEvaluatorBuilder
-     */
-    public CqlEvaluatorBuilder withCqlTranslatorOptions(CqlTranslatorOptions cqlTranslatorOptions) {
-        this.cqlTranslatorOptions = cqlTranslatorOptions;
+    public CqlEvaluatorBuilder withCqlOptions(CqlOptions cqlOptions) {
+        this.cqlOptions = cqlOptions;
         return this;
     }
 
@@ -290,27 +269,14 @@ public class CqlEvaluatorBuilder {
         return dataProviders;
     }
 
-    private CqlTranslatorOptions getDefaultOptions() {
-        CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
-        if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
-            options.getFormats().add(CqlTranslator.Format.XML);
-        }
-        logger.info("cql-options not found. Using default options.");
-        return options;
-    }
-
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.libraryContentProviders);
-        if (this.useEmbeddedLibraries) {
+        if (this.cqlOptions.useEmbeddedLibraries()) {
             this.libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
         }
-
-        if (this.cqlTranslatorOptions == null) {
-            this.cqlTranslatorOptions = getDefaultOptions();
-        }
-
+        
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlTranslatorOptions);
+                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlOptions.getCqlTranslatorOptions());
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
         }
@@ -368,7 +334,7 @@ public class CqlEvaluatorBuilder {
         TerminologyProvider terminologyProvider = this.buildTerminologyProvider();
         Map<String, DataProvider> dataProviders = this.buildDataProviders(terminologyProvider);
 
-        return new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider, this.engineOptions);
+        return new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider, this.cqlOptions.getCqlEngineOptions().getOptions());
     }
 
 }

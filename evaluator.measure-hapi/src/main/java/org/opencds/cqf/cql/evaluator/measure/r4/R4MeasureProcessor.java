@@ -12,7 +12,6 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -31,6 +30,7 @@ import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
@@ -48,7 +48,7 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvalConfig;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
@@ -76,9 +76,9 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
-    private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
+    private CqlOptions cqlOptions = CqlOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
-    private MeasureEvalConfig measureEvalConfig = MeasureEvalConfig.defaultConfig();
+    private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
     // TODO: This should all be collapsed down to FhirDal
     protected LibraryContentProvider localLibraryContentProvider;
@@ -91,14 +91,14 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
         this(terminologyProviderFactory, dataProviderFactory, libraryContentProviderFactory, fhirDalFactory,
-                endpointConverter, null, null, null, null, null, null);
+                endpointConverter, null, null, null, null, null, null, null);
     }
 
     public R4MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
             DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
             TerminologyProvider localTerminologyProvider, LibraryContentProvider localLibraryContentProvider,
-            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvalConfig measureEvalConfig,
+            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvaluationOptions measureEvaluationOptions, CqlOptions cqlOptions,
             Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
@@ -113,16 +113,19 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         this.libraryCache = libraryCache;
 
-        if (measureEvalConfig != null) {
-            this.measureEvalConfig = measureEvalConfig;
+        if (measureEvaluationOptions != null) {
+            this.measureEvaluationOptions = measureEvaluationOptions;
         }
 
+        if (cqlOptions != null) {
+            this.cqlOptions = cqlOptions;
+        }
     }
 
     public R4MeasureProcessor(TerminologyProvider localTerminologyProvider,
             LibraryContentProvider localLibraryContentProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
         this(null, null, null, null, null, localTerminologyProvider, localLibraryContentProvider, localDataProvider,
-                localFhirDal, null, null);
+                localFhirDal, null, null, null);
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
@@ -161,7 +164,6 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         scorer.score(measureScoring, measureReport);
 
         return measureReport;
-
     }
 
     public static <T> List<List<T>> getBatches(List<T> collection, int batchSize) {
@@ -202,9 +204,9 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
             List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
-        if (this.measureEvalConfig.getParallelEnabled()
-                && subjectIds.size() > this.measureEvalConfig.getParallelThreshold()) {
-            return parallelMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+        if (this.measureEvaluationOptions.isThreadedEnabled()
+                && subjectIds.size() > this.measureEvaluationOptions.getThreadedBatchSize()) {
+            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
                     contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
         } else {
             return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
@@ -215,17 +217,17 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     }
 
-    protected MeasureReport parallelMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
+    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
             String reportType,
             List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
-        List<List<String>> batches = getBatches(subjectIds, this.measureEvalConfig.getParallelThreshold());
-        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvalConfig.getParallelThreads());
+        List<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
+        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
         List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
         for (List<String> idBatch : batches) {
             futures.add(
                     CompletableFuture.supplyAsync(
-                            () -> this.evaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
+                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
                                     fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
                             executor));
         }
@@ -313,10 +315,12 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     private LibraryLoader buildLibraryLoader(LibraryContentProvider libraryContentProvider) {
         List<LibraryContentProvider> libraryContentProviders = new ArrayList<>();
         libraryContentProviders.add(libraryContentProvider);
-        libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+        if (this.cqlOptions.useEmbeddedLibraries()) {
+            libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+        }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlTranslatorOptions);
+                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlOptions.getCqlTranslatorOptions());
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
@@ -376,12 +380,12 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
         context.setDebugMap(new DebugMap());
 
-        if (this.measureEvalConfig.getCqlEngineOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
+        if (this.cqlOptions.getCqlEngineOptions().getOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
             context.setExpressionCaching(true);
         }
 
-        if (this.measureEvalConfig.getDebugLoggingEnabled()) {
-        context.getDebugMap().setIsLoggingEnabled(true);
+        if (this.cqlOptions.getCqlEngineOptions().isDebugLoggingEnabled()) {
+            context.getDebugMap().setIsLoggingEnabled(true);
         }
 
         return context;

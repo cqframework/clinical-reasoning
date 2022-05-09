@@ -1,17 +1,17 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import static org.testng.Assert.assertEquals;
+
+import java.math.BigDecimal;
+
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.testng.annotations.Test;
 
-import java.math.BigDecimal;
-
-import static org.testng.Assert.assertEquals;
-
 
 @Test()
-public class StratifierParallelMeasureProcessorTest extends BaseMeasureProcessorTest {
-    public StratifierParallelMeasureProcessorTest() {
+public class StratifierThreadedMeasureProcessorTest extends BaseMeasureProcessorTest {
+    public StratifierThreadedMeasureProcessorTest() {
         super("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR-bundle.json", true, 8);
     }
 

@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOR;
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOREXCEPTION;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.DENOMINATOREXCLUSION;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.INITIALPOPULATION;
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.MEASUREOBSERVATION;
@@ -199,9 +200,47 @@ public class MeasureEvaluator {
 
         for (GroupDef groupDef : measureDef.getGroups()) {
             evaluateGroup(measureScoring, groupDef, measureDef.getSdes(), subjectIds);
+            validateEvaluatedMeasureCount(measureScoring, groupDef);
         }
 
         return measureDef;
+    }
+
+    private void validateEvaluatedMeasureCount(MeasureScoring measureScoring, GroupDef groupDef) {
+        switch (measureScoring) {
+            case PROPORTION:
+            case RATIO:
+                // the count of denominator + denominator exclusion + denominator exception must
+                // be <= the count of initial population.
+                if (groupDef.get(INITIALPOPULATION).getResources()
+                        .size() < ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size()
+                        : 0) +
+                        (groupDef.get(DENOMINATOREXCEPTION) != null
+                                ? groupDef.get(DENOMINATOREXCEPTION).getResources().size()
+                                : 0)
+                        +
+                        (groupDef.get(DENOMINATOREXCLUSION) != null
+                                ? groupDef.get(DENOMINATOREXCLUSION).getResources().size()
+                                : 0))) {
+                    logger.debug("For group: {}, Initial population count is less than the sum of denominator," +
+                            " denominator exception and denominator exclusion", groupDef.getId());
+                }
+
+                // the count of numerator + numerator exclusion must be <= the count of the
+                // denominator.
+                if ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size()
+                        : 0) < ((groupDef.get(NUMERATOR) != null ? groupDef.get(NUMERATOR).getResources().size() : 0) +
+                        (groupDef.get(NUMERATOREXCLUSION) != null
+                                ? groupDef.get(NUMERATOREXCLUSION).getResources().size()
+                                : 0))) {
+                    logger.debug(
+                            "For group: {}, Denominator count is less than the sum of numerator and numerator exclusion",
+                            groupDef.getId());
+                }
+
+                break;
+            default:
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -218,7 +257,7 @@ public class MeasureEvaluator {
         }
 
         if (result instanceof Boolean) {
-            if (((Boolean) result)) {
+            if ((Boolean.TRUE.equals(result))) {
                 return Collections.singletonList(this.context.resolveExpressionRef(subjectType).evaluate(this.context));
             } else {
                 return Collections.emptyList();
@@ -302,23 +341,23 @@ public class MeasureEvaluator {
                 boolean inNumerator = evaluatePopulationMembership(subjectType, subjectId, groupDef.get(NUMERATOR),
                         groupDef.get(NUMERATOREXCLUSION));
 
-                if (!inNumerator && groupDef.get(DENOMINATOREXCLUSION) != null) {
+                if (!inNumerator && groupDef.get(DENOMINATOREXCEPTION) != null) {
                     // Are they in the denominator exception?
 
-                    PopulationDef denominatorExclusion = groupDef.get(DENOMINATOREXCLUSION);
+                    PopulationDef denominatorException = groupDef.get(DENOMINATOREXCEPTION);
                     PopulationDef denominator = groupDef.get(DENOMINATOR);
                     boolean inException = false;
                     for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
-                            denominatorExclusion.getCriteriaExpression(),
-                            denominatorExclusion.getEvaluatedResources())) {
+                            denominatorException.getCriteriaExpression(),
+                            denominatorException.getEvaluatedResources())) {
                         inException = true;
-                        denominatorExclusion.getResources().add(resource);
+                        denominatorException.getResources().add(resource);
                         denominator.getResources().remove(resource);
 
                     }
 
                     if (inException) {
-                        denominatorExclusion.getSubjects().add(subjectId);
+                        denominatorException.getSubjects().add(subjectId);
                         denominator.getSubjects().remove(subjectId);
                     }
                 }

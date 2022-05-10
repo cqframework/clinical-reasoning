@@ -42,6 +42,9 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // Groups
         for (MeasureGroupComponent group : measure.getGroup()) {
             GroupDef groupDef = new GroupDef();
+
+            groupDef.setId(group.getId());
+
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 MeasurePopulationType populationType = MeasurePopulationType
                         .fromCode(pop.getCode().getCodingFirstRep().getCode());

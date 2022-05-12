@@ -9,4 +9,8 @@ public class MeasureConstants {
     public static final String MEASUREMENT_PERIOD_PARAMETER_NAME = "Measurement Period";
 
     public static final String FHIR_MODEL_URI = "http://hl7.org/fhir";
+
+    public static final String EXT_PERTINENT_URI = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isPertinent";
+
+    public static final String EXT_PERTINENT_STR = "strongly-positive";
 }

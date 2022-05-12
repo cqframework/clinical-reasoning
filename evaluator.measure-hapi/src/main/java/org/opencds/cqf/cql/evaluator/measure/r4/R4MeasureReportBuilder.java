@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -58,8 +59,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
+    Extension extension;
+
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
+        extension = new Extension();
+        extension.setUrl(MeasureConstants.EXT_PERTINENT_URI);
+        extension.setValue(new StringType(MeasureConstants.EXT_PERTINENT_STR));
     }
 
     protected Measure measure = null;
@@ -85,9 +91,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
 
+
+        FhirContext fhirContext = FhirContext.forR4();
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
             for (Reference r : this.getEvaluatedResourceReferences().values()) {
+
+               // r.addExtension(extension);
+               // System.out.println("Resource%%%:"+r.toString());
                 report.addEvaluatedResource(r);
             }
         }
@@ -307,6 +318,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
                 Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
                         measurePopulationType.toCode());
+                System.out.println("Adding extension:"+ measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);
             }
         }
@@ -379,7 +391,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         break;
                 }
 
-                report.addEvaluatedResource(new Reference(obs));
+                Reference r = new Reference(obs);
+                addExtensionToReference(r, extension);
+
+                report.addEvaluatedResource(r);
                 report.addContained(obs);
             }
         }

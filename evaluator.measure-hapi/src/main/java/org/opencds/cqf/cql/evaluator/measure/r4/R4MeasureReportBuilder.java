@@ -92,13 +92,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
 
 
-        FhirContext fhirContext = FhirContext.forR4();
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
             for (Reference r : this.getEvaluatedResourceReferences().values()) {
-
-               // r.addExtension(extension);
-               // System.out.println("Resource%%%:"+r.toString());
+                r.addExtension(extension);
                 report.addEvaluatedResource(r);
             }
         }
@@ -318,7 +315,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
                 Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
                         measurePopulationType.toCode());
-                System.out.println("Adding extension:"+ measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);
             }
         }

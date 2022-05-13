@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -56,6 +56,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
     protected static String EXT_SDE_REFERENCE_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
+    protected static final String POPULATION_BASIS_URL = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
+
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
@@ -90,7 +92,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         processSdes(measure, measureDef, subjectIds);
 
         this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
-
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
@@ -242,7 +243,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
-        reportPopulation.setCount(populationDef.getSubjects().size());
+
+        if (checkIfNotBooleanBasedMeasure(measure)) {
+            reportPopulation.setCount(populationDef.getResources().size());
+        } else {
+            reportPopulation.setCount(populationDef.getSubjects().size());
+        }
 
         if (measurePopulation.hasDescription()) {
             reportPopulation.addExtension(
@@ -308,7 +314,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void addResourceReferences(MeasurePopulationType measurePopulationType, List<Object> evaluatedResources) {
-        if (evaluatedResources.size() > 0) {
+        if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
                 Resource resource = (Resource) object;
                 String resourceId = resource.getId();
@@ -511,6 +517,20 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         obsExtension.addExtension(extExtPop);
 
         return obsExtension;
+    }
+
+    protected boolean checkIfNotBooleanBasedMeasure(Measure measure) {
+        if (measure.hasExtension() && measure.getExtension().size() > 0) {
+            return measure.getExtension().stream().anyMatch(item -> checkForNotBoolean(item)
+                    );
+        }
+        return false;
+    }
+
+    private boolean checkForNotBoolean(Extension item) {
+        return (item.getUrl() != null &&
+                StringUtils.equalsIgnoreCase(item.getUrl(), POPULATION_BASIS_URL) &&
+                !StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
     }
 
     protected DomainResource createPopulationObservation(String id, String populationId, Coding valueCoding,

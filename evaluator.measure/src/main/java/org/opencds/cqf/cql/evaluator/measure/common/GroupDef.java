@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class GroupDef {
+
+    private String id;
 
     private HashMap<MeasurePopulationType, PopulationDef> populationSets = new HashMap<>();
 
@@ -40,4 +42,8 @@ public class GroupDef {
 
         return this.stratifiers;
     }
+
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
 }

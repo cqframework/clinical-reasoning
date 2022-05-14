@@ -13,9 +13,11 @@ import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.ExpressionDef;
@@ -52,6 +54,7 @@ public class MeasureEvaluator {
 
     protected Context context;
     protected String measurementPeriodParameterName = null;
+    protected Set<String> evaluatedResourceMatchedExpression;
 
     public MeasureEvaluator(Context context, String measurementPeriodParameterName) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
@@ -72,6 +75,8 @@ public class MeasureEvaluator {
         // measurementPeriod is not required, because it's often defaulted in CQL
         this.setMeasurementPeriod(measurementPeriod);
 
+        populateEvaluatedResourceMatchedExpression(measureDef);
+
         switch (measureEvalType) {
             case PATIENT:
             case SUBJECT:
@@ -85,6 +90,27 @@ public class MeasureEvaluator {
             default:
                 throw new IllegalArgumentException(
                         String.format("Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
+        }
+    }
+
+    private void populateEvaluatedResourceMatchedExpression(MeasureDef measureDef) {
+        if(evaluatedResourceMatchedExpression ==  null) {
+            evaluatedResourceMatchedExpression = new HashSet<>();
+        } else {
+            evaluatedResourceMatchedExpression.clear();
+        }
+        for (SdeDef sde : measureDef.getSdes()) {
+            evaluatedResourceMatchedExpression.add(sde.getExpression());
+        }
+
+        for(GroupDef groupDef : measureDef.getGroups()) {
+            for(PopulationDef populationDef : groupDef.values()) {
+                evaluatedResourceMatchedExpression.add(populationDef.getCriteriaExpression());
+            }
+
+            for(StratifierDef stratifierDef : groupDef.getStratifiers()) {
+                evaluatedResourceMatchedExpression.add(stratifierDef.getExpression());
+            }
         }
     }
 

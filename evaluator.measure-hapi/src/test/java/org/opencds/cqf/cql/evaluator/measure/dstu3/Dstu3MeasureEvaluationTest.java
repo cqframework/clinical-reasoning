@@ -280,6 +280,21 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         return patient;
     }
 
+    private Patient adam_smith() {
+        Patient patient = new Patient();
+        patient.setId(new IdType("Patient", "adam-smith"));
+        patient.setName(
+                Arrays.asList(new HumanName().setFamily("Smith").setGiven(Arrays.asList(new StringType("Adam")))));
+        patient.setBirthDate(new Date());
+        patient.setGender(AdministrativeGender.MALE);
+
+        Extension usCoreRace = new Extension();
+        usCoreRace.setUrl(EXT_URL_US_CORE_RACE).addExtension().setUrl(OMB_CATEGORY).setValue(new Coding()
+                .setSystem(URL_SYSTEM_RACE).setCode(OMB_CATEGORY_RACE_BLACK).setDisplay(BLACK_OR_AFRICAN_AMERICAN));
+        patient.getExtension().add(usCoreRace);
+        return patient;
+    }
+
     private Patient jane_doe() {
         Patient patient = new Patient();
         patient.setId(new IdType("Patient", "jane-doe"));

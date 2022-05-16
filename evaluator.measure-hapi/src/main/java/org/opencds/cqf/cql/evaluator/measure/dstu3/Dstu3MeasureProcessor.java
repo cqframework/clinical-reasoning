@@ -1,11 +1,13 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -15,7 +17,6 @@ import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -50,6 +51,7 @@ import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureScoring;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.slf4j.Logger;
@@ -69,7 +71,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     protected LibraryContentProviderFactory libraryContentProviderFactory;
     protected FhirDalFactory fhirDalFactory;
 
-    private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new HashMap<>();
+    private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
@@ -142,36 +144,9 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         }
 
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
-        SubjectProvider subjectProvider = new SubjectProvider() {
+        List<String> subjectIds = this.getSubjects(measureEvalType,
+                subject != null ? subject : practitioner, dataEndpoint);
 
-            @Override
-            public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
-                if (subjectId == null) {
-                    Iterable<IBaseResource> resources = fhirDal.search("Patient");
-                    List<String> ids = new ArrayList<>();
-                    for (IBaseResource r : resources) {
-                        ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-                    }
-
-                    return ids;
-                } else {
-                    IBaseResource r = fhirDal.read(new IdType("Patient/" + subjectId));
-                    return Collections
-                            .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-                }
-            }
-        };
-
-        List<String> subjectIds = subjectProvider.getSubjects(measureEvalType,
-                subject != null ? subject : practitioner);
-
-        return evaluateMeasure(url, periodStart, periodEnd, reportType, subjectIds, fhirDal, contentEndpoint,
-                terminologyEndpoint, dataEndpoint, additionalData);
-    }
-
-    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
-            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint, Bundle additionalData) {
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
         Iterator<IBaseResource> measureIter = measures.iterator();
         if (!measureIter.hasNext()) {
@@ -180,9 +155,91 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
         Measure measure = (Measure) measureIter.next();
 
+        MeasureReport measureReport = evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal, contentEndpoint,
+                terminologyEndpoint, dataEndpoint, additionalData);
+
+        MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
+        Dstu3MeasureReportScorer scorer =  new Dstu3MeasureReportScorer();
+        scorer.score(measureScoring, measureReport);
+        return measureReport;
+    }
+
+    public List<String> getSubjects(String reportType, String subjectId) {
+        return this.getSubjects(reportType, subjectId, null);
+    }
+
+    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint) {
+        MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
+        return getSubjects(measureEvalType, subjectId, dataEndpoint);
+    }
+
+
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint) {
+        FhirDal fhirDal = dataEndpoint != null
+                ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint))
+                : localFhirDal;
+        SubjectProvider subjectProvider = new Dstu3FhirDalSubjectProvider(fhirDal);
+        return subjectProvider.getSubjects(measureEvalType, subjectId);
+
+    }
+
+    public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint, Bundle additionalData) {
+
+        if (this.measureEvaluationOptions.isThreadedEnabled()
+                && subjectIds.size() > this.measureEvaluationOptions.getThreadedBatchSize()) {
+            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+        } else {
+            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+                    contentEndpoint,
+                    terminologyEndpoint, dataEndpoint, additionalData);
+        }
+
+    }
+
+    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart, String periodEnd, String reportType,
+                List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+                Endpoint dataEndpoint, Bundle additionalData) {
+        List<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
+        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+        List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
+        for (List<String> idBatch : batches) {
+            futures.add(
+                    CompletableFuture.supplyAsync(
+                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
+                                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
+                            executor));
+        }
+
+        List<MeasureReport> reports = new ArrayList<>();
+        futures.forEach(x -> reports.add(x.join()));
+        Dstu3MeasureReportAggregator reportAggregator = new Dstu3MeasureReportAggregator();
+        return reportAggregator.aggregate(reports);
+    }
+
+    public static <T> List<List<T>> getBatches(List<T> collection, int batchSize) {
+        int i = 0;
+        List<List<T>> batches = new ArrayList<>();
+        while (i < collection.size()) {
+            int nextInc = Math.min(collection.size() - i, batchSize);
+            List<T> batch = collection.subList(i, i + nextInc);
+            batches.add(batch);
+            i = i + nextInc;
+        }
+
+        return batches;
+    }
+
+
+    protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
+              List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+              Endpoint dataEndpoint, Bundle additionalData) {
+
         if (!measure.hasLibrary()) {
             throw new IllegalArgumentException(
-                    String.format("Measure %s does not have a primary library specified", url));
+                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
         }
 
         Reference libraryUrl = measure.getLibrary().get(0);

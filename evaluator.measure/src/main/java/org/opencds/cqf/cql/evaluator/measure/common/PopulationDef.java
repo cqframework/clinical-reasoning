@@ -11,6 +11,7 @@ public class PopulationDef {
     protected List<Object> evaluatedResources;
     protected List<Object> resources;
     protected Set<String> subjects;
+    private List<Object> evaluatedResourcesWithMatchedExpression;
 
     protected String criteriaExpression;
 
@@ -52,6 +53,14 @@ public class PopulationDef {
         }
 
         return this.resources;
+    }
+
+    public List<Object> getEvaluatedResourcesWithMatchedExpression() {
+        if(evaluatedResourcesWithMatchedExpression == null) {
+            this.evaluatedResourcesWithMatchedExpression = new ArrayList<>();
+        }
+
+        return this.evaluatedResourcesWithMatchedExpression;
     }
 
     public String getCriteriaExpression() {

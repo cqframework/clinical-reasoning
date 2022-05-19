@@ -54,7 +54,7 @@ public class MeasureEvaluator {
 
     protected Context context;
     protected String measurementPeriodParameterName = null;
-    protected Set<String> evaluatedResourceMatchedExpression;
+    protected Set<String> evaluatedResourceMatchExpressionSet;
 
     public MeasureEvaluator(Context context, String measurementPeriodParameterName) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
@@ -75,7 +75,7 @@ public class MeasureEvaluator {
         // measurementPeriod is not required, because it's often defaulted in CQL
         this.setMeasurementPeriod(measurementPeriod);
 
-        populateEvaluatedResourceMatchedExpression(measureDef);
+        populateEvaluatedResourceMatchExpressionSet(measureDef);
 
         switch (measureEvalType) {
             case PATIENT:
@@ -93,23 +93,27 @@ public class MeasureEvaluator {
         }
     }
 
-    private void populateEvaluatedResourceMatchedExpression(MeasureDef measureDef) {
-        if(evaluatedResourceMatchedExpression ==  null) {
-            evaluatedResourceMatchedExpression = new HashSet<>();
-        } else {
-            evaluatedResourceMatchedExpression.clear();
+    private Set<String> getEvaluatedResourceMatchExpressionSet() {
+        if(evaluatedResourceMatchExpressionSet ==  null) {
+            evaluatedResourceMatchExpressionSet = new HashSet<>();
         }
+        return evaluatedResourceMatchExpressionSet;
+    }
+
+    private void populateEvaluatedResourceMatchExpressionSet(MeasureDef measureDef) {
+        getEvaluatedResourceMatchExpressionSet();
+
         for (SdeDef sde : measureDef.getSdes()) {
-            evaluatedResourceMatchedExpression.add(sde.getExpression());
+            evaluatedResourceMatchExpressionSet.add(sde.getExpression());
         }
 
         for(GroupDef groupDef : measureDef.getGroups()) {
             for(PopulationDef populationDef : groupDef.values()) {
-                evaluatedResourceMatchedExpression.add(populationDef.getCriteriaExpression());
+                evaluatedResourceMatchExpressionSet.add(populationDef.getCriteriaExpression());
             }
 
             for(StratifierDef stratifierDef : groupDef.getStratifiers()) {
-                evaluatedResourceMatchedExpression.add(stratifierDef.getExpression());
+                evaluatedResourceMatchExpressionSet.add(stratifierDef.getExpression());
             }
         }
     }
@@ -204,10 +208,14 @@ public class MeasureEvaluator {
         context.setContextValue(subjectType, subjectId);
     }
 
-    protected void captureEvaluatedResources(List<Object> outEvaluatedResources) {
+    protected void captureEvaluatedResources(List<Object> outEvaluatedResources,
+                                             List<Object> evaluatedResourcesWithMatchedExpression, boolean matched) {
         if (outEvaluatedResources != null && this.context.getEvaluatedResources() != null) {
             for (Object o : this.context.getEvaluatedResources()) {
                 outEvaluatedResources.add(o);
+                if(matched) {
+                    evaluatedResourcesWithMatchedExpression.add(o);
+                }
             }
         }
 
@@ -271,12 +279,12 @@ public class MeasureEvaluator {
 
     @SuppressWarnings("unchecked")
     protected Iterable<Object> evaluatePopulationCriteria(String subjectType, String subjectId,
-            String criteriaExpression, List<Object> outEvaluatedResources) {
+            String criteriaExpression, List<Object> outEvaluatedResources, PopulationDef populationDef) {
         if (criteriaExpression == null || criteriaExpression.isEmpty()) {
             return Collections.emptyList();
         }
 
-        Object result = this.evaluateCriteria(criteriaExpression, outEvaluatedResources);
+        Object result = this.evaluateCriteria(criteriaExpression, outEvaluatedResources, populationDef);
 
         if (result == null) {
             return Collections.emptyList();
@@ -293,22 +301,27 @@ public class MeasureEvaluator {
         return (Iterable<Object>) result;
     }
 
-    protected Object evaluateCriteria(String criteriaExpression, List<Object> outEvaluatedResources) {
+    protected Object evaluateCriteria(String criteriaExpression, List<Object> outEvaluatedResources,
+                                      PopulationDef populationDef) {
         Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
 
-        captureEvaluatedResources(outEvaluatedResources);
+        boolean matchExpression = getEvaluatedResourceMatchExpressionSet().contains(criteriaExpression);
+        captureEvaluatedResources(outEvaluatedResources, populationDef.getEvaluatedResourcesWithMatchedExpression(),
+                matchExpression);
 
         return result;
     }
 
     protected Object evaluateObservationCriteria(Object resource, String criteriaExpression,
-            List<Object> outEvaluatedResources) {
+            List<Object> outEvaluatedResources, PopulationDef populationDef) {
 
         ExpressionDef ed = context.resolveExpressionRef(criteriaExpression);
         if (!(ed instanceof FunctionDef)) {
             throw new IllegalArgumentException(String
                     .format("Measure observation %s does not reference a function definition", criteriaExpression));
         }
+
+        boolean matched = getEvaluatedResourceMatchExpressionSet().contains(criteriaExpression);
 
         Object result = null;
         context.pushWindow();
@@ -319,7 +332,7 @@ public class MeasureEvaluator {
             context.popWindow();
         }
 
-        captureEvaluatedResources(outEvaluatedResources);
+        captureEvaluatedResources(outEvaluatedResources, populationDef.getEvaluatedResourcesWithMatchedExpression(), matched);
 
         return result;
     }
@@ -328,14 +341,14 @@ public class MeasureEvaluator {
             PopulationDef exclusionDef) {
         boolean inPopulation = false;
         for (Object resource : evaluatePopulationCriteria(subjectType, subjectId, inclusionDef.getCriteriaExpression(),
-                inclusionDef.getEvaluatedResources())) {
+                inclusionDef.getEvaluatedResources(), inclusionDef)) {
             inPopulation = true;
             inclusionDef.getResources().add(resource);
         }
 
         if (inPopulation && exclusionDef != null) {
             for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
-                    exclusionDef.getCriteriaExpression(), exclusionDef.getEvaluatedResources())) {
+                    exclusionDef.getCriteriaExpression(), exclusionDef.getEvaluatedResources(), exclusionDef)) {
                 inPopulation = false;
                 exclusionDef.getResources().add(resource);
                 inclusionDef.getResources().remove(resource);
@@ -375,7 +388,7 @@ public class MeasureEvaluator {
                     boolean inException = false;
                     for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
                             denominatorException.getCriteriaExpression(),
-                            denominatorException.getEvaluatedResources())) {
+                            denominatorException.getEvaluatedResources(), denominatorException)) {
                         inException = true;
                         denominatorException.getResources().add(resource);
                         denominator.getResources().remove(resource);
@@ -406,7 +419,7 @@ public class MeasureEvaluator {
                 if (measureObservation != null) {
                     for (Object resource : measurePopulation.getResources()) {
                         Object observationResult = evaluateObservationCriteria(resource,
-                                measureObservation.getCriteriaExpression(), measureObservation.getEvaluatedResources());
+                                measureObservation.getCriteriaExpression(), measureObservation.getEvaluatedResources(),measureObservation);
                         measureObservation.getResources().add(observationResult);
                     }
                 }

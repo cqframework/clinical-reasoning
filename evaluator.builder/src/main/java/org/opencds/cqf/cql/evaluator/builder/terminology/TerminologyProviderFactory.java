@@ -27,8 +27,8 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
 
     @Inject
     public TerminologyProviderFactory(FhirContext fhirContext, Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
-        this.terminologyProviderFactories = terminologyProviderFactories;
-        this.fhirContext = fhirContext;
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+        this.terminologyProviderFactories = requireNonNull(terminologyProviderFactories, "terminologyProviderFactories can not be null");
     }
 
     public TerminologyProvider create(EndpointInfo endpointInfo) {

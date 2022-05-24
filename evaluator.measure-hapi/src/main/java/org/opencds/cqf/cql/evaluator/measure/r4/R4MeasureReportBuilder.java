@@ -65,9 +65,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
-        extension = new Extension();
-        extension.setUrl(MeasureConstants.EXT_PERTINENT_URI);
-        extension.setValue(new StringType(MeasureConstants.EXT_PERTINENT_STR));
+        initExtension();
     }
 
     protected Measure measure = null;
@@ -78,6 +76,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         this.measure = null;
         this.report = null;
         this.evaluatedResourceReferences = null;
+    }
+
+    private void initExtension() {
+        extension = new Extension();
+        extension.setUrl(MeasureConstants.EXT_PERTINENT_URI);
+        extension.setValue(new StringType(MeasureConstants.EXT_PERTINENT_STR));
     }
 
     @Override
@@ -255,7 +259,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
         }
 
-        addResourceReferences(populationDef.getType(), populationDef.getEvaluatedResources());
+        addResourceReferences(populationDef.getType(), populationDef.getEvaluatedResources(),
+                getResourceIds(populationDef.getEvaluatedResourcesWithMatchedExpression()));
 
         // This is a temporary list carried forward to stratifiers
         Set<String> populationSet = populationDef.getSubjects();
@@ -283,6 +288,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             default:
                 break;
         }
+    }
+
+    private Set<String> getResourceIds(List<Object> matchedEvaluatedResources) {
+        Set<String> set = new HashSet<>();
+        if (!matchedEvaluatedResources.isEmpty()) {
+            for (Object object : matchedEvaluatedResources) {
+                Resource resource = (Resource) object;
+                String resourceId = resource.getId();
+                set.add(resourceId);
+            }
+        }
+        return set;
     }
 
     protected void buildMeasureObservations(String observationName, List<Object> resources) {
@@ -313,7 +330,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return referenceList;
     }
 
-    private void addResourceReferences(MeasurePopulationType measurePopulationType, List<Object> evaluatedResources) {
+    private void addResourceReferences(MeasurePopulationType measurePopulationType, List<Object> evaluatedResources,
+                                       Set<String> resourceIds) {
         if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
                 Resource resource = (Resource) object;
@@ -322,6 +340,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
                         measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);
+
+                if(resourceIds.contains(resourceId)) {
+                    addExtensionToReference(reference, extension);
+                }
             }
         }
     }

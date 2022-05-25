@@ -4,9 +4,12 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-
 import java.math.BigDecimal;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 
 @Test(singleThreaded = true)
@@ -73,6 +76,11 @@ public class StratifierMeasureProcessorTest extends BaseMeasureProcessorTest {
         validateStratifier(mrgc.getStratifierFirstRep(), "false", "initial-population", 10);
         validateStratifier(mrgc.getStratifierFirstRep(), "false", "numerator", 4);
         validateStratumScore(mrgc.getStratifierFirstRep(), "false", new BigDecimal("0.5"));
+
+        assertFalse(report.getEvaluatedResource().isEmpty());
+        assertTrue(report.getEvaluatedResource().get(0).hasExtension());
+        assertNotNull(report.getEvaluatedResource().get(0).getExtensionByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isPertinent"));
+
     }
 
     @Test

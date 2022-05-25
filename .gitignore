@@ -22,3 +22,5 @@ jitdump.*
 
 .idea
 *.iml
+
+.apt_generated

@@ -82,7 +82,6 @@ public class PlanDefinitionProcessorTestBase {
 
                 @Override
                 public LibraryContentProvider create(String url, List<String> headers) {
-                    System.out.println("DAL Loading Library " + url);
                     return new BundleFhirLibraryContentProvider(fhirContext,
                             (IBaseBundle) load(url), adapterFactory, libraryVersionSelector);
                 }
@@ -101,7 +100,6 @@ public class PlanDefinitionProcessorTestBase {
 
                 @Override
                 public RetrieveProvider create(String url, List<String> headers) {
-                    System.out.println("DAL Loading Retrieve " + url);
                     return new BundleRetrieveProvider(fhirContext, (IBaseBundle) load(url));
                 }
             }
@@ -119,7 +117,6 @@ public class PlanDefinitionProcessorTestBase {
 
                 @Override
                 public TerminologyProvider create(String url, List<String> headers) {
-                    System.out.println("DAL Loading Terminology " + url);
                     return new BundleTerminologyProvider(fhirContext, (IBaseBundle) load(url));
                 }
             }

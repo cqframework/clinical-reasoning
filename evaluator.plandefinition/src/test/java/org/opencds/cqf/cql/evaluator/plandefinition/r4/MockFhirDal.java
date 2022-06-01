@@ -53,7 +53,6 @@ public class MockFhirDal implements FhirDal {
     
     @Override
     public IBaseResource read(IIdType id) {
-        System.out.println("DAL Read: " + id.getIdPart());
         return cacheById.get(toKey(id));
     }
 
@@ -68,13 +67,11 @@ public class MockFhirDal implements FhirDal {
 
     @Override
     public Iterable<IBaseResource> search(String resourceType) {
-        System.out.println("DAL Search Resource: " + resourceType);
         return cacheByType.get(resourceType);
     }
 
     @Override
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url) {
-        System.out.println("DAL Search: " + url);
         return cacheByURL.get(url).stream()
             .filter(resource -> resourceType.equals(resource.getIdElement().getResourceType()))
             .collect(Collectors.toList());

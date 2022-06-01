@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
@@ -57,7 +58,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 
-@SuppressWarnings("unused")
 public class PlanDefinitionProcessor {
   protected ActivityDefinitionProcessor activityDefinitionProcessor;
   protected LibraryProcessor libraryProcessor;
@@ -85,6 +85,14 @@ public class PlanDefinitionProcessor {
     this.operationParametersParser = operationParametersParser;
   }
 
+  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
+    if (obj == null) return Optional.empty();
+    if (type.isInstance(obj)) {
+      return Optional.of(type.cast(obj));
+    }
+    throw new IllegalArgumentException(errorMessage);
+  }
+
   public CarePlan apply(IdType theId, String patientId, String encounterId, String practitionerId,
       String organizationId, String userType, String userLanguage, String userTaskContext, String setting,
       String settingContext, Boolean mergeNestedCarePlans, IBaseParameters parameters, Boolean useServerData,
@@ -94,24 +102,20 @@ public class PlanDefinitionProcessor {
     // warn if prefetchData exists
     // if no data anywhere blow up
     IBaseResource basePlanDefinition = this.fhirDal.read(theId);
-    PlanDefinition planDefinition;
 
-    if (basePlanDefinition == null) {
-      throw new IllegalArgumentException("Couldn't find PlanDefinition " + theId);
-    }
-    if (!(basePlanDefinition instanceof PlanDefinition)) {
-      throw new IllegalArgumentException(
-          "The planDefinition passed to FhirDal was " + "not a valid instance of PlanDefinition.class");
-    }
-
-    planDefinition = (PlanDefinition) basePlanDefinition;
+    requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
+    
+    PlanDefinition planDefinition = castOrThrow(basePlanDefinition, PlanDefinition.class,
+      "The planDefinition passed to FhirDal was not a valid instance of PlanDefinition.class").get();
 
     logger.info("Performing $apply operation on PlanDefinition/" + theId);
 
     CarePlan builder = new CarePlan();
 
-    builder.addInstantiatesCanonical(planDefinition.getIdElement().getIdPart()).setSubject(new Reference(patientId))
-        .setStatus(CarePlan.CarePlanStatus.DRAFT);
+    builder
+      .addInstantiatesCanonical(planDefinition.getIdElement().getIdPart())
+      .setSubject(new Reference(patientId))
+      .setStatus(CarePlan.CarePlanStatus.DRAFT);
 
     if (encounterId != null)
       builder.setEncounter(new Reference(encounterId));
@@ -125,32 +129,20 @@ public class PlanDefinitionProcessor {
     // Each Group of actions shares a RequestGroup
     RequestGroup requestGroup = new RequestGroup().setStatus(RequestStatus.DRAFT).setIntent(RequestIntent.PROPOSAL);
 
-    IBaseDatatype basePrefetchDataKey = operationParametersParser.getValueChild(prefetchData, "key");
-    String prefetchDataKey = null;
-    if (basePrefetchDataKey != null) {
-      if (!(basePrefetchDataKey instanceof StringType)) {
-        throw new IllegalArgumentException("prefetchData key must be a String");
-      }
-      prefetchDataKey = ((StringType) basePrefetchDataKey).asStringValue();
-    }
+    String prefetchDataKey = castOrThrow(
+      operationParametersParser.getValueChild(prefetchData, "key"), StringType.class, 
+      "prefetchData key must be a String"
+    ).map(key -> key.asStringValue()).orElse(null);
 
-    IBaseResource basePrefetchDataDescription = operationParametersParser.getResourceChild(prefetchData, "descriptor");
-    DataRequirement prefetchDataDescription = null;
-    if (basePrefetchDataDescription != null) {
-      if (!(basePrefetchDataDescription instanceof DataRequirement)) {
-        throw new IllegalArgumentException("prefetchData descriptor must be a DataRequirement");
-      }
-      prefetchDataDescription = ((DataRequirement) basePrefetchDataDescription);
-    }
+    DataRequirement prefetchDataDescription = castOrThrow(
+      operationParametersParser.getResourceChild(prefetchData, "descriptor"), DataRequirement.class, 
+      "prefetchData descriptor must be a DataRequirement"
+    ).orElse(null);
 
-    IBaseResource basePrefetchDataData = operationParametersParser.getResourceChild(prefetchData, "data");
-    IBaseBundle prefetchDataData = null;
-    if (basePrefetchDataData != null) {
-      if (!(basePrefetchDataData instanceof IBaseBundle)) {
-        throw new IllegalArgumentException("prefetchData data must be a Bundle");
-      }
-      prefetchDataData = ((IBaseBundle) basePrefetchDataData);
-    }
+    IBaseBundle prefetchDataData = castOrThrow(
+      operationParametersParser.getResourceChild(prefetchData, "data"), IBaseBundle.class, 
+      "prefetchData data must be a Bundle"
+    ).orElse(null);
 
     Session session = new Session(planDefinition, builder, patientId, encounterId, practitionerId, organizationId,
         userType, userLanguage, userTaskContext, setting, settingContext, requestGroup, parameters, prefetchData,

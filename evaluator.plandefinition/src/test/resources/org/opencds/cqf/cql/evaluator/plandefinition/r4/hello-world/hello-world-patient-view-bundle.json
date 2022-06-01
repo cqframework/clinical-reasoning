@@ -60,7 +60,7 @@
           "kind": "start",
           "expression": {
             "description": "Whether or not a Hello World! card should be returned",
-            "language": "text/cql",
+            "language": "text/cql.identifier",
             "expression": "Main Action Condition Expression Is True"
           }
         } ],
@@ -77,13 +77,7 @@
             "language": "text/cql.identifier",
             "expression": "Get Description"
           }
-        }, {
-          "path": "action.extension",
-          "expression": {
-            "language": "text/cql.identifier",
-            "expression": "Get Indicator"
-          }
-        } ]
+        }]
       } ]
     },
     "request": {

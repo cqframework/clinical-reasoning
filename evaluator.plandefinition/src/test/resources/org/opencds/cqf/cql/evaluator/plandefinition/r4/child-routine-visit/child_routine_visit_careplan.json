@@ -1,0 +1,84 @@
+{
+	"resourceType": "CarePlan",
+	"identifier": [
+		{
+			"use": "official",
+			"value": ""
+		}
+	],
+	"status": "active",
+	"intent": "plan",
+	"title": "Child Routine visit CarePlan",
+	"description": "This defines the schedule of care for patients under 5 years old",
+	"subject": {
+		"reference": "Patient/Reportable",
+		"display": "Everywoman"
+	},
+	"period": {
+		"start": "",
+		"end": ""
+	},
+	"created": "",
+	"author": {
+		"reference": "Practitioner/",
+		"display": ""
+	},
+	"activity": [
+		{
+			"outcomeReference": [
+				{
+					"reference": "Task/",
+					"display": ""
+				}
+			],
+			"detail": {
+				"kind": "Task",
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/CodeSystem/encounter-type",
+							"code": "child_monthly_visit",
+							"display": "Child Monthly Routine visit"
+						}
+					],
+					"text": "Child Monthly Routine visit"
+				},
+				"status": "in-progress",
+				"scheduledTiming": {
+					"event": [
+						""
+					],
+					"repeat": {
+						"count": "59",
+						"countMax": "59",
+						"duration": 2,
+						"durationMax": 4,
+						"durationUnit": "h",
+						"frequency": "1",
+						"frequencyMax": "1",
+						"period": 1,
+						"periodMax": 1,
+						"periodUnit": "mo"
+					},
+					"code": {
+						"coding": [
+							{
+								"system": "https://www.hl7.org/fhir/v3/GTSAbbreviation/cs.html",
+								"code": "MO",
+								"display": "MO"
+							}
+						],
+						"text": "MO"
+					}
+				},
+				"performer": [
+					{
+						"reference": "Practitioner/",
+						"display": ""
+					}
+				],
+				"description": "Child Monthly Routine visit"
+			}
+		}
+	]
+}

@@ -11,6 +11,7 @@ import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -209,12 +210,18 @@ public class MeasureEvaluator {
     }
 
     protected void captureEvaluatedResources(List<Object> outEvaluatedResources,
-                                             List<Object> evaluatedResourcesWithMatchedExpression, boolean matched) {
+             List<Object> evaluatedResourcesWithMatchedExpression, boolean matched, Object result) {
         if (outEvaluatedResources != null && this.context.getEvaluatedResources() != null) {
             for (Object o : this.context.getEvaluatedResources()) {
                 outEvaluatedResources.add(o);
-                if(matched) {
-                    evaluatedResourcesWithMatchedExpression.add(o);
+                if (matched) {
+                    if (result != null && result instanceof Iterable) {
+                        List<Object> list = new ArrayList<>();
+                        flattenAdd(list, result);
+                        list.forEach(item -> {
+                            evaluatedResourcesWithMatchedExpression.add(item);
+                        });
+                    }
                 }
             }
         }
@@ -284,14 +291,32 @@ public class MeasureEvaluator {
             return Collections.emptyList();
         }
 
-        Object result = this.evaluateCriteria(criteriaExpression, outEvaluatedResources, populationDef);
+        return this.evaluateCriteria(subjectType, criteriaExpression, outEvaluatedResources, populationDef);
 
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Iterable<Object> evaluateCriteria(String subjectType, String criteriaExpression, List<Object> outEvaluatedResources,
+                                      PopulationDef populationDef) {
+        Object obj = context.resolveExpressionRef(criteriaExpression).evaluate(context);
+
+        boolean matchExpression = getEvaluatedResourceMatchExpressionSet().contains(criteriaExpression);
+        Iterable<Object> result = validateIterable(obj, subjectType);
+
+        captureEvaluatedResources(outEvaluatedResources, populationDef.getEvaluatedResourcesWithMatchedExpression(),
+                matchExpression, result);
+
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Iterable<Object> validateIterable(Object result, String subjectType) {
         if (result == null) {
             return Collections.emptyList();
         }
 
         if (result instanceof Boolean) {
-            if ((Boolean.TRUE.equals(result))) {
+            if ((Boolean.TRUE.equals(result)) && subjectType != null) {
                 return Collections.singletonList(this.context.resolveExpressionRef(subjectType).evaluate(this.context));
             } else {
                 return Collections.emptyList();
@@ -299,17 +324,6 @@ public class MeasureEvaluator {
         }
 
         return (Iterable<Object>) result;
-    }
-
-    protected Object evaluateCriteria(String criteriaExpression, List<Object> outEvaluatedResources,
-                                      PopulationDef populationDef) {
-        Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
-
-        boolean matchExpression = getEvaluatedResourceMatchExpressionSet().contains(criteriaExpression);
-        captureEvaluatedResources(outEvaluatedResources, populationDef.getEvaluatedResourcesWithMatchedExpression(),
-                matchExpression);
-
-        return result;
     }
 
     protected Object evaluateObservationCriteria(Object resource, String criteriaExpression,
@@ -331,8 +345,7 @@ public class MeasureEvaluator {
         } finally {
             context.popWindow();
         }
-
-        captureEvaluatedResources(outEvaluatedResources, populationDef.getEvaluatedResourcesWithMatchedExpression(), matched);
+        captureEvaluatedResources(outEvaluatedResources, populationDef.getEvaluatedResourcesWithMatchedExpression(), matched, result);
 
         return result;
     }

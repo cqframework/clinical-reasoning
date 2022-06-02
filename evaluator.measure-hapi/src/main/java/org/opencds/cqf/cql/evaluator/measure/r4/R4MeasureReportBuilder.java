@@ -61,7 +61,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
-    Extension extension;
+    Extension extensionIsPertinent;
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
@@ -79,9 +79,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void initExtension() {
-        extension = new Extension();
-        extension.setUrl(MeasureConstants.EXT_PERTINENT_URI);
-        extension.setValue(new StringType(MeasureConstants.EXT_PERTINENT_STR));
+        extensionIsPertinent = new Extension();
+        extensionIsPertinent.setUrl(MeasureConstants.EXT_PERTINENT_URI);
+        extensionIsPertinent.setValue(new StringType(MeasureConstants.EXT_PERTINENT_STR));
     }
 
     @Override
@@ -92,7 +92,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         this.measure = measure;
         this.report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
 
-        buildGroups(measure, measureDef);
+        Set<String> matchedReferenceSet = new HashSet<>();
+        buildGroups(measure, measureDef, matchedReferenceSet);
         processSdes(measure, measureDef, subjectIds);
 
         this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
@@ -100,7 +101,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
             for (Reference r : this.getEvaluatedResourceReferences().values()) {
-                r.addExtension(extension);
+                if (matchedReferenceSet.contains(r.getReference())) {
+                    addExtensionToReference(r, extensionIsPertinent);
+                }
                 report.addEvaluatedResource(r);
             }
         }
@@ -108,7 +111,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return this.report;
     }
 
-    protected void buildGroups(Measure measure, MeasureDef measureDef) {
+    protected void buildGroups(Measure measure, MeasureDef measureDef, Set<String> matchedReferenceSet) {
         if (measure.getGroup().size() != measureDef.getGroups().size()) {
             throw new IllegalArgumentException(
                     "The Measure has a different number of groups defined than the MeasureDef");
@@ -119,12 +122,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (int i = 0; i < measure.getGroup().size(); i++) {
             MeasureGroupComponent mgc = measure.getGroup().get(i);
             String groupKey = this.getKey("group", mgc.getId(), mgc.getCode(), i);
-            buildGroup(groupKey, mgc, this.report.addGroup(), measureDef.getGroups().get(i));
+            buildGroup(groupKey, mgc, this.report.addGroup(), measureDef.getGroups().get(i), matchedReferenceSet);
         }
     }
 
     protected void buildGroup(String groupKey, MeasureGroupComponent measureGroup,
-            MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+                              MeasureReportGroupComponent reportGroup, GroupDef groupDef, Set<String> matchedReferenceSet) {
         if (measureGroup.getPopulation().size() != groupDef.values().size()) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
@@ -145,7 +148,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
             buildPopulation(groupKey, mgpc, reportGroup.addPopulation(),
-                    groupDef.get(MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())));
+                    groupDef.get(MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())),
+                    matchedReferenceSet);
         }
 
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
@@ -243,7 +247,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected void buildPopulation(String groupKey, MeasureGroupPopulationComponent measurePopulation,
-            MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
+            MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef,
+                                   Set<String> matchedReferenceSet) {
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
@@ -259,8 +264,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
         }
 
-        addResourceReferences(populationDef.getType(), populationDef.getEvaluatedResources(),
-                getResourceIds(populationDef.getEvaluatedResourcesWithMatchedExpression()));
+        Set<String> set = getResourceIds(populationDef.getEvaluatedResourcesWithMatchedExpression());
+        matchedReferenceSet.addAll(set);
+
+        addResourceReferences(populationDef.getType(), populationDef.getEvaluatedResources(), set);
 
         // This is a temporary list carried forward to stratifiers
         Set<String> populationSet = populationDef.getSubjects();
@@ -330,8 +337,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return referenceList;
     }
 
-    private void addResourceReferences(MeasurePopulationType measurePopulationType, List<Object> evaluatedResources,
-                                       Set<String> resourceIds) {
+    private void addResourceReferences(MeasurePopulationType measurePopulationType,
+                                       List<Object> evaluatedResources, Set<String> resourceIds) {
         if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
                 Resource resource = (Resource) object;
@@ -341,8 +348,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);
 
-                if(resourceIds.contains(resourceId)) {
-                    addExtensionToReference(reference, extension);
+                if (resourceIds.contains(resourceId)) {
+                    addExtensionToReference(reference, extensionIsPertinent);
                 }
             }
         }
@@ -416,7 +423,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 }
 
                 Reference r = new Reference(obs);
-                addExtensionToReference(r, extension);
 
                 report.addEvaluatedResource(r);
                 report.addContained(obs);

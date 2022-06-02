@@ -432,7 +432,7 @@ public class MeasureEvaluator {
                 if (measureObservation != null) {
                     for (Object resource : measurePopulation.getResources()) {
                         Object observationResult = evaluateObservationCriteria(resource,
-                                measureObservation.getCriteriaExpression(), measureObservation.getEvaluatedResources(),measureObservation);
+                                measureObservation.getCriteriaExpression(), measureObservation.getEvaluatedResources(), measureObservation);
                         measureObservation.getResources().add(observationResult);
                     }
                 }

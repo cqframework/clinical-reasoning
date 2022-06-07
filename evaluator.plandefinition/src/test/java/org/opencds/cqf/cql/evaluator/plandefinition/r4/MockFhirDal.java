@@ -1,10 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -15,9 +11,9 @@ import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
 public class MockFhirDal implements FhirDal {
 
-    private Map<String, IBaseResource> cacheById = new HashMap<String, IBaseResource>();
-    private Map<String, List<IBaseResource>> cacheByURL = new HashMap<String, List<IBaseResource>>();
-    private Map<String, List<IBaseResource>> cacheByType = new HashMap<String, List<IBaseResource>>();
+    private final Map<String, IBaseResource> cacheById = new HashMap<String, IBaseResource>();
+    private final Map<String, List<IBaseResource>> cacheByURL = new HashMap<String, List<IBaseResource>>();
+    private final Map<String, List<IBaseResource>> cacheByType = new HashMap<String, List<IBaseResource>>();
 
     private String toKey(IIdType resource) {
         return resource.getResourceType() + "/" + resource.getIdPart();
@@ -27,7 +23,7 @@ public class MockFhirDal implements FhirDal {
         if (list.containsKey(key))
             list.get(key).add(element);
         else
-            list.put(key, new ArrayList<>(Arrays.asList(element)));
+            list.put(key, new ArrayList<>(Collections.singletonList(element)));
     }
 
     private void putIntoCache(IBaseResource resource) {

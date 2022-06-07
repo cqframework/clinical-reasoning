@@ -44,7 +44,7 @@ public class MockFhirDal implements FhirDal {
 
         if (resource instanceof Bundle) {
             ((Bundle) resource).getEntry().forEach(entry -> {
-                putIntoCache(entry.getResource());
+                addAll(entry.getResource());
             });
         } else {
             putIntoCache(resource);

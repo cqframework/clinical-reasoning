@@ -9,8 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -97,8 +98,9 @@ public class PlanDefinitionProcessor {
       .setStatus(CarePlan.CarePlanStatus.DRAFT);
 
     for (PlanDefinition.PlanDefinitionGoalComponent goal: planDefinition.getGoal()) {
-      builder.addGoal(new Reference(goal.getIdElement().getId()));
+      builder.addGoal(new Reference(convertGoal(goal)));
     }
+
     if (encounterId != null)
       builder.setEncounter(new Reference(encounterId));
     if (practitionerId != null)
@@ -132,6 +134,24 @@ public class PlanDefinitionProcessor {
         prefetchDataData, prefetchDataDescription, prefetchDataKey);
 
     return (CarePlan) ContainedHelper.liftContainedResourcesToParent(resolveActions(session));
+  }
+
+  private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
+    Goal myGoal = new Goal();
+    myGoal.setCategory(Collections.singletonList(goal.getCategory()));
+    myGoal.setDescription(goal.getDescription());
+    myGoal.setPriority(goal.getPriority());
+    myGoal.setStart(goal.getStart());
+
+    myGoal.setTarget(goal.getTarget().stream().map((target) -> {
+      Goal.GoalTargetComponent myTarget = new Goal.GoalTargetComponent();
+      myTarget.setDetail(target.getDetail());
+      myTarget.setMeasure(target.getMeasure());
+      myTarget.setDue(target.getDue());
+      myTarget.setExtension(target.getExtension());
+      return myTarget;
+    } ).collect(Collectors.toList()));
+    return myGoal;
   }
 
   private CarePlan resolveActions(Session session) {

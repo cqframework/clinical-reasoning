@@ -542,10 +542,19 @@ public class PlanDefinitionProcessor {
             session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint, session.bundle, 
             Collections.singleton(expression));
         break;
-      case "text/fhirpath": 
-        IBaseParameters resultParams = expressionEvaluator.evaluate(expression, params);
-        if (resultParams instanceof Parameters) {
-          result = getParameterComponentByName((Parameters) resultParams, "return");
+      case "text/fhirpath":
+        List<IBase> outputs;
+        try {
+          outputs = fhirPath.evaluate(null, expression, IBase.class);
+        } catch (FhirPathExecutionException e) {
+          throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
+        }
+        if (outputs == null || outputs.isEmpty()) {
+          result = null;
+        } else if (outputs.size() == 1) {
+          result = (Base)outputs.get(0);
+        } else {
+          throw new IllegalArgumentException("Expected only one value when evaluating FHIRPath expression: " + expression);
         }
         break;
       default:

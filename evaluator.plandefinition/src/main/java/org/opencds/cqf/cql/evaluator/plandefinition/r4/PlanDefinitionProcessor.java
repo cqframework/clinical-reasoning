@@ -261,7 +261,7 @@ public class PlanDefinitionProcessor {
     applyAction(session, carePlan, action);
 
     // Add an action to the request group which points to this CarePlan
-    session.requestGroup.addAction().setResourceTarget(carePlan);
+    session.requestGroup.addAction().setResource(new Reference(carePlan));
     session.requestGroup.addContained(carePlan);
 
     for (CanonicalType c : carePlan.getInstantiatesCanonical()) {

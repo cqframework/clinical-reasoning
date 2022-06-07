@@ -48,8 +48,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class PlanDefinitionProcessorTestBase {
-    private FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-    private IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+    private final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+    private final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     private MockFhirDal fhirDal;
     protected PlanDefinitionProcessor planDefinitionProcessor;
     

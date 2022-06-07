@@ -16,34 +16,13 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DataRequirement;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.ParameterDefinition;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestStatus;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
@@ -135,7 +114,7 @@ public class PlanDefinitionProcessor {
     String prefetchDataKey = castOrThrow(
       operationParametersParser.getValueChild(prefetchData, "key"), StringType.class, 
       "prefetchData key must be a String"
-    ).map(key -> key.asStringValue()).orElse(null);
+    ).map(PrimitiveType::asStringValue).orElse(null);
 
     DataRequirement prefetchDataDescription = castOrThrow(
       operationParametersParser.getResourceChild(prefetchData, "descriptor"), DataRequirement.class, 
@@ -195,19 +174,59 @@ public class PlanDefinitionProcessor {
       logger.debug("Resolving definition " + action.getDefinitionCanonicalType().getValue());
       CanonicalType definition = action.getDefinitionCanonicalType();
       switch (getResourceName(definition)) {
-        case ("PlanDefinition"):
+        case "PlanDefinition":
           applyNestedPlanDefinition(session, definition, action);
           break;
-        case ("ActivityDefinition"):
+        case "ActivityDefinition":
           applyActivityDefinition(session, definition, action);
           break;
-        case ("Questionnaire"):
-          throw new NotImplementedException("Questionnaire definition evaluation is not yet implemented.");
+        case "Questionnaire":
+          applyQuestionnaireDefinition(session, definition, action);
+          break;
         default:
           throw new RuntimeException(String.format("Unknown action definition: ", definition));
       }
     } else if (action.hasDefinitionUriType()) {
-      throw new NotImplementedException("Uri definition evaluation is not yet implemented");
+      UriType definition = action.getDefinitionUriType();
+      applyUriDefinition(session, definition, action);
+    }
+  }
+
+
+  private void applyUriDefinition(Session session, UriType definition, PlanDefinition.PlanDefinitionActionComponent action) {
+    session.requestGroup.
+            addAction()
+            .setResource(new Reference(definition.asStringValue()))
+            .setTitle(action.getTitle())
+            .setDescription(action.getDescription())
+            .setTextEquivalent(action.getTextEquivalent())
+            .setCode(action.getCode())
+            .setTiming(action.getTiming());
+  }
+
+  private void applyQuestionnaireDefinition(Session session, CanonicalType definition, PlanDefinition.PlanDefinitionActionComponent action) {
+    IBaseResource result;
+    try {
+      boolean referenceToContained = definition.getValue().startsWith("#");
+      if (referenceToContained) {
+        result = resolveContained(session.planDefinition, definition.getValue());
+      } else {
+        Iterator<IBaseResource> iterator = fhirDal.searchByUrl("Questionnaire", definition.asStringValue())
+            .iterator();
+        if (!iterator.hasNext()) {
+          throw new RuntimeException("No questionnaire found for definition: " + definition);
+        }
+        result = iterator.next();
+      }
+
+      applyAction(session, result, action);
+      session.requestGroup.addAction().setResource(new Reference((Resource) result));
+      session.requestGroup.addContained((Resource) result);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      logger.error("ERROR: Questionnaire {} could not be applied and threw exception {}", definition,
+          e.toString());
     }
   }
 
@@ -233,7 +252,6 @@ public class PlanDefinitionProcessor {
             session.userTaskContext, session.setting, session.settingContext, session.parameters,
             session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint);
       }
-
 
       applyAction(session, result, action);
       session.requestGroup.addAction().setResource(new Reference((Resource) result));

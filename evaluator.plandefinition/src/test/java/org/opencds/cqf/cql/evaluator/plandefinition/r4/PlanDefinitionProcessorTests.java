@@ -9,8 +9,8 @@ public class PlanDefinitionProcessorTests extends PlanDefinitionProcessorTestBas
                 "child-routine-visit/child_routine_visit_patient.json",
                 "child-routine-visit/child_routine_visit_plan_definition.json",
                 "ChildRoutineVisit-PlanDefinition-1.0.0",
-                "ChildRoutine-Reportable",
-                "ChildRoutine-Encouter-Reportable",
+                "Patient/ChildRoutine-Reportable",
+                null,
                 "child-routine-visit/child_routine_visit_careplan.json"
         );
     }

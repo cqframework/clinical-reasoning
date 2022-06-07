@@ -7,12 +7,6 @@
       "resource": {
         "resourceType": "PlanDefinition",
         "id": "ChildRoutineVisit-PlanDefinition-1.0.0",
-        "identifier": [
-          {
-            "use": "official",
-            "value": "296efd16-9328-43b3-a7c0-06d14879fcef"
-          }
-        ],
         "name": "Child Routine visit PlanDefinition",
         "title": "Child Routine visit PlanDefinition",
         "status": "active",
@@ -75,7 +69,7 @@
                 }
               }
             ],
-            "definitionCanonical": "http://hl7.org/fhir/R4/questionnaire.html",
+            "definitionCanonical":"http://hl7.org/fhir/R4/questionnaire.html",
             "definitionUri": "https://fhir.labs.smartregister.org/fhir/Questionnaire/105056",
             "transform": "https://fhir.labs.smartregister.org/fhir/StructureMap/105121",
             "timingTiming": {

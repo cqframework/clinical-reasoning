@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
@@ -48,7 +49,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class PlanDefinitionProcessorTestBase {
     private FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-    private IParser jsonParser = fhirContext.newJsonParser();
+    private IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     private MockFhirDal fhirDal;
     protected PlanDefinitionProcessor planDefinitionProcessor;
     
@@ -162,6 +163,10 @@ public class PlanDefinitionProcessorTestBase {
                 null, null, null, params, null, 
                 new Bundle(), null, dataEndpoint, endpoint, endpoint);
 
-        assertTrue(expected.equalsShallow(actual));
+        String expectedJson = jsonParser.encodeResourceToString(expected);
+        String actualJson = jsonParser.encodeResourceToString(actual);
+
+        //assertTrue(expected.equalsShallow(actual));
+        assertEquals(actualJson, expectedJson);
     }
 }

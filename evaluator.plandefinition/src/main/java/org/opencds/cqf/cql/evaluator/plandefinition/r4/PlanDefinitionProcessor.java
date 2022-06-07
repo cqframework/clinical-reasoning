@@ -167,10 +167,8 @@ public class PlanDefinitionProcessor {
     if (result.getId() == null) {
       result.setId(UUID.randomUUID().toString());
     }
-
-    session.carePlan
-        .addActivity(new CarePlan.CarePlanActivityComponent().setReference(new Reference("#" + result.getId())))
-        .addContained(result);
+    session.carePlan.addActivity().setReference(new Reference(result));
+    session.carePlan.addContained(result);
 
     return session.carePlan;
   }
@@ -245,9 +243,8 @@ public class PlanDefinitionProcessor {
       }
 
       applyAction(session, result, action);
-      session.requestGroup.addAction(new RequestGroup.RequestGroupActionComponent()
-          .setResource(new Reference("#" + result.getIdElement().getIdPart()))).addContained((Resource) result);
-
+      session.requestGroup.addAction().setResource(new Reference((Resource) result));
+      session.requestGroup.addContained((Resource) result);
     } catch (Exception e) {
       logger.error("ERROR: ActivityDefinition {} could not be applied and threw exception {}", definition,
           e.toString());
@@ -274,9 +271,8 @@ public class PlanDefinitionProcessor {
     applyAction(session, carePlan, action);
 
     // Add an action to the request group which points to this CarePlan
-    session.requestGroup
-        .addAction(new RequestGroup.RequestGroupActionComponent().setResource(new Reference("#" + carePlan.getId())))
-        .addContained(carePlan);
+    session.requestGroup.addAction().setResourceTarget(carePlan);
+    session.requestGroup.addContained(carePlan);
 
     for (CanonicalType c : carePlan.getInstantiatesCanonical()) {
       session.carePlan.addInstantiatesCanonical(c.getValueAsString());

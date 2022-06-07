@@ -2,62 +2,22 @@ package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.BackboneElement;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.DataRequirement;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Immunization;
-import org.hl7.fhir.r4.model.MedicationAdministration;
-import org.hl7.fhir.r4.model.MedicationDispense;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.ParameterDefinition;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.PlanDefinition;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Property;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.RequestGroup;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.TriggerDefinition;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.DataRequirement.DataRequirementCodeFilterComponent;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
@@ -78,7 +38,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 
-@SuppressWarnings("unused")
 public class PlanDefinitionProcessor {
   protected ActivityDefinitionProcessor activityDefinitionProcessor;
   protected LibraryProcessor libraryProcessor;
@@ -106,6 +65,14 @@ public class PlanDefinitionProcessor {
     this.operationParametersParser = operationParametersParser;
   }
 
+  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
+    if (obj == null) return Optional.empty();
+    if (type.isInstance(obj)) {
+      return Optional.of(type.cast(obj));
+    }
+    throw new IllegalArgumentException(errorMessage);
+  }
+
   public CarePlan apply(IdType theId, String patientId, String encounterId, String practitionerId,
       String organizationId, String userType, String userLanguage, String userTaskContext, String setting,
       String settingContext, Boolean mergeNestedCarePlans, IBaseParameters parameters, Boolean useServerData,
@@ -115,24 +82,24 @@ public class PlanDefinitionProcessor {
     // warn if prefetchData exists
     // if no data anywhere blow up
     IBaseResource basePlanDefinition = this.fhirDal.read(theId);
-    PlanDefinition planDefinition;
 
-    if (basePlanDefinition == null) {
-      throw new IllegalArgumentException("Couldn't find PlanDefinition " + theId);
-    }
-    if (!(basePlanDefinition instanceof PlanDefinition)) {
-      throw new IllegalArgumentException(
-          "The planDefinition passed to FhirDal was " + "not a valid instance of PlanDefinition.class");
-    }
-
-    planDefinition = (PlanDefinition) basePlanDefinition;
+    requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
+    
+    PlanDefinition planDefinition = castOrThrow(basePlanDefinition, PlanDefinition.class,
+      "The planDefinition passed to FhirDal was not a valid instance of PlanDefinition.class").get();
 
     logger.info("Performing $apply operation on PlanDefinition/" + theId);
 
     CarePlan builder = new CarePlan();
 
-    builder.addInstantiatesCanonical(planDefinition.getIdElement().getIdPart()).setSubject(new Reference(patientId))
-        .setStatus(CarePlan.CarePlanStatus.DRAFT);
+    builder
+      .addInstantiatesCanonical(planDefinition.getIdElement().getIdPart())
+      .setSubject(new Reference(patientId))
+      .setStatus(CarePlan.CarePlanStatus.DRAFT);
+
+    for (PlanDefinition.PlanDefinitionGoalComponent goal: planDefinition.getGoal()) {
+      builder.addGoal(new Reference(convertGoal(goal)));
+    }
 
     if (encounterId != null)
       builder.setEncounter(new Reference(encounterId));
@@ -146,32 +113,20 @@ public class PlanDefinitionProcessor {
     // Each Group of actions shares a RequestGroup
     RequestGroup requestGroup = new RequestGroup().setStatus(RequestStatus.DRAFT).setIntent(RequestIntent.PROPOSAL);
 
-    IBaseDatatype basePrefetchDataKey = operationParametersParser.getValueChild(prefetchData, "key");
-    String prefetchDataKey = null;
-    if (basePrefetchDataKey != null) {
-      if (!(basePrefetchDataKey instanceof StringType)) {
-        throw new IllegalArgumentException("prefetchData key must be a String");
-      }
-      prefetchDataKey = ((StringType) basePrefetchDataKey).asStringValue();
-    }
+    String prefetchDataKey = castOrThrow(
+      operationParametersParser.getValueChild(prefetchData, "key"), StringType.class, 
+      "prefetchData key must be a String"
+    ).map(PrimitiveType::asStringValue).orElse(null);
 
-    IBaseResource basePrefetchDataDescription = operationParametersParser.getResourceChild(prefetchData, "descriptor");
-    DataRequirement prefetchDataDescription = null;
-    if (basePrefetchDataDescription != null) {
-      if (!(basePrefetchDataDescription instanceof DataRequirement)) {
-        throw new IllegalArgumentException("prefetchData descriptor must be a DataRequirement");
-      }
-      prefetchDataDescription = ((DataRequirement) basePrefetchDataDescription);
-    }
+    DataRequirement prefetchDataDescription = castOrThrow(
+      operationParametersParser.getResourceChild(prefetchData, "descriptor"), DataRequirement.class, 
+      "prefetchData descriptor must be a DataRequirement"
+    ).orElse(null);
 
-    IBaseResource basePrefetchDataData = operationParametersParser.getResourceChild(prefetchData, "data");
-    IBaseBundle prefetchDataData = null;
-    if (basePrefetchDataData != null) {
-      if (!(basePrefetchDataData instanceof IBaseBundle)) {
-        throw new IllegalArgumentException("prefetchData data must be a Bundle");
-      }
-      prefetchDataData = ((IBaseBundle) basePrefetchDataData);
-    }
+    IBaseBundle prefetchDataData = castOrThrow(
+      operationParametersParser.getResourceChild(prefetchData, "data"), IBaseBundle.class, 
+      "prefetchData data must be a Bundle"
+    ).orElse(null);
 
     Session session = new Session(planDefinition, builder, patientId, encounterId, practitionerId, organizationId,
         userType, userLanguage, userTaskContext, setting, settingContext, requestGroup, parameters, prefetchData,
@@ -179,6 +134,24 @@ public class PlanDefinitionProcessor {
         prefetchDataData, prefetchDataDescription, prefetchDataKey);
 
     return (CarePlan) ContainedHelper.liftContainedResourcesToParent(resolveActions(session));
+  }
+
+  private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
+    Goal myGoal = new Goal();
+    myGoal.setCategory(Collections.singletonList(goal.getCategory()));
+    myGoal.setDescription(goal.getDescription());
+    myGoal.setPriority(goal.getPriority());
+    myGoal.setStart(goal.getStart());
+
+    myGoal.setTarget(goal.getTarget().stream().map((target) -> {
+      Goal.GoalTargetComponent myTarget = new Goal.GoalTargetComponent();
+      myTarget.setDetail(target.getDetail());
+      myTarget.setMeasure(target.getMeasure());
+      myTarget.setDue(target.getDue());
+      myTarget.setExtension(target.getExtension());
+      return myTarget;
+    } ).collect(Collectors.toList()));
+    return myGoal;
   }
 
   private CarePlan resolveActions(Session session) {
@@ -190,13 +163,8 @@ public class PlanDefinitionProcessor {
 
     RequestGroup result = session.requestGroup;
 
-    if (result.getId() == null) {
-      result.setId(UUID.randomUUID().toString());
-    }
-
-    session.carePlan
-        .addActivity(new CarePlan.CarePlanActivityComponent().setReference(new Reference("#" + result.getId())))
-        .addContained(result);
+    session.carePlan.addActivity().setReference(new Reference(result));
+    session.carePlan.addContained(result);
 
     return session.carePlan;
   }
@@ -226,19 +194,59 @@ public class PlanDefinitionProcessor {
       logger.debug("Resolving definition " + action.getDefinitionCanonicalType().getValue());
       CanonicalType definition = action.getDefinitionCanonicalType();
       switch (getResourceName(definition)) {
-        case ("PlanDefinition"):
+        case "PlanDefinition":
           applyNestedPlanDefinition(session, definition, action);
           break;
-        case ("ActivityDefinition"):
+        case "ActivityDefinition":
           applyActivityDefinition(session, definition, action);
           break;
-        case ("Questionnaire"):
-          throw new NotImplementedException("Questionnaire definition evaluation is not yet implemented.");
+        case "Questionnaire":
+          applyQuestionnaireDefinition(session, definition, action);
+          break;
         default:
           throw new RuntimeException(String.format("Unknown action definition: ", definition));
       }
     } else if (action.hasDefinitionUriType()) {
-      throw new NotImplementedException("Uri definition evaluation is not yet implemented");
+      UriType definition = action.getDefinitionUriType();
+      applyUriDefinition(session, definition, action);
+    }
+  }
+
+
+  private void applyUriDefinition(Session session, UriType definition, PlanDefinition.PlanDefinitionActionComponent action) {
+    session.requestGroup.
+            addAction()
+            .setResource(new Reference(definition.asStringValue()))
+            .setTitle(action.getTitle())
+            .setDescription(action.getDescription())
+            .setTextEquivalent(action.getTextEquivalent())
+            .setCode(action.getCode())
+            .setTiming(action.getTiming());
+  }
+
+  private void applyQuestionnaireDefinition(Session session, CanonicalType definition, PlanDefinition.PlanDefinitionActionComponent action) {
+    IBaseResource result;
+    try {
+      boolean referenceToContained = definition.getValue().startsWith("#");
+      if (referenceToContained) {
+        result = resolveContained(session.planDefinition, definition.getValue());
+      } else {
+        Iterator<IBaseResource> iterator = fhirDal.searchByUrl("Questionnaire", definition.asStringValue())
+            .iterator();
+        if (!iterator.hasNext()) {
+          throw new RuntimeException("No questionnaire found for definition: " + definition);
+        }
+        result = iterator.next();
+      }
+
+      applyAction(session, result, action);
+      session.requestGroup.addAction().setResource(new Reference((Resource) result));
+      session.requestGroup.addContained((Resource) result);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      logger.error("ERROR: Questionnaire {} could not be applied and threw exception {}", definition,
+          e.toString());
     }
   }
 
@@ -265,15 +273,9 @@ public class PlanDefinitionProcessor {
             session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint);
       }
 
-      if (!result.getIdElement().hasValue()) {
-        logger.warn("ActivityDefinition {} returned resource with no id, setting one", definition.getId());
-        result.setId(new IdType(UUID.randomUUID().toString()));
-      }
-
       applyAction(session, result, action);
-      session.requestGroup.addAction(new RequestGroup.RequestGroupActionComponent()
-          .setResource(new Reference("#" + result.getIdElement().getIdPart()))).addContained((Resource) result);
-
+      session.requestGroup.addAction().setResource(new Reference((Resource) result));
+      session.requestGroup.addContained((Resource) result);
     } catch (Exception e) {
       logger.error("ERROR: ActivityDefinition {} could not be applied and threw exception {}", definition,
           e.toString());
@@ -294,15 +296,11 @@ public class PlanDefinitionProcessor {
         session.useServerData, session.bundle, session.prefetchData, session.dataEndpoint, session.contentEndpoint,
         session.terminologyEndpoint);
 
-    if (carePlan.getId() == null) {
-      carePlan.setId(UUID.randomUUID().toString());
-    }
     applyAction(session, carePlan, action);
 
     // Add an action to the request group which points to this CarePlan
-    session.requestGroup
-        .addAction(new RequestGroup.RequestGroupActionComponent().setResource(new Reference("#" + carePlan.getId())))
-        .addContained(carePlan);
+    session.requestGroup.addAction().setResource(new Reference(carePlan));
+    session.requestGroup.addContained(carePlan);
 
     for (CanonicalType c : carePlan.getInstantiatesCanonical()) {
       session.carePlan.addInstantiatesCanonical(c.getValueAsString());
@@ -404,19 +402,28 @@ public class PlanDefinitionProcessor {
             result = evaluateConditionOrDynamicValue(alternateExpression.getExpression(), language, libraryToBeEvaluated, session, action.getInput());
           }
         }
+
+        // TODO - likely need more date transformations
+        if (result instanceof DateTime) {
+          result = Date.from(((DateTime) result).getDateTime().toInstant());
+        }
+
         // TODO: Rename bundle
         if (dynamicValue.hasPath() && dynamicValue.getPath().equals("$this")) {
           session.carePlan = ((CarePlan) result);
-        } else {
-
-          // TODO - likely need more date transformations
-          if (result instanceof DateTime) {
-            result = Date.from(((DateTime) result).getDateTime().toInstant());
+         } else if (dynamicValue.hasPath() && (dynamicValue.getPath().startsWith("action") || dynamicValue.getPath().startsWith("%action"))) {
+          try {
+            action.setProperty(dynamicValue.getPath().substring(dynamicValue.getPath().indexOf(".")+1), (Base) result);
+          } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(
+                String.format("Could not set path %s to value: %s", dynamicValue.getPath(), result));
           }
-
+        } else {
           try {
             session.carePlan.setProperty(dynamicValue.getPath(), (Base) result);
           } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(
                 String.format("Could not set path %s to value: %s", dynamicValue.getPath(), result));
           }
@@ -555,10 +562,19 @@ public class PlanDefinitionProcessor {
             session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint, session.bundle, 
             Collections.singleton(expression));
         break;
-      case "text/fhirpath": 
-        IBaseParameters resultParams = expressionEvaluator.evaluate(expression, params);
-        if (resultParams instanceof Parameters) {
-          result = getParameterComponentByName((Parameters) resultParams, "return");
+      case "text/fhirpath":
+        List<IBase> outputs;
+        try {
+          outputs = fhirPath.evaluate(null, expression, IBase.class);
+        } catch (FhirPathExecutionException e) {
+          throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
+        }
+        if (outputs == null || outputs.isEmpty()) {
+          result = null;
+        } else if (outputs.size() == 1) {
+          result = (Base)outputs.get(0);
+        } else {
+          throw new IllegalArgumentException("Expected only one value when evaluating FHIRPath expression: " + expression);
         }
         break;
       default:

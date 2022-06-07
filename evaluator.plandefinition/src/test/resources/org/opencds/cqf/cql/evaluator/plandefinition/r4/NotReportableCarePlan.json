@@ -2,7 +2,7 @@
     "resourceType": "CarePlan",
     "contained": [ {
       "resourceType": "RequestGroup",
-      "id": "757a3483-5eef-4f9f-aac6-7b0895cb1707",
+      "id": "1",
       "status": "draft",
       "intent": "proposal",
       "action": [ {
@@ -73,7 +73,7 @@
         } ]
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "ready",
@@ -215,7 +215,7 @@
         }
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -254,7 +254,7 @@
         }
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -263,7 +263,7 @@
       "resourceType": "Task",
       "id": "check-reportable",
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -281,7 +281,7 @@
         } ]
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -320,7 +320,7 @@
         }
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -359,7 +359,7 @@
         }
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -368,7 +368,7 @@
       "resourceType": "Task",
       "id": "create-and-report-eicr",
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -386,7 +386,7 @@
         } ]
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -404,7 +404,7 @@
         } ]
       } ],
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -413,7 +413,7 @@
       "resourceType": "Task",
       "id": "route-and-send-eicr",
       "basedOn": [ {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707",
+        "reference": "#1",
         "type": "RequestGroup"
       } ],
       "status": "draft",
@@ -426,7 +426,7 @@
     },
     "activity": [ {
       "reference": {
-        "reference": "#757a3483-5eef-4f9f-aac6-7b0895cb1707"
+        "reference": "#1"
       }
     } ]
   }

@@ -3,7 +3,7 @@
   "contained": [
     {
       "resourceType": "RequestGroup",
-      "id": "1455c7b7-e52b-495e-bbab-6d96c61fe186",
+      "id": "1",
       "status": "draft",
       "intent": "proposal"
     }
@@ -21,7 +21,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#1455c7b7-e52b-495e-bbab-6d96c61fe186"
+        "reference": "#1"
       }
     }
   ]

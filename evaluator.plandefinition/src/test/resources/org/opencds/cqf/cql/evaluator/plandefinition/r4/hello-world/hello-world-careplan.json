@@ -12,6 +12,12 @@
     "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
   ],
   "status": "draft",
+  "subject": {
+    "reference": "helloworld-patient-1"
+  },
+  "encounter": {
+    "reference": "helloworld-patient-1-encounter-1"
+  },
   "activity": [
     {
       "reference": {

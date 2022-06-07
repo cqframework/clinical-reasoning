@@ -117,6 +117,9 @@ public class PlanDefinitionProcessor {
       .setSubject(new Reference(patientId))
       .setStatus(CarePlan.CarePlanStatus.DRAFT);
 
+    for (PlanDefinition.PlanDefinitionGoalComponent goal: planDefinition.getGoal()) {
+      builder.addGoal(new Reference(goal.getIdElement().getId()));
+    }
     if (encounterId != null)
       builder.setEncounter(new Reference(encounterId));
     if (practitionerId != null)

@@ -164,9 +164,6 @@ public class PlanDefinitionProcessor {
 
     RequestGroup result = session.requestGroup;
 
-    if (result.getId() == null) {
-      result.setId(UUID.randomUUID().toString());
-    }
     session.carePlan.addActivity().setReference(new Reference(result));
     session.carePlan.addContained(result);
 
@@ -237,10 +234,6 @@ public class PlanDefinitionProcessor {
             session.contentEndpoint, session.terminologyEndpoint, session.dataEndpoint);
       }
 
-      if (!result.getIdElement().hasValue()) {
-        logger.warn("ActivityDefinition {} returned resource with no id, setting one", definition.getId());
-        result.setId(new IdType(UUID.randomUUID().toString()));
-      }
 
       applyAction(session, result, action);
       session.requestGroup.addAction().setResource(new Reference((Resource) result));
@@ -265,9 +258,6 @@ public class PlanDefinitionProcessor {
         session.useServerData, session.bundle, session.prefetchData, session.dataEndpoint, session.contentEndpoint,
         session.terminologyEndpoint);
 
-    if (carePlan.getId() == null) {
-      carePlan.setId(UUID.randomUUID().toString());
-    }
     applyAction(session, carePlan, action);
 
     // Add an action to the request group which points to this CarePlan

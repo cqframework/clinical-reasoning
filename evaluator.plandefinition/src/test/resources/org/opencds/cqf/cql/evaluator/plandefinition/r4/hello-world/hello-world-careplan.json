@@ -9,7 +9,7 @@
     }
   ],
   "instantiatesCanonical": [
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
+    "hello-world-patient-view"
   ],
   "status": "draft",
   "subject": {

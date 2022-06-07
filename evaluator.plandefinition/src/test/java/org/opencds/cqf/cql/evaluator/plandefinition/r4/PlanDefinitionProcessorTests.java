@@ -30,24 +30,24 @@ public class PlanDefinitionProcessorTests extends PlanDefinitionProcessorTestBas
     @Test
     public void testRuleFiltersNotReportable() {
         test(
-                "tests-NotReportable-bundle.json",
-                "RuleFilters-1.0.0-bundle.json",
+                "rule-filters/tests-NotReportable-bundle.json",
+                "rule-filters/RuleFilters-1.0.0-bundle.json",
                 "plandefinition-RuleFilters-1.0.0",
                 "NotReportable",
                 null,
-                "NotReportableCarePlan.json"
+                "rule-filters/NotReportableCarePlan.json"
         );
     }
 
     @Test
     public void testRuleFiltersReportable() {
         test(
-                "tests-Reportable-bundle.json",
-                "RuleFilters-1.0.0-bundle.json",
+                "rule-filters/tests-Reportable-bundle.json",
+                "rule-filters/RuleFilters-1.0.0-bundle.json",
                 "plandefinition-RuleFilters-1.0.0",
                 "Reportable",
                 null,
-                "ReportableCarePlan.json"
+                "rule-filters/ReportableCarePlan.json"
         );
     }
 }

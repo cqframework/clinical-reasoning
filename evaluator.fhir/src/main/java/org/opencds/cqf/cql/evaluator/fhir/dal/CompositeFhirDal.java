@@ -10,27 +10,27 @@ import org.slf4j.LoggerFactory;
 public class CompositeFhirDal implements FhirDal{
     private static final Logger logger = LoggerFactory.getLogger(CompositeFhirDal.class);
 
-    protected FhirDal jpaFhirDal;
-    protected FhirDal endPointDal;
     protected BundleFhirDal bundleFhirDal;
+    protected FhirDal[] fhirDals;
 
-    public CompositeFhirDal(FhirDal jpaFhirDal, FhirDal endPointDal, BundleFhirDal bundleFhirDal) {
-        this.jpaFhirDal = jpaFhirDal;
-        this.endPointDal = endPointDal;
+    public CompositeFhirDal(BundleFhirDal bundleFhirDal, FhirDal... fhirDals) {
         this.bundleFhirDal = bundleFhirDal;
+        this.fhirDals = fhirDals;
     }
 
     @Override
     public IBaseResource read(IIdType id) {
-        IBaseResource resource;
+        IBaseResource resource =  null;
 
-        resource = read(jpaFhirDal, id);
-        if (resource == null) {
-            resource = read(endPointDal, id);
+        for(FhirDal fhirDal : fhirDals ) {
+            resource = read(fhirDal, id);
+            if(resource != null) {
+                return resource;
+            }
         }
 
-        if(resource == null && bundleFhirDal != null) {
-            resource = bundleFhirDal.read(id);
+        if(bundleFhirDal != null) {
+            return bundleFhirDal.read(id);
         }
 
         return resource;
@@ -38,51 +38,75 @@ public class CompositeFhirDal implements FhirDal{
 
     @Override
     public void create(IBaseResource resource) {
-        if (jpaFhirDal == null && endPointDal == null) {
+
+        if (fhirDals.length == 0) {
             throw new NotImplementedException();
-        } else if (endPointDal == null) {
-            try {
-                jpaFhirDal.create(resource);
-            } catch (Exception e) {
-                logger.info(e.getMessage());
+        }
+
+        boolean created = false;
+        for (FhirDal fhirDal : fhirDals) {
+            if (!created) {
+                try {
+                    fhirDal.create(resource);
+                    created = true;
+                    break;
+                } catch (Exception e) {
+                    logger.info(e.getMessage());
+                    created = false;
+                }
             }
-        } else if (jpaFhirDal == null) {
-            endPointDal.create(resource);
         }
     }
 
     @Override
     public void update(IBaseResource resource) {
-        if (jpaFhirDal == null && endPointDal == null) {
+        if (fhirDals.length == 0) {
             throw new NotImplementedException();
-        } else if (endPointDal == null) {
-            try {
-                jpaFhirDal.update(resource);
-            } catch (Exception e) {
-                logger.info(e.getMessage());
+        }
+
+        boolean updated = false;
+        for (FhirDal fhirDal : fhirDals) {
+            if (!updated) {
+                try {
+                    fhirDal.update(resource);
+                    updated = true;
+                    break;
+                } catch (Exception e) {
+                    logger.info(e.getMessage());
+                    updated = false;
+                }
             }
-        } else if (jpaFhirDal == null) {
-            endPointDal.update(resource);
         }
     }
 
     @Override
     public void delete(IIdType id) {
-        if (jpaFhirDal == null && endPointDal == null) {
+        if (fhirDals.length == 0) {
             throw new NotImplementedException();
-        } else if (endPointDal == null) {
-            jpaFhirDal.delete(id);
-        } else if (jpaFhirDal == null) {
-            endPointDal.delete(id);
+        }
+
+        boolean deleted = false;
+        for (FhirDal fhirDal : fhirDals) {
+            if (!deleted) {
+                try {
+                    fhirDal.delete(id);
+                    deleted = true;
+                    break;
+                } catch (Exception e) {
+                    logger.info(e.getMessage());
+                    deleted = false;
+                }
+            }
         }
     }
 
     @Override
     public Iterable<IBaseResource> search(String resourceType) {
-        Iterable<IBaseResource> returnResources;
+        Iterable<IBaseResource> returnResources = null;
 
-        returnResources = search(jpaFhirDal, resourceType);
-        returnResources = concat(returnResources, search(endPointDal, resourceType));
+        for (FhirDal fhirDal : fhirDals) {
+            returnResources = concat(returnResources, search(fhirDal, resourceType));
+        }
 
         if (bundleFhirDal != null) {
             returnResources = concat(returnResources, bundleFhirDal.search(resourceType));
@@ -93,10 +117,11 @@ public class CompositeFhirDal implements FhirDal{
 
     @Override
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url) {
-        Iterable<IBaseResource> returnResources;
+        Iterable<IBaseResource> returnResources = null;
 
-        returnResources = searchByUrl(jpaFhirDal, resourceType, url);
-        returnResources = concat(returnResources, searchByUrl(endPointDal, resourceType, url));
+        for (FhirDal fhirDal : fhirDals) {
+            returnResources = concat(returnResources, searchByUrl(fhirDal, resourceType, url));
+        }
 
         if (bundleFhirDal != null) {
             returnResources = concat(returnResources,

@@ -206,7 +206,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             bundleDal = new BundleFhirDal(FhirContext.forCached(FhirVersionEnum.R4), additionalData);
         }
 
-        compositeFhirDal = new CompositeFhirDal(localFhirDal, endpointDal, bundleDal);
+        compositeFhirDal = new CompositeFhirDal(bundleDal, endpointDal, localFhirDal);
         SubjectProvider subjectProvider = new R4FhirDalSubjectProvider(compositeFhirDal);
         return subjectProvider.getSubjects(measureEvalType, subjectId);
 

@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -328,6 +330,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc = measure.getSupplementalData().get(i);
             SdeDef sde = measureDef.getSdes().get(i);
+
+            processSdeEvaluatedResourceExtension(sde);
+
             Map<ValueWrapper, Long> accumulated = sde.getValues().stream().map(x -> new ValueWrapper(x))
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
@@ -380,6 +385,35 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
                 report.addExtension(this.createReferenceExtension(EXT_SDE_REFERENCE_URL, "#" + obs.getId()));
                 report.addContained(obs);
+            }
+        }
+    }
+
+    private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
+        for (Object object : sdeDef.getValues()) {
+            if (object instanceof IBaseResource) {
+                //extension item
+                Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
+                IBaseResource iBaseResource = (IBaseResource) object;
+
+                //adding value to extension
+                extension.setValue(
+                        new StringType(
+                                new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                                        .append("/")
+                                        .append(iBaseResource.getIdElement().getIdPart())
+                                        .toString()
+                        )
+                );
+
+                //making a list of Extension and adding to extension item
+                List<Extension> list = new ArrayList<>();
+                list.add(new Extension(MeasureConstants.SDE_CRITERIA_REF_URL)
+                        .setValue(new StringType(sdeDef.getExpression().toString())));
+                extension.setExtension(list);
+
+                //adding item extension to MR extension list
+                report.getExtension().add(extension);
             }
         }
     }

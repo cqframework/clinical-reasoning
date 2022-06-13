@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -413,12 +412,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                                         .toString()
                         )
                 );
-
-                //making a list of Extension and adding to extension item
-                List<Extension> list = new ArrayList<>();
-                list.add(new Extension(MeasureConstants.SDE_CRITERIA_REF_URL)
-                        .setValue(new StringType(sdeDef.getExpression().toString())));
-                extension.setExtension(list);
 
                 //adding item extension to MR extension list
                 report.getExtension().add(extension);

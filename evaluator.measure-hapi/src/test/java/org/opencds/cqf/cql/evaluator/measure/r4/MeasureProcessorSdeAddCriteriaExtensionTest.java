@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 
 @Test(singleThreaded = true)
@@ -22,12 +22,10 @@ public class MeasureProcessorSdeAddCriteriaExtensionTest extends BaseMeasureProc
                 "Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47", null, null,
                 endpoint, endpoint, endpoint, null);
 
-        for(Extension extension :report.getExtension()) {
-            if(StringUtils.equalsIgnoreCase(extension.getUrl(), MeasureConstants.SDE_EXT_URL)) {
-                if(!extension.getExtension().isEmpty()) {
-                    assertEquals(extension.getExtension().get(0).getUrl(), MeasureConstants.SDE_CRITERIA_REF_URL);
-                    break;
-                }
+        for (Extension extension : report.getExtension()) {
+            if (StringUtils.equalsIgnoreCase(extension.getUrl(), MeasureConstants.SDE_EXT_URL)) {
+                assertNotNull(extension.getValue());
+                break;
             }
         }
     }

@@ -19,12 +19,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
-import org.cqframework.cql.cql2elm.CqlTranslatorException.ErrorSeverity;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.serialization.LibraryWrapper;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -98,7 +98,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     }
 
     protected Boolean translatorOptionsMatch(Library library) {
-        EnumSet<CqlTranslator.Options> options = TranslatorOptionsUtil.getTranslatorOptions(library);
+        EnumSet<CqlTranslatorOptions.Options> options = TranslatorOptionsUtil.getTranslatorOptions(library);
         if (options == null) {
             return false;
         }
@@ -119,8 +119,8 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     }
 
     protected Library translate(VersionedIdentifier libraryIdentifier) {
-        TranslatedLibrary library = null;
-        List<CqlTranslatorException> errors = new ArrayList<>();
+        CompiledLibrary library = null;
+        List<CqlCompilerException> errors = new ArrayList<>();
         try {
             library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier),
                     this.cqlTranslatorOptions, errors);
@@ -129,7 +129,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         }
 
         if (!errors.isEmpty()) {
-            for (CqlTranslatorException e : errors) {
+            for (CqlCompilerException e : errors) {
                 if (e.getSeverity() == ErrorSeverity.Error) {
                     throw new CqlException(String.format("Translation of library %s failed with the following message: %s", libraryIdentifier.getId(), e.getMessage()));
                 }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -34,7 +34,7 @@ public abstract class BaseMeasureEvaluationTest {
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         CqlTranslator translator = CqlTranslator.fromStream(new ByteArrayInputStream(cql.getBytes()), modelManager, libraryManager);
     
-        List<CqlTranslatorException> badStuff = new ArrayList<>();
+        List<CqlCompilerException> badStuff = new ArrayList<>();
         // the translator will duplicate exceptions with assigned severity in the errors, warnings, and messages lists
         badStuff.addAll(translator.getExceptions().stream().filter( e -> e.getSeverity() == null ).collect(Collectors.toList()));
         badStuff.addAll(translator.getErrors());
@@ -97,10 +97,10 @@ public abstract class BaseMeasureEvaluationTest {
                 "    return E.value as Coding\n\n";
     }
 
-    protected static String formatMsg(List<CqlTranslatorException> translationErrs) {
+    protected static String formatMsg(List<CqlCompilerException> translationErrs) {
         StringBuilder msg = new StringBuilder();
         msg.append("Translation failed due to errors:");
-        for (CqlTranslatorException error : translationErrs) {
+        for (CqlCompilerException error : translationErrs) {
             TrackBack tb = error.getLocator();
             String lines = tb == null ? "[n/a]"
                     : String.format("[%d:%d, %d:%d]", tb.getStartLine(), tb.getStartChar(), tb.getEndLine(),

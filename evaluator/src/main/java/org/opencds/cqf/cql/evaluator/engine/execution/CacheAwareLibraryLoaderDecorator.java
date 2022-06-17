@@ -56,7 +56,7 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
     }
 
     protected Boolean translatorOptionsMatch(Library library) {
-        EnumSet<CqlTranslator.Options> options = TranslatorOptionsUtil.getTranslatorOptions(library);
+        EnumSet<CqlTranslatorOptions.Options> options = TranslatorOptionsUtil.getTranslatorOptions(library);
         if (options == null) {
             return false;
         }

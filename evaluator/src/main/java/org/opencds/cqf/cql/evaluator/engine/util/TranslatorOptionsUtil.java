@@ -7,7 +7,7 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.cql_annotations.r1.CqlToElmInfo;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class TranslatorOptionsUtil {
      * @param library The library to extracts the options from.
      * @return The set of options used to translate the library.
      */
-    public static EnumSet<CqlTranslator.Options> getTranslatorOptions(Library library) {
+    public static EnumSet<CqlTranslatorOptions.Options> getTranslatorOptions(Library library) {
         requireNonNull(library, "library can not be null");
         if (library.getAnnotation() == null || library.getAnnotation().isEmpty()) {
             return null;
@@ -91,7 +91,7 @@ public class TranslatorOptionsUtil {
                     return  attributeNode.getNodeValue();
                 }
                 catch(Exception e) {
-                    continue;
+                    // do nothing
                 }
             }
         }
@@ -106,12 +106,12 @@ public class TranslatorOptionsUtil {
      * @param translatorOptions the string to parse
      * @return the set of options
      */
-    public static EnumSet<CqlTranslator.Options> parseTranslatorOptions(String translatorOptions) {
+    public static EnumSet<CqlTranslatorOptions.Options> parseTranslatorOptions(String translatorOptions) {
         if (translatorOptions == null) {
             return null;
         }
 
-        EnumSet<CqlTranslator.Options> optionSet = EnumSet.noneOf(CqlTranslator.Options.class);
+        EnumSet<CqlTranslatorOptions.Options> optionSet = EnumSet.noneOf(CqlTranslatorOptions.Options.class);
 
         if (translatorOptions.trim().isEmpty()) {
             return optionSet;
@@ -120,7 +120,7 @@ public class TranslatorOptionsUtil {
         String[] options = translatorOptions.trim().split(",");
 
         for (String option : options) {
-            optionSet.add(CqlTranslator.Options.valueOf(option));
+            optionSet.add(CqlTranslatorOptions.Options.valueOf(option));
         }
 
         return optionSet;

@@ -8,7 +8,6 @@
     <version>1.4.4</version>
     <packaging>pom</packaging>
 
-
     <name>evaluator.shared</name>
     <description>CQL Evaluator Project</description>
     <url>https://github.com/DBCG/cql-evaluator/tree/master</url>

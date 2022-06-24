@@ -2,6 +2,9 @@ package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -184,6 +188,42 @@ public class PlanDefinitionProcessorTests {
 
         CarePlan expectedCarePlan = getExpectedCarePlan("helloworld-careplan.json");
         assertTrue(expectedCarePlan.equalsShallow(actualCarePlan));
+    }
+
+    @Test
+    public void TestOpioidRec10(){
+        Parameters expected = new Parameters();
+
+        expected.addParameter().setName("return").setResource(getExpectedCarePlan("rec10-PV-careplan.json"));
+        Endpoint endpoint = new Endpoint().setAddress("rec10-PV-bundle.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Endpoint dataEndpoint = new Endpoint().setAddress("rec10PVPatientData.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+
+        Resource actualCarePlan = planDefinitionProcessor.apply(
+                new IdType("PlanDefinition", "opioidcds-10-patient-view"), "example-rec-10-patient-view-POS-Cocaine-drugs",
+                "example-rec-10-patient-view-POS-Cocaine-drugs-context", null, null, null, null,
+                null, null, null, null, expected, null,
+                null, null, dataEndpoint,
+                endpoint, endpoint);
+        writeResource(actualCarePlan, "/Users/bryantaustin/sandbox/actualCarePlan3.json");
+        CarePlan expectedCarePlan = getExpectedCarePlan("rec10-PV-careplan.json");
+
+        assertTrue(expectedCarePlan.equalsShallow(actualCarePlan));
+    }
+    private void writeResource(Resource resourceToWrite, String pathAndFileName){
+        try (FileOutputStream writer = new FileOutputStream(pathAndFileName))
+        {
+            IParser jsonParser = fhirContext.newJsonParser();
+            writer.write(jsonParser.setPrettyPrint(true).encodeResourceToString(resourceToWrite).getBytes());
+            writer.flush();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
+        }
     }
     @Test
     public void TestRuleFiltersReportable() {

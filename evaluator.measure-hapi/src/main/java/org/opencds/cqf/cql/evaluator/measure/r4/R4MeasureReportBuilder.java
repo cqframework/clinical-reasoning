@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -340,6 +341,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Map<ValueWrapper, Long> accumulated = sde.getValues().stream().map(x -> new ValueWrapper(x))
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
+            processSdeEvaluatedResourceExtension(sde);
+
             String sdeKey = this.getKey("sde-observation", msdc.getId(), msdc.getCode(), i);
             String sdeCode = sde.getCode();
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
@@ -355,7 +358,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 valueKey = this.escapeForFhirId(valueKey);
 
                 Coding valueCoding = new Coding().setCode(valueCode);
-                if (!sdeCode.equalsIgnoreCase("sde-sex")) {
+                //if (!sdeCode.equalsIgnoreCase("sde-sex")) {
                     // /**
                     // * Match up the category part of our SDE key (e.g. sde-race has a category of
                     // * race) with a patient extension of the same category (e.g.
@@ -375,7 +378,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     // break;
                     // }
                     // }
-                }
+                //}
 
                 DomainResource obs = null;
                 switch (this.report.getType()) {
@@ -389,6 +392,29 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
                 report.addEvaluatedResource(new Reference(obs));
                 report.addContained(obs);
+            }
+        }
+    }
+
+    private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
+        for (Object object : sdeDef.getValues()) {
+            if (object instanceof IBaseResource) {
+                //extension item
+                Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
+                IBaseResource iBaseResource = (IBaseResource) object;
+
+                //adding value to extension
+                extension.setValue(
+                        new StringType(
+                                new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                                        .append("/")
+                                        .append(iBaseResource.getIdElement().getIdPart())
+                                        .toString()
+                        )
+                );
+
+                //adding item extension to MR extension list
+                report.getExtension().add(extension);
             }
         }
     }
@@ -415,7 +441,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.COMPLETE);
         report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
-        ;
+
         if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {
             report.setSubject(new Reference(subjectIds.get(0)));
         }

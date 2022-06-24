@@ -186,7 +186,7 @@
           "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
         },
         "encounter": {
-          "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-context"
+          "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
         },
         "authoredOn": "2022-04-28",
         "dosageInstruction": [
@@ -484,7 +484,7 @@
     },{
       "resource": {
         "resourceType": "Encounter",
-        "id": "example-rec-10-patient-view-POS-Cocaine-drugs-encounter",
+        "id": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch",
         "meta": {
           "profile": [ "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter" ]
         },

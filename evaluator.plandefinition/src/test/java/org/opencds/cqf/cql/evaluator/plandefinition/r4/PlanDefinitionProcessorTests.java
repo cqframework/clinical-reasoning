@@ -28,6 +28,18 @@ public class PlanDefinitionProcessorTests extends PlanDefinitionProcessorTestBas
     }
 
     @Test
+    public void testOpioidRec10PatientView() {
+        test(
+                "opioid-Rec10-patient-view/opioid-Rec10-patient-view-patient-data.json",
+                "opioid-Rec10-patient-view/opioid-Rec10-patient-view-bundle.json",
+                "opioidcds-10-patient-view",
+                "example-rec-10-patient-view-POS-Cocaine-drugs",
+                "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch",
+                "opioid-Rec10-patient-view/opioid-Rec10-patient-view-careplan.json"
+        );
+    }
+
+    @Test
     public void testRuleFiltersNotReportable() {
         test(
                 "rule-filters/tests-NotReportable-bundle.json",

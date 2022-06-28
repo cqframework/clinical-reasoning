@@ -40,7 +40,14 @@ public class PriorityTerminologyProvider implements TerminologyProvider {
 
     @Override
     public Iterable<Code> expand(ValueSetInfo valueSet) {
-        return this.terminologyProviders.stream().map(x -> x.expand(valueSet)).findFirst().orElseGet(null);
+        for (TerminologyProvider provider : this.terminologyProviders) {
+            try {
+                return provider.expand(valueSet);
+            } catch (Exception e) {
+                continue;
+            }
+        }
+        return null;
     }
 
     @Override

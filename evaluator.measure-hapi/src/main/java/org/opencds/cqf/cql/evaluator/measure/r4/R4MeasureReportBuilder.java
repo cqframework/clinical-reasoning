@@ -347,18 +347,23 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             String sdeCode = sde.getCode();
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
-                String valueCode = accumulator.getKey().getValueAsString();
-                String valueKey = accumulator.getKey().getKey();
-                Long valueCount = accumulator.getValue();
+                DomainResource obs = null;
+                if (accumulator.getKey().getValue() instanceof DomainResource) {
+                    obs = (DomainResource) accumulator.getKey().getValue();
+                    report.addEvaluatedResource(new Reference(obs));
+                } else {
+                    String valueCode = accumulator.getKey().getValueAsString();
+                    String valueKey = accumulator.getKey().getKey();
+                    Long valueCount = accumulator.getValue();
 
-                if (valueKey == null) {
-                    valueKey = valueCode;
-                }
+                    if (valueKey == null) {
+                        valueKey = valueCode;
+                    }
 
-                valueKey = this.escapeForFhirId(valueKey);
+                    valueKey = this.escapeForFhirId(valueKey);
 
-                Coding valueCoding = new Coding().setCode(valueCode);
-                //if (!sdeCode.equalsIgnoreCase("sde-sex")) {
+                    Coding valueCoding = new Coding().setCode(valueCode);
+                    //if (!sdeCode.equalsIgnoreCase("sde-sex")) {
                     // /**
                     // * Match up the category part of our SDE key (e.g. sde-race has a category of
                     // * race) with a patient extension of the same category (e.g.
@@ -378,20 +383,19 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     // break;
                     // }
                     // }
-                //}
+                    //}
 
-                DomainResource obs = null;
-                switch (this.report.getType()) {
-                    case INDIVIDUAL:
-                        obs = createPatientObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding);
-                        break;
-                    default:
-                        obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding, valueCount);
-                        break;
+                    switch (this.report.getType()) {
+                        case INDIVIDUAL:
+                            obs = createPatientObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding);
+                            break;
+                        default:
+                            obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding, valueCount);
+                            break;
+                    }
+                    report.addEvaluatedResource(new Reference(obs));
+                    report.addContained(obs);
                 }
-
-                report.addEvaluatedResource(new Reference(obs));
-                report.addContained(obs);
             }
         }
     }

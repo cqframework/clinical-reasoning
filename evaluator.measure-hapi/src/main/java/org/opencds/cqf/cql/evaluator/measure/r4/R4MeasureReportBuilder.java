@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure;
@@ -666,6 +667,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (value instanceof IPrimitiveType<?>) {
                 IPrimitiveType<?> p = (IPrimitiveType<?>) value;
                 return joinValues("primitive", p.getValueAsString());
+            } else if (value instanceof Identifier) {
+                return ((Identifier) value).getValue();
             } else if (value != null) {
                 return value.toString();
             } else {
@@ -689,6 +692,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (value instanceof IPrimitiveType<?>) {
                 IPrimitiveType<?> p = (IPrimitiveType<?>) value;
                 return p.getValueAsString();
+            } else if (value instanceof Identifier) {
+                return ((Identifier) value).getValue();
             } else if (value != null) {
                 return value.toString();
             } else {
@@ -713,6 +718,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (value instanceof IPrimitiveType<?>) {
                 IPrimitiveType<?> p = (IPrimitiveType<?>) value;
                 return p.getValueAsString();
+            } else if (value instanceof Identifier) {
+                return ((Identifier) value).getValue();
             } else if (value != null) {
                 return value.toString();
             } else {

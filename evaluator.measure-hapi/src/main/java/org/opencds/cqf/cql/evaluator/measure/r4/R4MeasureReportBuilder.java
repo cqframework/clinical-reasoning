@@ -349,10 +349,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
                 DomainResource obs = null;
-                if (accumulator.getKey().getValue() instanceof DomainResource) {
-                    obs = (DomainResource) accumulator.getKey().getValue();
-                    report.addEvaluatedResource(new Reference(obs));
-                } else {
+                if (!(accumulator.getKey().getValue() instanceof DomainResource)) {
                     String valueCode = accumulator.getKey().getValueAsString();
                     String valueKey = accumulator.getKey().getKey();
                     Long valueCount = accumulator.getValue();
@@ -401,7 +398,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private Set<String> getExtensionKeySet() {
+        if(report.getUserData("extension-set") == null) {
+            report.setUserData("extension-set", new HashSet<String>());
+        }
+        return (Set<String>)report.getUserData("extension-set");
+    }
+
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
+        Set<String> keySet = getExtensionKeySet();
         for (Object object : sdeDef.getValues()) {
             if (object instanceof IBaseResource) {
                 //extension item
@@ -409,19 +415,21 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 IBaseResource iBaseResource = (IBaseResource) object;
 
                 //adding value to extension
-                extension.setValue(
-                        new StringType(
-                                new StringBuilder(iBaseResource.getIdElement().getResourceType())
-                                        .append("/")
-                                        .append(iBaseResource.getIdElement().getIdPart())
-                                        .toString()
-                        )
-                );
+                String value = new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                        .append("/")
+                        .append(iBaseResource.getIdElement().getIdPart())
+                        .toString();
 
-                //adding item extension to MR extension list
-                report.getExtension().add(extension);
+                if(!keySet.contains(value)) {
+                    extension.setValue(
+                            new StringType(value));
+                    //adding item extension to MR extension list
+                    report.getExtension().add(extension);
+                    keySet.add(value);
+                }
             }
         }
+        report.setUserData("extension-set", keySet);
     }
 
     protected Period getPeriod(Interval measurementPeriod) {

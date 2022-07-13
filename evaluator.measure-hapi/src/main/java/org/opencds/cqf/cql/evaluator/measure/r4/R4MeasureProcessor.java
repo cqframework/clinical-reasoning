@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -47,6 +49,8 @@ import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDec
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
+import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
+import org.opencds.cqf.cql.evaluator.fhir.dal.CompositeFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
@@ -146,9 +150,10 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
         }
 
+        List<String> subjectIds = null;
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
-        List<String> subjectIds = this.getSubjects(measureEvalType,
-                subject != null ? subject : practitioner, dataEndpoint);
+        subjectIds = this.getSubjects(measureEvalType,
+                subject != null ? subject : practitioner, dataEndpoint, additionalData);
 
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
         Iterator<IBaseResource> measureIter = measures.iterator();
@@ -179,26 +184,32 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         return batches;
     }
 
-    public List<String> getSubjects(String reportType, String subjectId) {
-        return this.getSubjects(reportType, subjectId, null);
-    }
-
     public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
-        return getSubjects(measureEvalType, subjectId, dataEndpoint);
+        return getSubjects(measureEvalType, subjectId, dataEndpoint, null);
     }
 
-    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint) {
-        FhirDal fhirDal = dataEndpoint != null
-                ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint))
-                : localFhirDal;
-        SubjectProvider subjectProvider = new R4FhirDalSubjectProvider(fhirDal);
+    public List<String> getSubjects(String reportType, String subjectId, Bundle additionalData) {
+        MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
+        return getSubjects(measureEvalType, subjectId, null, additionalData);
+    }
+
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
+        CompositeFhirDal compositeFhirDal;
+        BundleFhirDal bundleDal = null;
+        FhirDal endpointDal = null;
+
+        if (this.fhirDalFactory != null && dataEndpoint != null) {
+            endpointDal = this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint));
+        }
+        if (additionalData != null) {
+            bundleDal = new BundleFhirDal(FhirContext.forCached(FhirVersionEnum.R4), additionalData);
+        }
+
+        compositeFhirDal = new CompositeFhirDal(bundleDal, endpointDal, localFhirDal);
+        SubjectProvider subjectProvider = new R4FhirDalSubjectProvider(compositeFhirDal);
         return subjectProvider.getSubjects(measureEvalType, subjectId);
 
-    }
-
-    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
-        return this.getSubjects(measureEvalType, subjectId, null);
     }
 
     protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,

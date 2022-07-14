@@ -187,8 +187,8 @@ public class MeasureEvaluator {
         clearEvaluatedResources();
     }
 
+    // reset evaluated resources followed by a context evaluation
     private void clearEvaluatedResources() {
-        // reset evaluated resources followed by a context evaluation
         this.context.clearEvaluatedResources();
     }
 

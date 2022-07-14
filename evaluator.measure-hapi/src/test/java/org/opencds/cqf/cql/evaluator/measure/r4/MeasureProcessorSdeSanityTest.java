@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-//import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
@@ -19,7 +18,5 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
                 endpoint, endpoint, endpoint, null);
 
         assertNotNull(report);
-//        FhirContext fhirContext = FhirContext.forR4();
-//        System.out.println("Resource:" + fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 }

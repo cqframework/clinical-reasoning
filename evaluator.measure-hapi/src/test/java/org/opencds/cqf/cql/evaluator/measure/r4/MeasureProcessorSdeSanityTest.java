@@ -3,7 +3,9 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertNotNull;
+import java.util.HashSet;
+
+import static org.testng.Assert.*;
 
 public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
     public MeasureProcessorSdeSanityTest() {
@@ -18,5 +20,9 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
                 endpoint, endpoint, endpoint, null);
 
         assertNotNull(report);
+
+        HashSet<String> set = new HashSet<>();
+        report.getExtension().forEach(x -> set.add(x.getValue().toString()));
+        assertEquals(set.size(), report.getExtension().size());
     }
 }

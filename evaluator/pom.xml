@@ -29,6 +29,14 @@
             <artifactId>cql-to-elm</artifactId>
         </dependency>
         <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>

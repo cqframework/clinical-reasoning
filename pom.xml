@@ -18,7 +18,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cql-translator.version>2.0.0-SNAPSHOT</cql-translator.version>
-        <cql-engine.version>1.5.8-SNAPSHOT</cql-engine.version>
+        <cql-engine.version>2.0.0-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>6.0.1</hapi.version>
@@ -121,6 +121,11 @@
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model</artifactId>
                 <version>${cql-translator.version}</version>
             </dependency>
 
@@ -325,11 +330,13 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.10.1</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                        <failOnWarning>true</failOnWarning>
+                        <release>11</release>
+                        <source>11</source>
+                        <target>11</target>
+                        <failOnError>true</failOnError>
+                        <failOnWarning>false</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-Xlint:all</arg>

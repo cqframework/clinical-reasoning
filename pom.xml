@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>1.4.5-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>evaluator.shared</name>
@@ -109,11 +109,6 @@
                 <version>${cql-engine.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>engine.jaxb</artifactId>
-                <version>${cql-engine.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
                 <version>${cql-translator.version}</version>
@@ -127,6 +122,54 @@
                 <groupId>info.cqframework</groupId>
                 <artifactId>model</artifactId>
                 <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>qdm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>quick</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine.jaxb</artifactId>
+                <version>${cql-engine.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model-jackson</artifactId>
+                <version>${cql-translator.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm-jackson</artifactId>
+                <version>${cql-translator.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model-jaxb</artifactId>
+                <version>${cql-translator.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm-jaxb</artifactId>
+                <version>${cql-translator.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>org.eclipse.persistence.moxy</artifactId>
+                <version>2.7.7</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- HAPI depedencies -->
@@ -230,6 +273,12 @@
 
             <!-- test dependencies -->
             <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.10.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>7.4.0</version>
@@ -293,6 +342,10 @@
     <!-- Dependencies shared by all projects -->
     <dependencies>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
         </dependency>
@@ -307,10 +360,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

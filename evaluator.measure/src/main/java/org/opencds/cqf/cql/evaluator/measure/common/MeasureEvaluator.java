@@ -184,7 +184,11 @@ public class MeasureEvaluator {
                 outEvaluatedResources.add(o);
             }
         }
+        clearEvaluatedResources();
+    }
 
+    // reset evaluated resources followed by a context evaluation
+    private void clearEvaluatedResources() {
         this.context.clearEvaluatedResources();
     }
 
@@ -258,7 +262,9 @@ public class MeasureEvaluator {
 
         if (result instanceof Boolean) {
             if ((Boolean.TRUE.equals(result))) {
-                return Collections.singletonList(this.context.resolveExpressionRef(subjectType).evaluate(this.context));
+                Object booleanResult = this.context.resolveExpressionRef(subjectType).evaluate(this.context);
+                clearEvaluatedResources();
+                return Collections.singletonList(booleanResult);
             } else {
                 return Collections.emptyList();
             }
@@ -422,6 +428,7 @@ public class MeasureEvaluator {
 
             // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
+            clearEvaluatedResources();
         }
     }
 
@@ -445,6 +452,8 @@ public class MeasureEvaluator {
             if (result != null) {
                 sd.getSubjectValues().put(subjectId, result);
             }
+
+            clearEvaluatedResources();
         }
     }
 

@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure;
@@ -347,18 +348,20 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             String sdeCode = sde.getCode();
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
-                String valueCode = accumulator.getKey().getValueAsString();
-                String valueKey = accumulator.getKey().getKey();
-                Long valueCount = accumulator.getValue();
+                DomainResource obs = null;
+                if (!(accumulator.getKey().getValue() instanceof DomainResource)) {
+                    String valueCode = accumulator.getKey().getValueAsString();
+                    String valueKey = accumulator.getKey().getKey();
+                    Long valueCount = accumulator.getValue();
 
-                if (valueKey == null) {
-                    valueKey = valueCode;
-                }
+                    if (valueKey == null) {
+                        valueKey = valueCode;
+                    }
 
-                valueKey = this.escapeForFhirId(valueKey);
+                    valueKey = this.escapeForFhirId(valueKey);
 
-                Coding valueCoding = new Coding().setCode(valueCode);
-                //if (!sdeCode.equalsIgnoreCase("sde-sex")) {
+                    Coding valueCoding = new Coding().setCode(valueCode);
+                    //if (!sdeCode.equalsIgnoreCase("sde-sex")) {
                     // /**
                     // * Match up the category part of our SDE key (e.g. sde-race has a category of
                     // * race) with a patient extension of the same category (e.g.
@@ -378,25 +381,33 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     // break;
                     // }
                     // }
-                //}
+                    //}
 
-                DomainResource obs = null;
-                switch (this.report.getType()) {
-                    case INDIVIDUAL:
-                        obs = createPatientObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding);
-                        break;
-                    default:
-                        obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding, valueCount);
-                        break;
+                    switch (this.report.getType()) {
+                        case INDIVIDUAL:
+                            obs = createPatientObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding);
+                            break;
+                        default:
+                            obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding, valueCount);
+                            break;
+                    }
+                    report.addEvaluatedResource(new Reference(obs));
+                    report.addContained(obs);
                 }
-
-                report.addEvaluatedResource(new Reference(obs));
-                report.addContained(obs);
             }
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private Set<String> getExtensionKeySet() {
+        if(report.getUserData("extension-set") == null) {
+            report.setUserData("extension-set", new HashSet<String>());
+        }
+        return (Set<String>)report.getUserData("extension-set");
+    }
+
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
+        Set<String> keySet = getExtensionKeySet();
         for (Object object : sdeDef.getValues()) {
             if (object instanceof IBaseResource) {
                 //extension item
@@ -404,19 +415,21 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 IBaseResource iBaseResource = (IBaseResource) object;
 
                 //adding value to extension
-                extension.setValue(
-                        new StringType(
-                                new StringBuilder(iBaseResource.getIdElement().getResourceType())
-                                        .append("/")
-                                        .append(iBaseResource.getIdElement().getIdPart())
-                                        .toString()
-                        )
-                );
+                String value = new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                        .append("/")
+                        .append(iBaseResource.getIdElement().getIdPart())
+                        .toString();
 
-                //adding item extension to MR extension list
-                report.getExtension().add(extension);
+                if(!keySet.contains(value)) {
+                    extension.setValue(
+                            new StringType(value));
+                    //adding item extension to MR extension list
+                    report.getExtension().add(extension);
+                    keySet.add(value);
+                }
             }
         }
+        report.setUserData("extension-set", keySet);
     }
 
     protected Period getPeriod(Interval measurementPeriod) {
@@ -662,6 +675,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (value instanceof IPrimitiveType<?>) {
                 IPrimitiveType<?> p = (IPrimitiveType<?>) value;
                 return joinValues("primitive", p.getValueAsString());
+            } else if (value instanceof Identifier) {
+                return ((Identifier) value).getValue();
             } else if (value != null) {
                 return value.toString();
             } else {
@@ -685,6 +700,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (value instanceof IPrimitiveType<?>) {
                 IPrimitiveType<?> p = (IPrimitiveType<?>) value;
                 return p.getValueAsString();
+            } else if (value instanceof Identifier) {
+                return ((Identifier) value).getValue();
             } else if (value != null) {
                 return value.toString();
             } else {
@@ -709,6 +726,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (value instanceof IPrimitiveType<?>) {
                 IPrimitiveType<?> p = (IPrimitiveType<?>) value;
                 return p.getValueAsString();
+            } else if (value instanceof Identifier) {
+                return ((Identifier) value).getValue();
             } else if (value != null) {
                 return value.toString();
             } else {

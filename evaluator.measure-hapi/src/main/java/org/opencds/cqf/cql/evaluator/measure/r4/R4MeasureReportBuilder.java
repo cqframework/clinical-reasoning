@@ -408,25 +408,28 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
         Set<String> keySet = getExtensionKeySet();
+
         for (Object object : sdeDef.getValues()) {
             if (object instanceof IBaseResource) {
                 //extension item
                 Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
                 IBaseResource iBaseResource = (IBaseResource) object;
 
+                Extension criteriaReferenceExtension = new Extension(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
+                criteriaReferenceExtension.setValue(new StringType(sdeDef.getId()));
                 //adding value to extension
+
                 String value = new StringBuilder(iBaseResource.getIdElement().getResourceType())
                         .append("/")
                         .append(iBaseResource.getIdElement().getIdPart())
                         .toString();
 
-                if(!keySet.contains(value)) {
-                    extension.setValue(
-                            new StringType(value));
-                    //adding item extension to MR extension list
-                    report.getExtension().add(extension);
-                    keySet.add(value);
-                }
+                Reference reference = new Reference(value);
+                reference.addExtension(criteriaReferenceExtension);
+                extension.setValue(reference);
+
+                report.getExtension().add(extension);
+                keySet.add(value);
             }
         }
         report.setUserData("extension-set", keySet);

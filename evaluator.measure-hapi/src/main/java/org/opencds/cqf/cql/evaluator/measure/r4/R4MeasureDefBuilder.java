@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
@@ -36,6 +37,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     ? c.getCode().getCodingFirstRep().getCode()
                     : c.hasCode() && c.getCode().hasText() ? c.getCode().getText()
                             : expression.replace(" ", "-").toLowerCase();
+            if(StringUtils.isNotBlank(c.getId())) {
+                def.setId(c.getId());
+            }
             def.setCode(code);
             def.setExpression(expression);
 

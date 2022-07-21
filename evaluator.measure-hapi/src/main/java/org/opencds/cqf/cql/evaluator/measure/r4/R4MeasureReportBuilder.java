@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -344,7 +345,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
             processSdeEvaluatedResourceExtension(sde);
 
-            String sdeKey = this.getKey("sde-observation", msdc.getId(), msdc.getCode(), i);
             String sdeCode = sde.getCode();
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
@@ -385,10 +385,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
                     switch (this.report.getType()) {
                         case INDIVIDUAL:
-                            obs = createPatientObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding);
+                            obs = createPatientObservation(UUID.randomUUID().toString(), sdeCode, valueCoding);
                             break;
                         default:
-                            obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding, valueCount);
+                            obs = createPopulationObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, valueCount);
                             break;
                     }
                     report.addEvaluatedResource(new Reference(obs));

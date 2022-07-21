@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -254,7 +254,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Optional<org.hl7.fhir.r4.model.Reference> optional = report.getEvaluatedResource().stream()
                 .filter(x -> x.getReference().contains(obs.getId())).findFirst();
-        assertTrue(optional.isPresent());
+        assertFalse(optional.isPresent());
     }
 
     private Measure cohort_measure() {

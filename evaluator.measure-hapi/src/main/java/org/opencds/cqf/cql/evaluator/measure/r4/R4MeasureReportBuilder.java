@@ -391,7 +391,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                             obs = createPopulationObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, valueCount);
                             break;
                     }
-                    report.addEvaluatedResource(new Reference(obs));
                     report.addContained(obs);
                 }
             }

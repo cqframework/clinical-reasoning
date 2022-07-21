@@ -433,14 +433,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     extension.setValue(reference);
                     report.getExtension().add(extension);
                     updateKeySetMap(keySetMap, resourceReferenceValue, sdeDef.getId());
-                } else {
-                    if (keySetMap.get(resourceReferenceValue).contains(sdeDef.getId())) {
-                        continue;
-                    } else {
-                        updateExtensionInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL),
-                                criteriaReferenceExtension, resourceReferenceValue);
-                        updateKeySetMap(keySetMap, resourceReferenceValue, sdeDef.getId());
-                    }
+                } else if (!(keySetMap.get(resourceReferenceValue).contains(sdeDef.getId()))) {
+                    updateExtensionInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL),
+                            criteriaReferenceExtension, resourceReferenceValue);
+                    updateKeySetMap(keySetMap, resourceReferenceValue, sdeDef.getId());
                 }
             }
         }

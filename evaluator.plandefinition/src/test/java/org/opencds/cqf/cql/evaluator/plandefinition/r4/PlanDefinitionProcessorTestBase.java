@@ -157,11 +157,15 @@ public class PlanDefinitionProcessorTestBase {
         Endpoint dataEndpoint = new Endpoint().setAddress(dataAsset)
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
+        IBaseResource baseResource = load(libraryAsset);
+        Bundle bundleToSend = (Bundle)baseResource;
         CarePlan actual = planDefinitionProcessor.apply(
                 new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, 
                 null, null, null, null, null, 
                 null, null, null, params, null, 
-                new Bundle(), null, dataEndpoint, endpoint, endpoint);
+//                new Bundle(), null, dataEndpoint, endpoint, endpoint);
+                bundleToSend, null, dataEndpoint, endpoint, endpoint);
+
 
         String expectedJson = jsonParser.encodeResourceToString(expected);
         String actualJson = jsonParser.encodeResourceToString(actual);

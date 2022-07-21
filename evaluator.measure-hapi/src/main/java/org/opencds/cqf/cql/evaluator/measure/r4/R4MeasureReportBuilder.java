@@ -399,40 +399,69 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     @SuppressWarnings("unchecked")
-    private Set<String> getExtensionKeySet() {
-        if(report.getUserData("extension-set") == null) {
-            report.setUserData("extension-set", new HashSet<String>());
+    private Map<String, Set<String>> getExtensionKeySetMap() {
+        if (report.getUserData("extension-set") == null) {
+            report.setUserData("extension-set", new HashMap<String, HashSet<String>>());
         }
-        return (Set<String>)report.getUserData("extension-set");
+        return (Map<String, Set<String>>) report.getUserData("extension-set");
+    }
+
+    private void updateKeySetMap(Map<String, Set<String>> keySetMap, String key, String value) {
+        if (!keySetMap.containsKey(key)) {
+            HashSet<String> set = new HashSet<>();
+            set.add(value);
+            keySetMap.put(key, set);
+        } else {
+            keySetMap.get(key).add(value);
+        }
     }
 
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
-        Set<String> keySet = getExtensionKeySet();
+        Map<String, Set<String>> keySetMap = getExtensionKeySetMap();
 
         for (Object object : sdeDef.getValues()) {
             if (object instanceof IBaseResource) {
                 //extension item
-                Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
                 IBaseResource iBaseResource = (IBaseResource) object;
+                Extension criteriaReferenceExtension = createSdeCriteriaReferenceExtension(sdeDef.getId());
+                String resourceReferenceValue = createResourceReferenceValue(iBaseResource);
 
-                Extension criteriaReferenceExtension = new Extension(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
-                criteriaReferenceExtension.setValue(new StringType(sdeDef.getId()));
-                //adding value to extension
-
-                String value = new StringBuilder(iBaseResource.getIdElement().getResourceType())
-                        .append("/")
-                        .append(iBaseResource.getIdElement().getIdPart())
-                        .toString();
-
-                Reference reference = new Reference(value);
-                reference.addExtension(criteriaReferenceExtension);
-                extension.setValue(reference);
-
-                report.getExtension().add(extension);
-                keySet.add(value);
+                if (!keySetMap.containsKey(resourceReferenceValue)) {
+                    Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
+                    Reference reference = new Reference(resourceReferenceValue);
+                    reference.addExtension(criteriaReferenceExtension);
+                    extension.setValue(reference);
+                    report.getExtension().add(extension);
+                    updateKeySetMap(keySetMap, resourceReferenceValue, sdeDef.getId());
+                } else {
+                    if (keySetMap.get(resourceReferenceValue).contains(sdeDef.getId())) {
+                        continue;
+                    } else {
+                        updateExtensionInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL),
+                                criteriaReferenceExtension, resourceReferenceValue);
+                        updateKeySetMap(keySetMap, resourceReferenceValue, sdeDef.getId());
+                    }
+                }
             }
         }
-        report.setUserData("extension-set", keySet);
+        report.setUserData("extension-set", keySetMap);
+    }
+
+    private Extension createSdeCriteriaReferenceExtension(String value) {
+        return new Extension(MeasureConstants.EXT_CRITERIA_REFERENCE_URL)
+                .setValue(new StringType(value));
+    }
+
+    private String createResourceReferenceValue(IBaseResource iBaseResource) {
+        return new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                .append("/")
+                .append(iBaseResource.getIdElement().getIdPart())
+                .toString();
+    }
+
+    private void updateExtensionInExisingList(List<Extension> list, Extension criteriaReferenceExtension, String value) {
+        list.stream().filter(extension -> ((Reference) extension.getValue()).getReference().equals(value))
+                .collect(Collectors.toList()).stream().findFirst().get().getValue().addExtension(criteriaReferenceExtension);
     }
 
     protected Period getPeriod(Interval measurementPeriod) {

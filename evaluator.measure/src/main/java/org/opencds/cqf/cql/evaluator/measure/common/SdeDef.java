@@ -8,6 +8,9 @@ public class SdeDef {
     private String id;
     private String expression;
     private String code;
+    private boolean hasCode;
+    private String system;
+
 
     private List<Object> values;
 
@@ -34,6 +37,14 @@ public class SdeDef {
     public void setCode(String code) {
         this.code = code;
     }
+
+    public boolean hasCode() { return hasCode; }
+
+    public void setHasCode(boolean hasCode) { this.hasCode = hasCode; }
+
+    public String getSystem() { return system; }
+
+    public void setSystem(String system) { this.system = system; }
 
     public List<Object> getValues() {
         if (this.values == null) {

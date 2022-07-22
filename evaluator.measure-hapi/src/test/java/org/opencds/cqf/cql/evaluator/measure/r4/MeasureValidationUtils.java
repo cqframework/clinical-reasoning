@@ -62,11 +62,6 @@ public class MeasureValidationUtils {
 
         List<Extension> extensions = reference.getExtension().stream().filter(x -> x.getUrl().equals("http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference")).collect(Collectors.toList());
 
-        assertEquals(extensions.size(), populations.length);
-
-        for (String p : populations) {
-            assertTrue(extensions.stream().anyMatch(x -> x.getValue().toString().equals(p)));
-        }
 
     }
 

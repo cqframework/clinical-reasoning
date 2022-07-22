@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -316,7 +317,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 Resource resource = (Resource) object;
                 String resourceId = resource.getId();
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
-                Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
+                Extension ext = createStringExtension(MeasureConstants.EXT_CRITERIA_REFERENCE_URL,
                         measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);
             }
@@ -392,6 +393,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                             break;
                     }
                     report.addContained(obs);
+                    processCoreSdeEvaluatedResourceExtension(getExtensionKeySetMap(),
+                            createSdeCriteriaReferenceExtension(obs.getId()), obs.getId(), sde.getId());
                 }
             }
         }
@@ -424,22 +427,26 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 IBaseResource iBaseResource = (IBaseResource) object;
                 Extension criteriaReferenceExtension = createSdeCriteriaReferenceExtension(sdeDef.getId());
                 String resourceReferenceValue = createResourceReferenceValue(iBaseResource);
-
-                if (!keySetMap.containsKey(resourceReferenceValue)) {
-                    Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
-                    Reference reference = new Reference(resourceReferenceValue);
-                    reference.addExtension(criteriaReferenceExtension);
-                    extension.setValue(reference);
-                    report.getExtension().add(extension);
-                    updateKeySetMap(keySetMap, resourceReferenceValue, sdeDef.getId());
-                } else if (!(keySetMap.get(resourceReferenceValue).contains(sdeDef.getId()))) {
-                    updateExtensionInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL),
-                            criteriaReferenceExtension, resourceReferenceValue);
-                    updateKeySetMap(keySetMap, resourceReferenceValue, sdeDef.getId());
-                }
+                processCoreSdeEvaluatedResourceExtension(keySetMap, criteriaReferenceExtension, resourceReferenceValue, sdeDef.getId());
             }
         }
         report.setUserData("extension-set", keySetMap);
+    }
+
+    private void processCoreSdeEvaluatedResourceExtension(Map<String, Set<String>> keySetMap, Extension criteriaReferenceExtension,
+                                                          String resourceReferenceValue, String populationReference) {
+        if (!keySetMap.containsKey(resourceReferenceValue)) {
+            Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
+            Reference reference = new Reference(resourceReferenceValue);
+            reference.addExtension(criteriaReferenceExtension);
+            extension.setValue(reference);
+            report.getExtension().add(extension);
+            updateKeySetMap(keySetMap, resourceReferenceValue, populationReference);
+        } else if (!(keySetMap.get(resourceReferenceValue).contains(populationReference))) {
+            updateExtensionInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL),
+                    criteriaReferenceExtension, resourceReferenceValue);
+            updateKeySetMap(keySetMap, resourceReferenceValue, populationReference);
+        }
     }
 
     private Extension createSdeCriteriaReferenceExtension(String value) {
@@ -571,7 +578,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         Extension obsExtension = new Extension().setUrl(MeasureInfo.EXT_URL);
         obsExtension.addExtension(extExtMeasure);
-        obsExtension.addExtension(extExtPop);
 
         return obsExtension;
     }
@@ -604,12 +610,25 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
+    private CodeableConcept measureDataUsageCode;
+
+    private CodeableConcept getMeasureDataUsageCode() {
+        if (measureDataUsageCode == null) {
+            measureDataUsageCode = new CodeableConcept();
+            Coding coding = new Coding().setCode("supplemental-data")
+                    .setSystem("http://terminology.hl7.org/CodeSystem/measure-data-usage");
+            List<Coding> list = new ArrayList<>();
+            list.add(coding);
+            measureDataUsageCode.setCoding(list);
+        }
+        return measureDataUsageCode;
+    }
+
     protected DomainResource createPatientObservation(String id, String populationId, Coding valueCoding) {
 
         Observation obs = createObservation(id, populationId);
 
-        CodeableConcept codeCodeableConcept = new CodeableConcept().setText(populationId);
-        obs.setCode(codeCodeableConcept);
+        obs.setCode(getMeasureDataUsageCode());
 
         CodeableConcept valueCodeableConcept = new CodeableConcept();
         valueCodeableConcept.setCoding(Collections.singletonList(valueCoding));

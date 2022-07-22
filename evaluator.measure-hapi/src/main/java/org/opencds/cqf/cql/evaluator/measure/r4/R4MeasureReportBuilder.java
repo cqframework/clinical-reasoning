@@ -347,6 +347,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             processSdeEvaluatedResourceExtension(sde);
 
             String sdeCode = sde.getCode();
+            Coding originalCoding = generateOriginalCoding(sde);
+
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
                 DomainResource obs = null;
@@ -386,18 +388,29 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
                     switch (this.report.getType()) {
                         case INDIVIDUAL:
-                            obs = createPatientObservation(UUID.randomUUID().toString(), sdeCode, valueCoding);
+                            obs = createPatientObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, originalCoding);
                             break;
                         default:
-                            obs = createPopulationObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, valueCount);
+                            obs = createPopulationObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, valueCount, originalCoding);
                             break;
                     }
                     report.addContained(obs);
                     processCoreSdeEvaluatedResourceExtension(getExtensionKeySetMap(),
-                            createSdeCriteriaReferenceExtension(obs.getId()), obs.getId(), sde.getId());
+                            createSdeCriteriaReferenceExtension(sde.getId()),
+                            createResourceReferenceValue(obs.fhirType(), obs.getId()), sde.getId());
                 }
             }
         }
+    }
+
+    private Coding generateOriginalCoding(SdeDef sde) {
+        Coding originalCoding = null;
+        if (sde.hasCode()) {
+            originalCoding = new Coding().setCode(sde.getCode());
+            if (StringUtils.isNotBlank(sde.getSystem()))
+                originalCoding.setSystem(sde.getSystem());
+        }
+        return originalCoding;
     }
 
     @SuppressWarnings("unchecked")
@@ -426,11 +439,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 //extension item
                 IBaseResource iBaseResource = (IBaseResource) object;
                 Extension criteriaReferenceExtension = createSdeCriteriaReferenceExtension(sdeDef.getId());
-                String resourceReferenceValue = createResourceReferenceValue(iBaseResource);
+                String resourceReferenceValue = createResourceReferenceValue(iBaseResource.getIdElement().getResourceType(),
+                        iBaseResource.getIdElement().getIdPart());
                 processCoreSdeEvaluatedResourceExtension(keySetMap, criteriaReferenceExtension, resourceReferenceValue, sdeDef.getId());
             }
         }
-        report.setUserData("extension-set", keySetMap);
     }
 
     private void processCoreSdeEvaluatedResourceExtension(Map<String, Set<String>> keySetMap, Extension criteriaReferenceExtension,
@@ -447,6 +460,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     criteriaReferenceExtension, resourceReferenceValue);
             updateKeySetMap(keySetMap, resourceReferenceValue, populationReference);
         }
+        report.setUserData("extension-set", keySetMap);
     }
 
     private Extension createSdeCriteriaReferenceExtension(String value) {
@@ -454,11 +468,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .setValue(new StringType(value));
     }
 
-    private String createResourceReferenceValue(IBaseResource iBaseResource) {
-        return new StringBuilder(iBaseResource.getIdElement().getResourceType())
-                .append("/")
-                .append(iBaseResource.getIdElement().getIdPart())
-                .toString();
+    private String createResourceReferenceValue(String resourceType, String id) {
+        return new StringBuilder(resourceType).append("/").append(id).toString();
     }
 
     private void updateExtensionInExisingList(List<Extension> list, Extension criteriaReferenceExtension, String value) {
@@ -597,7 +608,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected DomainResource createPopulationObservation(String id, String populationId, Coding valueCoding,
-            Long sdeAccumulatorValue) {
+            Long sdeAccumulatorValue, Coding originalCoding) {
 
         Observation obs = createObservation(id, populationId);
 
@@ -610,25 +621,27 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    private CodeableConcept measureDataUsageCode;
 
-    private CodeableConcept getMeasureDataUsageCode() {
-        if (measureDataUsageCode == null) {
-            measureDataUsageCode = new CodeableConcept();
-            Coding coding = new Coding().setCode("supplemental-data")
-                    .setSystem("http://terminology.hl7.org/CodeSystem/measure-data-usage");
-            List<Coding> list = new ArrayList<>();
-            list.add(coding);
-            measureDataUsageCode.setCoding(list);
+    private CodeableConcept getMeasureDataUsageCode(Coding originalCoding) {
+
+        CodeableConcept measureDataUsageCode = new CodeableConcept();
+        Coding coding = new Coding().setCode("supplemental-data")
+                .setSystem("http://terminology.hl7.org/CodeSystem/measure-data-usage");
+        List<Coding> list = new ArrayList<>();
+        list.add(coding);
+        measureDataUsageCode.setCoding(list);
+
+        if (originalCoding != null) {
+            measureDataUsageCode.getCoding().add(originalCoding);
         }
         return measureDataUsageCode;
     }
 
-    protected DomainResource createPatientObservation(String id, String populationId, Coding valueCoding) {
+    protected DomainResource createPatientObservation(String id, String populationId, Coding valueCoding, Coding originalCoding) {
 
         Observation obs = createObservation(id, populationId);
 
-        obs.setCode(getMeasureDataUsageCode());
+        obs.setCode(getMeasureDataUsageCode(originalCoding));
 
         CodeableConcept valueCodeableConcept = new CodeableConcept();
         valueCodeableConcept.setCoding(Collections.singletonList(valueCoding));

@@ -57,12 +57,6 @@ public class MeasureValidationUtils {
     protected static void validateEvaluatedResourceExtension(List<Reference> measureReferences, String resourceId, String... populations) {
         List<Reference> resourceReferences = measureReferences.stream().filter(x -> x.getReference().equals(resourceId)).collect(Collectors.toList());
         assertEquals(resourceReferences.size(), 1);
-
-        Reference reference = resourceReferences.get(0);
-
-        List<Extension> extensions = reference.getExtension().stream().filter(x -> x.getUrl().equals("http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference")).collect(Collectors.toList());
-
-
     }
 
     protected static void validateListEquality(ListResource actual, ListResource expected) {

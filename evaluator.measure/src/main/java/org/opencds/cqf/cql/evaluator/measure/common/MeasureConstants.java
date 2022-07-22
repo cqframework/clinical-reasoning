@@ -10,8 +10,6 @@ public class MeasureConstants {
 
     public static final String EXT_CRITERIA_REFERENCE_URL = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference";
 
-    public static final String SDE_CRITERIA_REF_URL = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference";
-
     public static final String MEASUREMENT_PERIOD_PARAMETER_NAME = "Measurement Period";
 
     public static final String FHIR_MODEL_URI = "http://hl7.org/fhir";

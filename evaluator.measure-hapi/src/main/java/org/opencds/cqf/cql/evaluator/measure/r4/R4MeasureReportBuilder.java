@@ -395,8 +395,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                             break;
                     }
                     report.addContained(obs);
-                    processCoreSdeEvaluatedResourceExtension(getExtensionKeySetMap(),
-                            createSdeCriteriaReferenceExtension(sde.getId()),
+                    processCoreSdeEvaluatedResourceExtension(createSdeCriteriaReferenceExtension(sde.getId()),
                             createResourceReferenceValue(obs.fhirType(), obs.getId()), sde.getId());
                 }
             }
@@ -413,15 +412,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return originalCoding;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Set<String>> getExtensionKeySetMap() {
-        if (report.getUserData("extension-set") == null) {
-            report.setUserData("extension-set", new HashMap<String, HashSet<String>>());
+    private Map<String, HashSet<String>> extensionSet;
+
+    private Map<String, HashSet<String>> getExtensionKeySetMap() {
+        if (extensionSet == null) {
+            extensionSet = new HashMap<String, HashSet<String>>();
         }
-        return (Map<String, Set<String>>) report.getUserData("extension-set");
+        return extensionSet;
     }
 
-    private void updateKeySetMap(Map<String, Set<String>> keySetMap, String key, String value) {
+    private void updateKeySetMap(Map<String, HashSet<String>> keySetMap, String key, String value) {
         if (!keySetMap.containsKey(key)) {
             HashSet<String> set = new HashSet<>();
             set.add(value);
@@ -432,35 +432,31 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
-        Map<String, Set<String>> keySetMap = getExtensionKeySetMap();
-
         for (Object object : sdeDef.getValues()) {
             if (object instanceof IBaseResource) {
-                //extension item
                 IBaseResource iBaseResource = (IBaseResource) object;
                 Extension criteriaReferenceExtension = createSdeCriteriaReferenceExtension(sdeDef.getId());
                 String resourceReferenceValue = createResourceReferenceValue(iBaseResource.getIdElement().getResourceType(),
                         iBaseResource.getIdElement().getIdPart());
-                processCoreSdeEvaluatedResourceExtension(keySetMap, criteriaReferenceExtension, resourceReferenceValue, sdeDef.getId());
+                processCoreSdeEvaluatedResourceExtension(criteriaReferenceExtension, resourceReferenceValue, sdeDef.getId());
             }
         }
     }
 
-    private void processCoreSdeEvaluatedResourceExtension(Map<String, Set<String>> keySetMap, Extension criteriaReferenceExtension,
+    private void processCoreSdeEvaluatedResourceExtension(Extension criteriaReferenceExtension,
                                                           String resourceReferenceValue, String populationReference) {
-        if (!keySetMap.containsKey(resourceReferenceValue)) {
+        if (!getExtensionKeySetMap().containsKey(resourceReferenceValue)) {
             Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
             Reference reference = new Reference(resourceReferenceValue);
             reference.addExtension(criteriaReferenceExtension);
             extension.setValue(reference);
             report.getExtension().add(extension);
-            updateKeySetMap(keySetMap, resourceReferenceValue, populationReference);
-        } else if (!(keySetMap.get(resourceReferenceValue).contains(populationReference))) {
+            updateKeySetMap(getExtensionKeySetMap(), resourceReferenceValue, populationReference);
+        } else if (!(getExtensionKeySetMap().get(resourceReferenceValue).contains(populationReference))) {
             updateExtensionInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL),
                     criteriaReferenceExtension, resourceReferenceValue);
-            updateKeySetMap(keySetMap, resourceReferenceValue, populationReference);
+            updateKeySetMap(getExtensionKeySetMap(), resourceReferenceValue, populationReference);
         }
-        report.setUserData("extension-set", keySetMap);
     }
 
     private Extension createSdeCriteriaReferenceExtension(String value) {
@@ -607,34 +603,44 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 !StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
     }
 
-    protected DomainResource createPopulationObservation(String id, String populationId, Coding valueCoding,
-            Long sdeAccumulatorValue, Coding originalCoding) {
-
-        Observation obs = createObservation(id, populationId);
-
-        CodeableConcept obsCodeableConcept = new CodeableConcept();
-        obsCodeableConcept.setCoding(Collections.singletonList(valueCoding));
-
-        obs.setCode(obsCodeableConcept);
-        obs.setValue(new IntegerType(sdeAccumulatorValue));
-
-        return obs;
+    private Coding supplementalDataCoding;
+    private Coding geSupplementalDataCoding() {
+        if(supplementalDataCoding == null) {
+            supplementalDataCoding = new Coding().setCode("supplemental-data")
+                    .setSystem("http://terminology.hl7.org/CodeSystem/measure-data-usage");
+        }
+        return supplementalDataCoding;
     }
 
-
     private CodeableConcept getMeasureDataUsageCode(Coding originalCoding) {
-
         CodeableConcept measureDataUsageCode = new CodeableConcept();
-        Coding coding = new Coding().setCode("supplemental-data")
-                .setSystem("http://terminology.hl7.org/CodeSystem/measure-data-usage");
         List<Coding> list = new ArrayList<>();
-        list.add(coding);
+        list.add(geSupplementalDataCoding());
         measureDataUsageCode.setCoding(list);
 
         if (originalCoding != null) {
             measureDataUsageCode.getCoding().add(originalCoding);
         }
         return measureDataUsageCode;
+    }
+
+    protected DomainResource createPopulationObservation(String id, String populationId, Coding valueCoding,
+            Long sdeAccumulatorValue, Coding originalCoding) {
+
+        Observation obs = createObservation(id, populationId);
+
+        CodeableConcept obsCodeableConcept = new CodeableConcept();
+        List<Coding> list = new ArrayList<>();
+        list.add(valueCoding);
+        if (originalCoding != null) {
+            list.add(originalCoding);
+        }
+        obsCodeableConcept.setCoding(list);
+
+        obs.setCode(obsCodeableConcept);
+        obs.setValue(new IntegerType(sdeAccumulatorValue));
+
+        return obs;
     }
 
     protected DomainResource createPatientObservation(String id, String populationId, Coding valueCoding, Coding originalCoding) {

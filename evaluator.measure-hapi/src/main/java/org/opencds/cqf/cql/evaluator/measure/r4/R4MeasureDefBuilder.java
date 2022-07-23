@@ -41,10 +41,18 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 def.setId(c.getId());
             }
 
+            if(c.hasCode() && c.getCode().hasText() && StringUtils.isNotBlank(c.getCode().getText())) {
+                def.setText(c.getCode().getText());
+            }
+
             if (c.hasCode() && c.getCode().getCodingFirstRep().hasCode()) {
                 def.setHasCode(true);
                 if (c.getCode().getCodingFirstRep().hasSystem()) {
                     def.setSystem(c.getCode().getCodingFirstRep().getSystem());
+                }
+
+                if (c.getCode().getCodingFirstRep().hasDisplay()) {
+                    def.setDisplay(c.getCode().getCodingFirstRep().getDisplay());
                 }
             }
 

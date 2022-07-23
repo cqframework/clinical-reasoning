@@ -10,6 +10,8 @@ public class SdeDef {
     private String code;
     private boolean hasCode;
     private String system;
+    private String display;
+    private String text;
 
 
     private List<Object> values;
@@ -45,6 +47,14 @@ public class SdeDef {
     public String getSystem() { return system; }
 
     public void setSystem(String system) { this.system = system; }
+
+    public String getDisplay() { return display; }
+
+    public void setDisplay(String display) { this.display = display; }
+
+    public String getText() { return text; }
+
+    public void setText(String text) { this.text = text; }
 
     public List<Object> getValues() {
         if (this.values == null) {

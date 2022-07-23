@@ -405,20 +405,25 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private CodeableConcept generateOriginalConcept(SdeDef sde) {
         CodeableConcept originalConcept = null;
     
+        if (StringUtils.isNotBlank(sde.getText())) {
+            originalConcept = new CodeableConcept();
+            originalConcept.setText(sde.getText());
+        }
+
         if (sde.hasCode()) {
             Coding originalCoding = new Coding().setCode(sde.getCode());
             if (StringUtils.isNotBlank(sde.getSystem()))
                 originalCoding.setSystem(sde.getSystem());
             if (StringUtils.isNotBlank(sde.getDisplay()))
                 originalCoding.setDisplay(sde.getDisplay());
-
-            originalConcept = new CodeableConcept();
+            
             List<Coding> list = new ArrayList<>();
             list.add(originalCoding);
-            originalConcept.setCoding(list);
-            
-            if (StringUtils.isNotBlank(sde.getText()))
-                originalConcept.setText(sde.getText());
+
+            if (originalConcept == null) {
+                originalConcept = new CodeableConcept();
+            }
+            originalConcept.setCoding(list);       
         }
         return originalConcept;
     }
@@ -627,17 +632,19 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return supplementalDataCoding;
     }
 
-    private CodeableConcept getMeasureUsageConcept(CodeableConcept originalCodeableConcept) {
+    private CodeableConcept getMeasureUsageConcept(CodeableConcept originalConcept) {
         CodeableConcept measureUsageConcept = new CodeableConcept();
         List<Coding> list = new ArrayList<>();
         list.add(geSupplementalDataCoding());
         measureUsageConcept.setCoding(list);
 
-        if (originalCodeableConcept != null) {
-            measureUsageConcept.getCoding().add(originalCodeableConcept.getCodingFirstRep());
-            if (originalCodeableConcept.hasText() && StringUtils.isNotBlank(originalCodeableConcept.getText())) {
-                measureUsageConcept.setText(originalCodeableConcept.getText());
+        if (originalConcept != null) {
+            if (originalConcept.hasText() && StringUtils.isNotBlank(originalConcept.getText())) {
+                measureUsageConcept.setText(originalConcept.getText());
             }
+            if (originalConcept.hasCoding()) {
+                measureUsageConcept.getCoding().add(originalConcept.getCodingFirstRep());
+            }            
         }
         return measureUsageConcept;
     }

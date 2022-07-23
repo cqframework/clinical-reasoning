@@ -396,7 +396,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     }
                     report.addContained(obs);
                     processCoreSdeEvaluatedResourceExtension(createSdeCriteriaReferenceExtension(sde.getId()),
-                            createResourceReferenceValue(obs.fhirType(), obs.getId()), sde.getId());
+                        createContainedResourceReferenceValue(obs.getId()), sde.getId());
                 }
             }
         }
@@ -466,6 +466,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private String createResourceReferenceValue(String resourceType, String id) {
         return new StringBuilder(resourceType).append("/").append(id).toString();
+    }
+
+    private String createContainedResourceReferenceValue(String id) {
+        return new StringBuilder("#").append(id).toString();
     }
 
     private void updateExtensionInExisingList(List<Extension> list, Extension criteriaReferenceExtension, String value) {

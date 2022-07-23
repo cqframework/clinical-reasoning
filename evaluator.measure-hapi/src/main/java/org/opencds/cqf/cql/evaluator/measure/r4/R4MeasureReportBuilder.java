@@ -347,7 +347,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             processSdeEvaluatedResourceExtension(sde);
 
             String sdeCode = sde.getCode();
-            Coding originalCoding = generateOriginalCoding(sde);
+            CodeableConcept originalConcept = generateOriginalConcept(sde);
 
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
@@ -388,10 +388,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
                     switch (this.report.getType()) {
                         case INDIVIDUAL:
-                            obs = createPatientObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, originalCoding);
+                            obs = createPatientObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, originalConcept);
                             break;
                         default:
-                            obs = createPopulationObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, valueCount, originalCoding);
+                            obs = createPopulationObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, valueCount, originalConcept);
                             break;
                     }
                     report.addContained(obs);
@@ -402,14 +402,25 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private Coding generateOriginalCoding(SdeDef sde) {
-        Coding originalCoding = null;
+    private CodeableConcept generateOriginalConcept(SdeDef sde) {
+        CodeableConcept originalConcept = null;
+    
         if (sde.hasCode()) {
-            originalCoding = new Coding().setCode(sde.getCode());
+            Coding originalCoding = new Coding().setCode(sde.getCode());
             if (StringUtils.isNotBlank(sde.getSystem()))
                 originalCoding.setSystem(sde.getSystem());
+            if (StringUtils.isNotBlank(sde.getDisplay()))
+                originalCoding.setDisplay(sde.getDisplay());
+
+            originalConcept = new CodeableConcept();
+            List<Coding> list = new ArrayList<>();
+            list.add(originalCoding);
+            originalConcept.setCoding(list);
+            
+            if (StringUtils.isNotBlank(sde.getText()))
+                originalConcept.setText(sde.getText());
         }
-        return originalCoding;
+        return originalConcept;
     }
 
     private Map<String, HashSet<String>> extensionSet;
@@ -616,28 +627,31 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return supplementalDataCoding;
     }
 
-    private CodeableConcept getMeasureDataUsageCode(Coding originalCoding) {
-        CodeableConcept measureDataUsageCode = new CodeableConcept();
+    private CodeableConcept getMeasureUsageConcept(CodeableConcept originalCodeableConcept) {
+        CodeableConcept measureUsageConcept = new CodeableConcept();
         List<Coding> list = new ArrayList<>();
         list.add(geSupplementalDataCoding());
-        measureDataUsageCode.setCoding(list);
+        measureUsageConcept.setCoding(list);
 
-        if (originalCoding != null) {
-            measureDataUsageCode.getCoding().add(originalCoding);
+        if (originalCodeableConcept != null) {
+            measureUsageConcept.getCoding().add(originalCodeableConcept.getCodingFirstRep());
+            if (originalCodeableConcept.hasText() && StringUtils.isNotBlank(originalCodeableConcept.getText())) {
+                measureUsageConcept.setText(originalCodeableConcept.getText());
+            }
         }
-        return measureDataUsageCode;
+        return measureUsageConcept;
     }
 
     protected DomainResource createPopulationObservation(String id, String populationId, Coding valueCoding,
-            Long sdeAccumulatorValue, Coding originalCoding) {
+            Long sdeAccumulatorValue, CodeableConcept originalConcept) {
 
         Observation obs = createObservation(id, populationId);
 
         CodeableConcept obsCodeableConcept = new CodeableConcept();
         List<Coding> list = new ArrayList<>();
         list.add(valueCoding);
-        if (originalCoding != null) {
-            list.add(originalCoding);
+        if (originalConcept != null && originalConcept.hasCoding()) {
+            list.add(originalConcept.getCodingFirstRep());
         }
         obsCodeableConcept.setCoding(list);
 
@@ -647,11 +661,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    protected DomainResource createPatientObservation(String id, String populationId, Coding valueCoding, Coding originalCoding) {
+    protected DomainResource createPatientObservation(String id, String populationId, Coding valueCoding, CodeableConcept originalConcept) {
 
         Observation obs = createObservation(id, populationId);
 
-        obs.setCode(getMeasureDataUsageCode(originalCoding));
+        obs.setCode(getMeasureUsageConcept(originalConcept));
 
         CodeableConcept valueCodeableConcept = new CodeableConcept();
         valueCodeableConcept.setCoding(Collections.singletonList(valueCoding));

@@ -451,6 +451,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (Object object : sdeDef.getValues()) {
             if (object instanceof IBaseResource) {
                 IBaseResource iBaseResource = (IBaseResource) object;
+                // The resource should be included in the contained
+                report.addContained((DomainResource) object);
+
                 Extension criteriaReferenceExtension = createSdeCriteriaReferenceExtension(sdeDef.getId());
                 String resourceReferenceValue = createResourceReferenceValue(iBaseResource.getIdElement().getResourceType(),
                         iBaseResource.getIdElement().getIdPart());

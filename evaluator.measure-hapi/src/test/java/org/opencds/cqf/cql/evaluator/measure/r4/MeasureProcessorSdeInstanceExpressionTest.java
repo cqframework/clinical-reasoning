@@ -30,6 +30,6 @@ public class MeasureProcessorSdeInstanceExpressionTest extends BaseMeasureProces
         assertNotNull(report);
 
         assertTrue(report.getContained().stream().anyMatch(
-                item -> item.getId().startsWith("#hist-closed-HCC189-suspecting-algorithm-encounter")));
+                item -> item.getId().startsWith("hist-closed-HCC189-suspecting-algorithm-encounter")));
     }
 }

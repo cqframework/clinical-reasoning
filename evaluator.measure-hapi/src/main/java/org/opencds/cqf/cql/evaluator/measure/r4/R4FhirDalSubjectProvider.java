@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Group;
@@ -32,14 +33,23 @@ public class R4FhirDalSubjectProvider implements SubjectProvider {
 
             return ids;
         } else if (subjectId.indexOf("/") == -1) {
-            IBaseResource r = fhirDal.read(new IdType("Patient/" + subjectId));
+            IdType id = new IdType("Patient/" + subjectId);
+            IBaseResource r = fhirDal.read(id);
+
+            if (r == null) {
+                throw new ResourceNotFoundException(id);
+            }
             return Collections
                     .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-        }
-        else if (subjectId.startsWith("Group")) {
-            Group r = (Group)fhirDal.read(new IdType(subjectId));
-            List<String> subjectIds = new ArrayList<>();
+        } else if (subjectId.startsWith("Group")) {
+            IdType id = new IdType(subjectId);
+            Group r = (Group) fhirDal.read(id);
 
+            if (r == null) {
+                throw new ResourceNotFoundException(id);
+            }
+
+            List<String> subjectIds = new ArrayList<>();
             for (GroupMemberComponent gmc : r.getMember()) {
                 IIdType ref = gmc.getEntity().getReferenceElement();
                 subjectIds.add(ref.getResourceType() + "/" + ref.getIdPart());
@@ -47,7 +57,11 @@ public class R4FhirDalSubjectProvider implements SubjectProvider {
 
             return subjectIds;
         } else {
-            IBaseResource r = fhirDal.read(new IdType(subjectId));
+            IdType id = new IdType(subjectId);
+            IBaseResource r = fhirDal.read(id);
+            if (r == null) {
+                throw new ResourceNotFoundException(id);
+            }
             return Collections
                     .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
         }

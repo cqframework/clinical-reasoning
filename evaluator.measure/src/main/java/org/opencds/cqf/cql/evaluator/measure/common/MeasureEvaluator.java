@@ -435,7 +435,7 @@ public class MeasureEvaluator {
         }
     }
 
-    // to do : consider more complex expression
+    // consider more complex expression in future
     private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
         if (expressionDef.getExpression().getClass() == InstanceEvaluator.class) {
             sdeDef.setIsInstanceExpression(true);

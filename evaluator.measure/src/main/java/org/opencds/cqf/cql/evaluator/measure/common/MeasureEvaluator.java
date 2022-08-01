@@ -24,6 +24,7 @@ import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
+import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -424,11 +425,20 @@ public class MeasureEvaluator {
 
     protected void evaluateSdes(List<SdeDef> sdes) {
         for (SdeDef sde : sdes) {
-            Object result = this.context.resolveExpressionRef(sde.getExpression()).evaluate(this.context);
+            ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.getExpression());
+            inspectInstanceEvaluation(sde, expressionDef);
+            Object result = expressionDef.evaluate(this.context);
 
             // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
             clearEvaluatedResources();
+        }
+    }
+
+    // to do : consider more complex expression
+    private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
+        if (expressionDef.getExpression().getClass() == InstanceEvaluator.class) {
+            sdeDef.setIsInstanceExpression(true);
         }
     }
 

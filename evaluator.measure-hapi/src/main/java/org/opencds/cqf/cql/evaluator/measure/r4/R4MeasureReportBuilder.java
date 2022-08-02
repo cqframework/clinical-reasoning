@@ -452,11 +452,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             if (obj instanceof IBaseResource) {
                 IBaseResource res = (IBaseResource) obj;
                 Extension sdeCriteriaReferenceExt = createSdeCriteriaReferenceExt(sdeDef.getId());
-                String referenceValue = createResourceReference(res.fhirType(), res.getIdElement().getIdPart());
-                processCoreSdeEvaluatedResourceExt(sdeCriteriaReferenceExt, referenceValue, sdeDef.getId());
+                String referenceValue;
                 if (sdeDef.isInstanceExpression()) {
                     report.addContained((DomainResource) res);
+                    referenceValue = createContainedResourceReferenceValue(res.getIdElement().getIdPart());
+                } else {
+                    referenceValue = createResourceReference(res.fhirType(), res.getIdElement().getIdPart());
                 }
+                processCoreSdeEvaluatedResourceExt(sdeCriteriaReferenceExt, referenceValue, sdeDef.getId());
             }
         }
     }

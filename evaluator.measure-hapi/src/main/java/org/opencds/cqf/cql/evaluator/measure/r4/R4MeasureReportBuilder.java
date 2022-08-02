@@ -344,7 +344,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Map<ValueWrapper, Long> accumulated = sde.getValues().stream().map(x -> new ValueWrapper(x))
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-            processSdeEvaluatedResourceExtension(sde);
+            processSdeEvaluatedResourceExt(sde);
 
             String sdeCode = sde.getCode();
             CodeableConcept originalConcept = generateOriginalConcept(sde);
@@ -395,7 +395,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                             break;
                     }
                     report.addContained(obs);
-                    processCoreSdeEvaluatedResourceExtension(createSdeCriteriaReferenceExtension(sde.getId()),
+                    processCoreSdeEvaluatedResourceExt(createSdeCriteriaReferenceExt(sde.getId()),
                         createContainedResourceReferenceValue(obs.getId()), sde.getId());
                 }
             }
@@ -430,7 +430,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private Map<String, HashSet<String>> extensionSet;
 
-    private Map<String, HashSet<String>> getExtensionKeySetMap() {
+    private Map<String, HashSet<String>> getExtKeySetMap() {
         if (extensionSet == null) {
             extensionSet = new HashMap<String, HashSet<String>>();
         }
@@ -447,40 +447,43 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
-        for (Object object : sdeDef.getValues()) {
-            if (object instanceof IBaseResource) {
-                IBaseResource iBaseResource = (IBaseResource) object;
-                Extension criteriaReferenceExtension = createSdeCriteriaReferenceExtension(sdeDef.getId());
-                String resourceReferenceValue = createResourceReferenceValue(iBaseResource.getIdElement().getResourceType(),
-                        iBaseResource.getIdElement().getIdPart());
-                processCoreSdeEvaluatedResourceExtension(criteriaReferenceExtension, resourceReferenceValue, sdeDef.getId());
+    private void processSdeEvaluatedResourceExt(SdeDef sdeDef) {
+        for (Object obj : sdeDef.getValues()) {
+            if (obj instanceof IBaseResource) {
+                IBaseResource res = (IBaseResource) obj;
+                Extension sdeCriteriaReferenceExt = createSdeCriteriaReferenceExt(sdeDef.getId());
+                String referenceValue;
+                if (sdeDef.isInstanceExpression()) {
+                    report.addContained((DomainResource) res);
+                    referenceValue = createContainedResourceReferenceValue(res.getIdElement().getIdPart());
+                } else {
+                    referenceValue = createResourceReference(res.fhirType(), res.getIdElement().getIdPart());
+                }
+                processCoreSdeEvaluatedResourceExt(sdeCriteriaReferenceExt, referenceValue, sdeDef.getId());
             }
         }
     }
 
-    private void processCoreSdeEvaluatedResourceExtension(Extension criteriaReferenceExtension,
-                                                          String resourceReferenceValue, String populationReference) {
-        if (!getExtensionKeySetMap().containsKey(resourceReferenceValue)) {
-            Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
-            Reference reference = new Reference(resourceReferenceValue);
-            reference.addExtension(criteriaReferenceExtension);
-            extension.setValue(reference);
-            report.getExtension().add(extension);
-            updateKeySetMap(getExtensionKeySetMap(), resourceReferenceValue, populationReference);
-        } else if (!(getExtensionKeySetMap().get(resourceReferenceValue).contains(populationReference))) {
-            updateExtensionInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL),
-                    criteriaReferenceExtension, resourceReferenceValue);
-            updateKeySetMap(getExtensionKeySetMap(), resourceReferenceValue, populationReference);
+    private void processCoreSdeEvaluatedResourceExt(Extension criteriaRefExt, String referenceVal, String populationRef) {
+        if (!getExtKeySetMap().containsKey(referenceVal)) {
+            Extension ext = new Extension(MeasureConstants.SDE_EXT_URL);
+            Reference ref = new Reference(referenceVal);
+            ref.addExtension(criteriaRefExt);
+            ext.setValue(ref);
+            report.getExtension().add(ext);
+            updateKeySetMap(getExtKeySetMap(), referenceVal, populationRef);
+        } else if (!(getExtKeySetMap().get(referenceVal).contains(populationRef))) {
+            updateExtInExisingList(report.getExtensionsByUrl(MeasureConstants.SDE_EXT_URL), criteriaRefExt, referenceVal);
+            updateKeySetMap(getExtKeySetMap(), referenceVal, populationRef);
         }
     }
 
-    private Extension createSdeCriteriaReferenceExtension(String value) {
+    private Extension createSdeCriteriaReferenceExt(String value) {
         return new Extension(MeasureConstants.EXT_CRITERIA_REFERENCE_URL)
                 .setValue(new StringType(value));
     }
 
-    private String createResourceReferenceValue(String resourceType, String id) {
+    private String createResourceReference(String resourceType, String id) {
         return new StringBuilder(resourceType).append("/").append(id).toString();
     }
 
@@ -488,7 +491,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return new StringBuilder("#").append(id).toString();
     }
 
-    private void updateExtensionInExisingList(List<Extension> list, Extension criteriaReferenceExtension, String value) {
+    private void updateExtInExisingList(List<Extension> list, Extension criteriaReferenceExtension, String value) {
         list.stream().filter(extension -> ((Reference) extension.getValue()).getReference().equals(value))
                 .collect(Collectors.toList()).stream().findFirst().get().getValue().addExtension(criteriaReferenceExtension);
     }

@@ -9,6 +9,7 @@ public class SdeDef {
     private String expression;
     private String code;
     private boolean hasCode;
+    private boolean isInstanceExpression;
     private String system;
     private String display;
     private String text;
@@ -43,6 +44,10 @@ public class SdeDef {
     public boolean hasCode() { return hasCode; }
 
     public void setHasCode(boolean hasCode) { this.hasCode = hasCode; }
+
+    public boolean isInstanceExpression() { return isInstanceExpression; }
+
+    public void setIsInstanceExpression(boolean isInstanceExpression) { this.isInstanceExpression = isInstanceExpression; }
 
     public String getSystem() { return system; }
 

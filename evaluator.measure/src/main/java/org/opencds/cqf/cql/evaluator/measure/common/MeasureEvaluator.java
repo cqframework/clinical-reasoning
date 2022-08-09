@@ -18,12 +18,14 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.elm.execution.Expression;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
 import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
+import org.opencds.cqf.cql.engine.elm.execution.ExpressionRefEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
@@ -437,8 +439,21 @@ public class MeasureEvaluator {
 
     // consider more complex expression in future
     private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
-        if (expressionDef.getExpression().getClass() == InstanceEvaluator.class) {
+        Expression expression = expressionDef.getExpression();
+        if (expression.getClass() == InstanceEvaluator.class) {
             sdeDef.setIsInstanceExpression(true);
+        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
+                ((ExpressionRefEvaluator) expression).getLibraryName() != null) {
+            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
+            context.enterLibrary(expressionRef.getLibraryName());
+            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
+            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
+            context.exitLibrary(true);
+        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
+                ((ExpressionRefEvaluator) expression).getLibraryName() == null) {
+            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
+            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
+            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
         }
     }
 

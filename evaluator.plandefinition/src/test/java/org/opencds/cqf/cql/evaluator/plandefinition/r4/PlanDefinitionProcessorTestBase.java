@@ -1,13 +1,13 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -28,12 +28,11 @@ import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.LibraryContentProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
@@ -52,18 +51,18 @@ public class PlanDefinitionProcessorTestBase {
     private final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     private MockFhirDal fhirDal;
     protected PlanDefinitionProcessor planDefinitionProcessor;
-    
+
     private InputStream open(String asset) {
         return PlanDefinitionProcessorTestBase.class.getResourceAsStream(asset);
     }
-    
+
     public IBaseResource load(String asset) {
         return jsonParser.parseResource(open(asset));
     }
 
     @BeforeMethod
     public void setup() {
-        // cleans in memory database at every test. 
+        // cleans in memory database at every test.
         fhirDal = new MockFhirDal();
 
         AdapterFactory adapterFactory = new AdapterFactory();
@@ -74,23 +73,23 @@ public class PlanDefinitionProcessorTestBase {
         FhirModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
         Set<ModelResolverFactory> modelResolverFactories = Collections.singleton(fhirModelResolverFactory);
 
-        Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories = Collections.singleton(
-            new TypedLibraryContentProviderFactory() {
+        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = Collections.singleton(
+            new TypedLibrarySourceProviderFactory() {
                 @Override
                 public String getType() {
                     return Constants.HL7_FHIR_FILES;
                 }
 
                 @Override
-                public LibraryContentProvider create(String url, List<String> headers) {
-                    return new BundleFhirLibraryContentProvider(fhirContext,
+                public LibrarySourceProvider create(String url, List<String> headers) {
+                    return new BundleFhirLibrarySourceProvider(fhirContext,
                             (IBaseBundle) load(url), adapterFactory, libraryVersionSelector);
                 }
             }
         );
 
-        LibraryContentProviderFactory libraryContentProviderFactory = new LibraryContentProviderFactory(
-                fhirContext, adapterFactory, libraryContentProviderFactories, libraryVersionSelector);
+        LibrarySourceProviderFactory librarySourceProviderFactory = new LibrarySourceProviderFactory(
+                fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
 
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = Collections.singleton(
             new TypedRetrieveProviderFactory() {
@@ -105,7 +104,7 @@ public class PlanDefinitionProcessorTestBase {
                 }
             }
         );
-        
+
         DataProviderFactory dataProviderFactory = new DataProviderFactory(
                 fhirContext, modelResolverFactories, retrieveProviderFactories);
 
@@ -122,33 +121,33 @@ public class PlanDefinitionProcessorTestBase {
                 }
             }
         );
-        
+
         TerminologyProviderFactory terminologyProviderFactory = new TerminologyProviderFactory(
                 fhirContext, typedTerminologyProviderFactories);
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
+        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
                 dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
-            
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
+
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
             dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
 
         ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
-        
-        planDefinitionProcessor = new PlanDefinitionProcessor(fhirContext, fhirDal, libraryProcessor, evaluator, 
+
+        planDefinitionProcessor = new PlanDefinitionProcessor(fhirContext, fhirDal, libraryProcessor, evaluator,
             activityDefinitionProcessor, operationParametersParser);
     }
 
-    public void test(String dataAsset, String libraryAsset, 
-                    String planDefinitionID, String patientID, String encounterID, 
-                    String expectedCarePlan) { 
+    public void test(String dataAsset, String libraryAsset,
+                    String planDefinitionID, String patientID, String encounterID,
+                    String expectedCarePlan) {
         Parameters params = new Parameters();
 
         fhirDal.addAll(load(libraryAsset));
         fhirDal.addAll(load(dataAsset));
-        
+
         CarePlan expected = (CarePlan) load(expectedCarePlan);
 
         Endpoint endpoint = new Endpoint().setAddress(libraryAsset)
@@ -158,9 +157,9 @@ public class PlanDefinitionProcessorTestBase {
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         CarePlan actual = planDefinitionProcessor.apply(
-                new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, 
-                null, null, null, null, null, 
-                null, null, null, params, null, 
+                new IdType("PlanDefinition", planDefinitionID), patientID, encounterID,
+                null, null, null, null, null,
+                null, null, null, params, null,
                 new Bundle(), null, dataEndpoint, endpoint, endpoint);
 
         String expectedJson = jsonParser.encodeResourceToString(expected);

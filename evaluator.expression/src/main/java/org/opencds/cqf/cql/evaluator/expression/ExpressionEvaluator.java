@@ -10,10 +10,9 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.google.common.collect.Lists;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -23,16 +22,17 @@ import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
-import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.CqlParameterDefinition;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -45,7 +45,7 @@ public class ExpressionEvaluator {
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
-    protected LibraryContentProviderFactory libraryContentProviderFactory;
+    protected LibrarySourceProviderFactory librarySourceProviderFactory;
     protected DataProviderFactory dataProviderFactory;
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected EndpointConverter endpointConverter;
@@ -57,7 +57,7 @@ public class ExpressionEvaluator {
 
     @Inject
     public ExpressionEvaluator(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
-            LibraryContentProviderFactory libraryContentProviderFactory, DataProviderFactory dataProviderFactory,
+            LibrarySourceProviderFactory librarySourceProviderFactory, DataProviderFactory dataProviderFactory,
             TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
             ModelResolverFactory fhirModelResolverFactory,
             Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier) {
@@ -65,7 +65,7 @@ public class ExpressionEvaluator {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.fhirPath = fhirContext.newFhirPath();
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
-        this.libraryContentProviderFactory = requireNonNull(libraryContentProviderFactory,
+        this.librarySourceProviderFactory = requireNonNull(librarySourceProviderFactory,
                 "libraryLoaderFactory can not be null");
         this.dataProviderFactory = requireNonNull(dataProviderFactory, "dataProviderFactory can not be null");
         this.terminologyProviderFactory = requireNonNull(terminologyProviderFactory,
@@ -84,7 +84,7 @@ public class ExpressionEvaluator {
 
     /**
      * Evaluates a CQL expression and returns the results as a Parameters resource.
-     * 
+     *
      * @param expression          Expression to be evaluated. Note that this is an
      *                            expression of CQL, not the text of a library with
      *                            definition statements.
@@ -111,7 +111,7 @@ public class ExpressionEvaluator {
 
     /**
      * Evaluates a CQL expression and returns the results as a Parameters resource.
-     * 
+     *
      * @param expression          Expression to be evaluated. Note that this is an
      *                            expression of CQL, not the text of a library with
      *                            definition statements.
@@ -186,14 +186,14 @@ public class ExpressionEvaluator {
 
         String cql = constructCqlLibrary(expression, libraries, parameters);
 
-        LibraryContentProvider contentProvider = new InMemoryLibraryContentProvider(Lists.newArrayList(cql));
+        LibrarySourceProvider contentProvider = new InMemoryLibrarySourceProvider(Lists.newArrayList(cql));
         CqlEvaluatorBuilder builder = this.cqlEvaluatorSupplier.get();
-        builder.withLibraryContentProvider(contentProvider);
+        builder.withLibrarySourceProvider(contentProvider);
 
         Set<String> expressions = new HashSet<String>();
         expressions.add("return");
 
-        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryContentProviderFactory,
+        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
                 dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> builder);
 
         return libraryProcessor.evaluate(new VersionedIdentifier().withId("expression").withVersion("1.0.0"), subject,

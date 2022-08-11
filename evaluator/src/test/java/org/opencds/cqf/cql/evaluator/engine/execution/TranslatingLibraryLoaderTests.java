@@ -21,7 +21,7 @@
 // import org.mockito.Mockito;
 // import org.opencds.cqf.cql.engine.exception.CqlException;
 // import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-// import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibraryContentProvider;
+// import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibrarySourceProvider;
 // import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
 // import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 
@@ -34,7 +34,7 @@
 //     private static FhirContext fhirContext;
 //     private static IParser parser;
 //     private static ModelManager modelManger;
-//     private BaseFhirLibraryContentProvider testFhirLibraryContentProvider;
+//     private BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider;
 //     private LibraryLoader libraryLoader;
 
 //     @BeforeClass
@@ -46,7 +46,7 @@
 
 //     @BeforeMethod
 //     public void initialize() {
-//         this.testFhirLibraryContentProvider = Mockito.spy(new BaseFhirLibraryContentProvider(new AdapterFactory()) {
+//         this.testFhirLibrarySourceProvider = Mockito.spy(new BaseFhirLibrarySourceProvider(new AdapterFactory()) {
 //             @Override
 //             public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
 //                 String name = versionedIdentifier.getId();
@@ -58,7 +58,7 @@
 //         });
 
 //         this.libraryLoader = new TranslatingLibraryLoader(modelManger,
-//                 Collections.singletonList(testFhirLibraryContentProvider), CqlTranslatorOptions.defaultOptions());
+//                 Collections.singletonList(testFhirLibrarySourceProvider), CqlTranslatorOptions.defaultOptions());
 //     }
 
 //     // Disabled due to engine issue https://github.com/DBCG/cql_engine/issues/436
@@ -82,10 +82,10 @@
 //         Library library = this.libraryLoader.load(libraryIdentifier);
 //         assertNotNull(library);
 
-//         Mockito.verify(this.testFhirLibraryContentProvider, times(1))
+//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
 //                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
 
-//         Mockito.verify(this.testFhirLibraryContentProvider, times(0))
+//         Mockito.verify(this.testFhirLibrarySourceProvider, times(0))
 //                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.XML);
 //     }
 
@@ -95,10 +95,10 @@
 //         Library library = this.libraryLoader.load(libraryIdentifier);
 //         assertNotNull(library);
 
-//         Mockito.verify(this.testFhirLibraryContentProvider, times(1))
+//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
 //                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
 
-//         Mockito.verify(this.testFhirLibraryContentProvider, times(0))
+//         Mockito.verify(this.testFhirLibrarySourceProvider, times(0))
 //                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
 //     }
 
@@ -108,10 +108,10 @@
 //         Library library = this.libraryLoader.load(libraryIdentifier);
 //         assertNotNull(library);
 
-//         Mockito.verify(this.testFhirLibraryContentProvider, times(1))
+//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
 //                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
 
-//         Mockito.verify(this.testFhirLibraryContentProvider, times(1))
+//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
 //                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
 //     }
 

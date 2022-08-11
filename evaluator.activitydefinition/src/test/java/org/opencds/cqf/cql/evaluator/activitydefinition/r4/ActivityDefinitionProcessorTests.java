@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -19,15 +20,14 @@ import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
-import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
@@ -46,7 +46,7 @@ public class ActivityDefinitionProcessorTests {
     private static FhirContext fhirContext;
     private FhirDal fhirDal;
     private ActivityDefinitionProcessor activityDefinitionProcessor;
-    
+
     @BeforeClass
     public void setup() {
         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -55,22 +55,22 @@ public class ActivityDefinitionProcessorTests {
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
         CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
-        Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories = new HashSet<TypedLibraryContentProviderFactory>() {
+        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<TypedLibrarySourceProviderFactory>() {
             /**
              *
              */
             private static final long serialVersionUID = 1L;
 
             {
-                add(new TypedLibraryContentProviderFactory() {
+                add(new TypedLibrarySourceProviderFactory() {
                     @Override
                     public String getType() {
                         return Constants.HL7_FHIR_FILES;
                     }
 
                     @Override
-                    public LibraryContentProvider create(String url, List<String> headers) {
-                        return new BundleFhirLibraryContentProvider(fhirContext,
+                    public LibrarySourceProvider create(String url, List<String> headers) {
+                        return new BundleFhirLibrarySourceProvider(fhirContext,
                                 (IBaseBundle) fhirContext.newJsonParser()
                                         .parseResource(ActivityDefinitionProcessorTests.class.getResourceAsStream(url)),
                                 adapterFactory, libraryVersionSelector);
@@ -92,8 +92,8 @@ public class ActivityDefinitionProcessorTests {
             }
         };
 
-        LibraryContentProviderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryContentProviderFactory(
-                fhirContext, adapterFactory, libraryContentProviderFactories, libraryVersionSelector);
+        LibrarySourceProviderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
+                fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
             /**
              *
@@ -157,13 +157,13 @@ public class ActivityDefinitionProcessorTests {
     public void testActivityDefinitionApply() throws FHIRException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
-        
+
         Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
         Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
-        
+
         Object result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"), "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint, terminologyEndpoint, dataEndpoint);
         Assert.assertTrue(result instanceof MedicationRequest);
         MedicationRequest request = (MedicationRequest) result;

@@ -4,17 +4,19 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import org.cqframework.cql.cql2elm.LibraryContentType;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 
 /**
- * This class implements the LibraryContentProvider API, using a
+ * This class implements the LibrarySourceProvider API, using a
  * set of strings representing CQL library content as a source.
  */
-public class InMemoryLibraryContentProvider implements LibraryContentProvider {
+public class InMemoryLibrarySourceProvider implements LibrarySourceProvider {
 
     private List<String> libraries;
 
-    public InMemoryLibraryContentProvider(List<String> libraries) {
+    public InMemoryLibrarySourceProvider(List<String> libraries) {
         this.libraries = libraries;
     }
 

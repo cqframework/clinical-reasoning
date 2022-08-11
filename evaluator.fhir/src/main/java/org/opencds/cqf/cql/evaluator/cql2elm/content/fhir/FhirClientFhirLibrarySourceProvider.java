@@ -20,16 +20,16 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.util.BundleUtil;
 
 /**
- * This class implements the LibraryContentProvider API, using a FHIR
+ * This class implements the LibrarySourceProvider API, using a FHIR
  * server as a source for Library resources containing CQL content.
- * 
+ *
  * This class caches the Library resources that are resolved from the remote server,
  * so it's intended to be short-lived (i.e. for the duration of a single CQL evaluation)
  */
-public class FhirClientFhirLibraryContentProvider extends
-    BaseFhirLibraryContentProvider {
+public class FhirClientFhirLibrarySourceProvider extends
+    BaseFhirLibrarySourceProvider {
 
-    Logger logger = LoggerFactory.getLogger(FhirClientFhirLibraryContentProvider.class);
+    Logger logger = LoggerFactory.getLogger(FhirClientFhirLibrarySourceProvider.class);
 
     private IGenericClient client;
     private AdapterFactory adapterFactory;
@@ -42,7 +42,7 @@ public class FhirClientFhirLibraryContentProvider extends
      * @param adapterFactory factory for HL7 Structure adapters
      * @param libraryVersionSelector logic for selecting a specific library
      */
-    public FhirClientFhirLibraryContentProvider(IGenericClient client, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+    public FhirClientFhirLibrarySourceProvider(IGenericClient client, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
         super(adapterFactory);
         this.client = client;
         this.adapterFactory = adapterFactory;
@@ -73,7 +73,7 @@ public class FhirClientFhirLibraryContentProvider extends
 
         List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(this.client.getFhirContext(),
                 result, this.client.getFhirContext().getResourceDefinition("Library").getImplementingClass());
-                
+
         if (resources == null || resources.isEmpty()) {
             return null;
         }

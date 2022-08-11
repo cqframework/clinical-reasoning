@@ -15,23 +15,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
 @Named
-public class LibraryContentProviderFactory implements org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory {
+public class LibrarySourceProviderFactory implements org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory {
 
-    protected Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories;
+    protected Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories;
     protected FhirContext fhirContext;
     protected AdapterFactory adapterFactory;
     protected LibraryVersionSelector libraryVersionSelector;
@@ -39,17 +39,17 @@ public class LibraryContentProviderFactory implements org.opencds.cqf.cql.evalua
     protected Map<VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
     @Inject
-    public LibraryContentProviderFactory(FhirContext fhirContext, AdapterFactory adapterFactory,
-            Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories, LibraryVersionSelector libraryVersionSelector) {
-        this.libraryContentProviderFactories = requireNonNull(libraryContentProviderFactories,
-                "libraryContentProviderFactories can not be null");
+    public LibrarySourceProviderFactory(FhirContext fhirContext, AdapterFactory adapterFactory,
+            Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories, LibraryVersionSelector libraryVersionSelector) {
+        this.librarySourceProviderFactories = requireNonNull(librarySourceProviderFactories,
+                "librarySourceProviderFactories can not be null");
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
         this.libraryVersionSelector = requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
     }
 
     @Override
-    public LibraryContentProvider create(EndpointInfo endpointInfo) {
+    public LibrarySourceProvider create(EndpointInfo endpointInfo) {
         requireNonNull(endpointInfo, "endpointInfo can not be null");
         if (endpointInfo.getAddress() == null) {
             throw new IllegalArgumentException("endpointInfo must have a url defined");
@@ -59,7 +59,7 @@ public class LibraryContentProviderFactory implements org.opencds.cqf.cql.evalua
             endpointInfo.setType(detectType(endpointInfo.getAddress()));
         }
 
-        LibraryContentProvider contentProvider = this.getProvider(endpointInfo.getType(), endpointInfo.getAddress(),
+        LibrarySourceProvider contentProvider = this.getProvider(endpointInfo.getType(), endpointInfo.getAddress(),
                 endpointInfo.getHeaders());
 
         return contentProvider;
@@ -94,8 +94,8 @@ public class LibraryContentProviderFactory implements org.opencds.cqf.cql.evalua
         }
     }
 
-    protected LibraryContentProvider getProvider(IBaseCoding connectionType, String url, List<String> headers) {
-        for (TypedLibraryContentProviderFactory factory : this.libraryContentProviderFactories) {
+    protected LibrarySourceProvider getProvider(IBaseCoding connectionType, String url, List<String> headers) {
+        for (TypedLibrarySourceProviderFactory factory : this.librarySourceProviderFactories) {
             if (factory.getType().equals(connectionType.getCode())) {
                 return factory.create(url, headers);
             }
@@ -105,13 +105,13 @@ public class LibraryContentProviderFactory implements org.opencds.cqf.cql.evalua
     }
 
     @Override
-    public LibraryContentProvider create(IBaseBundle contentBundle) {
+    public LibrarySourceProvider create(IBaseBundle contentBundle) {
         requireNonNull(contentBundle, "contentBundle can not be null");
 
         if (!contentBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
             throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");
         }
 
-        return new BundleFhirLibraryContentProvider(this.fhirContext, contentBundle, this.adapterFactory, this.libraryVersionSelector);
+        return new BundleFhirLibrarySourceProvider(this.fhirContext, contentBundle, this.adapterFactory, this.libraryVersionSelector);
     }
 }

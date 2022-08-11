@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -21,7 +22,6 @@ import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.dagger.CqlEvaluatorComponent;
 import org.opencds.cqf.cql.evaluator.dagger.DaggerCqlEvaluatorComponent;
 
@@ -91,7 +91,7 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    private Map<String, LibraryContentProvider> libraryContentProviderIndex = new HashMap<>();
+    private Map<String, LibrarySourceProvider> librarySourceProviderIndex = new HashMap<>();
     private Map<String, TerminologyProvider> terminologyProviderIndex = new HashMap<>();
 
     @Override
@@ -112,15 +112,15 @@ public class CqlCommand implements Callable<Integer> {
         for (LibraryParameter library : libraries) {
             CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder().withCqlOptions(cqlOptions);
 
-            LibraryContentProvider libraryContentProvider = libraryContentProviderIndex.get(library.libraryUrl);
+            LibrarySourceProvider librarySourceProvider = librarySourceProviderIndex.get(library.libraryUrl);
 
-            if (libraryContentProvider == null) {
-                libraryContentProvider = cqlEvaluatorComponent.createLibraryContentProviderFactory()
+            if (librarySourceProvider == null) {
+                librarySourceProvider = cqlEvaluatorComponent.createLibrarySourceProviderFactory()
                         .create(new EndpointInfo().setAddress(library.libraryUrl));
-                this.libraryContentProviderIndex.put(library.libraryUrl, libraryContentProvider);
+                this.librarySourceProviderIndex.put(library.libraryUrl, librarySourceProvider);
             }
 
-            cqlEvaluatorBuilder.withLibraryContentProvider(libraryContentProvider);
+            cqlEvaluatorBuilder.withLibrarySourceProvider(librarySourceProvider);
 
             if (library.terminologyUrl != null) {
                 TerminologyProvider terminologyProvider = this.terminologyProviderIndex.get(library.terminologyUrl);

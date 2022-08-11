@@ -8,13 +8,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
-
 import org.hl7.elm.r1.Element;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 // import org.testng.annotations.Test;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 // This is just some code that helps bootstrap the library mapper code-gen
 // It's a one-off for now, but we could integrate it into the build at some point.
@@ -42,7 +42,7 @@ public class MapperCodeGen {
         .filter(x -> !Modifier.isAbstract(x.getModifiers())).collect(Collectors.toList());
 
         Map<Class<? extends Element>, Class<? extends org.cqframework.cql.elm.execution.Element>> typeMap = createConcreteTypeMap(concreteTranslatorTypes, engineTypeList, engineImplementationTypeList);
-  
+
 
         for (Map.Entry<Class<? extends Element>, Class<? extends org.cqframework.cql.elm.execution.Element>> entry : typeMap.entrySet()) {
             if (entry.getKey().getSimpleName().equals("Null")) {
@@ -93,7 +93,7 @@ public class MapperCodeGen {
                 logger.info("Skipped polymorphic type: " + engineClass.getName());
                 continue;
             }
-            
+
             Optional<Class<? extends Element>> translatorType = translatorTypeList.stream().filter(x -> x.getSimpleName().equals(engineClass.getSimpleName())).findFirst();
             if (!translatorType.isPresent()) {
                 logger.info("Could not find translator type for engine type: " + engineClass.getName());
@@ -117,14 +117,14 @@ public class MapperCodeGen {
         String abstractEngineName = abstractType.getName().replace("org.hl7.elm.r1",
                 "org.cqframework.cql.elm.execution");
         System.out.println("default " + abstractEngineName + " map(" + abstractType.getName() + " element) {");
-        
+
         System.out.println("if(element == null) {");
         System.out.println("\t return null;");
         System.out.println("}");
         System.out.println();
 
-        concreteSubClasses.sort((x, y) -> 
-            new Long(concreteSubClasses.stream().filter(z -> x.isAssignableFrom(z)).count()).compareTo(new Long(concreteSubClasses.stream().filter(z -> y.isAssignableFrom(z)).count())));
+        concreteSubClasses.sort((x, y) ->
+            Long.valueOf(concreteSubClasses.stream().filter(z -> x.isAssignableFrom(z)).count()).compareTo(Long.valueOf(concreteSubClasses.stream().filter(z -> y.isAssignableFrom(z)).count())));
         Boolean first = true;
         for (Class<? extends Element> clazz : concreteSubClasses) {
             if (!first) {
@@ -146,7 +146,7 @@ public class MapperCodeGen {
             if (clazz.equals(abstractType)) {
                 continue;
             }
-            
+
             if (!first) {
                 System.out.print("\telse if ");
             }

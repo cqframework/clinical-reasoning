@@ -3,11 +3,8 @@ package org.opencds.cqf.cql.evaluator.engine.execution;
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -15,7 +12,9 @@ import java.util.List;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.serialization.LibraryWrapper;
@@ -23,8 +22,6 @@ import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.execution.JsonCqlLibraryReader;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
 import org.opencds.cqf.cql.evaluator.engine.elm.LibraryMapper;
 import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
 
@@ -36,7 +33,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 /**
  * The TranslatingLibraryLoader attempts to load a library from a set of
- * LibraryContentProviders. If pre-existing ELM is found for the requested
+ * LibrarySourceProviders. If pre-existing ELM is found for the requested
  * library and the ELM was generated using the same set of translator options as
  * is provided to the TranslatingLibraryLoader, it will use that ELM. If the ELM
  * is not found, or the ELM translation options do not match, the
@@ -49,20 +46,20 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     protected static ObjectMapper objectMapper;
 
     protected CqlTranslatorOptions cqlTranslatorOptions;
-    protected List<LibraryContentProvider> libraryContentProviders;
+    protected List<LibrarySourceProvider> librarySourceProviders;
 
     protected LibraryManager libraryManager;
 
-    public TranslatingLibraryLoader(ModelManager modelManager, List<LibraryContentProvider> libraryContentProviders,
+    public TranslatingLibraryLoader(ModelManager modelManager, List<LibrarySourceProvider> librarySourceProviders,
             CqlTranslatorOptions translatorOptions) {
-        this.libraryContentProviders = requireNonNull(libraryContentProviders,
-                "libraryContentProviders can not be null");
+        this.librarySourceProviders = requireNonNull(librarySourceProviders,
+                "librarySourceProviders can not be null");
 
         this.cqlTranslatorOptions = translatorOptions != null ? translatorOptions
                 : CqlTranslatorOptions.defaultOptions();
 
         this.libraryManager = new LibraryManager(modelManager);
-        for (LibraryContentProvider provider : libraryContentProviders) {
+        for (LibrarySourceProvider provider : librarySourceProviders) {
             libraryManager.getLibrarySourceLoader().registerProvider(provider);
         }
     }
@@ -84,7 +81,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
     protected Library getLibraryFromElm(VersionedIdentifier libraryIdentifier) {
         org.hl7.elm.r1.VersionedIdentifier versionedIdentifier = toElmIdentifier(libraryIdentifier);
-        InputStream content = this.getLibraryContent(versionedIdentifier, LibraryContentType.JXSON);
+        InputStream content = this.getLibraryContent(versionedIdentifier, LibraryContentType.JSON);
         if (content != null) {
             try {
                 return this.readJxson(content);
@@ -107,8 +104,8 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
     protected InputStream getLibraryContent(org.hl7.elm.r1.VersionedIdentifier libraryIdentifier,
             LibraryContentType libraryContentType) {
-        for (LibraryContentProvider libraryContentProvider : libraryContentProviders) {
-            InputStream content = libraryContentProvider.getLibraryContent(libraryIdentifier, libraryContentType);
+        for (LibrarySourceProvider librarySourceProvider : librarySourceProviders) {
+            InputStream content = librarySourceProvider.getLibraryContent(libraryIdentifier, libraryContentType);
             if (content != null) {
                 return content;
             }
@@ -143,12 +140,8 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         }
     }
 
-    protected synchronized Library readJxson(String json) throws IOException {
-        return this.readJxson(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
-    }
-
     protected synchronized Library readJxson(InputStream inputStream) throws IOException {
-        return JsonCqlLibraryReader.read(new InputStreamReader(inputStream));
+        return JsonCqlLibraryReader.read(inputStream);
     }
 
     protected synchronized String toJxson(org.hl7.elm.r1.Library library) {

@@ -3,7 +3,7 @@ package org.opencds.cqf.cql.evaluator.dagger.builder;
 import javax.inject.Singleton;
 
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 
@@ -15,7 +15,7 @@ public abstract class BuilderBindingModule {
 
     @Binds
     @Singleton
-    abstract LibraryContentProviderFactory libraryLoaderFactory(org.opencds.cqf.cql.evaluator.builder.library.LibraryContentProviderFactory libraryLoaderFactory);
+    abstract LibrarySourceProviderFactory libraryLoaderFactory(org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory libraryLoaderFactory);
 
 
     @Binds

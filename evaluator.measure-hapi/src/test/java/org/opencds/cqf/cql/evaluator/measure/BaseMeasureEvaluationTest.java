@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
@@ -33,7 +33,7 @@ public abstract class BaseMeasureEvaluationTest {
         LibraryManager libraryManager = new LibraryManager(modelManager);
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         CqlTranslator translator = CqlTranslator.fromStream(new ByteArrayInputStream(cql.getBytes()), modelManager, libraryManager);
-    
+
         List<CqlCompilerException> badStuff = new ArrayList<>();
         // the translator will duplicate exceptions with assigned severity in the errors, warnings, and messages lists
         badStuff.addAll(translator.getExceptions().stream().filter( e -> e.getSeverity() == null ).collect(Collectors.toList()));
@@ -41,7 +41,7 @@ public abstract class BaseMeasureEvaluationTest {
         if( badStuff.size() > 0 ) {
             throw new Exception("Translation failed - " + formatMsg(badStuff));
         }
-        
+
         List<org.cqframework.cql.elm.execution.Library> cqlLibraries = new ArrayList<>();
         cqlLibraries.add(CqlLibraryReader.read(new StringReader(translator.toXml())));
         for( String text : translator.getLibrariesAsXML().values() ) {
@@ -52,10 +52,10 @@ public abstract class BaseMeasureEvaluationTest {
 
     protected Interval measurementPeriod(String periodStart, String periodEnd) {
         ZoneOffset offset = ZonedDateTime.now().getOffset();
-        
+
         DateTime start = new DateTime(periodStart, offset);
         DateTime end = new DateTime(periodEnd, offset);
-        
+
         return new Interval( start, true, end, true );
     }
 
@@ -82,18 +82,18 @@ public abstract class BaseMeasureEvaluationTest {
     public String patient_context() {
         return "context Patient\n";
     }
-    
+
     public abstract String getFhirVersion();
 
     protected String sde_race() {
-        return "define \"SDE Race\":\n" + 
-                "  (flatten (\n" + 
-                "    Patient.extension Extension\n" + 
-                "      where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'\n" + 
-                "        return Extension.extension\n" + 
-                "  )) E\n" + 
-                "    where E.url = 'ombCategory'\n" + 
-                "      or E.url = 'detailed'\n" + 
+        return "define \"SDE Race\":\n" +
+                "  (flatten (\n" +
+                "    Patient.extension Extension\n" +
+                "      where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'\n" +
+                "        return Extension.extension\n" +
+                "  )) E\n" +
+                "    where E.url = 'ombCategory'\n" +
+                "      or E.url = 'detailed'\n" +
                 "    return E.value as Coding\n\n";
     }
 

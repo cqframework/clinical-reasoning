@@ -5,8 +5,8 @@ import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isUri;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -21,18 +21,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 
 @Named
-public class CqlFileLibraryContentProviderFactory implements TypedLibraryContentProviderFactory {
-    private Logger logger = LoggerFactory.getLogger(CqlFileLibraryContentProviderFactory.class);
+public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {
 
     @Inject
-    CqlFileLibraryContentProviderFactory(){}
+    CqlFileLibrarySourceProviderFactory(){}
 
     @Override
     public String getType() {
@@ -40,9 +37,9 @@ public class CqlFileLibraryContentProviderFactory implements TypedLibraryContent
     }
 
     @Override
-    public LibraryContentProvider create(String url, List<String> headers) {
+    public LibrarySourceProvider create(String url, List<String> headers) {
         List<String> libraries = this.getLibrariesFromPath(url);
-        return new InMemoryLibraryContentProvider(libraries);
+        return new InMemoryLibrarySourceProvider(libraries);
     }
 
     protected List<String> getLibrariesFromPath(String path) {
@@ -56,9 +53,8 @@ public class CqlFileLibraryContentProviderFactory implements TypedLibraryContent
                 uri = new URI(path);
             }
         }
-        catch(Exception e) {
-            logger.error(String.format("error attempting to bundle path: %s", path), e);
-            throw new RuntimeException(e);
+        catch(URISyntaxException e) {
+            throw new IllegalArgumentException(String.format("error attempting to bundle path: %s", path),e);
         }
 
         Collection<File> files;
@@ -69,23 +65,21 @@ public class CqlFileLibraryContentProviderFactory implements TypedLibraryContent
             files = this.listDirectory(uri.getPath());
         }
 
-            
+
         return this.readFiles(files);
     }
 
 
     private Collection<File> listJar(URI uri, String path) {
-        try {
-            FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+        try (var fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())){
             Path jarPath = fileSystem.getPath(path);
             try(Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
                 return walk.map(x -> x.toFile()).filter(x -> x.isFile()).filter(
                     x -> x.getName().endsWith("json") || x.getName().endsWith("xml")).collect(Collectors.toList());
             }
         }
-        catch (Exception e) {
-            logger.error(String.format("error attempting to list jar: %s", uri.toString()));
-            throw new RuntimeException(e);
+        catch (IOException e) {
+            throw new IllegalArgumentException(String.format("error attempting to list jar: %s", uri.toString()),e);
         }
     }
 

@@ -427,14 +427,28 @@ public class MeasureEvaluator {
 
     protected void evaluateSdes(List<SdeDef> sdes) {
         for (SdeDef sde : sdes) {
-            ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.getExpression());
-            inspectInstanceEvaluation(sde, expressionDef);
-            Object result = expressionDef.evaluate(this.context);
+            Object result = this.context.resolveExpressionRef(sde.getExpression()).evaluate(this.context);
 
             // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
+            checkForInstanceResource(sde);
             clearEvaluatedResources();
         }
+    }
+
+    // id the result is not contained in evaluatedResources then it is supposed to be instance resource
+    private void checkForInstanceResource(SdeDef sde) {
+        boolean matched = false;
+        for (Object obj : sde.getValues()) {
+            System.out.println(obj);
+            if (context.getEvaluatedResources() != null) {
+                if (context.getEvaluatedResources().contains(obj)) {
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        sde.setIsInstanceExpression(!matched);
     }
 
     // consider more complex expression in future

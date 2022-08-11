@@ -436,11 +436,10 @@ public class MeasureEvaluator {
         }
     }
 
-    // id the result is not contained in evaluatedResources then it is supposed to be instance resource
+    // if the result is not contained in evaluatedResources then it is supposed to be instance resource
     private void checkForInstanceResource(SdeDef sde) {
         boolean matched = false;
         for (Object obj : sde.getValues()) {
-            System.out.println(obj);
             if (context.getEvaluatedResources() != null) {
                 if (context.getEvaluatedResources().contains(obj)) {
                     matched = true;

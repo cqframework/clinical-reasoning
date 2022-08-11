@@ -55,6 +55,20 @@
             <artifactId>quick</artifactId>
             <version>${cql-translator.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir</artifactId>
+            <version>${cql-translator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>fhir-r4</artifactId>
+            <version>${cql-translator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm-fhir</artifactId>
+            <version>${cql-translator.version}</version>
+        </dependency>
     </dependencies>
 </project>

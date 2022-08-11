@@ -24,7 +24,6 @@ import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
-import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -425,21 +424,27 @@ public class MeasureEvaluator {
 
     protected void evaluateSdes(List<SdeDef> sdes) {
         for (SdeDef sde : sdes) {
-            ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.getExpression());
-            inspectInstanceEvaluation(sde, expressionDef);
-            Object result = expressionDef.evaluate(this.context);
+            Object result = this.context.resolveExpressionRef(sde.getExpression()).evaluate(this.context);
 
             // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
+            checkForInstanceResource(sde);
             clearEvaluatedResources();
         }
     }
 
-    // consider more complex expression in future
-    private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
-        if (expressionDef.getExpression().getClass() == InstanceEvaluator.class) {
-            sdeDef.setIsInstanceExpression(true);
+    // if the result is not contained in evaluatedResources then it is supposed to be instance resource
+    private void checkForInstanceResource(SdeDef sde) {
+        boolean matched = false;
+        for (Object obj : sde.getValues()) {
+            if (context.getEvaluatedResources() != null) {
+                if (context.getEvaluatedResources().contains(obj)) {
+                    matched = true;
+                    break;
+                }
+            }
         }
+        sde.setIsInstanceExpression(!matched);
     }
 
     protected void evaluateStratifiers(String subjectId, List<StratifierDef> stratifierDefs) {

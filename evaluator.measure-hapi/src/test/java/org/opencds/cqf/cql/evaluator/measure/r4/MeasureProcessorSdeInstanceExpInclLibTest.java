@@ -3,7 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class MeasureProcessorSdeInstanceExpInclLibTest extends BaseMeasureProcessorTest {
     public MeasureProcessorSdeInstanceExpInclLibTest() {
@@ -18,6 +18,6 @@ public class MeasureProcessorSdeInstanceExpInclLibTest extends BaseMeasureProces
                 "Patient/DM1-patient-1", null, null,
                 endpoint, endpoint, endpoint, null);
 
-        assertNotNull(report);
+        assertEquals(3, report.getContained().size());
     }
 }

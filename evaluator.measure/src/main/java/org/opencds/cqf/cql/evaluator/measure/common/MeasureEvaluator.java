@@ -18,12 +18,15 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.elm.execution.Expression;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
 import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
+import org.opencds.cqf.cql.engine.elm.execution.ExpressionRefEvaluator;
+import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -424,27 +427,34 @@ public class MeasureEvaluator {
 
     protected void evaluateSdes(List<SdeDef> sdes) {
         for (SdeDef sde : sdes) {
-            Object result = this.context.resolveExpressionRef(sde.getExpression()).evaluate(this.context);
+            ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.getExpression());
+            inspectInstanceEvaluation(sde, expressionDef);
+            Object result = expressionDef.evaluate(this.context);
 
             // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
-            checkForInstanceResource(sde);
             clearEvaluatedResources();
         }
     }
 
-    // if the result is not contained in evaluatedResources then it is supposed to be instance resource
-    private void checkForInstanceResource(SdeDef sde) {
-        boolean matched = false;
-        for (Object obj : sde.getValues()) {
-            if (context.getEvaluatedResources() != null) {
-                if (context.getEvaluatedResources().contains(obj)) {
-                    matched = true;
-                    break;
-                }
-            }
+    // consider more complex expression in future
+    private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
+        Expression expression = expressionDef.getExpression();
+        if (expression.getClass() == InstanceEvaluator.class) {
+            sdeDef.setIsInstanceExpression(true);
+        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
+                ((ExpressionRefEvaluator) expression).getLibraryName() != null) {
+            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
+            context.enterLibrary(expressionRef.getLibraryName());
+            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
+            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
+            context.exitLibrary(true);
+        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
+                ((ExpressionRefEvaluator) expression).getLibraryName() == null) {
+            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
+            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
+            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
         }
-        sde.setIsInstanceExpression(!matched);
     }
 
     protected void evaluateStratifiers(String subjectId, List<StratifierDef> stratifierDefs) {

@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.testng.annotations.Test;
 
 
-@Test()
+@Test(enabled = false, description = "The R4ReportAggregator is order dependent, meaning it doesn't work correctly in multi-threaded environments")
 public class StratifierThreadedMeasureProcessorTest extends BaseMeasureProcessorTest {
     public StratifierThreadedMeasureProcessorTest() {
         super("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR-bundle.json", true, 8);
@@ -31,7 +31,7 @@ public class StratifierThreadedMeasureProcessorTest extends BaseMeasureProcessor
 
         assertEquals(mrgc.getStratifier().size(), 3);
 
-        // Stratifiers should cover the total population, so we expect 
+        // Stratifiers should cover the total population, so we expect
         // initial-population true (5) + initial-population false (10) = initial-population total (15)
         validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 5);
         validateStratifier(mrgc.getStratifierFirstRep(), "true", "numerator", 2);

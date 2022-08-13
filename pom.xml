@@ -29,8 +29,7 @@
         <guava.version>31.0.1-jre</guava.version>
     </properties>
     <modules>
-        <!--These 3 modules are simply group dependencies-->
-        <module>evaluator.cql-deps</module>
+        <!--These 2 modules simply group dependencies-->
         <module>evaluator.jaxb-deps</module>
         <module>evaluator.jackson-deps</module>
 

@@ -18,12 +18,15 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.elm.execution.Expression;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
 import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
+import org.opencds.cqf.cql.engine.elm.execution.ExpressionRefEvaluator;
+import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -184,7 +187,11 @@ public class MeasureEvaluator {
                 outEvaluatedResources.add(o);
             }
         }
+        clearEvaluatedResources();
+    }
 
+    // reset evaluated resources followed by a context evaluation
+    private void clearEvaluatedResources() {
         this.context.clearEvaluatedResources();
     }
 
@@ -258,7 +265,9 @@ public class MeasureEvaluator {
 
         if (result instanceof Boolean) {
             if ((Boolean.TRUE.equals(result))) {
-                return Collections.singletonList(this.context.resolveExpressionRef(subjectType).evaluate(this.context));
+                Object booleanResult = this.context.resolveExpressionRef(subjectType).evaluate(this.context);
+                clearEvaluatedResources();
+                return Collections.singletonList(booleanResult);
             } else {
                 return Collections.emptyList();
             }
@@ -418,10 +427,33 @@ public class MeasureEvaluator {
 
     protected void evaluateSdes(List<SdeDef> sdes) {
         for (SdeDef sde : sdes) {
-            Object result = this.context.resolveExpressionRef(sde.getExpression()).evaluate(this.context);
+            ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.getExpression());
+            inspectInstanceEvaluation(sde, expressionDef);
+            Object result = expressionDef.evaluate(this.context);
 
             // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
+            clearEvaluatedResources();
+        }
+    }
+
+    // consider more complex expression in future
+    private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
+        Expression expression = expressionDef.getExpression();
+        if (expression.getClass() == InstanceEvaluator.class) {
+            sdeDef.setIsInstanceExpression(true);
+        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
+                ((ExpressionRefEvaluator) expression).getLibraryName() != null) {
+            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
+            context.enterLibrary(expressionRef.getLibraryName());
+            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
+            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
+            context.exitLibrary(true);
+        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
+                ((ExpressionRefEvaluator) expression).getLibraryName() == null) {
+            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
+            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
+            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
         }
     }
 
@@ -445,6 +477,8 @@ public class MeasureEvaluator {
             if (result != null) {
                 sd.getSubjectValues().put(subjectId, result);
             }
+
+            clearEvaluatedResources();
         }
     }
 

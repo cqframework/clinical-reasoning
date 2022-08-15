@@ -1,9 +1,9 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import static org.testng.AssertJUnit.assertEquals;
+
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
-
-import static org.testng.AssertJUnit.assertEquals;
 
 public class MeasureProcessorSdeInstanceExpInclLibTest extends BaseMeasureProcessorTest {
     public MeasureProcessorSdeInstanceExpInclLibTest() {

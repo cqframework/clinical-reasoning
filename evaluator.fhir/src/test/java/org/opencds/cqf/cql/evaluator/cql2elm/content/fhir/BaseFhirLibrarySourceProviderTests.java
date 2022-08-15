@@ -9,9 +9,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentType;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -20,9 +20,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
-public class BaseFhirLibraryContentProviderTests {
+public class BaseFhirLibrarySourceProviderTests {
 
-    private static BaseFhirLibraryContentProvider testFhirLibraryContentProvider;
+    private static BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider;
     private static FhirContext fhirContext;
     private static IParser parser;
 
@@ -31,12 +31,12 @@ public class BaseFhirLibraryContentProviderTests {
         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         parser = fhirContext.newJsonParser();
 
-        testFhirLibraryContentProvider = new BaseFhirLibraryContentProvider(new AdapterFactory()) {
+        testFhirLibrarySourceProvider = new BaseFhirLibrarySourceProvider(new AdapterFactory()) {
             @Override
             public IBaseResource getLibrary(VersionedIdentifier versionedIdentifier) {
                 String name = versionedIdentifier.getId();
 
-                InputStream libraryStream = BaseFhirLibraryContentProviderTests.class
+                InputStream libraryStream = BaseFhirLibrarySourceProviderTests.class
                         .getResourceAsStream(name + ".json");
 
                 return parser.parseResource(new InputStreamReader(libraryStream));
@@ -51,7 +51,7 @@ public class BaseFhirLibraryContentProviderTests {
 
     private String getContent(String libraryName, LibraryContentType libraryContentType) {
         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId(libraryName);
-        InputStream stream = testFhirLibraryContentProvider.getLibraryContent(libraryIdentifier, libraryContentType);
+        InputStream stream = testFhirLibrarySourceProvider.getLibraryContent(libraryIdentifier, libraryContentType);
         if (stream == null) {
             return null;
         }
@@ -68,17 +68,14 @@ public class BaseFhirLibraryContentProviderTests {
         actual = this.getContent(libraryName, LibraryContentType.JSON);
         assertEquals(actual, "JSON");
 
-        actual = this.getContent(libraryName, LibraryContentType.JXSON);
-        assertEquals(actual, "JSON");
-
         actual = this.getContent(libraryName, LibraryContentType.XML);
         assertEquals(actual, "XML");
     }
 
-    @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void coffeeContentThrowsException() {
+    public void coffeeContentIsNull() {
         String libraryName = "AllContent";
-        this.getContent(libraryName, LibraryContentType.COFFEE);
+        String content = this.getContent(libraryName, LibraryContentType.COFFEE);
+        assertNull(content);
     }
 
     @Test
@@ -101,7 +98,7 @@ public class BaseFhirLibraryContentProviderTests {
     @Test
     public void getSourceReturnsCql() {
         String actual = this.readToString(
-                testFhirLibraryContentProvider.getLibrarySource(new VersionedIdentifier().withId("AllContent")));
+                testFhirLibrarySourceProvider.getLibrarySource(new VersionedIdentifier().withId("AllContent")));
         assertEquals(actual, "CQL");
     }
 }

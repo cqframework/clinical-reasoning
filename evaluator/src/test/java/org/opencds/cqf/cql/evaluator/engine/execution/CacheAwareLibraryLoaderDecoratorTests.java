@@ -22,7 +22,7 @@
 // import org.testng.annotations.Test;
 // import org.mockito.Mockito;
 // import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-// import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibraryContentProvider;
+// import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibrarySourceProvider;
 // import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 
 // import ca.uhn.fhir.context.FhirContext;
@@ -45,7 +45,7 @@
 //     }
 
 //     private TranslatorOptionAwareLibraryLoader createLibraryLoader(CqlTranslatorOptions translatorOptions) {
-//         BaseFhirLibraryContentProvider testFhirLibraryContentProvider = new BaseFhirLibraryContentProvider(
+//         BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider = new BaseFhirLibrarySourceProvider(
 //                 new AdapterFactory()) {
 //             @Override
 //             public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
@@ -58,7 +58,7 @@
 //             }
 //         };
 
-//         return new TranslatingLibraryLoader(modelManger, Collections.singletonList(testFhirLibraryContentProvider),
+//         return new TranslatingLibraryLoader(modelManger, Collections.singletonList(testFhirLibrarySourceProvider),
 //                 translatorOptions);
 //     }
 

@@ -16,16 +16,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleUtil;
 
 /**
- * This class implements the cql-translator LibraryContentProvider API, using a Bundle
+ * This class implements the cql-translator LibrarySourceProvider API, using a Bundle
  * containing Library Resources as a source for the CQL content.
  */
-public class BundleFhirLibraryContentProvider extends BaseFhirLibraryContentProvider {
+public class BundleFhirLibrarySourceProvider extends BaseFhirLibrarySourceProvider {
 
     private IBaseBundle bundle;
     private FhirContext fhirContext;
     private LibraryVersionSelector libraryVersionSelector;
 
-    public BundleFhirLibraryContentProvider(FhirContext fhirContext, IBaseBundle bundle, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+    public BundleFhirLibrarySourceProvider(FhirContext fhirContext, IBaseBundle bundle, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
         super(adapterFactory);
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.bundle = requireNonNull(bundle, "bundle can not be null");
@@ -53,11 +53,11 @@ public class BundleFhirLibraryContentProvider extends BaseFhirLibraryContentProv
         }
 
         Collection<IBaseResource> libraries = resources.stream().map(x -> (IBaseResource)x).collect(Collectors.toList());
-        
+
         if (libraries == null || libraries.isEmpty()) {
             return null;
         }
-        
+
         return this.libraryVersionSelector.select(libraryIdentifier, libraries);
     }
 }

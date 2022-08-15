@@ -10,6 +10,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -21,10 +22,9 @@ import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
-import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -36,7 +36,7 @@ public class LibraryProcessor {
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
-    protected LibraryContentProviderFactory libraryContentProviderFactory;
+    protected LibrarySourceProviderFactory librarySourceProviderFactory;
     protected DataProviderFactory dataProviderFactory;
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected EndpointConverter endpointConverter;
@@ -46,14 +46,14 @@ public class LibraryProcessor {
 
     @Inject
     public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
-            LibraryContentProviderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
+            LibrarySourceProviderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
             TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
             ModelResolverFactory fhirModelResolverFactory,
             Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
-        this.libraryContentProviderFactory = requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
+        this.librarySourceProviderFactory = requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
         this.dataProviderFactory = requireNonNull(dataProviderFactory, "dataProviderFactory can not be null");
         this.terminologyProviderFactory = requireNonNull(terminologyProviderFactory,
                 "terminologyProviderFactory can not be null");
@@ -70,7 +70,7 @@ public class LibraryProcessor {
     /**
      * The function evaluates a FHIR library by the Canonical Url and returns a
      * Parameters resource that contains the evaluation result
-     * 
+     *
      * @param url                 the url of the Library to evaluate
      * @param patientId           the patient Id to use for evaluation, if
      *                            applicable
@@ -96,7 +96,7 @@ public class LibraryProcessor {
     /**
      * The function evaluates a FHIR library by Id and returns a Parameters resource
      * that contains the evaluation result
-     * 
+     *
      * @param id                  the Id of the Library to evaluate
      * @param patientId           the patient Id to use for evaluation, if
      *                            applicable
@@ -122,7 +122,7 @@ public class LibraryProcessor {
     /**
      * The function evaluates a CQL / FHIR library by VersionedIdentifier and
      * returns a Parameters resource that contains the evaluation result
-     * 
+     *
      * @param id                  the VersionedIdentifier of the Library to evaluate
      * @param patientId           the patient Id to use for evaluation, if
      *                            applicable
@@ -143,7 +143,7 @@ public class LibraryProcessor {
 
         this.cqlEvaluatorBuilder = this.cqlEvaluatorBuilderSupplier.get();
 
-        this.addLibraryContentProviders(libraryEndpoint, additionalData);
+        this.addLibrarySourceProviders(libraryEndpoint, additionalData);
         this.addTerminologyProviders(terminologyEndpoint, additionalData);
         this.addDataProviders(dataEndpoint, additionalData);
 
@@ -158,16 +158,16 @@ public class LibraryProcessor {
         return libraryEvaluator.evaluate(id, contextParameter, parameters, expressions);
     }
 
-    protected void addLibraryContentProviders(IBaseResource libraryEndpoint, IBaseBundle additionalData) {
+    protected void addLibrarySourceProviders(IBaseResource libraryEndpoint, IBaseBundle additionalData) {
         if (libraryEndpoint != null) {
-            LibraryContentProvider libraryContentProvider = this.libraryContentProviderFactory
+            LibrarySourceProvider librarySourceProvider = this.librarySourceProviderFactory
                     .create(endpointConverter.getEndpointInfo(libraryEndpoint));
-            this.cqlEvaluatorBuilder.withLibraryContentProvider(libraryContentProvider);
+            this.cqlEvaluatorBuilder.withLibrarySourceProvider(librarySourceProvider);
         }
 
         if (additionalData != null) {
             this.cqlEvaluatorBuilder
-                    .withLibraryContentProvider(this.libraryContentProviderFactory.create(additionalData));
+                    .withLibrarySourceProvider(this.librarySourceProviderFactory.create(additionalData));
         }
     }
 
@@ -217,7 +217,7 @@ public class LibraryProcessor {
             throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 
-        @SuppressWarnings("unused") 
+        @SuppressWarnings("unused")
         String cqlNamespaceUrl = urlSplit[0];
 
         String cqlName = urlSplit[1];

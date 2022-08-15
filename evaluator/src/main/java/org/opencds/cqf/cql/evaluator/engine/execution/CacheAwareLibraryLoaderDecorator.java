@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -56,11 +55,11 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
     }
 
     protected Boolean translatorOptionsMatch(Library library) {
-        EnumSet<CqlTranslator.Options> options = TranslatorOptionsUtil.getTranslatorOptions(library);
+        EnumSet<CqlTranslatorOptions.Options> options = TranslatorOptionsUtil.getTranslatorOptions(library);
         if (options == null) {
             return false;
         }
-        
+
         return options.equals(this.getCqlTranslatorOptions().getOptions());
     }
 

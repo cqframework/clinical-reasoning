@@ -3,12 +3,11 @@ package org.opencds.cqf.cql.evaluator.fhir.adapter.r5;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.Attachment;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.Library;
 
 class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter
 {
@@ -75,7 +74,7 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.cql.eval
     }
 
     @Override
-    public Boolean hasContent() {
+    public boolean hasContent() {
         return this.getLibrary().hasContent();
     }
 

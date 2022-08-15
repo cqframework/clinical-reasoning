@@ -3,9 +3,8 @@ package org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Attachment;
-
+import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -75,7 +74,7 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.cql.eval
     }
 
     @Override
-    public Boolean hasContent() {
+    public boolean hasContent() {
         return this.getLibrary().hasContent();
     }
 

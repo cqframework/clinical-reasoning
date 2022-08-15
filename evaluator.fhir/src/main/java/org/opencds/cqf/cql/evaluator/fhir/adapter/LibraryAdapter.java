@@ -29,7 +29,7 @@ public interface LibraryAdapter extends ResourceAdapter {
 
     void setVersion(String version);
 
-    Boolean hasContent();
+    boolean hasContent();
 
     List<ICompositeType> getContent();
 

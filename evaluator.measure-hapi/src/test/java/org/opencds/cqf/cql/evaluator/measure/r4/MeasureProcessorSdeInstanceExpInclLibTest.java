@@ -1,16 +1,16 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import static org.testng.AssertJUnit.assertEquals;
+
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
-
-import static org.testng.AssertJUnit.assertEquals;
 
 public class MeasureProcessorSdeInstanceExpInclLibTest extends BaseMeasureProcessorTest {
     public MeasureProcessorSdeInstanceExpInclLibTest() {
         super("ContentBundleCustom.json");
     }
 
-    @Test
+    @Test(enabled = false, description = "SDEs not fully baked")
     public void measure_eval_non_retrieve_resource_incl_lib_ref() {
         MeasureReport report = this.measureProcessor.evaluateMeasure(
                 "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",

@@ -12,7 +12,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
+import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
@@ -24,8 +26,6 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
@@ -53,7 +53,7 @@ public class CqlEvaluatorBuilder {
 
     private static Map<VersionedIdentifier, Model> globalModelCache = new HashMap<>();
 
-    private List<LibraryContentProvider> libraryContentProviders;
+    private List<LibrarySourceProvider> librarySourceProviders;
 
     private List<TerminologyProvider> terminologyProviders;
 
@@ -72,7 +72,7 @@ public class CqlEvaluatorBuilder {
      */
     @Inject
     public CqlEvaluatorBuilder() {
-        this.libraryContentProviders = new ArrayList<>();
+        this.librarySourceProviders = new ArrayList<>();
         this.terminologyProviders = new ArrayList<>();
         this.dataProviderParts = new HashMap<>();
         this.libraryCache = new HashMap<>();
@@ -81,18 +81,18 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Adds a LibraryContentProvider to the list of LibraryContentProviders that may
+     * Adds a LibrarySourceProvider to the list of LibrarySourceProviders that may
      * be used during evaluation. This function uses FILO semantics. The first
-     * LibraryContentProvider added is the last to be searched for a Library.
-     * 
-     * @param libraryContentProvider the libraryContentProvider to add to the
+     * LibrarySourceProvider added is the last to be searched for a Library.
+     *
+     * @param librarySourceProvider the librarySourceProvider to add to the
      *                               evaluation context
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withLibraryContentProvider(LibraryContentProvider libraryContentProvider) {
-        requireNonNull(libraryContentProvider, "libraryLoader can not be null");
+    public CqlEvaluatorBuilder withLibrarySourceProvider(LibrarySourceProvider librarySourceProvider) {
+        requireNonNull(librarySourceProvider, "libraryLoader can not be null");
 
-        this.libraryContentProviders.add(libraryContentProvider);
+        this.librarySourceProviders.add(librarySourceProvider);
         return this;
     }
 
@@ -100,7 +100,7 @@ public class CqlEvaluatorBuilder {
      * Adds a TerminologyProvider to the list of TerminologyProviders that may be
      * used during evaluation. This function uses FILO semantics. The first
      * TerminologyProvider added is the last to be used for Terminology.
-     * 
+     *
      * @param terminologyProvider the TerminologyProvider to add to the evaluation
      *                            context
      * @return this CqlEvaluatorBuilder
@@ -115,7 +115,7 @@ public class CqlEvaluatorBuilder {
     /**
      * Adds a ModelResolver for a given model to the evaluation context. There may
      * only be one ModelResolver for a given model.
-     * 
+     *
      * @param model         the modelUri
      * @param modelResolver the resolver to use
      * @return this CqlEvaluatorBuilder
@@ -141,7 +141,7 @@ public class CqlEvaluatorBuilder {
      * Adds a RetrieveProvider for a given model to the evaluation context. This
      * function uses FILO semantics. The first RetrieveProvider added is the last to
      * be used for retrieves.
-     * 
+     *
      * @param model            the modelUri
      * @param retrieveProvider the provider to use
      * @return this CqlEvaluatorBuilder
@@ -166,7 +166,7 @@ public class CqlEvaluatorBuilder {
      * context. There may only be one ModelResolver for a given model. This function
      * uses FILO semantics. The first RetrieveProvider added is the last to be used
      * for retrieves.
-     * 
+     *
      * @param model            the modelUri
      * @param modelResolver    the resolver to use
      * @param retrieveProvider the provider to use
@@ -188,7 +188,7 @@ public class CqlEvaluatorBuilder {
      * context from the supplied DataProviderComponents  There may only be one ModelResolver for a given model. This function
      * uses FILO semantics. The first RetrieveProvider added is the last to be used
      * for retrieves.
-     * 
+     *
      * @param dataProviderComponents the model with a uri, ModelResolver, and RetrieveProvider
      * @return this CqlEvaluatorBuilder
      */
@@ -201,7 +201,7 @@ public class CqlEvaluatorBuilder {
 
     /**
      * Sets the CqlOptions to use
-     * 
+     *
      * @param cqlOptions the cql options to use
      * @return this CqlEvaluatorBuilder
      */
@@ -214,7 +214,7 @@ public class CqlEvaluatorBuilder {
      * Set the Library cache to use when loading CQL libraries. A cached library
      * will be verified to make sure versions match and that it was translated with
      * the same CQL options.
-     * 
+     *
      * @param libraryCache the library cache
      * @return this CqlEvaluatorBuilder
      */
@@ -229,7 +229,7 @@ public class CqlEvaluatorBuilder {
      * applied to all registered RetrieveProviders. If you want to configure each
      * individually do so directly on the RetrieveProvider prior to registering it
      * with the builder.
-     * 
+     *
      * @param retrieveProviderConfig the retrieveProviderConfig to use
      * @return this CqlEvaluatorBuilder
      */
@@ -270,13 +270,13 @@ public class CqlEvaluatorBuilder {
     }
 
     private LibraryLoader buildLibraryLoader() {
-        Collections.reverse(this.libraryContentProviders);
+        Collections.reverse(this.librarySourceProviders);
         if (this.cqlOptions.useEmbeddedLibraries()) {
-            this.libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+            this.librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
-        
+
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlOptions.getCqlTranslatorOptions());
+                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions());
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
         }
@@ -315,11 +315,11 @@ public class CqlEvaluatorBuilder {
     /**
      * Builds a CqlEvaluator that uses all content, data, terminology sources
      * supplied, and has the appropriate configuration applied.
-     * 
+     *
      * NOTE: The CqlEvaluator created by this default implementation is meant to be
      * short-lived (e.g. for the duration of a request). It won't pick up changes to
      * underlying content.
-     * 
+     *
      * @return a CqlEvaluator
      */
     public CqlEvaluator build() {

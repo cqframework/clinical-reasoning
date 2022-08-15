@@ -14,10 +14,10 @@ import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactor
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirRestRetrieveProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibraryContentProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibraryContentProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.FhirRestLibraryContentProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.FhirRestLibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.FhirFileTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.FhirRestTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory;
@@ -41,8 +41,8 @@ public class BuilderModule {
     @Singleton
     ModelResolverFactory fhirModelResolverFactory(FhirModelResolverFactory fhirModelResolverFactory) {
         return fhirModelResolverFactory;
-    }   
-      
+    }
+
 
     @Provides
     @Singleton
@@ -53,8 +53,8 @@ public class BuilderModule {
     @Provides
     @ElementsIntoSet
     @Singleton
-    Set<TypedLibraryContentProviderFactory> typedLibraryContentProviderFactories(CqlFileLibraryContentProviderFactory cqlFileLibraryContentProviderFactory, FhirFileLibraryContentProviderFactory fhirFileLibraryContentProviderFactory, FhirRestLibraryContentProviderFactory fhirRestLibraryContentProviderFactory) {
-        return new HashSet<>(Arrays.asList(cqlFileLibraryContentProviderFactory, fhirFileLibraryContentProviderFactory, fhirRestLibraryContentProviderFactory));
+    Set<TypedLibrarySourceProviderFactory> typedLibrarySourceProviderFactories(CqlFileLibrarySourceProviderFactory cqlFileLibrarySourceProviderFactory, FhirFileLibrarySourceProviderFactory fhirFileLibrarySourceProviderFactory, FhirRestLibrarySourceProviderFactory fhirRestLibrarySourceProviderFactory) {
+        return new HashSet<>(Arrays.asList(cqlFileLibrarySourceProviderFactory, fhirFileLibrarySourceProviderFactory, fhirRestLibrarySourceProviderFactory));
     }
 
     @Provides

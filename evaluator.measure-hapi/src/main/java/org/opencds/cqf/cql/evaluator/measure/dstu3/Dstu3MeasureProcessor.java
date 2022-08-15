@@ -1,18 +1,20 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
+import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -36,12 +38,10 @@ import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.FhirDalFactory;
-import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.EmbeddedFhirLibraryContentProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
@@ -68,7 +68,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected DataProviderFactory dataProviderFactory;
     protected EndpointConverter endpointConverter;
-    protected LibraryContentProviderFactory libraryContentProviderFactory;
+    protected LibrarySourceProviderFactory librarySourceProviderFactory;
     protected FhirDalFactory fhirDalFactory;
 
     private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
@@ -80,32 +80,32 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
     // TODO: This should all be collapsed down to FhirDal
-    protected LibraryContentProvider localLibraryContentProvider;
+    protected LibrarySourceProvider localLibrarySourceProvider;
     protected DataProvider localDataProvider;
     protected TerminologyProvider localTerminologyProvider;
     protected FhirDal localFhirDal;
 
     @Inject
     public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
-            DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
+            DataProviderFactory dataProviderFactory, LibrarySourceProviderFactory librarySourceProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
-        this(terminologyProviderFactory, dataProviderFactory, libraryContentProviderFactory, fhirDalFactory,
+        this(terminologyProviderFactory, dataProviderFactory, librarySourceProviderFactory, fhirDalFactory,
                 endpointConverter, null, null, null, null, null, null, null);
     }
 
     public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
-            DataProviderFactory dataProviderFactory, LibraryContentProviderFactory libraryContentProviderFactory,
+            DataProviderFactory dataProviderFactory, LibrarySourceProviderFactory librarySourceProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
-            TerminologyProvider localTerminologyProvider, LibraryContentProvider localLibraryContentProvider,
+            TerminologyProvider localTerminologyProvider, LibrarySourceProvider localLibrarySourceProvider,
             DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvaluationOptions measureEvaluationOptions, CqlOptions cqlOptions, Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
-        this.libraryContentProviderFactory = libraryContentProviderFactory;
+        this.librarySourceProviderFactory = librarySourceProviderFactory;
         this.endpointConverter = endpointConverter;
         this.fhirDalFactory = fhirDalFactory;
 
         this.localTerminologyProvider = localTerminologyProvider;
-        this.localLibraryContentProvider = localLibraryContentProvider;
+        this.localLibrarySourceProvider = localLibrarySourceProvider;
         this.localFhirDal = localFhirDal;
         this.localDataProvider = localDataProvider;
 
@@ -121,8 +121,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     }
 
     public Dstu3MeasureProcessor(TerminologyProvider localTerminologyProvider,
-            LibraryContentProvider localLibraryContentProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
-        this(null, null, null, null, null, localTerminologyProvider, localLibraryContentProvider, localDataProvider,
+            LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
+        this(null, null, null, null, null, localTerminologyProvider, localLibrarySourceProvider, localDataProvider,
                 localFhirDal, null, null, null);
     }
 
@@ -245,15 +245,15 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         Reference libraryUrl = measure.getLibrary().get(0);
 
         org.hl7.fhir.dstu3.model.Library primaryLibrary = (org.hl7.fhir.dstu3.model.Library)this.localFhirDal.read(libraryUrl.getReferenceElement());
-        LibraryContentProvider libraryContentProvider = contentEndpoint != null
-                ? this.libraryContentProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
-                : localLibraryContentProvider;
+        LibrarySourceProvider librarySourceProvider = contentEndpoint != null
+                ? this.librarySourceProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
+                : localLibrarySourceProvider;
 
-        if (libraryContentProvider == null) {
-            throw new IllegalStateException("a libraryContentProvider was not provided and one could not be constructed");
+        if (librarySourceProvider == null) {
+            throw new IllegalStateException("a librarySourceProvider was not provided and one could not be constructed");
         }
 
-        LibraryLoader libraryLoader = this.buildLibraryLoader(libraryContentProvider);
+        LibraryLoader libraryLoader = this.buildLibraryLoader(librarySourceProvider);
 
         Library library = libraryLoader.load(
                 new VersionedIdentifier().withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
@@ -282,15 +282,15 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     }
 
     // TODO: This is duplicate logic from the evaluator builder
-    private LibraryLoader buildLibraryLoader(LibraryContentProvider libraryContentProvider) {
-        List<LibraryContentProvider> libraryContentProviders = new ArrayList<>();
-        libraryContentProviders.add(libraryContentProvider);
+    private LibraryLoader buildLibraryLoader(LibrarySourceProvider librarySourceProvider) {
+        List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
+        librarySourceProviders.add(librarySourceProvider);
         if (this.cqlOptions.useEmbeddedLibraries()) {
-            libraryContentProviders.add(new EmbeddedFhirLibraryContentProvider());
+            librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), libraryContentProviders, this.cqlOptions.getCqlTranslatorOptions());
+                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions());
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);

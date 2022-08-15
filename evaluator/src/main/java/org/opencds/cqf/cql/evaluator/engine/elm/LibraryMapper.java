@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.engine.elm;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.mapstruct.Mapper;
@@ -59,27 +60,42 @@ public interface LibraryMapper {
     }
 
     @Mapping(target = "annotation")
-    default List<Object> mapAnnotations(List<Object> annotations) {
+    default List<org.cqframework.cql.elm.execution.CqlToElmBase> map(
+            List<org.hl7.cql_annotations.r1.CqlToElmBase> annotations) {
         if (annotations == null) {
             return null;
         }
 
-        List<Object> list = new ArrayList<Object>(annotations.size());
-        for (Object object : annotations) {
-
-            list.add(mapAnnotation(object));
+        if (annotations.isEmpty()) {
+            return Collections.emptyList();
         }
 
-        return list;
+        List<org.cqframework.cql.elm.execution.CqlToElmBase> engineAnnotations = new ArrayList<>();
+        for (org.hl7.cql_annotations.r1.CqlToElmBase a : annotations) {
+            if (a instanceof org.hl7.cql_annotations.r1.CqlToElmError) {
+                engineAnnotations.add(map((org.hl7.cql_annotations.r1.CqlToElmError) a));
+            } else if (a instanceof org.hl7.cql_annotations.r1.CqlToElmInfo) {
+                engineAnnotations.add(map((org.hl7.cql_annotations.r1.CqlToElmInfo) a));
+            } else if (a instanceof org.hl7.cql_annotations.r1.Locator) {
+                engineAnnotations.add(map((org.hl7.cql_annotations.r1.Locator) a));
+            } else if (a instanceof org.hl7.cql_annotations.r1.Annotation) {
+                engineAnnotations.add(map((org.hl7.cql_annotations.r1.Annotation) a));
+            } else {
+                throw new IllegalArgumentException(
+                        String.format("Tried to map unknown Annotation type: %s", a.getClass().getSimpleName()));
+            }
+        }
+
+        return engineAnnotations;
     }
 
-    // TODO: Once the annotations are actually present
-    // in the elm, go through and map them appropriately
-    // see: https://github.com/DBCG/cql_engine/issues/436
-    @ExcludeFromMapping
-    default Object mapAnnotation(Object annotation) {
-        return annotation;
-    }
+    org.cqframework.cql.elm.execution.CqlToElmError map(org.hl7.cql_annotations.r1.CqlToElmError element);
+
+    org.cqframework.cql.elm.execution.CqlToElmInfo map(org.hl7.cql_annotations.r1.CqlToElmInfo element);
+
+    org.cqframework.cql.elm.execution.Locator map(org.hl7.cql_annotations.r1.Locator element);
+
+    org.cqframework.cql.elm.execution.Annotation map(org.hl7.cql_annotations.r1.Annotation element);
 
     @Mapping(target = "valueset", qualifiedByName = { "ExpressionToValueSetRef" })
     org.opencds.cqf.cql.engine.elm.execution.InValueSetEvaluator map(org.hl7.elm.r1.InValueSet element);

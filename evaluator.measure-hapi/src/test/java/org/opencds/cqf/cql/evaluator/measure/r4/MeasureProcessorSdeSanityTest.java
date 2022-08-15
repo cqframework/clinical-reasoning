@@ -1,18 +1,19 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.HashSet;
 
-import static org.testng.Assert.*;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.testng.annotations.Test;
 
 public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
     public MeasureProcessorSdeSanityTest() {
         super("ContentBundleCustom.json");
     }
 
-    @Test
+    @Test(enabled = false, description = "SDEs not fully baked")
     public void measure_eval_unique_extension_list() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
                 "2020-01-01", "2022-06-29", "subject",

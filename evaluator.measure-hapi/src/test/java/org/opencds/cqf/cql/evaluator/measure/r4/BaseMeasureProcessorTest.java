@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -17,16 +18,15 @@ import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.FhirDalFactory;
-import org.opencds.cqf.cql.evaluator.builder.LibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.dal.TypedFhirDalFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.TypedRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.TypedLibraryContentProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.TypedLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.TypedTerminologyProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.LibraryContentProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibraryContentProvider;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
@@ -86,17 +86,17 @@ public abstract class BaseMeasureProcessorTest {
 
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
 
-        Set<TypedLibraryContentProviderFactory> libraryContentProviderFactories = new HashSet<TypedLibraryContentProviderFactory>() {
+        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<TypedLibrarySourceProviderFactory>() {
             {
-                add(new TypedLibraryContentProviderFactory() {
+                add(new TypedLibrarySourceProviderFactory() {
                     @Override
                     public String getType() {
                         return Constants.HL7_FHIR_FILES;
                     }
 
                     @Override
-                    public LibraryContentProvider create(String url, List<String> headers) {
-                        return new BundleFhirLibraryContentProvider(fhirContext,
+                    public LibrarySourceProvider create(String url, List<String> headers) {
+                        return new BundleFhirLibrarySourceProvider(fhirContext,
                                 (IBaseBundle) fhirContext.newJsonParser()
                                         .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)),
                                 adapterFactory, libraryVersionSelector);
@@ -111,8 +111,8 @@ public abstract class BaseMeasureProcessorTest {
             }
         };
 
-        LibraryContentProviderFactory libraryContentProviderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibraryContentProviderFactory(
-                fhirContext, adapterFactory, libraryContentProviderFactories, libraryVersionSelector);
+        LibrarySourceProviderFactory librarySourceProviderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
+                fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
             {
                 add(new TypedRetrieveProviderFactory() {
@@ -161,7 +161,7 @@ public abstract class BaseMeasureProcessorTest {
                             public String getType() {
                                 return Constants.HL7_FHIR_FILES;
                             }
-        
+
                             @Override
                             public FhirDal create(String url, List<String> headers) {
                                 return new BundleFhirDal(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
@@ -183,7 +183,7 @@ public abstract class BaseMeasureProcessorTest {
         }
 
         this.measureProcessor = new R4MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
-                libraryContentProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null, null);
+                librarySourceProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null, null);
 
     }
 }

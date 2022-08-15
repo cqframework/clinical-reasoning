@@ -225,24 +225,26 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        HashMap<String, String> codeScore = new HashMap<String, String>();
+        HashMap<String, MeasureReport.MeasureReportGroupPopulationComponent> codeScore = new HashMap<>();
 
         current.getGroupFirstRep().getPopulation().forEach(populationComponent -> {
-            CodeableConcept codeableConcept = populationComponent.getCode();
-            if (StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
-                codeScore.put(codeableConcept.getCodingFirstRep().getCode(), Integer.toString(populationComponent.getCount()));
+            String code = populationComponent.getCode().getCodingFirstRep().getCode();
+            if (StringUtils.isNotBlank(code)) {
+                codeScore.put(code, populationComponent);
             }
         });
 
         carry.getGroupFirstRep().getPopulation().forEach(populationComponent -> {
-            CodeableConcept codeableConcept = populationComponent.getCode();
-            if (StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
-                if (codeScore.get(codeableConcept.getCodingFirstRep().getCode()) != null) {
+            String code = populationComponent.getCode().getCodingFirstRep().getCode();
+            if (StringUtils.isNotBlank(code)) {
+                if (codeScore.get(code) != null) {
                     populationComponent.setCount(populationComponent.getCount() +
-                            Integer.parseInt(codeScore.get(codeableConcept.getCodingFirstRep().getCode())));
+                            codeScore.get(code).getCount());
+                    codeScore.remove(code);
                 }
             }
         });
+        carry.getGroupFirstRep().getPopulation().addAll(codeScore.values());
     }
 
     protected void mergeStratifier(MeasureReport carry, MeasureReport current) {
@@ -251,7 +253,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        HashMap<String, String> codeScore = new HashMap<String, String>();
+        HashMap<String, String> codeScore = new HashMap<>();
 
         AtomicReference<String> stratifierCodeKey = new AtomicReference<>("");
         AtomicReference<String> stratifierStratumKey = new AtomicReference<>("");

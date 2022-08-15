@@ -140,7 +140,7 @@
                             }
                         ]
                     },
-                    "count": 1
+                    "count": 10
                 },
                 {
                     "code": {
@@ -152,7 +152,7 @@
                             }
                         ]
                     },
-                    "count": 0
+                    "count": 5
                 },
                 {
                     "code": {
@@ -164,7 +164,7 @@
                             }
                         ]
                     },
-                    "count": 1
+                    "count": 15
                 },
                 {
                     "code": {
@@ -176,7 +176,19 @@
                             }
                         ]
                     },
-                    "count": 0
+                    "count": 5
+                },
+                {
+                    "code": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                                "code": "denominator-exception",
+                                "display": "Denominator Exception"
+                            }
+                        ]
+                    },
+                    "count": 1
                 }
             ],
             "stratifier": [

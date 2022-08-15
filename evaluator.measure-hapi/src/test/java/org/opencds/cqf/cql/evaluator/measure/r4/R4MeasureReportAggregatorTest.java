@@ -109,19 +109,25 @@ public class R4MeasureReportAggregatorTest {
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
 
         MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
-        MeasureReport.MeasureReportGroupComponent expectedMrgc = actual.getGroup().get(0);
+        MeasureReport.MeasureReportGroupComponent expectedMrgc = expected.getGroup().get(0);
 
-        MeasureValidationUtils.validateGroup(actualMrgc, "initial-population", 2);
-        MeasureValidationUtils.validateGroup(expectedMrgc, "initial-population", 2);
+        MeasureValidationUtils.validateGroup(actualMrgc, "initial-population", 10);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "initial-population", 10);
 
-        MeasureValidationUtils.validateGroup(actualMrgc, "numerator", 1);
-        MeasureValidationUtils.validateGroup(expectedMrgc, "numerator", 1);
+        MeasureValidationUtils.validateGroup(actualMrgc, "numerator", 10);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "numerator", 10);
 
-        MeasureValidationUtils.validateGroup(actualMrgc, "denominator", 2);
-        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator", 2);
+        MeasureValidationUtils.validateGroup(actualMrgc, "numerator-exclusion", 2);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "numerator-exclusion", 2);
 
-        MeasureValidationUtils.validateGroup(actualMrgc, "denominator-exclusion", 0);
-        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator-exclusion", 0);
+        MeasureValidationUtils.validateGroup(actualMrgc, "denominator", 30);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator", 30);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "denominator-exclusion", 10);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator-exclusion", 10);
+
+        MeasureValidationUtils.validateGroup(actualMrgc, "denominator-exception", 1);
+        MeasureValidationUtils.validateGroup(expectedMrgc, "denominator-exception", 1);
 
         MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "initial-population", 400);
         MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "male", "numerator", 150);
@@ -157,10 +163,6 @@ public class R4MeasureReportAggregatorTest {
 
         MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true", "denominator", 8);
         MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true", "denominator", 8);
-
-//        FhirContext fhirContext = FhirContext.forR4();
-//        System.out.println("Resource:"+fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
-
 
     }
 

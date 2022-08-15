@@ -13,7 +13,7 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
         super("ContentBundleCustom.json");
     }
 
-    @Test(enabled = false, description = "SDEs not fully baked")
+    @Test
     public void measure_eval_unique_extension_list() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
                 "2020-01-01", "2022-06-29", "subject",

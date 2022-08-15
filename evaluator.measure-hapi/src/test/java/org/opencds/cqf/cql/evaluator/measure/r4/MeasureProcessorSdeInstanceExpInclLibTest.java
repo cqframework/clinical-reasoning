@@ -10,7 +10,7 @@ public class MeasureProcessorSdeInstanceExpInclLibTest extends BaseMeasureProces
         super("ContentBundleCustom.json");
     }
 
-    @Test(enabled = false, description = "SDEs not fully baked")
+    @Test
     public void measure_eval_non_retrieve_resource_incl_lib_ref() {
         MeasureReport report = this.measureProcessor.evaluateMeasure(
                 "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",

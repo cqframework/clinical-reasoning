@@ -304,7 +304,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 }
 
                 if (stratifierComponent.hasStratum()) {
-                    for (MeasureReport.StratifierGroupComponent stratumComponent : stratifierComponent.getStratum()) {
+                    stratifierComponent.getStratum().forEach(stratumComponent -> {
                         if (stratumComponent.hasValue()) {
                             CodeableConcept value = stratumComponent.getValue();
                             stratifierStratumKey.set(getKeyValue(value));
@@ -332,7 +332,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                                             generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), "")))
                                     .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue())).values());
                         }
-                    }
+                    });
                 }
             }
         });

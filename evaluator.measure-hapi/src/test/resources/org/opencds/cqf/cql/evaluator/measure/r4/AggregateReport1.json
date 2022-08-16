@@ -227,6 +227,16 @@
                                     "code": {
                                         "coding": [
                                             {
+                                                "code": "numerator-exclusion"
+                                            }
+                                        ]
+                                    },
+                                    "count": 10
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
                                                 "code": "denominator"
                                             }
                                         ]

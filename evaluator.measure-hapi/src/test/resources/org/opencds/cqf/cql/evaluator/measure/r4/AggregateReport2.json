@@ -243,6 +243,16 @@
                                         ]
                                     },
                                     "count": 25
+                                },
+                                {
+                                    "code": {
+                                        "coding": [
+                                            {
+                                                "code": "denominator-exception"
+                                            }
+                                        ]
+                                    },
+                                    "count": 25
                                 }
                             ]
                         },

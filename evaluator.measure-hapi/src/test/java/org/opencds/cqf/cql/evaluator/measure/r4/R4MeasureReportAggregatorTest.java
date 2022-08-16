@@ -132,6 +132,8 @@ public class R4MeasureReportAggregatorTest {
         MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "initial-population", 400);
         MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "male", "numerator", 150);
 
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "numerator-exclusion", 10);
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "male", "denominator-exception", 25);
     }
 
     @Test

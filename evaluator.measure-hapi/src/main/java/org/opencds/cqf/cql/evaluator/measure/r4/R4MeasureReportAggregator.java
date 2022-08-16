@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -253,7 +254,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        HashMap<String, String> codeScore = new HashMap<>();
+        HashMap<String, MeasureReport.StratifierGroupPopulationComponent> codeScore = new HashMap<>();
 
         AtomicReference<String> stratifierCodeKey = new AtomicReference<>("");
         AtomicReference<String> stratifierStratumKey = new AtomicReference<>("");
@@ -281,7 +282,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
 
                                     if (stratumPopulationComp.hasCount()) {
                                         codeScore.put(generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get()),
-                                                Integer.toString(stratumPopulationComp.getCount()));
+                                                stratumPopulationComp);
                                     }
                                 }
                             });
@@ -303,7 +304,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 }
 
                 if (stratifierComponent.hasStratum()) {
-                    stratifierComponent.getStratum().forEach(stratumComponent -> {
+                    for (MeasureReport.StratifierGroupComponent stratumComponent : stratifierComponent.getStratum()) {
                         if (stratumComponent.hasValue()) {
                             CodeableConcept value = stratumComponent.getValue();
                             stratifierStratumKey.set(getKeyValue(value));
@@ -319,14 +320,19 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                                         String key = generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get());
                                         if (codeScore.containsKey(key)) {
                                             stratumPopulationComp.setCount(stratumPopulationComp.getCount() +
-                                                    Integer.parseInt(codeScore.get(key)));
+                                                    codeScore.get(key).getCount());
+                                            codeScore.remove(key);
                                         }
                                     }
 
                                 }
                             });
+                            stratumComponent.getPopulation().addAll(codeScore.entrySet()
+                                    .stream().filter(map -> map.getKey().startsWith(
+                                            generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), "")))
+                                    .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue())).values());
                         }
-                    });
+                    }
                 }
             }
         });

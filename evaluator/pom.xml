@@ -23,56 +23,50 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine</artifactId>
-            <version>${cql-engine.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.fhir</artifactId>
-            <version>${cql-engine.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
-            <version>${cql-translator.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm</artifactId>
-            <version>${cql-translator.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model</artifactId>
-            <version>${cql-translator.version}</version>
+        </dependency>
+        <!-- Required for MapStruct Annotations -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+
+        <!-- FHIR, Quick and QDM are not required to compile -->
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>qdm</artifactId>
-            <version>${cql-translator.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>quick</artifactId>
-            <version>${cql-translator.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cqf-fhir</artifactId>
-            <version>${cql-translator.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>fhir-r4</artifactId>
-            <version>${cql-translator.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-fhir</artifactId>
-            <version>${cql-translator.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -110,6 +112,14 @@ public class R4MeasureReportAggregatorTest {
 
         MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
         MeasureReport.MeasureReportGroupComponent expectedMrgc = expected.getGroup().get(0);
+
+        assertTrue(actual.getExtension().stream().anyMatch(item ->
+                item.getUrl().equals("http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData") &&
+                        item.getValue() instanceof Reference &&
+                        ((Reference) item.getValue()).getReference().equals("Encounter/DM1-patient-1-encounter-2") &&
+                        ( item.getValue()).getExtension().size() == 3
+        ));
+
 
         MeasureValidationUtils.validateGroup(actualMrgc, "initial-population", 10);
         MeasureValidationUtils.validateGroup(expectedMrgc, "initial-population", 10);

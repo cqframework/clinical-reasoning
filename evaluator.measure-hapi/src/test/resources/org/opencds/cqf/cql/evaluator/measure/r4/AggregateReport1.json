@@ -92,6 +92,19 @@
             "valueString": "This measure assesses the number of patients who received VTE prophylaxis or have documentation why no VTE prophylaxis was given the day of or the day after hospital admission or surgery end date for surgeries that start the day of or the day after hospital admission"
         },
         {
+            "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",
+            "valueReference": {
+                "extension": [ {
+                    "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+                    "valueString": "SDELastAppointmentDate"
+                }, {
+                    "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+                    "valueString": "SDELastAppointmentFilter"
+                } ],
+                "reference": "Encounter/DM1-patient-1-encounter-2"
+            }
+        },
+        {
             "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
             "valueReference": {
                 "reference": "#sde-observation-sde-ethnicity-coding-2186-5"

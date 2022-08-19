@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
@@ -177,9 +178,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
 
     private void mergeList(ListResource carry, ListResource current) {
         List<String> itemIds = new ArrayList<>();
-        carry.getEntry().forEach(comp -> {
-            itemIds.add(comp.getItem().getReference());
-        });
+        carry.getEntry().forEach(comp -> itemIds.add(comp.getItem().getReference()));
 
         current.getEntry().forEach(comp -> {
             if (!itemIds.contains(comp.getItem().getReference())) {
@@ -193,14 +192,16 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        List<String> extensionDummyIds = new ArrayList<>();
+        Map<String, List<Extension>> extensionMap = new HashMap<>();
 
         carry.getExtension().forEach(extension -> {
             if (extension.hasValue()) {
                 if (extension.getValue() instanceof StringType) {
-                    extensionDummyIds.add(((StringType) extension.getValue()).getValue());
+                    extensionMap.put(generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), ""),
+                            new ArrayList<>());
                 } else if (extension.getValue() instanceof Reference) {
-                    extensionDummyIds.add(((Reference) extension.getValue()).getReference());
+                    extensionMap.put(generateKey(extension.getUrl(), ((Reference) extension.getValue()).getReference(), ""),
+                            extension.getValue().getExtension());
                 }
             }
         });
@@ -208,12 +209,18 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         current.getExtension().forEach(extension -> {
             if (extension.hasValue()) {
                 if (extension.getValue() instanceof StringType) {
-                    if (!extensionDummyIds.contains(((StringType) extension.getValue()).getValue())) {
+                    if (!extensionMap.containsKey(
+                            generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), ""))
+                    ) {
                         carry.getExtension().add(extension);
                     }
                 } else if (extension.getValue() instanceof Reference) {
-                    if (!extensionDummyIds.contains(((Reference) extension.getValue()).getReference())) {
+                    Reference reference = (Reference) extension.getValue();
+                    String key = generateKey(extension.getUrl(), reference.getReference(), "");
+                    if (!extensionMap.containsKey(key)) {
                         carry.getExtension().add(extension);
+                    } else {
+                        extensionMap.get(key).addAll(reference.getExtension());
                     }
                 }
             }

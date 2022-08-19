@@ -478,5 +478,38 @@
         }
       ]
     }
+  ],
+  "evaluatedResource": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "initial-population"
+        },
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "numerator"
+        }
+      ],
+      "reference": "Condition/DM1-patient-1-condition-1"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "numerator"
+        }
+      ],
+      "reference": "Condition/DM1-patient-2-condition-2"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "numerator"
+        }
+      ],
+      "reference": "Condition/DM1-patient-3-condition-3"
+    }
   ]
 }

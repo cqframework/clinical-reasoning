@@ -120,6 +120,11 @@ public class R4MeasureReportAggregatorTest {
                         ( item.getValue()).getExtension().size() == 3
         ));
 
+        assertEquals(actual.getEvaluatedResource().size(), expected.getEvaluatedResource().size());
+
+        assertTrue(actual.getEvaluatedResource().stream().anyMatch(item ->
+                item.getReference().equals("Condition/DM1-patient-1-condition-1") &&
+                        item.getExtension().size() == 2));
 
         MeasureValidationUtils.validateGroup(actualMrgc, "initial-population", 10);
         MeasureValidationUtils.validateGroup(expectedMrgc, "initial-population", 10);

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -65,6 +67,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         mergePopulation(carry, current);
         mergeStratifier(carry, current);
         mergeContained(carry, current);
+        mergeEvaluatedResources(carry, current);
 
     }
 
@@ -223,6 +226,34 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                         extensionMap.get(key).addAll(reference.getExtension());
                     }
                 }
+            }
+        });
+    }
+
+    protected void mergeEvaluatedResources(MeasureReport carry, MeasureReport current) {
+        if (current == null || carry == null) {
+            return;
+        }
+
+        Map<String, List<Extension>> extensionMap = new HashMap<>();
+
+        carry.getEvaluatedResource().forEach(reference -> {
+            extensionMap.put(reference.getReference(), reference.getExtension());
+        });
+
+        current.getEvaluatedResource().forEach(reference -> {
+            if (!extensionMap.containsKey(reference.getReference())) {
+                carry.getEvaluatedResource().add(reference);
+            } else {
+                List<Extension> list = extensionMap.get(reference.getReference());
+                Set<String> mergeSet = new HashSet<>();
+                list.forEach(item -> mergeSet.add(generateKey(item.getUrl(), ((StringType) item.getValue()).getValue(), "")));
+                reference.getExtension().forEach(item -> {
+                    if (!mergeSet.contains(generateKey(item.getUrl(), ((StringType) item.getValue()).getValue(), ""))) {
+                        list.add(item);
+                    }
+                });
+                reference.setExtension(list);
             }
         });
     }

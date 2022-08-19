@@ -414,5 +414,25 @@
                 "value": 0.0
             }
         }
+    ],
+    "evaluatedResource": [
+        {
+            "extension": [
+                {
+                    "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+                    "valueString": "numerator"
+                }
+            ],
+            "reference": "Condition/DM1-patient-1-condition-1"
+        },
+        {
+            "extension": [
+                {
+                    "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+                    "valueString": "numerator"
+                }
+            ],
+            "reference": "Condition/DM1-patient-2-condition-2"
+        }
     ]
 }

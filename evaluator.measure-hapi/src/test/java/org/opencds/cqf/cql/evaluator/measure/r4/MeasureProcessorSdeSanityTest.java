@@ -26,7 +26,5 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
         HashSet<String> set = new HashSet<>();
         report.getExtension().forEach(x -> set.add(x.getValue().toString()));
         assertEquals(set.size(), report.getExtension().size());
-
-        System.out.println(FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 }

@@ -120,6 +120,24 @@
       "valueString": "This measure assesses the number of patients who received VTE prophylaxis or have documentation why no VTE prophylaxis was given the day of or the day after hospital admission or surgery end date for surgeries that start the day of or the day after hospital admission"
     },
     {
+      "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",
+      "valueReference": {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "SDELastAppointmentDate"
+        }, {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "SDELastAppointmentFilter"
+        },
+          {
+            "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+            "valueString": "SDEFirstAppointmentDate"
+          }
+        ],
+        "reference": "Encounter/DM1-patient-1-encounter-2"
+      }
+    },
+    {
       "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
       "valueReference": {
         "reference": "#sde-observation-sde-ethnicity-coding-2186-5"
@@ -174,7 +192,7 @@
               }
             ]
           },
-          "count": 2
+          "count": 10
         },
         {
           "code": {
@@ -186,7 +204,19 @@
               }
             ]
           },
-          "count": 1
+          "count": 10
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator-exclusion",
+                "display": "Numerator Exclusion"
+              }
+            ]
+          },
+          "count": 2
         },
         {
           "code": {
@@ -198,7 +228,7 @@
               }
             ]
           },
-          "count": 2
+          "count": 30
         },
         {
           "code": {
@@ -210,7 +240,19 @@
               }
             ]
           },
-          "count": 0
+          "count": 10
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exception",
+                "display": "Denominator Exception"
+              }
+            ]
+          },
+          "count": 1
         }
       ],
       "measureScore": {
@@ -253,6 +295,16 @@
                   "code": {
                     "coding": [
                       {
+                        "code": "numerator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 10
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
                         "code": "denominator"
                       }
                     ]
@@ -268,6 +320,16 @@
                     ]
                   },
                   "count": 75
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exception"
+                      }
+                    ]
+                  },
+                  "count": 25
                 }
               ]
             },
@@ -415,6 +477,39 @@
           ]
         }
       ]
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "initial-population"
+        },
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "numerator"
+        }
+      ],
+      "reference": "Condition/DM1-patient-1-condition-1"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "numerator"
+        }
+      ],
+      "reference": "Condition/DM1-patient-2-condition-2"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "valueString": "numerator"
+        }
+      ],
+      "reference": "Condition/DM1-patient-3-condition-3"
     }
   ]
 }

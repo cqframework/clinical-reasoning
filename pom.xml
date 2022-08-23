@@ -103,6 +103,53 @@
                 <version>1.0.3</version>
             </dependency>
 
+            <!-- Engine Dependencies -->
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine</artifactId>
+                <version>${cql-engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>cql-to-elm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine.fhir</artifactId>
+                <version>${cql-engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>qdm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>quick</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>fhir-r4</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm-fhir</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+
             <!-- HAPI depedencies -->
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
@@ -153,11 +200,6 @@
                 <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-validation-resources-r5</artifactId>
                 <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>${caffeine.version}</version>
             </dependency>
 
             <!-- CLI -->
@@ -234,6 +276,12 @@
                 <version>${spring.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+                <scope>test</scope>
+            </dependency>
 
 
             <!-- Logging -->
@@ -246,6 +294,7 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -285,6 +334,10 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
     </dependencies>
 

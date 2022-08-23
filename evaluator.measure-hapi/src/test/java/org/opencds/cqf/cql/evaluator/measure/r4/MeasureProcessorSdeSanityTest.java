@@ -5,7 +5,6 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.HashSet;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 

@@ -16,7 +16,6 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.tracking.TrackBack;
-import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;

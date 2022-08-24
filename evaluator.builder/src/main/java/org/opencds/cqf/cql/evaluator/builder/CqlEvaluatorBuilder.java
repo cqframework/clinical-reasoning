@@ -16,7 +16,7 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
-import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.cql.model.ModelIdentifier;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
@@ -51,7 +51,7 @@ public class CqlEvaluatorBuilder {
 
     private static Logger logger = LoggerFactory.getLogger(CqlEvaluatorBuilder.class);
 
-    private static Map<VersionedIdentifier, Model> globalModelCache = new HashMap<>();
+    private static Map<ModelIdentifier, Model> globalModelCache = new HashMap<>();
 
     private List<LibrarySourceProvider> librarySourceProviders;
 

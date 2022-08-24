@@ -10,18 +10,18 @@ import java.util.Map;
 
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
-import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.cql.model.ModelIdentifier;
 import org.testng.annotations.Test;
 
 public class CacheAwareModelManagerTests {
 
     @Test
     public void Multiple_resolutions_should_use_cache(){
-        Map<VersionedIdentifier, Model> cache = new HashMap<VersionedIdentifier, Model>();
-        Map<VersionedIdentifier, Model> cacheSpy = spy(cache);
+        Map<ModelIdentifier, Model> cache = new HashMap<>();
+        Map<ModelIdentifier, Model> cacheSpy = spy(cache);
 
         ModelManager manager = new CacheAwareModelManager(cacheSpy);
-        VersionedIdentifier versionedIdentifier = new VersionedIdentifier().withId("FHIR").withVersion("4.0.0");
+        ModelIdentifier versionedIdentifier = new ModelIdentifier().withId("FHIR").withVersion("4.0.0");
 
         // First resolution should load global cache
         Model result = manager.resolveModel(versionedIdentifier);

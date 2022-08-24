@@ -17,6 +17,7 @@ import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -77,7 +78,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     protected LibrarySourceProviderFactory librarySourceProviderFactory;
     protected FhirDalFactory fhirDalFactory;
 
-    private static Map<org.hl7.elm.r1.VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
+    private static Map<ModelIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 

@@ -6,29 +6,29 @@ import org.cqframework.cql.cql2elm.ModelInfoLoader;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.model.SystemModel;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.hl7.cql.model.ModelIdentifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * This class extends the CQL translator {@link org.cqframework.cql.cql2elm.ModelManager} class to be aware of a global cache of {@link org.cqframework.cql.cql2elm.model.Model}s
- * The global cache is by @{org.hl7.elm.r1.VersionedIdentifier}, while the local cache is by name. This is because the translator expects the ModelManager to only permit loading
+ * The global cache is by @{org.hl7.elm.r1.ModelIndentifer}, while the local cache is by name. This is because the translator expects the ModelManager to only permit loading
  * of a single version version of a given Model in a single translation context, while the global cache is for all versions of Models
  */
 public class CacheAwareModelManager extends ModelManager {
 
-    private final Map<VersionedIdentifier, Model> globalCache;
+    private final Map<ModelIndentifer, Model> globalCache;
 
     private final Map<String, Model> localCache;
 
     private final ModelInfoLoader modelInfoLoader;
 
     /**
-     * @param globalCache cache for Models by VersionedIdentifier. Expected to be thread-safe.
+     * @param globalCache cache for Models by ModelIndentifer. Expected to be thread-safe.
      */
-    public CacheAwareModelManager(Map<VersionedIdentifier, Model> globalCache) {
+    public CacheAwareModelManager(Map<ModelIndentifer, Model> globalCache) {
         requireNonNull(globalCache, "globalCache can not be null.");
 
         this.globalCache = globalCache;
@@ -36,7 +36,7 @@ public class CacheAwareModelManager extends ModelManager {
         this.modelInfoLoader = new ModelInfoLoader();
     }
 
-	private Model buildModel(VersionedIdentifier identifier) {
+	private Model buildModel(ModelIndentifer identifier) {
         Model model = null;
         try {
 
@@ -62,7 +62,7 @@ public class CacheAwareModelManager extends ModelManager {
      */
 
     @Override
-    public Model resolveModel(VersionedIdentifier modelIdentifier) {
+    public Model resolveModel(ModelIndentifer modelIdentifier) {
         Model model = null;
         if (this.localCache.containsKey(modelIdentifier.getId())) {
             model = this.localCache.get(modelIdentifier.getId());

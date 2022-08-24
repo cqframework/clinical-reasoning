@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.evaluator.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 
 import java.util.HashMap;
 import java.util.List;

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
@@ -18,6 +19,7 @@ import org.cqframework.cql.elm.tracking.TrackBack;
 import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;
 
 public abstract class BaseMeasureEvaluationTest {
 
@@ -43,9 +45,10 @@ public abstract class BaseMeasureEvaluationTest {
         }
 
         List<org.cqframework.cql.elm.execution.Library> cqlLibraries = new ArrayList<>();
-        cqlLibraries.add(CqlLibraryReader.read(new StringReader(translator.toXml())));
+        var reader = CqlLibraryReaderFactory.getReader(LibraryContentType.XML.mimeType());
+        cqlLibraries.add(reader.read(new StringReader(translator.toXml())));
         for( String text : translator.getLibrariesAsXML().values() ) {
-            cqlLibraries.add(CqlLibraryReader.read(new StringReader(text)));
+            cqlLibraries.add(reader.read(new StringReader(text)));
         }
         return cqlLibraries;
     }

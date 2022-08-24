@@ -80,7 +80,6 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
                     return CqlLibraryReaderFactory.getReader(type.mimeType()).read(is);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return null;
                 }
             }
         }

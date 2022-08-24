@@ -314,7 +314,7 @@
             </dependency>
 
             <!-- JAXB Implementation -->
-            <!-- This should be used on Test scope only, through evaluator.jaxb-deps -->
+            <!-- This should be used on test scope only, through evaluator.jaxb-deps -->
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
                 <artifactId>org.eclipse.persistence.moxy</artifactId>

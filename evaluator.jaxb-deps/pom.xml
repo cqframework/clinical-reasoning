@@ -23,17 +23,14 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine.jaxb</artifactId>
-            <version>${cql-engine.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model-jaxb</artifactId>
-            <version>${cql-translator.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-jaxb</artifactId>
-            <version>${cql-translator.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>

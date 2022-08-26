@@ -23,22 +23,22 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine.jaxb</artifactId>
-            <version>${cql-engine.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model-jaxb</artifactId>
-            <version>${cql-translator.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-jaxb</artifactId>
-            <version>${cql-translator.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.moxy</artifactId>
-            <version>2.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
         </dependency>
     </dependencies>
 </project>

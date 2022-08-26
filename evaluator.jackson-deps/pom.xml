@@ -23,12 +23,14 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model-jackson</artifactId>
-            <version>${cql-translator.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-jackson</artifactId>
-            <version>${cql-translator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.jackson</artifactId>
         </dependency>
     </dependencies>
 </project>

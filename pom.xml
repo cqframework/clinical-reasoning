@@ -125,8 +125,38 @@
                 <version>${cql-translator.version}</version>
             </dependency>
             <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model-jackson</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm-jackson</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model-jaxb</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm-jaxb</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine.fhir</artifactId>
+                <version>${cql-engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine.jaxb</artifactId>
+                <version>${cql-engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine.jackson</artifactId>
                 <version>${cql-engine.version}</version>
             </dependency>
             <dependency>
@@ -281,6 +311,19 @@
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- JAXB Implementation -->
+            <!-- This should be used on test scope only, through evaluator.jaxb-deps -->
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>org.eclipse.persistence.moxy</artifactId>
+                <version>2.7.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.json</artifactId>
+                <version>1.0.4</version>
             </dependency>
 
 

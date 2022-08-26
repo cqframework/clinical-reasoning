@@ -1,0 +1,167 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-should-screen-ccs-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "should-screen-ccs-1",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+      },
+      "status": "finished",
+      "class": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "AMB",
+        "display": "ambulatory"
+      },
+      "type": [ {
+        "coding": [ {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99201",
+          "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+        } ]
+      } ],
+      "subject": {
+        "reference": "Patient/should-screen-ccs"
+      },
+      "period": {
+        "start": "2022-05-30T00:00:00-00:00",
+        "end": "2022-05-31T00:00:00-00:00"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Encounter/should-screen-ccs-1"
+    }
+  }, {
+    "resource": {
+      "resourceType": "GuidanceResponse",
+      "id": "should-screen-ccs-5",
+      "contained": [ {
+        "resourceType": "CarePlan",
+        "id": "expected",
+        "instantiatesCanonical": [ "http://fhir.org/guides/cqf/ccc/PlanDefinition/ColorectalCancerScreeningCDS" ],
+        "status": "draft",
+        "intent": "proposal",
+        "subject": {
+          "reference": "Patient/should-screen-ccs"
+        },
+        "activity": [ {
+          "reference": {
+            "reference": "#screening-recommended"
+          }
+        } ]
+      }, {
+        "resourceType": "ServiceRequest",
+        "id": "screening-recommended",
+        "extension": [ {
+          "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-rationale",
+          "valueMarkdown": "Patient meets the inclusion criteria for appropriate colorectal cancer screening, but has most recent Colonoscopy performed on 2009-12-30"
+        } ],
+        "status": "draft",
+        "intent": "proposal",
+        "doNotPerform": true,
+        "code": {
+          "text": "Colorectal Cancer Screening Recommended"
+        },
+        "subject": {
+          "reference": "Patient/should-screen-ccs"
+        },
+        "supportingInfo": [ {
+          "reference": "Procedure/should-screen-ccs-2"
+        } ]
+      } ],
+      "moduleCanonical": "http://fhir.org/guides/cqf/ccc/PlanDefinition/ColorectalCancerScreeningCDS",
+      "status": "success",
+      "subject": {
+        "reference": "Patient/should-screen-ccs"
+      },
+      "result": {
+        "reference": "#expected"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "GuidanceResponse/should-screen-ccs-5"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "should-screen-ccs",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian"
+          }
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2135-2",
+            "display": "Hispanic or Latino"
+          }
+        } ]
+      } ],
+      "identifier": [ {
+        "use": "usual",
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          } ]
+        },
+        "system": "http://hospital.smarthealthit.org",
+        "value": "999999992"
+      } ],
+      "name": [ {
+        "family": "Dere",
+        "given": [ "Ben" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1968-01-01"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Patient/should-screen-ccs"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Procedure",
+      "id": "should-screen-ccs-2",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+      },
+      "status": "completed",
+      "code": {
+        "coding": [ {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "44392",
+          "display": "Colonoscopy through stoma; with removal of tumor(s), polyp(s), or other lesion(s) by hot biopsy forceps"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/should-screen-ccs"
+      },
+      "performedPeriod": {
+        "start": "2011-12-30T12:00:00",
+        "end": "2011-12-30T13:00:00"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Procedure/should-screen-ccs-2"
+    }
+  } ]
+}

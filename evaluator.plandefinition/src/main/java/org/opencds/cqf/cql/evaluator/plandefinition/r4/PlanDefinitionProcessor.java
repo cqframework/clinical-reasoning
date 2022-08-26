@@ -407,6 +407,9 @@ public class PlanDefinitionProcessor {
         if (result instanceof DateTime) {
           result = Date.from(((DateTime) result).getDateTime().toInstant());
         }
+        else if (result instanceof String) {
+          result = new StringType((String)result);
+        }
 
         // TODO: Rename bundle
         if (dynamicValue.hasPath() && dynamicValue.getPath().equals("$this")) {

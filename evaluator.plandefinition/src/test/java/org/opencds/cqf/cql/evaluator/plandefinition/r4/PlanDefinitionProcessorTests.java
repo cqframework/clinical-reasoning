@@ -66,4 +66,28 @@ public class PlanDefinitionProcessorTests extends PlanDefinitionProcessorTestBas
                 "rule-filters/ReportableCarePlan.json"
         );
     }
+
+    @Test
+    public void testColorectalCancerScreeningShouldScreen() {
+        test(
+                "cqf-ccc/tests-should-screen-ccs-bundle.json",
+                "cqf-ccc/ColorectalCancerScreeningCDS-bundle.json",
+                "ColorectalCancerScreeningCDS",
+                "should-screen-ccs",
+                null,
+                "cqf-ccc/careplan-should-screen-ccs.json"
+        );
+    }
+
+    @Test
+    public void testColorectalCancerScreeningShouldNotScreen() {
+        test(
+                "cqf-ccc/tests-should-not-screen-ccs-bundle.json",
+                "cqf-ccc/ColorectalCancerScreeningCDS-bundle.json",
+                "ColorectalCancerScreeningCDS",
+                "should-not-screen-ccs",
+                null,
+                "cqf-ccc/careplan-should-not-screen-ccs.json"
+        );
+    }
 }

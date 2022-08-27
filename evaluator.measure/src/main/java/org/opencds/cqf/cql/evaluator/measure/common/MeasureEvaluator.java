@@ -27,6 +27,7 @@ import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
 import org.opencds.cqf.cql.engine.elm.execution.ExpressionRefEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
+import org.opencds.cqf.cql.engine.elm.execution.QueryEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -437,10 +438,19 @@ public class MeasureEvaluator {
         }
     }
 
+    private boolean checkQueryEvaluator(Expression expression) {
+        if (expression.getClass() == QueryEvaluator.class) {
+            QueryEvaluator qe = (QueryEvaluator) expression;
+            return qe.getReturn() != null && qe.getReturn().getExpression() != null &&
+                    qe.getReturn().getExpression().getClass() == InstanceEvaluator.class;
+        }
+        return false;
+    }
+
     // consider more complex expression in future
     private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
         Expression expression = expressionDef.getExpression();
-        if (expression.getClass() == InstanceEvaluator.class) {
+        if (expression.getClass() == InstanceEvaluator.class|| checkQueryEvaluator(expression)) {
             sdeDef.setIsInstanceExpression(true);
         } else if (expression.getClass() == ExpressionRefEvaluator.class &&
                 ((ExpressionRefEvaluator) expression).getLibraryName() != null) {

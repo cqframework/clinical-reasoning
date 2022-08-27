@@ -18,6 +18,6 @@ public class MeasureProcessorSdeInstanceExpInclLibTest extends BaseMeasureProces
                 "Patient/DM1-patient-1", null, null,
                 endpoint, endpoint, endpoint, null);
 
-        assertEquals(3, report.getContained().size());
+        assertEquals(4, report.getContained().size());
     }
 }

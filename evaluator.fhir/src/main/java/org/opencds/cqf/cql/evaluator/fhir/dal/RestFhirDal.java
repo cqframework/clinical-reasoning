@@ -53,5 +53,9 @@ public class RestFhirDal implements FhirDal {
         IBaseBundle bundle = this.client.search().forResource(resourceType).whereMap(params).execute();
         return BundleUtil.toListOfResources(this.client.getFhirContext(), bundle);
     }
+
+    public void transaction(IBaseBundle bundle) {
+        this.client.transaction().withBundle(bundle).execute();
+    }
     
 }

@@ -414,15 +414,23 @@ public class PlanDefinitionProcessor {
         // TODO: Rename bundle
         if (dynamicValue.hasPath() && dynamicValue.getPath().equals("$this")) {
           session.carePlan = ((CarePlan) result);
-         } else if (dynamicValue.hasPath() && (dynamicValue.getPath().startsWith("action") || dynamicValue.getPath().startsWith("%action"))) {
-          try {
-            action.setProperty(dynamicValue.getPath().substring(dynamicValue.getPath().indexOf(".")+1), (Base) result);
-          } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(
-                String.format("Could not set path %s to value: %s", dynamicValue.getPath(), result));
+         }
+        else if (dynamicValue.hasPath() && (dynamicValue.getPath().startsWith("action")
+                || dynamicValue.getPath().startsWith("%action"))) {
+          if (dynamicValue.getPath().endsWith("extension")) {
+            ExtensionHelper.setExtension(action, false, null, (Type) result);
           }
-        } else {
+          else {
+            try {
+              action.setProperty(dynamicValue.getPath().substring(dynamicValue.getPath().indexOf(".") + 1), (Base) result);
+            } catch (Exception e) {
+              e.printStackTrace();
+              throw new RuntimeException(
+                      String.format("Could not set path %s to value: %s", dynamicValue.getPath(), result));
+            }
+          }
+        }
+        else {
           try {
             session.carePlan.setProperty(dynamicValue.getPath(), (Base) result);
           } catch (Exception e) {

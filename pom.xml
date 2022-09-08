@@ -18,7 +18,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cql-translator.version>2.1.0</cql-translator.version>
-        <cql-engine.version>2.0.0</cql-engine.version>
+        <cql-engine.version>2.1.0-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>6.0.1</hapi.version>
@@ -310,7 +310,7 @@
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
-                <scope>test</scope>
+                <!--<scope>test</scope>-->
             </dependency>
 
             <!-- JAXB Implementation -->
@@ -443,7 +443,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.1.0</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>

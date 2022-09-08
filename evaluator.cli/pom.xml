@@ -59,6 +59,11 @@
             <optional>true</optional>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

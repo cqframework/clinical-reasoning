@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
@@ -20,9 +21,15 @@ import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
+    private VersionedIdentifier primaryLibraryId;
+
+    public R4MeasureDefBuilder(VersionedIdentifier id) {
+        this.primaryLibraryId = id;
+    }
     @Override
     public MeasureDef build(Measure measure) {
         MeasureDef measureDef = new MeasureDef();
+        measureDef.setLibraryId(this.primaryLibraryId);
 
         measureDef.setUrl(measure.getUrl());
         measureDef.setMeasureScoring(MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()));

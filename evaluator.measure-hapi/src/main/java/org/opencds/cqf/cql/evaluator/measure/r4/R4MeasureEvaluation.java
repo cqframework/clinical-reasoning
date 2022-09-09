@@ -11,7 +11,7 @@ import org.opencds.cqf.cql.evaluator.measure.common.BaseMeasureEvaluation;
 public class R4MeasureEvaluation extends
         BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
 
-    public R4MeasureEvaluation(Context context, Measure measure) {
-        super(context, measure, new R4MeasureDefBuilder(), new R4MeasureReportBuilder());
+    public R4MeasureEvaluation(Context context, Measure measure, R4MeasureDefBuilder r4MeasureDefBuilder) {
+        super(context, measure, r4MeasureDefBuilder, new R4MeasureReportBuilder());
     }
 }

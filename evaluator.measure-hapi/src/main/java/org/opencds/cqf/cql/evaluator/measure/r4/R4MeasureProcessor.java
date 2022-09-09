@@ -283,8 +283,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         LibraryLoader libraryLoader = this.buildLibraryLoader(librarySourceProvider);
 
-        Library library = libraryLoader.load(
-                new VersionedIdentifier().withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
+        VersionedIdentifier libraryId = new VersionedIdentifier()
+                .withId(primaryLibrary.getName())
+                .withVersion(primaryLibrary.getVersion());
+
+        Library library = libraryLoader.load(libraryId);
 
         TerminologyProvider terminologyProvider = terminologyEndpoint != null
                 ? this.buildTerminologyProvider(terminologyEndpoint)
@@ -302,9 +305,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             throw new IllegalStateException("a dataProvider was not provided and one could not be constructed");
         }
 
+        R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder(libraryId);
+
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
-        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
+        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure, measureDefBuilder);
         return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds, measurementPeriod);
     }
 

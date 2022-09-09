@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ public class MeasureDef {
 
     private String url;
 
+    private VersionedIdentifier libraryId;
 
     public List<SdeDef> getSdes() {
         if (this.sdes == null) {
@@ -45,4 +48,8 @@ public class MeasureDef {
     public void setUrl(String url) {
         this.url = url;
     }
+    public void setLibraryId(VersionedIdentifier id) { this.libraryId = id; }
+
+    public VersionedIdentifier getLibraryId() { return this.libraryId; }
+
 }

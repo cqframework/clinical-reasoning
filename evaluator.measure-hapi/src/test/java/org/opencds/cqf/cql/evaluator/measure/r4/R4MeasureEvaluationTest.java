@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -229,7 +230,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         context.registerDataProvider(FHIR_NS_URI, dataProvider);
         context.registerLibraryLoader(ll);
 
-        R4MeasureEvaluation evaluation = new R4MeasureEvaluation(context, measure);
+        R4MeasureEvaluation evaluation = new R4MeasureEvaluation(context, measure,
+                new R4MeasureDefBuilder(new VersionedIdentifier().withId(primaryLibrary.getId()).withVersion(primaryLibrary.getVersion())));
         MeasureReport report = evaluation.evaluate(
                 subjectIds.size() == 1 ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION,
                 subjectIds, measurementPeriod);

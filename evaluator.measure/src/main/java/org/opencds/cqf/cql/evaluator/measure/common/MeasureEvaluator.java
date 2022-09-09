@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,9 +26,11 @@ import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.elm.execution.ExpressionRefEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -181,13 +184,17 @@ public class MeasureEvaluator {
         context.setContextValue(subjectType, subjectId);
     }
 
-    protected void captureEvaluatedResources(List<Object> outEvaluatedResources) {
-        if (outEvaluatedResources != null && this.context.getEvaluatedResources() != null) {
-            for (Object o : this.context.getEvaluatedResources()) {
+    protected void captureEvaluatedResources(VersionedIdentifier libraryId, String criteriaExpression, List<Object> outEvaluatedResources) {
+        if (outEvaluatedResources != null &&
+                this.context.isExpressionInCache(libraryId, criteriaExpression)) {
+            System.out.println("HAVE evaluated resource...."+ criteriaExpression);
+            for (Object o : this.context.getExpressionEvaluatedResourceFromCache(libraryId, criteriaExpression)) {
                 outEvaluatedResources.add(o);
+                System.out.println("Adding ER:"+o);
             }
         }
-        clearEvaluatedResources();
+        //clearEvaluatedResources();
+        //this.context.clearExpressions();
     }
 
     // reset evaluated resources followed by a context evaluation
@@ -206,9 +213,29 @@ public class MeasureEvaluator {
         }
 
         for (GroupDef groupDef : measureDef.getGroups()) {
-            evaluateGroup(measureScoring, groupDef, measureDef.getSdes(), subjectIds);
+            evaluateGroup(measureDef.getLibraryId(), measureScoring, groupDef, measureDef.getSdes(), subjectIds);
             validateEvaluatedMeasureCount(measureScoring, groupDef);
         }
+
+        Map<String, ExpressionResult> map = this.context.getExpressions().get(measureDef.getLibraryId());
+        System.out.println(map.keySet());
+        map.values().forEach(x -> System.out.println(x.getEvaluatedResource()));
+//        while (iterator.hasNext()) {
+//            VersionedIdentifier key = iterator.next();
+//            System.out.println("KEY:" + key );
+//            Map<String, ExpressionResult> map = this.context.getExpressions().get(key);
+//
+//            System.out.println("map:");
+//            System.out.println(map.keySet());
+//          map.values().forEach(x -> System.out.println(x.getEvaluatedResource()));
+
+//            Iterator<String> itr = map.keySet().iterator();
+//            while(itr.hasNext()) {
+//                String str = itr.next();
+//                System.out.println("k:" + str);
+//                System.out.println(map.get(str).getEvaluatedResource());
+//            }
+
 
         return measureDef;
     }
@@ -251,13 +278,13 @@ public class MeasureEvaluator {
     }
 
     @SuppressWarnings("unchecked")
-    protected Iterable<Object> evaluatePopulationCriteria(String subjectType, String subjectId,
+    protected Iterable<Object> evaluatePopulationCriteria(VersionedIdentifier libraryId, String subjectType, String subjectId,
             String criteriaExpression, List<Object> outEvaluatedResources) {
         if (criteriaExpression == null || criteriaExpression.isEmpty()) {
             return Collections.emptyList();
         }
 
-        Object result = this.evaluateCriteria(criteriaExpression, outEvaluatedResources);
+        Object result = this.evaluateCriteria(libraryId, criteriaExpression, outEvaluatedResources);
 
         if (result == null) {
             return Collections.emptyList();
@@ -276,15 +303,15 @@ public class MeasureEvaluator {
         return (Iterable<Object>) result;
     }
 
-    protected Object evaluateCriteria(String criteriaExpression, List<Object> outEvaluatedResources) {
+    protected Object evaluateCriteria(VersionedIdentifier libraryId, String criteriaExpression, List<Object> outEvaluatedResources) {
         Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
 
-        captureEvaluatedResources(outEvaluatedResources);
+        captureEvaluatedResources(libraryId, criteriaExpression, outEvaluatedResources);
 
         return result;
     }
 
-    protected Object evaluateObservationCriteria(Object resource, String criteriaExpression,
+    protected Object evaluateObservationCriteria(VersionedIdentifier libraryId, Object resource, String criteriaExpression,
             List<Object> outEvaluatedResources) {
 
         ExpressionDef ed = context.resolveExpressionRef(criteriaExpression);
@@ -302,22 +329,22 @@ public class MeasureEvaluator {
             context.popWindow();
         }
 
-        captureEvaluatedResources(outEvaluatedResources);
+        captureEvaluatedResources(libraryId, criteriaExpression, outEvaluatedResources);
 
         return result;
     }
 
-    protected boolean evaluatePopulationMembership(String subjectType, String subjectId, PopulationDef inclusionDef,
+    protected boolean evaluatePopulationMembership(VersionedIdentifier libraryId, String subjectType, String subjectId, PopulationDef inclusionDef,
             PopulationDef exclusionDef) {
         boolean inPopulation = false;
-        for (Object resource : evaluatePopulationCriteria(subjectType, subjectId, inclusionDef.getCriteriaExpression(),
+        for (Object resource : evaluatePopulationCriteria(libraryId, subjectType, subjectId, inclusionDef.getCriteriaExpression(),
                 inclusionDef.getEvaluatedResources())) {
             inPopulation = true;
             inclusionDef.getResources().add(resource);
         }
 
         if (inPopulation && exclusionDef != null) {
-            for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
+            for (Object resource : evaluatePopulationCriteria(libraryId, subjectType, subjectId,
                     exclusionDef.getCriteriaExpression(), exclusionDef.getEvaluatedResources())) {
                 inPopulation = false;
                 exclusionDef.getResources().add(resource);
@@ -336,18 +363,18 @@ public class MeasureEvaluator {
         return inPopulation;
     }
 
-    protected void evaluateProportion(GroupDef groupDef, String subjectType, String subjectId) {
+    protected void evaluateProportion(VersionedIdentifier libraryId, GroupDef groupDef, String subjectType, String subjectId) {
         // Are they in the initial population?
-        boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
+        boolean inInitialPopulation = evaluatePopulationMembership(libraryId, subjectType, subjectId,
                 groupDef.get(INITIALPOPULATION), null);
         if (inInitialPopulation) {
             // Are they in the denominator?
-            boolean inDenominator = evaluatePopulationMembership(subjectType, subjectId, groupDef.get(DENOMINATOR),
+            boolean inDenominator = evaluatePopulationMembership(libraryId, subjectType, subjectId, groupDef.get(DENOMINATOR),
                     groupDef.get(DENOMINATOREXCLUSION));
 
             if (inDenominator) {
                 // Are they in the numerator?
-                boolean inNumerator = evaluatePopulationMembership(subjectType, subjectId, groupDef.get(NUMERATOR),
+                boolean inNumerator = evaluatePopulationMembership(libraryId, subjectType, subjectId, groupDef.get(NUMERATOR),
                         groupDef.get(NUMERATOREXCLUSION));
 
                 if (!inNumerator && groupDef.get(DENOMINATOREXCEPTION) != null) {
@@ -356,7 +383,7 @@ public class MeasureEvaluator {
                     PopulationDef denominatorException = groupDef.get(DENOMINATOREXCEPTION);
                     PopulationDef denominator = groupDef.get(DENOMINATOR);
                     boolean inException = false;
-                    for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
+                    for (Object resource : evaluatePopulationCriteria(libraryId, subjectType, subjectId,
                             denominatorException.getCriteriaExpression(),
                             denominatorException.getEvaluatedResources())) {
                         inException = true;
@@ -374,21 +401,21 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void evaluateContinuousVariable(GroupDef groupDef, String subjectType, String subjectId) {
-        boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
+    protected void evaluateContinuousVariable(VersionedIdentifier libraryId, GroupDef groupDef, String subjectType, String subjectId) {
+        boolean inInitialPopulation = evaluatePopulationMembership(libraryId, subjectType, subjectId,
                 groupDef.get(INITIALPOPULATION), null);
 
         if (inInitialPopulation) {
             // Are they in the MeasureType population?
             PopulationDef measurePopulation = groupDef.get(MEASUREPOPULATION);
-            boolean inMeasurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation,
+            boolean inMeasurePopulation = evaluatePopulationMembership(libraryId, subjectType, subjectId, measurePopulation,
                     groupDef.get(MEASUREPOPULATIONEXCLUSION));
 
             if (inMeasurePopulation) {
                 PopulationDef measureObservation = groupDef.get(MEASUREOBSERVATION);
                 if (measureObservation != null) {
                     for (Object resource : measurePopulation.getResources()) {
-                        Object observationResult = evaluateObservationCriteria(resource,
+                        Object observationResult = evaluateObservationCriteria(libraryId, resource,
                                 measureObservation.getCriteriaExpression(), measureObservation.getEvaluatedResources());
                         measureObservation.getResources().add(observationResult);
                     }
@@ -397,12 +424,12 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void evaluateCohort(GroupDef groupDef, String subjectType, String subjectId) {
-        evaluatePopulationMembership(subjectType, subjectId, groupDef.get(INITIALPOPULATION), null);
+    protected void evaluateCohort(VersionedIdentifier libraryId, GroupDef groupDef, String subjectType, String subjectId) {
+        evaluatePopulationMembership(libraryId, subjectType, subjectId, groupDef.get(INITIALPOPULATION), null);
     }
 
-    protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef, List<SdeDef> sdes,
-            Collection<String> subjectIdentifiers) {
+    protected void evaluateGroup(VersionedIdentifier libraryId, MeasureScoring measureScoring, GroupDef groupDef,
+         List<SdeDef> sdes, Collection<String> subjectIdentifiers) {
         for (String subjectIdentifier : subjectIdentifiers) {
             Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectIdentifier);
             String subjectType = subjectInfo.getLeft();
@@ -413,13 +440,13 @@ public class MeasureEvaluator {
             switch (measureScoring) {
                 case PROPORTION:
                 case RATIO:
-                    evaluateProportion(groupDef, subjectType, subjectId);
+                    evaluateProportion(libraryId, groupDef, subjectType, subjectId);
                     break;
                 case CONTINUOUSVARIABLE:
-                    evaluateContinuousVariable(groupDef, subjectType, subjectId);
+                    evaluateContinuousVariable(libraryId, groupDef, subjectType, subjectId);
                     break;
                 case COHORT:
-                    evaluateCohort(groupDef, subjectType, subjectId);
+                    evaluateCohort(libraryId, groupDef, subjectType, subjectId);
                     break;
             }
         }

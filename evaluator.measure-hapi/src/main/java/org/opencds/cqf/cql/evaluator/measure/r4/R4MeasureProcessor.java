@@ -305,7 +305,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             throw new IllegalStateException("a dataProvider was not provided and one could not be constructed");
         }
 
-        R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder(libraryId);
+        R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder(library.getIdentifier());
 
         Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);

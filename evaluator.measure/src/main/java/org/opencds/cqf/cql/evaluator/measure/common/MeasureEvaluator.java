@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,7 +29,6 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.elm.execution.ExpressionRefEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
-import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -187,14 +185,8 @@ public class MeasureEvaluator {
     protected void captureEvaluatedResources(VersionedIdentifier libraryId, String criteriaExpression, List<Object> outEvaluatedResources) {
         if (outEvaluatedResources != null &&
                 this.context.isExpressionInCache(libraryId, criteriaExpression)) {
-            System.out.println("HAVE evaluated resource...."+ criteriaExpression);
-            for (Object o : this.context.getExpressionEvaluatedResourceFromCache(libraryId, criteriaExpression)) {
-                outEvaluatedResources.add(o);
-                System.out.println("Adding ER:"+o);
-            }
+            outEvaluatedResources.addAll(this.context.getExpressionEvaluatedResourceFromCache(libraryId, criteriaExpression));
         }
-        //clearEvaluatedResources();
-        //this.context.clearExpressions();
     }
 
     // reset evaluated resources followed by a context evaluation
@@ -216,26 +208,6 @@ public class MeasureEvaluator {
             evaluateGroup(measureDef.getLibraryId(), measureScoring, groupDef, measureDef.getSdes(), subjectIds);
             validateEvaluatedMeasureCount(measureScoring, groupDef);
         }
-
-        Map<String, ExpressionResult> map = this.context.getExpressions().get(measureDef.getLibraryId());
-        System.out.println(map.keySet());
-        map.values().forEach(x -> System.out.println(x.getEvaluatedResource()));
-//        while (iterator.hasNext()) {
-//            VersionedIdentifier key = iterator.next();
-//            System.out.println("KEY:" + key );
-//            Map<String, ExpressionResult> map = this.context.getExpressions().get(key);
-//
-//            System.out.println("map:");
-//            System.out.println(map.keySet());
-//          map.values().forEach(x -> System.out.println(x.getEvaluatedResource()));
-
-//            Iterator<String> itr = map.keySet().iterator();
-//            while(itr.hasNext()) {
-//                String str = itr.next();
-//                System.out.println("k:" + str);
-//                System.out.println(map.get(str).getEvaluatedResource());
-//            }
-
 
         return measureDef;
     }
@@ -293,7 +265,6 @@ public class MeasureEvaluator {
         if (result instanceof Boolean) {
             if ((Boolean.TRUE.equals(result))) {
                 Object booleanResult = this.context.resolveExpressionRef(subjectType).evaluate(this.context);
-                clearEvaluatedResources();
                 return Collections.singletonList(booleanResult);
             } else {
                 return Collections.emptyList();
@@ -460,7 +431,6 @@ public class MeasureEvaluator {
 
             // TODO: Is it valid for an SDE to give multiple results?
             flattenAdd(sde.getValues(), result);
-            clearEvaluatedResources();
         }
     }
 
@@ -504,8 +474,6 @@ public class MeasureEvaluator {
             if (result != null) {
                 sd.getSubjectValues().put(subjectId, result);
             }
-
-            clearEvaluatedResources();
         }
     }
 

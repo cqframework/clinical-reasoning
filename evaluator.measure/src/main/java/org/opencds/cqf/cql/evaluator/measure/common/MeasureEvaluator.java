@@ -435,8 +435,6 @@ public class MeasureEvaluator {
             String subjectType = subjectInfo.getLeft();
             String subjectId = subjectInfo.getRight();
             this.setContextToSubject(subjectType, subjectId);
-            evaluateSdes(sdes);
-            evaluateStratifiers(subjectId, groupDef.getStratifiers());
             switch (measureScoring) {
                 case PROPORTION:
                 case RATIO:
@@ -449,6 +447,8 @@ public class MeasureEvaluator {
                     evaluateCohort(libraryId, groupDef, subjectType, subjectId);
                     break;
             }
+            evaluateSdes(sdes);
+            evaluateStratifiers(subjectId, groupDef.getStratifiers());
         }
     }
 

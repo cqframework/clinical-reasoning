@@ -120,12 +120,15 @@ public class PlanDefinitionProcessorRestTestBase {
 
         IBaseResource baseResource = load(dataAsset);
         Bundle bundleToSend = (Bundle)baseResource;
+
+        long start = System.currentTimeMillis();
         CarePlan actual = planDefinitionProcessor.apply(
                 new IdType("PlanDefinition", planDefinitionID), patientID, encounterID,
                 null, null, null, null, null,
                 null, null, null, params, null,
                 bundleToSend, null, endpoint, endpoint, endpoint);
-
+        long time = System.currentTimeMillis() - start;
+        System.out.println("Time to run 1st time (ms): " + time);
 
         String expectedJson = jsonParser.encodeResourceToString(expected);
         String actualJson = jsonParser.encodeResourceToString(actual);

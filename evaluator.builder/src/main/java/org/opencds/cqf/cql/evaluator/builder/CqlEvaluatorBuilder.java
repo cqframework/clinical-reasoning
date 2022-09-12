@@ -61,7 +61,7 @@ public class CqlEvaluatorBuilder {
 
     private CqlOptions cqlOptions;
 
-    private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
+    private static Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache = new HashMap<>();
 
     private RetrieveProviderConfig retrieveProviderConfig;
 
@@ -75,7 +75,6 @@ public class CqlEvaluatorBuilder {
         this.librarySourceProviders = new ArrayList<>();
         this.terminologyProviders = new ArrayList<>();
         this.dataProviderParts = new HashMap<>();
-        this.libraryCache = new HashMap<>();
         this.retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
         this.cqlOptions = CqlOptions.defaultOptions();
     }
@@ -215,12 +214,12 @@ public class CqlEvaluatorBuilder {
      * will be verified to make sure versions match and that it was translated with
      * the same CQL options.
      *
-     * @param libraryCache the library cache
+     * @param newLibraryCache the library cache
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withLibraryCache(
-            HashMap<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> libraryCache) {
-        this.libraryCache = libraryCache;
+            Map<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> newLibraryCache) {
+        libraryCache = newLibraryCache;
         return this;
     }
 
@@ -277,8 +276,8 @@ public class CqlEvaluatorBuilder {
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
                 new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions());
-        if (this.libraryCache != null) {
-            libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
+        if (libraryCache != null) {
+            libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, libraryCache);
         }
 
         return this.decorate(libraryLoader);

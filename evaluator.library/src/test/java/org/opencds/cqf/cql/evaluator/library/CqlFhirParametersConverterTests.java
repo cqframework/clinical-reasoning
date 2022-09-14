@@ -13,11 +13,12 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -29,10 +30,10 @@ import org.testng.annotations.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 public class CqlFhirParametersConverterTests {
-    
+
 
     protected static CqlFhirParametersConverter cqlFhirParametersConverter;
-    
+
     @BeforeClass
     public void setup() {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -51,8 +52,8 @@ public class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
 
         EvaluationResult testData = new EvaluationResult();
-        testData.expressionResults.put("Patient", new Patient());
-        testData.expressionResults.put("Numerator", true);
+        testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
+        testData.expressionResults.put("Numerator",  new ExpressionResult(true, null));
 
         Parameters actual = (Parameters)cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -95,7 +96,7 @@ public class CqlFhirParametersConverterTests {
 
         assertEquals(actual.size(), 1);
         assertTrue(actual.containsKey("%encounters"));
-        
+
         Object value = actual.get("%encounters");
 
         assertTrue(value instanceof List);
@@ -118,7 +119,7 @@ public class CqlFhirParametersConverterTests {
 
         assertEquals(actual.size(), 1);
         assertTrue(actual.containsKey("%encounters"));
-        
+
         Object value = actual.get("%encounters");
 
         assertTrue(value instanceof List);
@@ -143,7 +144,7 @@ public class CqlFhirParametersConverterTests {
 
         assertEquals(actual.size(), 1);
         assertTrue(actual.containsKey("%encounters"));
-        
+
         Object value = actual.get("%encounters");
 
         assertTrue(value instanceof List);
@@ -179,7 +180,7 @@ public class CqlFhirParametersConverterTests {
 
         assertEquals(actual.size(), 1);
         assertTrue(actual.containsKey("%encounters"));
-        
+
         Object value = actual.get("%encounters");
 
         assertTrue(value instanceof List);

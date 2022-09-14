@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersAdapter;
@@ -63,7 +64,7 @@ public class CqlFhirParametersConverter {
 
         ParametersAdapter pa = this.adapterFactory.createParameters(params);
 
-        for (Map.Entry<String, Object> entry : evaluationResult.expressionResults.entrySet()) {
+        for (Map.Entry<String, ExpressionResult> entry : evaluationResult.expressionResults.entrySet()) {
             String name = entry.getKey();
             Object value = entry.getValue();
 

@@ -184,8 +184,8 @@ public class MeasureEvaluator {
 
     protected void captureEvaluatedResources(VersionedIdentifier libraryId, String criteriaExpression, List<Object> outEvaluatedResources) {
         if (outEvaluatedResources != null &&
-                this.context.isExpressionInCache(libraryId, criteriaExpression)) {
-            outEvaluatedResources.addAll(this.context.getExpressionEvaluatedResourceFromCache(libraryId, criteriaExpression));
+                this.context.isExpressionCached(libraryId, criteriaExpression)) {
+            outEvaluatedResources.addAll(this.context.getCachedExpression(libraryId, criteriaExpression).evaluatedResources());
         }
     }
 

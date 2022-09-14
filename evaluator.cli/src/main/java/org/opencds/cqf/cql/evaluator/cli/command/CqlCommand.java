@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
@@ -158,7 +159,7 @@ public class CqlCommand implements Callable<Integer> {
 
             EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
 
-            for (Map.Entry<String, Object> libraryEntry : result.expressionResults.entrySet()) {
+            for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
                 System.out.println(libraryEntry.getKey() + "=" + this.tempConvert(libraryEntry.getValue()));
             }
 

@@ -45,5 +45,10 @@
             <type>pom</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>fhir-r4</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

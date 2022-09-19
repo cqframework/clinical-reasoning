@@ -337,6 +337,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
+        //contained instance resource sometimes have duplicates which is reflected in the id, this set is used to remove duplicity
+        Set<String> tempCacheContained = new HashSet<>();
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc = measure.getSupplementalData().get(i);
@@ -344,7 +346,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Map<ValueWrapper, Long> accumulated = sde.getValues().stream().map(x -> new ValueWrapper(x))
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-            processSdeEvaluatedResourceExt(sde);
+            processSdeEvaluatedResourceExt(sde, tempCacheContained);
 
             String sdeCode = sde.getCode();
             CodeableConcept originalConcept = generateOriginalConcept(sde);
@@ -447,15 +449,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private void processSdeEvaluatedResourceExt(SdeDef sdeDef) {
+    private void processSdeEvaluatedResourceExt(SdeDef sdeDef, Set<String> referenceCache) {
         for (Object obj : sdeDef.getValues()) {
             if (obj instanceof IBaseResource) {
                 IBaseResource res = (IBaseResource) obj;
                 Extension sdeCriteriaReferenceExt = createSdeCriteriaReferenceExt(sdeDef.getId());
                 String referenceValue;
                 if (sdeDef.isInstanceExpression()) {
-                    report.addContained((DomainResource) res);
                     referenceValue = createContainedResourceReferenceValue(res.getIdElement().getIdPart());
+                    if (!referenceCache.contains(referenceValue)) {
+                        referenceCache.add(referenceValue);
+                        report.addContained((DomainResource) res);
+                    }
                 } else {
                     referenceValue = createResourceReference(res.fhirType(), res.getIdElement().getIdPart());
                 }

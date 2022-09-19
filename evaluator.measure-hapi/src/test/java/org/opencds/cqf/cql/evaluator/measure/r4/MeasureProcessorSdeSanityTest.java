@@ -6,7 +6,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.HashSet;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.StringType;
 import org.testng.annotations.Test;
@@ -28,8 +27,6 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
         HashSet<String> set = new HashSet<>();
         report.getExtension().forEach(x -> set.add(x.getValue().toString()));
         assertEquals(set.size(), report.getExtension().size());
-
-        System.out.println(FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
         assertEquals( report.getEvaluatedResource().size(), 5);
 

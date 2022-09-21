@@ -1,0 +1,25 @@
+{
+    "resourceType": "ActivityDefinition",
+    "id": "activityDefinition-test",
+    "name": "ActivityDefinition_CreateAProcedure",
+    "title": "CreateProcedure",
+    "status": "draft",
+    "description": "Create the procedure.",
+    "library": [ "http://test/fhir/Library/TestActivityDefinition|1.0.0" ],
+    "kind": "MedicationRequest",
+    "productCodeableConcept": {
+        "coding": [{
+            "system": "http://test/fhir/System",
+            "code": "productCode"
+        }]
+    },
+    "dynamicValue": [
+        {
+            "path": "doNotPerform",
+            "expression": {
+                "language": "text/cql.name",
+                "expression": "ActiveProcedureStatus"
+            }
+        }
+    ]
+}

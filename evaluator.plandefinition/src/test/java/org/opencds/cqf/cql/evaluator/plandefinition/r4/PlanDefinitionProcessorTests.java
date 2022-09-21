@@ -14,6 +14,15 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .withLibrary("child-routine-visit/child_routine_visit_plan_definition.json")
             .apply()
             .isEqualsTo("child-routine-visit/child_routine_visit_careplan.json");
+        PlanDefinition.Assert.that(
+                "ChildRoutineVisit-PlanDefinition-1.0.0",
+                "Patient/ChildRoutine-Reportable",
+                null
+            )
+            .withData("child-routine-visit/child_routine_visit_patient.json")
+            .withLibrary("child-routine-visit/child_routine_visit_plan_definition.json")
+            .applyR5()
+            .isEqualsTo("child-routine-visit/child_routine_visit_bundle.json");
     }
 
     @Test
@@ -27,6 +36,15 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .withLibrary("hello-world/hello-world-patient-view-bundle.json")
             .apply()
             .isEqualsTo("hello-world/hello-world-careplan.json");
+        PlanDefinition.Assert.that(
+                "hello-world-patient-view",
+                "helloworld-patient-1",
+                "helloworld-patient-1-encounter-1"
+            )
+            .withData("hello-world/hello-world-patient-data.json")
+            .withLibrary("hello-world/hello-world-patient-view-bundle.json")
+            .applyR5()
+            .isEqualsTo("hello-world/hello-world-bundle.json");
     }
 
     @Test
@@ -50,6 +68,21 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .isEqualsTo(
                     "opioid-Rec10-patient-view/opioid-Rec10-patient-view-careplan.json"
             );
+        PlanDefinition.Assert.that(
+                "opioidcds-10-patient-view",
+                "example-rec-10-patient-view-POS-Cocaine-drugs",
+                "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
+            )
+            .withData(
+                    "opioid-Rec10-patient-view/opioid-Rec10-patient-view-patient-data.json"
+            )
+            .withLibrary(
+                    "opioid-Rec10-patient-view/opioid-Rec10-patient-view-bundle.json"
+            )
+            .applyR5()
+            .isEqualsTo(
+                    "opioid-Rec10-patient-view/opioid-Rec10-patient-view-result.json"
+            );
     }
 
     @Test
@@ -63,6 +96,15 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .withLibrary("rule-filters/RuleFilters-1.0.0-bundle.json")
             .apply()
             .isEqualsTo("rule-filters/NotReportableCarePlan.json");
+        PlanDefinition.Assert.that(
+                "plandefinition-RuleFilters-1.0.0",
+                "NotReportable",
+                null
+            )
+            .withData("rule-filters/tests-NotReportable-bundle.json")
+            .withLibrary("rule-filters/RuleFilters-1.0.0-bundle.json")
+            .applyR5()
+            .isEqualsTo("rule-filters/NotReportableBundle.json");
     }
 
     @Test
@@ -76,5 +118,14 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .withLibrary("rule-filters/RuleFilters-1.0.0-bundle.json")
             .apply()
             .isEqualsTo("rule-filters/ReportableCarePlan.json");
+        PlanDefinition.Assert.that(
+                "plandefinition-RuleFilters-1.0.0",
+                "Reportable",
+                null
+            )
+            .withData("rule-filters/tests-Reportable-bundle.json")
+            .withLibrary("rule-filters/RuleFilters-1.0.0-bundle.json")
+            .applyR5()
+            .isEqualsTo("rule-filters/ReportableBundle.json");
     }
 }

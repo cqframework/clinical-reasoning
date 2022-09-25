@@ -33,4 +33,20 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+                <version>1.22</version>
+                <configuration>
+                    <signature>
+                        <groupId>net.sf.androidscents.signature</groupId>
+                        <artifactId>android-api-level-26</artifactId>
+                        <version>8.0.0_r2</version>
+                    </signature>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

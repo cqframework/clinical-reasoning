@@ -1,8 +1,10 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +18,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.json.JSONException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
@@ -38,33 +41,33 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
+import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
-import org.testng.annotations.BeforeMethod;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import org.skyscreamer.jsonassert.JSONAssert;
 
-public class PlanDefinitionProcessorTestBase {
-    private final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-    private final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
-    private MockFhirDal fhirDal;
-    protected PlanDefinitionProcessor planDefinitionProcessor;
+public class PlanDefinition {
+    private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+    private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
 
-    private InputStream open(String asset) {
-        return PlanDefinitionProcessorTestBase.class.getResourceAsStream(asset);
+    private static InputStream open(String asset) { return PlanDefinition.class.getResourceAsStream(asset); }
+
+    public static String load(InputStream asset) throws IOException {
+        return new String(asset.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    public IBaseResource load(String asset) {
+    public static String load(String asset) throws IOException { return load(open(asset)); }
+
+    public static IBaseResource parse(String asset) {
         return jsonParser.parseResource(open(asset));
     }
 
-    @BeforeMethod
-    public void setup() {
-        // cleans in memory database at every test.
-        fhirDal = new MockFhirDal();
 
+    public static PlanDefinitionProcessor buildProcessor(FhirDal fhirDal) {
         AdapterFactory adapterFactory = new AdapterFactory();
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
         FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
@@ -83,7 +86,7 @@ public class PlanDefinitionProcessorTestBase {
                 @Override
                 public LibrarySourceProvider create(String url, List<String> headers) {
                     return new BundleFhirLibrarySourceProvider(fhirContext,
-                            (IBaseBundle) load(url), adapterFactory, libraryVersionSelector);
+                            (IBaseBundle) parse(url), adapterFactory, libraryVersionSelector);
                 }
             }
         );
@@ -100,7 +103,7 @@ public class PlanDefinitionProcessorTestBase {
 
                 @Override
                 public RetrieveProvider create(String url, List<String> headers) {
-                    return new BundleRetrieveProvider(fhirContext, (IBaseBundle) load(url));
+                    return new BundleRetrieveProvider(fhirContext, (IBaseBundle) parse(url));
                 }
             }
         );
@@ -117,7 +120,7 @@ public class PlanDefinitionProcessorTestBase {
 
                 @Override
                 public TerminologyProvider create(String url, List<String> headers) {
-                    return new BundleTerminologyProvider(fhirContext, (IBaseBundle) load(url));
+                    return new BundleTerminologyProvider(fhirContext, (IBaseBundle) parse(url));
                 }
             }
         );
@@ -136,40 +139,102 @@ public class PlanDefinitionProcessorTestBase {
         ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
 
-        planDefinitionProcessor = new PlanDefinitionProcessor(fhirContext, fhirDal, libraryProcessor, evaluator,
-            activityDefinitionProcessor, operationParametersParser);
+        return new PlanDefinitionProcessor(
+            fhirContext, fhirDal, libraryProcessor, evaluator,
+            activityDefinitionProcessor, operationParametersParser
+        );
     }
 
-    public void test(String dataAsset, String libraryAsset,
-                    String planDefinitionID, String patientID, String encounterID,
-                    String expectedCarePlan) {
-        Parameters params = new Parameters();
+    /** Fluent interface starts here **/
 
-        fhirDal.addAll(load(libraryAsset));
-        fhirDal.addAll(load(dataAsset));
+    static class Assert {
+        public static Apply that(String planDefinitionID, String patientID, String encounterID) {
+            return new Apply(planDefinitionID, patientID, encounterID);
+        }
+    }
 
-        CarePlan expected = (CarePlan) load(expectedCarePlan);
+    static class Apply {
+        private String planDefinitionID;
 
-        Endpoint endpoint = new Endpoint().setAddress(libraryAsset)
+        private String patientID;
+        private String encounterID;
+
+        private MockFhirDal fhirDal = new MockFhirDal();
+        private Endpoint dataEndpoint;
+        private Endpoint libraryEndpoint;
+        private IBaseResource baseResource;
+
+        public Apply(String planDefinitionID, String patientID, String encounterID) {
+            this.planDefinitionID = planDefinitionID;
+            this.patientID = patientID;
+            this.encounterID = encounterID;
+        }
+
+        public Apply withData(String dataAssetName) {
+            dataEndpoint = new Endpoint()
+                .setAddress(dataAssetName)
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Endpoint dataEndpoint = new Endpoint().setAddress(dataAsset)
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+            baseResource = parse(dataAssetName);
 
-        IBaseResource baseResource = load(libraryAsset);
-        Bundle bundleToSend = (Bundle)baseResource;
-        CarePlan actual = planDefinitionProcessor.apply(
-                new IdType("PlanDefinition", planDefinitionID), patientID, encounterID,
-                null, null, null, null, null,
-                null, null, null, params, null,
-//                new Bundle(), null, dataEndpoint, endpoint, endpoint);
-                bundleToSend, null, dataEndpoint, endpoint, endpoint);
+            fhirDal.addAll(baseResource);
+            return this;
+        }
 
+        public Apply withLibrary(String dataAssetName) {
+            libraryEndpoint = new Endpoint()
+                    .setAddress(dataAssetName)
+                    .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        String expectedJson = jsonParser.encodeResourceToString(expected);
-        String actualJson = jsonParser.encodeResourceToString(actual);
+            fhirDal.addAll(parse(dataAssetName));
+            return this;
+        }
 
-        //assertTrue(expected.equalsShallow(actual));
-        assertEquals(actualJson, expectedJson);
+        public GeneratedCarePlan apply() {
+            return new GeneratedCarePlan(
+                buildProcessor(fhirDal)
+                    .apply(
+                        new IdType("PlanDefinition", planDefinitionID),
+                        patientID,
+                        encounterID,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new Parameters(),
+                        null,
+                        (Bundle) baseResource,
+                        null,
+                        dataEndpoint,
+                        libraryEndpoint,
+                        libraryEndpoint
+                    )
+            );
+        }
+    }
+
+    static class GeneratedCarePlan {
+        CarePlan carePlan;
+
+        public GeneratedCarePlan(CarePlan carePlan) {
+            this.carePlan = carePlan;
+        }
+
+        public void isEqualsTo(String expectedCarePlanAssetName) {
+            try {
+                JSONAssert.assertEquals(
+                        load(expectedCarePlanAssetName),
+                        jsonParser.encodeResourceToString(carePlan),
+                        true
+                );
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+                fail("Unable to compare Jsons: " + e.getMessage());
+            }
+        }
     }
 }

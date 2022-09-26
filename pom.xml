@@ -347,6 +347,14 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- JSON Comparisons ignoring property order, whitespaces/tabs, etc. -->
+            <dependency>
+                <groupId>org.skyscreamer</groupId>
+                <artifactId>jsonassert</artifactId>
+                <version>1.5.1</version>
+                <scope>test</scope>
+            </dependency>
+
             <!-- Library mapper code gen-->
             <dependency>
                 <groupId>org.mapstruct</groupId>

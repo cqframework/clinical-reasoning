@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>1.4.7</version>
+    <version>1.4.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>evaluator.shared</name>

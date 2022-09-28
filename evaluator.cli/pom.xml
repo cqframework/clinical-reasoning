@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.cli</artifactId>
-    <version>1.4.7</version>
+    <version>1.4.8-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>evaluator.cli</name>
@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>
-        <version>1.4.7</version>
+        <version>1.4.8-SNAPSHOT</version>
     </parent>
 
     <description>CQL Evaluator - CLI</description>
@@ -37,17 +37,17 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator</artifactId>
-            <version>1.4.7</version>
+            <version>1.4.8-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.builder</artifactId>
-            <version>1.4.7</version>
+            <version>1.4.8-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.dagger</artifactId>
-            <version>1.4.7</version>
+            <version>1.4.8-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>

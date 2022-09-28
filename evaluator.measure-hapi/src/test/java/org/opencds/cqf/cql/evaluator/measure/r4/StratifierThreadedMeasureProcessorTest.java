@@ -16,7 +16,7 @@ public class StratifierThreadedMeasureProcessorTest extends BaseMeasureProcessor
     }
 
     @Test
-    public void exm74_subject_list() {
+    public void exm74_subject_list_threaded() {
         MeasureReport report = this.measureProcessor.evaluateMeasure("http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR", "2019-01-01", "2020-01-01", "subject-list", null, null, null, endpoint, endpoint, endpoint, null);
 
         MeasureReportGroupComponent mrgc = report.getGroup().get(0);

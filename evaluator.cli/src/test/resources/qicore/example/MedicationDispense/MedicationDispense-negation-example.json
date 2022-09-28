@@ -1,9 +1,14 @@
 {
   "resourceType": "MedicationDispense",
   "id": "negation-example",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-mednotdispensed"
+    ]
+  },
   "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: negation-example</p><p><b>status</b>: declined</p><p><b>statusReason</b>: Drug treatment not indicated (situation) <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '183966005' = 'Drug treatment not indicated', given as 'Drug treatment not indicated (situation)'})</span></p><p><b>medication</b>: Medication Brand Name value set <span style=\"background: LightGoldenRodYellow\">(Details : {[not stated] code 'null' = 'null)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical record number = 12345 (USUAL); active; Peter James Chalmers (OFFICIAL), Jim Chalmers , Peter James Windsor (MAIDEN); ph: (03) 5555 6473(WORK), ph: (03) 3410 5613(MOBILE), ph: (03) 5555 8834(OLD); gender: male; birthDate: 1974-12-25; </a></p><p><b>authorizingPrescription</b>: <a href=\"MedicationRequest-example.html\">Generated Summary: id: example; status: active; intent: order; ????; authoredOn: Mar 26, 2015 12:32:52 AM; </a></p><p><b>dosageInstruction</b>: </p></div>"
+    "status": "extensions",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"negation-example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-mednotdispensed.html\">QICoreMedicationDispenseNotDone</a></p></div><p><b>QICoreNotDoneRecorded</b>: 2017-01-17</p><p><b>status</b>: declined</p><p><b>statusReason</b>: Drug treatment not indicated (situation) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#183966005)</span></p><p><b>medication</b>: Not Done Value Set: Ophthalmic Antihistamines <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (Not done value set: <a href=\"http://cts.nlm.nih.gov/fhir/1.3.6.1.4.1.6997.4.1.2.268.13.35211.1.13.1.999.321\">http://cts.nlm.nih.gov/fhir/1.3.6.1.4.1.6997.4.1.2.268.13.35211.1.13.1.999.321</a>)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Patient/example</a> \" CHALMERS\"</p><p><b>authorizingPrescription</b>: <a href=\"MedicationRequest-example.html\">MedicationRequest/example</a></p></div>"
   },
   "extension": [
     {
@@ -22,17 +27,13 @@
     ]
   },
   "medicationCodeableConcept": {
-    "coding": [
+    "extension": [
       {
-        "extension": [
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            "valueUri": "http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.88.12.80.16"
-          }
-        ]
+        "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet",
+        "valueCanonical": "http://cts.nlm.nih.gov/fhir/1.3.6.1.4.1.6997.4.1.2.268.13.35211.1.13.1.999.321"
       }
     ],
-    "text": "Medication Brand Name value set"
+    "text": "Not Done Value Set: Ophthalmic Antihistamines"
   },
   "subject": {
     "reference": "Patient/example"

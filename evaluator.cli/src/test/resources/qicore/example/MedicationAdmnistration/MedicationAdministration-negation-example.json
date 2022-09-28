@@ -1,9 +1,14 @@
 {
   "resourceType": "MedicationAdministration",
   "id": "negation-example",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-mednotadministered"
+    ]
+  },
   "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: negation-example</p><p><b>status</b>: not-done</p><p><b>statusReason</b>: Drug treatment not indicated (situation) <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '183966005' = 'Drug treatment not indicated', given as 'Drug treatment not indicated (situation)'})</span></p><p><b>medication</b>: Medication Brand Name value set <span style=\"background: LightGoldenRodYellow\">(Details : {[not stated] code 'null' = 'null)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical record number = 12345 (USUAL); active; Peter James Chalmers (OFFICIAL), Jim Chalmers , Peter James Windsor (MAIDEN); ph: (03) 5555 6473(WORK), ph: (03) 3410 5613(MOBILE), ph: (03) 5555 8834(OLD); gender: male; birthDate: 1974-12-25; </a></p><p><b>context</b>: <a href=\"Encounter-example.html\">Generated Summary: id: example; status: in-progress; <span title=\"{http://terminology.hl7.org/CodeSystem/v3-ActCode IMP}\">inpatient encounter</span>; <span title=\"Codes: {http://www.ama-assn.org/go/cpt 99223}\">Inpatient Hospital Care</span></a></p><p><b>supportingInformation</b>: <a href=\"Condition-example.html\">Generated Summary: id: example; <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/condition-clinical active}\">Active</span>; <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/condition-ver-status confirmed}\">Confirmed</span>; <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/condition-category problem-list-item}\">Problem List Item</span>; <span title=\"Codes: {http://snomed.info/sct 24484000}\">Severe (severity modifier)</span>; <span title=\"Codes: {http://snomed.info/sct 39065001}\">Burnt Ear</span>; <span title=\"Codes: {http://snomed.info/sct 49521004}\">Left Ear</span>; onset: May 24, 2012 12:00:00 AM; recordedDate: May 24, 2012 12:00:00 AM</a></p><p><b>effective</b>: Jan 15, 2015 1:30:00 PM --&gt; Jan 15, 2015 1:30:00 PM</p><p><b>request</b>: <a href=\"MedicationRequest-example.html\">Generated Summary: id: example; status: active; intent: order; ????; authoredOn: Mar 26, 2015 12:32:52 AM; </a></p><p><b>note</b>: Patient started Bupropion this morning - will administer in a reduced dose tomorrow</p><h3>Dosages</h3><table class=\"grid\"><tr><td>-</td><td><b>Route</b></td><td><b>Dose</b></td></tr><tr><td>*</td><td>Intravenous route (qualifier value) <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '47625008' = 'Intravenous route', given as 'Intravenous route (qualifier value)'})</span></td><td>3 mg<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code mg = 'mg')</span></td></tr></table></div>"
+    "status": "extensions",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"negation-example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-mednotadministered.html\">QICoreMedicationAdministrationNotDone</a></p></div><p><b>QICoreNotDoneRecorded</b>: 2015-01-15</p><p><b>status</b>: not-done</p><p><b>statusReason</b>: Drug treatment not indicated (situation) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#183966005)</span></p><p><b>medication</b>: Not Done Value Set: Low Dose Unfractionated Heparin for VTE Prophylaxis <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (Not done value set: <a href=\"http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.88.12.80.16\">http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.88.12.80.16</a>)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Patient/example</a> \" CHALMERS\"</p><p><b>context</b>: <a href=\"Encounter-example.html\">Encounter/example</a></p><p><b>supportingInformation</b>: <a href=\"Condition-example.html\">Condition/example</a></p><p><b>effective</b>: 2015-01-15 02:30:00+0100 --&gt; 2015-01-15 02:30:00+0100</p><p><b>request</b>: <a href=\"MedicationRequest-example.html\">MedicationRequest/example</a></p><p><b>note</b>: Patient started Bupropion this morning - will administer in a reduced dose tomorrow</p><h3>Dosages</h3><table class=\"grid\"><tr><td>-</td><td><b>Route</b></td><td><b>Dose</b></td></tr><tr><td>*</td><td>Intravenous route (qualifier value) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#47625008)</span></td><td>3 mg<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code mg = 'mg')</span></td></tr></table></div>"
   },
   "extension": [
     {
@@ -24,17 +29,13 @@
     }
   ],
   "medicationCodeableConcept": {
-    "coding": [
+    "extension": [
       {
-        "extension": [
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            "valueUri": "http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.88.12.80.16"
-          }
-        ]
+        "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet",
+        "valueCanonical": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.88.12.80.16"
       }
     ],
-    "text": "Medication Brand Name value set"
+    "text": "Not Done Value Set: Low Dose Unfractionated Heparin for VTE Prophylaxis"
   },
   "subject": {
     "reference": "Patient/example"

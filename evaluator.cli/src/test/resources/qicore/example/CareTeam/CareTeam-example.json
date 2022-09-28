@@ -3,7 +3,7 @@
   "id": "example",
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: example</p><p><b>status</b>: active</p><p><b>subject</b>: Eve Everywoman</p><h3>Participants</h3><table class=\"grid\"><tr><td>-</td><td><b>Role</b></td><td><b>Member</b></td></tr><tr><td>*</td><td>MW - Midwife <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '75271001' = 'Professional midwife', given as 'MW - Midwife'})</span></td><td>Mabel Midwife</td></tr></table></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"example\" </p></div><p><b>status</b>: active</p><p><b>subject</b>: <span>: Eve Everywoman</span></p><h3>Participants</h3><table class=\"grid\"><tr><td>-</td><td><b>Role</b></td><td><b>Member</b></td></tr><tr><td>*</td><td>MW - Midwife <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#75271001)</span></td><td><span>: Mabel Midwife</span></td></tr></table></div>"
   },
   "status": "active",
   "subject": {

@@ -8,7 +8,7 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: note-example</p><p><b>meta</b>: </p><p><b>status</b>: final</p><p><b>category</b>: Radiology <span style=\"background: LightGoldenRodYellow\">(Details : {LOINC code 'LP29684-5' = 'LP29684-5', given as 'Radiology'})</span></p><p><b>code</b>: Portable XR Chest Views <span style=\"background: LightGoldenRodYellow\">(Details : {LOINC code '30746-2' = 'Portable XR Chest Views', given as 'Portable XR Chest Views'})</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical record number = 12345 (USUAL); active; Peter James Chalmers (OFFICIAL), Jim Chalmers , Peter James Windsor (MAIDEN); ph: (03) 5555 6473(WORK), ph: (03) 3410 5613(MOBILE), ph: (03) 5555 8834(OLD); gender: male; birthDate: 1974-12-25; </a></p><p><b>effective</b>: Feb 3, 2019 7:43:30 PM</p><p><b>presentedForm</b>: </p></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2><span title=\"Codes: {http://loinc.org 30746-2}\">Portable XR Chest Views</span> (<span title=\"Codes: {http://loinc.org LP29684-5}\">Radiology</span>) </h2><table class=\"grid\"><tr><td>Subject</td><td><b>Jim Chalmers </b> male, DoB: 1974-12-25 ( Medical record number: 12345 (USUAL))</td></tr><tr><td>When For</td><td>2019-02-03 07:43:30+0000</td></tr></table><p><b>Report Details</b></p></div>"
   },
   "status": "final",
   "category": [

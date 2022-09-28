@@ -7,12 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -52,6 +47,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				this.fhirContext, this.bundle,
 				this.fhirContext.getResourceDefinition(dataType).getImplementingClass());
 
+		resources = this.filterByTemplateId(dataType, templateId, resources);
 		resources = this.filterByContext(dataType, context, contextPath, contextValue, resources);
 		resources = this.filterByTerminology(dataType, codePath, codes, valueSet, resources);
 
@@ -138,6 +134,17 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				continue;
 			}
 
+			if (values != null && values.size() == 1 && values.get(0).fhirType().equals("CodeableConcept")) {
+				String codeValueSet = getValueSetFromCode(values.get(0));
+				if (codeValueSet != null) {
+					if (valueSet != null && codeValueSet.equals(valueSet)) {
+						filtered.add(res);
+					}
+					// TODO: If the value sets are not equal by name, test whether they have the same expansion...
+					continue;
+				}
+			}
+
 			final List<Code> resourceCodes = this.codeUtil.getElmCodesFromObject(values);
 			if (resourceCodes == null) {
 				continue;
@@ -155,6 +162,38 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		}
 
 		return filtered;
+	}
+
+	private List<? extends IBaseResource> filterByTemplateId(final String dataType, final String templateId, final List<? extends IBaseResource> resources) {
+		if (templateId == null || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
+			logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
+			return resources;
+		}
+
+		final List<IBaseResource> filtered = new ArrayList<>();
+		for (final IBaseResource res : resources) {
+			if (res.getMeta() != null && res.getMeta().getProfile() != null) {
+				for (IPrimitiveType<?> profile : res.getMeta().getProfile()) {
+					if (profile.hasValue() && profile.getValueAsString().equals(templateId)) {
+						filtered.add(res);
+					}
+				}
+			}
+		}
+
+		return filtered;
+	}
+
+	// Super hackery, just to get this running for connectathon
+	private String getValueSetFromCode(IBase base) {
+		if (base instanceof org.hl7.fhir.r4.model.CodeableConcept) {
+			org.hl7.fhir.r4.model.CodeableConcept cc = (org.hl7.fhir.r4.model.CodeableConcept)base;
+			org.hl7.fhir.r4.model.Extension e = cc.getExtensionByUrl("http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
+			if (e != null && e.hasValue()) {
+				return e.getValueAsPrimitive().getValueAsString();
+			}
+		}
+		return null;
 	}
 
 	private List<? extends IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,

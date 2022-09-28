@@ -8,22 +8,23 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>QICore Diagnostic Order Precondition</h2><div><p>The condition, state, or problem that the patient is in or has prior to a therapy or procedure. This captures temporal (temporary circumstances) that have bearing on the data that it qualifies but will not necessarily modify its meaning. Things like 'after activity', 'at rest', or 'post-op'.</p>\n</div><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/diagnosticorder-precondition defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">1<a name=\"diagnosticorder-precondition-1\"> </a></td><td>After activity</td><td>The diagnostic test was or should be performed after the patient has engaged in physical activity</td></tr><tr><td style=\"white-space:nowrap\">2<a name=\"diagnosticorder-precondition-2\"> </a></td><td>At rest</td><td>The diagnostic test was or should be performed while the patient is at rest</td></tr><tr><td style=\"white-space:nowrap\">3<a name=\"diagnosticorder-precondition-3\"> </a></td><td>Post-op</td><td>The diagnostic test was or should be performed after the patient operation</td></tr></table></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/diagnosticorder-precondition defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">1<a name=\"diagnosticorder-precondition-1\"> </a></td><td>After activity</td><td>The diagnostic test was or should be performed after the patient has engaged in physical activity</td></tr><tr><td style=\"white-space:nowrap\">2<a name=\"diagnosticorder-precondition-2\"> </a></td><td>At rest</td><td>The diagnostic test was or should be performed while the patient is at rest</td></tr><tr><td style=\"white-space:nowrap\">3<a name=\"diagnosticorder-precondition-3\"> </a></td><td>Post-op</td><td>The diagnostic test was or should be performed after the patient operation</td></tr></table></div>"
   },
   "url": "http://hl7.org/fhir/us/qicore/CodeSystem/diagnosticorder-precondition",
-  "version": "4.0.0",
+  "version": "4.1.1",
   "name": "DiagnosticOrderPrecondition",
   "title": "QICore Diagnostic Order Precondition",
   "status": "draft",
   "experimental": false,
-  "date": "2018-08-22T00:00:00+00:00",
-  "publisher": "Health Level Seven, Inc. - CQI WG",
+  "date": "2018-08-22",
+  "publisher": "http://www.hl7.org/Special/committees/cqi/index.cfm",
   "contact": [
     {
+      "name": "Clinical Quality Information WG",
       "telecom": [
         {
           "system": "url",
-          "value": "http://hl7.org/special/committees/CQI"
+          "value": "http://www.hl7.org/Special/committees/cqi"
         }
       ]
     }
@@ -34,8 +35,7 @@
       "coding": [
         {
           "system": "urn:iso:std:iso:3166",
-          "code": "US",
-          "display": "United States of America"
+          "code": "US"
         }
       ]
     }

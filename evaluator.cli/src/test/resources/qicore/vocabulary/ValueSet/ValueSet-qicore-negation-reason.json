@@ -3,23 +3,33 @@
   "id": "qicore-negation-reason",
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>Negation Reason Codes</h2><div><p>This value set defines the set of codes that can be used to indicate the reason an action was not taken</p>\n</div><ul><li>Import all the codes that are contained in http://cts.nlm.nih.gov/fhir/2.16.840.1.113762.1.4.1021.56, http://cts.nlm.nih.gov/fhir/2.16.840.1.113762.1.4.1021.58, http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.526.3.1009</li></ul></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Import all the codes that are contained in <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1021.56/expansion\">http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.56</a>, <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1021.58/expansion\">http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.58</a>, <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113883.3.526.3.1009/expansion\">http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1009</a></li></ul></div>"
   },
   "url": "http://hl7.org/fhir/us/qicore/ValueSet/qicore-negation-reason",
-  "version": "4.0.0",
+  "version": "4.1.1",
   "name": "NegationReasonCodes",
   "title": "Negation Reason Codes",
   "status": "active",
-  "date": "2018-12-05T00:00:00+00:00",
-  "publisher": "Health Level Seven, Inc. - CQI WG",
+  "date": "2018-12-05",
+  "publisher": "http://www.hl7.org/Special/committees/cqi/index.cfm",
+  "contact": [
+    {
+      "name": "Clinical Quality Information WG",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/cqi"
+        }
+      ]
+    }
+  ],
   "description": "This value set defines the set of codes that can be used to indicate the reason an action was not taken",
   "jurisdiction": [
     {
       "coding": [
         {
           "system": "urn:iso:std:iso:3166",
-          "code": "US",
-          "display": "United States of America"
+          "code": "US"
         }
       ]
     }
@@ -29,9 +39,9 @@
     "include": [
       {
         "valueSet": [
-          "http://cts.nlm.nih.gov/fhir/2.16.840.1.113762.1.4.1021.56",
-          "http://cts.nlm.nih.gov/fhir/2.16.840.1.113762.1.4.1021.58",
-          "http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.526.3.1009"
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.56",
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.58",
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1009"
         ]
       }
     ]

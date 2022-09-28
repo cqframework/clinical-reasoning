@@ -8,15 +8,21 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: example</p><p><b>meta</b>: </p><p><b>contained</b>: </p><p><b>code</b>: alemtuzumab 10 MG/ML [Lemtrada] <span style=\"background: LightGoldenRodYellow\">(Details : {RxNorm code '1594660' = 'alemtuzumab 10 MG/ML [Lemtrada]', given as 'alemtuzumab 10 MG/ML [Lemtrada]'})</span></p><p><b>manufacturer</b>: unknown resource contained</p><p><b>form</b>: Conventional release solution for injection (dose form) <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '385219001' = 'Solution for injection', given as 'Conventional release solution for injection (dose form)'})</span></p><h3>Ingredients</h3><table class=\"grid\"><tr><td>-</td><td><b>Item[x]</b></td><td><b>Strength</b></td></tr><tr><td>*</td><td>Alemtuzumab (substance) <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '129472003' = 'Alemtuzumab', given as 'Alemtuzumab (substance)'})</span></td><td>12 mg<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code mg = 'mg')</span>/1.2 mL<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code mL = 'mL')</span></td></tr></table><h3>Batches</h3><table class=\"grid\"><tr><td>-</td><td><b>LotNumber</b></td><td><b>ExpirationDate</b></td></tr><tr><td>*</td><td>9494788</td><td>May 22, 2017 12:00:00 AM</td></tr></table></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-medication.html\">QICoreMedication</a></p></div><p><b>code</b>: alemtuzumab 10 MG/ML [Lemtrada] <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-v3-rxNorm.html\">RxNorm</a>#1594660)</span></p><p><b>manufacturer</b>: <a name=\"org6\"> </a></p><blockquote><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"org6\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-organization.html\">QICoreOrganization</a></p></div><p><b>identifier</b>: id: ORG-006 (TEMP)</p><p><b>active</b>: true</p><p><b>name</b>: Genzyme</p><p><b>telecom</b>: <a href=\"https://www.sanofigenzyme.com/\">https://www.sanofigenzyme.com/</a></p><p><b>address</b>: Cambridge MA USA (WORK)</p></blockquote><p><b>form</b>: Conventional release solution for injection (dose form) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#385219001)</span></p><h3>Ingredients</h3><table class=\"grid\"><tr><td>-</td><td><b>Item[x]</b></td><td><b>Strength</b></td></tr><tr><td>*</td><td>Alemtuzumab (substance) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#129472003)</span></td><td>12 mg<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code mg = 'mg')</span>/1.2 mL<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code mL = 'mL')</span></td></tr></table><h3>Batches</h3><table class=\"grid\"><tr><td>-</td><td><b>LotNumber</b></td><td><b>ExpirationDate</b></td></tr><tr><td>*</td><td>9494788</td><td>2017-05-22</td></tr></table></div>"
   },
   "contained": [
     {
       "resourceType": "Organization",
       "id": "org6",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-organization"
+        ]
+      },
       "identifier": [
         {
-          "system": "http://example.org/identifier",
+          "use": "temp",
+          "system": "urn:oid:2.16.840.1.113883.4.336",
           "value": "ORG-006"
         }
       ],

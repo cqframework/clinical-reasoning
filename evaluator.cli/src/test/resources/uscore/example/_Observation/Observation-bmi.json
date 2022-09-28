@@ -3,7 +3,8 @@
   "id": "bmi",
   "meta": {
     "profile": [
-      "http://hl7.org/fhir/StructureDefinition/vitalsigns"
+      "http://hl7.org/fhir/StructureDefinition/vitalsigns",
+      "http://hl7.org/fhir/StructureDefinition/bmi"
     ]
   },
   "text": {

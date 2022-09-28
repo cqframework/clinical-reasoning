@@ -8,22 +8,23 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>QICore Communication Medium Codes</h2><div><p>Value Set for QICore Communication Medium (Example)</p>\n</div><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/communication-medium defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">unspecified<a name=\"communication-medium-unspecified\"> </a></td><td>Not Specified</td><td>The communication medium has not been specified</td></tr><tr><td style=\"white-space:nowrap\">telephone<a name=\"communication-medium-telephone\"> </a></td><td>Telephone</td><td>The message was communicated via telephone</td></tr><tr><td style=\"white-space:nowrap\">fax<a name=\"communication-medium-fax\"> </a></td><td>Facsimile (fax)</td><td>The message was sent via a fax transmission</td></tr><tr><td style=\"white-space:nowrap\">device<a name=\"communication-medium-device\"> </a></td><td>Via medical device</td><td>The message was communicated via a medical device</td></tr><tr><td style=\"white-space:nowrap\">video<a name=\"communication-medium-video\"> </a></td><td>Video call</td><td>The message was communicated via a video call</td></tr><tr><td style=\"white-space:nowrap\">voicemail<a name=\"communication-medium-voicemail\"> </a></td><td>Voice message (voicemail)</td><td>The message was left on the recipient's voicemail system</td></tr><tr><td style=\"white-space:nowrap\">text<a name=\"communication-medium-text\"> </a></td><td>Text message (SMS)</td><td>The message was sent via text message (SMS)</td></tr><tr><td style=\"white-space:nowrap\">social-media<a name=\"communication-medium-social-media\"> </a></td><td>Social media</td><td>The message was communicated via a social media platform</td></tr><tr><td style=\"white-space:nowrap\">in-person<a name=\"communication-medium-in-person\"> </a></td><td>In person</td><td>The message was communicated in person</td></tr><tr><td style=\"white-space:nowrap\">mail<a name=\"communication-medium-mail\"> </a></td><td>Mail (conventional)</td><td>The message was posted via conventional mail</td></tr><tr><td style=\"white-space:nowrap\">email<a name=\"communication-medium-email\"> </a></td><td>Electronic mail (email)</td><td>The message was sent as an email</td></tr><tr><td style=\"white-space:nowrap\">portal<a name=\"communication-medium-portal\"> </a></td><td>Patient portal</td><td>The message was communicated via a patient portal</td></tr></table></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/communication-medium defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">unspecified<a name=\"communication-medium-unspecified\"> </a></td><td>Not Specified</td><td>The communication medium has not been specified</td></tr><tr><td style=\"white-space:nowrap\">telephone<a name=\"communication-medium-telephone\"> </a></td><td>Telephone</td><td>The message was communicated via telephone</td></tr><tr><td style=\"white-space:nowrap\">fax<a name=\"communication-medium-fax\"> </a></td><td>Facsimile (fax)</td><td>The message was sent via a fax transmission</td></tr><tr><td style=\"white-space:nowrap\">device<a name=\"communication-medium-device\"> </a></td><td>Via medical device</td><td>The message was communicated via a medical device</td></tr><tr><td style=\"white-space:nowrap\">video<a name=\"communication-medium-video\"> </a></td><td>Video call</td><td>The message was communicated via a video call</td></tr><tr><td style=\"white-space:nowrap\">voicemail<a name=\"communication-medium-voicemail\"> </a></td><td>Voice message (voicemail)</td><td>The message was left on the recipient's voicemail system</td></tr><tr><td style=\"white-space:nowrap\">text<a name=\"communication-medium-text\"> </a></td><td>Text message (SMS)</td><td>The message was sent via text message (SMS)</td></tr><tr><td style=\"white-space:nowrap\">social-media<a name=\"communication-medium-social-media\"> </a></td><td>Social media</td><td>The message was communicated via a social media platform</td></tr><tr><td style=\"white-space:nowrap\">in-person<a name=\"communication-medium-in-person\"> </a></td><td>In person</td><td>The message was communicated in person</td></tr><tr><td style=\"white-space:nowrap\">mail<a name=\"communication-medium-mail\"> </a></td><td>Mail (conventional)</td><td>The message was posted via conventional mail</td></tr><tr><td style=\"white-space:nowrap\">email<a name=\"communication-medium-email\"> </a></td><td>Electronic mail (email)</td><td>The message was sent as an email</td></tr><tr><td style=\"white-space:nowrap\">portal<a name=\"communication-medium-portal\"> </a></td><td>Patient portal</td><td>The message was communicated via a patient portal</td></tr></table></div>"
   },
   "url": "http://hl7.org/fhir/us/qicore/CodeSystem/communication-medium",
-  "version": "4.0.0",
+  "version": "4.1.1",
   "name": "CommunicationMedium",
   "title": "QICore Communication Medium Codes",
   "status": "draft",
   "experimental": false,
-  "date": "2018-08-22T00:00:00+00:00",
-  "publisher": "Health Level Seven, Inc. - CQI WG",
+  "date": "2018-08-22",
+  "publisher": "http://www.hl7.org/Special/committees/cqi/index.cfm",
   "contact": [
     {
+      "name": "Clinical Quality Information WG",
       "telecom": [
         {
           "system": "url",
-          "value": "http://hl7.org/special/committees/CQI"
+          "value": "http://www.hl7.org/Special/committees/cqi"
         }
       ]
     }
@@ -34,8 +35,7 @@
       "coding": [
         {
           "system": "urn:iso:std:iso:3166",
-          "code": "US",
-          "display": "United States of America"
+          "code": "US"
         }
       ]
     }

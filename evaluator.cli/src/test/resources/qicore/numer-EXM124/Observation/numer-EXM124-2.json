@@ -3,7 +3,7 @@
   "id": "numer-EXM124-3",
   "meta": {
     "profile": [
-        "http://hl7.org/fhir/observation"
+        "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
     ]
   },
   "status": "final",

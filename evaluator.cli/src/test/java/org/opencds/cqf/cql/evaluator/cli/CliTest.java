@@ -221,6 +221,15 @@ public class CliTest {
         //assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
         assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestEncounterDiagnosisCardinality=true"));
+        //assertTrue(output.contains("TestProcedureNotDoneElements=[Procedure(id=negation-example), Procedure(id=negation-with-code-example)]"));
+        assertTrue(output.contains("TestGeneralDeviceNotRequested=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]"));
+        assertTrue(output.contains("TestGeneralDeviceNotRequestedCode=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]"));
+        assertTrue(output.contains("TestGeneralDeviceNotRequestedValueSet=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]"));
+        assertTrue(output.contains("TestGeneralDeviceNotRequestedActual=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]"));
+        assertTrue(output.contains("TestGeneralDeviceNotRequestedExplicit=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]"));
+        assertTrue(output.contains("TestGeneralDeviceNotRequestedCodeExplicit=[DeviceRequest(id=negation-with-code-example)]"));
+        assertTrue(output.contains("TestGeneralDeviceNotRequestedValueSetExplicit=[DeviceRequest(id=negation-example)]"));
     }
 
     @Test
@@ -341,6 +350,36 @@ public class CliTest {
         assertTrue(output.contains("TestConditions=[Condition(id=Condition-17-94)]"));
         assertTrue(output.contains("TestConditionsViaFunction=[Condition(id=Condition-17-94)]"));
         assertTrue(output.contains("TestConditionsDirectly=[Condition(id=Condition-17-94)]"));
+    }
+
+    @Test
+    public void testQICoreSupplementalDataElements() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-lu="+ testResourcePath + "/qicore",
+                "-ln=SupplementalDataElements_QICore4",
+                "-lv=2.0.0",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/qicore",
+                "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("SDE Ethnicity=[Code { code: 2184-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Dominican }, Code { code: 2148-5, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Mexican }]"));
+        assertTrue(output.contains("SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
+        assertTrue(output.contains("SDE Payer=[Tuple {\n" +
+                "\t\"code\": Concept {\n" +
+                "\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n" +
+                "}\n" +
+                "\t\"period\": Interval[2011-05-23, 2012-05-23]\n" +
+                "}]"));
+        assertTrue(output.contains("SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));
     }
 
     @Test

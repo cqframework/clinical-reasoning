@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>1.4.7-SNAPSHOT</version>
+    <version>1.4.7</version>
     <packaging>pom</packaging>
 
     <name>evaluator.shared</name>
@@ -17,8 +17,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cql-translator.version>1.5.12-SNAPSHOT</cql-translator.version>
-        <cql-engine.version>1.5.10-SNAPSHOT</cql-engine.version>
+        <cql-translator.version>1.5.12</cql-translator.version>
+        <cql-engine.version>1.5.10</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>5.6.3</hapi.version>

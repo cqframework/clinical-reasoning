@@ -8,12 +8,13 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: example</p><p><b>meta</b>: </p><p><b>identifier</b>: 23</p><p><b>active</b>: true</p><p><b>name</b>: Adam Careful </p><p><b>address</b>: 534 Erewhon St PleasantVille UT 84414 (HOME)</p><h3>Qualifications</h3><table class=\"grid\"><tr><td>-</td><td><b>Identifier</b></td><td><b>Code</b></td><td><b>Period</b></td><td><b>Issuer</b></td></tr><tr><td>*</td><td>12345</td><td>Bachelor of Science <span style=\"background: LightGoldenRodYellow\">(Details : {http://terminology.hl7.org/CodeSystem/v2-0360|2.7 code 'BS' = 'Bachelor of Science', given as 'Bachelor of Science'})</span></td><td>Jan 1, 1995 12:00:00 AM --&gt; (ongoing)</td><td>Example University</td></tr></table></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-practitioner.html\">QICorePractitioner</a></p></div><p><b>identifier</b>: id: Practitioner-23 (TEMP)</p><p><b>active</b>: true</p><p><b>name</b>: Adam Careful </p><p><b>address</b>: 534 Erewhon St PleasantVille UT 84414 (HOME)</p><h3>Qualifications</h3><table class=\"grid\"><tr><td>-</td><td><b>Identifier</b></td><td><b>Code</b></td><td><b>Period</b></td><td><b>Issuer</b></td></tr><tr><td>*</td><td>id: 12345</td><td>Bachelor of Science <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://hl7.org/fhir/R4/v2/0360/2.7/index.html\">v2 table 0360, Version 2.7</a>#BS)</span></td><td>1995 --&gt; (ongoing)</td><td><span>: Example University</span></td></tr></table></div>"
   },
   "identifier": [
     {
-      "system": "http://www.acme.org/practitioners",
-      "value": "23"
+      "use": "temp",
+      "system": "urn:oid:2.16.840.1.113883.4.336",
+      "value": "Practitioner-23"
     }
   ],
   "active": true,

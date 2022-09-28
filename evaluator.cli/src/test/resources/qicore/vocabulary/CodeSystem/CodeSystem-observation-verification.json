@@ -8,22 +8,23 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>QICore Observation Verification Method</h2><div><p>Code for method by which the observation result was validated, e.g., human review, sliding average.</p>\n</div><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/observation-verification defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">1<a name=\"observation-verification-1\"> </a></td><td>Human review</td><td>The observation was reviewed and verified by a person</td></tr><tr><td style=\"white-space:nowrap\">2<a name=\"observation-verification-2\"> </a></td><td>Sliding average</td><td>The observation was verified against a sliding average</td></tr></table></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/observation-verification defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">1<a name=\"observation-verification-1\"> </a></td><td>Human review</td><td>The observation was reviewed and verified by a person</td></tr><tr><td style=\"white-space:nowrap\">2<a name=\"observation-verification-2\"> </a></td><td>Sliding average</td><td>The observation was verified against a sliding average</td></tr></table></div>"
   },
   "url": "http://hl7.org/fhir/us/qicore/CodeSystem/observation-verification",
-  "version": "4.0.0",
+  "version": "4.1.1",
   "name": "ObservationVerification",
-  "title": "QICore Observation Verification Method",
+  "title": "QICore Observation Verification Method Codes",
   "status": "draft",
   "experimental": false,
-  "date": "2018-08-22T00:00:00+00:00",
-  "publisher": "Health Level Seven, Inc. - CQI WG",
+  "date": "2018-08-22",
+  "publisher": "http://www.hl7.org/Special/committees/cqi/index.cfm",
   "contact": [
     {
+      "name": "Clinical Quality Information WG",
       "telecom": [
         {
           "system": "url",
-          "value": "http://hl7.org/special/committees/CQI"
+          "value": "http://www.hl7.org/Special/committees/cqi"
         }
       ]
     }
@@ -34,8 +35,7 @@
       "coding": [
         {
           "system": "urn:iso:std:iso:3166",
-          "code": "US",
-          "display": "United States of America"
+          "code": "US"
         }
       ]
     }

@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,10 +46,12 @@ import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
+import org.opencds.cqf.cql.evaluator.measure.MeasureReportValidator;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
 import org.testng.annotations.Test;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 @Test(singleThreaded = true)
@@ -167,7 +169,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Arrays.asList(jane_doe().getId(),
                 john_doe().getId()), measure, retrieveProvider);
         checkStratification(report);
-
     }
 
     @Test
@@ -187,6 +188,13 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
                 measure, retrieveProvider);
         checkEvidence(patient, report);
+        validateReport(report);
+    }
+
+    private void validateReport(MeasureReport report) {
+        var validator = new MeasureReportValidator(FhirVersionEnum.R4);
+        var result = validator.validate(report);
+        assertEquals(report, result);
     }
 
     private void checkStratification(MeasureReport report) {

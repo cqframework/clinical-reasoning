@@ -76,6 +76,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
                 measure, retrieveProvider);
         checkEvidence(patient, report);
+        validateReport(report);
     }
 
     @Test
@@ -93,6 +94,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
                 measure, retrieveProvider);
         checkEvidence(patient, report);
+        validateReport(report);
     }
 
     @Test
@@ -112,6 +114,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
                 measure, retrieveProvider);
         checkEvidence(patient, report);
+        validateReport(report);
     }
 
     @Test
@@ -130,6 +133,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
         checkEvidence(patient, report);
+        validateReport(report);
     }
 
     @Test
@@ -148,6 +152,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
                 measure, retrieveProvider);
         checkEvidence(patient, report);
+        validateReport(report);
     }
 
     @Test
@@ -169,6 +174,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Arrays.asList(jane_doe().getId(),
                 john_doe().getId()), measure, retrieveProvider);
         checkStratification(report);
+        validateReport(report);
     }
 
     @Test

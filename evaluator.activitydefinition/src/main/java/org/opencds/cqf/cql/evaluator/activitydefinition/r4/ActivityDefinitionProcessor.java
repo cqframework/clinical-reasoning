@@ -64,7 +64,7 @@ public class ActivityDefinitionProcessor {
             IBaseResource terminologyEndpoint, IBaseResource dataEndpoint)
             throws FHIRException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         requireNonNull(subjectId, "subjectId can not be null");
-        IBaseResource activityDefinitionResource = this.fhirDal.read(theId);
+        var activityDefinitionResource = this.fhirDal.read(theId);
         ActivityDefinition activityDefinition = null;
         if (activityDefinitionResource != null && activityDefinitionResource instanceof ActivityDefinition) {
             activityDefinition = (ActivityDefinition) activityDefinitionResource;
@@ -92,37 +92,42 @@ public class ActivityDefinitionProcessor {
         }
 
         switch (result.fhirType()) {
-        case "ServiceRequest":
-            result = resolveServiceRequest(activityDefinition, patientId, practitionerId, organizationId);
-            break;
+            case "ServiceRequest":
+                result = resolveServiceRequest(activityDefinition, patientId, practitionerId, organizationId);
+                break;
 
-        case "MedicationRequest":
-            result = resolveMedicationRequest(activityDefinition, patientId);
-            break;
+            case "MedicationRequest":
+                result = resolveMedicationRequest(activityDefinition, patientId);
+                break;
 
-        case "SupplyRequest":
-            result = resolveSupplyRequest(activityDefinition, practitionerId, organizationId);
-            break;
+            case "SupplyRequest":
+                result = resolveSupplyRequest(activityDefinition, practitionerId, organizationId);
+                break;
 
-        case "Procedure":
-            result = resolveProcedure(activityDefinition, patientId);
-            break;
+            case "Procedure":
+                result = resolveProcedure(activityDefinition, patientId);
+                break;
 
-        case "DiagnosticReport":
-            result = resolveDiagnosticReport(activityDefinition, patientId);
-            break;
+            case "DiagnosticReport":
+                result = resolveDiagnosticReport(activityDefinition, patientId);
+                break;
 
-        case "Communication":
-            result = resolveCommunication(activityDefinition, patientId);
-            break;
+            case "Communication":
+                result = resolveCommunication(activityDefinition, patientId);
+                break;
 
-        case "CommunicationRequest":
-            result = resolveCommunicationRequest(activityDefinition, patientId);
-            break;
+            case "CommunicationRequest":
+                result = resolveCommunicationRequest(activityDefinition, patientId);
+                break;
 
-        case "Task":
-            result = resolveTask(activityDefinition, patientId, organizationId);
-            break;
+            case "Task":
+                result = resolveTask(activityDefinition, patientId, organizationId);
+                break;
+
+            default:
+                var msg = "Unsupported activity type: " + result.fhirType();
+                logger.error(msg);
+                throw new RuntimeException(msg);
         }
 
         for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition

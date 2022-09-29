@@ -1,10 +1,14 @@
 {
     "cSpell.words": [
+        "activitydefinition",
         "argfile",
+        "Codeable",
         "Configurer",
         "CONTINUOUSVARIABLE",
         "DENOMINATOREXCEPTION",
         "DENOMINATOREXCLUSION",
+        "dstu",
+        "Fhir",
         "fhirpath",
         "INITIALPOPULATION",
         "JXSON",
@@ -18,7 +22,9 @@
         "mrgsc",
         "numer",
         "NUMERATOREXCLUSION",
+        "opencds",
         "PATIENTLIST",
+        "plandefinition",
         "ppca",
         "qicore",
         "sdes",
@@ -50,5 +56,5 @@
 		"**/.project": true,
 		"**/.settings": true,
 		"**/.factorypath": true
-	}
+    }
 }

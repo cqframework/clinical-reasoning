@@ -44,11 +44,12 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
+import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -190,6 +191,32 @@ public class PlanDefinition {
             return this;
         }
 
+        public GeneratedBundle applyR5() {
+            return new GeneratedBundle(
+                buildProcessor(fhirDal)
+                    .applyR5(
+                        new IdType("PlanDefinition", planDefinitionID),
+                        patientID,
+                        encounterID,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new Parameters(),
+                        null,
+                        (Bundle) baseResource,
+                        null,
+                        dataEndpoint,
+                        libraryEndpoint,
+                        libraryEndpoint
+                    )
+            );
+        }
+
         public GeneratedCarePlan apply() {
             return new GeneratedCarePlan(
                 buildProcessor(fhirDal)
@@ -214,6 +241,27 @@ public class PlanDefinition {
                         libraryEndpoint
                     )
             );
+        }
+    }
+
+    static class GeneratedBundle {
+        Bundle bundle;
+
+        public GeneratedBundle(Bundle bundle) {
+            this.bundle = bundle;
+        }
+
+        public void isEqualsTo(String expectedBundleAssetName) {
+            try {
+                JSONAssert.assertEquals(
+                        load(expectedBundleAssetName),
+                        jsonParser.encodeResourceToString(bundle),
+                        true
+                );
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+                fail("Unable to compare Jsons: " + e.getMessage());
+            }
         }
     }
 

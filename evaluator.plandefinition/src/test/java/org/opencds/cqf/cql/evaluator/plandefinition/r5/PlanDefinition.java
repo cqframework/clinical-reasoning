@@ -12,20 +12,11 @@ import java.util.Set;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-<<<<<<< HEAD:evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r4/PlanDefinition.java
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-=======
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Endpoint;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
->>>>>>> 92713dc (Support returning RequestGroups only from $apply.  Add $apply support for dstu3 and r5.):evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r5/PlanDefinition.java
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
@@ -48,31 +39,19 @@ import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
-<<<<<<< HEAD:evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r4/PlanDefinition.java
-import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
-import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
-=======
 import org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
 import org.skyscreamer.jsonassert.JSONAssert;
->>>>>>> 92713dc (Support returning RequestGroups only from $apply.  Add $apply support for dstu3 and r5.):evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r5/PlanDefinition.java
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
-<<<<<<< HEAD:evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r4/PlanDefinition.java
-    private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-=======
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
->>>>>>> 92713dc (Support returning RequestGroups only from $apply.  Add $apply support for dstu3 and r5.):evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r5/PlanDefinition.java
     private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
 
     private static InputStream open(String asset) { return PlanDefinition.class.getResourceAsStream(asset); }
@@ -211,13 +190,8 @@ public class PlanDefinition {
             return this;
         }
 
-<<<<<<< HEAD:evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r4/PlanDefinition.java
-        public GeneratedCarePlan apply() {
-            return new GeneratedCarePlan(
-=======
         public GeneratedBundle apply() {
             return new GeneratedBundle(
->>>>>>> 92713dc (Support returning RequestGroups only from $apply.  Add $apply support for dstu3 and r5.):evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r5/PlanDefinition.java
                 buildProcessor(fhirDal)
                     .apply(
                         new IdType("PlanDefinition", planDefinitionID),
@@ -243,20 +217,6 @@ public class PlanDefinition {
         }
     }
 
-<<<<<<< HEAD:evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r4/PlanDefinition.java
-    static class GeneratedCarePlan {
-        CarePlan carePlan;
-
-        public GeneratedCarePlan(CarePlan carePlan) {
-            this.carePlan = carePlan;
-        }
-
-        public void isEqualsTo(String expectedCarePlanAssetName) {
-            try {
-                JSONAssert.assertEquals(
-                        load(expectedCarePlanAssetName),
-                        jsonParser.encodeResourceToString(carePlan),
-=======
     static class GeneratedBundle {
         Bundle bundle;
 
@@ -269,7 +229,6 @@ public class PlanDefinition {
                 JSONAssert.assertEquals(
                         load(expectedBundleAssetName),
                         jsonParser.encodeResourceToString(bundle),
->>>>>>> 92713dc (Support returning RequestGroups only from $apply.  Add $apply support for dstu3 and r5.):evaluator.plandefinition/src/test/java/org/opencds/cqf/cql/evaluator/plandefinition/r5/PlanDefinition.java
                         true
                 );
             } catch (JSONException | IOException e) {

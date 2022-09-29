@@ -53,7 +53,32 @@
             "reference": "Patient/numer-EXM74-strat3-case12"
           }
         } ]
-    } ],
+    },
+    {
+      "resourceType": "Observation",
+      "id": "9971abde-0e7f-4aa6-9a69-a5070d52d4f2",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "2186-5"
+          }
+        ]
+      },
+      "valueInteger": 1
+    }
+  ],
   "extension": [ {
     "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
     "valueString": "Percentage of children, 6 months - 20 years of age, who received a fluoride varnish application during the measurement period"

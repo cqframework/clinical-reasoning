@@ -92,6 +92,54 @@
         ]
       },
       "valueInteger": 1
+    },
+    {
+      "resourceType": "Observation",
+      "id": "f4aaff6f-b223-4df7-8869-854f0218881f",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "2186-5"
+          }
+        ]
+      },
+      "valueInteger": 1
+    },
+    {
+      "resourceType": "Observation",
+      "id": "5cec1cee-976d-4316-a01b-f15af8000d62",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "F"
+          }
+        ]
+      },
+      "valueInteger": 1
     }
   ],
   "extension": [ {

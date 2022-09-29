@@ -91,29 +91,37 @@
     },
     {
       "resourceType": "Observation",
-      "id": "sde-observation-sde-ethnicity-coding-2186-5",
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
-          "extension": [
-            {
-              "url": "measure",
-              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108"
-            },
-            {
-              "url": "populationId",
-              "valueString": "sde-ethnicity"
-            }
-          ]
-        }
-      ],
+      "id": "9971abde-0e7f-4aa6-9a69-a5070d52d4f2",
+      "extension": [ {
+        "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+        "extension": [ {
+          "url": "measure",
+          "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130"
+        } ]
+      } ],
       "status": "final",
       "code": {
-        "coding": [
-          {
-            "code": "2186-5"
-          }
-        ]
+        "coding": [ {
+          "code": "2186-5"
+        } ]
+      },
+      "valueInteger": 3
+    },
+    {
+      "resourceType": "Observation",
+      "id": "5cec1cee-976d-4316-a01b-f15af8000d62",
+      "extension": [ {
+        "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+        "extension": [ {
+          "url": "measure",
+          "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130"
+        } ]
+      } ],
+      "status": "final",
+      "code": {
+        "coding": [ {
+          "code": "F"
+        } ]
       },
       "valueInteger": 1
     },

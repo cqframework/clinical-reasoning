@@ -73,7 +73,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
     protected Library getLibraryFromElm(VersionedIdentifier libraryIdentifier) {
         org.hl7.elm.r1.VersionedIdentifier versionedIdentifier = toElmIdentifier(libraryIdentifier);
-        for (var type: List.of(LibraryContentType.JSON, LibraryContentType.XML)) {
+        for (var type: new LibraryContentType[]{LibraryContentType.JSON, LibraryContentType.XML}) {
             InputStream is = this.getLibraryContent(versionedIdentifier, type);
             if (is != null) {
                 try {

@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure;
 
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -9,12 +10,14 @@ import ca.uhn.fhir.validation.FhirValidator;
 public class MeasureReportValidator {
   private FhirContext context;
   private FhirValidator validator;
+  // private IParser parser;
 
   public MeasureReportValidator(FhirVersionEnum version) {
     this.context = FhirContext.forCached(version);
     this.validator = this.context.newValidator();
-    // var module = new FhirInstanceValidator(this.context);
-    // this.validator.registerValidatorModule(module);
+    var module = new FhirInstanceValidator(this.context);
+    this.validator.registerValidatorModule(module);
+    // this.parser = context.newXmlParser();
   }
 
   public IBaseResource validate(IBaseResource measureReport) {

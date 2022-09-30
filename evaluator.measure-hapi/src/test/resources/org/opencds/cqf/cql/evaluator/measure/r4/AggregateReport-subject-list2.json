@@ -79,10 +79,18 @@
       "valueInteger": 1
     }
   ],
-  "extension": [ {
-    "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
-    "valueString": "Percentage of children, 6 months - 20 years of age, who received a fluoride varnish application during the measurement period"
-  } ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
+      "valueString": "Percentage of children, 6 months - 20 years of age, who received a fluoride varnish application during the measurement period"
+    },
+    {
+      "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",
+      "valueReference": {
+        "reference": "#9971abde-0e7f-4aa6-9a69-a5070d52d4f2"
+      }
+    }
+  ],
   "status": "complete",
   "type": "subject-list",
   "measure": "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR",

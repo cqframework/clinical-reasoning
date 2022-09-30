@@ -70,6 +70,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
+
         //this map will store population code as key and subjectReference as list item
         Map<String, List<Reference>> populationCodeSubjectsReferenceMap = new HashMap<>();
 
@@ -77,16 +78,30 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         harvestSubjectReferencesAgainstPopulationCode(populationCodeSubjectsReferenceMap, current);
 
         System.out.println("Map:" + populationCodeSubjectsReferenceMap);
+        System.out.println("Carry count: " + carry.getContained().size());
+        System.out.println("Current count: " + current.getContained().size());
 
         Map<String, Resource> resourceMap = new HashMap<>();
         Map<String, Resource> carryListResourceMap = new HashMap<>();
         Map<String, Resource> currentListResourceMap = new HashMap<>();
 
-        populateMapsWithResourceAndListResource(carry, resourceMap, carryListResourceMap);
+        populateMapsWithResource(carry, resourceMap, carryListResourceMap);
         carry.getContained().clear();
-        populateMapsWithResourceAndListResource(current, resourceMap, currentListResourceMap);
+        System.out.println("Carry count: " + carry.getContained().size());
+        System.out.println("Resource map count: " + resourceMap.values().size());
+        System.out.println("carryListResourceMap map count: " + carryListResourceMap.values().size());
+        populateMapsWithResource(current, resourceMap, currentListResourceMap);
+        System.out.println("Current count: " + current.getContained().size());
+        System.out.println("Resource map count: " + resourceMap.values().size());
+        System.out.println("currentListResourceMap map count: " + currentListResourceMap.values().size());
 
-        Map<String, Resource> reducedMap = addObservationIfApplicable(resourceMap);
+
+        //this map will contain the added and vanished observations new id reference
+        Map<String, String> changedIdMap = new HashMap<>();
+        //this map will contain resources and summed observation where applicable
+        Map<String, Resource> reducedMap = new HashMap<>();
+        addObservationIfApplicable(resourceMap, reducedMap, changedIdMap);
+        System.out.println("ChangedIdMap:" + changedIdMap);
 
         populationCodeSubjectsReferenceMap.values().forEach(list -> {
             ListResource carryList = null, currentList = null;
@@ -102,53 +117,59 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 String reference = extractId(list.get(0).getReference());
 
                 carryList = getMatchedListResource(carryListResourceMap, reference);
-                carryList = getMatchedListResource(currentListResourceMap, reference);
-
+                if(carryList == null) {
+                    carryList = getMatchedListResource(currentListResourceMap, reference);
+                }
             }
 
             if (carryList != null && currentList != null) {
                 mergeList(carryList, currentList);
             }
             if (carryList != null) {
-                resourceMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(), carryList);
+                reducedMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(), carryList);
             }
         });
 
 
+        System.out.println("Reduced map:" + reducedMap.values().size());
         carry.getContained().addAll(reducedMap.values());
+        System.out.println("carryListResourceMap map:" + carryListResourceMap.values().size());
         carry.getContained().addAll(carryListResourceMap.values());
+        System.out.println("currentListResourceMap map:" + currentListResourceMap.values().size());
         carry.getContained().addAll(currentListResourceMap.values());
 
     }
 
-    private Map<String, Resource> addObservationIfApplicable(Map<String, Resource> resourceMap) {
+    private void addObservationIfApplicable(Map<String, Resource> resourceMap,
+        Map<String, Resource> reducedMap, Map<String, String> changedIdMap) {
+
         Map<String, Observation> codeReducedMap = new HashMap<>();
-        Map<String, Resource> reducedMap = new HashMap<>();
-        Map<String, String> changedIdMap = new HashMap<>();
+
         resourceMap.values().forEach(resource -> {
             if (resource.getResourceType().equals(ResourceType.Observation)) {
                 Observation observation = ((Observation) resource);
-                if (observation.getValue() instanceof IntegerType) {
-                    String code = observation.getCode().getCodingFirstRep().getCode();
-                    if (!codeReducedMap.containsKey(code)) {
-                        codeReducedMap.put(code, observation);
+                if (checkIfObservationIsAdditive(observation)) {
+                    if (observation.getCode().getCodingFirstRep().hasCode()) {
+                        String code = observation.getCode().getCodingFirstRep().getCode();
+                        if (!codeReducedMap.containsKey(code)) {
+                            codeReducedMap.put(code, observation);
+                        } else {
+                            int sum = observation.getValueIntegerType().getValue() +
+                                    codeReducedMap.get(code).getValueIntegerType().getValue();
+                            codeReducedMap.get(code).setValue(new IntegerType(sum));
+                            changedIdMap.put(observation.getId(), codeReducedMap.get(code).getId());
+                        }
                     }
-                    else {
-                        int sum = observation.getValueIntegerType().getValue() +
-                                codeReducedMap.get(code).getValueIntegerType().getValue();
-                        codeReducedMap.get(code).setValue(new IntegerType(sum));
-                        changedIdMap.put(observation.getId(), codeReducedMap.get(code).getId());
-                    }
-
                 }
             } else {
                 reducedMap.put(resource.getId(), resource);
             }
         });
-
         codeReducedMap.values().forEach(resource -> {  reducedMap.put(resource.getId(), resource);});
-        System.out.println("ChangedIdMap:" + changedIdMap);
-        return reducedMap;
+    }
+
+    private boolean checkIfObservationIsAdditive(Observation observation) {
+        return (observation.getValue() instanceof IntegerType);
     }
 
     private String extractId(String reference) {
@@ -171,9 +192,9 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                         resource.getResourceType().equals(ResourceType.List));
     }
 
-    private void populateMapsWithResourceAndListResource(MeasureReport measureReport,
-                                                         Map<String, Resource> resourceMap,
-                                                         Map<String, Resource> listResourceMap) {
+    private void populateMapsWithResource(MeasureReport measureReport,
+                                          Map<String, Resource> resourceMap,
+                                          Map<String, Resource> listResourceMap) {
         measureReport.getContained().forEach(resource -> {
             if (!isEligibleListResourceType(resource)) {
                 if (!resourceMap.containsKey(extractId(resource.getId()))) {

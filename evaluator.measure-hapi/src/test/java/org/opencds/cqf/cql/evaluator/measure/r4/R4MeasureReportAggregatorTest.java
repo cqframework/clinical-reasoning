@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -183,8 +184,11 @@ public class R4MeasureReportAggregatorTest {
         MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true", "denominator", 8);
         MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true", "denominator", 8);
 
-        System.out.println(FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
-        System.out.println(actual.getContained().size());
+//        System.out.println(FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(actual));
+//        System.out.println(actual.getContained().size());
+//        for(Resource resource : actual.getContained()) {
+//            System.out.println(resource.getId());
+//        }
     }
 
 }

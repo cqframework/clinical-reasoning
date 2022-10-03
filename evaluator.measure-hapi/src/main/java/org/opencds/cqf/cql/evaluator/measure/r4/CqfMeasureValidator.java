@@ -19,6 +19,10 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 
 public class CqfMeasureValidator extends ResourceValidator {
+
+    public static void main(String[] args) {
+        new CqfMeasureValidator(FhirContext.forR4()).setValidator();
+    }
     protected IParser parser;
 
     public CqfMeasureValidator(FhirContext context) {

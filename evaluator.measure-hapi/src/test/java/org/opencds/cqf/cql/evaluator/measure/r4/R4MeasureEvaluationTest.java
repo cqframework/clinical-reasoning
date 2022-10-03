@@ -45,8 +45,8 @@ import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.fhir.util.ResourceValidator;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
-import org.opencds.cqf.cql.evaluator.measure.MeasureReportValidator;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
 import org.testng.annotations.Test;
@@ -198,7 +198,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private void validateReport(MeasureReport report) {
-        var validator = new MeasureReportValidator(FhirVersionEnum.R4);
+        var validator = new ResourceValidator(FhirVersionEnum.R4);
         var result = validator.validate(report);
         assertEquals(report, result);
     }

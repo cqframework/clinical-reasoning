@@ -86,6 +86,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
+    protected CqfMeasureValidator validator;
+
     // TODO: This should all be collapsed down to FhirDal
     protected LibrarySourceProvider localLibrarySourceProvider;
     protected DataProvider localDataProvider;
@@ -126,6 +128,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         if (cqlOptions != null) {
             this.cqlOptions = cqlOptions;
         }
+
+        this.validator = new CqfMeasureValidator(FhirVersionEnum.R4);
     }
 
     public R4MeasureProcessor(TerminologyProvider localTerminologyProvider,
@@ -137,6 +141,12 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
             String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
             Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
+        return this.evaluateMeasure(url, periodStart, periodEnd, reportType, subject, practitioner, lastReceivedOn, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData, true);
+    }
+
+    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
+            String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData, Boolean validateMeasure) {
 
         if (lastReceivedOn != null) {
             logger.warn(
@@ -164,6 +174,13 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
 
         Measure measure = (Measure) measureIter.next();
+        if (Boolean.TRUE.equals(validateMeasure)) {
+            var validateResult = this.validator.validate(measure);
+            if (validateResult.fhirType().equals("OperationOutcome")) {
+                throw new IllegalArgumentException(String.format("Measure does not conform to CQF Measure specifications. The following problems were found: %s", validateResult.fhirType()));
+            }
+        }
+
         MeasureReport measureReport = this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
                 fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
         MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());

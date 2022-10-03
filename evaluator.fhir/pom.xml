@@ -53,7 +53,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-validation</artifactId>
-            <version>6.0.1</version>
+            <version>6.1.0</version>
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>

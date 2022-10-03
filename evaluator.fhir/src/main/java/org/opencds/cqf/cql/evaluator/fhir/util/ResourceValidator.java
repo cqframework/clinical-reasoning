@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.fhir.util;
 
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+//import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -23,8 +23,8 @@ public class ResourceValidator {
 
     protected void setValidator() {
         this.validator = this.context.newValidator();
-        var module = new FhirInstanceValidator(this.context);
-        this.validator.registerValidatorModule(module);
+//        var module = new FhirInstanceValidator(this.context);
+//        this.validator.registerValidatorModule(module);
     }
 
     public IBaseResource validate(IBaseResource resource) {

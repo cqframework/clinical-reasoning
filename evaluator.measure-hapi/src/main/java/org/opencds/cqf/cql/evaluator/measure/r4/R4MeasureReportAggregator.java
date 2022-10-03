@@ -12,8 +12,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportAggregator;
 
 public class R4MeasureReportAggregator implements MeasureReportAggregator<MeasureReport> {
@@ -69,7 +78,6 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         if (current == null || carry == null) {
             return;
         }
-
 
         //this map will store population code as key and subjectReference as list item
         Map<String, List<Reference>> populationCodeSubjectsReferenceMap = new HashMap<>();
@@ -193,8 +201,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
     }
 
     private void populateMapsWithResource(MeasureReport measureReport,
-                                          Map<String, Resource> resourceMap,
-                                          Map<String, Resource> listResourceMap) {
+        Map<String, Resource> resourceMap, Map<String, Resource> listResourceMap) {
         measureReport.getContained().forEach(resource -> {
             if (!isEligibleListResourceType(resource)) {
                 if (!resourceMap.containsKey(extractId(resource.getId()))) {

@@ -56,10 +56,10 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be of the same type. carry: %s, current: %s", carry.getType().toCode(), current.getType().toCode()));  
         }
 
-        mergeExtensions(carry, current);
         mergePopulation(carry, current);
         mergeStratifier(carry, current);
         mergeContained(carry, current);
+        mergeExtensions(carry, current);
         mergeEvaluatedResources(carry, current);
 
     }
@@ -77,23 +77,13 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         harvestSubjectReferencesAgainstPopulationCode(populationCodeSubjectsReferenceMap, carry);
         harvestSubjectReferencesAgainstPopulationCode(populationCodeSubjectsReferenceMap, current);
 
-        System.out.println("Map:" + populationCodeSubjectsReferenceMap);
-        System.out.println("Carry count: " + carry.getContained().size());
-        System.out.println("Current count: " + current.getContained().size());
-
         Map<String, Resource> resourceMap = new HashMap<>();
         Map<String, Resource> carryListResourceMap = new HashMap<>();
         Map<String, Resource> currentListResourceMap = new HashMap<>();
 
         populateMapsWithResource(carry, resourceMap, carryListResourceMap);
-        carry.getContained().clear();
-        System.out.println("Carry count: " + carry.getContained().size());
-        System.out.println("Resource map count: " + resourceMap.values().size());
-        System.out.println("carryListResourceMap map count: " + carryListResourceMap.values().size());
+
         populateMapsWithResource(current, resourceMap, currentListResourceMap);
-        System.out.println("Current count: " + current.getContained().size());
-        System.out.println("Resource map count: " + resourceMap.values().size());
-        System.out.println("currentListResourceMap map count: " + currentListResourceMap.values().size());
 
 
         //this map will contain the added and vanished observations new id reference
@@ -101,7 +91,6 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         //this map will contain resources and summed observation where applicable
         Map<String, Resource> reducedMap = new HashMap<>();
         addObservationIfApplicable(resourceMap, reducedMap, changedIdMap);
-        System.out.println("ChangedIdMap:" + changedIdMap);
 
         populationCodeSubjectsReferenceMap.values().forEach(list -> {
             ListResource carryList = null, currentList = null;
@@ -131,13 +120,11 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         });
 
 
-        System.out.println("Reduced map:" + reducedMap.values().size());
+        carry.getContained().clear();
         carry.getContained().addAll(reducedMap.values());
-        System.out.println("carryListResourceMap map:" + carryListResourceMap.values().size());
         carry.getContained().addAll(carryListResourceMap.values());
-        System.out.println("currentListResourceMap map:" + currentListResourceMap.values().size());
         carry.getContained().addAll(currentListResourceMap.values());
-
+        updateExtensionListResourceReference(carry, changedIdMap);
     }
 
     private void addObservationIfApplicable(Map<String, Resource> resourceMap,
@@ -170,6 +157,19 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
 
     private boolean checkIfObservationIsAdditive(Observation observation) {
         return (observation.getValue() instanceof IntegerType);
+    }
+
+    private void updateExtensionListResourceReference(MeasureReport report, Map<String, String> changedIdMap) {
+        report.getExtension().forEach(extension ->
+        {
+            if (extension.getValue() instanceof Reference) {
+                Reference reference = (Reference) extension.getValue();
+                String key = reference.getReference();
+                if (changedIdMap.containsKey(key)) {
+                    reference.setReference(changedIdMap.get(key));
+                }
+            }
+        });
     }
 
     private String extractId(String reference) {

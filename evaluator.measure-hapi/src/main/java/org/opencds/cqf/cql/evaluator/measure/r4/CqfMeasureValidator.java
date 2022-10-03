@@ -1,15 +1,16 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+//import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+//import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+//import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+//import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+//import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+//import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.fhir.util.ResourceValidator;
 
@@ -33,29 +34,28 @@ public class CqfMeasureValidator extends ResourceValidator {
     @Override
     protected void setValidator() {
         this.parser = this.context.newJsonParser();
-        var supportChain = new ValidationSupportChain();
+ /*       var supportChain = new ValidationSupportChain();
         var defaultSupport = new DefaultProfileValidationSupport(this.context);
         supportChain.addValidationSupport(defaultSupport);
         supportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(this.context));
         supportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(this.context));
-
+*/
         var resources = new ArrayList<IBaseResource>();
         try {
-            // this.getClass().getClassLoader().getP
-            // var files = new File(".").listFiles();
-            // for (var file : files) {
-            //     resources.add(this.parser.parseResource(theInputStream))
-            // }
-            var stream = CqfMeasureValidator.class.getResourceAsStream(".");
-            var reader = new BufferedReader(new InputStreamReader(stream));
-            String file = null;
-            while ((file = reader.readLine()) != null) {
-                resources.add(this.parser.parseResource(getClass().getResourceAsStream(file)));
-            }
+
+
+            List<String> files = IOUtils.readLines(CqfMeasureValidator.class.getClassLoader().getResourceAsStream("org/opencds/cqf/cql/evaluator/measure/r4"),
+                    Charsets.toCharset("UTF-8"));
+            System.out.println(files);
+
+            IBaseResource res = this.parser.parseResource(CqfMeasureValidator.class.getResourceAsStream(files.get(0)));
+            System.out.println(res.getIdElement().getIdPart());
+
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
 
+        /*
         var cqfMeasureSupport = new PrePopulatedValidationSupport(this.context);
         for (var resource : resources) {
             cqfMeasureSupport.addResource(resource);
@@ -71,6 +71,7 @@ public class CqfMeasureValidator extends ResourceValidator {
         var cache = new CachingValidationSupport(supportChain);
         var validatorModule = new FhirInstanceValidator(cache);
         this.validator = this.context.newValidator().registerValidatorModule(validatorModule);
+        */
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -24,6 +25,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -141,7 +143,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
             String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
             Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
-        return this.evaluateMeasure(url, periodStart, periodEnd, reportType, subject, practitioner, lastReceivedOn, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData, true);
+        return this.evaluateMeasure(url, periodStart, periodEnd, reportType, subject, practitioner, lastReceivedOn, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData, false);
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
@@ -177,7 +179,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         if (Boolean.TRUE.equals(validateMeasure)) {
             var validateResult = this.validator.validate(measure);
             if (validateResult.fhirType().equals("OperationOutcome")) {
-                throw new IllegalArgumentException(String.format("Measure does not conform to CQF Measure specifications. The following problems were found: %s", validateResult.fhirType()));
+                var errors = ((OperationOutcome)validateResult).getIssue().stream()
+                    .filter(i ->
+                        i.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR) || i.getSeverity().equals(OperationOutcome.IssueSeverity.FATAL)
+                    ).collect(Collectors.toList());
+                throw new IllegalArgumentException(String.format("Measure does not conform to CQF Measure specifications. The following problems were found: %s", errors));
             }
         }
 

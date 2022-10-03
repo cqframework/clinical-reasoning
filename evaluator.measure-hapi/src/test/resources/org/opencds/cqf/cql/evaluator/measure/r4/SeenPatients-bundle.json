@@ -52700,7 +52700,8 @@
         "lastUpdated": "2019-08-17T06:51:31.231-06:00",
         "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cohort-measure-cqfm", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm" ]
       },
-      "extension": [ {
+      "extension": [
+      {
         "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
         "valueCode": "boolean"
       }, {
@@ -52854,14 +52855,8 @@
             } ]
           } ]
         }
-      }, {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
-        "valueCoding": {
-          "system": "http://loinc.org",
-          "code": "88124-3",
-          "display": "Food insecurity risk [HVS]"
-        }
-      } ],
+      } 
+    ],
       "url": "http://hl7.org/fhir/us/chronic-ds/Measure/SeenPatients",
       "version": "0.1.0",
       "name": "SeenPatients",
@@ -52869,6 +52864,7 @@
       "status": "draft",
       "experimental": true,
       "date": "2021-08-03T12:56:55-06:00",
+      "publisher": "Health Level 7 (HL7) International - Public Health Work Group",
       "description": "Seen patients during the measurement period",
       "purpose": "The Seen Patients cohort measure is defined to provide a baseline for chronic disease surveillance. For each individual in the cohort, supplemental data is collected aligning with the supplemental data defined for other chronic disease surveillance measure usages, allowing for analytics across and between specific measures.",
       "topic": [ {
@@ -52906,14 +52902,16 @@
       "library": [ "http://hl7.org/fhir/us/chronic-ds/Library/SeenPatients" ],
       "scoring": {
         "coding": [ {
-          "system": "http://hl7.org/fhir/measure-scoring",
-          "code": "cohort"
+          "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+          "code": "cohort",
+          "display": "Cohort"
         } ]
       },
       "type": [ {
         "coding": [ {
-          "system": "http://hl7.org/fhir/measure-type",
-          "code": "process"
+          "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+          "code": "process",
+          "display": "Process"
         } ]
       } ],
       "guidance": "Patients with an encounter that ends during the measurement period are considered in the cohort.",
@@ -52929,7 +52927,7 @@
           },
           "description": "Seen patients",
           "criteria": {
-            "language": "text/cql",
+            "language": "text/cql-identifier",
             "expression": "Initial Population"
           }
         } ]
@@ -52951,7 +52949,7 @@
         } ],
         "description": "Ethnicity (CDC Value Set)",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE Ethnicity"
         }
       }, {
@@ -52971,7 +52969,7 @@
         } ],
         "description": "Payer",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE Payer"
         }
       }, {
@@ -52991,7 +52989,7 @@
         } ],
         "description": "Race (CDC Value Set)",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE Race"
         }
       }, {
@@ -53011,7 +53009,7 @@
         } ],
         "description": "Administrative sex",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE Sex"
         }
       }, {
@@ -53031,7 +53029,7 @@
         } ],
         "description": "Age",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE Age"
         }
       }, {
@@ -53051,7 +53049,7 @@
         } ],
         "description": "State of residence",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE State of Residence"
         }
       }, {
@@ -53071,7 +53069,7 @@
         } ],
         "description": "Postal code of residence",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE Postal Code of Residence"
         }
       }, {
@@ -53091,7 +53089,7 @@
         } ],
         "description": "Food insecurity risk status",
         "criteria": {
-          "language": "text/cql",
+          "language": "text/cql-identifier",
           "expression": "SDE Food Insecurity Risk Status"
         }
       } ]

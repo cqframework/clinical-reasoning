@@ -14,7 +14,7 @@ public class CohortMeasureProcessorTest extends BaseMeasureProcessorTest {
 
     @Test
     public void seenPatients_singlePatient() {
-        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/SeenPatients", "2019-01-01", "2019-12-31", "subject", "ip-SeenPatients", null, null, endpoint, endpoint, endpoint, null);
+        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/SeenPatients", "2019-01-01", "2019-12-31", "subject", "ip-SeenPatients", null, null, endpoint, endpoint, endpoint, null, true);
         
         // Cohort Measures only have one population
         assertEquals(report.getGroup().size(), 1);

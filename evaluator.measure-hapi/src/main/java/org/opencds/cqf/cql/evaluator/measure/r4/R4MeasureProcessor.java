@@ -8,7 +8,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,7 +24,6 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -177,14 +175,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         Measure measure = (Measure) measureIter.next();
         if (Boolean.TRUE.equals(validateMeasure)) {
-            var validateResult = this.validator.validate(measure);
-            if (validateResult.fhirType().equals("OperationOutcome")) {
-                var errors = ((OperationOutcome)validateResult).getIssue().stream()
-                    .filter(i ->
-                        i.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR) || i.getSeverity().equals(OperationOutcome.IssueSeverity.FATAL)
-                    ).collect(Collectors.toList());
-                throw new IllegalArgumentException(String.format("Measure does not conform to CQF Measure specifications. The following problems were found: %s", errors));
-            }
+            this.validator.validate(measure, true);
         }
 
         MeasureReport measureReport = this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,

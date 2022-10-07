@@ -250,39 +250,31 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        Map<String, List<Extension>> extensionMap = new HashMap<>();
+        Map<String, Extension> extensionMap = new HashMap<>();
+        carry.getExtension().addAll(current.getExtension());
 
         carry.getExtension().forEach(extension -> {
             if (extension.hasValue()) {
+                String key;
                 if (extension.getValue() instanceof StringType) {
-                    extensionMap.put(generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), ""),
-                            new ArrayList<>());
-                } else if (extension.getValue() instanceof Reference) {
-                    extensionMap.put(generateKey(extension.getUrl(), ((Reference) extension.getValue()).getReference(), ""),
-                            extension.getValue().getExtension());
-                }
-            }
-        });
-
-        current.getExtension().forEach(extension -> {
-            if (extension.hasValue()) {
-                if (extension.getValue() instanceof StringType) {
-                    if (!extensionMap.containsKey(
-                            generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), ""))
-                    ) {
-                        carry.getExtension().add(extension);
-                    }
-                } else if (extension.getValue() instanceof Reference) {
-                    Reference reference = (Reference) extension.getValue();
-                    String key = generateKey(extension.getUrl(), reference.getReference(), "");
+                    key = generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), "");
                     if (!extensionMap.containsKey(key)) {
-                        carry.getExtension().add(extension);
-                    } else {
-                        extensionMap.get(key).addAll(reference.getExtension());
+                        extensionMap.put(key, extension);
                     }
+                } else if (extension.getValue() instanceof Reference) {
+                    key = generateKey(extension.getUrl(), ((Reference) extension.getValue()).getReference(), "");
+                    if (extensionMap.containsKey(key)) {
+                        extensionMap.get(key).getValue().getExtension().addAll(extension.getValue().getExtension());
+                    } else {
+                        extensionMap.put(key, extension);
+                    }
+                } else {
+                    extensionMap.put(UUID.randomUUID().toString(), extension);
                 }
             }
         });
+        carry.getExtension().clear();
+        carry.getExtension().addAll(extensionMap.values());
     }
 
     protected void mergeEvaluatedResources(MeasureReport carry, MeasureReport current) {

@@ -12,8 +12,11 @@ import java.util.Collections;
 
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -165,9 +168,11 @@ public class R4MeasureReportAggregatorTest {
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
 
+        assertTrue(actual.getContained().stream().anyMatch( resource -> matchObservation(resource)));
+
         MeasureValidationUtils.validateMeasureReportContained(expected, actual);
         MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
-        MeasureReport.MeasureReportGroupComponent expectedMrgc = actual.getGroup().get(0);
+        MeasureReport.MeasureReportGroupComponent expectedMrgc = expected.getGroup().get(0);
 
         MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "false", "initial-population", 20);
         MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "false", "initial-population", 20);
@@ -181,6 +186,15 @@ public class R4MeasureReportAggregatorTest {
         MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true", "denominator", 8);
         MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true", "denominator", 8);
 
+    }
+
+    private boolean matchObservation(Resource resource) {
+        if (resource.getResourceType() == ResourceType.Observation) {
+            Observation observation = (Observation) resource;
+            return observation.getCode().getCodingFirstRep().getCode().equals("2186-5") &&
+                    observation.hasValueIntegerType() && (observation.getValueIntegerType().getValue() == 3);
+        }
+        return false;
     }
 
 }

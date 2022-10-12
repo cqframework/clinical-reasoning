@@ -214,7 +214,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     }
 
-    protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
+   public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
             List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
         if (this.measureEvaluationOptions.isThreadedEnabled()

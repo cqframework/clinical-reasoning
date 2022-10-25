@@ -1,0 +1,397 @@
+<div>
+    <table class="grid dict">
+        {% if PlanDefinition.id.exists() %}
+        <tr>
+            <th scope="row"><b>Id: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.id}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.url.exists() %}
+        <tr>
+            <th scope="row"><b>Url: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.url}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.version.exists() %}
+        <tr>
+            <th scope="row"><b>Version: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.version}}</td>
+        </tr>
+        {% endif %}
+        {% for identifier in PlanDefinition.identifier %}
+        <tr>
+            <th scope="row"><b>Identifier: </b></th>
+            <td style="padding-left: 4px;">
+                {% if identifier.type.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>type: </b> <span>{{identifier.type.value}}</span>
+                </p>
+                {% endif %}
+                {% if identifier.value.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>value: </b> <span>{{identifier.value}}</span>
+                </p>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        {% if PlanDefinition.name.exists() %}
+        <tr>
+            <th scope="row"><b>Name: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.name}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.title.exists() %}
+        <tr>
+            <th scope="row"><b>Title: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.title}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.subtitle.exists() %}
+        <tr>
+            <th scope="row"><b>Subtitle: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.subtitle}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.status.exists() %}
+        <tr>
+            <th scope="row"><b>Status: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.status.value}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.experimental.exists() %}
+        <tr>
+            <th scope="row"><b>Experimental: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.experimental.value}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.type.exists() %}
+        <tr>
+            <th scope="row"><b>Type: </b></th>
+            <td style="padding-left: 4px;">
+                {% if PlanDefinition.type.coding.exists() %}
+                    {% for coding in PlanDefinition.type.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span>{{coding.system}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if PlanDefinition.type.coding.exists().not and PlanDefinition.type.text.exists() %}
+                    {{PlanDefinition.type.text}}
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.subject.exists() %}
+        <tr>
+            <th scope="row"><b>Subject: </b></th>
+            {%if PlanDefinition.subject is CodeableConcept %}
+            <td style="padding-left: 4px;">
+                {% if PlanDefinition.subject.coding.exists() %}
+                    {% for coding in PlanDefinition.subject.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span>{{coding.system}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if PlanDefinition.subject.coding.exists().not and PlanDefinition.subject.text.exists() %}
+                    {{PlanDefinition.subject.text}}
+                {% endif %}
+            </td>
+            {% endif %}
+            {% if PlanDefinition.subject is Reference %}
+            <td style="padding-left: 4px;">
+                {% if PlanDefinition.subject.reference.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>reference: </b> <span>{{PlanDefinition.subject.reference}}</span>
+                </p>
+                {% endif %}
+                {% if PlanDefinition.subject.type.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>type: </b> <span>{{PlanDefinition.subject.type}}</span>
+                </p>
+                {% endif %}
+                {% if PlanDefinition.subject.display.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>code: </b> <span>{{PlanDefinition.subject.display}}</span>
+                </p>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.date.exists() %}
+        <tr>
+            <th scope="row"><b>Date: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.date}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.publisher.exists() %}
+        <tr>
+            <th scope="row"><b>Publisher: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.publisher}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.description.exists() %}
+        <tr>
+            <th scope="row"><b>Description: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.description.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability').exists() %}
+        <tr>
+          <th scope="row"><b>Knowledge Capability: </b></th>
+          <td style="padding-left: 4px;">
+            {% for extension in PlanDefinition.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability') %}{{extension.value}} {% endfor %}
+          </td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel').exists() %}
+        <tr>
+          <th scope="row"><b>Knowledge Representation Level: </b></th>
+          <td style="padding-left: 4px;">
+            {% for extension in PlanDefinition.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel') %}{{extension.value}}{% endfor %}
+          </td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.useContext.exists() %}
+        <tr>
+            <th scope="row"><b>Use Context: </b></th>
+            <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>code</b></th><th><b>value</b></th><th><b>display</b></th></tr>
+                    {% for useContext in PlanDefinition.useContext %}
+                      <tr>
+                        <td>{{useContext.code.code}}</td>
+                        <td>{{(useContext.value as CodeableConcept).coding.first().code}}</td>
+                        <td>{{(useContext.value as CodeableConcept).coding.first().display.escape('html')}}</td>
+                      </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.jurisdiction.exists() %}
+        <tr>
+            <th scope="row"><b>Jurisdiction: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.jurisdiction.first().coding.first().code}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.purpose.exists() %}
+        <tr>
+            <th scope="row"><b>Purpose: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.purpose.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.usage.exists() %}
+        <tr>
+            <th scope="row"><b>Usage: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.usage.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.copyright.exists() %}
+        <tr>
+            <th scope="row"><b>Copyright: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.copyright.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.approvalDate.exists() %}
+        <tr>
+            <th scope="row"><b>Approval Date: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.approvalDate}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.lastReviewDate.exists() %}
+        <tr>
+            <th scope="row"><b>Last Review Date: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.lastReviewDate}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.effectivePeriod.exists() %}
+        <tr>
+            <th scope="row"><b>Effective Period: </b></th>
+            <td style="padding-left: 4px;">{{PlanDefinition.effectivePeriod.start}}..{{PlanDefinition.effectivePeriod.end}}</td>
+        </tr>
+        {% endif %}
+        {% if PlanDefinition.relatedArtifact.exists() %}
+        <tr>
+          <th scope="row"><b>Related Artifacts: </b></th>
+          <td style="padding-left: 4px;">
+            {% if PlanDefinition.relatedArtifact.where(type = 'documentation' or type = 'justification').exists() %}
+            <p><b>Documentation</b></p>
+            <ul>
+              {% for artifact in PlanDefinition.relatedArtifact.where(type = 'documentation' or type = 'justification') %}
+                <li><a href="{{artifact.url}}">{{artifact.label}} {{artifact.display.escape('html')}}</a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if PlanDefinition.relatedArtifact.where(type = 'citation').exists() %}
+            <p><b>References</b></p>
+            <ul>
+              {% for artifact in PlanDefinition.relatedArtifact.where(type = 'citation') %}
+                <li>{{artifact.citation}}<br/><a href="{{artifact.url}}">{{artifact.url}}</a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if PlanDefinition.relatedArtifact.where(type = 'depends-on').exists() %}
+            <p><b>Dependencies</b></p>
+            <ul>
+              {% for artifact in PlanDefinition.relatedArtifact.where(type = 'depends-on') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if PlanDefinition.relatedArtifact.where(type = 'composed-of').exists() %}
+            <p><b>Components</b></p>
+            <ul>
+              {% for artifact in PlanDefinition.relatedArtifact.where(type = 'composed-of') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if PlanDefinition.relatedArtifact.where(type = 'derived-from').exists() %}
+            <p><b>Derived From</b></p>
+            <ul>
+              {% for artifact in PlanDefinition.relatedArtifact.where(type = 'derived-from') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if PlanDefinition.relatedArtifact.where(type = 'successor').exists() %}
+            <p><b>Successor</b></p>
+            <ul>
+              {% for artifact in PlanDefinition.relatedArtifact.where(type = 'successor') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if PlanDefinition.relatedArtifact.where(type = 'predecessor').exists() %}
+            <p><b>Predecessor</b></p>
+            <ul>
+              {% for artifact in PlanDefinition.relatedArtifact.where(type = 'predecessor') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </td>
+        </tr>
+        {% endif %}
+
+        {% if PlanDefinition.library.exists() %}
+        <tr>
+          <th scope="row"><b>Libraries: </b></th>
+          <td style="padding-left: 4px;">
+            <table class="grid-dict">
+              {% for library in PlanDefinition.library %}
+                <tr><td>{{library}}</td></tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+
+        {% if PlanDefinition.action.exists() %}
+        <tr>
+          <th scope="row"><b>Actions: </b></th>
+          <td style="padding-left: 4px;">
+            <table class="grid-dict">
+              {% for action in PlanDefinition.action %}
+                <tr>
+                  <td>
+                    {% if action.textEquivalent.exists() %}{{action.textEquivalent.escape('html')}}{% else %}<b>{{action.prefix}} {{action.title.escape('html')}}:</b> {{action.description.escape('html')}}{% endif %}<br/>
+                    {% if action.trigger.exists() %}<b>When:</b> {% for trigger in action.trigger %}<i>{{trigger.type}}:</i> {{trigger.name.escape('html')}}<br/>{% endfor %}{% endif %}
+                    {% if action.condition.exists() %}<b>If:</b> {% for condition in action.condition %}<i>{{condition.kind}}:</i> {% if condition.expression.description.exists() %}{{condition.expression.description.escape('html')}}{% endif %} <i>({{condition.expression.expression.escape('html')}})</i><br/>{% endfor %}{% endif %}
+                    {% if action.action.exists() %}
+                      <b>Then:</b>
+                      <table class="grid-dict">
+                        {% for action in action.action %}
+                          <tr>
+                            <td>
+                              {% if action.textEquivalent.exists() %}{{action.textEquivalent.escape('html')}}{% else %}<b>{{action.prefix}} {{action.title.escape('html')}}:</b> {{action.description.escape('html')}}{% endif %}<br/>
+                              {% if action.trigger.exists() %}<b>When:</b> {% for trigger in action.trigger %}<i>{{trigger.type}}:</i> {{trigger.name.escape('html')}}<br/>{% endfor %}{% endif %}
+                              {% if action.condition.exists() %}<b>If:</b> {% for condition in action.condition %}<i>{{condition.kind}}:</i> {% if condition.expression.description.exists() %}{{condition.expression.description.escape('html')}}{% endif %} <i>({{condition.expression.expression.escape('html')}})</i><br/>{% endfor %}{% endif %}
+                              {% if action.action.exists() %}
+                                <b>Then:</b>
+                                <table class="grid-dict">
+                                  {% for action in action.action %}
+                                    <tr>
+                                      <td>
+                                        {% if action.textEquivalent.exists() %}{{action.textEquivalent.escape('html')}}{% else %}<b>{{action.prefix}} {{action.title.escape('html')}}:</b> {{action.description.escape('html')}}{% endif %}<br/>
+                                        {% if action.trigger.exists() %}<b>When:</b> {% for trigger in action.trigger %}<i>{{trigger.type}}:</i> {{trigger.name.escape('html')}}<br/>{% endfor %}{% endif %}
+                                        {% if action.condition.exists() %}<b>If:</b> {% for condition in action.condition %}<i>{{condition.kind}}:</i> {% if condition.expression.description.exists() %}{{condition.expression.description.escape('html')}}{% endif %} <i>({{condition.expression.expression.escape('html')}})</i><br/>{% endfor %}{% endif %}
+                                        {% if action.action.exists() %}
+                                        <b>Then:</b> <i>Additional sub-actions not displayed</i>
+                                        {% else %}
+                                          {% if action.definition.exists() %}
+                                            <b>Then:</b> <i>Definition:</i> {{action.definition}}<br/>
+                                            {% if action.dynamicValue.exists() %}
+                                              <i>Dynamic Values:</i><br/>
+                                              {% for dynamicValue in action.dynamicValue %}
+                                                {{dynamicValue.path}}: <i>({{dynamicValue.expression.expression.escape('html')}})</i><br/>
+                                              {% endfor %}
+                                            {% endif %}
+                                          {% endif %}
+                                        {% endif %}
+                                      </td>
+                                    </tr>
+                                  {% endfor %}
+                                </table>
+                              {% else %}
+                                {% if action.definition.exists() %}
+                                  <b>Then:</b> <i>Definition:</i> {{action.definition}}<br/>
+                                  {% if action.dynamicValue.exists() %}
+                                    <i>Dynamic Values:</i><br/>
+                                    {% for dynamicValue in action.dynamicValue %}
+                                      {{dynamicValue.path}}: <i>({{dynamicValue.expression.expression.escape('html')}})</i><br/>
+                                    {% endfor %}
+                                  {% endif %}
+                                {% endif %}
+                              {% endif %}
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </table>
+                    {% else %}
+                      {% if action.definition.exists() %}
+                      <b>Then:</b> <i>Definition:</i> {{action.definition}}<br/>
+                        {% if action.dynamicValue.exists() %}
+                          <i>Dynamic Values:</i><br/>
+                          {% for dynamicValue in action.dynamicValue %}
+                            {{dynamicValue.path}}: <i>({{dynamicValue.expression.expression.escape('html')}})</i><br/>
+                          {% endfor %}
+                        {% endif %}
+                      {% endif %}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+    </table>
+</div>

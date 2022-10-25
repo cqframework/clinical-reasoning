@@ -429,4 +429,28 @@ public class CliTest {
         assertTrue(output.contains("Numerator=true"));
     }
 
+    @Test
+    public void testSampleContentIG() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-rd=" + testResourcePath + "/samplecontentig",
+                "-ig=" + "/input/mycontentig.xml",
+                "-lu="+ testResourcePath + "/samplecontentig/input/cql",
+                "-ln=DependencyExample",
+                "-lv=0.1.0",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/samplecontentig/input/tests/DependencyExample",
+                "-t=" + testResourcePath + "/samplecontentig/input/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("Test=[Observation(id="));
+    }
+
 }

@@ -51,6 +51,7 @@ import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminolog
 import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.CompositeFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
@@ -83,6 +84,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
     private CqlOptions cqlOptions = CqlOptions.defaultOptions();
+
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
@@ -325,6 +327,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
 
     // TODO: This is duplicate logic from the evaluator builder
+    // TODO: Add NPM library source loader support
     private LibraryLoader buildLibraryLoader(LibrarySourceProvider librarySourceProvider) {
         List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
         librarySourceProviders.add(librarySourceProvider);
@@ -333,7 +336,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions());
+                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), null);
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);

@@ -1,0 +1,394 @@
+<div>
+    <table class="grid dict">
+        {% if Library.id.exists() %}
+        <tr>
+            <th scope="row"><b>Id: </b></th>
+            <td style="padding-left: 4px;">{{Library.id}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.url.exists() %}
+        <tr>
+            <th scope="row"><b>Url: </b></th>
+            <td style="padding-left: 4px;">{{Library.url}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.version.exists() %}
+        <tr>
+            <th scope="row"><b>Version: </b></th>
+            <td style="padding-left: 4px;">{{Library.version}}</td>
+        </tr>
+        {% endif %}
+        {% for identifier in Library.identifier %}
+        <tr>
+            <th scope="row"><b>Identifier: </b></th>
+            <td style="padding-left: 4px;">
+                {% if identifier.type.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>type: </b> <span>{{identifier.type.value}}</span>
+                </p>
+                {% endif %}
+                {% if identifier.value.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>value: </b> <span>{{identifier.value}}</span>
+                </p>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        {% if Library.name.exists() %}
+        <tr>
+            <th scope="row"><b>Name: </b></th>
+            <td style="padding-left: 4px;">{{Library.name}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.title.exists() %}
+        <tr>
+            <th scope="row"><b>Title: </b></th>
+            <td style="padding-left: 4px;">{{Library.title.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.subtitle.exists() %}
+        <tr>
+            <th scope="row"><b>Subtitle: </b></th>
+            <td style="padding-left: 4px;">{{Library.subtitle.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.status.exists() %}
+        <tr>
+            <th scope="row"><b>Status: </b></th>
+            <td style="padding-left: 4px;">{{Library.status.value}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.experimental.exists() %}
+        <tr>
+            <th scope="row"><b>Experimental: </b></th>
+            <td style="padding-left: 4px;">{{Library.experimental.value}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.type.exists() %}
+        <tr>
+            <th scope="row"><b>Type: </b></th>
+            <td style="padding-left: 4px;">
+                {% if Library.type.coding.exists() %}
+                    {% for coding in Library.type.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span>{{coding.system}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display.escape('html')}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if Library.type.coding.exists().not and Library.type.text.exists() %}
+                    {{Library.type.text}}
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+        {% if Library.subject.exists() %}
+        <tr>
+            <th scope="row"><b>Subject: </b></th>
+            {%if Library.subject is CodeableConcept %}
+            <td style="padding-left: 4px;">
+                {% if Library.subject.coding.exists() %}
+                    {% for coding in Library.subject.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span>{{coding.system}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display.escape('html')}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if Library.subject.coding.exists().not and Library.subject.text.exists() %}
+                    {{Library.subject.text}}
+                {% endif %}
+            </td>
+            {% endif %}
+            {% if Library.subject is Reference %}
+            <td style="padding-left: 4px;">
+                {% if Library.subject.reference.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>reference: </b> <span>{{Library.subject.reference}}</span>
+                </p>
+                {% endif %}
+                {% if Library.subject.type.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>type: </b> <span>{{Library.subject.type}}</span>
+                </p>
+                {% endif %}
+                {% if Library.subject.display.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>code: </b> <span>{{Library.subject.display.escape('html')}}</span>
+                </p>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% endif %}
+        {% if Library.date.exists() %}
+        <tr>
+            <th scope="row"><b>Date: </b></th>
+            <td style="padding-left: 4px;">{{Library.date}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.publisher.exists() %}
+        <tr>
+            <th scope="row"><b>Publisher: </b></th>
+            <td style="padding-left: 4px;">{{Library.publisher.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.description.exists() %}
+        <tr>
+            <th scope="row"><b>Description: </b></th>
+            <td style="padding-left: 4px;">{{Library.description.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability').exists() %}
+        <tr>
+          <th scope="row"><b>Knowledge Capability: </b></th>
+          <td style="padding-left: 4px;">
+            {% for extension in Library.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability') %}{{extension.value}} {% endfor %}
+          </td>
+        </tr>
+        {% endif %}
+        {% if Library.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel').exists() %}
+        <tr>
+          <th scope="row"><b>Knowledge Representation Level: </b></th>
+          <td style="padding-left: 4px;">
+            {% for extension in Library.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel') %}{{extension.value}}{% endfor %}
+          </td>
+        </tr>
+        {% endif %}
+        {% if Library.useContext.exists() %}
+        <tr>
+            <th scope="row"><b>Use Context: </b></th>
+            <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>code</b></th><th><b>value</b></th><th><b>display</b></th></tr>
+                    {% for useContext in Library.useContext %}
+                      <tr>
+                        <td>{{useContext.code.code}}</td>
+                        <td>{{(useContext.value as CodeableConcept).coding.first().code}}</td>
+                        <td>{{(useContext.value as CodeableConcept).coding.first().display.escape('html')}}</td>
+                      </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% endif %}
+        {% if Library.jurisdiction.exists() %}
+        <tr>
+            <th scope="row"><b>Jurisdiction: </b></th>
+            <td style="padding-left: 4px;">{{Library.jurisdiction.first().coding.first().code}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.purpose.exists() %}
+        <tr>
+            <th scope="row"><b>Purpose: </b></th>
+            <td style="padding-left: 4px;">{{Library.purpose.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.usage.exists() %}
+        <tr>
+            <th scope="row"><b>Usage: </b></th>
+            <td style="padding-left: 4px;">{{Library.usage.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.copyright.exists() %}
+        <tr>
+            <th scope="row"><b>Copyright: </b></th>
+            <td style="padding-left: 4px;">{{Library.copyright.escape('html')}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.approvalDate.exists() %}
+        <tr>
+            <th scope="row"><b>Approval Date: </b></th>
+            <td style="padding-left: 4px;">{{Library.approvalDate}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.lastReviewDate.exists() %}
+        <tr>
+            <th scope="row"><b>Last Review Date: </b></th>
+            <td style="padding-left: 4px;">{{Library.lastReviewDate}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.effectivePeriod.exists() %}
+        <tr>
+            <th scope="row"><b>Effective Period: </b></th>
+            <td style="padding-left: 4px;">{{Library.effectivePeriod.start}}..{{Library.effectivePeriod.end}}</td>
+        </tr>
+        {% endif %}
+        {% if Library.relatedArtifact.exists() %}
+        <tr>
+          <th scope="row"><b>Related Artifacts: </b></th>
+          <td style="padding-left: 4px;">
+            {% if Library.relatedArtifact.where(type = 'documentation' or type = 'justification').exists() %}
+            <p><b>Documentation</b></p>
+            <ul>
+              {% for artifact in Library.relatedArtifact.where(type = 'documentation' or type = 'justification') %}
+                <li><a href="{{artifact.url}}">{{artifact.label}} {{artifact.display.escape('html')}}</a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if Library.relatedArtifact.where(type = 'citation').exists() %}
+            <p><b>References</b></p>
+            <ul>
+              {% for artifact in Library.relatedArtifact.where(type = 'citation') %}
+                <li>{{artifact.citation}}<br/><a href="{{artifact.url}}">{{artifact.url}}</a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if Library.relatedArtifact.where(type = 'depends-on').exists() %}
+            <p><b>Dependencies</b></p>
+            <ul>
+              {% for artifact in Library.relatedArtifact.where(type = 'depends-on') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if Library.relatedArtifact.where(type = 'composed-of').exists() %}
+            <p><b>Components</b></p>
+            <ul>
+              {% for artifact in Library.relatedArtifact.where(type = 'composed-of') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if Library.relatedArtifact.where(type = 'derived-from').exists() %}
+            <p><b>Derived From</b></p>
+            <ul>
+              {% for artifact in Library.relatedArtifact.where(type = 'derived-from') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if Library.relatedArtifact.where(type = 'successor').exists() %}
+            <p><b>Successor</b></p>
+            <ul>
+              {% for artifact in Library.relatedArtifact.where(type = 'successor') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            {% if Library.relatedArtifact.where(type = 'predecessor').exists() %}
+            <p><b>Predecessor</b></p>
+            <ul>
+              {% for artifact in Library.relatedArtifact.where(type = 'predecessor') %}
+                <li>{{artifact.resource}}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </td>
+        </tr>
+        {% endif %}
+        {% if Library.parameter.exists() %}
+        <tr>
+          <th scope="row"><b>Parameters: </b></th>
+          <td style="padding-left: 4px;">
+            <table class="grid-dict">
+              <tr><th><b>Name</b></th><th><b>Type</b></th><th><b>Min</b></th><th><b>Max</b></th><th><b>In/Out</b></th></tr>
+              {% for param in Library.parameter %}
+                <tr><th>{{param.name}}</th><th>{{param.type}}</th><th>{{param.min}}</th><th>{{param.max}}</th><th>{{param.use}}</th></tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% if Library.dataRequirement.exists() %}
+        <tr>
+          <th scope="row"><b>Data Requirements:</b></th>
+          <td style="padding-left: 4px;">
+            <table class="grid-dict">
+              <tr><th><b>Type</b></th><th><b>Profile</b></th><th><b>MS</b></th><th><b>Code Filter</b></th></tr>
+              {% for requirement in Library.dataRequirement %}
+                <tr>
+                  <th>{{requirement.type.value}}</th>
+                  <th>{% for profile in requirement.profile %}{{profile.value}}{% endfor %}</th>
+                  <th>{% for support in requirement.mustSupport %}{{mustSupport}};{% endfor %}</th>
+                  <th>
+                    {% for cfilter in requirement.codeFilter %}
+                      <b>code filter: </b>
+                      {% if cfilter.path.exists() or cfilter.valueSet.exists() or cfilter.code.exists() %}
+                      <br/>
+                      {% endif %}
+                      {% if cfilter.path.exists() %}
+                      <span style="padding-left: 4px;">
+                          <b>path: </b><span>{{cfilter.path}}</span>
+                      </span>
+                      {% if cfilter.valueSet.exists() or cfilter.code.exists() %}
+                      <br/>
+                      {% endif %}
+                      {% endif %}
+                      {% if cfilter.valueSet.exists() %}
+                      <span style="padding-left: 4px;">
+                          <b>value set: </b><span>{{cfilter.valueSet.value}}</span>
+                      </span>
+                      {% endif %}
+                      {% for coding in cfilter.code %}
+                          {% if coding.system.exists() %}
+                          <p style="margin-bottom: 5px;">
+                              <b>system: </b> <span>{{coding.system}}</span>
+                          </p>
+                          {% endif %}
+                          {% if coding.code.exists() %}
+                          <p style="margin-bottom: 5px;">
+                              <b>code: </b> <span>{{coding.code}}</span>
+                          </p>
+                          {% endif %}
+                          {% if coding.display.exists() %}
+                          <p style="margin-bottom: 5px;">
+                              <b>display: </b> <span>{{coding.display.escape('html')}}</span>
+                          </p>
+                          {% endif %}
+                      {% endfor %}
+                    {% endfor %}
+                  </th>
+                </tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% for c in Library.content %}
+        {% if c.contentType = 'text/cql' %}
+        <tr>
+          <td colspan="2">
+            <table>
+              <tr><th><a id="cql-content"><b>Content: </b></a> {{c.contentType}}</th></tr>
+              <tr><td><pre><code class="language-cql">{{c.data.decode('base64').escape('html')}}</code></pre></td></tr>
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% if c.contentType != 'text/cql' %}
+        <tr>
+          <td colspan="2">
+            <table>
+              <tr><th><b>Content: </b> {{c.contentType}}</th></tr>
+              <tr><td><pre><code>{{'Encoded data (' + c.data.length().toString() + ' characters)'}}</code></pre></td></tr>
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+</div>

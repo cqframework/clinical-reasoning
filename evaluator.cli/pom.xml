@@ -58,6 +58,16 @@
             <artifactId>caffeine</artifactId>
             <scope>compile</scope>
         </dependency>
+        <!-- NPM Packaging Dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+        <!-- BundleResources requirement -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

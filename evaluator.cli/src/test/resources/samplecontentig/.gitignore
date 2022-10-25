@@ -1,0 +1,28 @@
+# Temporary folders #
+#####################
+temp
+template
+output
+
+# Don't commit this because it's so large #
+###########################################
+/input-cache/org.hl7.fhir.publisher.jar
+/input-cache/publisher.jar
+/input-cache/tooling*
+
+# Ignore test bundles, etc. generated via _refresh #
+/input/tests/*Example/example/*-bundle.json
+/input/resources/device/*
+
+# Windows generated files #
+###########################
+Thumbs.db
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+
+# backup files #
+################
+*.bak

@@ -1,0 +1,13 @@
+// Add warning and/or information messages here after you've confirmed that they aren't really a problem
+// (And include comments like this justifying why)
+
+// This is inherited from the base resource
+WARNING: StructureDefinition/myObservation: StructureDefinition.snapshot.element[15].mapping[3].map: value should not start or finish with whitespace
+
+// We're expecting these to not match the slice - we're showing how you can use slicing to define the one repetition you want even when many repetitions might be present
+INFORMATION: Patient/example: Patient.name[0]: This element does not match any known slice for the profile http://somewhere.org/fhir/uv/myig/StructureDefinition/mypatient
+INFORMATION: Patient/example: Patient.name[1]: This element does not match any known slice for the profile http://somewhere.org/fhir/uv/myig/StructureDefinition/mypatient
+
+// If this was a real IG, there should be examples for these profiles too.  But it's not, and I'm lazy...
+WARNING: http://somewhere.org/fhir/uv/myig/StructureDefinition/myObservation: The Implementation Guide contains no examples for this profile
+WARNING: http://somewhere.org/fhir/uv/myig/StructureDefinition/mypractitioner: The Implementation Guide contains no examples for this profile

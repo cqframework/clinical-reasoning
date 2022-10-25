@@ -12,13 +12,12 @@
     <description>CQL Evaluator Project</description>
     <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
 
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cql-translator.version>2.2.0</cql-translator.version>
-        <cql-engine.version>2.1.0</cql-engine.version>
+        <cql-translator.version>2.3.0-SNAPSHOT</cql-translator.version>
+        <cql-engine.version>2.2.0-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <hapi.version>6.0.1</hapi.version>
@@ -35,6 +34,7 @@
 
         <module>evaluator</module>
         <module>evaluator.fhir</module>
+        <module>evaluator.fhir-npm</module>
         <module>evaluator.library</module>
         <module>evaluator.builder</module>
         <module>evaluator.dagger</module>
@@ -179,6 +179,16 @@
                 <artifactId>elm-fhir</artifactId>
                 <version>${cql-translator.version}</version>
             </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>cqf-fhir</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>cqf-fhir-npm</artifactId>
+                <version>${cql-translator.version}</version>
+            </dependency>
 
             <!-- HAPI depedencies -->
             <dependency>
@@ -251,6 +261,20 @@
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
                 <version>1.3.2</version>
+            </dependency>
+
+            <!-- NPM Packaging Dependencies -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.21</version>
+            </dependency>
+
+            <!-- BundleResources requirement -->
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.6</version>
             </dependency>
 
             <!-- Dagger -->

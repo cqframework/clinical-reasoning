@@ -16,7 +16,12 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.fhir.npm.ILibraryReader;
+import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
+import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.fhir.r5.context.IWorkerContext;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
@@ -34,6 +39,7 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
+import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +66,10 @@ public class CqlEvaluatorBuilder {
     private Map<String, Pair<ModelResolver, List<RetrieveProvider>>> dataProviderParts;
 
     private CqlOptions cqlOptions;
+
+    private NamespaceInfo namespaceInfo;
+
+    private NpmProcessor npmProcessor;
 
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
@@ -211,6 +221,30 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
+     * Sets the NamespaceInfo to use for the evaluator. If provided, this is the default
+     * namespace for translation. If library sources are provided without namespaces associated,
+     * they will be considered as part of this namespace.
+     * @param namespaceInfo the namespaceInfo to use
+     * @return this CqlEvaluatorBuilder
+     */
+    public CqlEvaluatorBuilder withNamespaceInfo(NamespaceInfo namespaceInfo) {
+        this.namespaceInfo = namespaceInfo;
+        return this;
+    }
+
+    /**
+     * Sets the NpmProcessor to use for the evaluator. If provided the NpmProcessor is
+     * used to establish IG context and provide Fhir Npm package lookup for Cql libraries
+     * @param npmProcessor
+     * @return
+     */
+    public CqlEvaluatorBuilder withNpmProcessor(NpmProcessor npmProcessor) {
+        requireNonNull(npmProcessor, "npmProcessor can not be null");
+        this.npmProcessor = npmProcessor;
+        return this;
+    }
+
+    /**
      * Set the Library cache to use when loading CQL libraries. A cached library
      * will be verified to make sure versions match and that it was translated with
      * the same CQL options.
@@ -269,16 +303,43 @@ public class CqlEvaluatorBuilder {
         return dataProviders;
     }
 
+    private class LoggerWrapper implements IWorkerContext.ILoggingService {
+        private Logger innerLogger;
+
+        public LoggerWrapper(Logger innerLogger) {
+            this.innerLogger = innerLogger;
+        }
+        @Override
+        public void logMessage(String s) {
+            logger.info(s);
+        }
+
+        @Override
+        public void logDebugMessage(LogCategory logCategory, String s) {
+            logger.debug(String.format("%s: %s", logCategory.toString(), s));
+        }
+    }
+
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.librarySourceProviders);
         if (this.cqlOptions.useEmbeddedLibraries()) {
             this.librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
 
+        // TODO: Would be good to plug this in through DI, but I ran into so many issues doing that, I just went this route
+        if (npmProcessor != null) {
+            ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(npmProcessor.getIgContext().getFhirVersion());
+            this.librarySourceProviders.add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, new LoggerWrapper(logger)));
+        }
+
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions());
+                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.namespaceInfo);
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
+        }
+
+        if (npmProcessor != null) {
+            libraryLoader.loadNamespaces(npmProcessor.getNamespaces());
         }
 
         return this.decorate(libraryLoader);

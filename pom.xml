@@ -409,8 +409,6 @@
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-Xlint:all</arg>
-                            <!-- This fixes a boostrapclass path warning which the "release" property fixes on Java 9+ -->
-                            <arg>-Xlint:-options</arg>
                             <!-- This bypasses annotation processing for Inject -->
                             <arg>-Xlint:-processing</arg>
                             <arg>-Werror</arg>
@@ -437,7 +435,9 @@
                     <version>3.3.1</version>
                     <configuration>
                         <source>11</source>
-                        <show>private</show>
+                        <release>11</release>
+                        <doclint>-missing</doclint>
+                        <quiet>true</quiet>
                     </configuration>
                     <executions>
                         <execution>

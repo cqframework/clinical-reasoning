@@ -15,7 +15,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-@Named
+//@Named
 public class NpmProcessor {
     /**
      * Provides access to the Npm package manager. Note that this will be throw an exception in the case that
@@ -38,7 +38,7 @@ public class NpmProcessor {
         return this.igContext;
     }
 
-    @Inject
+    //@Inject
     public NpmProcessor(IGContext igContext) {
         this.igContext = igContext;
         if (igContext != null) {

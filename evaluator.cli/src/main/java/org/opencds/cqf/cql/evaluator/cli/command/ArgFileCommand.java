@@ -15,11 +15,11 @@ public class ArgFileCommand implements Callable<Integer> {
 
     @Parameters(arity = "1", description = "file containing arguments")
     File[] files;
-    
+
     @Override
     public Integer call() throws Exception {
         List<String> args = Files.readAllLines(files[0].toPath());
         return Main.run(args.toArray(new String[args.size()]));
     }
-    
+
 }

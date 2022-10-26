@@ -438,6 +438,7 @@
                         <release>11</release>
                         <doclint>-missing</doclint>
                         <quiet>true</quiet>
+                        <detectOfflineLinks>false</detectOfflineLinks>
                     </configuration>
                     <executions>
                         <execution>

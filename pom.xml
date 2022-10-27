@@ -189,7 +189,7 @@
                 <version>${cql-translator.version}</version>
             </dependency>
 
-            <!-- HAPI depedencies -->
+            <!-- HAPI dependencies -->
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-client</artifactId>

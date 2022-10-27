@@ -1,23 +1,42 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StratifierComponentDef {
+    private final String id;
+    private final ConceptDef code;
+    private final String expression;
 
-    private String expression;
-    private String code;
+    private Map<String, Object> subjectValues;
 
-    public String getExpression() {
-        return this.expression;
-    }
-
-    public void setExpression(String expression) {
+    public StratifierComponentDef(String id, ConceptDef code, String expression) {
+        this.id = id;
+        this.code = code;
         this.expression = expression;
     }
 
-    public String getCode() {
+    public String id() {
+        return this.id;
+    }
+
+    public String expression() {
+        return this.expression;
+    }
+
+    public ConceptDef code() {
         return this.code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }    
+    public void putSubjectValue(String subject, Object value) {
+        this.getSubjectValues().put(subject, value);
+    }
+
+    public Map<String, Object> getSubjectValues() {
+        if (this.subjectValues == null) {
+            this.subjectValues = new HashMap<>();
+        }
+
+        return this.subjectValues;
+    }
 }

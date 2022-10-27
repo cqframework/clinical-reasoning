@@ -18,15 +18,12 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.elm.execution.Expression;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
 import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
-import org.opencds.cqf.cql.engine.elm.execution.ExpressionRefEvaluator;
-import org.opencds.cqf.cql.engine.elm.execution.InstanceEvaluator;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -197,16 +194,16 @@ public class MeasureEvaluator {
 
     protected MeasureDef evaluate(MeasureDef measureDef, MeasureReportType type, List<String> subjectIds) {
 
-        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.getUrl(), type.toCode(),
+        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.url(), type.toCode(),
                 subjectIds.size());
 
-        MeasureScoring measureScoring = measureDef.getMeasureScoring();
+        MeasureScoring measureScoring = measureDef.scoring();
         if (measureScoring == null) {
             throw new RuntimeException("MeasureScoring type is required in order to calculate.");
         }
 
-        for (GroupDef groupDef : measureDef.getGroups()) {
-            evaluateGroup(measureScoring, groupDef, measureDef.getSdes(), subjectIds);
+        for (GroupDef groupDef : measureDef.groups()) {
+            evaluateGroup(measureScoring, groupDef, measureDef.sdes(), subjectIds);
             validateEvaluatedMeasureCount(measureScoring, groupDef);
         }
 
@@ -219,30 +216,30 @@ public class MeasureEvaluator {
             case RATIO:
                 // the count of denominator + denominator exclusion + denominator exception must
                 // be <= the count of initial population.
-                if (groupDef.get(INITIALPOPULATION).getResources()
-                        .size() < ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size()
+                if (groupDef.getSingle(INITIALPOPULATION).getResources()
+                        .size() < ((groupDef.getSingle(DENOMINATOR) != null ? groupDef.getSingle(DENOMINATOR).getResources().size()
                         : 0) +
-                        (groupDef.get(DENOMINATOREXCEPTION) != null
-                                ? groupDef.get(DENOMINATOREXCEPTION).getResources().size()
+                        (groupDef.getSingle(DENOMINATOREXCEPTION) != null
+                                ? groupDef.getSingle(DENOMINATOREXCEPTION).getResources().size()
                                 : 0)
                         +
-                        (groupDef.get(DENOMINATOREXCLUSION) != null
-                                ? groupDef.get(DENOMINATOREXCLUSION).getResources().size()
+                        (groupDef.getSingle(DENOMINATOREXCLUSION) != null
+                                ? groupDef.getSingle(DENOMINATOREXCLUSION).getResources().size()
                                 : 0))) {
                     logger.debug("For group: {}, Initial population count is less than the sum of denominator," +
-                            " denominator exception and denominator exclusion", groupDef.getId());
+                            " denominator exception and denominator exclusion", groupDef.id());
                 }
 
                 // the count of numerator + numerator exclusion must be <= the count of the
                 // denominator.
-                if ((groupDef.get(DENOMINATOR) != null ? groupDef.get(DENOMINATOR).getResources().size()
-                        : 0) < ((groupDef.get(NUMERATOR) != null ? groupDef.get(NUMERATOR).getResources().size() : 0) +
-                        (groupDef.get(NUMERATOREXCLUSION) != null
-                                ? groupDef.get(NUMERATOREXCLUSION).getResources().size()
+                if ((groupDef.getSingle(DENOMINATOR) != null ? groupDef.getSingle(DENOMINATOR).getResources().size()
+                        : 0) < ((groupDef.getSingle(NUMERATOR) != null ? groupDef.getSingle(NUMERATOR).getResources().size() : 0) +
+                        (groupDef.getSingle(NUMERATOREXCLUSION) != null
+                                ? groupDef.getSingle(NUMERATOREXCLUSION).getResources().size()
                                 : 0))) {
                     logger.debug(
                             "For group: {}, Denominator count is less than the sum of numerator and numerator exclusion",
-                            groupDef.getId());
+                            groupDef.id());
                 }
 
                 break;
@@ -310,27 +307,27 @@ public class MeasureEvaluator {
     protected boolean evaluatePopulationMembership(String subjectType, String subjectId, PopulationDef inclusionDef,
             PopulationDef exclusionDef) {
         boolean inPopulation = false;
-        for (Object resource : evaluatePopulationCriteria(subjectType, subjectId, inclusionDef.getCriteriaExpression(),
+        for (Object resource : evaluatePopulationCriteria(subjectType, subjectId, inclusionDef.expression(),
                 inclusionDef.getEvaluatedResources())) {
             inPopulation = true;
-            inclusionDef.getResources().add(resource);
+            inclusionDef.addResource(resource);
         }
 
         if (inPopulation && exclusionDef != null) {
             for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
-                    exclusionDef.getCriteriaExpression(), exclusionDef.getEvaluatedResources())) {
+                    exclusionDef.expression(), exclusionDef.getEvaluatedResources())) {
                 inPopulation = false;
-                exclusionDef.getResources().add(resource);
-                inclusionDef.getResources().remove(resource);
+                exclusionDef.addResource(resource);
+                inclusionDef.removeResource(resource);
             }
         }
 
         if (inPopulation) {
-            inclusionDef.getSubjects().add(subjectId);
+            inclusionDef.addSubject(subjectId);
         }
 
         if (!inPopulation && exclusionDef != null) {
-            exclusionDef.getSubjects().add(subjectId);
+            exclusionDef.addSubject(subjectId);
         }
 
         return inPopulation;
@@ -339,35 +336,35 @@ public class MeasureEvaluator {
     protected void evaluateProportion(GroupDef groupDef, String subjectType, String subjectId) {
         // Are they in the initial population?
         boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
-                groupDef.get(INITIALPOPULATION), null);
+                groupDef.getSingle(INITIALPOPULATION), null);
         if (inInitialPopulation) {
             // Are they in the denominator?
-            boolean inDenominator = evaluatePopulationMembership(subjectType, subjectId, groupDef.get(DENOMINATOR),
-                    groupDef.get(DENOMINATOREXCLUSION));
+            boolean inDenominator = evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(DENOMINATOR),
+                    groupDef.getSingle(DENOMINATOREXCLUSION));
 
             if (inDenominator) {
                 // Are they in the numerator?
-                boolean inNumerator = evaluatePopulationMembership(subjectType, subjectId, groupDef.get(NUMERATOR),
-                        groupDef.get(NUMERATOREXCLUSION));
+                boolean inNumerator = evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(NUMERATOR),
+                        groupDef.getSingle(NUMERATOREXCLUSION));
 
-                if (!inNumerator && groupDef.get(DENOMINATOREXCEPTION) != null) {
+                if (!inNumerator && groupDef.getSingle(DENOMINATOREXCEPTION) != null) {
                     // Are they in the denominator exception?
 
-                    PopulationDef denominatorException = groupDef.get(DENOMINATOREXCEPTION);
-                    PopulationDef denominator = groupDef.get(DENOMINATOR);
+                    PopulationDef denominatorException = groupDef.getSingle(DENOMINATOREXCEPTION);
+                    PopulationDef denominator = groupDef.getSingle(DENOMINATOR);
                     boolean inException = false;
                     for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
-                            denominatorException.getCriteriaExpression(),
+                            denominatorException.expression(),
                             denominatorException.getEvaluatedResources())) {
                         inException = true;
-                        denominatorException.getResources().add(resource);
-                        denominator.getResources().remove(resource);
+                        denominatorException.addResource(resource);
+                        denominator.removeResource(resource);
 
                     }
 
                     if (inException) {
-                        denominatorException.getSubjects().add(subjectId);
-                        denominator.getSubjects().remove(subjectId);
+                        denominatorException.addSubject(subjectId);
+                        denominator.removeSubject(subjectId);
                     }
                 }
             }
@@ -376,21 +373,21 @@ public class MeasureEvaluator {
 
     protected void evaluateContinuousVariable(GroupDef groupDef, String subjectType, String subjectId) {
         boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
-                groupDef.get(INITIALPOPULATION), null);
+                groupDef.getSingle(INITIALPOPULATION), null);
 
         if (inInitialPopulation) {
             // Are they in the MeasureType population?
-            PopulationDef measurePopulation = groupDef.get(MEASUREPOPULATION);
+            PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
             boolean inMeasurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation,
-                    groupDef.get(MEASUREPOPULATIONEXCLUSION));
+                    groupDef.getSingle(MEASUREPOPULATIONEXCLUSION));
 
             if (inMeasurePopulation) {
-                PopulationDef measureObservation = groupDef.get(MEASUREOBSERVATION);
+                PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
                 if (measureObservation != null) {
                     for (Object resource : measurePopulation.getResources()) {
                         Object observationResult = evaluateObservationCriteria(resource,
-                                measureObservation.getCriteriaExpression(), measureObservation.getEvaluatedResources());
-                        measureObservation.getResources().add(observationResult);
+                                measureObservation.expression(), measureObservation.getEvaluatedResources());
+                        measureObservation.addResource(observationResult);
                     }
                 }
             }
@@ -398,7 +395,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(GroupDef groupDef, String subjectType, String subjectId) {
-        evaluatePopulationMembership(subjectType, subjectId, groupDef.get(INITIALPOPULATION), null);
+        evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION), null);
     }
 
     protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef, List<SdeDef> sdes,
@@ -409,7 +406,7 @@ public class MeasureEvaluator {
             String subjectId = subjectInfo.getRight();
             this.setContextToSubject(subjectType, subjectId);
             evaluateSdes(sdes);
-            evaluateStratifiers(subjectId, groupDef.getStratifiers());
+            evaluateStratifiers(subjectId, groupDef.stratifiers());
             switch (measureScoring) {
                 case PROPORTION:
                 case RATIO:
@@ -427,8 +424,7 @@ public class MeasureEvaluator {
 
     protected void evaluateSdes(List<SdeDef> sdes) {
         for (SdeDef sde : sdes) {
-            ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.getExpression());
-            inspectInstanceEvaluation(sde, expressionDef);
+            ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.expression());
             Object result = expressionDef.evaluate(this.context);
 
             // TODO: Is it valid for an SDE to give multiple results?
@@ -437,34 +433,14 @@ public class MeasureEvaluator {
         }
     }
 
-    // consider more complex expression in future
-    private void inspectInstanceEvaluation(SdeDef sdeDef, ExpressionDef expressionDef) {
-        Expression expression = expressionDef.getExpression();
-        if (expression.getClass() == InstanceEvaluator.class) {
-            sdeDef.setIsInstanceExpression(true);
-        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
-                ((ExpressionRefEvaluator) expression).getLibraryName() != null) {
-            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
-            context.enterLibrary(expressionRef.getLibraryName());
-            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
-            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
-            context.exitLibrary(true);
-        } else if (expression.getClass() == ExpressionRefEvaluator.class &&
-                ((ExpressionRefEvaluator) expression).getLibraryName() == null) {
-            ExpressionRefEvaluator expressionRef = ((ExpressionRefEvaluator) expression);
-            ExpressionDef nextExpressionDef = this.context.resolveExpressionRef(expressionRef.getName());
-            inspectInstanceEvaluation(sdeDef, nextExpressionDef);
-        }
-    }
-
     protected void evaluateStratifiers(String subjectId, List<StratifierDef> stratifierDefs) {
         for (StratifierDef sd : stratifierDefs) {
-            if (!sd.getComponents().isEmpty()) {
+            if (!sd.components().isEmpty()) {
                 throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
             }
 
             // TODO: Handle list values as components?
-            Object result = this.context.resolveExpressionRef(sd.getExpression()).evaluate(this.context);
+            Object result = this.context.resolveExpressionRef(sd.expression()).evaluate(this.context);
             if (result instanceof Iterable) {
                 Iterator<?> resultIter = ((Iterable<?>) result).iterator();
                 if (resultIter.hasNext()) {
@@ -475,7 +451,7 @@ public class MeasureEvaluator {
             }
 
             if (result != null) {
-                sd.getSubjectValues().put(subjectId, result);
+                sd.putSubjectValue(subjectId, result);
             }
 
             clearEvaluatedResources();

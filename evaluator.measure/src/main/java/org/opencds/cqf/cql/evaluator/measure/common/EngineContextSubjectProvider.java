@@ -12,14 +12,14 @@ import org.slf4j.LoggerFactory;
 
 public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
 
-    private final static Logger logger = LoggerFactory.getLogger(EngineContextSubjectProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(EngineContextSubjectProvider.class);
 
     protected Context context;
     protected String modelUri;
     protected String subjectType;
 
     protected Function<SubjectT, String> getId;
-    
+
     public EngineContextSubjectProvider(Context context, String modelUri, Function<SubjectT, String> getId) {
         this.context = context;
         this.modelUri = modelUri;

@@ -30,6 +30,7 @@
         "sdes",
         "sgpc",
         "SUBJECTLIST",
+        "testng",
         "Unvalidated",
         "uscore"
     ],
@@ -51,6 +52,7 @@
 		"source.organizeImports": true,
 		"editor.formatOnSave": true
 	},
+    "sonar.java.source" : "11",
 	"files.exclude": {
 		"**/.classpath": true,
 		"**/.project": true,

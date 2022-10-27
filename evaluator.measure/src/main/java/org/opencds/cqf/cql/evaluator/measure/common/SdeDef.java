@@ -5,61 +5,34 @@ import java.util.List;
 
 public class SdeDef {
 
-    private String id;
-    private String expression;
-    private String code;
-    private boolean hasCode;
-    private boolean isInstanceExpression;
-    private String system;
-    private String display;
-    private String text;
+    private final String id;
+    private final ConceptDef code;
+    private final String expression;
+
+    public SdeDef(String id, ConceptDef code, String expression) {
+        this.id = id;
+        this.code = code;
+        this.expression = expression;
+    }
 
 
     private List<Object> values;
 
-    public String getId() {
+    public String id() {
         return this.id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getExpression() {
+    public String expression() {
         return this.expression;
     }
 
-    public void setExpression(String expression) {
-        this.expression = expression;
-    }
-
-    public String getCode() {
+    public ConceptDef code() {
         return this.code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void addValue(Object value) {
+        this.getValues().add(value);
     }
-
-    public boolean hasCode() { return hasCode; }
-
-    public void setHasCode(boolean hasCode) { this.hasCode = hasCode; }
-
-    public boolean isInstanceExpression() { return isInstanceExpression; }
-
-    public void setIsInstanceExpression(boolean isInstanceExpression) { this.isInstanceExpression = isInstanceExpression; }
-
-    public String getSystem() { return system; }
-
-    public void setSystem(String system) { this.system = system; }
-
-    public String getDisplay() { return display; }
-
-    public void setDisplay(String display) { this.display = display; }
-
-    public String getText() { return text; }
-
-    public void setText(String text) { this.text = text; }
 
     public List<Object> getValues() {
         if (this.values == null) {

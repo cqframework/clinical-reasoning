@@ -1,108 +1,147 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponentComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
+import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.measure.common.CodeDef;
+import org.opencds.cqf.cql.evaluator.measure.common.ConceptDef;
 import org.opencds.cqf.cql.evaluator.measure.common.GroupDef;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureDef;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureDefBuilder;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureScoring;
+import org.opencds.cqf.cql.evaluator.measure.common.PopulationDef;
 import org.opencds.cqf.cql.evaluator.measure.common.SdeDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierComponentDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
+    private final boolean enforceIds;
+
+    public R4MeasureDefBuilder() {
+        this(false);
+    }
+
+    public R4MeasureDefBuilder(boolean enforceIds) {
+        this.enforceIds = enforceIds;
+    }
+
     @Override
     public MeasureDef build(Measure measure) {
-        MeasureDef measureDef = new MeasureDef();
-
-        measureDef.setUrl(measure.getUrl());
-        measureDef.setMeasureScoring(MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()));
+        checkId(measure);
 
         // SDES
-        List<MeasureSupplementalDataComponent> sdes = measure.getSupplementalData();
-        for (MeasureSupplementalDataComponent c : sdes) {
-            SdeDef def = new SdeDef();
-
-            String expression = c.getCriteria().getExpression();
-            String code = c.hasCode() && c.getCode().getCodingFirstRep().hasCode()
-                    ? c.getCode().getCodingFirstRep().getCode()
-                    : c.hasCode() && c.getCode().hasText() ? c.getCode().getText()
-                            : expression.replace(" ", "-").toLowerCase();
-            if(StringUtils.isNotBlank(c.getId())) {
-                def.setId(c.getId());
-            }
-
-            if(c.hasCode() && c.getCode().hasText() && StringUtils.isNotBlank(c.getCode().getText())) {
-                def.setText(c.getCode().getText());
-            }
-
-            if (c.hasCode() && c.getCode().getCodingFirstRep().hasCode()) {
-                def.setHasCode(true);
-                if (c.getCode().getCodingFirstRep().hasSystem()) {
-                    def.setSystem(c.getCode().getCodingFirstRep().getSystem());
-                }
-
-                if (c.getCode().getCodingFirstRep().hasDisplay()) {
-                    def.setDisplay(c.getCode().getCodingFirstRep().getDisplay());
-                }
-            }
-
-            def.setCode(code);
-            def.setExpression(expression);
-
-            measureDef.getSdes().add(def);
+        List<SdeDef> sdes = new ArrayList<>();
+        for (MeasureSupplementalDataComponent s :  measure.getSupplementalData()) {
+            checkId(s);
+            SdeDef def = new SdeDef(
+                s.getId(),
+                conceptToConceptDef(s.getCode()),
+                s.getCriteria().getExpression());
+            sdes.add(def);
         }
 
         // Groups
+        List<GroupDef> groups = new ArrayList<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
-            GroupDef groupDef = new GroupDef();
+            checkId(group);
 
-            groupDef.setId(group.getId());
 
+            // Populations
+            List<PopulationDef> populations = new ArrayList<>();
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
+                checkId(pop);
                 MeasurePopulationType populationType = MeasurePopulationType
                         .fromCode(pop.getCode().getCodingFirstRep().getCode());
-                groupDef.createPopulation(populationType, pop.getCriteria().getExpression());
+
+                populations.add(new PopulationDef(
+                    pop.getId(),
+                    conceptToConceptDef(pop.getCode()),
+                    populationType,
+                    pop.getCriteria().getExpression()));
             }
 
             // Stratifiers
+            List<StratifierDef> stratifiers = new ArrayList<>();
             for (MeasureGroupStratifierComponent mgsc : group.getStratifier()) {
-                String expression = mgsc.hasCriteria() ? mgsc.getCriteria().getExpression() : null;
-                String code = mgsc.hasCode() ? mgsc.getCode().getCodingFirstRep().getCode()
-                        : (expression != null ? expression.replace(" ", "-").toLowerCase() : null);
+                checkId(mgsc);
 
-                StratifierDef stratifierDef = new StratifierDef();
-                stratifierDef.setCode(code);
-                stratifierDef.setExpression(expression);
-
+                // Components
+                var components = new ArrayList<StratifierComponentDef>();
                 for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
+                    checkId(scc);
+                    var scd = new StratifierComponentDef(
+                        scc.getId(),
+                        conceptToConceptDef(scc.getCode()),
+                        scc.hasCriteria() ? scc.getCriteria().getExpression() : null);
 
-                    expression = scc.hasCriteria() ? scc.getCriteria().getExpression() : null;
-                    code = scc.hasCode() ? scc.getCode().getCodingFirstRep().getCode()
-                            : (expression != null ? expression.replace(" ", "-").toLowerCase() : null);
-
-                    StratifierComponentDef stratifierComponentDef = new StratifierComponentDef();
-                    stratifierComponentDef.setCode(code);
-                    stratifierComponentDef.setExpression(expression);
-
-                    stratifierDef.getComponents().add(stratifierComponentDef);
+                    components.add(scd);
                 }
 
-                groupDef.getStratifiers().add(stratifierDef);
+                StratifierDef stratifierDef = new StratifierDef(
+                    mgsc.getId(),
+                    conceptToConceptDef(mgsc.getCode()),
+                    mgsc.getCriteria().getExpression(),
+                    components
+                );
+
+                stratifiers.add(stratifierDef);
             }
 
-            measureDef.getGroups().add(groupDef);
+            groups.add(new GroupDef(
+                group.getId(),
+                conceptToConceptDef(group.getCode()),
+                 stratifiers,
+                 populations));
+
         }
 
-        return measureDef;
+        return new MeasureDef(
+            measure.getId(),
+            measure.getUrl(),
+            measure.getVersion(),
+            MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
+            groups,
+            sdes);
+    }
+
+    private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
+        if (codeable == null) {
+            return null;
+        }
+
+        List<CodeDef> codes = new ArrayList<>();
+        for (var c : codeable.getCoding()) {
+            codes.add(codeToCodeDef(c));
+        }
+
+        return new ConceptDef(codes, codeable.getText());
+    }
+
+    private CodeDef codeToCodeDef(Coding coding) {
+        return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(), coding.getDisplay());
+    }
+
+    private void checkId(Element e) {
+        if (enforceIds && (e.getId() == null || e.getId().isBlank())) {
+            throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
+        }
+    }
+
+    private void checkId(Resource r) {
+        if (enforceIds && (r.getId() == null || r.getId().isBlank())) {
+            throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
+        }
     }
 }

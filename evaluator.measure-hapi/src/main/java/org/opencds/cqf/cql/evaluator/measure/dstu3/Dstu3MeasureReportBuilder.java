@@ -86,7 +86,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
 
-        this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
+        this.measureReportScorer.score(measureDef.scoring(), this.report);
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
@@ -100,7 +100,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildGroups(Measure measure, MeasureDef measureDef) {
-        if (measure.getGroup().size() != measureDef.getGroups().size()) {
+        if (measure.getGroup().size() != measureDef.groups().size()) {
             throw new IllegalArgumentException(
                     "The Measure has a different number of groups defined than the MeasureDef");
         }
@@ -110,18 +110,18 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         for (int i = 0; i < measure.getGroup().size(); i++) {
             MeasureGroupComponent mgc = measure.getGroup().get(i);
             String groupKey = this.getKey("group", mgc.getId(), null, i);
-            buildGroup(groupKey, mgc, this.report.addGroup(), measureDef.getGroups().get(i));
+            buildGroup(groupKey, mgc, this.report.addGroup(), measureDef.groups().get(i));
         }
     }
 
     protected void buildGroup(String groupKey, MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
-        if (measureGroup.getPopulation().size() != groupDef.values().size()) {
+        if (measureGroup.getPopulation().size() != groupDef.populations().size()) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
 
-        if (measureGroup.getStratifier().size() != groupDef.getStratifiers().size()) {
+        if (measureGroup.getStratifier().size() != groupDef.stratifiers().size()) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of stratifiers defined than the GroupDef");
         }
@@ -135,12 +135,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
             buildPopulation(groupKey, mgpc, reportGroup.addPopulation(),
-                    groupDef.get(MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())));
+                    groupDef.getSingle(MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())));
         }
 
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             buildStratifier(groupKey, i, measureGroup.getStratifier().get(i), reportGroup.addStratifier(),
-                    groupDef.getStratifiers().get(i), measureGroup.getPopulation());
+                    groupDef.stratifiers().get(i), measureGroup.getPopulation());
         }
     }
 
@@ -240,7 +240,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
         }
 
-        addResourceReferences(populationDef.getType(), populationDef.getEvaluatedResources());
+        addResourceReferences(populationDef.type(), populationDef.getEvaluatedResources());
 
         // This is a temporary list carried forward to stratifiers
         Set<String> populationSet = populationDef.getSubjects();
@@ -251,7 +251,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             case PATIENTLIST:
                 if (populationSet.size() > 0) {
                     ListResource subjectList = createIdList(
-                            "subject-list-" + groupKey + "-" + populationDef.getType().toCode(), populationSet);
+                            "subject-list-" + groupKey + "-" + populationDef.type().toCode(), populationSet);
                     this.report.addContained(subjectList);
                     reportPopulation.setPatients(new Reference("#" + subjectList.getId()));
                 }
@@ -262,9 +262,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
 
         // Population Type behavior
-        switch (populationDef.getType()) {
+        switch (populationDef.type()) {
             case MEASUREOBSERVATION:
-                buildMeasureObservations(populationDef.getCriteriaExpression(), populationDef.getResources());
+                buildMeasureObservations(populationDef.expression(), populationDef.getResources());
                 break;
             default:
                 break;
@@ -328,7 +328,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc = measure.getSupplementalData().get(i);
-            SdeDef sde = measureDef.getSdes().get(i);
+            SdeDef sde = measureDef.sdes().get(i);
 
             processSdeEvaluatedResourceExtension(sde);
 
@@ -336,7 +336,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             String sdeKey = this.getKey("sde-observation", msdc.getId(), null, i);
-            String sdeCode = sde.getCode();
+            String sdeId = sde.id();
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
                 String valueCode = accumulator.getKey().getValueAsString();
@@ -350,7 +350,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                 valueKey = this.escapeForFhirId(valueKey);
 
                 Coding valueCoding = new Coding().setCode(valueCode);
-                if (!sdeCode.equalsIgnoreCase("sde-sex")) {
+                if (!sdeId.equalsIgnoreCase("sde-sex")) {
                     // /**
                     // * Match up the category part of our SDE key (e.g. sde-race has a category of
                     // * race) with a patient extension of the same category (e.g.
@@ -375,10 +375,10 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                 DomainResource obs = null;
                 switch (this.report.getType()) {
                     case INDIVIDUAL:
-                        obs = createPatientObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding);
+                        obs = createPatientObservation(sdeKey + "-" + valueKey, sdeId, valueCoding);
                         break;
                     default:
-                        obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeCode, valueCoding, valueCount);
+                        obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeId, valueCoding, valueCount);
                         break;
                 }
 

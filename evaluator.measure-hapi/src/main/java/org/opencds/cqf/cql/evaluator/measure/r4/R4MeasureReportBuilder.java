@@ -43,6 +43,8 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.measure.common.CodeDef;
+import org.opencds.cqf.cql.evaluator.measure.common.ConceptDef;
 import org.opencds.cqf.cql.evaluator.measure.common.GroupDef;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureDef;
@@ -90,7 +92,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
 
-        this.measureReportScorer.score(measureDef.getMeasureScoring(), this.report);
+        this.measureReportScorer.score(measureDef.scoring(), this.report);
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
@@ -103,7 +105,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected void buildGroups(Measure measure, MeasureDef measureDef) {
-        if (measure.getGroup().size() != measureDef.getGroups().size()) {
+        if (measure.getGroup().size() != measureDef.groups().size()) {
             throw new IllegalArgumentException(
                     "The Measure has a different number of groups defined than the MeasureDef");
         }
@@ -113,18 +115,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (int i = 0; i < measure.getGroup().size(); i++) {
             MeasureGroupComponent mgc = measure.getGroup().get(i);
             String groupKey = this.getKey("group", mgc.getId(), mgc.getCode(), i);
-            buildGroup(groupKey, mgc, this.report.addGroup(), measureDef.getGroups().get(i));
+            buildGroup(groupKey, mgc, this.report.addGroup(), measureDef.groups().get(i));
         }
     }
 
     protected void buildGroup(String groupKey, MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
-        if (measureGroup.getPopulation().size() != groupDef.values().size()) {
+        if (measureGroup.getPopulation().size() != groupDef.populations().size()) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
 
-        if (measureGroup.getStratifier().size() != groupDef.getStratifiers().size()) {
+        if (measureGroup.getStratifier().size() != groupDef.stratifiers().size()) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of stratifiers defined than the GroupDef");
         }
@@ -139,12 +141,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
             buildPopulation(groupKey, mgpc, reportGroup.addPopulation(),
-                    groupDef.get(MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())));
+                    groupDef.getSingle(MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())));
         }
 
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             buildStratifier(groupKey, i, measureGroup.getStratifier().get(i), reportGroup.addStratifier(),
-                    groupDef.getStratifiers().get(i), measureGroup.getPopulation());
+                    groupDef.stratifiers().get(i), measureGroup.getPopulation());
         }
     }
 
@@ -253,7 +255,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
         }
 
-        addResourceReferences(populationDef.getType(), populationDef.getEvaluatedResources());
+        addResourceReferences(populationDef.type(), populationDef.getEvaluatedResources());
 
         // This is a temporary list carried forward to stratifiers
         Set<String> populationSet = populationDef.getSubjects();
@@ -264,7 +266,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             case SUBJECTLIST:
                 if (populationSet.size() > 0) {
                     ListResource subjectList = createIdList(
-                            "subject-list-" + groupKey + "-" + populationDef.getType().toCode(), populationSet);
+                            "subject-list-" + groupKey + "-" + populationDef.type().toCode(), populationSet);
                     this.report.addContained(subjectList);
                     reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
                 }
@@ -274,9 +276,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // Population Type behavior
-        switch (populationDef.getType()) {
+        switch (populationDef.type()) {
             case MEASUREOBSERVATION:
-                buildMeasureObservations(populationDef.getCriteriaExpression(), populationDef.getResources());
+                buildMeasureObservations(populationDef.expression(), populationDef.getResources());
                 break;
             default:
                 break;
@@ -342,14 +344,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc = measure.getSupplementalData().get(i);
-            SdeDef sde = measureDef.getSdes().get(i);
+            SdeDef sde = measureDef.sdes().get(i);
             Map<ValueWrapper, Long> accumulated = sde.getValues().stream().map(x -> new ValueWrapper(x))
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             processSdeEvaluatedResourceExt(sde, tempCacheContained);
 
-            String sdeCode = sde.getCode();
-            CodeableConcept originalConcept = generateOriginalConcept(sde);
+            CodeableConcept originalConcept = conceptDefToConcept(sde.code());
 
             for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
@@ -390,51 +391,46 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
                     switch (this.report.getType()) {
                         case INDIVIDUAL:
-                            obs = createPatientObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, originalConcept);
+                            obs = createPatientObservation(UUID.randomUUID().toString(), sde.id(), valueCoding, originalConcept);
                             break;
                         default:
-                            obs = createPopulationObservation(UUID.randomUUID().toString(), sdeCode, valueCoding, valueCount, originalConcept);
+                            obs = createPopulationObservation(UUID.randomUUID().toString(), sde.id(), valueCoding, valueCount, originalConcept);
                             break;
                     }
                     report.addContained(obs);
-                    processCoreSdeEvaluatedResourceExt(createSdeCriteriaReferenceExt(sde.getId()),
-                        createContainedResourceReferenceValue(obs.getId()), sde.getId());
+                    processCoreSdeEvaluatedResourceExt(createSdeCriteriaReferenceExt(sde.id()),
+                        createContainedResourceReferenceValue(obs.getId()), sde.id());
                 }
             }
         }
     }
 
-    private CodeableConcept generateOriginalConcept(SdeDef sde) {
-        CodeableConcept originalConcept = null;
-    
-        if (StringUtils.isNotBlank(sde.getText())) {
-            originalConcept = new CodeableConcept();
-            originalConcept.setText(sde.getText());
+    private CodeableConcept conceptDefToConcept(ConceptDef c) {
+        var cc = new CodeableConcept();
+        cc.setText(c.text());
+
+        for (var cd : c.codes()) {
+            cc.addCoding(codeDefToCoding(cd));
         }
 
-        if (sde.hasCode()) {
-            Coding originalCoding = new Coding().setCode(sde.getCode());
-            if (StringUtils.isNotBlank(sde.getSystem()))
-                originalCoding.setSystem(sde.getSystem());
-            if (StringUtils.isNotBlank(sde.getDisplay()))
-                originalCoding.setDisplay(sde.getDisplay());
-            
-            List<Coding> list = new ArrayList<>();
-            list.add(originalCoding);
+        return cc;
+    }
 
-            if (originalConcept == null) {
-                originalConcept = new CodeableConcept();
-            }
-            originalConcept.setCoding(list);       
-        }
-        return originalConcept;
+    private Coding codeDefToCoding(CodeDef c) {
+        var cd = new Coding();
+        cd.setSystem(c.system());
+        cd.setCode(c.code());
+        cd.setVersion(c.version());
+        cd.setDisplay(c.display());
+
+        return cd;
     }
 
     private Map<String, HashSet<String>> extensionSet;
 
     private Map<String, HashSet<String>> getExtKeySetMap() {
         if (extensionSet == null) {
-            extensionSet = new HashMap<String, HashSet<String>>();
+            extensionSet = new HashMap<>();
         }
         return extensionSet;
     }
@@ -453,18 +449,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (Object obj : sdeDef.getValues()) {
             if (obj instanceof IBaseResource) {
                 IBaseResource res = (IBaseResource) obj;
-                Extension sdeCriteriaReferenceExt = createSdeCriteriaReferenceExt(sdeDef.getId());
+                Extension sdeCriteriaReferenceExt = createSdeCriteriaReferenceExt(sdeDef.id());
                 String referenceValue;
-                if (sdeDef.isInstanceExpression()) {
-                    referenceValue = createContainedResourceReferenceValue(res.getIdElement().getIdPart());
-                    if (!referenceCache.contains(referenceValue)) {
-                        referenceCache.add(referenceValue);
-                        report.addContained((DomainResource) res);
-                    }
-                } else {
-                    referenceValue = createResourceReference(res.fhirType(), res.getIdElement().getIdPart());
-                }
-                processCoreSdeEvaluatedResourceExt(sdeCriteriaReferenceExt, referenceValue, sdeDef.getId());
+
+                // TODO: Check if value is an evaluatedResource, if so, it's not not contained
+                referenceValue = createResourceReference(res.fhirType(), res.getIdElement().getIdPart());
+                processCoreSdeEvaluatedResourceExt(sdeCriteriaReferenceExt, referenceValue, sdeDef.id());
             }
         }
     }
@@ -652,7 +642,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
             if (originalConcept.hasCoding()) {
                 measureUsageConcept.getCoding().add(originalConcept.getCodingFirstRep());
-            }            
+            }
         }
         return measureUsageConcept;
     }

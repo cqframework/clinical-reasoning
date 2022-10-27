@@ -93,33 +93,34 @@ public class PlanDefinitionProcessor {
       IBaseBundle bundle, IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
     var planDefinition = getPlanDefinition(theId);
-    var session = createSession(patientId, encounterId, practitionerId, organizationId, userType,
+    var session = createSession(new CarePlan(), patientId, encounterId, practitionerId, organizationId, userType,
           userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
           prefetchData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         
     var requestGroup = applyPlanDefinition(planDefinition, session);
 
-    var carePlan = new CarePlan()
-      .setDefinition(requestGroup.getDefinition())
-      .setSubject(requestGroup.getSubject())
+    session.carePlan
       .setStatus(CarePlan.CarePlanStatus.DRAFT)
-      .setIntent(CarePlan.CarePlanIntent.PROPOSAL);
-  
+      .setIntent(CarePlan.CarePlanIntent.PROPOSAL)
+      .setDefinition(requestGroup.getDefinition())
+      .setSubject(requestGroup.getSubject());
+    if (session.encounterId != null)
+      session.carePlan.setContext(new Reference(session.encounterId));
     if (requestGroup.hasAuthor()) {
-      carePlan.setAuthor(Collections.singletonList(requestGroup.getAuthor()));
+      session.carePlan.setAuthor(Collections.singletonList(requestGroup.getAuthor()));
     }
     if (requestGroup.getLanguage() != null) {
-      carePlan.setLanguage(requestGroup.getLanguage());
+      session.carePlan.setLanguage(requestGroup.getLanguage());
     }
     for (var goal : session.requestResources) {
       if (goal.fhirType().equals("Goal")) {
-        carePlan.addGoal(new Reference((Resource)goal));
+        session.carePlan.addGoal(new Reference((Resource)goal));
       }
     }
-    carePlan.addActivity().setReference(new Reference("#" + requestGroup.getIdElement().getIdPart()));
-    carePlan.addContained(requestGroup);
+    session.carePlan.addActivity().setReference(new Reference("#" + requestGroup.getIdElement().getIdPart()));
+    session.carePlan.addContained(requestGroup);
 
-    return (CarePlan)ContainedHelper.liftContainedResourcesToParent(carePlan);
+    return (CarePlan)ContainedHelper.liftContainedResourcesToParent(session.carePlan);
   }
 
   private PlanDefinition getPlanDefinition(IdType theId) {
@@ -135,7 +136,7 @@ public class PlanDefinitionProcessor {
     return planDefinition;
   }
 
-  private Session createSession(String patientId, String encounterId, String practitionerId,
+  private Session createSession(CarePlan carePlan, String patientId, String encounterId, String practitionerId,
       String organizationId, String userType, String userLanguage, String userTaskContext, String setting,
       String settingContext, IBaseParameters parameters, Boolean useServerData,
       IBaseBundle bundle, IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
@@ -157,7 +158,7 @@ public class PlanDefinitionProcessor {
 
     var requestResources = new ArrayList<IBaseResource>();
 
-    return new Session(requestResources, patientId, encounterId, practitionerId, organizationId,
+    return new Session(requestResources, carePlan, patientId, encounterId, practitionerId, organizationId,
         userType, userLanguage, userTaskContext, setting, settingContext, parameters, prefetchData,
         contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, useServerData,
         prefetchDataData, prefetchDataDescription, prefetchDataKey);
@@ -172,8 +173,8 @@ public class PlanDefinitionProcessor {
       .setSubject(new Reference(session.patientId));
     
     requestGroup.setId(new IdType(requestGroup.fhirType(), planDefinition.getIdElement().getIdPart()));
-    // if (session.encounterId != null)
-    //   requestGroup.setEncounter(new Reference(session.encounterId));
+    if (session.encounterId != null)
+      requestGroup.setContext(new Reference(session.encounterId));
     if (session.practitionerId != null)
       requestGroup.setAuthor(new Reference(session.practitionerId));
     if (session.organizationId != null)
@@ -196,7 +197,6 @@ public class PlanDefinitionProcessor {
     }
 
     return requestGroup;
-    //return (RequestGroup)ContainedHelper.liftContainedResourcesToParent(requestGroup);
   }
 
   private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
@@ -435,7 +435,7 @@ public class PlanDefinitionProcessor {
 
         // TODO: Rename bundle
         if (dynamicValue.hasPath() && dynamicValue.getPath().equals("$this")) {
-          requestGroup = ((RequestGroup) result);
+          session.setCarePlan((CarePlan) result);
         } else if (dynamicValue.hasPath() && (dynamicValue.getPath().startsWith("action") || dynamicValue.getPath().startsWith("%action"))) {
           try {
             action.setProperty(dynamicValue.getPath().substring(dynamicValue.getPath().indexOf(".")+1), (Base) result);
@@ -446,7 +446,7 @@ public class PlanDefinitionProcessor {
           }
         } else {
           try {
-            requestGroup.setProperty(dynamicValue.getPath(), (Base) result);
+            session.carePlan.setProperty(dynamicValue.getPath(), (Base) result);
           } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(
@@ -545,12 +545,10 @@ public class PlanDefinitionProcessor {
 
   public Object getParameterComponentByName(Parameters params, String name) {
     var first = params.getParameter().stream().filter(x -> x.getName().equals(name)).findFirst();
-    var component = first.orElse(null);
-    if (component == null) return null;
+    var component = first.isPresent() ? first.get() : new ParametersParameterComponent();
     return component.hasValue() ? component.getValue() : component.getResource();
   }
   
-  // TODO: We don't have tests for this function. 
   protected Object evaluateConditionOrDynamicValue(String expression, String language, String libraryToBeEvaluated, Session session, List<DataRequirement> dataRequirements) {
     var params = resolveInputParameters(dataRequirements);
     if (session.parameters instanceof Parameters) {
@@ -564,6 +562,7 @@ public class PlanDefinitionProcessor {
       case "text/cql-expression": 
         result = expressionEvaluator.evaluate(expression, params);
         // The expression is assumed to be the parameter component name used in getParameterComponentByName()
+        // The expression evaluator creates a library with a single expression defined as "return"
         expression = "return";
         break;
       case "text/cql-identifier":

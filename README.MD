@@ -23,7 +23,7 @@ mvn package
 Then you can run the cli with:
 
 ```bash
-java -jar ./evaluator.cli/target/evaluator.cli-1.4.4-shaded.jar --help
+java -jar ./evaluator.cli/target/evaluator.cli-2.2.0-shaded.jar --help
 ```
 
 That will list the command line options. There is some CQL content available in the [Connectathon IG](https://github.com/DBCG/connectathon) repository. If you have that repository checked out as a sibling repo to this one, you can execute a sample Measure test case by running:

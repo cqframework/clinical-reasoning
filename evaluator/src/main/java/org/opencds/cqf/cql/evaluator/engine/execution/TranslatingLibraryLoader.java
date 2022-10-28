@@ -57,12 +57,6 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     }
 
     public Library load(VersionedIdentifier libraryIdentifier) {
-        Library library = this.getLibraryFromElm(libraryIdentifier);
-
-        if (library != null && this.translatorOptionsMatch(library)) {
-            return library;
-        }
-
         return this.translate(libraryIdentifier);
     }
 

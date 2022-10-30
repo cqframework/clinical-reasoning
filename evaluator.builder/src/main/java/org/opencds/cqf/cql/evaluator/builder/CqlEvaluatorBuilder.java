@@ -39,6 +39,7 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
+import org.opencds.cqf.cql.evaluator.fhir.npm.LoggerAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,23 +304,6 @@ public class CqlEvaluatorBuilder {
         return dataProviders;
     }
 
-    private class LoggerWrapper implements IWorkerContext.ILoggingService {
-        private Logger innerLogger;
-
-        public LoggerWrapper(Logger innerLogger) {
-            this.innerLogger = innerLogger;
-        }
-        @Override
-        public void logMessage(String s) {
-            logger.info(s);
-        }
-
-        @Override
-        public void logDebugMessage(LogCategory logCategory, String s) {
-            logger.debug(String.format("%s: %s", logCategory.toString(), s));
-        }
-    }
-
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.librarySourceProviders);
         if (this.cqlOptions.useEmbeddedLibraries()) {
@@ -329,7 +313,7 @@ public class CqlEvaluatorBuilder {
         // TODO: Would be good to plug this in through DI, but I ran into so many issues doing that, I just went this route
         if (npmProcessor != null) {
             ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(npmProcessor.getIgContext().getFhirVersion());
-            this.librarySourceProviders.add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, new LoggerWrapper(logger)));
+            this.librarySourceProviders.add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, new LoggerAdapter(logger)));
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(

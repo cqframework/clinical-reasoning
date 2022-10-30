@@ -53,6 +53,14 @@ public class NpmProcessor {
         }
     }
 
+    public NamespaceInfo getIgNamespace() {
+        if (igContext != null) {
+            return new NamespaceInfo(igContext.getPackageId(), igContext.getCanonicalBase());
+        }
+
+        return null;
+    }
+
     public List<NamespaceInfo> getNamespaces() {
         List<NamespaceInfo> namespaceInfos = new ArrayList<NamespaceInfo>();
         if (packageManager != null) {

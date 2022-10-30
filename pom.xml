@@ -19,6 +19,7 @@
         <cql-engine.version>2.3.0-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
+        <fhir-core.version>5.6.36</fhir-core.version>
         <hapi.version>6.0.1</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <slf4j.version>1.7.29</slf4j.version>
@@ -187,6 +188,33 @@
                 <groupId>info.cqframework</groupId>
                 <artifactId>cqf-fhir-npm</artifactId>
                 <version>${cql-translator.version}</version>
+            </dependency>
+
+            <!-- Core FHIR dependencies -->
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.r4</artifactId>
+                <version>${fhir-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.r4b</artifactId>
+                <version>${fhir-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.r5</artifactId>
+                <version>${fhir-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.convertors</artifactId>
+                <version>${fhir-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.utilities</artifactId>
+                <version>${fhir-core.version}</version>
             </dependency>
 
             <!-- HAPI dependencies -->

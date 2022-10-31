@@ -43,11 +43,11 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         List<SdeDef> sdes = new ArrayList<>();
         for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
             checkId(s);
-            SdeDef def = new SdeDef(
-                s.getId(),
-                null, // No code on sde in dstu3
-                s.getCriteria());
-            sdes.add(def);
+            SdeDef sdeDef = new SdeDef(
+                    s.getId(),
+                    null, // No code on sde in dstu3
+                    s.getCriteria());
+            sdes.add(sdeDef);
 
         }
 
@@ -64,39 +64,38 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         .fromCode(pop.getCode().getCodingFirstRep().getCode());
 
                 populations.add(new PopulationDef(
-                    pop.getId(),
-                    conceptToConceptDef(pop.getCode()),
-                    populationType,
-                    pop.getCriteria()));
+                        pop.getId(),
+                        conceptToConceptDef(pop.getCode()),
+                        populationType,
+                        pop.getCriteria()));
             }
 
             // Stratifiers
             List<StratifierDef> stratifiers = new ArrayList<>();
             for (MeasureGroupStratifierComponent mgsc : group.getStratifier()) {
                 checkId(mgsc);
-                var def = new StratifierDef(
-                    mgsc.getId(),
-                    null, // No code on stratifier in dstu3
-                    mgsc.getCriteria()
-                );
+                var stratifierDef = new StratifierDef(
+                        mgsc.getId(),
+                        null, // No code on stratifier in dstu3
+                        mgsc.getCriteria());
 
-                stratifiers.add(def);
+                stratifiers.add(stratifierDef);
             }
 
             groups.add(new GroupDef(
-                group.getId(),
-                null,  // No code on group in dstu3
-                stratifiers,
-                populations));
+                    group.getId(),
+                    null, // No code on group in dstu3
+                    stratifiers,
+                    populations));
         }
 
         return new MeasureDef(
-            measure.getId(),
-            measure.getUrl(),
-            measure.getVersion(),
-            MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-            groups,
-            sdes);
+                measure.getId(),
+                measure.getUrl(),
+                measure.getVersion(),
+                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
+                groups,
+                sdes);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

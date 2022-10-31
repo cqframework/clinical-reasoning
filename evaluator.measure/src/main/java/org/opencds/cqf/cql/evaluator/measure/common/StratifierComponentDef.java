@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StratifierComponentDef {
@@ -8,7 +9,7 @@ public class StratifierComponentDef {
     private final ConceptDef code;
     private final String expression;
 
-    private Map<String, Object> subjectValues;
+    private Map<String, CriteriaResult> results;
 
     public StratifierComponentDef(String id, ConceptDef code, String expression) {
         this.id = id;
@@ -28,15 +29,15 @@ public class StratifierComponentDef {
         return this.code;
     }
 
-    public void putSubjectValue(String subject, Object value) {
-        this.getSubjectValues().put(subject, value);
+    public void putResult(String subject, Object value, List<Object> evaluatedResources) {
+        this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
     }
 
-    public Map<String, Object> getSubjectValues() {
-        if (this.subjectValues == null) {
-            this.subjectValues = new HashMap<>();
+    public Map<String, CriteriaResult> getResults() {
+        if (this.results == null) {
+            this.results = new HashMap<>();
         }
 
-        return this.subjectValues;
+        return this.results;
     }
 }

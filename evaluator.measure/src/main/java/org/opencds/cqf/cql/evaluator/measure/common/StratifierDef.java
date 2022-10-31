@@ -13,7 +13,7 @@ public class StratifierDef {
 
     private final List<StratifierComponentDef> components;
 
-    private Map<String, Object> subjectValues;
+    private Map<String, CriteriaResult> results;
 
     public StratifierDef(String id, ConceptDef code, String expression) {
         this(id, code, expression, Collections.emptyList());
@@ -25,7 +25,6 @@ public class StratifierDef {
         this.expression = expression;
         this.components = components;
     }
-
 
     public String expression() {
         return this.expression;
@@ -39,20 +38,19 @@ public class StratifierDef {
         return this.id;
     }
 
-    public void putSubjectValue(String subject, Object value) {
-        this.getSubjectValues().put(subject, value);
-    }
-
-    public Map<String, Object> getSubjectValues() {
-        if (this.subjectValues == null) {
-            this.subjectValues = new HashMap<>();
-        }
-
-        return this.subjectValues;
-    }
-
     public List<StratifierComponentDef> components() {
         return this.components;
     }
 
+    public void putResult(String subject, Object value, List<Object> evaluatedResources) {
+        this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
+    }
+
+    public Map<String, CriteriaResult> getResults() {
+        if (this.results == null) {
+            this.results = new HashMap<>();
+        }
+
+        return this.results;
+    }
 }

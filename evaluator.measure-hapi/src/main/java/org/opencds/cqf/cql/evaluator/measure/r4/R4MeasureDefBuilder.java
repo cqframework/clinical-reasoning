@@ -43,20 +43,19 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // SDES
         List<SdeDef> sdes = new ArrayList<>();
-        for (MeasureSupplementalDataComponent s :  measure.getSupplementalData()) {
+        for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
             checkId(s);
-            SdeDef def = new SdeDef(
-                s.getId(),
-                conceptToConceptDef(s.getCode()),
-                s.getCriteria().getExpression());
-            sdes.add(def);
+            var sdeDef = new SdeDef(
+                    s.getId(),
+                    conceptToConceptDef(s.getCode()),
+                    s.getCriteria().getExpression());
+            sdes.add(sdeDef);
         }
 
         // Groups
         List<GroupDef> groups = new ArrayList<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
             checkId(group);
-
 
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
@@ -66,10 +65,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         .fromCode(pop.getCode().getCodingFirstRep().getCode());
 
                 populations.add(new PopulationDef(
-                    pop.getId(),
-                    conceptToConceptDef(pop.getCode()),
-                    populationType,
-                    pop.getCriteria().getExpression()));
+                        pop.getId(),
+                        conceptToConceptDef(pop.getCode()),
+                        populationType,
+                        pop.getCriteria().getExpression()));
             }
 
             // Stratifiers
@@ -82,38 +81,37 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
                     checkId(scc);
                     var scd = new StratifierComponentDef(
-                        scc.getId(),
-                        conceptToConceptDef(scc.getCode()),
-                        scc.hasCriteria() ? scc.getCriteria().getExpression() : null);
+                            scc.getId(),
+                            conceptToConceptDef(scc.getCode()),
+                            scc.hasCriteria() ? scc.getCriteria().getExpression() : null);
 
                     components.add(scd);
                 }
 
-                StratifierDef stratifierDef = new StratifierDef(
-                    mgsc.getId(),
-                    conceptToConceptDef(mgsc.getCode()),
-                    mgsc.getCriteria().getExpression(),
-                    components
-                );
+                var stratifierDef = new StratifierDef(
+                        mgsc.getId(),
+                        conceptToConceptDef(mgsc.getCode()),
+                        mgsc.getCriteria().getExpression(),
+                        components);
 
                 stratifiers.add(stratifierDef);
             }
 
             groups.add(new GroupDef(
-                group.getId(),
-                conceptToConceptDef(group.getCode()),
-                 stratifiers,
-                 populations));
+                    group.getId(),
+                    conceptToConceptDef(group.getCode()),
+                    stratifiers,
+                    populations));
 
         }
 
         return new MeasureDef(
-            measure.getId(),
-            measure.getUrl(),
-            measure.getVersion(),
-            MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-            groups,
-            sdes);
+                measure.getId(),
+                measure.getUrl(),
+                measure.getVersion(),
+                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
+                groups,
+                sdes);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

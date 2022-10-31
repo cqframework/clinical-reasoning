@@ -1,22 +1,21 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SdeDef {
 
     private final String id;
     private final ConceptDef code;
     private final String expression;
+    private Map<String, CriteriaResult> results;
 
     public SdeDef(String id, ConceptDef code, String expression) {
         this.id = id;
         this.code = code;
         this.expression = expression;
     }
-
-
-    private List<Object> values;
 
     public String id() {
         return this.id;
@@ -30,15 +29,15 @@ public class SdeDef {
         return this.code;
     }
 
-    public void addValue(Object value) {
-        this.getValues().add(value);
+    public void putResult(String subject, Object value, List<Object> evaluatedResources) {
+        this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
     }
 
-    public List<Object> getValues() {
-        if (this.values == null) {
-            this.values = new ArrayList<>();
+    public Map<String, CriteriaResult> getResults() {
+        if (this.results == null) {
+            this.results = new HashMap<>();
         }
 
-        return this.values;
+        return this.results;
     }
 }

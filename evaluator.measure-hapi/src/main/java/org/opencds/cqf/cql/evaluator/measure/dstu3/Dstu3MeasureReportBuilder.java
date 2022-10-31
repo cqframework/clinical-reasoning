@@ -40,6 +40,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.measure.common.CriteriaResult;
 import org.opencds.cqf.cql.evaluator.measure.common.GroupDef;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureDef;
@@ -54,9 +55,9 @@ import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
 public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
-    protected static String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
-    protected static String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
-    protected static String EXT_SDE_REFERENCE_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
+    protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
+    protected static final String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
+    protected static final String EXT_SDE_REFERENCE_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
     protected static final String POPULATION_BASIS_URL = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
@@ -166,13 +167,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         String stratifierKey = this.getKey("stratifier", measureStratifier.getId(), null, stratIndex);
 
-        Map<String, Object> subjectValues = stratifierDef.getSubjectValues();
+        Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
         // Because most of the types we're dealing with don't implement hashCode or
         // equals
         // the ValueWrapper does it for them.
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x))));
+                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x).value())));
 
         for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(groupKey, stratifierKey, reportStratifier.addStratum(), stratValue.getKey(),
@@ -215,7 +216,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
-        if (intersection.size() > 0 && this.report.getType() == org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.PATIENTLIST) {
+        if (intersection.size() > 0
+                && this.report.getType() == org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.PATIENTLIST) {
             ListResource popSubjectList = this.createIdList("subject-list-" + groupKey + "-" + stratifierKey + "-"
                     + "stratum-" + stratumKey + "-" + population.getCode().getCodingFirstRep().getCode(), intersection);
             this.report.addContained(popSubjectList);
@@ -321,7 +323,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected Reference getEvaluatedResourceReference(String id) {
-        return this.getEvaluatedResourceReferences().computeIfAbsent(id, k -> new Reference(k));
+        return this.getEvaluatedResourceReferences().computeIfAbsent(id, Reference::new);
     }
 
     protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
@@ -332,7 +334,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
             processSdeEvaluatedResourceExtension(sde);
 
-            Map<ValueWrapper, Long> accumulated = sde.getValues().stream().map(x -> new ValueWrapper(x))
+            Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
+                    .map(x -> new ValueWrapper(x.value()))
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             String sdeKey = this.getKey("sde-observation", msdc.getId(), null, i);
@@ -389,24 +392,24 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
-        for (Object object : sdeDef.getValues()) {
-            if (object instanceof IBaseResource) {
-                //extension item
-                Extension extension = new Extension(MeasureConstants.SDE_EXT_URL);
-                IBaseResource iBaseResource = (IBaseResource) object;
+        for (CriteriaResult r : sdeDef.getResults().values()) {
+            for (Object o : r.evaluatedResources()) {
+                if (o instanceof IBaseResource) {
+                    // extension item
+                    Extension extension = new Extension(MeasureConstants.EXT_SDE_URL);
+                    IBaseResource iBaseResource = (IBaseResource) o;
 
-                //adding value to extension
-                extension.setValue(
-                        new StringType(
-                                new StringBuilder(iBaseResource.getIdElement().getResourceType())
-                                        .append("/")
-                                        .append(iBaseResource.getIdElement().getIdPart())
-                                        .toString()
-                        )
-                );
+                    // adding value to extension
+                    extension.setValue(
+                            new StringType(
+                                    new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                                            .append("/")
+                                            .append(iBaseResource.getIdElement().getIdPart())
+                                            .toString()));
 
-                //adding item extension to MR extension list
-                report.getExtension().add(extension);
+                    // adding item extension to MR extension list
+                    report.getExtension().add(extension);
+                }
             }
         }
     }
@@ -514,8 +517,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     protected boolean checkIfNotBooleanBasedMeasure(Measure measure) {
         if (measure.hasExtension() && measure.getExtension().size() > 0) {
-            return measure.getExtension().stream().anyMatch(item -> checkForNotBoolean(item)
-            );
+            return measure.getExtension().stream().anyMatch(item -> checkForNotBoolean(item));
         }
         return false;
     }

@@ -11,7 +11,6 @@ import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
 import java.time.OffsetDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -173,10 +172,6 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void setContextToSubject(String subjectType, String subjectId) {
-        context.setContextValue(subjectType, subjectId);
-    }
-
     protected void captureEvaluatedResources(List<Object> outEvaluatedResources) {
         if (outEvaluatedResources != null && this.context.getEvaluatedResources() != null) {
             for (Object o : this.context.getEvaluatedResources()) {
@@ -196,56 +191,27 @@ public class MeasureEvaluator {
         logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.url(), type.toCode(),
                 subjectIds.size());
 
-        MeasureScoring measureScoring = measureDef.scoring();
-        if (measureScoring == null) {
+        MeasureScoring scoring = measureDef.scoring();
+        if (scoring == null) {
             throw new RuntimeException("MeasureScoring type is required in order to calculate.");
         }
 
-        for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(measureScoring, groupDef, measureDef.sdes(), subjectIds);
-            validateEvaluatedMeasureCount(measureScoring, groupDef);
+        for (String subjectId : subjectIds) {
+            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
+            String subjectTypePart = subjectInfo.getLeft();
+            String subjectIdPart = subjectInfo.getRight();
+            context.setContextValue(subjectTypePart, subjectIdPart);
+            evaluateSubject(measureDef, scoring, subjectTypePart, subjectIdPart);
         }
 
         return measureDef;
     }
 
-    private void validateEvaluatedMeasureCount(MeasureScoring measureScoring, GroupDef groupDef) {
-        switch (measureScoring) {
-            case PROPORTION:
-            case RATIO:
-                // the count of denominator + denominator exclusion + denominator exception must
-                // be <= the count of initial population.
-                if (groupDef.getSingle(INITIALPOPULATION).getResources()
-                        .size() < ((groupDef.getSingle(DENOMINATOR) != null
-                                ? groupDef.getSingle(DENOMINATOR).getResources().size()
-                                : 0) +
-                                (groupDef.getSingle(DENOMINATOREXCEPTION) != null
-                                        ? groupDef.getSingle(DENOMINATOREXCEPTION).getResources().size()
-                                        : 0)
-                                +
-                                (groupDef.getSingle(DENOMINATOREXCLUSION) != null
-                                        ? groupDef.getSingle(DENOMINATOREXCLUSION).getResources().size()
-                                        : 0))) {
-                    logger.debug("For group: {}, Initial population count is less than the sum of denominator," +
-                            " denominator exception and denominator exclusion", groupDef.id());
-                }
-
-                // the count of numerator + numerator exclusion must be <= the count of the
-                // denominator.
-                if ((groupDef.getSingle(DENOMINATOR) != null ? groupDef.getSingle(DENOMINATOR).getResources().size()
-                        : 0) < ((groupDef.getSingle(NUMERATOR) != null
-                                ? groupDef.getSingle(NUMERATOR).getResources().size()
-                                : 0) +
-                                (groupDef.getSingle(NUMERATOREXCLUSION) != null
-                                        ? groupDef.getSingle(NUMERATOREXCLUSION).getResources().size()
-                                        : 0))) {
-                    logger.debug(
-                            "For group: {}, Denominator count is less than the sum of numerator and numerator exclusion",
-                            groupDef.id());
-                }
-
-                break;
-            default:
+    protected void evaluateSubject(MeasureDef measureDef, MeasureScoring scoring, String subjectType,
+            String subjectId) {
+        evaluateSdes(subjectId, measureDef.sdes());
+        for (GroupDef groupDef : measureDef.groups()) {
+            evaluateGroup(scoring, groupDef, subjectType, subjectId);
         }
     }
 
@@ -402,27 +368,20 @@ public class MeasureEvaluator {
         evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION), null);
     }
 
-    protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef, List<SdeDef> sdes,
-            Collection<String> subjectIdentifiers) {
-        for (String subjectIdentifier : subjectIdentifiers) {
-            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectIdentifier);
-            String subjectType = subjectInfo.getLeft();
-            String subjectId = subjectInfo.getRight();
-            this.setContextToSubject(subjectType, subjectId);
-            evaluateSdes(subjectId, sdes);
-            evaluateStratifiers(subjectId, groupDef.stratifiers());
-            switch (measureScoring) {
-                case PROPORTION:
-                case RATIO:
-                    evaluateProportion(groupDef, subjectType, subjectId);
-                    break;
-                case CONTINUOUSVARIABLE:
-                    evaluateContinuousVariable(groupDef, subjectType, subjectId);
-                    break;
-                case COHORT:
-                    evaluateCohort(groupDef, subjectType, subjectId);
-                    break;
-            }
+    protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef,
+            String subjectType, String subjectId) {
+        evaluateStratifiers(subjectId, groupDef.stratifiers());
+        switch (measureScoring) {
+            case PROPORTION:
+            case RATIO:
+                evaluateProportion(groupDef, subjectType, subjectId);
+                break;
+            case CONTINUOUSVARIABLE:
+                evaluateContinuousVariable(groupDef, subjectType, subjectId);
+                break;
+            case COHORT:
+                evaluateCohort(groupDef, subjectType, subjectId);
+                break;
         }
     }
 

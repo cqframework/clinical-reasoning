@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -282,7 +283,7 @@ public class PlanDefinitionProcessor {
     if (action.hasDefinitionCanonicalType()) {
       logger.debug("Resolving definition " + action.getDefinitionCanonicalType().getValue());
       var definition = action.getDefinitionCanonicalType();
-      var resourceName = getResourceName(definition);
+      var resourceName = resolveResourceName(definition, planDefinition);
       switch (resourceName) {
         case "PlanDefinition":
           applyNestedPlanDefinition(requestGroup, session, definition, action);
@@ -640,12 +641,15 @@ public class PlanDefinitionProcessor {
   // return ((StringType) result).asStringValue();
   // }
 
-  protected static String getResourceName(CanonicalType canonical) {
+  protected String resolveResourceName(CanonicalType canonical, MetadataResource resource) {
     if (canonical.hasValue()) {
       var id = canonical.getValue();
       if (id.contains("/")) {
         id = id.replace(id.substring(id.lastIndexOf("/")), "");
         return id.contains("/") ? id.substring(id.lastIndexOf("/") + 1) : id;
+      }
+      else if (id.startsWith("#")){
+        return resolveContained(resource, id).getResourceType().name();
       }
       return null;
     }

@@ -1,0 +1,77 @@
+{
+  "resourceType": "CarePlan",
+  "contained": [ {
+    "resourceType": "RequestGroup",
+    "id": "AncVisit-PlanDefinition",
+    "instantiatesCanonical": [ "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/AncVisit-PlanDefinition" ],
+    "status": "draft",
+    "intent": "proposal",
+    "subject": {
+      "reference": "Patient/TEST_PATIENT"
+    },
+    "action": [ {
+      "resource": {
+        "reference": "Task"
+      }
+    } ]
+  }, {
+    "resourceType": "Goal",
+    "id": "1",
+    "category": [ {
+      "coding": [ {
+        "system": "https://www.hl7.org/fhir/codesystem-goal-category.html",
+        "code": "nursing",
+        "display": "Nursing"
+      } ]
+    } ],
+    "priority": {
+      "coding": [ {
+        "system": "https://www.hl7.org/fhir/codesystem-goal-priority.html",
+        "code": "high-priority",
+        "display": "High Priority"
+      } ]
+    },
+    "startCodeableConcept": {
+      "coding": [ {
+        "system": "http://www.snomed.org/",
+        "code": "32485007",
+        "display": "Admission to hospital"
+      } ]
+    }
+  }, {
+    "resourceType": "Task",
+    "id": "Task",
+    "extension": [ {
+      "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus",
+      "valueString": "ready"
+    } ],
+    "basedOn": [ {
+      "reference": "#RequestGroup/AncVisit-PlanDefinition",
+      "type": "RequestGroup"
+    } ],
+    "status": "ready",
+    "code": {
+      "coding": [ {
+        "system": "http://example.org/CodeSystem/encounter-type",
+        "code": "pregnant_monthly_visit",
+        "display": "Pregnant (ANC) Monthly Routine visit"
+      } ],
+      "text": "Pregnant (ANC) Monthly Routine visit"
+    },
+    "description": "This action will performed every month for a pregnant woman"
+  } ],
+  "instantiatesCanonical": [ "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/AncVisit-PlanDefinition" ],
+  "status": "draft",
+  "intent": "proposal",
+  "subject": {
+    "reference": "Patient/TEST_PATIENT"
+  },
+  "goal": [ {
+    "reference": "#1"
+  } ],
+  "activity": [ {
+    "reference": {
+      "reference": "#AncVisit-PlanDefinition"
+    }
+  } ]
+}

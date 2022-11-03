@@ -27,12 +27,14 @@ import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"unused", "squid:S107"})
 @Named
 public class LibraryProcessor {
 
-    // private static Logger logger =
-    // LoggerFactory.getLogger(LibraryProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
@@ -152,7 +154,10 @@ public class LibraryProcessor {
 
         Pair<String, Object> contextParameter = null;
         if (patientId != null) {
-            contextParameter = Pair.of("Patient", (Object) patientId);
+            if (patientId.startsWith("Patient/")) {
+                patientId = patientId.replace("Patient/", "");
+            }
+            contextParameter = Pair.of("Patient", patientId);
         }
 
         return libraryEvaluator.evaluate(id, contextParameter, parameters, expressions);
@@ -217,7 +222,6 @@ public class LibraryProcessor {
             throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 
-        @SuppressWarnings("unused")
         String cqlNamespaceUrl = urlSplit[0];
 
         String cqlName = urlSplit[1];

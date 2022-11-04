@@ -26,6 +26,28 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     }
 
     @Test
+    public void testAncVisitContainedActivityDefinition() {
+        PlanDefinition.Assert.that(
+                "AncVisit-PlanDefinition",
+                "Patient/TEST_PATIENT",
+                null
+            )
+            .withData("anc-visit/anc_visit_patient.json")
+            .withLibrary("anc-visit/anc_visit_plan_definition.json")
+            .apply()
+            .isEqualsTo("anc-visit/anc_visit_careplan.json");
+        PlanDefinition.Assert.that(
+                "AncVisit-PlanDefinition",
+                "Patient/TEST_PATIENT",
+                null
+            )
+            .withData("anc-visit/anc_visit_patient.json")
+            .withLibrary("anc-visit/anc_visit_plan_definition.json")
+            .applyR5()
+            .isEqualsTo("anc-visit/anc_visit_bundle.json");
+    }
+
+    @Test
     public void testHelloWorld() {
         PlanDefinition.Assert.that(
                 "hello-world-patient-view",

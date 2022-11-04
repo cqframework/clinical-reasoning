@@ -51,6 +51,7 @@ import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminolog
 import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.CompositeFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.cql.evaluator.fhir.util.ResourceValidator;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
@@ -85,6 +86,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     private CqlOptions cqlOptions = CqlOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+
+    private ResourceValidator validator;
 
     // TODO: This should all be collapsed down to FhirDal
     protected LibrarySourceProvider localLibrarySourceProvider;
@@ -126,12 +129,29 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         if (cqlOptions != null) {
             this.cqlOptions = cqlOptions;
         }
+
+        if (this.measureEvaluationOptions.isValidationEnabled()) {
+            createValidator();
+        }
     }
 
     public R4MeasureProcessor(TerminologyProvider localTerminologyProvider,
             LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
         this(null, null, null, null, null, localTerminologyProvider, localLibrarySourceProvider, localDataProvider,
                 localFhirDal, null, null, null);
+    }
+
+    protected void createValidator() {
+        this.validator = new ResourceValidator(FhirVersionEnum.R4, this.measureEvaluationOptions.getValidationProfiles(), this.localFhirDal);
+    }
+
+    public void setValidationEnabled(boolean value) {
+        this.measureEvaluationOptions.setValidationEnabled(value);
+        if (value) {
+            createValidator();
+        } else {
+            this.validator = null;
+        }
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
@@ -217,6 +237,15 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
    public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
             List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
+        if (Boolean.TRUE.equals(this.measureEvaluationOptions.isValidationEnabled())) {
+            if (this.validator == null) {
+                // Throw or log?
+                logger.error("Validation is enabled and no validator has been found. Check measure validation configuration.");
+            } else {
+                this.validator.validate(measure, true);
+            }
+        }
+
         if (this.measureEvaluationOptions.isThreadedEnabled()
                 && subjectIds.size() > this.measureEvaluationOptions.getThreadedBatchSize()) {
             return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,

@@ -57,7 +57,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
-@SuppressWarnings("squid:S107")
+@SuppressWarnings({"unused", "squid:S107"})
 public class PlanDefinitionProcessor {
   protected ActivityDefinitionProcessor activityDefinitionProcessor;
   protected LibraryProcessor libraryProcessor;
@@ -261,7 +261,7 @@ public class PlanDefinitionProcessor {
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
     // TODO: If action has inputs generate QuestionnaireItems
-    if (meetsConditions(planDefinition, requestGroup, session, action)) {
+    if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, session, action))) {
       if (action.hasRelatedAction()) {
         for (var relatedActionComponent : action.getRelatedAction()) {
           if (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)

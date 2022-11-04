@@ -52,6 +52,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
+@SuppressWarnings({"unused", "squid:S107"})
 public class PlanDefinitionProcessor {
   protected ActivityDefinitionProcessor activityDefinitionProcessor;
   protected LibraryProcessor libraryProcessor;
@@ -129,7 +130,7 @@ public class PlanDefinitionProcessor {
     var planDefinition = castOrThrow(basePlanDefinition, PlanDefinition.class,
         "The planDefinition passed to FhirDal was not a valid instance of PlanDefinition.class").get();
 
-    logger.info("Performing $apply operation on PlanDefinition/" + theId);
+    logger.info("Performing $apply operation on PlanDefinition/{}", theId);
 
     return planDefinition;
   }
@@ -222,7 +223,7 @@ public class PlanDefinitionProcessor {
   private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup, Session session, Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
     // TODO: If action has inputs generate QuestionnaireItems
-    if (meetsConditions(planDefinition, requestGroup, session, action)) {
+    if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, session, action))) {
       if (action.hasRelatedAction()) {
         for (var relatedActionComponent : action.getRelatedAction()) {
           if (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER) && metConditions.containsKey(relatedActionComponent.getActionId())) {
@@ -240,10 +241,10 @@ public class PlanDefinitionProcessor {
 
   private void resolveDefinition(PlanDefinition planDefinition, RequestGroup requestGroup, Session session, PlanDefinition.PlanDefinitionActionComponent action) {
     if (action.hasDefinition()) {
-      logger.debug("Resolving definition " + action.getDefinition().getReference());
+      logger.debug("Resolving definition {}", action.getDefinition().getReference());
       var definition = action.getDefinition();
       var resourceName = getResourceName(definition);
-      switch (resourceName) {
+      switch (requireNonNull(resourceName)) {
         case "PlanDefinition":
           applyNestedPlanDefinition(requestGroup, session, definition, action);
           break;
@@ -254,7 +255,7 @@ public class PlanDefinitionProcessor {
           applyQuestionnaireDefinition(planDefinition, requestGroup, session, definition, action);
           break;
         default:
-          throw new RuntimeException(String.format("Unknown action definition: ", definition));
+          throw new RuntimeException(String.format("Unknown action definition: %s", definition));
       }
     }
   }
@@ -331,7 +332,7 @@ public class PlanDefinitionProcessor {
 
     // Add an action to the request group which points to this CarePlan
     requestGroup.addAction().setResource(new Reference(result.getIdElement()));
-    requestGroup.addContained((Resource) result);
+    requestGroup.addContained(result);
 
     for (var c : result.getDefinition()) {
       requestGroup.addDefinition(c);
@@ -487,7 +488,7 @@ public class PlanDefinitionProcessor {
         }
 
         if (!(result instanceof BooleanType)) {
-          logger.warn("The condition returned a non-boolean value: " + result.getClass().getSimpleName());
+          logger.warn("The condition returned a non-boolean value: {}", result.getClass().getSimpleName());
           continue;
         }
 
@@ -544,14 +545,15 @@ public class PlanDefinitionProcessor {
 
   public Object getParameterComponentByName(Parameters params, String name) {
     var first = params.getParameter().stream().filter(x -> x.getName().equals(name)).findFirst();
-    var component = first.isPresent() ? first.get() : null;
+    var component = first.orElse(null);
+    if (component == null) return null;
     return component.hasValue() ? component.getValue() : component.getResource();
   }
   
   // TODO: We don't have tests for this function. 
   protected Object evaluateConditionOrDynamicValue(String expression, String language, String libraryToBeEvaluated, Session session, List<DataRequirement> dataRequirements) {
     var params = resolveInputParameters(dataRequirements);
-    if (session.parameters != null && session.parameters instanceof Parameters) {
+    if (session.parameters instanceof Parameters) {
       params.getParameter().addAll(((Parameters) session.parameters).getParameter());
     }
 
@@ -561,6 +563,8 @@ public class PlanDefinitionProcessor {
       case "text/cql.expression":
       case "text/cql-expression": 
         result = expressionEvaluator.evaluate(expression, params);
+        // The expression is assumed to be the parameter component name used in getParameterComponentByName()
+        expression = "return";
         break;
       case "text/cql-identifier":
       case "text/cql.identifier":
@@ -577,16 +581,14 @@ public class PlanDefinitionProcessor {
         } catch (FhirPathExecutionException e) {
           throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
         }
-        if (outputs == null || outputs.isEmpty()) {
-          result = null;
-        } else if (outputs.size() == 1) {
+        if (outputs != null && outputs.size() == 1) {
           result = outputs.get(0);
         } else {
           throw new IllegalArgumentException("Expected only one value when evaluating FHIRPath expression: " + expression);
         }
         break;
       default:
-        logger.warn("An action language other than CQL was found: " + language);
+        logger.warn("An action language other than CQL was found: {}", language);
     }
     if (result instanceof Parameters) {
       result = getParameterComponentByName((Parameters) result, expression);
@@ -601,7 +603,7 @@ public class PlanDefinitionProcessor {
     for (var req : dataRequirements) {
       var resources = fhirDal.search(req.getType()).iterator();
       
-      if (resources != null && resources.hasNext()) {
+      if (resources.hasNext()) {
         var index = 0;
         var found = true;
         while (resources.hasNext()) {
@@ -615,14 +617,14 @@ public class PlanDefinitionProcessor {
                 var valueset = fhirDal.searchByUrl("ValueSet", filter.getValueSet().getId());
                 if (valueset != null && valueset.iterator().hasNext()) {
                   codeFilterParam.addParameter().setName("%valueset").setResource((Resource)valueset.iterator().next());
-                  var codeFilterExpression = "%" + String.format("resource.%s.where(code.memberOf(\'%s\'))", filter.getPath(), "%" + "valueset");
+                  var codeFilterExpression = "%" + String.format("resource.%s.where(code.memberOf('%s'))", filter.getPath(), "%" + "valueset");
                   var codeFilterResult = expressionEvaluator.evaluate(codeFilterExpression, codeFilterParam);
-                  var tempResult = operationParametersParser.getValueChild(((Parameters) codeFilterResult), "return");
+                  var tempResult = operationParametersParser.getValueChild((codeFilterResult), "return");
                   if (tempResult instanceof BooleanType) {
                     found = ((BooleanType)tempResult).booleanValue();
                   }
                 }
-                logger.debug(String.format("Could not find ValueSet with url %s on the local server.", filter.getValueSet()));
+                logger.debug("Could not find ValueSet with url {} on the local server.", filter.getValueSet());
               }
             }
           }
@@ -652,9 +654,9 @@ public class PlanDefinitionProcessor {
 
   protected Resource resolveContained(DomainResource resource, String id) {
     var first = resource.getContained().stream()
-        .filter(x -> x.hasIdElement())
+        .filter(Resource::hasIdElement)
         .filter(x -> x.getIdElement().getIdPart().equals(id))
         .findFirst();
-    return first.isPresent() ? first.get() : null;
+    return first.orElse(null);
   }
 }

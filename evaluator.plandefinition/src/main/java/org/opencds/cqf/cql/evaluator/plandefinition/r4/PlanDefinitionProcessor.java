@@ -656,12 +656,10 @@ public class PlanDefinitionProcessor {
 
   public Object getParameterComponentByName(Parameters params, String name) {
     var first = params.getParameter().stream().filter(x -> x.getName().equals(name)).findFirst();
-    var component = first.orElse(null);
-    if (component == null) return null;
+    var component = first.isPresent() ? first.get() : new ParametersParameterComponent();
     return component.hasValue() ? component.getValue() : component.getResource();
   }
 
-  // TODO: We don't have tests for this function.
   protected Object evaluateConditionOrDynamicValue(String expression, String language, String libraryToBeEvaluated,
       Session session, List<DataRequirement> dataRequirements) {
     var params = resolveInputParameters(dataRequirements);
@@ -676,6 +674,7 @@ public class PlanDefinitionProcessor {
       case "text/cql-expression":
         result = expressionEvaluator.evaluate(expression, params);
         // The expression is assumed to be the parameter component name used in getParameterComponentByName()
+        // The expression evaluator creates a library with a single expression defined as "return"
         expression = "return";
         break;
       case "text/cql-identifier":

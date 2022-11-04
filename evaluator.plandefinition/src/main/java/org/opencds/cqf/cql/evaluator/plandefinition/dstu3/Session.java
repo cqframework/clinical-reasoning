@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
 import java.util.Collection;
 
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -9,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 class Session {
     public final String patientId;
+    public CarePlan carePlan;
     public final Collection<IBaseResource> requestResources;
     public final String practitionerId;
     public final String organizationId;
@@ -19,13 +21,17 @@ class Session {
     public final String settingContext;
     public final String prefetchDataKey;
     public final String encounterId;
-    public IBaseParameters parameters, prefetchData;
-    public IBaseResource contentEndpoint, terminologyEndpoint, dataEndpoint;
-    public IBaseBundle bundle, prefetchDataData;
-    public DataRequirement prefetchDataDescription;
-    public Boolean useServerData;
+    public final IBaseParameters parameters;
+    public final IBaseParameters prefetchData;
+    public final IBaseResource contentEndpoint;
+    public final IBaseResource terminologyEndpoint;
+    public final IBaseResource dataEndpoint;
+    public final IBaseBundle bundle;
+    public final IBaseBundle prefetchDataData;
+    public final DataRequirement prefetchDataDescription;
+    public final Boolean useServerData;
   
-    public Session(Collection<IBaseResource> requestResources, String patientId, String encounterId,
+    public Session(Collection<IBaseResource> requestResources, CarePlan carePlan, String patientId, String encounterId,
         String practitionerId, String organizationId, String userType, String userLanguage, String userTaskContext,
         String setting, String settingContext, IBaseParameters parameters,
         IBaseParameters prefetchData, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
@@ -33,6 +39,7 @@ class Session {
         IBaseBundle prefetchDataData, DataRequirement prefetchDataDescription, String prefetchDataKey) {
   
       this.patientId = patientId;
+      this.carePlan = carePlan;
       this.requestResources = requestResources;
       this.encounterId = encounterId;
       this.practitionerId = practitionerId;
@@ -53,5 +60,9 @@ class Session {
       this.prefetchData = prefetchData;
       this.prefetchDataKey = prefetchDataKey;
     }
-  }
+
+    public void setCarePlan(CarePlan carePlan) {
+		this.carePlan = carePlan;
+	}
+}
   

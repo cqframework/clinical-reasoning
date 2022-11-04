@@ -284,7 +284,6 @@ public class PlanDefinitionProcessor {
     if (action.hasDefinitionCanonicalType()) {
       logger.debug("Resolving definition {}", action.getDefinitionCanonicalType().getValue());
       var definition = action.getDefinitionCanonicalType();
-      switch (resourceName) {
       var resourceName = resolveResourceName(definition, planDefinition);
       switch (requireNonNull(resourceName)) {
         case "PlanDefinition":

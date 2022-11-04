@@ -149,8 +149,8 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                         if (!codeReducedMap.containsKey(code)) {
                             codeReducedMap.put(code, observation);
                         } else {
-                            int sum = observation.getValueIntegerType().getValue() +
-                                    codeReducedMap.get(code).getValueIntegerType().getValue();
+                            int sum = observation.getValueIntegerType().getValue().intValue() +
+                                    codeReducedMap.get(code).getValueIntegerType().getValue().intValue();
                             codeReducedMap.get(code).setValue(new IntegerType(sum));
                             changedIdMap.put(observation.getId(), codeReducedMap.get(code).getId());
                         }

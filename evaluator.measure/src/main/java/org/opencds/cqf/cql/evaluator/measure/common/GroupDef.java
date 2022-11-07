@@ -1,49 +1,61 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GroupDef {
 
-    private String id;
+    private final String id;
+    private final ConceptDef code;
+    private final List<StratifierDef> stratifiers;
+    private final List<PopulationDef> populations;
 
-    private HashMap<MeasurePopulationType, PopulationDef> populationSets = new HashMap<>();
+    private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
-    private List<StratifierDef> stratifiers;
-
-    public PopulationDef get(MeasurePopulationType populationType) {
-        return this.populationSets.get(populationType);
+    public GroupDef(String id, ConceptDef code, List<StratifierDef> stratifiers, List<PopulationDef> populations) {
+        this.id = id;
+        this.code = code;
+        this.stratifiers = stratifiers;
+        this.populations = populations;
+        this.populationIndex = index(populations);
     }
 
-    public PopulationDef createPopulation(MeasurePopulationType measurePopulationType, String criteriaExpression) {
-        return this.populationSets.put(measurePopulationType, new PopulationDef(measurePopulationType, criteriaExpression));
+    public String id() {
+        return this.id;
     }
 
-    public Set<MeasurePopulationType> keys() {
-        return this.populationSets.keySet();
+    public ConceptDef code() {
+        return this.code;
     }
 
-    public Collection<PopulationDef> values() {
-        return this.populationSets.values();
-    }
-
-    public Set<Entry<MeasurePopulationType, PopulationDef>> entrySet() {
-        return this.populationSets.entrySet();
-    }
-
-    public List<StratifierDef> getStratifiers() {
-        if (this.stratifiers == null) {
-            this.stratifiers = new ArrayList<>();
-        }
-
+    public List<StratifierDef> stratifiers() {
         return this.stratifiers;
     }
 
-    public String getId() { return id; }
+    public List<PopulationDef> populations() {
+        return this.populations;
+    }
 
-    public void setId(String id) { this.id = id; }
+    public PopulationDef getSingle(MeasurePopulationType type) {
+        if (!populationIndex.containsKey(type)) {
+            return null;
+        }
+
+        List<PopulationDef> defs = this.populationIndex.get(type);
+        if (defs.size() > 1) {
+            throw new IllegalStateException("There is more than one PopulationDef of type: " + type.toCode());
+        }
+
+        return defs.get(0);
+    }
+
+    public List<PopulationDef> get(MeasurePopulationType type) {
+        return this.populationIndex.computeIfAbsent(type, x -> Collections.emptyList());
+    }
+
+    private Map<MeasurePopulationType, List<PopulationDef>> index(List<PopulationDef> populations) {
+        return populations.stream().collect(Collectors.groupingBy(PopulationDef::type));
+    }
 }

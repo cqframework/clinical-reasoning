@@ -27,6 +27,7 @@ import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
@@ -200,8 +201,9 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     private Measure cohort_measure() {
 
         Measure measure = measure("cohort");
+        addGroup(measure, "group-1");
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
-        measure.getSupplementalDataFirstRep().setCriteria("SDE Race");
+        addSDE(measure, "sde-race", "SDE Race");
 
         return measure;
     }
@@ -209,10 +211,11 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     private Measure proportion_measure() {
 
         Measure measure = measure("proportion");
+        addGroup(measure, "group-1");
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
         addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
-        measure.getSupplementalDataFirstRep().setCriteria("SDE Race");
+        addSDE(measure, "sde-race", "SDE Race");
 
         return measure;
     }
@@ -220,9 +223,10 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     private Measure continuous_variable_measure() {
 
         Measure measure = measure("continuous-variable");
+        addGroup(measure, "group-1");
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.MEASUREPOPULATION, "MeasurePopulation");
-        measure.getSupplementalDataFirstRep().setCriteria("SDE Race");
+        addSDE(measure, "sde-race", "SDE Race");
 
         return measure;
     }
@@ -233,16 +237,27 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         return measure;
     }
 
+    private void addGroup(Measure measure, String groupId) {
+        measure.addGroup().setId(groupId);
+    }
+
     private void addStratifier(Measure measure, String stratifierId, String expression) {
         MeasureGroupStratifierComponent mgsc = measure.getGroupFirstRep().addStratifier();
         mgsc.setCriteria(expression);
         mgsc.setId(stratifierId);
     }
 
+    private void addSDE(Measure measure, String sdeId, String expression) {
+        MeasureSupplementalDataComponent sde = measure.addSupplementalData();
+        sde.setId(sdeId);
+        sde.setCriteria(expression);
+    }
+
     private void addPopulation(Measure measure, MeasurePopulationType populationType, String expression) {
         MeasureGroupPopulationComponent mgpc = measure.getGroupFirstRep().addPopulation();
         mgpc.getCode().getCodingFirstRep().setCode(populationType.toCode());
         mgpc.setCriteria(expression);
+        mgpc.setId(populationType.toCode());
     }
 
     private Measure measure(String scoring) {

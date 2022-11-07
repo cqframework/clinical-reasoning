@@ -51,10 +51,8 @@ public enum MeasurePopulationType {
 
     // This method can be used for reverse lookup purpose
     public static MeasurePopulationType fromCode(String code) {
-        if (code != null && !code.isEmpty()) {
-            if (lookup.containsKey(code)) {
-                return lookup.get(code);
-            }
+        if (code != null && !code.isEmpty() && lookup.containsKey(code)) {
+            return lookup.get(code);
         }
 
         return null;

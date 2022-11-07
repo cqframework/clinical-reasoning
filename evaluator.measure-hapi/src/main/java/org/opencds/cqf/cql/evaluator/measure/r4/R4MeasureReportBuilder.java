@@ -1,22 +1,30 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import static org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
-import static org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.common.reflection.qual.GetClass;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BaseDateTimeType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -41,6 +49,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -61,6 +70,8 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.opencds.cqf.cql.evaluator.measure.common.PopulationDef;
 import org.opencds.cqf.cql.evaluator.measure.common.SdeDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
+
+import com.google.common.collect.Lists;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
@@ -84,12 +95,21 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         private final HashMap<String, Reference> evaluatedResourceReferences = new HashMap<>();
         private final HashMap<String, Reference> supplementalDataReferences = new HashMap<>();
+        private final Map<String, Resource> contained = new HashMap<>();
         private final Set<String> issues = new HashSet<>();
 
         public BuilderContext(Measure measure, MeasureDef measureDef, MeasureReport measureReport) {
             this.measure = measure;
             this.measureDef = measureDef;
             this.measureReport = measureReport;
+        }
+
+        public Map<String, Resource> contained() {
+            return this.contained;
+        }
+
+        public void addContained(Resource r) {
+            this.contained.computeIfAbsent(this.getId(r), x -> r);
         }
 
         public Measure measure() {
@@ -137,16 +157,26 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             addExtensionIfNotExists(reference, ext);
         }
 
-        public void addCriteriaExtensionToSupplementalData(String resourceId, String criteriaId) {
-            validateReference(resourceId);
-            var ref = addSupplementalDataReference(resourceId);
+        public void addCriteriaExtensionToSupplementalData(Resource resource, String criteriaId) {
+            var id = getId(resource);
+
+            // This is not an evaluated resource, so add it to the contained resources
+            if (!hasEvaluatedResource(id)) {
+                this.addContained(resource);
+                id = "#" + resource.getIdElement().getIdPart();
+            }
+            var ref = addSupplementalDataReference(id);
             addCriteriaExtensionToReference(ref, criteriaId);
         }
 
-        public void addCriteriaExtensionToEvaluatedResource(String resourceId, String criteriaId) {
-            validateReference(resourceId);
-            var ref = addEvaluatedResourceReference(resourceId);
+        public void addCriteriaExtensionToEvaluatedResource(Resource resource, String criteriaId) {
+            var id = getId(resource);
+            var ref = addEvaluatedResourceReference(id);
             addCriteriaExtensionToReference(ref, criteriaId);
+        }
+
+        private String getId(Resource resource) {
+            return resource.fhirType() + "/" + resource.getIdElement().getIdPart();
         }
 
         private void addExtensionIfNotExists(Element element, Extension ext) {
@@ -173,12 +203,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 throw new NullPointerException();
             }
 
-            // Must be type/id and that's it
-            if (reference.split("/").length != 2) {
+            // If it's a contained reference, must be just the Guid and nothing else
+            if (reference.startsWith("#") && reference.indexOf("/") != -1) {
+                throw new IllegalArgumentException();
+            }
+
+            // If it's a full reference, it must be type/id and that's it
+            if (!reference.startsWith("#") && reference.split("/").length != 2) {
                 throw new IllegalArgumentException();
             }
         }
-
     }
 
     @Override
@@ -198,6 +232,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         addEvaluatedResource(bc);
         addSupplementalData(bc);
         // addIssues(bc);
+
+        for (var r : bc.contained().values()) {
+            bc.report().addContained(r);
+        }
 
         this.measureReportScorer.score(measureDef.scoring(), bc.report());
 
@@ -235,7 +273,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             oc.addIssue().setSeverity(IssueSeverity.WARNING).setDiagnostics(issue);
         }
 
-        report.addContained(oc);
+        bc.addContained(oc);
         report.addExtension(MeasureConstants.EXT_OPERATION_OUTCOME_REFERENCE_URL, new Reference("#" + oc.getId()));
     }
 
@@ -313,7 +351,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // equals
         // the ValueWrapper does it for them.
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x).value())));
+                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x).rawValue())));
 
         for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             var reportStratum = reportStratifier.addStratum();
@@ -366,7 +404,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         if (!intersection.isEmpty()
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
             ListResource popSubjectList = this.createIdList(UUID.randomUUID().toString(), intersection);
-            bc.report().addContained(popSubjectList);
+            bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
     }
@@ -378,7 +416,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
-        if (ifIsBooleanBasis(bc.measure())) {
+        if (isBooleanBasis(bc.measure())) {
             reportPopulation.setCount(populationDef.getResources().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
@@ -390,7 +428,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     new StringType(measurePopulation.getDescription()));
         }
 
-        addResourceReferences(bc, populationDef.id(), populationDef.getEvaluatedResources());
+        addEvaluatedResourceReferences(bc, populationDef.id(), populationDef.getEvaluatedResources());
 
         // This is a temporary list carried forward to stratifiers
         Set<String> populationSet = populationDef.getSubjects();
@@ -402,7 +440,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (!populationSet.isEmpty()) {
                     ListResource subjectList = createIdList(
                             UUID.randomUUID().toString(), populationSet);
-                    bc.report().addContained(subjectList);
+                    bc.addContained(subjectList);
                     reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
                 }
                 break;
@@ -426,7 +464,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Observation observation = createMeasureObservation(bc,
                     "measure-observation-" + observationName + "-" + (i + 1),
                     observationName);
-            bc.report().addContained(observation);
+            bc.addContained(observation);
         }
     }
 
@@ -449,7 +487,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return referenceList;
     }
 
-    protected void addResourceReferences(BuilderContext bc, String id,
+    protected void addEvaluatedResourceReferences(BuilderContext bc, String criteriaId,
             List<Object> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
@@ -457,40 +495,56 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         for (Object object : evaluatedResources) {
             Resource resource = (Resource) object;
-            String resourceId = resource.getId();
-            bc.addCriteriaExtensionToEvaluatedResource(resourceId, id);
+            bc.addCriteriaExtensionToEvaluatedResource(resource, criteriaId);
         }
     }
 
+    // This processes the SDEs for a given report.
+    // Case 1: individual - primitive types (ints, codes, etc)
+    // convert to observation, add observation as contained, add sde reference with
+    // criteria reference extension
+    // Case 2: individual - resource types
+    // add sde reference with criteria reference extension for each resource
+    // if not an evaluated resource, add to contained
+    // Case 3: population - primitive types, non aggregatable
+    // convert to observation, add observation as contained, add sde reference with
+    // criteria reference extension,
+    // Case 4: population - primitive type, aggregatable
+    // aggregate by value, convert to observation, add observation as contained, sum
+    // the
+    // sde reference with criteria reference extension
+    // Case 5: population - resource types
+    // add sde reference with criteria reference extension for each resource
+    // if not an evaluated resource, add to contained
     protected void buildSDE(BuilderContext bc, MeasureSupplementalDataComponent msdc, SdeDef sde) {
         var report = bc.report();
 
-        // This processes the SDEs for a given report.
-        // Case 1: individual - primitive types (ints, codes, etc)
-        // convert to observation, add observation as contained, add sde reference with
-        // criteria reference extension
-        // Case 2: individual - resource types
-        // add sde reference with criteria reference extension for each resource
-        // if not an evaluated resource, add to contained
-        // Case 3: population - primitive types, non aggregatable
-        // convert to observation, add observation as contained, add sde reference with
-        // criteria reference extension
-        // Case 4: population - primitive type, aggregatable
-        // aggregate by value, convert to observation, add observation as contained, add
-        // sde reference with criteria reference extension
-        // Case 5: population - resource types
-        // add sde reference with criteria reference extension for each resource
-        // if not an evaluated resource, add to contained
+        // No SDEs were calculated, do nothing
+        if (sde.getResults().isEmpty()) {
+            return;
+        }
+
+        // This is an individual report... shouldn't have more than one subject!
+        if (report.getType() == MeasureReport.MeasureReportType.INDIVIDUAL && sde.getResults().keySet().size() > 1) {
+            throw new IllegalArgumentException();
+        }
+
+        // Add all evaluated resources
+        for (var e : sde.getResults().entrySet()) {
+            addEvaluatedResourceReferences(bc, sde.id(), e.getValue().evaluatedResources());
+        }
 
         CodeableConcept concept = conceptDefToConcept(sde.code());
 
-        Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream().map(x -> new ValueWrapper(x.value()))
+        Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
+                .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream())
+                .map(ValueWrapper::new)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
-            DomainResource obs = null;
-            if (!(accumulator.getKey().getValue() instanceof DomainResource)) {
+            Resource obs = null;
+            if (!(accumulator.getKey().getValue() instanceof Resource)) {
                 String valueCode = accumulator.getKey().getValueAsString();
                 String valueKey = accumulator.getKey().getKey();
                 Long valueCount = accumulator.getValue();
@@ -534,11 +588,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                                 valueCount, concept);
                         break;
                 }
-                report.addContained(obs);
-                bc.addCriteriaExtensionToSupplementalData("#" + obs.getId(), sde.id());
+
+                bc.addCriteriaExtensionToSupplementalData(obs, sde.id());
+            } else {
+                Resource r = (Resource) accumulator.getKey().getValue();
+                bc.addCriteriaExtensionToSupplementalData(r, sde.id());
             }
         }
-
     }
 
     protected void buildSDEs(BuilderContext bc) {
@@ -661,7 +717,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obsExtension;
     }
 
-    protected boolean ifIsBooleanBasis(Measure measure) {
+    protected boolean isBooleanBasis(Measure measure) {
         if (measure.hasExtension()) {
             return measure.getExtension().stream().anyMatch(this::isBooleanBasisExtension);
         }
@@ -828,7 +884,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (value != null) {
                 return value.toString();
             } else {
-                return null;
+                return "<null>";
             }
         }
 
@@ -892,6 +948,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         public Class<?> getValueClass() {
+            if (this.value == null) {
+                return String.class;
+            }
+
             return this.value.getClass();
         }
 

@@ -53,6 +53,8 @@ import org.opencds.cqf.cql.evaluator.measure.common.PopulationDef;
 import org.opencds.cqf.cql.evaluator.measure.common.SdeDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
+import com.google.common.collect.Lists;
+
 public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
@@ -173,7 +175,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // equals
         // the ValueWrapper does it for them.
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x).value())));
+                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x).rawValue())));
 
         for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(groupKey, stratifierKey, reportStratifier.addStratum(), stratValue.getKey(),
@@ -335,7 +337,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             processSdeEvaluatedResourceExtension(sde);
 
             Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
-                    .map(x -> new ValueWrapper(x.value()))
+                    .flatMap(x -> ((List<Object>) Lists.newArrayList(x.iterableValue())).stream())
+                    .map(ValueWrapper::new)
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             String sdeKey = this.getKey("sde-observation", msdc.getId(), null, i);

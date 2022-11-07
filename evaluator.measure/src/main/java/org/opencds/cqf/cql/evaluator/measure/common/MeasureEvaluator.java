@@ -389,9 +389,8 @@ public class MeasureEvaluator {
         for (SdeDef sde : sdes) {
             ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.expression());
             Object result = expressionDef.evaluate(this.context);
-            if (result != null) {
-                sde.putResult(subjectId, result, context.getEvaluatedResources());
-            }
+
+            sde.putResult(subjectId, result, context.getEvaluatedResources());
 
             clearEvaluatedResources();
         }
@@ -406,12 +405,19 @@ public class MeasureEvaluator {
             // TODO: Handle list values as components?
             Object result = this.context.resolveExpressionRef(sd.expression()).evaluate(this.context);
             if (result instanceof Iterable) {
-                throw new IllegalArgumentException("stratifiers may not return multiple values");
+                var resultIter = ((Iterable<?>) result).iterator();
+                if (!resultIter.hasNext()) {
+                    result = null;
+                } else {
+                    result = resultIter.next();
+                }
+
+                if (resultIter.hasNext()) {
+                    throw new IllegalArgumentException("stratifiers may not return multiple values");
+                }
             }
 
-            if (result != null) {
-                sd.putResult(subjectId, result, this.context.getEvaluatedResources());
-            }
+            sd.putResult(subjectId, result, this.context.getEvaluatedResources());
 
             clearEvaluatedResources();
         }

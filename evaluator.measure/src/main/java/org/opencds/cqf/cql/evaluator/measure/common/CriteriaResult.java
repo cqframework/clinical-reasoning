@@ -16,8 +16,19 @@ public class CriteriaResult {
         this.evaluatedResources = List.copyOf(evaluatedResources);
     }
 
-    public Object value() {
+    public Object rawValue() {
         return this.value;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Iterable<Object> iterableValue() {
+        if (this.rawValue() instanceof Iterable<?>) {
+            return (Iterable) this.rawValue();
+        } else if (this.rawValue() == null) {
+            return Collections.emptyList();
+        } else {
+            return Collections.singletonList(this.rawValue());
+        }
     }
 
     public List<Object> evaluatedResources() {

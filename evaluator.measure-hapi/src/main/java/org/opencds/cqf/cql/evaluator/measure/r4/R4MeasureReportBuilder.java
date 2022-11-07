@@ -417,9 +417,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reportPopulation.setId(measurePopulation.getId());
 
         if (isBooleanBasis(bc.measure())) {
-            reportPopulation.setCount(populationDef.getResources().size());
-        } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
+        } else {
+            reportPopulation.setCount(populationDef.getResources().size());
         }
 
         if (measurePopulation.hasDescription()) {

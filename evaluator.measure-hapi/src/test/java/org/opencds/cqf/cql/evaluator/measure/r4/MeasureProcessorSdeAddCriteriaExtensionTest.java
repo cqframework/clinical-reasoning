@@ -1,6 +1,10 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Extension;
@@ -28,5 +32,18 @@ public class MeasureProcessorSdeAddCriteriaExtensionTest extends BaseMeasureProc
                 break;
             }
         }
+
+        String populationName = "initial-population";
+        int expectedCount = 2;
+
+        Optional<MeasureReport.MeasureReportGroupPopulationComponent> population = report.getGroup().get(0)
+                .getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
+                        && x.getCode().getCoding().get(0).getCode().equals(populationName))
+                .findFirst();
+
+        assertTrue(population.isPresent(),
+                String.format("Unable to locate a population with id \"%s\"", populationName));
+        assertEquals(population.get().getCount(), expectedCount,
+                String.format("expected count for population \"%s\" did not match", populationName));
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class CriteriaResult {
 
     public CriteriaResult(Object value, List<Object> evaluatedResources) {
         this.value = value;
-        this.evaluatedResources = List.copyOf(evaluatedResources);
+        this.evaluatedResources = new ArrayList<>(evaluatedResources);
     }
 
     public Object rawValue() {

@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
@@ -24,6 +25,8 @@ import org.opencds.cqf.cql.evaluator.measure.common.PopulationDef;
 import org.opencds.cqf.cql.evaluator.measure.common.SdeDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierComponentDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
+
+import ca.uhn.fhir.util.StringUtil;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
@@ -132,13 +135,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void checkId(Element e) {
-        if (enforceIds && (e.getId() == null || e.getId().isBlank())) {
+        if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
             throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
-        if (enforceIds && (r.getId() == null || r.getId().isBlank())) {
+        if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
     }

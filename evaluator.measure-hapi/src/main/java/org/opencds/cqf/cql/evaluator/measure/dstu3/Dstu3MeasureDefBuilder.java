@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.dstu3;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Element;
@@ -116,13 +117,13 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void checkId(Element e) {
-        if (enforceIds && (e.getId() == null || e.getId().isBlank())) {
+        if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
             throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
-        if (enforceIds && (r.getId() == null || r.getId().isBlank())) {
+        if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
     }

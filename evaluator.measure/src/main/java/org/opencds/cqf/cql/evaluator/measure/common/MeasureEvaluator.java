@@ -53,8 +53,7 @@ public class MeasureEvaluator {
 
     public MeasureEvaluator(Context context, String measurementPeriodParameterName) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
-        this.measurementPeriodParameterName = Objects.requireNonNull(measurementPeriodParameterName,
-                "measurementPeriodParameterName is a required argument");
+        this.measurementPeriodParameterName = measurementPeriodParameterName;
     }
 
     public MeasureDef evaluate(MeasureDef measureDef, MeasureEvalType measureEvalType, List<String> subjectIds,
@@ -99,7 +98,8 @@ public class MeasureEvaluator {
         }
 
         for (ParameterDef pd : lib.getParameters().getDef()) {
-            if (pd.getName().equals(this.measurementPeriodParameterName)) {
+            if (this.measurementPeriodParameterName != null &&
+                    pd.getName().equals(this.measurementPeriodParameterName)) {
                 return pd;
             }
         }

@@ -444,7 +444,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             report.setPatient(new Reference(subjectIds.get(0)));
         }
 
-        report.setPeriod(getPeriod(measurementPeriod));
+        if (measurementPeriod != null) {
+            report.setPeriod(getPeriod(measurementPeriod));
+        }
         report.setMeasure(new Reference(measure.getId()));
         report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());

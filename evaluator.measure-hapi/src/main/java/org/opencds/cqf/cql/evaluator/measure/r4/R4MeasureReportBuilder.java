@@ -658,7 +658,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             report.setSubject(new Reference(subjectIds.get(0)));
         }
 
-        report.setPeriod(getPeriod(measurementPeriod));
+        if (measurementPeriod != null) {
+            report.setPeriod(getPeriod(measurementPeriod));
+        }
         report.setMeasure(measure.getUrl());
         report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());

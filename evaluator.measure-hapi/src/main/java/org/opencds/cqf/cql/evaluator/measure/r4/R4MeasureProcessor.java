@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
@@ -331,7 +332,12 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             throw new IllegalStateException("a dataProvider was not provided and one could not be constructed");
         }
 
-        Interval measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
+
+        Interval measurementPeriod = null;
+        if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
+            measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
+        }
+        
         Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
         R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
         return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds, measurementPeriod);

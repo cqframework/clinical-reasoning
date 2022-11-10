@@ -306,14 +306,15 @@ public class CqlEvaluatorBuilder {
 
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.librarySourceProviders);
-        if (this.cqlOptions.useEmbeddedLibraries()) {
-            this.librarySourceProviders.add(new FhirLibrarySourceProvider());
-        }
-
         // TODO: Would be good to plug this in through DI, but I ran into so many issues doing that, I just went this route
         if (npmProcessor != null) {
             ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(npmProcessor.getIgContext().getFhirVersion());
             this.librarySourceProviders.add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, new LoggerAdapter(logger)));
+        }
+
+        // Put this after the NPM provider so that if an embedded library is found on the NPM pat, it will be used first
+        if (this.cqlOptions.useEmbeddedLibraries()) {
+            this.librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(

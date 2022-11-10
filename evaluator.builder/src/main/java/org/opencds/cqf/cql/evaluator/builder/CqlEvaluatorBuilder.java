@@ -13,11 +13,13 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
@@ -306,10 +308,13 @@ public class CqlEvaluatorBuilder {
 
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.librarySourceProviders);
+        ModelManager modelManager = new CacheAwareModelManager(globalModelCache);
         // TODO: Would be good to plug this in through DI, but I ran into so many issues doing that, I just went this route
         if (npmProcessor != null) {
             ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(npmProcessor.getIgContext().getFhirVersion());
-            this.librarySourceProviders.add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, new LoggerAdapter(logger)));
+            LoggerAdapter adapter = new LoggerAdapter(logger);
+            this.librarySourceProviders.add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+            modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
         }
 
         // Put this after the NPM provider so that if an embedded library is found on the NPM pat, it will be used first
@@ -318,7 +323,7 @@ public class CqlEvaluatorBuilder {
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.namespaceInfo);
+                modelManager, librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.namespaceInfo);
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
         }

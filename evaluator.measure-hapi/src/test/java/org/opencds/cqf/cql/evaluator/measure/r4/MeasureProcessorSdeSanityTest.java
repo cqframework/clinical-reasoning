@@ -52,5 +52,8 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
                         endpoint, endpoint, endpoint, null);
 
                 assertNotNull(report);
+
+                assertEquals(report.getPeriod().getStart().toString(), "Tue Jan 01 00:00:00 MST 2019");
+                assertEquals(report.getPeriod().getEnd().toString(), "Tue Dec 31 23:59:59 MST 2019");
         }
 }

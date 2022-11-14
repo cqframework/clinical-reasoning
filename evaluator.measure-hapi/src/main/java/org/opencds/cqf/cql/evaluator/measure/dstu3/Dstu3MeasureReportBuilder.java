@@ -84,7 +84,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         this.reset();
 
         this.measure = measure;
-        this.report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
+        this.report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
@@ -434,8 +434,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    protected MeasureReport createMeasureReport(Measure measure, MeasureReportType type, List<String> subjectIds,
-            Interval measurementPeriod) {
+    protected MeasureReport createMeasureReport(Measure measure, MeasureDef measureDef, MeasureReportType type,
+            List<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
@@ -446,6 +446,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         if (measurementPeriod != null) {
             report.setPeriod(getPeriod(measurementPeriod));
+        } else if (measureDef.getDefaultMeasurementPeriod() != null) {
+            report.setPeriod(getPeriod(measureDef.getDefaultMeasurementPeriod()));
         }
         report.setMeasure(new Reference(measure.getId()));
         report.setDate(new java.util.Date());

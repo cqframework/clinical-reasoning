@@ -53,7 +53,8 @@ public class MeasureEvaluator {
 
     public MeasureEvaluator(Context context, String measurementPeriodParameterName) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
-        this.measurementPeriodParameterName = measurementPeriodParameterName;
+        this.measurementPeriodParameterName = Objects.requireNonNull(measurementPeriodParameterName,
+                "measurementPeriodParameterName is a required argument");
     }
 
     public MeasureDef evaluate(MeasureDef measureDef, MeasureEvalType measureEvalType, List<String> subjectIds,
@@ -67,7 +68,7 @@ public class MeasureEvaluator {
         }
 
         // measurementPeriod is not required, because it's often defaulted in CQL
-        this.setMeasurementPeriod(measurementPeriod);
+        this.setMeasurementPeriod(measureDef, measurementPeriod);
 
         switch (measureEvalType) {
             case PATIENT:
@@ -108,7 +109,11 @@ public class MeasureEvaluator {
 
     }
 
-    protected void setMeasurementPeriod(Interval measurementPeriod) {
+    protected void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod) {
+        if (measurementPeriod == null) {
+            measurementPeriod = getMeasurementPeriod();
+            measureDef.setDefaultMeasurementPeriod(measurementPeriod);
+        }
         if (measurementPeriod == null) {
             return;
         }

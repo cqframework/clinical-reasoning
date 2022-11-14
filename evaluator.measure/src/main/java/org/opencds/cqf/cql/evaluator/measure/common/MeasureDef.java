@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
+import org.opencds.cqf.cql.engine.runtime.Interval;
 import java.util.List;
 
 public class MeasureDef {
@@ -7,6 +8,7 @@ public class MeasureDef {
     private final String id;
     private final String url;
     private final String version;
+    private Interval defaultMeasurementPeriod;
     private final MeasureScoring scoring;
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
@@ -35,6 +37,14 @@ public class MeasureDef {
 
     public MeasureScoring scoring() {
         return this.scoring;
+    }
+
+    public Interval getDefaultMeasurementPeriod() {
+        return defaultMeasurementPeriod;
+    }
+
+    public void setDefaultMeasurementPeriod(Interval defaultMeasurementPeriod) {
+        this.defaultMeasurementPeriod = defaultMeasurementPeriod;
     }
 
     public List<SdeDef> sdes() {

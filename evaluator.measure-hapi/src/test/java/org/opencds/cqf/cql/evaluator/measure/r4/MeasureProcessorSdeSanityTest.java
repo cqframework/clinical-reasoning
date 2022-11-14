@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -53,7 +54,8 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
 
                 assertNotNull(report);
 
-                assertEquals(report.getPeriod().getStart().toString(), "Tue Jan 01 00:00:00 MST 2019");
-                assertEquals(report.getPeriod().getEnd().toString(), "Tue Dec 31 23:59:59 MST 2019");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                assertEquals(formatter.format(report.getPeriod().getStart()), "2019-01-01");
+                assertEquals(formatter.format(report.getPeriod().getEnd()), "2019-12-31");
         }
 }

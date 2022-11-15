@@ -68,7 +68,7 @@ public class MeasureEvaluator {
         }
 
         // measurementPeriod is not required, because it's often defaulted in CQL
-        this.setMeasurementPeriod(measurementPeriod);
+        this.setMeasurementPeriod(measureDef, measurementPeriod);
 
         switch (measureEvalType) {
             case PATIENT:
@@ -99,7 +99,8 @@ public class MeasureEvaluator {
         }
 
         for (ParameterDef pd : lib.getParameters().getDef()) {
-            if (pd.getName().equals(this.measurementPeriodParameterName)) {
+            if (this.measurementPeriodParameterName != null &&
+                    pd.getName().equals(this.measurementPeriodParameterName)) {
                 return pd;
             }
         }
@@ -108,7 +109,11 @@ public class MeasureEvaluator {
 
     }
 
-    protected void setMeasurementPeriod(Interval measurementPeriod) {
+    protected void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod) {
+        if (measurementPeriod == null) {
+            measurementPeriod = getMeasurementPeriod();
+            measureDef.setDefaultMeasurementPeriod(measurementPeriod);
+        }
         if (measurementPeriod == null) {
             return;
         }

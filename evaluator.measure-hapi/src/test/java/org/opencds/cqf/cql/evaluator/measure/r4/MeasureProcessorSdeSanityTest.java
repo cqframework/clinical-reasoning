@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -41,5 +42,20 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
                                                 &&
                                                 ((StringType) item.getExtension().get(0).getValue()).getValue()
                                                                 .equalsIgnoreCase("numerator")));
+        }
+
+        @Test
+        public void measure_eval_without_measure_period() {
+                MeasureReport report = this.measureProcessor.evaluateMeasure(
+                        "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
+                        null, "", "subject",
+                        "Patient/DM1-patient-1", null, null,
+                        endpoint, endpoint, endpoint, null);
+
+                assertNotNull(report);
+
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                assertEquals(formatter.format(report.getPeriod().getStart()), "2019-01-01");
+                assertEquals(formatter.format(report.getPeriod().getEnd()), "2019-12-31");
         }
 }

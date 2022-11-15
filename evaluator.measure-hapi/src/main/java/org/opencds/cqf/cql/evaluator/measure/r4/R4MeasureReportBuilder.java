@@ -219,7 +219,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     public MeasureReport build(Measure measure, MeasureDef measureDef, MeasureReportType measureReportType,
             Interval measurementPeriod, List<String> subjectIds) {
 
-        var report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
+        var report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
 
         var bc = new BuilderContext(measure, measureDef, report);
 
@@ -648,8 +648,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected MeasureReport createMeasureReport(Measure measure, MeasureReportType type, List<String> subjectIds,
-            Interval measurementPeriod) {
+    protected MeasureReport createMeasureReport(Measure measure, MeasureDef measureDef, MeasureReportType type,
+            List<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.COMPLETE);
         report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
@@ -658,7 +658,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             report.setSubject(new Reference(subjectIds.get(0)));
         }
 
-        report.setPeriod(getPeriod(measurementPeriod));
+        if (measurementPeriod != null) {
+            report.setPeriod(getPeriod(measurementPeriod));
+        } else if (measureDef.getDefaultMeasurementPeriod() != null) {
+            report.setPeriod(getPeriod(measureDef.getDefaultMeasurementPeriod()));
+        }
         report.setMeasure(measure.getUrl());
         report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());

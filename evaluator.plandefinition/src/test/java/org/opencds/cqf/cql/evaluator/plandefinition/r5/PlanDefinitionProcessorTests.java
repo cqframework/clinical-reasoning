@@ -53,7 +53,8 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     //         );
     // }
 
-    @Test
+    // Commenting this out until we have a ModelResolver for R5
+    //@Test
     public void testRuleFiltersNotReportable() {
         PlanDefinition.Assert.that(
                 "plandefinition-RuleFilters-1.0.0",
@@ -66,7 +67,8 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .isEqualsTo("rule-filters/NotReportableBundle.json");
     }
 
-    @Test
+    // Commenting this out until we have a ModelResolver for R5
+    //@Test
     public void testRuleFiltersReportable() {
         PlanDefinition.Assert.that(
                 "plandefinition-RuleFilters-1.0.0",

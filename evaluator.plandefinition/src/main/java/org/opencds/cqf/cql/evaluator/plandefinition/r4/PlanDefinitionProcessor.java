@@ -357,8 +357,7 @@ public class PlanDefinitionProcessor {
       if (referenceToContained) {
         var activityDefinition = (ActivityDefinition) resolveContained(planDefinition, definition.getValue());
         result = this.activityDefinitionProcessor.resolveActivityDefinition(activityDefinition, session.patientId,
-            session.practitionerId, session.organizationId, session.parameters, session.contentEndpoint,
-            session.terminologyEndpoint, session.dataEndpoint);
+            session.practitionerId, session.organizationId);
         result.setId(activityDefinition.getIdElement().withResourceType(result.fhirType()));
       } else {
         var iterator = fhirDal.searchByUrl("ActivityDefinition", definition.asStringValue()).iterator();

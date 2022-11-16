@@ -136,12 +136,13 @@ public class PlanDefinition {
         ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
             dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
 
-        ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
+        // Commenting this out until we have a ModelResolver for R5
+        // ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
 
         return new PlanDefinitionProcessor(
             fhirContext, fhirDal, libraryProcessor, evaluator,
-            activityDefinitionProcessor, operationParametersParser
+            null, operationParametersParser
         );
     }
 

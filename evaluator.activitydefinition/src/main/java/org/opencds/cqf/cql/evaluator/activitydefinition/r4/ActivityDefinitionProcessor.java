@@ -1,24 +1,16 @@
 package org.opencds.cqf.cql.evaluator.activitydefinition.r4;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Procedure;
@@ -30,59 +22,26 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 
-public class ActivityDefinitionProcessor {
-    private static final String targetStatusExtension = "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus";
-    FhirContext fhirContext;
-    FhirDal fhirDal;
-    LibraryProcessor libraryProcessor;
-    IFhirPath fhirPath;
+public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor<ActivityDefinition> {
     private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
     public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor) {
-        requireNonNull(fhirContext, "fhirContext can not be null");
-        requireNonNull(fhirDal, "fhirDal can not be null");
-        requireNonNull(libraryProcessor, "LibraryProcessor can not be null");
-        this.fhirContext = fhirContext;
-        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-        this.fhirDal = fhirDal;
-        this.libraryProcessor = libraryProcessor;
-    }
-
-    public IBaseResource apply(IdType theId, String subjectId, String encounterId, String practitionerId,
-            String organizationId, String userType, String userLanguage, String userTaskContext, String setting,
-            String settingContext, IBaseParameters parameters, IBaseResource contentEndpoint,
-            IBaseResource terminologyEndpoint, IBaseResource dataEndpoint)
-            throws FHIRException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        requireNonNull(subjectId, "subjectId can not be null");
-        var activityDefinitionResource = this.fhirDal.read(theId);
-        ActivityDefinition activityDefinition = null;
-        if (activityDefinitionResource != null && activityDefinitionResource instanceof ActivityDefinition) {
-            activityDefinition = (ActivityDefinition) activityDefinitionResource;
-        }
-
-        if (activityDefinition == null) {
-            throw new IllegalArgumentException("Couldn't find ActivityDefinition " + theId);
-        }
-
-        return resolveActivityDefinition(activityDefinition, subjectId, practitionerId, organizationId, parameters,
-                contentEndpoint, terminologyEndpoint, dataEndpoint);
+        super(fhirContext, fhirDal, libraryProcessor);
     }
 
     // For library use
+    @Override
     public Resource resolveActivityDefinition(ActivityDefinition activityDefinition, String patientId,
-            String practitionerId, String organizationId, IBaseParameters parameters, IBaseResource contentEndpoint,
-            IBaseResource terminologyEndpoint, IBaseResource dataEndpoint) throws FHIRException {
-        Resource result = null;
+            String practitionerId, String organizationId) {
+        Resource result;
         try {
             result = (Resource) Class.forName("org.hl7.fhir.r4.model." + activityDefinition.getKind().toCode())
                     .getConstructor().newInstance();
@@ -121,100 +80,43 @@ public class ActivityDefinitionProcessor {
                 break;
 
             case "Task":
-                result = resolveTask(activityDefinition, patientId, organizationId);
+                result = resolveTask(activityDefinition);
                 break;
 
             default:
                 var msg = "Unsupported activity type: " + result.fhirType();
                 logger.error(msg);
-                throw new RuntimeException(msg);
+                throw new FHIRException(msg);
         }
 
         for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition
                 .getDynamicValue()) {
-
-            if (!dynamicValue.hasExpression()) {
-                logger.error("Missing condition expression");
-                throw new RuntimeException("Missing condition expression");
-            }
-
-            if (dynamicValue.getExpression().hasLanguage()) {
-                logger.info("Evaluating action condition expression " + dynamicValue.getExpression());
-                String expression = dynamicValue.getExpression().getExpression();
-                String language = dynamicValue.getExpression().getLanguage();
-                Base value = null;
-                switch (language) {
-                case "text/cql":
-                case "text/cql.expression":
-                case "text/cql-expression":
-                    logger.warn("CQL expression in PlanDefinition action not supported right now.");
-                    break;
-                case "text/cql.name":
-                case "text/cql-name":
-                case "text/cql.identifier":
-                case "text/cql-identifier":
-                    if (activityDefinition.getLibrary().size() != 1) {
-                        throw new RuntimeException(
-                                "ActivityDefinition library must only include one primary library for evaluation.");
-                    }
-                    String libraryUrl = activityDefinition.getLibrary().get(0).getValue();
-                    Set<String> expressions = new HashSet<String>();
-                    expressions.add(expression);
-                    Parameters parametersResult = (Parameters) libraryProcessor.evaluate(libraryUrl, patientId,
-                            parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, null, expressions);
-                    if (parametersResult == null || parametersResult.getParameter() == null
-                            || parametersResult.getParameter().size() == 0) {
-                        value = null;
-                        break;
-                    }
-
-                    // TODO: Lists are represented as repeating parameter elements.
-                    value = parametersResult.getParameterFirstRep().getValue();
-                    break;
-                case "text/fhirpath":
-                    List<IBase> outputs;
-                    try {
-                        outputs = fhirPath.evaluate(null, expression, IBase.class);
-                    } catch (FhirPathExecutionException e) {
-                        throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
-                    }
-                    if (outputs == null || outputs.isEmpty()) {
-                        value = null;
-                    }
-                    else if (outputs.size() == 1) {
-                        value = (Base)outputs.get(0);
-                    }
-                    else {
-                        throw new IllegalArgumentException("Expected only one value when evaluating FHIRPath expression: " + expression);
-                    } 
-
-                    break;
-                default:
-                    logger.warn("An action language other than CQL was found: "
-                            + dynamicValue.getExpression().getLanguage());
-                    break;
-                }
-
-                try {
-                    result.setProperty(dynamicValue.getPath(), value);
-                } catch (Exception e) {
-                    throw new RuntimeException(
-                            String.format("Could not set path %s to value: %s", dynamicValue.getPath(), value));
-                }
+            if (dynamicValue.hasExpression()) {
+                resolveDynamicValue(dynamicValue.getExpression().getLanguage(),
+                        dynamicValue.getExpression().getExpression(),
+                        activityDefinition.getLibrary().get(0).getValueAsString(),
+                        dynamicValue.getPath(), result);
             }
         }
 
         return result;
     }
 
-    private Task resolveTask(ActivityDefinition activityDefinition, String patientId, String organizationId) throws RuntimeException {
+    @Override
+    public Object resolveParameterValue(IBase value) {
+        return ((Parameters.ParametersParameterComponent) value).getValue();
+    }
+
+    private Task resolveTask(ActivityDefinition activityDefinition) {
         Task task = new Task();
-        if (activityDefinition.hasExtension(targetStatusExtension)) {
-            Type value = activityDefinition.getExtensionByUrl(targetStatusExtension).getValue();
-            if (value != null && value instanceof StringType) {
+        if (activityDefinition.hasExtension(BaseActivityDefinitionProcessor.TARGET_STATUS_URL)) {
+            Type value = activityDefinition.getExtensionByUrl(BaseActivityDefinitionProcessor.TARGET_STATUS_URL).getValue();
+            if (value instanceof StringType) {
                 task.setStatus(Task.TaskStatus.valueOf(((StringType)value).asStringValue().toUpperCase()));
             } else {
-                logger.debug(String.format("Extension %s should have a value of type %s", targetStatusExtension, StringType.class.getName()));
+                logger.debug("Extension {} should have a value of type {}",
+                        BaseActivityDefinitionProcessor.TARGET_STATUS_URL,
+                        StringType.class.getName());
             }
         } else {
             task.setStatus(Task.TaskStatus.DRAFT);
@@ -235,7 +137,7 @@ public class ActivityDefinitionProcessor {
     }
 
     private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition, String patientId,
-            String practitionerId, String organizationId) throws RuntimeException {
+            String practitionerId, String organizationId) {
         // status, intent, code, and subject are required
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
@@ -260,7 +162,7 @@ public class ActivityDefinitionProcessor {
 
         // code can be set as a dynamicValue
         else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
-            throw new RuntimeException("Missing required code property");
+            throw new FHIRException(MISSING_CODE_PROPERTY);
         }
 
         if (activityDefinition.hasBodySite()) {
@@ -268,18 +170,17 @@ public class ActivityDefinitionProcessor {
         }
 
         if (activityDefinition.hasProduct()) {
-            throw new RuntimeException("Product does not map to " + activityDefinition.getKind());
+            throw new FHIRException(PRODUCT_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         if (activityDefinition.hasDosage()) {
-            throw new RuntimeException("Dosage does not map to " + activityDefinition.getKind());
+            throw new FHIRException(DOSAGE_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         return serviceRequest;
     }
 
-    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId)
-            throws RuntimeException {
+    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId) {
         // intent, medication, and subject are required
         MedicationRequest medicationRequest = new MedicationRequest();
         medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
@@ -290,7 +191,7 @@ public class ActivityDefinitionProcessor {
         }
 
         else {
-            throw new RuntimeException("Missing required product property");
+            throw new FHIRException(MISSING_CODE_PROPERTY);
         }
 
         if (activityDefinition.hasDosage()) {
@@ -298,22 +199,22 @@ public class ActivityDefinitionProcessor {
         }
 
         if (activityDefinition.hasBodySite()) {
-            throw new RuntimeException("BodySite does not map to " + activityDefinition.getKind());
+            throw new FHIRException(BODYSITE_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         if (activityDefinition.hasCode()) {
-            throw new RuntimeException("Code does not map to " + activityDefinition.getKind());
+            throw new FHIRException(CODE_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         if (activityDefinition.hasQuantity()) {
-            throw new RuntimeException("Quantity does not map to " + activityDefinition.getKind());
+            throw new FHIRException(QUANTITY_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         return medicationRequest;
     }
 
     private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition, String practitionerId,
-            String organizationId) throws RuntimeException {
+            String organizationId) {
         SupplyRequest supplyRequest = new SupplyRequest();
 
         if (practitionerId != null) {
@@ -329,7 +230,7 @@ public class ActivityDefinitionProcessor {
         }
 
         else {
-            throw new RuntimeException("Missing required orderedItem.quantity property");
+            throw new FHIRException("Missing required orderedItem.quantity property");
         }
 
         if (activityDefinition.hasCode()) {
@@ -337,15 +238,15 @@ public class ActivityDefinitionProcessor {
         }
 
         if (activityDefinition.hasProduct()) {
-            throw new RuntimeException("Product does not map to " + activityDefinition.getKind());
+            throw new FHIRException(PRODUCT_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         if (activityDefinition.hasDosage()) {
-            throw new RuntimeException("Dosage does not map to " + activityDefinition.getKind());
+            throw new FHIRException(DOSAGE_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         if (activityDefinition.hasBodySite()) {
-            throw new RuntimeException("BodySite does not map to " + activityDefinition.getKind());
+            throw new FHIRException(BODYSITE_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         return supplyRequest;
@@ -379,7 +280,7 @@ public class ActivityDefinitionProcessor {
         }
 
         else {
-            throw new RuntimeException("Missing required ActivityDefinition.code property for DiagnosticReport");
+            throw new FHIRException("Missing required ActivityDefinition.code property for DiagnosticReport");
         }
 
         if (activityDefinition.hasRelatedArtifact()) {
@@ -437,10 +338,8 @@ public class ActivityDefinitionProcessor {
         communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.UNKNOWN);
         communicationRequest.setSubject(new Reference(patientId));
 
-        if (activityDefinition.hasCode()) {
-            if (activityDefinition.getCode().hasText()) {
-                communicationRequest.addPayload().setContent(new StringType(activityDefinition.getCode().getText()));
-            }
+        if (activityDefinition.hasCode() && activityDefinition.getCode().hasText()) {
+            communicationRequest.addPayload().setContent(new StringType(activityDefinition.getCode().getText()));
         }
 
         return communicationRequest;

@@ -156,35 +156,29 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
-            String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
+         String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
+         Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
-        if (lastReceivedOn != null) {
-            logger.warn(
-                    "the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
-        }
+        List<String> subjectIds = this.getSubjects(reportType,
+                subject != null ? subject : practitioner, dataEndpoint, additionalData);
+
+        return evaluateMeasure(url, periodStart, periodEnd, reportType, subjectIds, lastReceivedOn,
+                contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+    }
+
+    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
+         List<String> subjectIds, String lastReceivedOn, Endpoint contentEndpoint,
+         Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
         // TODO: Need a federated FhirDal..
         FhirDal fhirDal = contentEndpoint != null
                 ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
                 : localFhirDal;
 
-        if (fhirDal == null) {
-            throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
-        }
+        measureEvalValidation(lastReceivedOn, fhirDal);
 
-        List<String> subjectIds = null;
-        MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
-        subjectIds = this.getSubjects(measureEvalType,
-                subject != null ? subject : practitioner, dataEndpoint, additionalData);
+        Measure measure = getMeasure(fhirDal, url);
 
-        Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
-        Iterator<IBaseResource> measureIter = measures.iterator();
-        if (!measureIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate Measure with url %s", url));
-        }
-
-        Measure measure = (Measure) measureIter.next();
         MeasureReport measureReport = this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
                 fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
         MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
@@ -192,6 +186,27 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         scorer.score(measureScoring, measureReport);
 
         return measureReport;
+    }
+
+    private void measureEvalValidation(String lastReceivedOn, FhirDal fhirDal) {
+        if (lastReceivedOn != null) {
+            logger.warn(
+                    "the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
+        }
+
+        if (fhirDal == null) {
+            throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
+        }
+    }
+
+    private  Measure getMeasure(FhirDal fhirDal, String url) {
+        Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
+        Iterator<IBaseResource> measureIter = measures.iterator();
+        if (!measureIter.hasNext()) {
+            throw new IllegalArgumentException(String.format("Unable to locate Measure with url %s", url));
+        }
+
+        return (Measure) measureIter.next();
     }
 
     public static <T> List<List<T>> getBatches(List<T> collection, int batchSize) {
@@ -215,6 +230,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     public List<String> getSubjects(String reportType, String subjectId, Bundle additionalData) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         return getSubjects(measureEvalType, subjectId, null, additionalData);
+    }
+
+    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
+        MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
+        return getSubjects(measureEvalType, subjectId, dataEndpoint, additionalData);
     }
 
     public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
@@ -395,7 +415,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             throw new IllegalArgumentException("Either dataEndpoint or additionalData must be specified");
         }
 
-        DataProviderComponents dataProvider = null;
+        DataProviderComponents dataProvider;
         if (dataEndpoint != null) {
             dataProvider = this.dataProviderFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint));
         } else {

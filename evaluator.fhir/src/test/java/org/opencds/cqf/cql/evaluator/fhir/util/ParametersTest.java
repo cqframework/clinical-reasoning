@@ -55,44 +55,40 @@ class ParametersTest {
         assertEquals("r4ParameterName", r4Parameters.getParameterFirstRep().getName());
     }
 
-    // TODO: FhirContext Version mismatch here.
+    // @Test
+    void testR5Parameters() {
+        FhirContext fhirContext = FhirContext.forR5Cached();
+        IBaseParameters parameters = newParameters(fhirContext);
+        assertTrue(parameters instanceof org.hl7.fhir.r5.model.Parameters);
+        parameters = newParameters(fhirContext, "r5ParameterIdString");
+        assertEquals("r5ParameterIdString", parameters.getIdElement().getIdPart());
+        parameters = newParameters(fhirContext, new org.hl7.fhir.r5.model.IdType("r5ParameterIdType"));
+        assertEquals("r5ParameterIdType", parameters.getIdElement().getIdPart());
+    }
 
     // @Test
-    // void testR5Parameters() {
-    // FhirContext fhirContext = FhirContext.forR5Cached();
-    // IBaseParameters parameters = newParameters(fhirContext);
-    // assertTrue(parameters instanceof org.hl7.fhir.r5.model.Parameters);
-    // parameters = newParameters(fhirContext, "r5ParameterIdString");
-    // assertEquals("r5ParameterIdString", parameters.getIdElement().getIdPart());
-    // parameters = newParameters(fhirContext, new
-    // org.hl7.fhir.r5.model.IdType("r5ParameterIdType"));
-    // assertEquals("r5ParameterIdType", parameters.getIdElement().getIdPart());
-    // }
+    void testR5ParametersPartName() {
+        FhirContext fhirContext = FhirContext.forR5Cached();
+        IBaseParameters parameters = newParameters(fhirContext, newPart(fhirContext,
+                "r5ParameterName"));
+        assertTrue(parameters instanceof org.hl7.fhir.r5.model.Parameters);
+        org.hl7.fhir.r5.model.Parameters r5Parameters = (org.hl7.fhir.r5.model.Parameters) parameters;
+        assertEquals("r5ParameterName",
+                r5Parameters.getParameterFirstRep().getName());
+    }
 
     // @Test
-    // void testR5ParametersPartName() {
-    // FhirContext fhirContext = FhirContext.forR5Cached();
-    // IBaseParameters parameters = newParameters(fhirContext, newPart(fhirContext,
-    // "r5ParameterName"));
-    // assertTrue(parameters instanceof org.hl7.fhir.r5.model.Parameters);
-    // org.hl7.fhir.r5.model.Parameters r5Parameters =
-    // (org.hl7.fhir.r5.model.Parameters) parameters;
-    // assertEquals("r5ParameterName",
-    // r5Parameters.getParameterFirstRep().getName());
-    // }
+    void getPartsByNameTest() {
+        FhirContext fhirContext = FhirContext.forR5Cached();
+        IBaseParameters parameters = newParameters(fhirContext,
+                newPart(fhirContext, "r5ParameterName"),
+                newPart(fhirContext, "r5ParameterName1"),
+                newPart(fhirContext, "r5ParameterName1"));
+        List<IBase> parts = getPartsByName(fhirContext, parameters,
+                "r5ParameterName");
+        assertEquals(1, parts.size());
 
-    // @Test
-    // void getPartsByNameTest() {
-    // FhirContext fhirContext = FhirContext.forR5Cached();
-    // IBaseParameters parameters = newParameters(fhirContext,
-    // newPart(fhirContext, "r5ParameterName"),
-    // newPart(fhirContext, "r5ParameterName1"),
-    // newPart(fhirContext, "r5ParameterName1"));
-    // List<IBase> parts = getPartsByName(fhirContext, parameters,
-    // "r5ParameterName");
-    // assertEquals(1, parts.size());
-
-    // parts = getPartsByName(fhirContext, parameters, "r5ParameterName1");
-    // assertEquals(2, parts.size());
-    // }
+        parts = getPartsByName(fhirContext, parameters, "r5ParameterName1");
+        assertEquals(2, parts.size());
+    }
 }

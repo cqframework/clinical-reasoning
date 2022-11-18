@@ -48,8 +48,10 @@ public class ActivityDefinitionProcessorTests {
         fhirDal = new MockFhirDal();
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory()
+                .create(fhirContext.getVersion().getVersion());
+        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext,
+                adapterFactory, fhirTypeConverter);
         Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<TypedLibrarySourceProviderFactory>() {
             /**
              *
@@ -142,26 +144,34 @@ public class ActivityDefinitionProcessorTests {
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
+                libraryLoaderFactory,
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory,
+                () -> new CqlEvaluatorBuilder());
 
         activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
     }
 
-    @Test
-    public void testActivityDefinitionApply() throws FHIRException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    // @Test
+    public void testActivityDefinitionApply()
+            throws FHIRException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         Assert.assertTrue(true);
         /* Commenting this out until we have a ModelResolver for R5 */
-        // Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
+        // Endpoint contentEndpoint = new
+        // Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        // Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
+        // Endpoint terminologyEndpoint = new
+        // Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        // Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
+        // Endpoint dataEndpoint = new
+        // Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        // Object result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"), "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint, terminologyEndpoint, dataEndpoint);
+        // Object result = this.activityDefinitionProcessor.apply(new
+        // IdType("activityDefinition-test"), "patient-1", null, null, null, null, null,
+        // null, null, null, null, contentEndpoint, terminologyEndpoint, dataEndpoint);
         // Assert.assertTrue(result instanceof MedicationRequest);
         // MedicationRequest request = (MedicationRequest) result;
         // Assert.assertTrue(request.getDoNotPerform());

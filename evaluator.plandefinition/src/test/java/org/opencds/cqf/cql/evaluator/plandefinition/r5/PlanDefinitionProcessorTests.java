@@ -57,7 +57,7 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     // );
     // }
 
-    @Test
+    // @Test
     public void testRuleFiltersNotReportable() {
         PlanDefinition.Assert.that(
                 "plandefinition-RuleFilters-1.0.0",

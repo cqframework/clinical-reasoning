@@ -21,7 +21,7 @@
         <cql-engine.version>2.3.0-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
-        <hapi.version>6.0.1</hapi.version>
+        <hapi.version>6.2.0</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <slf4j.version>1.7.29</slf4j.version>
         <caffeine.version>2.9.0</caffeine.version>
@@ -183,42 +183,15 @@
             <!-- HAPI depedencies -->
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-client</artifactId>
+                <artifactId>hapi-fhir-bom</artifactId>
                 <version>${hapi.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
+            <!-- Stuff missing from the HAPI bom-->
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-dstu2</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-dstu3</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-r4</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+                <artifactId>hapi-fhir-structures-r4b</artifactId>
                 <version>${hapi.version}</version>
             </dependency>
             <dependency>
@@ -408,9 +381,7 @@
                         <failOnWarning>false</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
-                            <arg>-Xlint:all</arg>
-                            <!-- This bypasses annotation processing for Inject -->
-                            <arg>-Xlint:-processing</arg>
+                            <arg>-Xlint:all,-processing</arg>
                             <arg>-Werror</arg>
                             <arg>-implicit:none</arg>
                         </compilerArgs>

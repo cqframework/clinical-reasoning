@@ -9,14 +9,17 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 
 public class FhirPathCache {
 
-    private final static Map<FhirVersionEnum, IFhirPath> fhirPathCache = new ConcurrentHashMap<>();
+    private FhirPathCache() {
+    }
+
+    private static final Map<FhirVersionEnum, IFhirPath> CACHE = new ConcurrentHashMap<>();
 
     public static IFhirPath cachedForContext(FhirContext fhirContext) {
-        return fhirPathCache.computeIfAbsent(fhirContext.getVersion().getVersion(), x -> fhirContext.newFhirPath());
+        return CACHE.computeIfAbsent(fhirContext.getVersion().getVersion(), x -> fhirContext.newFhirPath());
     }
 
     public static IFhirPath cachedForVersion(FhirVersionEnum fhirVersionEnum) {
-        return fhirPathCache.computeIfAbsent(fhirVersionEnum, x -> x.newContext().newFhirPath());
+        return CACHE.computeIfAbsent(fhirVersionEnum, x -> x.newContext().newFhirPath());
     }
-    
+
 }

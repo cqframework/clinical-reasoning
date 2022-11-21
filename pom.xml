@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>evaluator.shared</name>
@@ -17,11 +17,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cql-translator.version>2.1.0</cql-translator.version>
-        <cql-engine.version>2.1.0-SNAPSHOT</cql-engine.version>
+        <cql-translator.version>2.4.0-SNAPSHOT</cql-translator.version>
+        <cql-engine.version>2.3.0-SNAPSHOT</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
-        <hapi.version>6.0.1</hapi.version>
+        <hapi.version>6.2.1</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <slf4j.version>1.7.29</slf4j.version>
         <caffeine.version>2.9.0</caffeine.version>
@@ -183,42 +183,15 @@
             <!-- HAPI depedencies -->
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-client</artifactId>
+                <artifactId>hapi-fhir-bom</artifactId>
                 <version>${hapi.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
+            <!-- Stuff missing from the HAPI bom-->
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-dstu2</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-dstu3</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-structures-r4</artifactId>
-                <version>${hapi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+                <artifactId>hapi-fhir-structures-r4b</artifactId>
                 <version>${hapi.version}</version>
             </dependency>
             <dependency>
@@ -347,6 +320,14 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- JSON Comparisons ignoring property order, whitespaces/tabs, etc. -->
+            <dependency>
+                <groupId>org.skyscreamer</groupId>
+                <artifactId>jsonassert</artifactId>
+                <version>1.5.1</version>
+                <scope>test</scope>
+            </dependency>
+
             <!-- Library mapper code gen-->
             <dependency>
                 <groupId>org.mapstruct</groupId>
@@ -400,11 +381,7 @@
                         <failOnWarning>false</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
-                            <arg>-Xlint:all</arg>
-                            <!-- This fixes a boostrapclass path warning which the "release" property fixes on Java 9+ -->
-                            <arg>-Xlint:-options</arg>
-                            <!-- This bypasses annotation processing for Inject -->
-                            <arg>-Xlint:-processing</arg>
+                            <arg>-Xlint:all,-processing</arg>
                             <arg>-Werror</arg>
                             <arg>-implicit:none</arg>
                         </compilerArgs>
@@ -429,7 +406,10 @@
                     <version>3.3.1</version>
                     <configuration>
                         <source>11</source>
-                        <show>private</show>
+                        <release>11</release>
+                        <doclint>-missing</doclint>
+                        <quiet>true</quiet>
+                        <detectOfflineLinks>false</detectOfflineLinks>
                     </configuration>
                     <executions>
                         <execution>
@@ -564,6 +544,27 @@
                             <phase>prepare-package</phase>
                             <goals>
                                 <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <version>1.22</version>
+                    <configuration>
+                        <signature>
+                            <groupId>net.sf.androidscents.signature</groupId>
+                            <artifactId>android-api-level-26</artifactId>
+                            <version>8.0.0_r2</version>
+                        </signature>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>check-android-26-compliance</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>check</goal>
                             </goals>
                         </execution>
                     </executions>

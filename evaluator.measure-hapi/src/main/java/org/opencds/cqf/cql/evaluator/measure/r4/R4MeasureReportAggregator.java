@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -63,10 +65,10 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be of the same type. carry: %s, current: %s", carry.getType().toCode(), current.getType().toCode()));  
         }
 
-        mergeExtensions(carry, current);
         mergePopulation(carry, current);
         mergeStratifier(carry, current);
         mergeContained(carry, current);
+        mergeExtensions(carry, current);
         mergeEvaluatedResources(carry, current);
 
     }
@@ -87,9 +89,16 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         Map<String, Resource> carryListResourceMap = new HashMap<>();
         Map<String, Resource> currentListResourceMap = new HashMap<>();
 
-        populateMapsWithResourceAndListResource(carry, resourceMap, carryListResourceMap);
-        carry.getContained().clear();
-        populateMapsWithResourceAndListResource(current, resourceMap, currentListResourceMap);
+        populateMapsWithResource(carry, resourceMap, carryListResourceMap);
+
+        populateMapsWithResource(current, resourceMap, currentListResourceMap);
+
+
+        //this map will contain the added and vanished observations new id reference
+        Map<String, String> changedIdMap = new HashMap<>();
+        //this map will contain resources and summed observation where applicable
+        Map<String, Resource> reducedMap = new HashMap<>();
+        addObservationIfApplicable(resourceMap, reducedMap, changedIdMap);
 
         populationCodeSubjectsReferenceMap.values().forEach(list -> {
             ListResource carryList = null, currentList = null;
@@ -105,23 +114,70 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 String reference = extractId(list.get(0).getReference());
 
                 carryList = getMatchedListResource(carryListResourceMap, reference);
-                carryList = getMatchedListResource(currentListResourceMap, reference);
-
+                if(carryList == null) {
+                    carryList = getMatchedListResource(currentListResourceMap, reference);
+                }
             }
 
             if (carryList != null && currentList != null) {
                 mergeList(carryList, currentList);
             }
             if (carryList != null) {
-                resourceMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(), carryList);
+                reducedMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(), carryList);
             }
         });
 
 
-        carry.getContained().addAll(resourceMap.values());
+        carry.getContained().clear();
+        carry.getContained().addAll(reducedMap.values());
         carry.getContained().addAll(carryListResourceMap.values());
         carry.getContained().addAll(currentListResourceMap.values());
+        updateExtensionListResourceReference(carry, changedIdMap);
+    }
 
+    private void addObservationIfApplicable(Map<String, Resource> resourceMap,
+        Map<String, Resource> reducedMap, Map<String, String> changedIdMap) {
+
+        Map<String, Observation> codeReducedMap = new HashMap<>();
+
+        resourceMap.values().forEach(resource -> {
+            if (resource.getResourceType().equals(ResourceType.Observation)) {
+                Observation observation = ((Observation) resource);
+                if (checkIfObservationIsAdditive(observation)) {
+                    if (observation.getCode().getCodingFirstRep().hasCode()) {
+                        String code = observation.getCode().getCodingFirstRep().getCode();
+                        if (!codeReducedMap.containsKey(code)) {
+                            codeReducedMap.put(code, observation);
+                        } else {
+                            int sum = observation.getValueIntegerType().getValue().intValue() +
+                                    codeReducedMap.get(code).getValueIntegerType().getValue().intValue();
+                            codeReducedMap.get(code).setValue(new IntegerType(sum));
+                            changedIdMap.put(observation.getId(), codeReducedMap.get(code).getId());
+                        }
+                    }
+                }
+            } else {
+                reducedMap.put(resource.getId(), resource);
+            }
+        });
+        codeReducedMap.values().forEach(resource -> {  reducedMap.put(resource.getId(), resource);});
+    }
+
+    private boolean checkIfObservationIsAdditive(Observation observation) {
+        return (observation.getValue() instanceof IntegerType);
+    }
+
+    private void updateExtensionListResourceReference(MeasureReport report, Map<String, String> changedIdMap) {
+        report.getExtension().forEach(extension ->
+        {
+            if (extension.getValue() instanceof Reference) {
+                Reference reference = (Reference) extension.getValue();
+                String key = reference.getReference();
+                if (changedIdMap.containsKey(key)) {
+                    reference.setReference(changedIdMap.get(key));
+                }
+            }
+        });
     }
 
     private String extractId(String reference) {
@@ -144,9 +200,8 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                         resource.getResourceType().equals(ResourceType.List));
     }
 
-    private void populateMapsWithResourceAndListResource(MeasureReport measureReport,
-                                                         Map<String, Resource> resourceMap,
-                                                         Map<String, Resource> listResourceMap) {
+    private void populateMapsWithResource(MeasureReport measureReport,
+        Map<String, Resource> resourceMap, Map<String, Resource> listResourceMap) {
         measureReport.getContained().forEach(resource -> {
             if (!isEligibleListResourceType(resource)) {
                 if (!resourceMap.containsKey(extractId(resource.getId()))) {
@@ -195,39 +250,31 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        Map<String, List<Extension>> extensionMap = new HashMap<>();
+        Map<String, Extension> extensionMap = new HashMap<>();
+        carry.getExtension().addAll(current.getExtension());
 
         carry.getExtension().forEach(extension -> {
             if (extension.hasValue()) {
+                String key;
                 if (extension.getValue() instanceof StringType) {
-                    extensionMap.put(generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), ""),
-                            new ArrayList<>());
-                } else if (extension.getValue() instanceof Reference) {
-                    extensionMap.put(generateKey(extension.getUrl(), ((Reference) extension.getValue()).getReference(), ""),
-                            extension.getValue().getExtension());
-                }
-            }
-        });
-
-        current.getExtension().forEach(extension -> {
-            if (extension.hasValue()) {
-                if (extension.getValue() instanceof StringType) {
-                    if (!extensionMap.containsKey(
-                            generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), ""))
-                    ) {
-                        carry.getExtension().add(extension);
-                    }
-                } else if (extension.getValue() instanceof Reference) {
-                    Reference reference = (Reference) extension.getValue();
-                    String key = generateKey(extension.getUrl(), reference.getReference(), "");
+                    key = generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), "");
                     if (!extensionMap.containsKey(key)) {
-                        carry.getExtension().add(extension);
-                    } else {
-                        extensionMap.get(key).addAll(reference.getExtension());
+                        extensionMap.put(key, extension);
                     }
+                } else if (extension.getValue() instanceof Reference) {
+                    key = generateKey(extension.getUrl(), ((Reference) extension.getValue()).getReference(), "");
+                    if (extensionMap.containsKey(key)) {
+                        extensionMap.get(key).getValue().getExtension().addAll(extension.getValue().getExtension());
+                    } else {
+                        extensionMap.put(key, extension);
+                    }
+                } else {
+                    extensionMap.put(UUID.randomUUID().toString(), extension);
                 }
             }
         });
+        carry.getExtension().clear();
+        carry.getExtension().addAll(extensionMap.values());
     }
 
     protected void mergeEvaluatedResources(MeasureReport carry, MeasureReport current) {

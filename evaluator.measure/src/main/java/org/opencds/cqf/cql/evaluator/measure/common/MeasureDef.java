@@ -1,48 +1,57 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
-import java.util.ArrayList;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 import java.util.List;
 
 public class MeasureDef {
 
-    private List<GroupDef> groups;
+    private final String id;
+    private final String url;
+    private final String version;
+    private Interval defaultMeasurementPeriod;
+    private final MeasureScoring scoring;
+    private final List<GroupDef> groups;
+    private final List<SdeDef> sdes;
 
-    private ArrayList<SdeDef> sdes;
 
-    private MeasureScoring measureScoring;
-
-    private String url;
-
-
-    public List<SdeDef> getSdes() {
-        if (this.sdes == null) {
-            this.sdes = new ArrayList<>();
-        }
-
-        return this.sdes;
+    public MeasureDef(String id, String url, String version, MeasureScoring scoring, List<GroupDef> groups, List<SdeDef> sdes) {
+        this.id = id;
+        this.url = url;
+        this.version = version;
+        this.scoring = scoring;
+        this.groups = groups;
+        this.sdes = sdes;
     }
 
-    public List<GroupDef> getGroups() {
-        if (this.groups == null) {
-            this.groups = new ArrayList<>();
-        }
-
-        return this.groups;
+    public String id() {
+        return this.id;
     }
 
-    public MeasureScoring getMeasureScoring() {
-        return this.measureScoring;
-    }
-
-    public void setMeasureScoring(MeasureScoring measureScoring) {
-        this.measureScoring = measureScoring;
-    }
-
-    public String getUrl() {
+    public String url() {
         return this.url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public String version() {
+        return this.version;
+    }
+
+    public MeasureScoring scoring() {
+        return this.scoring;
+    }
+
+    public Interval getDefaultMeasurementPeriod() {
+        return defaultMeasurementPeriod;
+    }
+
+    public void setDefaultMeasurementPeriod(Interval defaultMeasurementPeriod) {
+        this.defaultMeasurementPeriod = defaultMeasurementPeriod;
+    }
+
+    public List<SdeDef> sdes() {
+        return this.sdes;
+    }
+
+    public List<GroupDef> groups() {
+        return this.groups;
     }
 }

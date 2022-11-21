@@ -92,12 +92,80 @@
         ]
       },
       "valueInteger": 1
+    },
+    {
+      "resourceType": "Observation",
+      "id": "f4aaff6f-b223-4df7-8869-854f0218881f",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "2186-5"
+          }
+        ]
+      },
+      "valueInteger": 1
+    },
+    {
+      "resourceType": "Observation",
+      "id": "5cec1cee-976d-4316-a01b-f15af8000d62",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-measureInfo",
+          "extension": [
+            {
+              "url": "measure",
+              "valueCanonical": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130"
+            }
+          ]
+        }
+      ],
+      "status": "final",
+      "code": {
+        "coding": [
+          {
+            "code": "F"
+          }
+        ]
+      },
+      "valueInteger": 1
     }
   ],
-  "extension": [ {
+  "extension": [
+    {
     "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
     "valueString": "Percentage of children, 6 months - 20 years of age, who received a fluoride varnish application during the measurement period"
-  } ],
+    },
+    {
+      "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",
+      "valueReference": {
+        "reference": "#sde-observation-sde-ethnicity-coding-2186-5"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",
+      "valueReference": {
+        "reference": "#f4aaff6f-b223-4df7-8869-854f0218881f"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",
+      "valueReference": {
+        "reference": "#5cec1cee-976d-4316-a01b-f15af8000d62"
+      }
+    }
+  ],
   "status": "complete",
   "type": "subject-list",
   "measure": "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR",

@@ -41,7 +41,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 @Named
 public class ExpressionEvaluator {
 
-    private static Logger logger = LoggerFactory.getLogger(ExpressionEvaluator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExpressionEvaluator.class);
 
     protected FhirContext fhirContext;
     protected CqlFhirParametersConverter cqlFhirParametersConverter;
@@ -179,6 +179,7 @@ public class ExpressionEvaluator {
      *         Parameters resource
      */
     // Canonical is not a canonical data type.
+    @SuppressWarnings("squid:S107")
     public IBaseParameters evaluate(String expression, IBaseParameters parameters, String subject,
             List<Pair<String, String>> libraries, Boolean useServerData, IBaseBundle bundle,
             List<Triple<String, DataRequirement, IBaseBundle>> prefetchData, IBaseResource dataEndpoint,
@@ -190,7 +191,7 @@ public class ExpressionEvaluator {
         CqlEvaluatorBuilder builder = this.cqlEvaluatorSupplier.get();
         builder.withLibrarySourceProvider(contentProvider);
 
-        Set<String> expressions = new HashSet<String>();
+        Set<String> expressions = new HashSet<>();
         expressions.add("return");
 
         libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
@@ -202,7 +203,6 @@ public class ExpressionEvaluator {
 
     private String constructCqlLibrary(String expression, List<Pair<String, String>> libraries,
             IBaseParameters parameters) {
-        String cql = null;
         logger.debug("Constructing expression for local evaluation");
 
         StringBuilder sb = new StringBuilder();
@@ -213,20 +213,20 @@ public class ExpressionEvaluator {
         constructParameters(sb, parameters);
         constructExpression(sb, expression);
 
-        cql = sb.toString();
+        String cql = sb.toString();
 
         logger.debug(cql);
         return cql;
     }
 
     private void constructExpression(StringBuilder sb, String expression) {
-        sb.append(String.format("\ndefine \"return\":\n       %s", expression));
+        sb.append(String.format("%ndefine \"return\":%n       %s", expression));
     }
 
     private void constructIncludes(StringBuilder sb, IBaseParameters parameters, List<Pair<String, String>> libraries) {
         String fhirVersion = getFhirVersion(parameters);
         if (fhirVersion != null) {
-            sb.append(String.format("include FHIRHelpers version \'%s\' called FHIRHelpers\n", fhirVersion));
+            sb.append(String.format("include FHIRHelpers version '%s' called FHIRHelpers%n", fhirVersion));
         }
 
         if (libraries != null) {
@@ -234,7 +234,7 @@ public class ExpressionEvaluator {
                 VersionedIdentifier vi = getVersionedIdentifer(library.getLeft());
                 sb.append(String.format("include \"%s\"", vi.getId()));
                 if (vi.getVersion() != null) {
-                    sb.append(String.format(" version \'%s\'", vi.getVersion()));
+                    sb.append(String.format(" version '%s'", vi.getVersion()));
                 }
                 if (library.getRight() != null) {
                     sb.append(String.format(" called \"%s\"", library.getRight()));
@@ -252,19 +252,20 @@ public class ExpressionEvaluator {
         // TODO: Can we consolidate this logic in the Library evaluator somehow? Then we
         // don't have to do this conversion twice
         List<CqlParameterDefinition> cqlParameters = this.cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
-        if (cqlParameters.size() == 0) {
+        if (cqlParameters.isEmpty()) {
             return;
         }
 
         for (CqlParameterDefinition cpd : cqlParameters) {
-            sb.append("parameter \"" + cpd.getName() + "\" " + this.getTypeDeclaration(cpd.getType(), cpd.getIsList()) + "\n");
+            sb.append("parameter \"").append(cpd.getName()).append("\" ")
+                    .append(this.getTypeDeclaration(cpd.getType(), cpd.getIsList())).append(String.format("%n"));
         }
     }
 
     private String getTypeDeclaration(String type, Boolean isList) {
         // TODO: Handle "FHIR" and "System" prefixes
         // Should probably mark system types in the CqlParameterDefinition?
-        if (isList) {
+        if (Boolean.TRUE.equals(isList)) {
             return "List<" + type + ">";
         }
         else {
@@ -275,12 +276,12 @@ public class ExpressionEvaluator {
     private void constructUsings(StringBuilder sb, IBaseParameters parameters) {
         String fhirVersion = getFhirVersion(parameters);
         if (fhirVersion != null) {
-            sb.append(String.format("using FHIR version \'%s\'\n", fhirVersion));
+            sb.append(String.format("using FHIR version '%s'%n", fhirVersion));
         }
     }
 
     private void constructHeader(StringBuilder sb) {
-        sb.append("library expression version \'1.0.0\'\n\n");
+        sb.append(String.format("library expression version '1.0.0'%n%n"));
     }
 
     private String getFhirVersion(IBaseParameters parameters) {

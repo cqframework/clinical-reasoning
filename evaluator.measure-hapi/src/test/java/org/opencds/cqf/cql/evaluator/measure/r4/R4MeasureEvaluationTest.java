@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -187,6 +187,13 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()),
                 measure, retrieveProvider);
         checkEvidence(patient, report);
+        validateReport(report);
+    }
+
+    private void validateReport(MeasureReport report) {
+        // var validator = new ResourceValidator(FhirVersionEnum.R4, null);
+        // var result = validator.validate(report);
+        // assertEquals(report, result);
     }
 
     private void checkStratification(MeasureReport report) {

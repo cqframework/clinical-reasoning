@@ -2,13 +2,11 @@ package org.opencds.cqf.cql.evaluator.fhir.dal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.UriType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -29,8 +27,9 @@ public class BundleFhirDal implements FhirDal {
     @Override
     @SuppressWarnings("unchecked")
     public IBaseResource read(IIdType id) {
-        List<IBaseResource> resources = (List<IBaseResource>)BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
-        this.context.getResourceDefinition(id.getResourceType()).getImplementingClass());
+        List<IBaseResource> resources = (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context,
+                this.bundle,
+                this.context.getResourceDefinition(id.getResourceType()).getImplementingClass());
 
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart().equals(id.getIdPart())) {
@@ -66,15 +65,31 @@ public class BundleFhirDal implements FhirDal {
     @Override
     @SuppressWarnings("unchecked")
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url) {
-        List<IBaseResource> resources = (List<IBaseResource>)BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
-        this.context.getResourceDefinition(resourceType).getImplementingClass());
-
+        List<IBaseResource> resources = (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context,
+                this.bundle, this.context.getResourceDefinition(resourceType).getImplementingClass());
 
         List<IBaseResource> returnList = new ArrayList<>();
         for (IBaseResource resource : resources) {
-            Optional<UriType> urlString = this.fhirPath.evaluateFirst(resource, "url", UriType.class);
-            if (urlString.isPresent() && urlString.get().getValue().equals(url)) {
-                returnList.add(resource);
+            switch (this.context.getVersion().getVersion()) {
+                case DSTU3:
+                    var dstu3String = this.fhirPath.evaluateFirst(resource, "url",
+                            org.hl7.fhir.dstu3.model.UriType.class);
+                    if (dstu3String.isPresent() && dstu3String.get().getValue().equals(url)) {
+                        returnList.add(resource);
+                    }
+                    break;
+
+                case R4:
+                    var r4String = this.fhirPath.evaluateFirst(resource, "url",
+                            org.hl7.fhir.r4.model.UriType.class);
+                    if (r4String.isPresent() && r4String.get().getValue().equals(url)) {
+                        returnList.add(resource);
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException(
+                            String.format("Unsupported FHIR version %s", this.context.getVersion().getVersion()));
             }
         }
 

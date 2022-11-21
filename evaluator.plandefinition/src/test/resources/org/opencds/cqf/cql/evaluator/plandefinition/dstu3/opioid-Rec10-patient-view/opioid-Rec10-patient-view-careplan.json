@@ -1,0 +1,44 @@
+{
+    "resourceType": "CarePlan",
+    "contained": [
+        {
+            "resourceType": "RequestGroup",
+            "id": "opioidcds-10",
+            "definition": [
+                {
+                    "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10"
+                }
+            ],
+            "status": "draft",
+            "intent": "proposal",
+            "subject": {
+                "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+            },
+            "context": {
+                "reference": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
+            }
+        }
+    ],
+    "definition": [
+        {
+            "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10"
+        }
+    ],
+    "status": "draft",
+    "intent": "proposal",
+    "title": "No Screening In Last 12 Months Summary",
+    "description": "No Screening In Last 12 Months Detail",
+    "subject": {
+        "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+    },
+    "context": {
+        "reference": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
+    },
+    "activity": [
+        {
+            "reference": {
+                "reference": "#opioidcds-10"
+            }
+        }
+    ]
+}

@@ -2,11 +2,13 @@ package org.opencds.cqf.cql.evaluator.engine.execution;
 
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
 
 /**
@@ -70,5 +72,9 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
 
     public Map<VersionedIdentifier, Library> getLibraryCache() {
         return this.libraryCache;
+    }
+
+    public void loadNamespaces(List<NamespaceInfo> namespaceInfos) {
+        this.innerLoader.loadNamespaces(namespaceInfos);
     }
 }

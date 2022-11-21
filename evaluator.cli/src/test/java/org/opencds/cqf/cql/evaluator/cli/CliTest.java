@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.cli;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -427,6 +428,36 @@ public class CliTest {
         assertTrue(output.contains("Denominator=true"));
         assertTrue(output.contains("Denominator Exclusion=false"));
         assertTrue(output.contains("Numerator=true"));
+    }
+
+    @Test
+    public void testSampleContentIG() {
+        String[] args = new String[]{
+                "cql",
+                "-fv=R4",
+                "-rd=" + testResourcePath + "/samplecontentig",
+                "-ig=" + "/input/mycontentig.xml",
+                "-lu="+ testResourcePath + "/samplecontentig/input/cql",
+                "-ln=DependencyExample",
+                "-lv=0.1.0",
+                "-m=FHIR",
+                "-mu=" + testResourcePath + "/samplecontentig/input/tests/DependencyExample",
+                "-t=" + testResourcePath + "/samplecontentig/input/vocabulary/ValueSet",
+                "-c=Patient",
+                "-cv=example"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("Observation(id=example)"));
+        assertTrue(output.contains("Observation(id=negation-example)"));
+        assertTrue(output.contains("Observation(id=pediatric-bmi-example)"));
+        assertTrue(output.contains("Observation(id=pediatric-wt-example)"));
+        assertTrue(output.contains("Observation(id=satO2-fiO2)"));
+        assertFalse(output.contains("Observation(id=blood-glucose)"));
+        assertFalse(output.contains("Observation(id=blood-pressure)"));
     }
 
 }

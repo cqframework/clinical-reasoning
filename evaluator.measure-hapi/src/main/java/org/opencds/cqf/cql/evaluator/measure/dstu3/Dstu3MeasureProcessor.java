@@ -309,9 +309,10 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
             librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
 
+        /* NOTE: Npm package support not implemented for Dstu3 measure processing */
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
                 new CacheAwareModelManager(globalModelCache), librarySourceProviders,
-                this.cqlOptions.getCqlTranslatorOptions());
+                this.cqlOptions.getCqlTranslatorOptions(), null);
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);

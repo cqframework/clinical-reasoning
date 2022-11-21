@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.builder</artifactId>
+    <artifactId>evaluator.fhir-npm</artifactId>
     <version>2.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>evaluator.builder</name>
-    <description>CQL Evaluator - Builder</description>
+    <name>evaluator.fhir-npm</name>
+    <description>CQL Evaluator - FHIR NPM Packaging Operations</description>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
@@ -28,20 +28,24 @@
             <artifactId>evaluator.fhir</artifactId>
             <version>2.3.0-SNAPSHOT</version>
         </dependency>
+
+        <!-- Translator Dependencies -->
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.fhir-npm</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir</artifactId>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cqf-fhir-npm</artifactId>
         </dependency>
+
+        <!-- NPM Packaging Dependencies -->
         <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>

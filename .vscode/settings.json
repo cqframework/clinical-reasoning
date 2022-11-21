@@ -49,9 +49,6 @@
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.dependency.packagePresentation": "hierarchical",
-    "editor.codeActionsOnSave": {
-        // "source.organizeImports": true,
-    },
     "editor.formatOnSave": true,
     "files.exclude": {
         "**/.classpath": true,
@@ -59,5 +56,15 @@
         "**/.settings": true,
         "**/.factorypath": true
     },
-    "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication -javaagent:\"/home/jp/.vscode/extensions/gabrielbb.vscode-lombok-1.0.1/server/lombok.jar\""
+    "java.compile.nullAnalysis.nonnull": [
+        "javax.annotation.Nonnull",
+        "org.eclipse.jdt.annotation.NonNull",
+        "org.springframework.lang.NonNull"
+    ],
+    "java.compile.nullAnalysis.nullable": [
+        "javax.annotation.Nullable",
+        "org.eclipse.jdt.annotation.Nullable",
+        "org.springframework.lang.Nullable"
+    ],
+    "java.format.settings.profile": "GoogleStyle",
 }

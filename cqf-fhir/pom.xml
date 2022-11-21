@@ -3,75 +3,28 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.shared</artifactId>
+    <groupId>org.opencds.cqf</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>2.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-
-    <name>evaluator.shared</name>
-    <description>CQL Evaluator Project</description>
+    <name>FHIR Clinical Reasoning</name>
+    <description>FHIR Clinical Reasoning Implementations</description>
     <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
 
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <cql-translator.version>2.4.0-SNAPSHOT</cql-translator.version>
-        <cql-engine.version>2.3.0-SNAPSHOT</cql-engine.version>
-        <spring.version>5.3.19</spring.version>
-        <dagger.version>2.34.1</dagger.version>
         <hapi.version>6.2.1</hapi.version>
-        <picocli.version>4.6.1</picocli.version>
-        <slf4j.version>1.7.29</slf4j.version>
-        <caffeine.version>2.9.0</caffeine.version>
-        <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
-        <guava.version>31.0.1-jre</guava.version>
+        <junit.version>5.9.1</junit.version>
+        <slf4j.version>2.0.4</slf4j.version>
     </properties>
-    <modules>
-        <!-- CQF FHIR Setup -->
-        <module>cqf-fhir</module>
-        <module>cqf-fhir-api</module>
-        <module>cqf-fhir-bom</module>
-        <module>cqf-fhir-test</module>
-        <module>cqf-fhir-cql</module>
-        <module>cqf-fhir-utility</module>
-        <module>cqf-fhir-cr</module>
-
-        <!--These 2 modules simply group dependencies-->
-        <module>evaluator.jaxb-deps</module>
-        <module>evaluator.jackson-deps</module>
-
-        <module>evaluator</module>
-        <module>evaluator.fhir</module>
-        <module>evaluator.library</module>
-        <module>evaluator.builder</module>
-        <module>evaluator.dagger</module>
-        <module>evaluator.spring</module>
-        <module>evaluator.cli</module>
-        <module>evaluator.content-test</module>
-        <module>evaluator.measure</module>
-        <module>evaluator.measure-hapi</module>
-        <module>evaluator.activitydefinition</module>
-        <module>evaluator.plandefinition</module>
-        <module>evaluator.expression</module>
-    </modules>
-
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-
-    <developers>
-        <developer>
-            <name>Jonathan Percival</name>
-        </developer>
-        <developer>
-            <name>Josh Reynolds</name>
-        </developer>
-    </developers>
 
     <scm>
         <connection>scm:git:git://github.com/DBCG/cql-evaluator.git</connection>
@@ -106,89 +59,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.fhir</groupId>
-                <artifactId>ucum</artifactId>
-                <version>1.0.3</version>
-            </dependency>
-
-            <!-- Engine Dependencies -->
-            <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>engine</artifactId>
-                <version>${cql-engine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>cql-to-elm</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model-jackson</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm-jackson</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model-jaxb</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm-jaxb</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>engine.fhir</artifactId>
-                <version>${cql-engine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>engine.jaxb</artifactId>
-                <version>${cql-engine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>engine.jackson</artifactId>
-                <version>${cql-engine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>qdm</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>quick</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>fhir-r4</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm-fhir</artifactId>
-                <version>${cql-translator.version}</version>
-            </dependency>
-
             <!-- HAPI depedencies -->
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
@@ -214,100 +84,14 @@
                 <version>${hapi.version}</version>
             </dependency>
 
-            <!-- CLI -->
-            <dependency>
-                <groupId>info.picocli</groupId>
-                <artifactId>picocli</artifactId>
-                <version>${picocli.version}</version>
-            </dependency>
-
-            <!-- DI APIs -->
-            <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>javax.inject</artifactId>
-                <version>1</version>
-            </dependency>
-
-            <!-- Generated annotation -->
-            <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>javax.annotation-api</artifactId>
-                <version>1.3.2</version>
-            </dependency>
-
-            <!-- Dagger -->
-            <dependency>
-                <groupId>com.google.dagger</groupId>
-                <artifactId>dagger</artifactId>
-                <version>${dagger.version}</version>
-            </dependency>
-
-            <!-- Guava-->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-
-            <!-- Spring -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
             <!-- test dependencies -->
             <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>0.10.2</version>
-                <scope>test</scope>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>7.4.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-all</artifactId>
-                <version>1.3</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>3.9.0</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>${spring.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>${caffeine.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <!-- JAXB Implementation -->
-            <!-- This should be used on test scope only, through evaluator.jaxb-deps -->
-            <dependency>
-                <groupId>org.eclipse.persistence</groupId>
-                <artifactId>org.eclipse.persistence.moxy</artifactId>
-                <version>2.7.7</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.json</artifactId>
-                <version>1.0.4</version>
-            </dependency>
-
 
             <!-- Logging -->
             <dependency>
@@ -328,21 +112,6 @@
                 <optional>true</optional>
                 <scope>test</scope>
             </dependency>
-
-            <!-- JSON Comparisons ignoring property order, whitespaces/tabs, etc. -->
-            <dependency>
-                <groupId>org.skyscreamer</groupId>
-                <artifactId>jsonassert</artifactId>
-                <version>1.5.1</version>
-                <scope>test</scope>
-            </dependency>
-
-            <!-- Library mapper code gen-->
-            <dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct</artifactId>
-                <version>${org.mapstruct.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -353,24 +122,9 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -520,25 +274,6 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.3.0</version>
-                    <executions>
-                        <execution>
-                            <id>add-source</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>${project.build.directory}/generated-sources/java/</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.8</version>
@@ -582,10 +317,6 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
@@ -593,25 +324,15 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
+
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -622,11 +343,27 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-enforcer-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

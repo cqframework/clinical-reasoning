@@ -104,6 +104,7 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
 
     @Override
     public Object resolveParameterValue(IBase value) {
+        if (value == null) return null;
         return ((Parameters.ParametersParameterComponent) value).getValue();
     }
 

@@ -132,10 +132,10 @@ public class PlanDefinition {
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
         LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
 
         ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
 
         ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
@@ -193,53 +193,53 @@ public class PlanDefinition {
 
         public GeneratedBundle applyR5() {
             return new GeneratedBundle(
-                buildProcessor(fhirDal)
-                    .applyR5(
-                        new IdType("PlanDefinition", planDefinitionID),
-                        patientID,
-                        encounterID,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        new Parameters(),
-                        null,
-                        (Bundle) baseResource,
-                        null,
-                        dataEndpoint,
-                        libraryEndpoint,
-                        libraryEndpoint
-                    )
+                    (Bundle) buildProcessor(fhirDal)
+                        .applyR5(
+                            new IdType("PlanDefinition", planDefinitionID),
+                            patientID,
+                            encounterID,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            new Parameters(),
+                            null,
+                            (Bundle) baseResource,
+                            null,
+                            dataEndpoint,
+                            libraryEndpoint,
+                            libraryEndpoint
+                        )
             );
         }
 
         public GeneratedCarePlan apply() {
             return new GeneratedCarePlan(
-                buildProcessor(fhirDal)
-                    .apply(
-                        new IdType("PlanDefinition", planDefinitionID),
-                        patientID,
-                        encounterID,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        new Parameters(),
-                        null,
-                        (Bundle) baseResource,
-                        null,
-                        dataEndpoint,
-                        libraryEndpoint,
-                        libraryEndpoint
-                    )
+                    (CarePlan) buildProcessor(fhirDal)
+                        .apply(
+                            new IdType("PlanDefinition", planDefinitionID),
+                            patientID,
+                            encounterID,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            new Parameters(),
+                            null,
+                            (Bundle) baseResource,
+                            null,
+                            dataEndpoint,
+                            libraryEndpoint,
+                            libraryEndpoint
+                        )
             );
         }
     }
@@ -273,6 +273,7 @@ public class PlanDefinition {
         }
 
         public void isEqualsTo(String expectedCarePlanAssetName) {
+            String s = jsonParser.encodeResourceToString(carePlan);
             try {
                 JSONAssert.assertEquals(
                         load(expectedCarePlanAssetName),

@@ -85,6 +85,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
 
     private CqlOptions cqlOptions = CqlOptions.defaultOptions();
+
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
@@ -380,6 +381,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
 
     // TODO: This is duplicate logic from the evaluator builder
+    // TODO: Add NPM library source loader support
     private LibraryLoader buildLibraryLoader(LibrarySourceProvider librarySourceProvider) {
         List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
         librarySourceProviders.add(librarySourceProvider);
@@ -388,7 +390,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
 
         TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions());
+                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), null);
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);

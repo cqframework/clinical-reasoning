@@ -146,55 +146,54 @@ public class ActivityDefinitionProcessor {
                 var language = dynamicValue.getExpression().getLanguage();
                 Base value = null;
                 switch (language) {
-                case "text/cql":
-                case "text/cql.expression":
-                case "text/cql-expression":
-                    logger.warn("CQL expression in PlanDefinition action not supported right now.");
-                    break;
-                case "text/cql.name":
-                case "text/cql-name":
-                case "text/cql.identifier":
-                case "text/cql-identifier":
-                    if (activityDefinition.getLibrary().size() != 1) {
-                        throw new RuntimeException(
-                                "ActivityDefinition library must only include one primary library for evaluation.");
-                    }
-                    var libraryUrl = activityDefinition.getLibrary().get(0).getValue();
-                    var expressions = new HashSet<String>();
-                    expressions.add(expression);
-                    var parametersResult = (Parameters) libraryProcessor.evaluate(libraryUrl, patientId,
-                            parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, null, expressions);
-                    if (parametersResult == null || parametersResult.getParameter() == null
-                            || parametersResult.getParameter().isEmpty()) {
-                        value = null;
+                    case "text/cql":
+                    case "text/cql.expression":
+                    case "text/cql-expression":
+                        logger.warn("CQL expression in PlanDefinition action not supported right now.");
                         break;
-                    }
+                    case "text/cql.name":
+                    case "text/cql-name":
+                    case "text/cql.identifier":
+                    case "text/cql-identifier":
+                        if (activityDefinition.getLibrary().size() != 1) {
+                            throw new RuntimeException(
+                                    "ActivityDefinition library must only include one primary library for evaluation.");
+                        }
+                        var libraryUrl = activityDefinition.getLibrary().get(0).getValue();
+                        var expressions = new HashSet<String>();
+                        expressions.add(expression);
+                        var parametersResult = (Parameters) libraryProcessor.evaluate(libraryUrl, patientId,
+                                parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, null, expressions);
+                        if (parametersResult == null || parametersResult.getParameter() == null
+                                || parametersResult.getParameter().isEmpty()) {
+                            value = null;
+                            break;
+                        }
 
-                    // TODO: Lists are represented as repeating parameter elements.
-                    value = parametersResult.getParameterFirstRep().getValue();
-                    break;
-                case "text/fhirpath":
-                    List<IBase> outputs;
-                    try {
-                        outputs = fhirPath.evaluate(null, expression, IBase.class);
-                    } catch (FhirPathExecutionException e) {
-                        throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
-                    }
-                    if (outputs == null || outputs.isEmpty()) {
-                        value = null;
-                    }
-                    else if (outputs.size() == 1) {
-                        value = (Base)outputs.get(0);
-                    }
-                    else {
-                        throw new IllegalArgumentException("Expected only one value when evaluating FHIRPath expression: " + expression);
-                    } 
+                        // TODO: Lists are represented as repeating parameter elements.
+                        value = parametersResult.getParameterFirstRep().getValue();
+                        break;
+                    case "text/fhirpath":
+                        List<IBase> outputs;
+                        try {
+                            outputs = fhirPath.evaluate(null, expression, IBase.class);
+                        } catch (FhirPathExecutionException e) {
+                            throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
+                        }
+                        if (outputs == null || outputs.isEmpty()) {
+                            value = null;
+                        } else if (outputs.size() == 1) {
+                            value = (Base) outputs.get(0);
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "Expected only one value when evaluating FHIRPath expression: " + expression);
+                        }
 
-                    break;
-                default:
-                    logger.warn("An action language other than CQL was found: "
-                            + dynamicValue.getExpression().getLanguage());
-                    break;
+                        break;
+                    default:
+                        logger.warn("An action language other than CQL was found: "
+                                + dynamicValue.getExpression().getLanguage());
+                        break;
                 }
 
                 try {
@@ -209,14 +208,16 @@ public class ActivityDefinitionProcessor {
         return result;
     }
 
-    private Task resolveTask(ActivityDefinition activityDefinition, String patientId, String organizationId) throws RuntimeException {
+    private Task resolveTask(ActivityDefinition activityDefinition, String patientId, String organizationId)
+            throws RuntimeException {
         var task = new Task();
         if (activityDefinition.hasExtension(targetStatusExtension)) {
             var value = activityDefinition.getExtensionByUrl(targetStatusExtension).getValue();
             if (value instanceof StringType) {
-                task.setStatus(Task.TaskStatus.valueOf(((StringType)value).asStringValue().toUpperCase()));
+                task.setStatus(Task.TaskStatus.valueOf(((StringType) value).asStringValue().toUpperCase()));
             } else {
-                logger.debug(String.format("Extension %s should have a value of type %s", targetStatusExtension, StringType.class.getName()));
+                logger.debug(String.format("Extension %s should have a value of type %s", targetStatusExtension,
+                        StringType.class.getName()));
             }
         } else {
             task.setStatus(Task.TaskStatus.DRAFT);
@@ -232,7 +233,7 @@ public class ActivityDefinitionProcessor {
 
         if (activityDefinition.hasDescription()) {
             task.setDescription(activityDefinition.getDescription());
-        }  
+        }
         return task;
     }
 
@@ -257,7 +258,7 @@ public class ActivityDefinitionProcessor {
         }
 
         if (activityDefinition.hasCode()) {
-            serviceRequest.setCode(activityDefinition.getCode());
+            serviceRequest.setCode(new CodeableReference(activityDefinition.getCode()));
         }
 
         // code can be set as a dynamicValue
@@ -280,7 +281,8 @@ public class ActivityDefinitionProcessor {
         return serviceRequest;
     }
 
-    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId) throws RuntimeException {
+    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId)
+            throws RuntimeException {
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
         medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
@@ -289,8 +291,8 @@ public class ActivityDefinitionProcessor {
         if (activityDefinition.hasProduct()) {
             var medicationValue = new CodeableReference();
             // activityDefinition.hasProductCodeableConcept()
-            //     ? medicationValue.setConcept(activityDefinition.getProductCodeableConcept())
-            //     : medicationValue.setReference(activityDefinition.getProductReference());
+            // ? medicationValue.setConcept(activityDefinition.getProductCodeableConcept())
+            // : medicationValue.setReference(activityDefinition.getProductReference());
             if (activityDefinition.hasProductCodeableConcept()) {
                 medicationValue.setConcept(activityDefinition.getProductCodeableConcept());
             } else {
@@ -304,7 +306,8 @@ public class ActivityDefinitionProcessor {
         }
 
         if (activityDefinition.hasDosage()) {
-            medicationRequest.setDose(new MedicationRequestDoseComponent().setDosageInstruction(activityDefinition.getDosage()));
+            medicationRequest
+                    .setDose(new MedicationRequestDoseComponent().setDosageInstruction(activityDefinition.getDosage()));
         }
 
         if (activityDefinition.hasBodySite()) {
@@ -322,7 +325,8 @@ public class ActivityDefinitionProcessor {
         return medicationRequest;
     }
 
-    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition, String practitionerId, String organizationId) throws RuntimeException {
+    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition, String practitionerId,
+            String organizationId) throws RuntimeException {
         var supplyRequest = new SupplyRequest();
 
         if (practitionerId != null) {
@@ -418,7 +422,8 @@ public class ActivityDefinitionProcessor {
         communication.setSubject(new Reference(patientId));
 
         if (activityDefinition.hasCode()) {
-            communication.setReason(Collections.singletonList(new CodeableReference().setConcept(activityDefinition.getCode())));
+            communication.setReason(
+                    Collections.singletonList(new CodeableReference().setConcept(activityDefinition.getCode())));
         }
 
         if (activityDefinition.hasRelatedArtifact()) {

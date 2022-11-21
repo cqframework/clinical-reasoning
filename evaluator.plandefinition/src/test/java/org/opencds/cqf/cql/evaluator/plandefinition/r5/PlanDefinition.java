@@ -12,6 +12,7 @@ import java.util.Set;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Endpoint;
@@ -54,95 +55,102 @@ public class PlanDefinition {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
     private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
 
-    private static InputStream open(String asset) { return PlanDefinition.class.getResourceAsStream(asset); }
+    private static InputStream open(String asset) {
+        return PlanDefinition.class.getResourceAsStream(asset);
+    }
 
     public static String load(InputStream asset) throws IOException {
         return new String(asset.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    public static String load(String asset) throws IOException { return load(open(asset)); }
+    public static String load(String asset) throws IOException {
+        return load(open(asset));
+    }
 
     public static IBaseResource parse(String asset) {
         return jsonParser.parseResource(open(asset));
     }
 
-
     public static PlanDefinitionProcessor buildProcessor(FhirDal fhirDal) {
         AdapterFactory adapterFactory = new AdapterFactory();
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory()
+                .create(fhirContext.getVersion().getVersion());
+        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext,
+                adapterFactory, fhirTypeConverter);
 
         FhirModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
         Set<ModelResolverFactory> modelResolverFactories = Collections.singleton(fhirModelResolverFactory);
 
         Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = Collections.singleton(
-            new TypedLibrarySourceProviderFactory() {
-                @Override
-                public String getType() {
-                    return Constants.HL7_FHIR_FILES;
-                }
+                new TypedLibrarySourceProviderFactory() {
+                    @Override
+                    public String getType() {
+                        return Constants.HL7_FHIR_FILES;
+                    }
 
-                @Override
-                public LibrarySourceProvider create(String url, List<String> headers) {
-                    return new BundleFhirLibrarySourceProvider(fhirContext,
-                            (IBaseBundle) parse(url), adapterFactory, libraryVersionSelector);
-                }
-            }
-        );
+                    @Override
+                    public LibrarySourceProvider create(String url, List<String> headers) {
+                        return new BundleFhirLibrarySourceProvider(fhirContext,
+                                (IBaseBundle) parse(url), adapterFactory, libraryVersionSelector);
+                    }
+                });
 
         LibrarySourceProviderFactory librarySourceProviderFactory = new LibrarySourceProviderFactory(
                 fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
 
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = Collections.singleton(
-            new TypedRetrieveProviderFactory() {
-                @Override
-                public String getType() {
-                    return Constants.HL7_FHIR_FILES;
-                }
+                new TypedRetrieveProviderFactory() {
+                    @Override
+                    public String getType() {
+                        return Constants.HL7_FHIR_FILES;
+                    }
 
-                @Override
-                public RetrieveProvider create(String url, List<String> headers) {
-                    return new BundleRetrieveProvider(fhirContext, (IBaseBundle) parse(url));
-                }
-            }
-        );
+                    @Override
+                    public RetrieveProvider create(String url, List<String> headers) {
+                        return new BundleRetrieveProvider(fhirContext, (IBaseBundle) parse(url));
+                    }
+                });
 
         DataProviderFactory dataProviderFactory = new DataProviderFactory(
                 fhirContext, modelResolverFactories, retrieveProviderFactories);
 
         Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = Collections.singleton(
-            new TypedTerminologyProviderFactory() {
-                @Override
-                public String getType() {
-                    return Constants.HL7_FHIR_FILES;
-                }
+                new TypedTerminologyProviderFactory() {
+                    @Override
+                    public String getType() {
+                        return Constants.HL7_FHIR_FILES;
+                    }
 
-                @Override
-                public TerminologyProvider create(String url, List<String> headers) {
-                    return new BundleTerminologyProvider(fhirContext, (IBaseBundle) parse(url));
-                }
-            }
-        );
+                    @Override
+                    public TerminologyProvider create(String url, List<String> headers) {
+                        return new BundleTerminologyProvider(fhirContext, (IBaseBundle) parse(url));
+                    }
+                });
 
         TerminologyProviderFactory terminologyProviderFactory = new TerminologyProviderFactory(
                 fhirContext, typedTerminologyProviderFactories);
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
+                librarySourceProviderFactory,
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory,
+                () -> new CqlEvaluatorBuilder());
 
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter,
+                librarySourceProviderFactory,
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory,
+                () -> new CqlEvaluatorBuilder());
 
-        ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
-        OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
+        ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal,
+                libraryProcessor);
+        OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory,
+                fhirTypeConverter);
 
         return new PlanDefinitionProcessor(
-            fhirContext, fhirDal, libraryProcessor, evaluator,
-            activityDefinitionProcessor, operationParametersParser
-        );
+                fhirContext, fhirDal, libraryProcessor, evaluator,
+                activityDefinitionProcessor, operationParametersParser);
     }
 
     /** Fluent interface starts here **/
@@ -172,8 +180,9 @@ public class PlanDefinition {
 
         public Apply withData(String dataAssetName) {
             dataEndpoint = new Endpoint()
-                .setAddress(dataAssetName)
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+                    .setAddress(dataAssetName)
+                    .setConnectionType(Collections
+                            .singletonList(new CodeableConcept(new Coding().setCode(Constants.HL7_FHIR_FILES))));
 
             baseResource = parse(dataAssetName);
 
@@ -184,7 +193,8 @@ public class PlanDefinition {
         public Apply withLibrary(String dataAssetName) {
             libraryEndpoint = new Endpoint()
                     .setAddress(dataAssetName)
-                    .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+                    .setConnectionType(Collections
+                            .singletonList(new CodeableConcept(new Coding().setCode(Constants.HL7_FHIR_FILES))));
 
             fhirDal.addAll(parse(dataAssetName));
             return this;
@@ -192,28 +202,26 @@ public class PlanDefinition {
 
         public GeneratedBundle apply() {
             return new GeneratedBundle(
-                buildProcessor(fhirDal)
-                    .apply(
-                        new IdType("PlanDefinition", planDefinitionID),
-                        patientID,
-                        encounterID,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        new Parameters(),
-                        null,
-                        (Bundle) baseResource,
-                        null,
-                        dataEndpoint,
-                        libraryEndpoint,
-                        libraryEndpoint
-                    )
-            );
+                    buildProcessor(fhirDal)
+                            .apply(
+                                    new IdType("PlanDefinition", planDefinitionID),
+                                    patientID,
+                                    encounterID,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    new Parameters(),
+                                    null,
+                                    (Bundle) baseResource,
+                                    null,
+                                    dataEndpoint,
+                                    libraryEndpoint,
+                                    libraryEndpoint));
         }
     }
 
@@ -229,8 +237,7 @@ public class PlanDefinition {
                 JSONAssert.assertEquals(
                         load(expectedBundleAssetName),
                         jsonParser.encodeResourceToString(bundle),
-                        true
-                );
+                        true);
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());

@@ -523,12 +523,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     throw new FHIRException("CanonicalType must have a value for resource name extraction");
   }
 
-  public Object getParameterComponentByName(Parameters params, String name) {
-    var first = params.getParameter().stream().filter(x -> x.getName().equals(name)).findFirst();
-    var component = first.isPresent() ? first.get() : new ParametersParameterComponent();
-    return component.hasValue() ? component.getValue() : component.getResource();
-  }
-
   private Parameters resolveInputParameters(List<DataRequirement> dataRequirements) {
     if (dataRequirements == null)
       return new Parameters();

@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
@@ -24,7 +25,18 @@ public class R4FhirDalSubjectProvider implements SubjectProvider {
 
     @Override
     public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
-        if (subjectId == null) {
+        if (subjectId != null && subjectId.startsWith("Practitioner/")) {
+            Iterable<IBaseResource> resources = fhirDal.search("Patient");
+            List<String> ids = new ArrayList<>();
+            for (IBaseResource r : resources) {
+                Patient patient = (Patient) r;
+                if (patient.getGeneralPractitionerFirstRep().hasReference() &&
+                        patient.getGeneralPractitionerFirstRep().getReference().equals(subjectId)) {
+                    ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+                }
+            }
+            return ids;
+        } else if (subjectId == null) {
             Iterable<IBaseResource> resources = fhirDal.search("Patient");
             List<String> ids = new ArrayList<>();
             for (IBaseResource r : resources) {

@@ -159,8 +159,10 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
          String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
          Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
+        practitioner = prefixPractitionerRef(practitioner);
+
         List<String> subjectIds = this.getSubjects(reportType,
-                subject != null ? subject : practitioner, dataEndpoint, additionalData);
+                StringUtils.isNotBlank(subject) ? subject : practitioner, dataEndpoint, additionalData);
 
         return evaluateMeasure(url, periodStart, periodEnd, reportType, subjectIds, lastReceivedOn,
                 contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
@@ -197,6 +199,17 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         if (fhirDal == null) {
             throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
         }
+    }
+
+    private String prefixPractitionerRef(String practitioner) {
+        if(StringUtils.isNotBlank(practitioner)) {
+            if(!practitioner.contains("/")) {
+                return "Practitioner/" + practitioner;
+            } else if(!practitioner.startsWith("Practitioner/")) {
+                throw new IllegalArgumentException("bad practitioner reference formation");
+            }
+        }
+        return null;
     }
 
     private  Measure getMeasure(FhirDal fhirDal, String url) {

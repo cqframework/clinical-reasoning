@@ -18966,7 +18966,10 @@
           }
         ],
         "gender": "male",
-        "birthDate": "1985-01-01"
+        "birthDate": "1985-01-01",
+        "generalPractitioner": {
+          "reference": "Practitioner/DM1-practitioner-1"
+        }
       },
       "request": {
         "method": "PUT",

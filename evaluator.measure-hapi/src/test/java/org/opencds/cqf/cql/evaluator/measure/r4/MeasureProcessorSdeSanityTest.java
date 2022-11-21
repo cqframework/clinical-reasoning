@@ -19,11 +19,25 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
         @Test
         public void measure_eval_unique_extension_list() {
                 MeasureReport report = this.measureProcessor.evaluateMeasure(
-                                "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
-                                "2020-01-01", "2022-06-29", "subject",
-                                "Patient/DM1-patient-1", null, null,
-                                endpoint, endpoint, endpoint, null);
+                        "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
+                        "2020-01-01", "2022-06-29", "subject",
+                        "Patient/DM1-patient-1", null, null,
+                        endpoint, endpoint, endpoint, null);
 
+                verifySpecifics(report);
+        }
+
+        @Test
+        public void measure_eval_unique_extension_list_with_practioner_ref() {
+                MeasureReport report = this.measureProcessor.evaluateMeasure(
+                        "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
+                        "2020-01-01", "2022-06-29", "subject",
+                        null, "DM1-practitioner-1", null,
+                        endpoint, endpoint, endpoint, null);
+
+                verifySpecifics(report);
+        }
+        private void verifySpecifics(MeasureReport report) {
                 assertNotNull(report);
 
                 HashSet<String> set = new HashSet<>();
@@ -33,15 +47,16 @@ public class MeasureProcessorSdeSanityTest extends BaseMeasureProcessorTest {
                 assertEquals(report.getEvaluatedResource().size(), 10);
 
                 assertTrue(report.getEvaluatedResource().stream().anyMatch(
-                                item -> item.getReference().equalsIgnoreCase("Patient/DM1-patient-1") &&
-                                                ((StringType) item.getExtension().get(0).getValue()).getValue()
-                                                                .equalsIgnoreCase("initial-population")));
+                        item -> item.getReference().equalsIgnoreCase("Patient/DM1-patient-1") &&
+                                ((StringType) item.getExtension().get(0).getValue()).getValue()
+                                        .equalsIgnoreCase("initial-population")));
 
                 assertTrue(report.getEvaluatedResource().stream().anyMatch(
-                                item -> item.getReference().equalsIgnoreCase("Observation/DM1-patient-1-observation-1")
-                                                &&
-                                                ((StringType) item.getExtension().get(0).getValue()).getValue()
-                                                                .equalsIgnoreCase("numerator")));
+                        item -> item.getReference().equalsIgnoreCase("Observation/DM1-patient-1-observation-1")
+                                &&
+                                ((StringType) item.getExtension().get(0).getValue()).getValue()
+                                        .equalsIgnoreCase("numerator")));
+
         }
 
         @Test

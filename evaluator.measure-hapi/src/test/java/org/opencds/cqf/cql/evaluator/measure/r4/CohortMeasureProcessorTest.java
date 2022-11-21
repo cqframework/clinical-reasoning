@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 public class CohortMeasureProcessorTest extends BaseMeasureProcessorTest {
     public CohortMeasureProcessorTest() {
         super("SeenPatients-bundle.json");
+        // this.measureProcessor.measureEvaluationOptions.setValidationEnabled(true);
     }
 
     @Test

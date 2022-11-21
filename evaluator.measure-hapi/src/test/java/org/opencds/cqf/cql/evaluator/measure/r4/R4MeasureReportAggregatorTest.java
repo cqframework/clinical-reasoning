@@ -156,7 +156,12 @@ public class R4MeasureReportAggregatorTest {
 
     @Test
     public void aggregateReports_subject_listType_combines_reports() {
+        // set setAutoContainReferenceTargetsWithNoId to false if we intend to print fhir resource
+        // setting this option true includes resources in MeasureReport contained based on id reference used in
+        // other sections like SDE
+        fhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
         IParser parser = fhirContext.newJsonParser();
+
         MeasureReport left = (MeasureReport)parser.parseResource(R4MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list1.json"));
         assertNotNull(left);
 

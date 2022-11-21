@@ -1,49 +1,56 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class StratifierDef {
 
-    private String expression;
-    private String code;
+    private final String id;
+    private final ConceptDef code;
+    private final String expression;
 
-    private Map<String, Object> subjectValues;
+    private final List<StratifierComponentDef> components;
 
-    private List<StratifierComponentDef> stratifierComponentDefs;
+    private Map<String, CriteriaResult> results;
 
-    public String getExpression() {
+    public StratifierDef(String id, ConceptDef code, String expression) {
+        this(id, code, expression, Collections.emptyList());
+    }
+
+    public StratifierDef(String id, ConceptDef code, String expression, List<StratifierComponentDef> components) {
+        this.id = id;
+        this.code = code;
+        this.expression = expression;
+        this.components = components;
+    }
+
+    public String expression() {
         return this.expression;
     }
 
-    public void setExpression(String expression) {
-        this.expression = expression;
-    }
-
-    public String getCode() {
+    public ConceptDef code() {
         return this.code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public String id() {
+        return this.id;
     }
 
-    public Map<String, Object> getSubjectValues() {
-        if (this.subjectValues == null) {
-            this.subjectValues = new HashMap<>();
+    public List<StratifierComponentDef> components() {
+        return this.components;
+    }
+
+    public void putResult(String subject, Object value, List<Object> evaluatedResources) {
+        this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
+    }
+
+    public Map<String, CriteriaResult> getResults() {
+        if (this.results == null) {
+            this.results = new HashMap<>();
         }
 
-        return this.subjectValues;
+        return this.results;
     }
-
-    public List<StratifierComponentDef> getComponents() {
-        if (this.stratifierComponentDefs == null) {
-            this.stratifierComponentDefs = new ArrayList<>();
-        }
-
-        return this.stratifierComponentDefs;
-    }
-    
 }

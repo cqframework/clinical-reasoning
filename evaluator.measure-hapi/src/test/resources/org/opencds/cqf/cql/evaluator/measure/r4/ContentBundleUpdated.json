@@ -1859,7 +1859,7 @@
           {
             "population": [
               {
-                "id": "Initial Population",
+                "id": "initial-population",
                 "code": {
                   "coding": [
                     {
@@ -1875,7 +1875,7 @@
                 }
               },
               {
-                "id": "Denominator",
+                "id": "denominator",
                 "code": {
                   "coding": [
                     {
@@ -1891,7 +1891,7 @@
                 }
               },
               {
-                "id": "Denominator Exclusion",
+                "id": "denominator-exclusion",
                 "code": {
                   "coding": [
                     {
@@ -1907,7 +1907,7 @@
                 }
               },
               {
-                "id": "Numerator",
+                "id": "numerator",
                 "code": {
                   "coding": [
                     {

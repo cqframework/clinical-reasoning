@@ -26,6 +26,7 @@ import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.CqlParameterDefinition;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
@@ -63,7 +64,7 @@ public class ExpressionEvaluator {
             Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.fhirPath = fhirContext.newFhirPath();
+        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
         this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
         this.librarySourceProviderFactory = requireNonNull(librarySourceProviderFactory,
                 "libraryLoaderFactory can not be null");
@@ -75,7 +76,8 @@ public class ExpressionEvaluator {
                 "cqlEvaluatorBuilderSupplier can not be null");
         this.endpointConverter = requireNonNull(endpointConverter, "endpointConverter can not be null");
 
-        this.fhirModelResolverFactory = requireNonNull(fhirModelResolverFactory, "fhirModelResolverFactory can not be null");
+        this.fhirModelResolverFactory = requireNonNull(fhirModelResolverFactory,
+                "fhirModelResolverFactory can not be null");
 
         if (!this.fhirModelResolverFactory.getModelUri().equals(Constants.FHIR_MODEL_URI)) {
             throw new IllegalArgumentException("fhirModelResolverFactory was a FHIR modelResolverFactory");
@@ -85,18 +87,18 @@ public class ExpressionEvaluator {
     /**
      * Evaluates a CQL expression and returns the results as a Parameters resource.
      *
-     * @param expression          Expression to be evaluated. Note that this is an
-     *                            expression of CQL, not the text of a library with
-     *                            definition statements.
-     * @param parameters          Any input parameters for the expression.
-     *                            Parameters defined in this input will be made
-     *                            available by name to the CQL expression. Parameter
-     *                            types are mapped to CQL as specified in the Using
-     *                            CQL section of the cpg implementation guide. If a
-     *                            parameter appears more than once in the input
-     *                            Parameters resource, it is represented with a List
-     *                            in the input CQL. If a parameter has parts, it is
-     *                            represented as a Tuple in the input CQL.
+     * @param expression Expression to be evaluated. Note that this is an
+     *                   expression of CQL, not the text of a library with
+     *                   definition statements.
+     * @param parameters Any input parameters for the expression.
+     *                   Parameters defined in this input will be made
+     *                   available by name to the CQL expression. Parameter
+     *                   types are mapped to CQL as specified in the Using
+     *                   CQL section of the cpg implementation guide. If a
+     *                   parameter appears more than once in the input
+     *                   Parameters resource, it is represented with a List
+     *                   in the input CQL. If a parameter has parts, it is
+     *                   represented as a Tuple in the input CQL.
      * @return IBaseParameters The result of evaluating the given expression,
      *         returned as a FHIR type, either a resource, or a FHIR-defined type
      *         corresponding to the CQL return type, as defined in the Using CQL
@@ -130,7 +132,8 @@ public class ExpressionEvaluator {
      *                            represented as a relative FHIR id (e.g.
      *                            Patient/123), which establishes both the context
      *                            and context value for the evaluation
-     * @param libraries           The list of libraries to be included in the evaluation context.
+     * @param libraries           The list of libraries to be included in the
+     *                            evaluation context.
      * @param useServerData       Whether to use data from the server performing the
      *                            evaluation. If this parameter is true (the
      *                            default), then the operation will use data first
@@ -195,7 +198,8 @@ public class ExpressionEvaluator {
         expressions.add("return");
 
         libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> builder);
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory,
+                () -> builder);
 
         return libraryProcessor.evaluate(new VersionedIdentifier().withId("expression").withVersion("1.0.0"), subject,
                 parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, expressions);
@@ -251,7 +255,8 @@ public class ExpressionEvaluator {
 
         // TODO: Can we consolidate this logic in the Library evaluator somehow? Then we
         // don't have to do this conversion twice
-        List<CqlParameterDefinition> cqlParameters = this.cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
+        List<CqlParameterDefinition> cqlParameters = this.cqlFhirParametersConverter
+                .toCqlParameterDefinitions(parameters);
         if (cqlParameters.isEmpty()) {
             return;
         }
@@ -267,8 +272,7 @@ public class ExpressionEvaluator {
         // Should probably mark system types in the CqlParameterDefinition?
         if (Boolean.TRUE.equals(isList)) {
             return "List<" + type + ">";
-        }
-        else {
+        } else {
             return type;
         }
     }

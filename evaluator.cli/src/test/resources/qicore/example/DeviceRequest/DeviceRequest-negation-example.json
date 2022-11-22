@@ -1,9 +1,14 @@
 {
   "resourceType": "DeviceRequest",
   "id": "negation-example",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-devicenotrequested"
+    ]
+  },
   "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: negation-example</p><p><b>status</b>: completed</p><p><b>intent</b>: original-order</p><p><b>code</b>: Venous Foot Pumps (VFP) value set <span style=\"background: LightGoldenRodYellow\">(Details : {[not stated] code 'null' = 'null)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical record number = 12345 (USUAL); active; Peter James Chalmers (OFFICIAL), Jim Chalmers , Peter James Windsor (MAIDEN); ph: (03) 5555 6473(WORK), ph: (03) 3410 5613(MOBILE), ph: (03) 5555 8834(OLD); gender: male; birthDate: 1974-12-25; </a></p><p><b>authoredOn</b>: Apr 5, 2016 1:20:00 PM</p></div>"
+    "status": "extensions",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"negation-example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-devicenotrequested.html\">QICoreDeviceNotRequested</a></p></div><p><b>QICoreDoNotPerformReason</b>: Not indicated (qualifier value) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#410534003)</span></p><p><b>status</b>: completed</p><p><b>intent</b>: original-order</p><p><b>code</b>: Not Done Value Set: Venous Foot Pumps (VFP) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (Not done value set: <a href=\"http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.117.1.7.1.230\">http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.117.1.7.1.230</a>)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Patient/example</a> \" CHALMERS\"</p><p><b>authoredOn</b>: 2016-04-05 09:20:00-0400</p></div>"
   },
   "extension": [
     {
@@ -21,24 +26,20 @@
   ],
   "modifierExtension": [
     {
-      "url": "http://hl7.org/fhir/StructureDefinition/request-doNotPerform",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-DeviceRequest.doNotPerform",
       "valueBoolean": true
     }
   ],
   "status": "completed",
   "intent": "original-order",
   "codeCodeableConcept": {
-    "coding": [
+    "extension": [
       {
-        "extension": [
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            "valueUri": "http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.117.1.7.1.230"
-          }
-        ]
+        "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet",
+        "valueCanonical": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.230"
       }
     ],
-    "text": "Venous Foot Pumps (VFP) value set"
+    "text": "Not Done Value Set: Venous Foot Pumps (VFP)"
   },
   "subject": {
     "reference": "Patient/example"

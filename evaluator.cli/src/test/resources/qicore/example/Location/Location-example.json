@@ -8,10 +8,12 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: example</p><p><b>meta</b>: </p><p><b>identifier</b>: B1-S.F2</p><p><b>status</b>: active</p><p><b>name</b>: South Wing, second floor</p><p><b>alias</b>: Mean Joe Greene University Medical Center, South Wing, second floor, BU MC, SW, F2</p><p><b>description</b>: Second floor of the Old South Wing, formerly in use by Psychiatry</p><p><b>mode</b>: instance</p><p><b>type</b>: Hospital <span style=\"background: LightGoldenRodYellow\">(Details : {http://terminology.hl7.org/CodeSystem/v3-RoleCode code 'HOSP' = 'Hospital', given as 'Hospital'})</span></p><p><b>telecom</b>: ph: 2328(WORK), fax: 2329(WORK), second wing admissions, http://sampleorg.com/southwing(WORK)</p><p><b>address</b>: Iron Curtain 75, Building A Pittsburgh PA 15016 US (WORK)</p><p><b>physicalType</b>: Wing <span style=\"background: LightGoldenRodYellow\">(Details : {http://terminology.hl7.org/CodeSystem/location-physical-type code 'wi' = 'Wing', given as 'Wing'})</span></p><h3>Positions</h3><table class=\"grid\"><tr><td>-</td><td><b>Longitude</b></td><td><b>Latitude</b></td><td><b>Altitude</b></td></tr><tr><td>*</td><td>-83.6945691</td><td>42.25475478</td><td>0</td></tr></table><p><b>managingOrganization</b>: <a href=\"Organization-example.html\">Generated Summary: id: example; ??; active; <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/organization-type team}\">Organizational team</span>; name: Health Level Seven International; ph: (+1) 734-677-7777, fax: (+1) 734-677-6622, hq@HL7.org</a></p></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-location.html\">QICoreLocation</a></p></div><p><b>identifier</b>: id: B1-S.F2 (TEMP)</p><p><b>status</b>: active</p><p><b>name</b>: South Wing, second floor</p><p><b>alias</b>: Mean Joe Greene University Medical Center, South Wing, second floor, BU MC, SW, F2</p><p><b>description</b>: Second floor of the Old South Wing, formerly in use by Psychiatry</p><p><b>mode</b>: instance</p><p><b>type</b>: Hospital <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-v3-RoleCode.html\">RoleCode</a>#HOSP)</span></p><p><b>telecom</b>: ph: 2328(WORK), fax: 2329(WORK), <a href=\"mailto:secondwing@meanjoegreeneuniversitymedicalcenter.com\">secondwing@meanjoegreeneuniversitymedicalcenter.com</a>, <a href=\"http://sampleorg.com/southwing\">http://sampleorg.com/southwing</a></p><p><b>address</b>: Iron Curtain 75, Building A Pittsburgh PA 15016 US (WORK)</p><p><b>physicalType</b>: Wing <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-location-physical-type.html\">Location type</a>#wi)</span></p><h3>Positions</h3><table class=\"grid\"><tr><td>-</td><td><b>Longitude</b></td><td><b>Latitude</b></td><td><b>Altitude</b></td></tr><tr><td>*</td><td>-83.6945691</td><td>42.25475478</td><td>0</td></tr></table><p><b>managingOrganization</b>: <a href=\"Organization-example.html\">Organization/example</a> \"Health Level Seven International\"</p></div>"
   },
   "identifier": [
     {
+      "use": "temp",
+      "system": "http://exampleoflocation.com",
       "value": "B1-S.F2"
     }
   ],
@@ -47,7 +49,7 @@
     },
     {
       "system": "email",
-      "value": "second wing admissions"
+      "value": "secondwing@meanjoegreeneuniversitymedicalcenter.com"
     },
     {
       "system": "url",

@@ -1,27 +1,24 @@
 package org.opencds.cqf.cql.evaluator.fhir.npm;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.cqframework.fhir.npm.NpmPackageManager;
 import org.cqframework.fhir.utilities.IGContext;
 import org.cqframework.fhir.utilities.exception.IGInitializationException;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Objects.requireNonNull;
-
 //@Named
 public class NpmProcessor {
     /**
-     * Provides access to the Npm package manager. Note that this will be throw an exception in the case that
+     * Provides access to the Npm package manager. Note that this will be throw an
+     * exception in the case that
      * there is no ig context.
      */
     private NpmPackageManager packageManager;
+
     public NpmPackageManager getPackageManager() {
         if (this.packageManager == null) {
             throw new IllegalStateException("Package manager is not available outside of an ig context");
@@ -30,15 +27,17 @@ public class NpmProcessor {
     }
 
     /**
-     * The igContext for the npmProcessor (i.e. the root IG that defines dependencies accessible in the context)
+     * The igContext for the npmProcessor (i.e. the root IG that defines
+     * dependencies accessible in the context)
      * Note that this may be null in the case that there is no IG context
      */
     private IGContext igContext;
+
     public IGContext getIgContext() {
         return this.igContext;
     }
 
-    //@Inject
+    // @Inject
     public NpmProcessor(IGContext igContext) {
         this.igContext = igContext;
         if (igContext != null) {

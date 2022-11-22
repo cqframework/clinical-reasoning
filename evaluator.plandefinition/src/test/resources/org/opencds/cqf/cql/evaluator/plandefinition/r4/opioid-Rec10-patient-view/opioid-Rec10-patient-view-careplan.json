@@ -6,6 +6,7 @@
     "instantiatesCanonical": [ "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view" ],
     "status": "draft",
     "intent": "proposal",
+    "priority": "urgent",
     "subject": {
       "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
     },

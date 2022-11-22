@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.opencds.cqf.cql</groupId>
+    <artifactId>evaluator.fhir-npm</artifactId>
+    <version>2.3.0</version>
+    <packaging>jar</packaging>
+
+    <name>evaluator.fhir-npm</name>
+    <description>CQL Evaluator - FHIR NPM Packaging Operations</description>
+
+    <parent>
+        <groupId>org.opencds.cqf.cql</groupId>
+        <artifactId>evaluator.shared</artifactId>
+        <version>2.3.0</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.fhir</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
+        <!-- Translator Dependencies -->
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir-npm</artifactId>
+        </dependency>
+
+        <!-- NPM Packaging Dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

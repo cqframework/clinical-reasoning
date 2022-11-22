@@ -7,6 +7,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -21,7 +22,7 @@ public class BundleFhirDal implements FhirDal {
     public BundleFhirDal(FhirContext context, IBaseBundle bundle) {
         this.context = context;
         this.bundle = bundle;
-        this.fhirPath = this.context.newFhirPath();
+        this.fhirPath = FhirPathCache.cachedForContext(context);
     }
 
     @Override

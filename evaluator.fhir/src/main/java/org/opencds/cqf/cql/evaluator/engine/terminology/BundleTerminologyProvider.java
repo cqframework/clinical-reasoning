@@ -19,6 +19,7 @@ import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.cql.evaluator.engine.util.ValueSetUtil;
+import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +43,17 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         requireNonNull(bundle, "bundle can not be null.");
 
         this.fhirContext = fhirContext;
-        this.fhirPath = fhirContext.newFhirPath();
-        this.valueSets = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle, this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
+        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
+        this.valueSets = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle,
+                this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
     }
 
-    
-    /** 
+    /**
      * This method checks for membership of a Code in a ValueSet
-     * @param code The Code to check.
-     * @param valueSet The ValueSetInfo for the ValueSet to check membership of. Can not be null.
+     * 
+     * @param code     The Code to check.
+     * @param valueSet The ValueSetInfo for the ValueSet to check membership of. Can
+     *                 not be null.
      * @return True if code is in the ValueSet.
      */
     @Override
@@ -69,15 +72,19 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         return false;
     }
 
-    /** 
-     * This method expands a ValueSet into a list of Codes. It will use the "expansion" element of the ValueSet if present.
-     * It will fall back the to "compose" element if not present. <b>NOTE:</b> This provider does not provide a full expansion
-     * of the "compose" element. If only lists the codes present in the "compose". 
+    /**
+     * This method expands a ValueSet into a list of Codes. It will use the
+     * "expansion" element of the ValueSet if present.
+     * It will fall back the to "compose" element if not present. <b>NOTE:</b> This
+     * provider does not provide a full expansion
+     * of the "compose" element. If only lists the codes present in the "compose".
+     * 
      * @param valueSet The ValueSetInfo of the ValueSet to expand
-     * @return The Codes in the ValueSet. <b>NOTE:</b> This method never returns null.
+     * @return The Codes in the ValueSet. <b>NOTE:</b> This method never returns
+     *         null.
      */
     @Override
-    
+
     public Iterable<Code> expand(ValueSetInfo valueSet) {
         requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
@@ -90,22 +97,26 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         return this.valueSetIndex.get(valueSet.getId());
     }
 
-    
-    /** 
-     * Lookup is only partially implemented for this TerminologyProvider. Full implementation requires the ability to
-     * access the full CodeSystem. This implementation only checks the code system of the code matches the CodeSystemInfo
+    /**
+     * Lookup is only partially implemented for this TerminologyProvider. Full
+     * implementation requires the ability to
+     * access the full CodeSystem. This implementation only checks the code system
+     * of the code matches the CodeSystemInfo
      * url, and verifies the version if present.
-     * @param code The Code to lookup
+     * 
+     * @param code       The Code to lookup
      * @param codeSystem The CodeSystemInfo of the CodeSystem to check.
-     * @return The Code if the system of the Code (and version if specified) matches the CodeSystemInfo url (and version)
+     * @return The Code if the system of the Code (and version if specified) matches
+     *         the CodeSystemInfo url (and version)
      */
     @Override
-	public Code lookup(Code code, CodeSystemInfo codeSystem) {
+    public Code lookup(Code code, CodeSystemInfo codeSystem) {
         if (code.getSystem() == null) {
             return null;
         }
 
-        if (code.getSystem().equals(codeSystem.getId()) && (code.getVersion() == null || code.getVersion().equals(codeSystem.getVersion()))) {
+        if (code.getSystem().equals(codeSystem.getId())
+                && (code.getVersion() == null || code.getVersion().equals(codeSystem.getVersion()))) {
             logger.warn("Unvalidated CodeSystem lookup: {} in {}", code.toString(), codeSystem.getId());
             return code;
         }
@@ -123,12 +134,14 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
 
             if (codes == null) {
-                logger.warn("ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ", url);
+                logger.warn(
+                        "ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ",
+                        url);
                 codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
             } else {
                 Boolean isNaiveExpansion = isNaiveExpansion(resource);
                 if (isNaiveExpansion != null && isNaiveExpansion) {
-                    logger.warn("Codes expanded without a terminology server, some results may not be correct.");     
+                    logger.warn("Codes expanded without a terminology server, some results may not be correct.");
                 }
             }
 
@@ -139,10 +152,8 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             this.valueSetIndex.put(url, codes);
         }
 
-
         this.initialized = true;
     }
-
 
     @SuppressWarnings("unchecked")
     private Boolean isNaiveExpansion(IBaseResource resource) {
@@ -150,7 +161,7 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         if (expansion != null) {
             Object object = ValueSetUtil.getExpansionParameters(expansion, fhirPath, ".where(name = 'naive').value");
             if (object instanceof IBase) {
-                return resolveNaiveBoolean((IBase)object);
+                return resolveNaiveBoolean((IBase) object);
             } else if (object instanceof Iterable) {
                 List<IBase> naiveParameters = (List<IBase>) object;
                 for (IBase param : naiveParameters) {
@@ -161,16 +172,14 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         return null;
     }
 
-
     private Boolean resolveNaiveBoolean(IBase param) {
         if (param.fhirType().equals("boolean")) {
-            return (Boolean)((IPrimitiveType<?>)param).getValue();
+            return (Boolean) ((IPrimitiveType<?>) param).getValue();
         } else {
             return null;
         }
     }
 
-    
     private void checkExpansion(Iterable<Code> expandedCodes, ValueSetInfo valueSet) {
         if (expandedCodes != null && !Iterables.isEmpty(expandedCodes)) {
             return;
@@ -180,7 +189,8 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         for (IBaseResource res : this.valueSets) {
             String idPart = res.getIdElement().getIdPart();
             String versionIdPart = res.getIdElement().getVersionIdPart();
-            if (valueSet.getId().equals(idPart) || valueSet.getId().endsWith(idPart) || valueSet.getId().endsWith(idPart + "|" + versionIdPart)) {
+            if (valueSet.getId().equals(idPart) || valueSet.getId().endsWith(idPart)
+                    || valueSet.getId().endsWith(idPart + "|" + versionIdPart)) {
                 resource = res;
             }
         }
@@ -195,7 +205,6 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             throw new IllegalArgumentException(msg);
         }
     }
-
 
     private boolean containsExpansionLogic(IBaseResource resource) {
         List<IBase> includeFilters = ValueSetUtil.getIncludeFilters(this.fhirContext, resource);

@@ -8,7 +8,7 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: example</p><p><b>meta</b>: </p><p><b>identifier</b>: 19009</p><p><b>status</b>: draft</p><p><b>intent</b>: proposal</p><p><b>priority</b>: routine</p><p><b>code</b>: Medication Reconciliation <span style=\"background: LightGoldenRodYellow\">(Details )</span></p><p><b>for</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical record number = 12345 (USUAL); active; Peter James Chalmers (OFFICIAL), Jim Chalmers , Peter James Windsor (MAIDEN); ph: (03) 5555 6473(WORK), ph: (03) 3410 5613(MOBILE), ph: (03) 5555 8834(OLD); gender: male; birthDate: 1974-12-25; </a></p><p><b>executionPeriod</b>: Jun 11, 2018 12:00:00 AM --&gt; Jun 11, 2018 12:00:00 AM</p></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-task.html\">QICoreTask</a></p></div><p><b>identifier</b>: id: 19009</p><p><b>status</b>: draft</p><p><b>intent</b>: proposal</p><p><b>priority</b>: routine</p><p><b>code</b>: Medication Reconciliation <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> ()</span></p><p><b>for</b>: <a href=\"Patient-example.html\">Patient/example</a> \" CHALMERS\"</p><p><b>executionPeriod</b>: 2018-06-11 --&gt; 2018-06-11</p></div>"
   },
   "identifier": [
     {

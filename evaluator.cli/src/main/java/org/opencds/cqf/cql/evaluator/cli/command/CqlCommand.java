@@ -10,9 +10,12 @@ import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.cqframework.fhir.utilities.IGContext;
+import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.context.IWorkerContext;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -27,6 +30,7 @@ import org.opencds.cqf.cql.evaluator.dagger.CqlEvaluatorComponent;
 import org.opencds.cqf.cql.evaluator.dagger.DaggerCqlEvaluatorComponent;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -38,6 +42,21 @@ public class CqlCommand implements Callable<Integer> {
 
     @Option(names= { "-op", "--options-path" })
     public String optionsPath;
+
+    @ArgGroup(multiplicity = "0..1", exclusive = false)
+    public NamespaceParameter namespace;
+    static class NamespaceParameter {
+        @Option(names = { "-nn", "--namespace-name" })
+        public String namespaceName;
+        @Option(names = { "-nu", "--namespace-uri" })
+        public String namespaceUri;
+    }
+
+    @Option(names = { "-rd", "--root-dir" })
+    public String rootDir;
+
+    @Option(names = { "-ig", "--ig-path"})
+    public String igPath;
 
     @ArgGroup(multiplicity = "1..*", exclusive = false)
     List<LibraryParameter> libraries;
@@ -95,13 +114,42 @@ public class CqlCommand implements Callable<Integer> {
     private Map<String, LibrarySourceProvider> librarySourceProviderIndex = new HashMap<>();
     private Map<String, TerminologyProvider> terminologyProviderIndex = new HashMap<>();
 
+    private class Logger implements IWorkerContext.ILoggingService {
+
+        @Override
+        public void logMessage(String s) {
+            System.out.println(s);
+        }
+
+        @Override
+        public void logDebugMessage(LogCategory logCategory, String s) {
+            System.out.println(String.format("%s: %s", logCategory.toString(), s));
+        }
+    }
+
+    private String toVersionNumber(FhirVersionEnum fhirVersion) {
+        switch (fhirVersion) {
+            case R4: return "4.0.1";
+            case R5: return "5.0.0-ballot";
+            case DSTU3: return "3.0.2";
+            default: throw new IllegalArgumentException(String.format("Unsupported FHIR version %s", fhirVersion));
+        }
+    }
+
     @Override
     public Integer call() throws Exception {
 
         FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
 
-        CqlEvaluatorComponent cqlEvaluatorComponent = DaggerCqlEvaluatorComponent.builder()
-                .fhirContext(fhirVersionEnum.newContext()).build();
+        CqlEvaluatorComponent.Builder builder = DaggerCqlEvaluatorComponent.builder().fhirContext(fhirVersionEnum.newContext());
+
+        IGContext igContext = null;
+        if (rootDir != null && igPath != null) {
+            igContext = new IGContext(new Logger());
+            igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
+        }
+
+        CqlEvaluatorComponent cqlEvaluatorComponent = builder.build();
 
         CqlOptions cqlOptions = CqlOptions.defaultOptions();
 
@@ -112,6 +160,14 @@ public class CqlCommand implements Callable<Integer> {
 
         for (LibraryParameter library : libraries) {
             CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder().withCqlOptions(cqlOptions);
+
+            if (namespace != null) {
+                cqlEvaluatorBuilder.withNamespaceInfo(new NamespaceInfo(namespace.namespaceName, namespace.namespaceUri));
+            }
+
+            if (igContext != null) {
+                cqlEvaluatorBuilder.withNpmProcessor(new NpmProcessor(igContext));
+            }
 
             LibrarySourceProvider librarySourceProvider = librarySourceProviderIndex.get(library.libraryUrl);
 

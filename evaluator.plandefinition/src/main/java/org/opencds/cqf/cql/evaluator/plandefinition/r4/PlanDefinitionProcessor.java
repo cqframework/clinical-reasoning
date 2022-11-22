@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestStatus;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 @SuppressWarnings({"unused", "squid:S107"})
 public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDefinition> {
+
   private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
 
   private final ActivityDefinitionProcessor activityDefinitionProcessor;
@@ -186,6 +188,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       for (int i = 0; i < matchCount; ++i) {
         requestGroup.addAction();
       }
+    }
+    if (path.equals("activity.extension") || path.equals("action.extension")) {
+      // default to adding extension to last action
+      requestGroup.getAction().get(requestGroup.getAction().size() - 1).addExtension().setValue((Type) value);
+      return;
     }
     if (requestGroup.hasAction() && requestGroup.getAction().size() < matchCount) {
       for (int i = matchCount - requestGroup.getAction().size(); i < matchCount; ++i) {

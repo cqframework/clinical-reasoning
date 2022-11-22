@@ -226,7 +226,6 @@ public class PlanDefinition {
         }
 
         public void isEqualsTo(String expectedCarePlanAssetName) {
-            String s = jsonParser.encodeResourceToString(carePlan);
             try {
                 JSONAssert.assertEquals(
                         load(expectedCarePlanAssetName),

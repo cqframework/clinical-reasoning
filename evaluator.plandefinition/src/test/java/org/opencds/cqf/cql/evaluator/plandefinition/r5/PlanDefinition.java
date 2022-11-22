@@ -131,18 +131,17 @@ public class PlanDefinition {
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
         LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
 
         ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
 
-        // Commenting this out until we have a ModelResolver for R5
-        // ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
+        ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
         OperationParametersParser operationParametersParser = new OperationParametersParser(adapterFactory, fhirTypeConverter);
 
         return new PlanDefinitionProcessor(
             fhirContext, fhirDal, libraryProcessor, evaluator,
-            null, operationParametersParser
+                activityDefinitionProcessor, operationParametersParser
         );
     }
 
@@ -193,27 +192,27 @@ public class PlanDefinition {
 
         public GeneratedBundle apply() {
             return new GeneratedBundle(
-                buildProcessor(fhirDal)
-                    .apply(
-                        new IdType("PlanDefinition", planDefinitionID),
-                        patientID,
-                        encounterID,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        new Parameters(),
-                        null,
-                        (Bundle) baseResource,
-                        null,
-                        dataEndpoint,
-                        libraryEndpoint,
-                        libraryEndpoint
-                    )
+                    (Bundle) buildProcessor(fhirDal)
+                        .apply(
+                            new IdType("PlanDefinition", planDefinitionID),
+                            patientID,
+                            encounterID,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            new Parameters(),
+                            null,
+                            (Bundle) baseResource,
+                            null,
+                            dataEndpoint,
+                            libraryEndpoint,
+                            libraryEndpoint
+                        )
             );
         }
     }

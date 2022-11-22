@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.plandefinition;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -89,6 +90,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
            String setting, String settingContext, Boolean mergeNestedCarePlans, IBaseParameters parameters,
            Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData, IBaseResource dataEndpoint,
            IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+      if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
+         return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
+                 userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
+                 useServerData, bundle, prefetchData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+      }
       this.patientId = patientId;
       this.encounterId = encounterId;
       this.practitionerId = practitionerId;
@@ -213,6 +219,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
          result = getExpressionResult(altExpression, altLanguage, libraryUrl, params);
       }
       if (path.startsWith("action.")) {
+         resolveCdsHooksDynamicValue(resource, result, path);
+      }
+      // backwards compatibility where CDS Hooks indicator was set with activity.extension or action.extension path
+      else if (path.startsWith("activity.extension") || path.startsWith("action.extension")) {
+         if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
+            throw new IllegalArgumentException("Please use the priority path when setting indicator values when using FHIR R5 for CDS Hooks evaluation");
+         }
          resolveCdsHooksDynamicValue(resource, result, path);
       }
       else {

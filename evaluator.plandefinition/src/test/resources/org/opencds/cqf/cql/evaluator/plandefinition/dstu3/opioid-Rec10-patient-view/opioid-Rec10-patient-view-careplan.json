@@ -15,6 +15,10 @@
             "reference": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
         },
         "action": [ {
+            "extension": [ {
+                "url": null,
+                "valueString": "warning"
+            } ],
             "title": "No Screening In Last 12 Months Summary",
             "description": "No Screening In Last 12 Months Detail"
         } ]

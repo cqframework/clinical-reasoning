@@ -30,6 +30,7 @@ import org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Task;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -164,6 +165,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       for (int i = 0; i < matchCount; ++i) {
         requestGroup.addAction();
       }
+    }
+    if (path.equals("activity.extension") || path.equals("action.extension")) {
+      // default to adding extension to last action
+      requestGroup.getAction().get(requestGroup.getAction().size() - 1).addExtension().setValue((Type) value);
+      return;
     }
     if (requestGroup.hasAction() && requestGroup.getAction().size() < matchCount) {
       for (int i = matchCount - requestGroup.getAction().size(); i < matchCount; ++i) {

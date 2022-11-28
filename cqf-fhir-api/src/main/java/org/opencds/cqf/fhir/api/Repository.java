@@ -51,14 +51,12 @@ public interface Repository {
                         @Nonnull Map<String, String> headers);
 
         @Nonnull
-        // TODO: Support AND search maps...
         default <B extends IBaseBundle, T extends IBaseResource> B search(@Nonnull Class<T> resourceType,
                         @Nonnull Map<String, List<IQueryParameterType>> searchParameters) {
                 return this.search(resourceType, searchParameters, Collections.emptyMap());
         }
 
         @Nonnull
-        // TODO: Support AND search maps...
         <B extends IBaseBundle, T extends IBaseResource> B search(@Nonnull Class<T> resourceType,
                         @Nonnull Map<String, List<IQueryParameterType>> searchParameters,
                         @Nonnull Map<String, String> headers);

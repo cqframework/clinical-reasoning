@@ -63,6 +63,7 @@ public class RestRepository implements Repository {
     }
 
     @Override
+    @Nonnull
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(@Nonnull Class<T> resourceType,
             @Nonnull I id,
             @Nonnull Map<String, String> headers) {
@@ -161,6 +162,7 @@ public class RestRepository implements Repository {
             @Nonnull String name, @Nonnull P parameters, @Nonnull Map<String, String> headers) {
         var op = this.client.operation().onType(resourceType).named(name).withParameters(parameters)
                 .returnMethodOutcome();
+
         for (var entry : headers.entrySet()) {
             op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
         }

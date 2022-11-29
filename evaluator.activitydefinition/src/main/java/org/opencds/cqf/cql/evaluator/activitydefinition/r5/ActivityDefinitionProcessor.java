@@ -106,7 +106,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
 
     @Override
     public Object resolveParameterValue(IBase value) {
-        if (value == null) return null;
+        if (value == null)
+            return null;
         return ((Parameters.ParametersParameterComponent) value).getValue();
     }
 
@@ -115,9 +116,10 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         if (activityDefinition.hasExtension(TARGET_STATUS_URL)) {
             var value = activityDefinition.getExtensionByUrl(TARGET_STATUS_URL).getValue();
             if (value instanceof StringType) {
-                task.setStatus(Task.TaskStatus.valueOf(((StringType)value).asStringValue().toUpperCase()));
+                task.setStatus(Task.TaskStatus.valueOf(((StringType) value).asStringValue().toUpperCase()));
             } else {
-                logger.debug("Extension {} should have a value of type {}", TARGET_STATUS_URL, StringType.class.getName());
+                logger.debug("Extension {} should have a value of type {}", TARGET_STATUS_URL,
+                        StringType.class.getName());
             }
         } else {
             task.setStatus(Task.TaskStatus.DRAFT);
@@ -133,7 +135,7 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
 
         if (activityDefinition.hasDescription()) {
             task.setDescription(activityDefinition.getDescription());
-        }  
+        }
         return task;
     }
 
@@ -157,14 +159,14 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
             serviceRequest.setExtension(activityDefinition.getExtension());
         }
 
-        if (activityDefinition.hasCode()) {
-            serviceRequest.setCode(activityDefinition.getCode());
-        }
+        serviceRequest.setCode(new CodeableReference().setReference(new Reference(activityDefinition.getIdElement())));
 
-        // code can be set as a dynamicValue
-        else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(MISSING_CODE_PROPERTY);
-        }
+        // Is this still needed?
+        // // code can be set as a dynamicValue
+        // else if (!activityDefinition.hasCode() &&
+        // !activityDefinition.hasDynamicValue()) {
+        // throw new FHIRException(MISSING_CODE_PROPERTY);
+        // }
 
         if (activityDefinition.hasBodySite()) {
             serviceRequest.setBodySite(activityDefinition.getBodySite());
@@ -181,7 +183,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return serviceRequest;
     }
 
-    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId) throws FHIRException {
+    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId)
+            throws FHIRException {
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
         medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
@@ -202,7 +205,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         }
 
         if (activityDefinition.hasDosage()) {
-            medicationRequest.setDose(new MedicationRequestDoseComponent().setDosageInstruction(activityDefinition.getDosage()));
+            medicationRequest
+                    .setDose(new MedicationRequestDoseComponent().setDosageInstruction(activityDefinition.getDosage()));
         }
 
         if (activityDefinition.hasBodySite()) {
@@ -220,7 +224,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return medicationRequest;
     }
 
-    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition, String practitionerId, String organizationId) throws FHIRException {
+    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition, String practitionerId,
+            String organizationId) throws FHIRException {
         var supplyRequest = new SupplyRequest();
 
         if (practitionerId != null) {
@@ -316,7 +321,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         communication.setSubject(new Reference(patientId));
 
         if (activityDefinition.hasCode()) {
-            communication.setReason(Collections.singletonList(new CodeableReference().setConcept(activityDefinition.getCode())));
+            communication.setReason(
+                    Collections.singletonList(new CodeableReference().setConcept(activityDefinition.getCode())));
         }
 
         if (activityDefinition.hasRelatedArtifact()) {

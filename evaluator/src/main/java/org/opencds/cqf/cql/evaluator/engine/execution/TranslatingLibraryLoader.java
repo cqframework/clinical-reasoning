@@ -74,7 +74,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         if (library != null && this.translatorOptionsMatch(library)) {
             return library;
         }
-
+        this.cqlTranslatorOptions.setEnableCqlOnly(true);
         return this.translate(libraryIdentifier);
     }
 

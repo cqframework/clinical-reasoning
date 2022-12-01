@@ -136,12 +136,12 @@ public class PlanDefinition {
         LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
                 librarySourceProviderFactory,
                 dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory,
-                () -> new CqlEvaluatorBuilder());
+                CqlEvaluatorBuilder::new);
 
         ExpressionEvaluator evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter,
                 librarySourceProviderFactory,
                 dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory,
-                () -> new CqlEvaluatorBuilder());
+                CqlEvaluatorBuilder::new);
 
         ActivityDefinitionProcessor activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal,
                 libraryProcessor);
@@ -182,7 +182,8 @@ public class PlanDefinition {
             dataEndpoint = new Endpoint()
                     .setAddress(dataAssetName)
                     .setConnectionType(Collections
-                            .singletonList(new CodeableConcept(new Coding().setCode(Constants.HL7_FHIR_FILES))));
+                            .singletonList(new CodeableConcept().setCoding(
+                                    Collections.singletonList(new Coding().setCode(Constants.HL7_FHIR_FILES)))));
 
             baseResource = parse(dataAssetName);
 
@@ -193,8 +194,8 @@ public class PlanDefinition {
         public Apply withLibrary(String dataAssetName) {
             libraryEndpoint = new Endpoint()
                     .setAddress(dataAssetName)
-                    .setConnectionType(Collections
-                            .singletonList(new CodeableConcept(new Coding().setCode(Constants.HL7_FHIR_FILES))));
+                    .setConnectionType(Collections.singletonList(new CodeableConcept()
+                            .setCoding(Collections.singletonList(new Coding().setCode(Constants.HL7_FHIR_FILES)))));
 
             fhirDal.addAll(parse(dataAssetName));
             return this;
@@ -202,7 +203,7 @@ public class PlanDefinition {
 
         public GeneratedBundle apply() {
             return new GeneratedBundle(
-                    buildProcessor(fhirDal)
+                    (Bundle) buildProcessor(fhirDal)
                             .apply(
                                     new IdType("PlanDefinition", planDefinitionID),
                                     patientID,

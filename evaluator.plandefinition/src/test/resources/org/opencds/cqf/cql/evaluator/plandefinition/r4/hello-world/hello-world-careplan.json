@@ -1,25 +1,23 @@
 {
   "resourceType": "CarePlan",
-  "contained": [
-    {
-      "resourceType": "RequestGroup",
-      "id": "hello-world-patient-view",
-      "instantiatesCanonical": [
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
-      ],
-      "status": "draft",
-      "intent": "proposal",
-      "subject": {
-        "reference": "helloworld-patient-1"
-      },
-      "encounter": {
-        "reference": "helloworld-patient-1-encounter-1"
-      }
-    }
-  ],
-  "instantiatesCanonical": [
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
-  ],
+  "contained": [ {
+    "resourceType": "RequestGroup",
+    "id": "hello-world-patient-view",
+    "instantiatesCanonical": [ "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view" ],
+    "status": "draft",
+    "intent": "proposal",
+    "subject": {
+      "reference": "helloworld-patient-1"
+    },
+    "encounter": {
+      "reference": "helloworld-patient-1-encounter-1"
+    },
+    "action": [ {
+      "title": "Hello World!",
+      "description": "The CDS Service is alive and communicating successfully!"
+    } ]
+  } ],
+  "instantiatesCanonical": [ "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view" ],
   "status": "draft",
   "intent": "proposal",
   "subject": {
@@ -28,11 +26,9 @@
   "encounter": {
     "reference": "helloworld-patient-1-encounter-1"
   },
-  "activity": [
-    {
-      "reference": {
-        "reference": "#hello-world-patient-view"
-      }
+  "activity": [ {
+    "reference": {
+      "reference": "#hello-world-patient-view"
     }
-  ]
+  } ]
 }

@@ -14,7 +14,11 @@
                 },
                 "encounter": {
                     "reference": "helloworld-patient-1-encounter-1"
-                }
+                },
+                "action": [ {
+                    "title": "Hello World!",
+                    "description": "The CDS Service is alive and communicating successfully!"
+                } ]
             }
         }
     ]

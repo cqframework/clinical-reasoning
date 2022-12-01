@@ -94,6 +94,9 @@
               }
             ],
             "copyright": "© CDC 2016+.",
+            "library": {
+                "reference": "Library/OpioidCDSREC10PatientView"
+            },
             "action": [
               {
                  "triggerDefinition": [
@@ -161,14 +164,19 @@
                       ],
                       "dynamicValue": [
                          {
-                            "path": "description",
+                            "path": "action.description",
                             "language": "text/cql",
                             "expression": "'No Screening In Last 12 Months Detail'"
                          },
                          {
-                            "path": "title",
+                            "path": "action.title",
                             "language": "text/cql",
                             "expression": "'No Screening In Last 12 Months Summary'"
+                         },
+                         {
+                            "path": "action.extension",
+                            "language": "text/cql",
+                            "expression": "'warning'"
                          }
                       ],
                       "action": [

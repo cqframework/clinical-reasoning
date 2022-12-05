@@ -14,6 +14,7 @@ import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
+import org.opencds.cqf.cql.evaluator.fhir.helper.r5.R5FhirModelResolver;
 import org.opencds.cqf.cql.evaluator.fhir.util.VersionUtilities;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -47,6 +48,9 @@ public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.b
                     break;
                 case R4:
                     resolver = new CachingModelResolverDecorator(new R4FhirModelResolver());
+                    break;
+                case R5:
+                    resolver = new CachingModelResolverDecorator(new R5FhirModelResolver());
                     break;
                 default:
                     throw new IllegalArgumentException("unknown or unsupported FHIR version");

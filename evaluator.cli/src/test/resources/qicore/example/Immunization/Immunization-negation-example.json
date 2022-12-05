@@ -1,9 +1,14 @@
 {
   "resourceType": "Immunization",
   "id": "negation-example",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-immunizationnotdone"
+    ]
+  },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: negation-example</p><p><b>status</b>: not-done</p><p><b>statusReason</b>: Procedure refused for religious reason (situation) <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '183945002' = 'Procedure refused for religious reason (situation)', given as 'Procedure refused for religious reason (situation)'})</span></p><p><b>vaccineCode</b>: Influenze Vaccine value set <span style=\"background: LightGoldenRodYellow\">(Details : {[not stated] code 'null' = 'null)</span></p><p><b>patient</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical record number = 12345 (USUAL); active; Peter James Chalmers (OFFICIAL), Jim Chalmers , Peter James Windsor (MAIDEN); ph: (03) 5555 6473(WORK), ph: (03) 3410 5613(MOBILE), ph: (03) 5555 8834(OLD); gender: male; birthDate: 1974-12-25; </a></p><p><b>encounter</b>: <a href=\"Encounter-example.html\">Generated Summary: id: example; status: in-progress; <span title=\"{http://terminology.hl7.org/CodeSystem/v3-ActCode IMP}\">inpatient encounter</span>; <span title=\"Codes: {http://www.ama-assn.org/go/cpt 99223}\">Inpatient Hospital Care</span></a></p><p><b>occurrence</b>: Jan 10, 2013 12:00:00 AM</p><p><b>recorded</b>: Jan 10, 2013 12:00:00 AM</p><p><b>primarySource</b>: true</p></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"negation-example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-qicore-immunizationnotdone.html\">QICoreImmunizationNotDone</a></p></div><p><b>status</b>: not-done</p><p><b>statusReason</b>: Procedure refused for religious reason (situation) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#183945002)</span></p><p><b>vaccineCode</b>: Not Done Value Set: Influenza vaccine <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (Not done value set: <a href=\"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1254\">http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1254</a>)</span></p><p><b>patient</b>: <a href=\"Patient-example.html\">Patient/example</a> \" CHALMERS\"</p><p><b>encounter</b>: <a href=\"Encounter-example.html\">Encounter/example</a></p><p><b>occurrence</b>: 2013-01-10</p><p><b>recorded</b>: 2013-01-10</p><p><b>primarySource</b>: true</p></div>"
   },
   "status": "not-done",
   "statusReason": {
@@ -16,17 +21,13 @@
     ]
   },
   "vaccineCode": {
-    "coding": [
+    "extension": [
       {
-        "extension": [
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            "valueUri": "http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.464.1003.196.12.1218"
-          }
-        ]
+        "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet",
+        "valueCanonical": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1254"
       }
     ],
-    "text": "Influenze Vaccine value set"
+    "text": "Not Done Value Set: Influenza vaccine"
   },
   "patient": {
     "reference": "Patient/example"

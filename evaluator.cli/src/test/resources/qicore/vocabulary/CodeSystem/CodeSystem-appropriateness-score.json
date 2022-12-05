@@ -8,22 +8,23 @@
   },
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>RAND Appropriateness Scores</h2><div><p>The RAND scoring for appropriateness of the procedure.</p>\n</div><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/appropriateness-score defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">extremely-inappropriate<a name=\"appropriateness-score-extremely-inappropriate\"> </a></td><td>Extremely Inappropriate</td><td>The procedure is extremely inappropriate</td></tr><tr><td style=\"white-space:nowrap\">inappropriate<a name=\"appropriateness-score-inappropriate\"> </a></td><td>Inappropriate</td><td>The procedure is inappropriate</td></tr><tr><td style=\"white-space:nowrap\">probably-inappropriate<a name=\"appropriateness-score-probably-inappropriate\"> </a></td><td>Probably Inappropriate</td><td>The procedure is probably inappropriate</td></tr><tr><td style=\"white-space:nowrap\">uncertain-inappropriate<a name=\"appropriateness-score-uncertain-inappropriate\"> </a></td><td>Uncertain Inappropriate</td><td>The appropriateness of the procedure is uncertain, leaning towards inappropriate</td></tr><tr><td style=\"white-space:nowrap\">uncertain<a name=\"appropriateness-score-uncertain\"> </a></td><td>Uncertain</td><td>The appropriateness of the procedure is uncertain</td></tr><tr><td style=\"white-space:nowrap\">uncertain-appropriate<a name=\"appropriateness-score-uncertain-appropriate\"> </a></td><td>Uncertain Appropriate</td><td>The appropriateness of the procedure is uncertain, leaning towards appropriate</td></tr><tr><td style=\"white-space:nowrap\">probably-appropriate<a name=\"appropriateness-score-probably-appropriate\"> </a></td><td>Probably Appropriate</td><td>The procedure is probably appropriate</td></tr><tr><td style=\"white-space:nowrap\">appropriate<a name=\"appropriateness-score-appropriate\"> </a></td><td>Appropriate</td><td>The procedure is appropriate</td></tr><tr><td style=\"white-space:nowrap\">extremely-appropriate<a name=\"appropriateness-score-extremely-appropriate\"> </a></td><td>Extremely Appropriate</td><td>The procedure is extremely appropriate</td></tr></table></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>This code system http://hl7.org/fhir/us/qicore/CodeSystem/appropriateness-score defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">extremely-inappropriate<a name=\"appropriateness-score-extremely-inappropriate\"> </a></td><td>Extremely Inappropriate</td><td>The procedure is extremely inappropriate</td></tr><tr><td style=\"white-space:nowrap\">inappropriate<a name=\"appropriateness-score-inappropriate\"> </a></td><td>Inappropriate</td><td>The procedure is inappropriate</td></tr><tr><td style=\"white-space:nowrap\">probably-inappropriate<a name=\"appropriateness-score-probably-inappropriate\"> </a></td><td>Probably Inappropriate</td><td>The procedure is probably inappropriate</td></tr><tr><td style=\"white-space:nowrap\">uncertain-inappropriate<a name=\"appropriateness-score-uncertain-inappropriate\"> </a></td><td>Uncertain Inappropriate</td><td>The appropriateness of the procedure is uncertain, leaning towards inappropriate</td></tr><tr><td style=\"white-space:nowrap\">uncertain<a name=\"appropriateness-score-uncertain\"> </a></td><td>Uncertain</td><td>The appropriateness of the procedure is uncertain</td></tr><tr><td style=\"white-space:nowrap\">uncertain-appropriate<a name=\"appropriateness-score-uncertain-appropriate\"> </a></td><td>Uncertain Appropriate</td><td>The appropriateness of the procedure is uncertain, leaning towards appropriate</td></tr><tr><td style=\"white-space:nowrap\">probably-appropriate<a name=\"appropriateness-score-probably-appropriate\"> </a></td><td>Probably Appropriate</td><td>The procedure is probably appropriate</td></tr><tr><td style=\"white-space:nowrap\">appropriate<a name=\"appropriateness-score-appropriate\"> </a></td><td>Appropriate</td><td>The procedure is appropriate</td></tr><tr><td style=\"white-space:nowrap\">extremely-appropriate<a name=\"appropriateness-score-extremely-appropriate\"> </a></td><td>Extremely Appropriate</td><td>The procedure is extremely appropriate</td></tr></table></div>"
   },
   "url": "http://hl7.org/fhir/us/qicore/CodeSystem/appropriateness-score",
-  "version": "4.0.0",
+  "version": "4.1.1",
   "name": "AppropriatenessScore",
-  "title": "RAND Appropriateness Scores",
+  "title": "RAND Appropriateness Score Codes",
   "status": "draft",
   "experimental": false,
-  "date": "2018-08-22T00:00:00+00:00",
-  "publisher": "Health Level Seven, Inc. - CQI WG",
+  "date": "2018-08-22",
+  "publisher": "http://www.hl7.org/Special/committees/cqi/index.cfm",
   "contact": [
     {
+      "name": "Clinical Quality Information WG",
       "telecom": [
         {
           "system": "url",
-          "value": "http://hl7.org/special/committees/CQI"
+          "value": "http://www.hl7.org/Special/committees/cqi"
         }
       ]
     }
@@ -34,8 +35,7 @@
       "coding": [
         {
           "system": "urn:iso:std:iso:3166",
-          "code": "US",
-          "display": "United States of America"
+          "code": "US"
         }
       ]
     }

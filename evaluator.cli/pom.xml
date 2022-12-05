@@ -5,18 +5,16 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.cli</artifactId>
-    <version>2.3.0-SNAPSHOT</version>
+    <version>2.4.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>evaluator.cli</name>
     <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
 
-
-
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>
-        <version>2.3.0-SNAPSHOT</version>
+        <version>2.4.0-SNAPSHOT</version>
     </parent>
 
     <description>CQL Evaluator - CLI</description>
@@ -25,22 +23,22 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>2.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.builder</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>2.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.dagger</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>2.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.jackson-deps</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>2.4.0-SNAPSHOT</version>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -57,6 +55,16 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <!-- NPM Packaging Dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+        <!-- BundleResources requirement -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
         </dependency>
     </dependencies>
 

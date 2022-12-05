@@ -19,6 +19,7 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.engine.exception.CqlException;
 import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;
 import org.opencds.cqf.cql.evaluator.engine.elm.LibraryMapper;
@@ -37,22 +38,33 @@ import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
  */
 public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoader {
 
+    protected NamespaceInfo namespaceInfo;
     protected CqlTranslatorOptions cqlTranslatorOptions;
     protected List<LibrarySourceProvider> librarySourceProviders;
 
     protected LibraryManager libraryManager;
 
     public TranslatingLibraryLoader(ModelManager modelManager, List<LibrarySourceProvider> librarySourceProviders,
-            CqlTranslatorOptions translatorOptions) {
+            CqlTranslatorOptions translatorOptions, NamespaceInfo namespaceInfo) {
         this.librarySourceProviders = requireNonNull(librarySourceProviders,
                 "librarySourceProviders can not be null");
 
         this.cqlTranslatorOptions = translatorOptions != null ? translatorOptions
                 : CqlTranslatorOptions.defaultOptions();
 
+        if (namespaceInfo != null) {
+            modelManager.getNamespaceManager().addNamespace(namespaceInfo);
+        }
+
         this.libraryManager = new LibraryManager(modelManager);
         for (LibrarySourceProvider provider : librarySourceProviders) {
             libraryManager.getLibrarySourceLoader().registerProvider(provider);
+        }
+    }
+
+    public void loadNamespaces(List<NamespaceInfo> namespaceInfos) {
+        for (NamespaceInfo ni : namespaceInfos) {
+            libraryManager.getNamespaceManager().addNamespace(ni);
         }
     }
 
@@ -62,7 +74,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         if (library != null && this.translatorOptionsMatch(library)) {
             return library;
         }
-
+        this.cqlTranslatorOptions.setEnableCqlOnly(true);
         return this.translate(libraryIdentifier);
     }
 

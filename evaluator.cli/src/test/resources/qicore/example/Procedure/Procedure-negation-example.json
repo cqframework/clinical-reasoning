@@ -1,20 +1,19 @@
 {
   "resourceType": "Procedure",
   "id": "negation-example",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurenotdone"
+    ]
+  },
   "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: negation-example</p><p><b>status</b>: not-done</p><p><b>statusReason</b>: Complication of medical care (disorder) <span style=\"background: LightGoldenRodYellow\">(Details : {SNOMED CT code '35688006' = 'Complication of medical care', given as 'Complication of medical care (disorder)'})</span></p><p><b>code</b>: Excision of appendix (procedure) <span style=\"background: LightGoldenRodYellow\">(Details : {[not stated] code 'null' = 'null)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Generated Summary: id: example; Medical record number = 12345 (USUAL); active; Peter James Chalmers (OFFICIAL), Jim Chalmers , Peter James Windsor (MAIDEN); ph: (03) 5555 6473(WORK), ph: (03) 3410 5613(MOBILE), ph: (03) 5555 8834(OLD); gender: male; birthDate: 1974-12-25; </a></p><p><b>encounter</b>: <a href=\"Encounter-example.html\">Generated Summary: id: example; status: in-progress; <span title=\"{http://terminology.hl7.org/CodeSystem/v3-ActCode IMP}\">inpatient encounter</span>; <span title=\"Codes: {http://www.ama-assn.org/go/cpt 99223}\">Inpatient Hospital Care</span></a></p><h3>Performers</h3><table class=\"grid\"><tr><td>-</td><td><b>Actor</b></td></tr><tr><td>*</td><td><a href=\"Practitioner-example.html\">Dr Cecil Surgeon. Generated Summary: id: example; 23; active; Adam Careful </a></td></tr></table></div>"
+    "status": "extensions",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource \"negation-example\" </p></div><p><b>QICoreNotDoneRecorded</b>: 2013-04-05 10:30:00-0400</p><p><b>status</b>: not-done</p><p><b>statusReason</b>: Complication of medical care (disorder) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"https://browser.ihtsdotools.org/\">SNOMED CT</a>#35688006)</span></p><p><b>code</b>: Not Done Value Set: Intermittent pneumatic compression devices (IPC) <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (Not done value set: <a href=\"http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.117.1.7.1.214\">http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.117.1.7.1.214</a>)</span></p><p><b>subject</b>: <a href=\"Patient-example.html\">Patient/example</a> \" CHALMERS\"</p><p><b>encounter</b>: <a href=\"Encounter-example.html\">Encounter/example</a></p><p><b>performed</b>: </p><h3>Performers</h3><table class=\"grid\"><tr><td>-</td><td><b>Actor</b></td></tr><tr><td>*</td><td><a href=\"Practitioner-example.html\">Practitioner/example: Dr Cecil Surgeon</a> \" CAREFUL\"</td></tr></table></div>"
   },
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-recorded",
       "valueDateTime": "2013-04-05T10:30:00-04:00"
-    }
-  ],
-  "modifierExtension": [
-    {
-      "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDone",
-      "valueBoolean": true
     }
   ],
   "status": "not-done",
@@ -28,23 +27,27 @@
     ]
   },
   "code": {
-    "coding": [
+    "extension": [
       {
-        "extension": [
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-reference",
-            "valueUri": "http://cts.nlm.nih.gov/fhir/2.16.840.1.113762.1.4.1018.240"
-          }
-        ]
+        "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet",
+        "valueCanonical": "http://cts.nlm.nih.gov/fhir/2.16.840.1.113883.3.117.1.7.1.214"
       }
     ],
-    "text": "Excision of appendix (procedure)"
+    "text": "Not Done Value Set: Intermittent pneumatic compression devices (IPC)"
   },
   "subject": {
     "reference": "Patient/example"
   },
   "encounter": {
     "reference": "Encounter/example"
+  },
+  "_performedDateTime": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+        "valueCode": "not-performed"
+      }
+    ]
   },
   "performer": [
     {

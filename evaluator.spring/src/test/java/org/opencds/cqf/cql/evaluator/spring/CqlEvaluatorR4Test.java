@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.spring;
 
 import static org.testng.Assert.assertNotNull;
 
+import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor;
@@ -29,5 +30,11 @@ public class CqlEvaluatorR4Test extends AbstractTestNGSpringContextTests {
     public void canInstantiateExpressionEvaluator() {
         ExpressionEvaluator expressionEvaluator = this.applicationContext.getBean(ExpressionEvaluator.class);
         assertNotNull(expressionEvaluator);
+    }
+
+    @Test
+    public void canInstantiateBuilder() {
+        CqlEvaluatorBuilder evaluatorBuilder = this.applicationContext.getBean(CqlEvaluatorBuilder.class);
+        assertNotNull(evaluatorBuilder);
     }
 }

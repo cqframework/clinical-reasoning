@@ -95,7 +95,9 @@
     <author>
         <name value="Robert McClure, MD, MPH"/>
     </author>
-    <library value="http://fhir.org/guides/cdc/opioid-cds/Library/OpioidCDSREC10PatientView"/>
+    <library>
+        <reference value="Library/OpioidCDSREC10PatientView"/>
+    </library>
     <action>
         <prefix value="Order Urine Screening"/>
         <title value="Annual Urine Screening Check"/>

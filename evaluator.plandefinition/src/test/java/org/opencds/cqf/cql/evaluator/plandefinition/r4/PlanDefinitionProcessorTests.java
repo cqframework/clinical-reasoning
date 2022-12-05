@@ -150,4 +150,26 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .applyR5()
             .isEqualsTo("rule-filters/ReportableBundle.json");
     }
+
+    @Test
+    public void testCDSHooksMultipleActions() {
+        PlanDefinition.Assert.that(
+                        "CdsHooksMultipleActions-PlanDefinition-1.0.0",
+                        "patient-CdsHooksMultipleActions",
+                        null
+                )
+                .withData("cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json")
+                .withLibrary("cds-hooks-multiple-actions/cds_hooks_multiple_actions_plan_definition.json")
+                .apply()
+                .isEqualsTo("cds-hooks-multiple-actions/cds_hooks_multiple_actions_careplan.json");
+        PlanDefinition.Assert.that(
+                        "CdsHooksMultipleActions-PlanDefinition-1.0.0",
+                        "patient-CdsHooksMultipleActions",
+                        null
+                )
+                .withData("cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json")
+                .withLibrary("cds-hooks-multiple-actions/cds_hooks_multiple_actions_plan_definition.json")
+                .applyR5()
+                .isEqualsTo("cds-hooks-multiple-actions/cds_hooks_multiple_actions_bundle.json");
+    }
 }

@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>2.3.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
     <description>FHIR Clinical Reasoning Implementations</description>
@@ -18,6 +18,8 @@
         <hapi.version>6.2.1</hapi.version>
         <junit.version>5.9.1</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
+        <cql-compiler.version>2.4.0</cql-compiler.version>
+        <cql-runtime.version>2.3.0</cql-runtime.version>
     </properties>
     <licenses>
         <license>

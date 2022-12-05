@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.fhir</groupId>
-    <artifactId>cqf-fhir-cql</artifactId>
+    <artifactId>cqf-fhir-cql-r4</artifactId>
     <version>3.0.0-SNAPSHOT</version>
 
-    <name>FHIR Clinical Reasoning (CQL)</name>
-    <description>Tools, utilities, code gen to support CQL in FHIR Clinical Reasoning operations</description>
+    <name>FHIR Clinical Reasoning (CQL R4)</name>
+    <description>CQL Authoring Support for R4</description>
 
     <parent>
         <groupId>org.opencds.cqf.fhir</groupId>

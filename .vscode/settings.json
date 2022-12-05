@@ -67,4 +67,5 @@
         "org.springframework.lang.Nullable"
     ],
     "java.format.settings.profile": "GoogleStyle",
+    "java.compile.nullAnalysis.mode": "automatic"
 }

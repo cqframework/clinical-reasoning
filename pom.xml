@@ -629,9 +629,18 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>ca.jd.cdr</groupId>
+                    <artifactId>cdr-build-plugins</artifactId>
+                    <version>2023.02.PRE</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>ca.jd.cdr</groupId>
+                <artifactId>cdr-build-plugins</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

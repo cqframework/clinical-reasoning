@@ -59,5 +59,6 @@
         "**/.settings": true,
         "**/.factorypath": true
     },
-    "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication -javaagent:\"/home/jp/.vscode/extensions/gabrielbb.vscode-lombok-1.0.1/server/lombok.jar\""
+    "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication -javaagent:\"/home/jp/.vscode/extensions/gabrielbb.vscode-lombok-1.0.1/server/lombok.jar\"",
+    "java.compile.nullAnalysis.mode": "automatic"
 }

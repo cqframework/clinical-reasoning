@@ -28,7 +28,6 @@
         <guava.version>31.0.1-jre</guava.version>
     </properties>
     <modules>
-        <!-- CQF FHIR Setup -->
         <module>cqf-fhir</module>
         <module>cqf-fhir-api</module>
         <module>cqf-fhir-utility</module>
@@ -39,6 +38,7 @@
         <module>cqf-fhir-cql-r5</module>
         <module>cqf-fhir-elm</module>
         <module>cqf-fhir-cr</module>
+        <module>cqf-fhir-cdshooks</module>
         <module>cqf-fhir-jackson</module>
         <module>cqf-fhir-jaxb</module>
         <module>cqf-fhir-bom</module>
@@ -83,6 +83,24 @@
     </scm>
 
     <repositories>
+        <repository>
+            <id>smilecdr-api-public-maven</id>
+            <url>https://gitlab.com/api/v4/projects/24364373/packages/maven</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
+        </repository>
+        <repository>
+            <id>cda2fhir-maven</id>
+            <url>https://gitlab.com/api/v4/projects/31768607/packages/maven</url>
+        </repository>
         <repository>
             <id>oss-sonatype</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -397,6 +415,7 @@
                 <artifactId>mapstruct</artifactId>
                 <version>${org.mapstruct.version}</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -635,15 +654,10 @@
                 <plugin>
                     <groupId>ca.jd.cdr</groupId>
                     <artifactId>cdr-build-plugins</artifactId>
-                    <version>2023.02.PRE</version>
                 </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>ca.jd.cdr</groupId>
-                <artifactId>cdr-build-plugins</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

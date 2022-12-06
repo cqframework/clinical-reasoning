@@ -76,6 +76,11 @@
                 <artifactId>cqf-fhir-cr</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.opencds.cqf.fhir</groupId>
+                <artifactId>cqf-fhir-cdshooks</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

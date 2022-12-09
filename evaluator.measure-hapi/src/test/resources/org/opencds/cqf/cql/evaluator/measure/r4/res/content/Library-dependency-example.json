@@ -28,6 +28,6 @@
   "description": "Example library illustrating reference to dependencies in dependent implementation guides",
   "content": [ {
     "contentType": "text/cql",
-    "data": "bGlicmFyeSBEZXBlbmRlbmN5RXhhbXBsZSB2ZXJzaW9uICcwLjEuMCcKCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnCgppbmNsdWRlIEZISVJIZWxwZXJzIHZlcnNpb24gJzQuMC4xJwoKaW5jbHVkZSBleGFtcGxlLmZoaXIudXYubXlpZy5leGFtcGxlIGNhbGxlZCB0ZXN0Cgpjb250ZXh0IFBhdGllbnQKCmRlZmluZSBUZXN0OiBbIk9ic2VydmF0aW9uIl0gTwogIHdoZXJlIGV4aXN0cyAoTy5jYXRlZ29yeSBDCiAgICB3aGVyZSBDIH4gdGVzdC4iTGFib3JhdG9yeSBPYnNlcnZhdGlvbiBDYXRlZ29yeSIKICApCg=="
+    "url": "res/cql/DependencyExample.cql"
   } ]
 }

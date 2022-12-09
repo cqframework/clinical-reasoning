@@ -52,11 +52,11 @@
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-cr</artifactId>
+            <artifactId>cqf-fhir-elm</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-elm</artifactId>
+            <artifactId>cqf-fhir-cr</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>

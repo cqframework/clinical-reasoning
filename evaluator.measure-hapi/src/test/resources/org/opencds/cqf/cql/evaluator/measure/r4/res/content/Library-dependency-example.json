@@ -1,0 +1,33 @@
+{
+  "resourceType": "Library",
+  "id": "dependency-example",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  } ],
+  "url": "http://somewhere.org/fhir/uv/mycontentig/Library/DependencyExample",
+  "version": "0.1.0",
+  "name": "DependencyExample",
+  "title": "Dependency Example",
+  "status": "draft",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "subjectCodeableConcept": {
+    "coding": [ {
+      "system": "hl7.org/fhir/resource-types",
+      "code": "Patient"
+    } ]
+  },
+  "description": "Example library illustrating reference to dependencies in dependent implementation guides",
+  "content": [ {
+    "contentType": "text/cql",
+    "data": "bGlicmFyeSBEZXBlbmRlbmN5RXhhbXBsZSB2ZXJzaW9uICcwLjEuMCcKCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnCgppbmNsdWRlIEZISVJIZWxwZXJzIHZlcnNpb24gJzQuMC4xJwoKaW5jbHVkZSBleGFtcGxlLmZoaXIudXYubXlpZy5leGFtcGxlIGNhbGxlZCB0ZXN0Cgpjb250ZXh0IFBhdGllbnQKCmRlZmluZSBUZXN0OiBbIk9ic2VydmF0aW9uIl0gTwogIHdoZXJlIGV4aXN0cyAoTy5jYXRlZ29yeSBDCiAgICB3aGVyZSBDIH4gdGVzdC4iTGFib3JhdG9yeSBPYnNlcnZhdGlvbiBDYXRlZ29yeSIKICApCg=="
+  } ]
+}

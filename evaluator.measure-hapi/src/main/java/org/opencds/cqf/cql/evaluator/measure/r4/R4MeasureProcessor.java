@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -74,6 +75,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     private static Logger logger = LoggerFactory.getLogger(R4MeasureProcessor.class);
 
+    //***** new parameters*********
+    protected Repository repository;
+
+    //********************************
+
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected DataProviderFactory dataProviderFactory;
     protected EndpointConverter endpointConverter;
@@ -103,6 +109,27 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
         this(terminologyProviderFactory, dataProviderFactory, librarySourceProviderFactory, fhirDalFactory,
                 endpointConverter, null, null, null, null, null, null, null);
+    }
+
+    public R4MeasureProcessor(Repository repository, EndpointConverter endpointConverter, MeasureEvaluationOptions measureEvaluationOptions, CqlOptions cqlOptions,
+                              Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
+        this.repository = repository;
+
+        this.endpointConverter = endpointConverter;
+
+        this.libraryCache = libraryCache;
+
+        if (measureEvaluationOptions != null) {
+            this.measureEvaluationOptions = measureEvaluationOptions;
+        }
+
+        if (cqlOptions != null) {
+            this.cqlOptions = cqlOptions;
+        }
+
+        if (this.measureEvaluationOptions.isValidationEnabled()) {
+            createValidator();
+        }
     }
 
     public R4MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,

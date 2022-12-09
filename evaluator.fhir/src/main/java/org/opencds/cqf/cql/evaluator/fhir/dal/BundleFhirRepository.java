@@ -55,7 +55,7 @@ public class BundleFhirRepository implements Repository {
    //HashMap<String, List<List<IQueryParameterType>>>
         Iterable<IBaseResource> iterable = (Iterable<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
                 this.context.getResourceDefinition(resourceType).getImplementingClass());
-        Iterator ite = iterable.iterator();
+//        Iterator ite = iterable.iterator();
 //        while(ite.hasNext()) {
 //            IBase iBase = (IBase)ite.next();
 //

@@ -1,16 +1,35 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.measure.ResourceLoader;
 import org.opencds.cqf.fhir.api.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class R4TestRepository implements Repository {
+public class R4TestRepository implements Repository, ResourceLoader {
 
 
+    FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
+
+    private Map<String, Resource> resourceMap;
+
+    public R4TestRepository() {
+        resourceMap = new HashMap<>();
+        //todo load all necessary resources
+        loadTestResources("r4/res/tests/Patient-example.json");
+    }
+
+    private void loadTestResources(String location) {
+        IBaseResource resource = readResource(context, location);
+        System.out.println("ID:"+ resource.getIdElement().getResourceType());
+    }
 
     @Override
     public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id, Map<String, String> headers) {

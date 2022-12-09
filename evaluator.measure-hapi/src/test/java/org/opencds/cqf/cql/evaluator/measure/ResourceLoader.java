@@ -61,6 +61,7 @@ public interface ResourceLoader {
     @SuppressWarnings("java:S112")
     default String stringFromResource(String theLocation) {
         InputStream is = null;
+        // todo load from direcrory
         try {
             if (theLocation.startsWith(File.separator)) {
                 is = new FileInputStream(theLocation);

@@ -76,9 +76,10 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     protected TerminologyProviderFactory terminologyProviderFactory;
     protected DataProviderFactory dataProviderFactory;
-    protected EndpointConverter endpointConverter;
     protected LibrarySourceProviderFactory librarySourceProviderFactory;
     protected FhirDalFactory fhirDalFactory;
+
+    protected EndpointConverter endpointConverter;
 
     private static Map<ModelIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 

@@ -68,5 +68,17 @@
         "org.springframework.lang.Nullable"
     ],
     "java.format.settings.profile": "GoogleStyle",
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "yaml.schemas": {
+        "https://squidfunk.github.io/mkdocs-material/schema.json": "cqf-fhir-docs/src/doc/mkdocs.yml",
+        "https://json.schemastore.org/github-workflow.json": ".github/workflows/deploy.yml"
+      },
+      "yaml.customTags": [
+        "tag:yaml.org,2002:python/name:materialx.emoji.to_svg",
+        "tag:yaml.org,2002:python/name:materialx.emoji.twemoji",
+        "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
+      ],
+      "markdownlint.ignore": [
+        "**/CNAME"
+      ]
 }

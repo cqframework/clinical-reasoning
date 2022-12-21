@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -8,11 +9,14 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IHistoryTyped;
+import ca.uhn.fhir.util.ParametersUtil;
 
 public class RestRepository implements Repository {
 
@@ -40,6 +44,18 @@ public class RestRepository implements Repository {
     @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
         var op = this.client.create().resource(resource);
+        for (var entry : headers.entrySet()) {
+            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+        }
+
+        return op.execute();
+    }
+
+    @Override
+    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters,
+            Map<String, String> headers) {
+        var op = this.client.patch().withFhirPatch(patchParameters).withId(id);
+
         for (var entry : headers.entrySet()) {
             op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
         }
@@ -99,6 +115,17 @@ public class RestRepository implements Repository {
     @Override
     public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
         var op = this.client.transaction().withBundle(transaction);
+
+        for (var entry : headers.entrySet()) {
+            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+        }
+
+        return op.execute();
+    }
+
+    @Override
+    public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
+        var op = this.client.loadPage().byUrl(url).andReturnBundle(bundleType);
 
         for (var entry : headers.entrySet()) {
             op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
@@ -183,5 +210,66 @@ public class RestRepository implements Repository {
         }
 
         return op.execute();
+    }
+
+    @Override
+    public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters, Class<B> returnType,
+            Map<String, String> headers) {
+        var op = this.client.history().onServer().returnBundle(returnType);
+
+        for (var entry : headers.entrySet()) {
+            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+        }
+
+        this.applyHistoryParams(op, parameters);
+
+        return op.execute();
+    }
+
+    @Override
+    public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(Class<T> resourceType,
+            P parameters, Class<B> returnType, Map<String, String> headers) {
+        var op = this.client.history().onType(resourceType).returnBundle(returnType);
+
+        for (var entry : headers.entrySet()) {
+            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+        }
+
+        this.applyHistoryParams(op, parameters);
+
+        return op.execute();
+    }
+
+    @Override
+    public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id, P parameters,
+            Class<B> returnType, Map<String, String> headers) {
+        var op = this.client.history().onInstance(id).returnBundle(returnType);
+
+        for (var entry : headers.entrySet()) {
+            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+        }
+
+        this.applyHistoryParams(op, parameters);
+
+        return op.execute();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <B extends IBaseBundle, P extends IBaseParameters> void applyHistoryParams(
+            IHistoryTyped<B> operation,
+            P parameters) {
+
+        var ctx = this.client.getFhirContext();
+        var count = ParametersUtil.getNamedParameterValuesAsInteger(ctx, parameters, "_count");
+        if (count != null && !count.isEmpty()) {
+            operation.count(count.get(0));
+        }
+
+        // TODO: Figure out how to handle date ranges for the _at parameter
+
+        var since = ParametersUtil.getNamedParameter(ctx, parameters, "_since");
+        if (since.isPresent()) {
+            operation.since((IPrimitiveType<Date>) since.get());
+        }
     }
 }

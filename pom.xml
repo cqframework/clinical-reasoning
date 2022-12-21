@@ -42,7 +42,7 @@
         <module>cqf-fhir-jackson</module>
         <module>cqf-fhir-jaxb</module>
         <module>cqf-fhir-bom</module>
-        <module>cqf-fhir-docs</module>
+        <module>docs</module>
 
         <module>evaluator</module>
         <module>evaluator.fhir</module>

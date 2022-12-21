@@ -52,7 +52,7 @@ public class BundleFhirRepository implements Repository {
             Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         IBaseResource bundle = Resources.newResource(IBaseBundle.class, UUID.randomUUID().toString());
-   //HashMap<String, List<List<IQueryParameterType>>>
+        //HashMap<String, List<List<IQueryParameterType>>>
         Iterable<IBaseResource> iterable = (Iterable<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
                 this.context.getResourceDefinition(resourceType).getImplementingClass());
 //        Iterator ite = iterable.iterator();
@@ -64,8 +64,18 @@ public class BundleFhirRepository implements Repository {
     }
 
     @Override
+    public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
+        return null;
+    }
+
+    @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters, Map<String, String> headers) {
+        return null;
     }
 
     @Override
@@ -115,6 +125,21 @@ public class BundleFhirRepository implements Repository {
 
     @Override
     public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name, P parameters, Map<String, String> headers) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters, Class<B> returnType, Map<String, String> headers) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id, P parameters, Class<B> returnType, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 }

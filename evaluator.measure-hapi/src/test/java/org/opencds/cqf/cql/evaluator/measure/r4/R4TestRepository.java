@@ -9,7 +9,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.measure.FhirResourceLoader;
 import org.opencds.cqf.fhir.api.Repository;
@@ -17,21 +16,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import java.util.*;
 
 public class R4TestRepository implements Repository {
-
-    public static void main(String[] args) {
-        R4TestRepository repository = new R4TestRepository();
-        IBaseResource res = repository.read(Patient.class, new IdType("example"), null);
-        System.out.println(res.getIdElement().getIdPart());
-
-        Patient john = new Patient();
-        john.setId(new IdType("Patient", "id-john-doe"));
-        repository.create(john, null);
-
-        repository.create(john, null);
-
-        IBaseBundle bundle = repository.search(Bundle.class, Patient.class, null, null);
-        System.out.println(((Bundle) bundle).getEntry().size());
-    }
 
     FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
     private Map<IdType, IBaseResource> resourceMap;
@@ -73,7 +57,6 @@ public class R4TestRepository implements Repository {
             if(!resourceMap.containsKey(theId)) {
                 resourceMap.put(theId, iBaseResource);
                 methodOutcome.setCreated(true);
-                System.out.println("created:" + theId);
             } else {
                 Long nextLong = new Random().nextLong();
                 theId = new IdType(iBaseResource.getIdElement().getResourceType(),
@@ -81,7 +64,6 @@ public class R4TestRepository implements Repository {
                         nextLong.toString());
                 resourceMap.put(theId, iBaseResource);
                 methodOutcome.setCreated(true);
-                System.out.println("created:" + theId);
             }
 
         } else {
@@ -107,11 +89,9 @@ public class R4TestRepository implements Repository {
             IdType theId = new IdType(iBaseResource.getIdElement().getResourceType(), iBaseResource.getIdElement().getIdPart());
             if(resourceMap.containsKey(theId)) {
                 resourceMap.put(theId, iBaseResource);
-                System.out.println("updated:" + theId);
             } else {
                 resourceMap.put(theId, iBaseResource);
                 methodOutcome.setCreated(true);
-                System.out.println("created:" + theId);
             }
         } else {
             // IBaseResource.class is not super class of resource

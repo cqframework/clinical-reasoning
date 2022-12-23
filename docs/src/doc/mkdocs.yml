@@ -39,7 +39,7 @@ markdown_extensions:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets:
-      base_path: [".", "../../src/main/java/docs"]
+      base_path: [".", "../main/java/docs", "../main/resources"]
   - pymdownx.superfences
 
 nav:

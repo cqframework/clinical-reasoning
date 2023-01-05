@@ -2,9 +2,9 @@ package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.*;
@@ -43,15 +43,14 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 			final String templateId, final String codePath, final Iterable<Code> codes, final String valueSet, final String datePath,
 			final String dateLowPath, final String dateHighPath, final Interval dateRange) {
 
-		List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(
+		return BundleUtil.toListOfResourcesOfType(
 				this.fhirContext, this.bundle,
-				this.fhirContext.getResourceDefinition(dataType).getImplementingClass());
-
-		resources = this.filterByTemplateId(dataType, templateId, resources);
-		resources = this.filterByContext(dataType, context, contextPath, contextValue, resources);
-		resources = this.filterByTerminology(dataType, codePath, codes, valueSet, resources);
-
-		return resources.stream().map(x -> (Object) x).collect(Collectors.toList());
+				this.fhirContext.getResourceDefinition(dataType).getImplementingClass())
+			.stream()
+			.filter(filterByTemplateId(dataType, templateId))
+			.filter(filterByContext(dataType, context, contextPath, contextValue))
+			.filter(filterByTerminology(dataType, codePath, codes, valueSet))
+			.collect(Collectors.<Object>toList());
 	}
 
 	private boolean anyCodeMatch(final Iterable<Code> left, final Iterable<Code> right) {
@@ -112,76 +111,54 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return false;
 	}
 
-	private List<? extends IBaseResource> filterByTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
-			final String valueSet, final List<? extends IBaseResource> resources) {
+	private Predicate<? super IBaseResource> filterByTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
+			final String valueSet) {
 		if (codes == null && valueSet == null) {
-			return resources;
+			return resource -> true;
 		}
 
 		if (codePath == null) {
-			return resources;
+			return resource -> true;
 		}
 
-		final List<IBaseResource> filtered = new ArrayList<>();
-
-		for (final IBaseResource res : resources) {
+		return (IBaseResource res) -> {
 			final List<IBase> values = this.fhirPath.evaluate(res, codePath, IBase.class);
 
-			if (values != null && values.size() == 1 && values.get(0) instanceof IPrimitiveType) {
-				if (isPrimitiveMatch(dataType, (IPrimitiveType<?>) values.get(0), codes)) {
-					filtered.add(res);
+			if (values != null && values.size() == 1) {
+				if (values.get(0) instanceof IPrimitiveType) {
+					return isPrimitiveMatch(dataType, (IPrimitiveType<?>) values.get(0), codes);
 				}
-				continue;
-			}
 
-			if (values != null && values.size() == 1 && values.get(0).fhirType().equals("CodeableConcept")) {
-				String codeValueSet = getValueSetFromCode(values.get(0));
-				if (codeValueSet != null) {
-					if (valueSet != null && codeValueSet.equals(valueSet)) {
-						filtered.add(res);
+				if (values.get(0).fhirType().equals("CodeableConcept")) {
+					String codeValueSet = getValueSetFromCode(values.get(0));
+					if (codeValueSet != null) {
+						// TODO: If the value sets are not equal by name, test whether they have the same expansion...
+						return valueSet != null && codeValueSet.equals(valueSet);
 					}
-					// TODO: If the value sets are not equal by name, test whether they have the same expansion...
-					continue;
 				}
 			}
 
 			final List<Code> resourceCodes = this.codeUtil.getElmCodesFromObject(values);
-			if (resourceCodes == null) {
-				continue;
-			}
-
-			if (anyCodeMatch(resourceCodes, codes)) {
-				filtered.add(res);
-				continue;
-			}
-
-			if (anyCodeInValueSet(resourceCodes, valueSet)) {
-				filtered.add(res);
-				continue;
-			}
-		}
-
-		return filtered;
+			return anyCodeMatch(resourceCodes, codes) || anyCodeInValueSet(resourceCodes, valueSet);
+		};
 	}
 
-	private List<? extends IBaseResource> filterByTemplateId(final String dataType, final String templateId, final List<? extends IBaseResource> resources) {
+	private Predicate<? super IBaseResource> filterByTemplateId(final String dataType, final String templateId) {
 		if (templateId == null || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
 			logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
-			return resources;
+			return resource -> true;
 		}
 
-		final List<IBaseResource> filtered = new ArrayList<>();
-		for (final IBaseResource res : resources) {
+		return (IBaseResource res) -> {
 			if (res.getMeta() != null && res.getMeta().getProfile() != null) {
 				for (IPrimitiveType<?> profile : res.getMeta().getProfile()) {
 					if (profile.hasValue() && profile.getValueAsString().equals(templateId)) {
-						filtered.add(res);
+						return true;
 					}
 				}
 			}
-		}
-
-		return filtered;
+			return false;
+		};
 	}
 
 	// Super hackery, just to get this running for connectathon
@@ -196,25 +173,23 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return null;
 	}
 
-	private List<? extends IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,
-			final Object contextValue, final List<? extends IBaseResource> resources) {
+	private Predicate<? super IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,
+			final Object contextValue) {
 		if (context == null || contextValue == null || contextPath == null) {
 			logger.debug(
 					"Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning unfiltered resources.",
 					dataType, context, contextPath, contextValue);
-			return resources;
+			return resource -> true;
 		}
 
-		final List<IBaseResource> filtered = new ArrayList<>();
-
-		for (final IBaseResource res : resources) {
+		return (IBaseResource res) -> {
 			final Optional<IBase> resContextValue = this.fhirPath.evaluateFirst(res, contextPath, IBase.class);
 			if (resContextValue.isPresent() && resContextValue.get() instanceof IIdType) {
 				String id = ((IIdType)resContextValue.get()).getIdPart();
 
 				if (id == null) {
 					logger.debug("Found null id for {} resource. Skipping.", dataType);
-					continue;
+					return false;
 				}
 
 				if (id.startsWith("urn:")) {
@@ -223,14 +198,14 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				}
 				if (!id.equals(contextValue)) {
 					logger.debug("Found {} with id {}. Skipping.", dataType, id);
-					continue;
+					return false;
 				}
 			}
 			else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
 					String reference = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
 					if (reference == null) {
 						logger.debug("Found null reference for {} resource. Skipping.", dataType);
-						continue;
+						return false;
 					}
 
 					if (reference.startsWith("urn:")) {
@@ -244,14 +219,14 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 					
 					if (!reference.equals(contextValue)) {
 						logger.debug("Found {} with reference {}. Skipping.", dataType, reference);
-						continue;
+						return false;
 					}
 				}
 			else {
 				final Optional<IBase> reference = this.fhirPath.evaluateFirst(res, "reference", IBase.class);
 				if (!reference.isPresent()) {
 					logger.debug("Found {} resource unrelated to context. Skipping.", dataType);
-					continue;
+					return false;
 				}
 
 				String referenceString = ((IPrimitiveType<?>)reference.get()).getValueAsString();
@@ -268,14 +243,12 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				if (!referenceString.equals((String) contextValue)) {
 					logger.debug("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
 							referenceString, (String) contextValue);
-					continue;
+					return false;
 				}
 			}
 
-			filtered.add(res);
-		}
-
-		return filtered;
+			return true;
+		};
 	}
 
     private String stripUrnScheme(String uri) {

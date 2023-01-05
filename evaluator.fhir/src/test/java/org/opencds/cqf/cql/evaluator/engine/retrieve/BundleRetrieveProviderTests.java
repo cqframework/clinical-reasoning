@@ -19,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.Patient;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -77,7 +78,11 @@ public class BundleRetrieveProviderTests {
 
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
         assertNotNull(results);
+<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
+=======
+        assertThat(results, emptyIterable());
+>>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
     }
 
 
@@ -94,7 +99,11 @@ public class BundleRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
+<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
+=======
+        assertThat(results, emptyIterable());
+>>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
     }
 
     @Test
@@ -133,7 +142,11 @@ public class BundleRetrieveProviderTests {
         // Id does not exist
         codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med-does-exist");
         results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
+<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
+=======
+        assertThat(results, emptyIterable());
+>>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
     }
 
     @Test
@@ -144,7 +157,11 @@ public class BundleRetrieveProviderTests {
         Code code = new Code().withCode("not-a-code").withSystem("not-a-system");
         Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results); 
+<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
+=======
+        assertThat(results, emptyIterable());
+>>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
 
         // Codes does match
         code = new Code().withCode("10327003").withSystem("http://snomed.info/sct");

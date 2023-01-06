@@ -149,6 +149,19 @@ public class BundleRetrieveProviderTests {
 >>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
     }
 
+    // This test covers a special case that's outside of normal usage, which is supplying
+    // Strings in the "Codes" element to allows filtering by Id.
+    @Test
+    @SuppressWarnings("unchecked")
+    public void test_filterById_codePathPointsToChoiceTypeWithReference() {
+        IBaseBundle bundle = this.loadBundle("TestBundleMedicationAdministrationWithReference.json");
+        BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
+
+        Iterable<Code> codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("Medication/med1");
+        Iterable<Object> results = brp.retrieve("Patient", "subject", "pat1" , "MedicationAdministration", null, "medication", codes, null, null, null, null, null);
+        assertThat(results, contains(instanceOf(MedicationAdministration.class)));
+    }
+
     @Test
     public void test_filterToCodes() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
@@ -198,6 +211,23 @@ public class BundleRetrieveProviderTests {
         results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
         "http://localhost/fhir/ValueSet/value-set-one", null, null, null, null);
         assertThat(results, is(iterableWithSize(1)));
+    }
+
+    @Test
+    public void test_filterToValueSet_codePathPointsToChoiceTypeWithReference() {
+        IBaseBundle bundle = this.loadBundle("TestBundleMedicationAdministrationWithReference.json");
+        BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
+
+        // Despite the Medication referenced by MedicationAdminstration matching the code, the
+        // RetrieveProvider (as it exists today) does not support resolving the reference and then
+        // matching the code.
+        //
+        // This test ensures BundleRetrieveProvider does not crash in this scenario, which it
+        // previously did by throwing an IllegalArgumentException that stated, "Unable to extract
+        // codes from fhirType Reference."
+        Code code = new Code().withCode("456").withSystem("http://example.com/sys1");
+        Iterable<Object> results = brp.retrieve("Patient", "subject", "pat1" , "MedicationAdministration", null, "medication", Collections.singleton(code), null, null, null, null, null);
+        assertThat(results, is(emptyIterable()));
     }
 
     @Test

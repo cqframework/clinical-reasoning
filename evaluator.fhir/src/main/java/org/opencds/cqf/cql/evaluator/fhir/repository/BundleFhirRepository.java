@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.fhir.dal;
+package org.opencds.cqf.cql.evaluator.fhir.repository;
 
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.NotImplementedException;
@@ -12,7 +12,6 @@ import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.opencds.cqf.fhir.api.Repository;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

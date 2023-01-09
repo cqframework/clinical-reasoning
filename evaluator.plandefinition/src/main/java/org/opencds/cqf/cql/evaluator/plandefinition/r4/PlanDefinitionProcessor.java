@@ -14,32 +14,12 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.DataRequirement;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Goal;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.ParameterDefinition;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestStatus;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
@@ -47,6 +27,9 @@ import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
+import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +41,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
 
   private final ActivityDefinitionProcessor activityDefinitionProcessor;
+  private final QuestionnaireProcessor questionnaireProcessor;
+  private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
 
   public PlanDefinitionProcessor(
           FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor,
@@ -65,6 +50,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           OperationParametersParser operationParametersParser) {
     super(fhirContext, fhirDal, libraryProcessor, expressionEvaluator, operationParametersParser);
     this.activityDefinitionProcessor = activityDefinitionProcessor;
+    this.questionnaireProcessor = new QuestionnaireProcessor(fhirContext, fhirDal, libraryProcessor, expressionEvaluator);
+    this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(fhirContext, fhirDal);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
@@ -74,6 +61,22 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       return Optional.of(type.cast(obj));
     }
     throw new IllegalArgumentException(errorMessage);
+  }
+
+  @Override
+  public void extractQuestionnaireResponse() {
+    var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
+            .filter(entry -> entry.getResource().fhirType() == Enumerations.FHIRAllTypes.QUESTIONNAIRERESPONSE.toCode())
+            .map(entry -> (QuestionnaireResponse) entry.getResource())
+            .collect(Collectors.toList());
+    if (questionnaireResponses != null && questionnaireResponses.size() > 0) {
+      for (var questionnaireResponse : questionnaireResponses) {
+        var extractedResources = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
+        for (var entry : extractedResources.getEntry()) {
+          ((Bundle) bundle).addEntry(entry);
+        }
+      }
+    }
   }
 
   @Override
@@ -203,6 +206,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             path.replace("action.", ""), value);
   }
 
+  @Override
+  public IBaseResource getSubject() {
+    return this.fhirDal.read(new IdType("Patient", this.patientId));
+  }
+
   private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
     var myGoal = new Goal();
     myGoal.setCategory(Collections.singletonList(goal.getCategory()));
@@ -221,10 +229,42 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return myGoal;
   }
 
+  private List<Bundle> getQuestionnaireForOrder(String orderId) {
+    // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as the order id to pass
+
+    return Collections.singletonList(new Bundle());
+  }
+
+  private void resolvePrepopulateAction(PlanDefinition.PlanDefinitionActionComponent action) {
+    // The action should define where to get the Questionnaire
+    var questionnaireBundles = getQuestionnaireForOrder("");
+    for (var bundle : questionnaireBundles) {
+      // Each bundle should contain a Questionnaire and supporting Library and ValueSet resources
+      var questionnaire = (Questionnaire) bundle.getEntry().get(0).getResource();
+      var libraries = bundle.getEntry().stream()
+              .filter(e -> e.hasResource() && (e.getResource().fhirType() == Enumerations.FHIRAllTypes.LIBRARY.toCode()))
+              .map(e -> (Library) e.getResource())
+              .collect(Collectors.toList());
+      var valueSets = bundle.getEntry().stream()
+              .filter(e -> e.hasResource() && (e.getResource().fhirType() == Enumerations.FHIRAllTypes.VALUESET.toCode()))
+              .map(e -> (ValueSet) e.getResource())
+              .collect(Collectors.toList());
+      var additionalData = bundle.copy();
+      libraries.forEach(library -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(library)); });
+      valueSets.forEach(valueSet -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)); });
+      requestResources.add(questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters, additionalData, dataEndpoint));
+    }
+  }
+
   private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup,
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
     // TODO: If action has inputs generate QuestionnaireItems
+
+    if (action.hasExtension("prepopulate action")) {
+      resolvePrepopulateAction(action);
+    }
+
     if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, action))) {
       if (action.hasRelatedAction()) {
         for (var relatedActionComponent : action.getRelatedAction()) {

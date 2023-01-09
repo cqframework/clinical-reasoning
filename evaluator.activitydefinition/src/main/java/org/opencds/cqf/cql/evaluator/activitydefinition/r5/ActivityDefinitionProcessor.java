@@ -5,6 +5,8 @@ import java.util.Collections;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableReference;
@@ -91,13 +93,15 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
                 throw new FHIRException(msg);
         }
 
+        var subjectCode = activityDefinition.getSubjectCodeableConcept().getCoding().get(0).getCode();
+        var subjectType = subjectCode != null ? subjectCode : "Patient";
         for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition
                 .getDynamicValue()) {
             if (dynamicValue.hasExpression()) {
                 resolveDynamicValue(dynamicValue.getExpression().getLanguage(),
                         dynamicValue.getExpression().getExpression(),
                         activityDefinition.getLibrary().get(0).getValueAsString(),
-                        dynamicValue.getPath(), result);
+                        dynamicValue.getPath(), result, subjectType);
             }
         }
 
@@ -109,6 +113,11 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         if (value == null)
             return null;
         return ((Parameters.ParametersParameterComponent) value).getValue();
+    }
+
+    @Override
+    public IBaseResource getSubject(String subjectType) {
+        return this.fhirDal.read(new IdType(subjectType, this.subjectId));
     }
 
     private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {

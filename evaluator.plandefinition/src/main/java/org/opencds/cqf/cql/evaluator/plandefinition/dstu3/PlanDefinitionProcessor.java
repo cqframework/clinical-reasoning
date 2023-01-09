@@ -10,27 +10,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.ActivityDefinition;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.DomainResource;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Goal;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.ParameterDefinition;
-import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRelationshipType;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Task;
-import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,6 +26,8 @@ import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +37,8 @@ import ca.uhn.fhir.context.FhirContext;
 public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
   protected ActivityDefinitionProcessor activityDefinitionProcessor;
+  private final QuestionnaireProcessor questionnaireProcessor;
+  private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
 
   public PlanDefinitionProcessor(
           FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor, 
@@ -58,6 +46,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           OperationParametersParser operationParametersParser) {
     super(fhirContext, fhirDal, libraryProcessor, expressionEvaluator, operationParametersParser);
     this.activityDefinitionProcessor = activityDefinitionProcessor;
+    this.questionnaireProcessor = new QuestionnaireProcessor(fhirContext, fhirDal, libraryProcessor, expressionEvaluator);
+    this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(fhirContext, fhirDal);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
@@ -66,6 +56,22 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       return Optional.of(type.cast(obj));
     }
     throw new IllegalArgumentException(errorMessage);
+  }
+
+  @Override
+  public void extractQuestionnaireResponse() {
+    var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
+            .filter(entry -> entry.getResource().fhirType() == Enumerations.FHIRAllTypes.QUESTIONNAIRERESPONSE.toCode())
+            .map(entry -> (QuestionnaireResponse) entry.getResource())
+            .collect(Collectors.toList());
+    if (questionnaireResponses != null && questionnaireResponses.size() > 0) {
+      for (var questionnaireResponse : questionnaireResponses) {
+        var extractedResources = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
+        for (var entry : extractedResources.getEntry()) {
+          ((Bundle) bundle).addEntry(entry);
+        }
+      }
+    }
   }
 
   @Override
@@ -178,6 +184,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
     modelResolver.setValue(requestGroup.getAction().get(matchCount - 1),
             path.replace("action.", ""), value);
+  }
+
+  @Override
+  public IBaseResource getSubject() {
+    return this.fhirDal.read(new IdType("Patient", this.patientId));
   }
 
   private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {

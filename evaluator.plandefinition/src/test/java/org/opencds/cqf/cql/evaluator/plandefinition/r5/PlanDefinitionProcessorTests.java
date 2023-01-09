@@ -82,4 +82,30 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
                 .apply()
                 .isEqualsTo("rule-filters/ReportableBundle.json");
     }
+
+    @Test (enabled = false)
+    public void testQuestionnairePrepopulate() {
+        PlanDefinition.Assert.that(
+                        "",
+                        "",
+                        null
+                )
+                .withData("")
+                .withLibrary("")
+                .apply()
+                .isEqualsTo("");
+    }
+
+    @Test(enabled = false)
+    public void testQuestionnaireResponse() {
+        PlanDefinition.Assert.that(
+                        "",
+                        "",
+                        null
+                )
+                .withData("")
+                .withLibrary("")
+                .apply()
+                .isEqualsTo("");
+    }
 }

@@ -9,15 +9,19 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 
 public class R4RepositoryTest {
 
-    R4TestRepository repository;
+    FhirRepository repository;
 
     public R4RepositoryTest() {
-        repository = new R4TestRepository();
+        repository = new FhirRepository(this.getClass(),
+                List.of("res/tests", "res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/", "res/content/"), false);
     }
 
     @Test

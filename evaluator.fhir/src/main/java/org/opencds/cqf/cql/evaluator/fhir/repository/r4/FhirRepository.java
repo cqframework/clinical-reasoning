@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.measure.r4;
+package org.opencds.cqf.cql.evaluator.fhir.repository.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -10,20 +10,19 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.cql.evaluator.measure.FhirResourceLoader;
+import org.opencds.cqf.cql.evaluator.fhir.util.FhirResourceLoader;
 import org.opencds.cqf.fhir.api.Repository;
 
 import java.util.*;
 
-public class R4TestRepository implements Repository {
+public class FhirRepository implements Repository {
 
     FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
     private Map<IdType, IBaseResource> resourceMap;
 
-    public R4TestRepository() {
-        FhirResourceLoader fhirResourceLoader = new FhirResourceLoader(context, this.getClass(),
-                List.of("res/tests", "res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/", "res/content/"),
-                false);
+    public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
+        FhirResourceLoader fhirResourceLoader = new FhirResourceLoader(context, clazz, directoryList
+                , recursive);
         List<IBaseResource> list = fhirResourceLoader.getResources();
         System.out.println(list.size());
 
@@ -109,7 +108,7 @@ public class R4TestRepository implements Repository {
         if (resourceMap.containsKey(theId)) {
             resourceMap.remove(theId);
         } else {
-         throw new ResourceNotFoundException("Resource not found with id " + theId);
+            throw new ResourceNotFoundException("Resource not found with id " + theId);
         }
         return methodOutcome;
     }

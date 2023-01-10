@@ -6,14 +6,23 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirResourceLoader;
 import org.opencds.cqf.fhir.api.Repository;
 
-import java.util.*;
+import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+
 
 public class FhirRepository implements Repository {
 
@@ -21,10 +30,8 @@ public class FhirRepository implements Repository {
     private Map<IdType, IBaseResource> resourceMap;
 
     public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
-        FhirResourceLoader fhirResourceLoader = new FhirResourceLoader(context, clazz, directoryList
-                , recursive);
-        List<IBaseResource> list = fhirResourceLoader.getResources();
-        System.out.println(list.size());
+        FhirResourceLoader resourceLoader = new FhirResourceLoader(context, clazz, directoryList, recursive);
+        List<IBaseResource> list = resourceLoader.getResources();
 
         resourceMap = new LinkedHashMap<>();
 

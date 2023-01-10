@@ -2,9 +2,11 @@ package org.opencds.cqf.cql.evaluator.fhir.repository.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -14,24 +16,24 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirResourceLoader;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.opencds.cqf.fhir.api.Repository;
 
-import java.util.List;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 
 public class FhirRepository implements Repository {
 
     FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
+    protected IFhirPath fhirPath;
+
     private Map<IdType, IBaseResource> resourceMap;
 
     public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
         FhirResourceLoader resourceLoader = new FhirResourceLoader(context, clazz, directoryList, recursive);
+        this.fhirPath = FhirPathCache.cachedForContext(context);
         List<IBaseResource> list = resourceLoader.getResources();
 
         resourceMap = new LinkedHashMap<>();
@@ -131,13 +133,52 @@ public class FhirRepository implements Repository {
         Bundle bundle = Resources.newResource(Bundle.class, UUID.randomUUID().toString());
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
+        List<IBaseResource> resourceList = new ArrayList<>();
         for(IBaseResource resource : resourceMap.values()) {
             if(resource.getIdElement().getResourceType().equals(resourceType.getSimpleName())) {
-                bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
+                resourceList.add(resource);
             }
         }
 
+        if(searchParameters.containsKey("url")) {
+            Iterable<IBaseResource> bundleResources = searchByUrl(resourceList, searchParameters.get("url").get(0)
+                    .getValueAsQueryToken(context));
+
+            bundleResources.forEach(resource -> bundle.addEntry(
+                    new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+        }
+
         return (B) bundle;
+    }
+
+    private Iterable<IBaseResource> searchByUrl(List<IBaseResource> resources, String url) {
+
+        List<IBaseResource> returnList = new ArrayList<>();
+        for (IBaseResource resource : resources) {
+            switch (this.context.getVersion().getVersion()) {
+                case DSTU3:
+                    var dstu3String = this.fhirPath.evaluateFirst(resource, "url",
+                            org.hl7.fhir.dstu3.model.UriType.class);
+                    if (dstu3String.isPresent() && dstu3String.get().getValue().equals(url)) {
+                        returnList.add(resource);
+                    }
+                    break;
+
+                case R4:
+                    var r4String = this.fhirPath.evaluateFirst(resource, "url",
+                            org.hl7.fhir.r4.model.UriType.class);
+                    if (r4String.isPresent() && r4String.get().getValue().equals(url)) {
+                        returnList.add(resource);
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException(
+                            String.format("Unsupported FHIR version %s", this.context.getVersion().getVersion()));
+            }
+        }
+
+        return returnList;
     }
 
     @Override

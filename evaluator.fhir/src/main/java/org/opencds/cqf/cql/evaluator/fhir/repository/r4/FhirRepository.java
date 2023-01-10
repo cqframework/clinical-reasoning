@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirResourceLoader;
+import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.opencds.cqf.fhir.api.Repository;
 
 import java.util.List;
@@ -126,8 +127,8 @@ public class FhirRepository implements Repository {
                                                                      Class<T> resourceType,
                                                                      Map<String, List<IQueryParameterType>> searchParameters,
                                                                      Map<String, String> headers) {
-        Bundle bundle = new Bundle();
-        bundle.setId(UUID.randomUUID().toString());
+
+        Bundle bundle = Resources.newResource(Bundle.class, UUID.randomUUID().toString());
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
         for(IBaseResource resource : resourceMap.values()) {

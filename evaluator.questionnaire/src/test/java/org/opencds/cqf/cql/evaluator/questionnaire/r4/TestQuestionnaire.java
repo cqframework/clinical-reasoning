@@ -6,10 +6,7 @@ import ca.uhn.fhir.parser.IParser;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.*;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
@@ -137,8 +134,8 @@ public class TestQuestionnaire {
     /** Fluent interface starts here **/
 
     static class Assert {
-        public static PrePopulate that(String questionnaireName) {
-            return new PrePopulate(questionnaireName);
+        public static PrePopulate that(String questionnaireName, String patientId) {
+            return new PrePopulate(questionnaireName, patientId);
         }
     }
 
@@ -146,10 +143,13 @@ public class TestQuestionnaire {
         private MockFhirDal fhirDal = new MockFhirDal();
         private Bundle bundle;
         private Endpoint dataEndpoint;
+        private Parameters parameters;
         private Questionnaire baseResource;
+        private String patientId;
 
-        public PrePopulate(String questionnaireName) {
+        public PrePopulate(String questionnaireName, String patientId) {
             baseResource = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
+            this.patientId = patientId;
         }
 
         public PrePopulate withData(String dataAssetName) {
@@ -166,8 +166,13 @@ public class TestQuestionnaire {
             return this;
         }
 
+        public PrePopulate withParameters(Parameters params) {
+            parameters = params;
+            return this;
+        }
+
         public GeneratedQuestionnaire prePopulate() {
-            return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, null, null, bundle, dataEndpoint));
+            return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId, parameters, bundle, dataEndpoint));
         }
     }
 

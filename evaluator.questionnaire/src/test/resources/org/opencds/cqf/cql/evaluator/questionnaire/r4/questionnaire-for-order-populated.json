@@ -12,7 +12,7 @@
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-      "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorization-prepopulation"
+      "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
     }
   ],
   "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
@@ -52,7 +52,7 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "FacilityName"
               }
             }
@@ -72,7 +72,7 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "FacilityNPI"
               }
             }
@@ -80,33 +80,20 @@
           "linkId": "1.2",
           "text": "NPI",
           "type": "text",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueString": "1407071236"
+            }
+          ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "FacilityPTAN"
-              }
-            }
-          ],
           "linkId": "1.3",
           "text": "PTAN",
           "type": "string",
           "required": true
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "FacilityContractRegion"
-              }
-            }
-          ],
           "linkId": "1.4",
           "text": "Contract/Region",
           "type": "choice",
@@ -146,7 +133,7 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "BeneficiaryFirstName"
               }
             }
@@ -154,14 +141,19 @@
           "linkId": "2.1",
           "text": "First Name",
           "type": "string",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueString": "Peter"
+            }
+          ]
         },
         {
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "BeneficiaryLastName"
               }
             }
@@ -169,14 +161,19 @@
           "linkId": "2.2",
           "text": "Last Name",
           "type": "text",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueString": "Chalmers"
+            }
+          ]
         },
         {
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "BeneficiaryDOB"
               }
             }
@@ -184,14 +181,19 @@
           "linkId": "2.3",
           "text": "Date of Birth",
           "type": "date",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueDate": "1974-12-25"
+            }
+          ]
         },
         {
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "BeneficiaryMedicareID"
               }
             }
@@ -199,14 +201,19 @@
           "linkId": "2.4",
           "text": "Medicare ID",
           "type": "string",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueString": "525697298M"
+            }
+          ]
         },
         {
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "BeneficiaryGender"
               }
             }
@@ -245,6 +252,11 @@
                 "display": "Unknown"
               }
             }
+          ],
+          "initial": [
+            {
+              "valueString": "male"
+            }
           ]
         }
       ]
@@ -259,7 +271,7 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "OperatingPhysicianFirstName"
               }
             }
@@ -267,14 +279,19 @@
           "linkId": "3.1",
           "text": "First Name",
           "type": "string",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueString": "Fielding"
+            }
+          ]
         },
         {
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "OperatingPhysicianLastName"
               }
             }
@@ -282,14 +299,19 @@
           "linkId": "3.2",
           "text": "Last Name",
           "type": "text",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueString": "Kathy"
+            }
+          ]
         },
         {
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "OperatingPhysicianNPI"
               }
             }
@@ -297,18 +319,14 @@
           "linkId": "3.3",
           "text": "NPI",
           "type": "string",
-          "required": true
+          "required": true,
+          "initial": [
+            {
+              "valueString": "1245319599"
+            }
+          ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "OperatingPhysicianPTAN"
-              }
-            }
-          ],
           "linkId": "3.4",
           "text": "PTAN",
           "type": "string",
@@ -325,7 +343,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianAddress1"
                   }
                 }
@@ -333,14 +351,19 @@
               "linkId": "3.5.1",
               "text": "Address1",
               "type": "string",
-              "required": true
+              "required": true,
+              "initial": [
+                {
+                  "valueString": "1080 FIRST COLONIAL RD"
+                }
+              ]
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianAddress2"
                   }
                 }
@@ -355,7 +378,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianAddressCity"
                   }
                 }
@@ -363,14 +386,19 @@
               "linkId": "3.5.3",
               "text": "City",
               "type": "string",
-              "required": true
+              "required": true,
+              "initial": [
+                {
+                  "valueString": "Virginia Beach"
+                }
+              ]
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianAddressState"
                   }
                 }
@@ -378,14 +406,19 @@
               "linkId": "3.5.4",
               "text": "State",
               "type": "string",
-              "required": true
+              "required": true,
+              "initial": [
+                {
+                  "valueString": "VA"
+                }
+              ]
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianAddressZip"
                   }
                 }
@@ -393,7 +426,12 @@
               "linkId": "3.5.5",
               "text": "Zip",
               "type": "string",
-              "required": true
+              "required": true,
+              "initial": [
+                {
+                  "valueString": "21454-2406"
+                }
+              ]
             }
           ]
         }
@@ -409,7 +447,7 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
-                "language": "text/cql",
+                "language": "text/cql.identifier",
                 "expression": "AttendingPhysicianSame"
               }
             }
@@ -417,7 +455,12 @@
           "linkId": "4.1",
           "text": "Same as Operating Physician?",
           "type": "boolean",
-          "required": false
+          "required": false,
+          "initial": [
+            {
+              "valueBoolean": false
+            }
+          ]
         },
         {
           "linkId": "4.2",
@@ -436,7 +479,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "AttendingPhysicianFirstName"
                   }
                 }
@@ -444,14 +487,19 @@
               "linkId": "4.2.1",
               "text": "First Name",
               "type": "string",
-              "required": true
+              "required": true,
+              "initial": [
+                {
+                  "valueString": "Ronald"
+                }
+              ]
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "AttendingPhysicianLastName"
                   }
                 }
@@ -459,14 +507,19 @@
               "linkId": "4.2.2",
               "text": "Last Name",
               "type": "text",
-              "required": true
+              "required": true,
+              "initial": [
+                {
+                  "valueString": "Bone"
+                }
+              ]
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql",
+                    "language": "text/cql.identifier",
                     "expression": "AttendingPhysicianNPI"
                   }
                 }
@@ -474,18 +527,14 @@
               "linkId": "4.2.3",
               "text": "NPI",
               "type": "string",
-              "required": true
+              "required": true,
+              "initial": [
+                {
+                  "valueString": "9941339108"
+                }
+              ]
             },
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "AttendingPhysicianPTAN"
-                  }
-                }
-              ],
               "linkId": "4.2.4",
               "text": "PTAN",
               "type": "string",
@@ -502,7 +551,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql",
+                        "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianAddress1"
                       }
                     }
@@ -510,14 +559,19 @@
                   "linkId": "4.2.5.1",
                   "text": "Address1",
                   "type": "string",
-                  "required": true
+                  "required": true,
+                  "initial": [
+                    {
+                      "valueString": "1003 Healthcare Drive"
+                    }
+                  ]
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql",
+                        "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianAddress2"
                       }
                     }
@@ -532,7 +586,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql",
+                        "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianAddressCity"
                       }
                     }
@@ -540,14 +594,19 @@
                   "linkId": "4.2.5.3",
                   "text": "City",
                   "type": "string",
-                  "required": true
+                  "required": true,
+                  "initial": [
+                    {
+                      "valueString": "Amherst"
+                    }
+                  ]
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql",
+                        "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianAddressState"
                       }
                     }
@@ -555,14 +614,19 @@
                   "linkId": "4.2.5.4",
                   "text": "State",
                   "type": "string",
-                  "required": true
+                  "required": true,
+                  "initial": [
+                    {
+                      "valueString": "MA"
+                    }
+                  ]
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql",
+                        "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianAddressZip"
                       }
                     }
@@ -570,1032 +634,16 @@
                   "linkId": "4.2.5.5",
                   "text": "Zip",
                   "type": "string",
-                  "required": true
+                  "required": true,
+                  "initial": [
+                    {
+                      "valueString": "01002"
+                    }
+                  ]
                 }
               ]
             }
           ]
-        }
-      ]
-    },
-    {
-      "linkId": "5",
-      "text": "Request Details",
-      "type": "group",
-      "item": [
-        {
-          "linkId": "5.1",
-          "text": "Is this a ",
-          "type": "group",
-          "item": [
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "RequestDetailsResubmition"
-                  }
-                }
-              ],
-              "linkId": "5.1.1",
-              "text": "Resubmission?",
-              "type": "boolean",
-              "required": false
-            },
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "RequestDetailsResubmitionUTN"
-                  }
-                }
-              ],
-              "linkId": "5.1.2",
-              "text": "Please provide UTN",
-              "type": "string",
-              "enableWhen": [
-                {
-                  "question": "5.1.1",
-                  "operator": "=",
-                  "answerBoolean": true
-                }
-              ],
-              "required": true
-            }
-          ]
-        },
-        {
-          "linkId": "5.2",
-          "text": "Is this ",
-          "type": "group",
-          "item": [
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "RequestDetailsLifeThreatening"
-                  }
-                }
-              ],
-              "linkId": "5.2.1",
-              "text": "Life Threatening?",
-              "type": "boolean",
-              "required": false
-            },
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "RequestDetailsLifeThreateningExplanation"
-                  }
-                }
-              ],
-              "linkId": "5.2.2",
-              "text": "Please explain",
-              "type": "string",
-              "enableWhen": [
-                {
-                  "question": "5.2.1",
-                  "operator": "=",
-                  "answerBoolean": true
-                }
-              ],
-              "required": true
-            }
-          ]
-        },
-        {
-          "linkId": "5.3",
-          "text": "Diagnosis",
-          "type": "group",
-          "item": [
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "RequestDetailsPrimaryDiagnosisCode"
-                  }
-                }
-              ],
-              "linkId": "5.3.1",
-              "text": "Primary Diagnosis Code",
-              "type": "string",
-              "required": true
-            },
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "RequestDetailsSecondaryDiagnosisCode"
-                  }
-                }
-              ],
-              "linkId": "5.3.2",
-              "text": "Secondary Diagnosis Code",
-              "type": "string",
-              "required": true
-            },
-            {
-              "linkId": "5.3.3",
-              "text": "Additional Diagnosis Code(s)",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsAdditionalDiagnosisCode1"
-                      }
-                    }
-                  ],
-                  "linkId": "5.3.3.1",
-                  "text": "Diagnosis Code 1",
-                  "type": "string",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsAdditionalDiagnosisCode2"
-                      }
-                    }
-                  ],
-                  "linkId": "5.3.3.2",
-                  "text": "Diagnosis Code 2",
-                  "type": "string",
-                  "required": false
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "linkId": "5.4",
-          "text": "Procedure Codes -Please select all procedure codes for this request",
-          "type": "group",
-          "item": [
-            {
-              "linkId": "5.4.1",
-              "text": "Botox",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode64612"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.1.1",
-                  "text": "64612",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCodeJ0585"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.1.2",
-                  "text": "J0585",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCodeJ0587"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.1.3",
-                  "text": "J0587",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode64615"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.1.4",
-                  "text": "64615",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCodeJ0586"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.1.5",
-                  "text": "J0586",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCodeJ0588"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.1.6",
-                  "text": "J0588",
-                  "type": "boolean",
-                  "required": false
-                }
-              ]
-            },
-            {
-              "linkId": "5.4.2",
-              "text": "Blepharoplasty",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode15820"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.1",
-                  "text": "15820",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode15821"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.2",
-                  "text": "15821",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode15822"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.3",
-                  "text": "15822",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode15823"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.4",
-                  "text": "15823",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode67900"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.5",
-                  "text": "67900",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode67901"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.6",
-                  "text": "67901",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode67902"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.7",
-                  "text": "67902",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode67903"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.8",
-                  "text": "67903",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode67904"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.9",
-                  "text": "67904",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode67906"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.10",
-                  "text": "67906",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode67908"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.2.11",
-                  "text": "67908",
-                  "type": "boolean",
-                  "required": false
-                }
-              ]
-            },
-            {
-              "linkId": "5.4.3",
-              "text": "Cervical Fusion with Disc Removal",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode22551"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.3.1",
-                  "text": "22551",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode22552"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.3.2",
-                  "text": "22552",
-                  "type": "boolean",
-                  "required": false
-                }
-              ]
-            },
-            {
-              "linkId": "5.4.4",
-              "text": "Implanted Spinal Neurostimulators",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode63650"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.4.1",
-                  "text": "63650",
-                  "type": "boolean",
-                  "required": false
-                }
-              ]
-            },
-            {
-              "linkId": "5.4.5",
-              "text": "Panniculectomy",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode15830"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.5.1",
-                  "text": "15830",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode15847"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.5.2",
-                  "text": "15847",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode15877"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.5.3",
-                  "text": "15877",
-                  "type": "boolean",
-                  "required": false
-                }
-              ]
-            },
-            {
-              "linkId": "5.4.6",
-              "text": "Rhinoplasty",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode20912"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.1",
-                  "text": "20912",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode21210"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.2",
-                  "text": "21210",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30400"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.3",
-                  "text": "30400",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30410"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.4",
-                  "text": "30410",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30420"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.5",
-                  "text": "30420",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30430"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.6",
-                  "text": "30430",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30435"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.7",
-                  "text": "30435",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30450"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.8",
-                  "text": "30450",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30460"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.9",
-                  "text": "30460",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30462"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.10",
-                  "text": "30462",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30465"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.11",
-                  "text": "30465",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode30520"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.6.12",
-                  "text": "30520",
-                  "type": "boolean",
-                  "required": false
-                }
-              ]
-            },
-            {
-              "linkId": "5.4.7",
-              "text": "Vein Ablation",
-              "type": "group",
-              "item": [
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36473"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.1",
-                  "text": "36473",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36474"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.2",
-                  "text": "36474",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36475"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.3",
-                  "text": "36475",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36476"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.4",
-                  "text": "36476",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36478"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.5",
-                  "text": "36478",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36479"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.6",
-                  "text": "36479",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36482"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.7",
-                  "text": "36482",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCode36483"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.8",
-                  "text": "36483",
-                  "type": "boolean",
-                  "required": false
-                },
-                {
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql",
-                        "expression": "RequestDetailsProcedureCodeStaged"
-                      }
-                    }
-                  ],
-                  "linkId": "5.4.7.9",
-                  "text": "Staged Procedure",
-                  "type": "boolean",
-                  "required": false
-                }
-              ]
-            },
-            {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql",
-                    "expression": "RequestDetailsProcedureCodeStaged"
-                  }
-                }
-              ],
-              "linkId": "5.4.8",
-              "text": "Number of Units Requested (Required for requests with J0585, J0586, J0587, or J0588 only)",
-              "type": "string",
-              "enableWhen": [
-                {
-                  "question": "5.4.1.2",
-                  "operator": "=",
-                  "answerBoolean": true
-                },
-                {
-                  "question": "5.4.1.3",
-                  "operator": "=",
-                  "answerBoolean": true
-                },
-                {
-                  "question": "5.4.1.5",
-                  "operator": "exists",
-                  "answerBoolean": true
-                },
-                {
-                  "question": "5.4.1.6",
-                  "operator": "exists",
-                  "answerBoolean": true
-                }
-              ],
-              "enableBehavior": "any",
-              "required": true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "linkId": "6",
-      "text": "Requestor Information",
-      "type": "group",
-      "item": [
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "RequestorInformationName"
-              }
-            }
-          ],
-          "linkId": "6.1",
-          "text": "Requestor Name",
-          "type": "string",
-          "required": true
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "RequestorInformationRepresentative"
-              }
-            }
-          ],
-          "linkId": "6.2",
-          "text": "Requestor is a representative of the...",
-          "type": "choice",
-          "required": false,
-          "answerOption": [
-            {
-              "id": "RequestorInformationRepresentative-Hospital",
-              "valueCoding": {
-                "code": "hospital",
-                "display": "Hospital Outpatient Department"
-              }
-            },
-            {
-              "id": "RequestorInformationRepresentativePhysNpp",
-              "valueCoding": {
-                "code": "physnpp",
-                "display": "Physician/NPP"
-              }
-            }
-          ]
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "RequestorInformationPhone"
-              }
-            }
-          ],
-          "linkId": "6.3",
-          "text": "Requestor Phone",
-          "type": "string",
-          "required": true
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "RequestorInformationFax"
-              }
-            }
-          ],
-          "linkId": "6.4",
-          "text": "Requestor Fax",
-          "type": "string",
-          "required": true
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueExpression": {
-                "language": "text/cql",
-                "expression": "RequestorInformationFacilityFax"
-              }
-            }
-          ],
-          "linkId": "6.5",
-          "text": "Requestor Facility Fax",
-          "type": "string",
-          "required": true
         }
       ]
     }

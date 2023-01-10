@@ -59,6 +59,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
                     var expression = (Expression) item.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-expression").getValue();
                     var libraryUrl = expression.hasReference() ? expression.getReference() : defaultLibrary;
                     var result = getExpressionResult(expression.getExpression(), expression.getLanguage(), libraryUrl, this.parameters);
+                    // TODO: what to do with choice answerOptions of type valueCoding with an expression that returns a valueString
                     item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent().setValue((Type)result));
                 }
             }

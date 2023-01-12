@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
+import org.hl7.fhir.r4.model.Parameters;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests extends PlanDefinition {
@@ -107,18 +108,19 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
                 .isEqualsTo("cds-hooks-multiple-actions/cds_hooks_multiple_actions_bundle.json");
     }
 
-    @Test (enabled = false)
+    @Test
     public void testQuestionnairePrepopulate() {
-        var planDefinitionID = "";
-        var patientID = "";
-        var data = "";
-        var library = "";
+        var planDefinitionID = "prepopulate";
+        var patientID = "OPA-Patient1";
+        var data = "prepopulate/prepopulate-patient-data.json";
+        var library = "prepopulate/prepopulate-content-bundle.json";
+        var parameters = new Parameters().addParameter("ClaimId", "OPA-Claim1");
         PlanDefinition.Assert.that(planDefinitionID, patientID, null)
-                .withData(data).withLibrary(library).apply()
-                .isEqualsTo("");
+                .withData(data).withLibrary(library).withParameters(parameters).apply()
+                .isEqualsTo("prepopulate/prepopulate-careplan.json");
         PlanDefinition.Assert.that(planDefinitionID, patientID, null)
-                .withData(data).withLibrary(library).applyR5()
-                .isEqualsTo("");
+                .withData(data).withLibrary(library).withParameters(parameters).applyR5()
+                .isEqualsTo("prepopulate/prepopulate-bundle.json");
     }
 
     @Test (enabled = false)

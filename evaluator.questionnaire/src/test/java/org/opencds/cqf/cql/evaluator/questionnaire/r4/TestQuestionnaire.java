@@ -172,7 +172,7 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaire prePopulate() {
-            return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId, parameters, bundle, dataEndpoint));
+            return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId, parameters, bundle, dataEndpoint, null, null));
         }
     }
 

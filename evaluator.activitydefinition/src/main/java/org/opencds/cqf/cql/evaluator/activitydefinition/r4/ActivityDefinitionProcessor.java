@@ -122,6 +122,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
             task.setStatus(Task.TaskStatus.DRAFT);
         }
 
+        task.setIntent(Task.TaskIntent.PROPOSAL);
+
         if (activityDefinition.hasCode()) {
             task.setCode(activityDefinition.getCode());
         }

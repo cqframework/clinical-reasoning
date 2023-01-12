@@ -33,7 +33,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     public IBaseResource getSubject() { return this.fhirDal.read(new IdType("Patient", this.patientId)); }
 
     @Override
-    public Questionnaire prePopulate(Questionnaire questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint) {
+    public Questionnaire prePopulate(Questionnaire questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
         if (questionnaire == null) {
             throw new IllegalArgumentException("No questionnaire passed in");
         }
@@ -41,6 +41,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         this.parameters = parameters;
         this.bundle = bundle;
         this.dataEndpoint = dataEndpopint;
+        this.contentEndpoint = contentEndpoint;
+        this.terminologyEndpoint = terminologyEndpoint;
 
         var libraryUrl = (CanonicalType) questionnaire.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-library").getValue();
 

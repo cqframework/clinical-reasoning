@@ -1,6 +1,8 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.cql.evaluator.questionnaireresponse.Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE;
+import static org.opencds.cqf.cql.evaluator.questionnaireresponse.Constants.SDC_QUESTIONNAIRE_PREPOPULATE;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
@@ -23,6 +26,7 @@ import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinition
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
+import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
@@ -343,7 +347,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
    * offset -> Duration timing -> Timing ( just our use case for connectathon
    * period periodUnit frequency count ) use task code
    */
-  private Resource resolveTask(RequestGroup requestGroup, Task task, PlanDefinition.PlanDefinitionActionComponent action) {
+  private void resolveTask(RequestGroup requestGroup, Task task, PlanDefinition.PlanDefinitionActionComponent action) {
     task.setId(new IdType(task.fhirType(), action.getId()));
     if (action.hasRelatedAction()) {
         var relatedActions = action.getRelatedAction();
@@ -392,8 +396,87 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         task.addExtension(input);
       }
     }
+
     task.addBasedOn(new Reference(requestGroup));
-    return task;
+    task.setFor(requestGroup.getSubject());
+
+    if (action.hasExtension(SDC_QUESTIONNAIRE_PREPOPULATE)) {
+      resolvePrepopulateAction(action, requestGroup, task);
+    }
+  }
+
+  private void resolvePrepopulateAction(PlanDefinition.PlanDefinitionActionComponent action, RequestGroup requestGroup, Task task) {
+    var questionnaireBundles = getQuestionnaireForOrder(action);
+    for (var questionnaireBundle : questionnaireBundles) {
+      // Each bundle should contain a Questionnaire and supporting Library and ValueSet resources
+      var questionnaire = (Questionnaire) questionnaireBundle.getEntry().get(0).getResource();
+      var libraries = questionnaireBundle.getEntry().stream()
+              .filter(e -> e.hasResource() && (e.getResource().fhirType() == Enumerations.FHIRAllTypes.LIBRARY.toCode()))
+              .map(e -> (Library) e.getResource())
+              .collect(Collectors.toList());
+      var valueSets = questionnaireBundle.getEntry().stream()
+              .filter(e -> e.hasResource() && (e.getResource().fhirType() == Enumerations.FHIRAllTypes.VALUESET.toCode()))
+              .map(e -> (ValueSet) e.getResource())
+              .collect(Collectors.toList());
+      var additionalData = ((Bundle) bundle).copy();
+      libraries.forEach(library -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(library)); });
+      valueSets.forEach(valueSet -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)); });
+      var prepopResult = questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters, additionalData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+      if (Boolean.TRUE.equals(containResources)) {
+        requestGroup.addContained((Resource) prepopResult);
+      } else {
+        requestResources.add(prepopResult);
+      }
+      task.setFocus(new Reference(prepopResult.getIdElement()));
+      task.setFor(requestGroup.getSubject());
+    }
+  }
+
+  private List<Bundle> getQuestionnaireForOrder(PlanDefinition.PlanDefinitionActionComponent action) {
+    Bundle bundle = null;
+    // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as the order id to pass
+    var prepopulateExtension = action.getExtensionsByUrl(SDC_QUESTIONNAIRE_PREPOPULATE).get(0);
+    var parameterName = prepopulateExtension.getValue().toString();
+    var prepopulateParameter = this.parameters != null
+            ? ((Parameters) this.parameters).getParameter().stream().filter(p -> p.getName() == parameterName).collect(Collectors.toList()).get(0)
+            : null;
+    if (prepopulateParameter == null) {
+      throw new IllegalArgumentException(String.format("Parameter not found: %s ", parameterName));
+    }
+    var orderId = prepopulateParameter.toString();
+
+    var questionnaireUrl = (action.getExtensionsByUrl(SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).get(0).getValue()).toString();
+
+    if (questionnaireUrl.contains("$")) {
+      var urlSplit = questionnaireUrl.split("$");
+      IGenericClient client = Clients.forUrl(fhirContext, urlSplit[0]);
+      // Clients.registerBasicAuth(client, user, password);
+      try {
+        bundle = client.operation().onInstance(new IdType("Patient"))
+                .named("$" + urlSplit[1])
+                .withParameters(new Parameters().addParameter(new ParametersParameterComponent(new StringType("order")).setValue(new StringType(orderId))))
+                .returnResourceType(Bundle.class)
+                .execute();
+      } catch (Exception e) {
+        logger.error("Error encountered calling $Questionnaire-for-Order operation: %s", e);
+      }
+    } else {
+      var questionnaires = this.fhirDal.searchByUrl("Questionnaire", questionnaireUrl);
+      var iterator = questionnaires.iterator();
+      if (!iterator.hasNext()) {
+        throw new FHIRException("No questionnaire found for definition: " + questionnaireUrl);
+      }
+      var questionnaire = iterator.next();
+      if (questionnaire != null) {
+        bundle = new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource((Resource) questionnaire));
+      }
+    }
+
+    if (bundle == null) {
+      bundle = new Bundle();
+    }
+
+    return Collections.singletonList(bundle);
   }
 
   private void resolveDynamicActions(

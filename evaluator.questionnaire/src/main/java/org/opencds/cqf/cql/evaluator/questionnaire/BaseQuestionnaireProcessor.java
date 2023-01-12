@@ -31,6 +31,8 @@ public abstract class BaseQuestionnaireProcessor<T> {
     protected IBaseParameters parameters;
     protected IBaseBundle bundle;
     protected IBaseResource dataEndpoint;
+    protected IBaseResource contentEndpoint;
+    protected IBaseResource terminologyEndpoint;
 
     public BaseQuestionnaireProcessor(
             FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor,
@@ -42,7 +44,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
         this.expressionEvaluator = expressionEvaluator;
     }
 
-    public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint);
+    public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
     public abstract T generateQuestionnaire();
     public abstract Object resolveParameterValue(IBase value);
     public abstract IBaseResource getSubject();
@@ -68,7 +70,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
             case "text/cql.name":
             case "text/cql-name":
                 parametersResult = libraryProcessor.evaluate(libraryToBeEvaluated, patientId, parameters,
-                        null, null, dataEndpoint, bundle, Collections.singleton(expression));
+                        contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, Collections.singleton(expression));
                 result = (IBase) resolveParameterValue(ParametersUtil.getNamedParameter(
                         fhirContext, parametersResult, expression).orElse(null));
                 break;

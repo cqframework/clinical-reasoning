@@ -13,4 +13,8 @@ public class Constants {
     public static final String SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT = "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse-isSubject";
 
     public static final String SDC_QUESTIONNAIRE_INITIAL_EXPRESSION = "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression";
+
+    public static final String SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE = "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire";
+
+    public static final String SDC_QUESTIONNAIRE_PREPOPULATE = "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate";
 }

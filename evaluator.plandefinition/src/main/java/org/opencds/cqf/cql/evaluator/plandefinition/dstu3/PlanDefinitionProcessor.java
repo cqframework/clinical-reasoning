@@ -1,8 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.cql.evaluator.questionnaireresponse.Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE;
-import static org.opencds.cqf.cql.evaluator.questionnaireresponse.Constants.SDC_QUESTIONNAIRE_PREPOPULATE;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +22,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
@@ -400,7 +399,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     task.addBasedOn(new Reference(requestGroup));
     task.setFor(requestGroup.getSubject());
 
-    if (action.hasExtension(SDC_QUESTIONNAIRE_PREPOPULATE)) {
+    if (action.hasExtension(Constants.SDC_QUESTIONNAIRE_PREPOPULATE)) {
       resolvePrepopulateAction(action, requestGroup, task);
     }
   }
@@ -435,7 +434,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private List<Bundle> getQuestionnaireForOrder(PlanDefinition.PlanDefinitionActionComponent action) {
     Bundle bundle = null;
     // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as the order id to pass
-    var prepopulateExtension = action.getExtensionsByUrl(SDC_QUESTIONNAIRE_PREPOPULATE).get(0);
+    var prepopulateExtension = action.getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE).get(0);
     var parameterName = prepopulateExtension.getValue().toString();
     var prepopulateParameter = this.parameters != null
             ? ((Parameters) this.parameters).getParameter().stream().filter(p -> p.getName() == parameterName).collect(Collectors.toList()).get(0)
@@ -445,7 +444,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
     var orderId = prepopulateParameter.toString();
 
-    var questionnaireUrl = (action.getExtensionsByUrl(SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).get(0).getValue()).toString();
+    var questionnaireUrl = (action.getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).get(0).getValue()).toString();
 
     if (questionnaireUrl.contains("$")) {
       var urlSplit = questionnaireUrl.split("$");

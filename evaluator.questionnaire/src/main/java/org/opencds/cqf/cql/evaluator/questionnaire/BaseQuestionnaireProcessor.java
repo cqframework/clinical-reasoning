@@ -45,6 +45,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
     }
 
     public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
+    public abstract IBaseResource populate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
     public abstract T generateQuestionnaire();
     public abstract Object resolveParameterValue(IBase value);
     public abstract IBaseResource getSubject();

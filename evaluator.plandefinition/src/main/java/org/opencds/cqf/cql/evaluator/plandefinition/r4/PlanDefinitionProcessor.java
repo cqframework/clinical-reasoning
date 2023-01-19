@@ -1,8 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.cql.evaluator.questionnaireresponse.Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE;
-import static org.opencds.cqf.cql.evaluator.questionnaireresponse.Constants.SDC_QUESTIONNAIRE_PREPOPULATE;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,13 +19,13 @@ import org.hl7.fhir.r4.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestStatus;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
-import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.slf4j.Logger;
@@ -443,7 +441,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     task.addBasedOn(new Reference(requestGroup).setType(requestGroup.fhirType()));
     task.setFor(requestGroup.getSubject());
 
-    if (action.hasExtension(SDC_QUESTIONNAIRE_PREPOPULATE)) {
+    if (action.hasExtension(Constants.SDC_QUESTIONNAIRE_PREPOPULATE)) {
       resolvePrepopulateAction(action, requestGroup, task);
     }
   }
@@ -478,7 +476,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private List<Bundle> getQuestionnaireForOrder(PlanDefinition.PlanDefinitionActionComponent action) {
     Bundle bundle = null;
     // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as the order id to pass
-    var prepopulateExtension = action.getExtensionByUrl(SDC_QUESTIONNAIRE_PREPOPULATE);
+    var prepopulateExtension = action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE);
     var parameterName = prepopulateExtension.getValue().toString();
     var prepopulateParameter = this.parameters != null ? ((Parameters) this.parameters).getParameter(parameterName) : null;
     if (prepopulateParameter == null) {
@@ -486,7 +484,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
     var orderId = prepopulateParameter.toString();
 
-    var questionnaireUrl = ((CanonicalType) action.getExtensionByUrl(SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).getValue()).getValue();
+    var questionnaireUrl = ((CanonicalType) action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).getValue()).getValue();
 
     if (questionnaireUrl.contains("$")) {
       var urlSplit = questionnaireUrl.split("$");

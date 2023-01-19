@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4;
+package org.opencds.cqf.cql.evaluator.questionnaire.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -6,7 +6,7 @@ import ca.uhn.fhir.parser.IParser;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r5.model.*;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
@@ -27,10 +27,11 @@ import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaire.r5.QuestionnaireProcessor;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.io.IOException;
@@ -43,7 +44,7 @@ import java.util.Set;
 import static org.testng.Assert.fail;
 
 public class TestQuestionnaire {
-    private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+    private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
     private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
 
     private static InputStream open(String asset) { return TestQuestionnaire.class.getResourceAsStream(asset); }
@@ -154,7 +155,8 @@ public class TestQuestionnaire {
         public QuestionnaireResult withData(String dataAssetName) {
             dataEndpoint = new Endpoint()
                     .setAddress(dataAssetName)
-                    .setConnectionType(new Coding().setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
+                    .setConnectionType(Collections.singletonList(new CodeableConcept()
+                            .setCoding(Collections.singletonList(new Coding().setCode(Constants.HL7_FHIR_FILES)))));
 
             fhirDal.addAll(parse(dataAssetName));
             return this;

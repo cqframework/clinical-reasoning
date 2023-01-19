@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests extends PlanDefinition {
@@ -78,25 +80,30 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             .isEqualsTo("rule-filters/ReportableCarePlan.json");
     }
 
-    @Test (enabled = false)
+    @Test (enabled = false) // Need valid dstu3 content for this test
     public void testQuestionnairePrepopulate() {
         PlanDefinition.Assert.that(
-                        "",
-                        "",
-                        null
+                    "prepopulate",
+                    "OPA-Patient1",
+                    null
                 )
-                .withData("")
-                .withLibrary("")
+                .withData("prepopulate/prepopulate-patient-data.json")
+                .withLibrary("prepopulate/prepopulate-content-bundle.json")
+                .withParameters(
+                        new Parameters()
+                            .addParameter(new Parameters.ParametersParameterComponent(new StringType("ClaimId"))
+                                    .setValue(new StringType("OPA-Claim1")))
+                )
                 .apply()
-                .isEqualsTo("");
+                .isEqualsTo("prepopulate/prepopulate-bundle.json");
     }
 
-    @Test(enabled = false)
+    @Test (enabled = false)
     public void testQuestionnaireResponse() {
         PlanDefinition.Assert.that(
-                        "",
-                        "",
-                        null
+                    "",
+                    "",
+                    null
                 )
                 .withData("")
                 .withLibrary("")

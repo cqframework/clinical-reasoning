@@ -10,7 +10,7 @@
   "subject": {
     "reference": "http://example.org/fhir/Patient/12345"
   },
-  "authored": "2021-12-01",
+  "authored": "2021-12-01T00:00:00-07:00",
   "item": [
     {
       "linkId": "1",

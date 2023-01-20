@@ -11,6 +11,7 @@ import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -229,8 +230,9 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         obs.setSubject(subject);
         // obs.setFocus();
         obs.setEncounter(questionnaireResponse.getEncounter());
-        obs.setEffective(new DateTimeType(questionnaireResponse.getAuthored()));
-        obs.setIssued(questionnaireResponse.getAuthored());
+        var authoredDate = new DateTimeType((questionnaireResponse.hasAuthored() ? questionnaireResponse.getAuthored().toInstant() : Instant.now()).toString());
+        obs.setEffective(authoredDate);
+        obs.setIssuedElement(new InstantType(authoredDate));
         obs.setPerformer(Collections.singletonList(questionnaireResponse.getAuthor()));
 
         switch (answer.getValue().fhirType()) {

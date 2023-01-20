@@ -94,11 +94,22 @@
           ]
         },
         {
+          "linkId": "2.4.0",
+          "definition": "http://hl7.org/fhir/Patient#Patient.identifier.system",
+          "answer": [
+            {
+              "valueUri": "http://hl7.org/fhir/sid/us-medicare"
+            }
+          ]
+        },
+        {
           "linkId": "2.4",
-          "definition": "http://hl7.org/fhir/Patient#Patient.identifier",
+          "definition": "http://hl7.org/fhir/Patient#Patient.identifier.value",
           "text": "Medicare ID",
           "answer": [
-
+            {
+              "valueString": "123456789"
+            }
           ]
         },
         {

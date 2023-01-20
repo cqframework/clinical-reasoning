@@ -8,18 +8,24 @@
     {
       "resource": {
         "resourceType": "Organization",
-        "id": "qr1903.1",
-        "name": ""
+        "id": "qr-1903.1",
+        "name": "Test Facility"
       },
       "request": {
         "method": "PUT",
-        "url": "Organization/qr1903.1"
+        "url": "Organization/qr-1903.1"
       }
     },
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "qr1903.2",
+        "id": "qr-1903.2",
+        "identifier": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-medicare",
+            "value": "123456789"
+          }
+        ],
         "name": [
           {
             "family": "Man",
@@ -28,12 +34,12 @@
             ]
           }
         ],
-        "birthdate": "1950-01-01",
+        "birthDate": "1950-01-01",
         "gender": "male"
       },
       "request": {
         "method": "PUT",
-        "url": "Patient/qr1903.2"
+        "url": "Patient/qr-1903.2"
       }
     }
   ]

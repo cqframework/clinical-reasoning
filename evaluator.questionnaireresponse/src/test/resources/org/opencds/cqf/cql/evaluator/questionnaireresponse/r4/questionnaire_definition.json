@@ -204,6 +204,22 @@
         {
           "extension": [
             {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+              "valueBoolean": true
+            }
+          ],
+          "linkId": "2.4.0",
+          "definition": "http://hl7.org/fhir/Patient#Patient.identifier.system",
+          "type": "string",
+          "initial": [
+            {
+              "valueString": "http://hl7.org/fhir/sid/us-medicare"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
               "valueExpression": {
                 "language": "text/cql",
@@ -212,7 +228,7 @@
             }
           ],
           "linkId": "2.4",
-          "definition": "http://hl7.org/fhir/Patient#Patient.identifier",
+          "definition": "http://hl7.org/fhir/Patient#Patient.identifier.value",
           "text": "Medicare ID",
           "type": "string",
           "required": true

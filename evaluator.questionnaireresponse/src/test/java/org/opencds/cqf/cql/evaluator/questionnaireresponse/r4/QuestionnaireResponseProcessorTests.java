@@ -29,7 +29,7 @@ public class QuestionnaireResponseProcessorTests {
                 .isEqualsTo("questionnaire_response_is_subject_bundle.json");
     }
 
-    @Test (enabled = false)
+    @Test
     void testDefinitionBasedExtraction() {
         TestQuestionnaireResponse.Assert.that("questionnaire_response_definition.json")
                 .withData("questionnaire_definition.json")

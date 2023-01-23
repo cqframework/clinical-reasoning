@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r5;
 
+import org.hl7.fhir.r5.model.Parameters;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests extends PlanDefinition {
@@ -81,5 +82,32 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
                 .withLibrary("rule-filters/RuleFilters-1.0.0-bundle.json")
                 .apply()
                 .isEqualsTo("rule-filters/ReportableBundle.json");
+    }
+
+    @Test (enabled = false) // Need valid r5 content for this test
+    public void testQuestionnairePrepopulate() {
+        PlanDefinition.Assert.that(
+                        "prepopulate",
+                        "OPA-Patient1",
+                        null
+                )
+                .withData("prepopulate/prepopulate-patient-data.json")
+                .withLibrary("prepopulate/prepopulate-content-bundle.json")
+                .withParameters(new Parameters().addParameter("ClaimId", "OPA-Claim1"))
+                .apply()
+                .isEqualsTo("prepopulate/prepopulate-bundle.json");
+    }
+
+    @Test(enabled = false)
+    public void testQuestionnaireResponse() {
+        PlanDefinition.Assert.that(
+                        "",
+                        "",
+                        null
+                )
+                .withData("")
+                .withLibrary("")
+                .apply()
+                .isEqualsTo("");
     }
 }

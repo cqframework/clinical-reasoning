@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.Resource;
  *
  * The FHIR specification does not allow contained resources to contain additional resources:
  * &gt; Contained resources SHALL NOT contain additional contained resources.
- * <a href="https://www.hl7.org/fhir/references.html#contained">...</a>
+ * https://www.hl7.org/fhir/references.html#contained
  *
  * When returning a resource from an annotated method that responds to an incoming request any
  * resources contained in another resource will be removed.  `liftContainedResourcesToParent` in
@@ -22,10 +22,6 @@ import org.hl7.fhir.r4.model.Resource;
  * to clients.
  */
 public class ContainedHelper {
-
-  private ContainedHelper() {
-
-  }
 
   /**
    * Adds all contained resources in resources contained on the parent to the parent.

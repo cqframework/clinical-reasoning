@@ -11,7 +11,7 @@
     },
     "action": [ {
       "resource": {
-        "reference": "Task"
+        "reference": "Task/careplan-activity"
       }
     } ]
   }, {
@@ -40,7 +40,7 @@
     }
   }, {
     "resourceType": "Task",
-    "id": "Task",
+    "id": "careplan-activity",
     "extension": [ {
       "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus",
       "valueString": "ready"
@@ -50,6 +50,7 @@
       "type": "RequestGroup"
     } ],
     "status": "ready",
+    "intent": "proposal",
     "code": {
       "coding": [ {
         "system": "http://example.org/CodeSystem/encounter-type",
@@ -58,7 +59,10 @@
       } ],
       "text": "Pregnant (ANC) Monthly Routine visit"
     },
-    "description": "This action will performed every month for a pregnant woman"
+    "description": "This action will performed every month for a pregnant woman",
+    "for": {
+      "reference": "Patient/TEST_PATIENT"
+    }
   } ],
   "instantiatesCanonical": [ "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/AncVisit-PlanDefinition" ],
   "status": "draft",

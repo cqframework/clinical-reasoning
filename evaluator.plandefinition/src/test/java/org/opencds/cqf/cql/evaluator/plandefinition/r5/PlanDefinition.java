@@ -171,6 +171,7 @@ public class PlanDefinition {
         private Endpoint dataEndpoint;
         private Endpoint libraryEndpoint;
         private IBaseResource baseResource;
+        private Parameters parameters;
 
         public Apply(String planDefinitionID, String patientID, String encounterID) {
             this.planDefinitionID = planDefinitionID;
@@ -181,9 +182,8 @@ public class PlanDefinition {
         public Apply withData(String dataAssetName) {
             dataEndpoint = new Endpoint()
                     .setAddress(dataAssetName)
-                    .setConnectionType(Collections
-                            .singletonList(new CodeableConcept().setCoding(
-                                    Collections.singletonList(new Coding().setCode(Constants.HL7_FHIR_FILES)))));
+                    .setConnectionType(Collections.singletonList(new CodeableConcept()
+                            .setCoding(Collections.singletonList(new Coding().setCode(Constants.HL7_FHIR_FILES)))));
 
             baseResource = parse(dataAssetName);
 
@@ -198,6 +198,11 @@ public class PlanDefinition {
                             .setCoding(Collections.singletonList(new Coding().setCode(Constants.HL7_FHIR_FILES)))));
 
             fhirDal.addAll(parse(dataAssetName));
+            return this;
+        }
+
+        public Apply withParameters(Parameters params) {
+            parameters = params;
             return this;
         }
 
@@ -216,7 +221,7 @@ public class PlanDefinition {
                                     null,
                                     null,
                                     null,
-                                    new Parameters(),
+                                    parameters,
                                     null,
                                     (Bundle) baseResource,
                                     null,

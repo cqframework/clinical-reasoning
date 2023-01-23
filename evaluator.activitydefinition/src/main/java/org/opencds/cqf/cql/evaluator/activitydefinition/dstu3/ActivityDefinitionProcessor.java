@@ -26,6 +26,8 @@ import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
@@ -102,7 +104,7 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
                 resolveDynamicValue(dynamicValue.getLanguage(),
                         dynamicValue.getExpression(),
                         activityDefinition.getLibrary().get(0).getReference(),
-                        dynamicValue.getPath(), result);
+                        dynamicValue.getPath(), result, "Patient");
             }
         }
 
@@ -113,6 +115,11 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
     public Object resolveParameterValue(IBase value) {
         if (value == null) return null;
         return ((Parameters.ParametersParameterComponent) value).getValue();
+    }
+
+    @Override
+    public IBaseResource getSubject(String subjectType) {
+        return this.fhirDal.read(new IdType(subjectType, this.subjectId));
     }
 
     private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {
@@ -127,6 +134,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         } else {
             task.setStatus(Task.TaskStatus.DRAFT);
         }
+
+        task.setIntent(Task.TaskIntent.PROPOSAL);
 
         if (activityDefinition.hasCode()) {
             task.setCode(activityDefinition.getCode());

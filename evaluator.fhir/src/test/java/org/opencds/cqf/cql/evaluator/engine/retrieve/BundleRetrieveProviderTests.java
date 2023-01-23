@@ -78,11 +78,7 @@ public class BundleRetrieveProviderTests {
 
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
         assertNotNull(results);
-<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
-=======
-        assertThat(results, emptyIterable());
->>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
     }
 
 
@@ -99,11 +95,7 @@ public class BundleRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
-<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
-=======
-        assertThat(results, emptyIterable());
->>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
     }
 
     @Test
@@ -142,11 +134,7 @@ public class BundleRetrieveProviderTests {
         // Id does not exist
         codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med-does-exist");
         results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
-<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
-=======
-        assertThat(results, emptyIterable());
->>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
     }
 
     // This test covers a special case that's outside of normal usage, which is supplying
@@ -157,9 +145,15 @@ public class BundleRetrieveProviderTests {
         IBaseBundle bundle = this.loadBundle("TestBundleMedicationAdministrationWithReference.json");
         BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
 
+        // Id does exist
         Iterable<Code> codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("Medication/med1");
         Iterable<Object> results = brp.retrieve("Patient", "subject", "pat1" , "MedicationAdministration", null, "medication", codes, null, null, null, null, null);
         assertThat(results, contains(instanceOf(MedicationAdministration.class)));
+
+        // Id does not exist
+        codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("Medication/med-not-exist");
+        results = brp.retrieve("Patient", "subject", "pat1" , "MedicationAdministration", null, "medication", codes, null, null, null, null, null);
+        assertThat(results, is(emptyIterable()));
     }
 
     @Test
@@ -170,11 +164,7 @@ public class BundleRetrieveProviderTests {
         Code code = new Code().withCode("not-a-code").withSystem("not-a-system");
         Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results); 
-<<<<<<< HEAD
         assertThat(results, is(emptyIterable()));
-=======
-        assertThat(results, emptyIterable());
->>>>>>> bb6c78ee (Use more concise assertions in BundleRetrieveProvider.java)
 
         // Codes does match
         code = new Code().withCode("10327003").withSystem("http://snomed.info/sct");

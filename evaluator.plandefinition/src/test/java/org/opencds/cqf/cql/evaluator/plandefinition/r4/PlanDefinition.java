@@ -164,6 +164,7 @@ public class PlanDefinition {
         private Endpoint dataEndpoint;
         private Endpoint libraryEndpoint;
         private IBaseResource baseResource;
+        private Parameters parameters;
 
         public Apply(String planDefinitionID, String patientID, String encounterID) {
             this.planDefinitionID = planDefinitionID;
@@ -191,6 +192,11 @@ public class PlanDefinition {
             return this;
         }
 
+        public Apply withParameters(Parameters params) {
+            parameters = params;
+            return this;
+        }
+
         public GeneratedBundle applyR5() {
             return new GeneratedBundle(
                     (Bundle) buildProcessor(fhirDal)
@@ -206,7 +212,7 @@ public class PlanDefinition {
                             null,
                             null,
                             null,
-                            new Parameters(),
+                            parameters,
                             null,
                             (Bundle) baseResource,
                             null,
@@ -232,7 +238,7 @@ public class PlanDefinition {
                             null,
                             null,
                             null,
-                            new Parameters(),
+                            parameters,
                             null,
                             (Bundle) baseResource,
                             null,

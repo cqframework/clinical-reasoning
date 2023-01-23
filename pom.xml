@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <cql-translator.version>2.4.0</cql-translator.version>
-        <cql-engine.version>2.4.0</cql-engine.version>
+        <cql-engine.version>2.3.0</cql-engine.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <fhir-core.version>5.6.68</fhir-core.version>
@@ -46,6 +46,8 @@
         <module>evaluator.activitydefinition</module>
         <module>evaluator.plandefinition</module>
         <module>evaluator.expression</module>
+        <module>evaluator.questionnaireresponse</module>
+        <module>evaluator.questionnaire</module>
     </modules>
 
     <licenses>

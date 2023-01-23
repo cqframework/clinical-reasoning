@@ -129,6 +129,11 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 					return isPrimitiveMatch(dataType, (IPrimitiveType<?>) values.get(0), codes);
 				}
 
+				if (values.get(0) instanceof IBaseReference) {
+					return isPrimitiveMatch(
+						dataType, ((IBaseReference) values.get(0)).getReferenceElement(), codes);
+				}
+
 				if (values.get(0).fhirType().equals("CodeableConcept")) {
 					String codeValueSet = getValueSetFromCode(values.get(0));
 					if (codeValueSet != null) {

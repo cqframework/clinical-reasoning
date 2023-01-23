@@ -208,7 +208,7 @@ public class BundleRetrieveProviderTests {
         IBaseBundle bundle = this.loadBundle("TestBundleMedicationAdministrationWithReference.json");
         BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
 
-        // Despite the Medication referenced by MedicationAdminstration matching the code, the
+        // Despite the Medication referenced by MedicationAdministration matching the code, the
         // RetrieveProvider (as it exists today) does not support resolving the reference and then
         // matching the code.
         //

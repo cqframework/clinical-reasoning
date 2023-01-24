@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.content_test.opioid_mme_r4;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -98,7 +99,7 @@ public class OpioidMmeR4Tests {
         Parameters actual = (Parameters)libraryProcessor.evaluate(id, 
         this.getSubject(test), null, libraryEndpoint, terminologyEndpoint, dataEndpoint, null, asSet("TotalMME"));
 
-        assertNotNull(actual);
+        assertTrue(expected.equalsDeep(actual));
     }
 
     @Test
@@ -112,6 +113,6 @@ public class OpioidMmeR4Tests {
         Parameters actual = (Parameters)libraryProcessor.evaluate(id, 
         this.getSubject(test), null, libraryEndpoint, terminologyEndpoint, dataEndpoint, null, asSet("TotalMME"));
 
-        assertNotNull(actual);
+        assertTrue(expected.equalsDeep(actual));
     }
 }

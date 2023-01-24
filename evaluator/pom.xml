@@ -45,7 +45,7 @@
         <!-- FHIR, Quick and QDM are not required to compile -->
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>engine.fhir</artifactId>
+            <artifactId>engine-fhir</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

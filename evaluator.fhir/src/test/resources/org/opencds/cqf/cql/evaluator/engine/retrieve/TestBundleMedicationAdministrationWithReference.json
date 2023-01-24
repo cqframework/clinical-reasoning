@@ -1,6 +1,5 @@
 {
     "resourceType": "Bundle",
-    "id": "test-bundle-two-patients",
     "type": "collection",
     "entry": [
         {

@@ -153,12 +153,12 @@
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
-                <artifactId>engine.jaxb</artifactId>
+                <artifactId>engine-jaxb</artifactId>
                 <version>${cql-engine.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
-                <artifactId>engine.jackson</artifactId>
+                <artifactId>engine-jackson</artifactId>
                 <version>${cql-engine.version}</version>
             </dependency>
             <dependency>

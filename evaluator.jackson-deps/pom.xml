@@ -31,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>engine.jackson</artifactId>
+            <artifactId>engine-jackson</artifactId>
         </dependency>
     </dependencies>
 </project>

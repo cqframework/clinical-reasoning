@@ -26,7 +26,8 @@
         <!-- Engine Dependencies for FHIR -->
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>engine.fhir</artifactId>
+            <artifactId>engine-fhir</artifactId>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>

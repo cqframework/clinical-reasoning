@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>engine.jaxb</artifactId>
+            <artifactId>engine-jaxb</artifactId>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>

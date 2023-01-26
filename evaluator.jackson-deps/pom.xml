@@ -5,19 +5,19 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.jackson-deps</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
+    <version>2.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
 
     <name>evaluator.jackson-deps</name>
-    <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
+    <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
 
     <description>CQL Evaluator - Jackson Dependencies</description>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>
-        <version>2.5.0-SNAPSHOT</version>
+        <version>2.6.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -30,8 +30,8 @@
             <artifactId>elm-jackson</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.jackson</artifactId>
+            <groupId>info.cqframework</groupId>
+            <artifactId>engine-jackson</artifactId>
         </dependency>
     </dependencies>
 </project>

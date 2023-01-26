@@ -5,16 +5,16 @@
 
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.cli</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
+    <version>2.6.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>evaluator.cli</name>
-    <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
+    <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
         <artifactId>evaluator.shared</artifactId>
-        <version>2.5.0-SNAPSHOT</version>
+        <version>2.6.0-SNAPSHOT</version>
     </parent>
 
     <description>CQL Evaluator - CLI</description>
@@ -23,22 +23,22 @@
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator</artifactId>
-            <version>2.5.0-SNAPSHOT</version>
+            <version>2.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.builder</artifactId>
-            <version>2.5.0-SNAPSHOT</version>
+            <version>2.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.dagger</artifactId>
-            <version>2.5.0-SNAPSHOT</version>
+            <version>2.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.jackson-deps</artifactId>
-            <version>2.5.0-SNAPSHOT</version>
+            <version>2.6.0-SNAPSHOT</version>
             <type>pom</type>
         </dependency>
         <dependency>

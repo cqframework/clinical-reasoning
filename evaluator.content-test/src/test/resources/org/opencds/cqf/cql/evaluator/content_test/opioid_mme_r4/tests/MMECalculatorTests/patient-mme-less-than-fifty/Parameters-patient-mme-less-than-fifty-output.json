@@ -1,13 +1,13 @@
 {
   "resourceType": "Parameters",
-  "id": "patient-mme-greater-than-fifty-output",
   "parameter": [
     {
       "name": "TotalMME",
       "valueQuantity": {
         "system": "http://unitsofmeasure.org",
         "value": "45.0",
-        "code": "{MME}/d"
+        "code": "{MME}/d",
+        "unit": "{MME}/d"
       }
     }
   ]

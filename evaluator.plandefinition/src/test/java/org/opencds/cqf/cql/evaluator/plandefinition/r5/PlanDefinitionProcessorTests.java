@@ -98,16 +98,17 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
                 .isEqualsTo("prepopulate/prepopulate-bundle.json");
     }
 
-    @Test(enabled = false)
+    @Test (enabled = false) // Need better error handling, coming with task #235
     public void testQuestionnaireResponse() {
         PlanDefinition.Assert.that(
-                        "",
-                        "",
+                        "prepopulate",
+                        "OPA-Patient1",
                         null
                 )
-                .withData("")
-                .withLibrary("")
+                .withData("extract-questionnaireresponse/patient-data.json")
+                .withLibrary("prepopulate/prepopulate-content-bundle.json")
+                .withParameters(new Parameters().addParameter("ClaimId", "OPA-Claim1"))
                 .apply()
-                .isEqualsTo("");
+                .isEqualsTo("extract-questionnaireresponse/bundle.json");
     }
 }

@@ -58,12 +58,12 @@
             },
             {
               "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
-              "valueCanonical": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+              "valueUri": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
             }
           ],
           "title": "Prepopulate!",
           "description": "A simple recommendation to complete a prepopulated Questionnaire",
-          "definitionCanonical": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire"
+          "definition": { "reference": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire" }
         } ]
       }
     },
@@ -101,7 +101,7 @@
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-            "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+            "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
           }
         ],
         "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
@@ -140,10 +140,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "FacilityName"
-                    }
+                    "valueString": "FacilityName"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "1.1",
@@ -155,10 +156,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "FacilityNPI"
-                    }
+                    "valueString": "FacilityNPI"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "1.2",
@@ -211,10 +213,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "BeneficiaryFirstName"
-                    }
+                    "valueString": "BeneficiaryFirstName"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "2.1",
@@ -226,10 +229,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "BeneficiaryLastName"
-                    }
+                    "valueString": "BeneficiaryLastName"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "2.2",
@@ -241,10 +245,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "BeneficiaryDOB"
-                    }
+                    "valueString": "BeneficiaryDOB"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "2.3",
@@ -256,10 +261,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "BeneficiaryMedicareID"
-                    }
+                    "valueString": "BeneficiaryMedicareID"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "2.4",
@@ -271,10 +277,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "BeneficiaryGender"
-                    }
+                    "valueString": "BeneficiaryGender"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "2.5",
@@ -324,10 +331,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "OperatingPhysicianFirstName"
-                    }
+                    "valueString": "OperatingPhysicianFirstName"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "3.1",
@@ -339,10 +347,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "OperatingPhysicianLastName"
-                    }
+                    "valueString": "OperatingPhysicianLastName"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "3.2",
@@ -354,10 +363,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "OperatingPhysicianNPI"
-                    }
+                    "valueString": "OperatingPhysicianNPI"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "3.3",
@@ -381,10 +391,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "OperatingPhysicianAddress1"
-                        }
+                        "valueString": "OperatingPhysicianAddress1"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "3.5.1",
@@ -396,10 +407,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "OperatingPhysicianAddress2"
-                        }
+                        "valueString": "OperatingPhysicianAddress2"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "3.5.2",
@@ -411,10 +423,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "OperatingPhysicianAddressCity"
-                        }
+                        "valueString": "OperatingPhysicianAddressCity"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "3.5.3",
@@ -426,10 +439,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "OperatingPhysicianAddressState"
-                        }
+                        "valueString": "OperatingPhysicianAddressState"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "3.5.4",
@@ -441,10 +455,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "OperatingPhysicianAddressZip"
-                        }
+                        "valueString": "OperatingPhysicianAddressZip"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "3.5.5",
@@ -465,10 +480,11 @@
                 "extension": [
                   {
                     "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "AttendingPhysicianSame"
-                    }
+                    "valueString": "AttendingPhysicianSame"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                    "valueString": "text/cql.identifier"
                   }
                 ],
                 "linkId": "4.1",
@@ -492,10 +508,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "AttendingPhysicianFirstName"
-                        }
+                        "valueString": "AttendingPhysicianFirstName"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "4.2.1",
@@ -507,10 +524,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "AttendingPhysicianLastName"
-                        }
+                        "valueString": "AttendingPhysicianLastName"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "4.2.2",
@@ -522,10 +540,11 @@
                     "extension": [
                       {
                         "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "AttendingPhysicianNPI"
-                        }
+                        "valueString": "AttendingPhysicianNPI"
+                      },
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                        "valueString": "text/cql.identifier"
                       }
                     ],
                     "linkId": "4.2.3",
@@ -549,10 +568,11 @@
                         "extension": [
                           {
                             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                            "valueExpression": {
-                              "language": "text/cql.identifier",
-                              "expression": "AttendingPhysicianAddress1"
-                            }
+                            "valueString": "AttendingPhysicianAddress1"
+                          },
+                          {
+                            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                            "valueString": "text/cql.identifier"
                           }
                         ],
                         "linkId": "4.2.5.1",
@@ -564,10 +584,11 @@
                         "extension": [
                           {
                             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                            "valueExpression": {
-                              "language": "text/cql.identifier",
-                              "expression": "AttendingPhysicianAddress2"
-                            }
+                            "valueString": "AttendingPhysicianAddress2"
+                          },
+                          {
+                            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                            "valueString": "text/cql.identifier"
                           }
                         ],
                         "linkId": "4.2.5.2",
@@ -579,10 +600,11 @@
                         "extension": [
                           {
                             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                            "valueExpression": {
-                              "language": "text/cql.identifier",
-                              "expression": "AttendingPhysicianAddressCity"
-                            }
+                            "valueString": "AttendingPhysicianAddressCity"
+                          },
+                          {
+                            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                            "valueString": "text/cql.identifier"
                           }
                         ],
                         "linkId": "4.2.5.3",
@@ -594,10 +616,11 @@
                         "extension": [
                           {
                             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                            "valueExpression": {
-                              "language": "text/cql.identifier",
-                              "expression": "AttendingPhysicianAddressState"
-                            }
+                            "valueString": "AttendingPhysicianAddressState"
+                          },
+                          {
+                            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                            "valueString": "text/cql.identifier"
                           }
                         ],
                         "linkId": "4.2.5.4",
@@ -609,10 +632,11 @@
                         "extension": [
                           {
                             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                            "valueExpression": {
-                              "language": "text/cql.identifier",
-                              "expression": "AttendingPhysicianAddressZip"
-                            }
+                            "valueString": "AttendingPhysicianAddressZip"
+                          },
+                          {
+                            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                            "valueString": "text/cql.identifier"
                           }
                         ],
                         "linkId": "4.2.5.5",

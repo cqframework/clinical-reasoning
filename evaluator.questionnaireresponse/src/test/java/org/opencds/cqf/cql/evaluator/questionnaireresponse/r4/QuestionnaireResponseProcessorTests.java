@@ -37,8 +37,7 @@ public class QuestionnaireResponseProcessorTests {
                 .isEqualsTo("questionnaire_response_definition_bundle.json");
     }
 
-    // Disabling this test until Questionnaire $populate has been implemented
-    @Test(enabled = false)
+    @Test (enabled = false)
     void testDemographicsExtraction() {
         TestQuestionnaireResponse.Assert.that("questionnaire_response_demographics.json")
                 .withData("questionnaire_demographics.json")

@@ -106,7 +106,7 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         // Definition-based extraction - http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
         var resourceType = getFhirType(itemExtractionContext).toCode();
         var resource = (Resource) this.fhirContext.getResourceDefinition(resourceType).newInstance();
-        resource.setId(new IdType(resourceType, "qr-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId));
+        resource.setId(new IdType(resourceType, "extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId));
         var subjectProperty = getSubjectProperty(resource);
         if (subjectProperty != null) {
             resource.setProperty(subjectProperty.getName(), subject);
@@ -216,7 +216,7 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
             Reference subject, Map<String, List<Coding>> questionnaireCodeMap) {
         // Observation-based extraction - http://build.fhir.org/ig/HL7/sdc/extraction.html#observation-based-extraction
         var obs = new Observation();
-        obs.setId("qr" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
+        obs.setId("extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
         obs.setBasedOn(questionnaireResponse.getBasedOn());
         obs.setPartOf(questionnaireResponse.getPartOf());
         obs.setStatus(Observation.ObservationStatus.FINAL);
@@ -287,10 +287,16 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
 //        Clients.registerBasicAuth(client, user, password);
 //
 //        Questionnaire questionnaire = client.read().resource(Questionnaire.class).withUrl(questionnaireUrl).execute();
-        var questionnaire = (Questionnaire) this.fhirDal.searchByUrl("Questionnaire", questionnaireUrl).iterator().next();
-
-        if (questionnaire == null) {
-            throw new IllegalArgumentException("Unable to find resource by URL " + questionnaireUrl);
+        Questionnaire questionnaire = null;
+        try {
+            var results = this.fhirDal.searchByUrl("Questionnaire", questionnaireUrl);
+            questionnaire = results == null ? null : (Questionnaire) results.iterator().next();
+            if (questionnaire == null) {
+                throw new RuntimeException();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("Error encountered searching for Questionnaire during extract operation: %s", e.getMessage()));
+            throw new IllegalArgumentException(String.format("Unable to find resource by URL %s", questionnaireUrl));
         }
 
         return createCodeMap(questionnaire);

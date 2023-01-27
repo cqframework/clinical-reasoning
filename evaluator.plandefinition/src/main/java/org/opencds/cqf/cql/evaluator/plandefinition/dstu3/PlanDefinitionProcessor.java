@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
+import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
@@ -86,7 +87,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var planDefinition = castOrThrow(basePlanDefinition, PlanDefinition.class,
             "The planDefinition passed to FhirDal was not a valid instance of PlanDefinition.class").orElse(null);
 
-    logger.info("Performing $apply operation on PlanDefinition/{}", theId);
+    logger.info("Performing $apply operation on {}", theId);
 
     return planDefinition;
   }
@@ -422,7 +423,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       valueSets.forEach(valueSet -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)); });
       var prepopResult = questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters, additionalData, dataEndpoint, contentEndpoint, terminologyEndpoint);
       if (Boolean.TRUE.equals(containResources)) {
-        requestGroup.addContained((Resource) prepopResult);
+        requestGroup.addContained(prepopResult);
       } else {
         requestResources.add(prepopResult);
       }
@@ -434,17 +435,22 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private List<Bundle> getQuestionnaireForOrder(PlanDefinition.PlanDefinitionActionComponent action) {
     Bundle bundle = null;
     // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as the order id to pass
-    var prepopulateExtension = action.getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE).get(0);
+
+    var prepopulateExtension = getExtensionByUrl(action, Constants.SDC_QUESTIONNAIRE_PREPOPULATE);
     var parameterName = prepopulateExtension.getValue().toString();
     var prepopulateParameter = this.parameters != null
-            ? ((Parameters) this.parameters).getParameter().stream().filter(p -> p.getName() == parameterName).collect(Collectors.toList()).get(0)
+            ? ((Parameters) this.parameters).getParameter().stream().filter(p -> p.getName().equals(parameterName)).collect(Collectors.toList()).get(0)
             : null;
     if (prepopulateParameter == null) {
       throw new IllegalArgumentException(String.format("Parameter not found: %s ", parameterName));
     }
     var orderId = prepopulateParameter.toString();
 
-    var questionnaireUrl = (action.getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).get(0).getValue()).toString();
+    var urlExtension = getExtensionByUrl(action, Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE);
+    if (urlExtension == null || urlExtension.getValue() == null) {
+      throw new RuntimeException("No lookup questionnaire defined for prepopulate");
+    }
+    var questionnaireUrl = ((UriType) urlExtension.getValue()).getValue();
 
     if (questionnaireUrl.contains("$")) {
       var urlSplit = questionnaireUrl.split("$");

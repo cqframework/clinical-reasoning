@@ -49,9 +49,6 @@
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.dependency.packagePresentation": "hierarchical",
-    "editor.codeActionsOnSave": {
-        // "source.organizeImports": true,
-    },
     "editor.formatOnSave": true,
     "files.exclude": {
         "**/.classpath": true,
@@ -59,6 +56,28 @@
         "**/.settings": true,
         "**/.factorypath": true
     },
-    "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication -javaagent:\"/home/jp/.vscode/extensions/gabrielbb.vscode-lombok-1.0.1/server/lombok.jar\"",
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.format.settings.profile": "GoogleStyle",
+    "commandOnAllFiles.commands": {
+        "Format Java File": {
+            "command": "editor.action.formatDocument",
+            "includeFileExtensions": [
+                ".java"
+            ]
+        },
+        "Format JSON and XML Files": {
+            "command": "editor.action.formatDocument",
+            "includeFileExtensions": [
+                ".json",
+                ".xml"
+            ]
+        },
+        "Format Markdown Files": {
+            "command": "editor.action.formatDocument",
+            "includeFileExtensions": [
+                ".md"
+            ]
+        }
+    }
 }

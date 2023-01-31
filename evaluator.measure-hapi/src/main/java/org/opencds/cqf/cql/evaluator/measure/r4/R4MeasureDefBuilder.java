@@ -26,8 +26,6 @@ import org.opencds.cqf.cql.evaluator.measure.common.SdeDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierComponentDef;
 import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
-import ca.uhn.fhir.util.StringUtil;
-
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private final boolean enforceIds;

@@ -2,19 +2,14 @@ package org.opencds.cqf.cql.evaluator.questionnaireresponse;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -49,7 +44,7 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
     protected FhirContext fhirContext;
     protected FhirDal fhirDal;
 
-    public BaseQuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
+    protected BaseQuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
         this.fhirContext = fhirContext;
         this.fhirDal = fhirDal;
         this.parser = this.fhirContext.newJsonParser();
@@ -74,5 +69,6 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
     }
 
     protected abstract IBaseBundle createResourceBundle(T questionnaireResponse, List<IBaseResource> resources);
+
     public abstract List<IBaseResource> processItems(T questionnaireResponse);
 }

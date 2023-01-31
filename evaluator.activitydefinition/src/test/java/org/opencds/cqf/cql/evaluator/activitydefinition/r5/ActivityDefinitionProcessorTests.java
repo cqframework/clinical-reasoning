@@ -31,7 +31,6 @@ import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -42,14 +41,16 @@ public class ActivityDefinitionProcessorTests {
     private ActivityDefinitionProcessor activityDefinitionProcessor;
 
     /* Commenting this out until we have a ModelResolver for R5 */
-    //@BeforeClass
+    // @BeforeClass
     public void setup() {
         fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
         FhirDal fhirDal = new MockFhirDal();
         AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory()
+                .create(fhirContext.getVersion().getVersion());
+        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext,
+                adapterFactory, fhirTypeConverter);
         Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<>() {
             /**
              *
@@ -142,8 +143,10 @@ public class ActivityDefinitionProcessorTests {
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
+        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
+                libraryLoaderFactory,
+                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory,
+                CqlEvaluatorBuilder::new);
 
         activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
     }
@@ -152,16 +155,21 @@ public class ActivityDefinitionProcessorTests {
     public void testActivityDefinitionApply() throws FHIRException {
         Assert.assertTrue(true);
         /* Commenting this out until we have a ModelResolver for R5 */
-        // Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
+        // Endpoint contentEndpoint = new
+        // Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        // Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
+        // Endpoint terminologyEndpoint = new
+        // Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        // Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
+        // Endpoint dataEndpoint = new
+        // Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
         // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        // Object result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"), "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint, terminologyEndpoint, dataEndpoint);
+        // Object result = this.activityDefinitionProcessor.apply(new
+        // IdType("activityDefinition-test"), "patient-1", null, null, null, null, null,
+        // null, null, null, null, contentEndpoint, terminologyEndpoint, dataEndpoint);
         // Assert.assertTrue(result instanceof MedicationRequest);
         // MedicationRequest request = (MedicationRequest) result;
         // Assert.assertTrue(request.getDoNotPerform());

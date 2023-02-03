@@ -29,8 +29,6 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(BundleRetrieveProvider.class);
 
-	private final IBaseBundle bundle;
-	private final FhirContext fhirContext;
 	private final CodeUtil codeUtil;
 	private final IFhirPath fhirPath;
 
@@ -38,8 +36,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 
 	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle iBaseBundle) {
 
-		this.fhirContext = requireNonNull(fhirContext, "bundle can not be null.");
-		this.bundle = requireNonNull(iBaseBundle, "bundle can not be null.");
+		requireNonNull(fhirContext, "bundle can not be null.");
+		requireNonNull(iBaseBundle, "bundle can not be null.");
 		this.codeUtil = new CodeUtil(fhirContext);
 		this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
 
@@ -225,7 +223,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				}
 
 				if (reference.startsWith("urn:")) {
-					logger.debug("Found reference with urn: prefix. Stripping.", dataType);
+					logger.debug("Found reference on {} resource with urn: prefix. Stripping.", dataType);
 					reference = stripUrnScheme(reference);
 				}
 
@@ -246,7 +244,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 
 				String referenceString = ((IPrimitiveType<?>) reference.get()).getValueAsString();
 				if (referenceString.startsWith("urn:")) {
-					logger.debug("Found reference with urn: prefix. Stripping.", dataType);
+					logger.debug("Found reference on {} resource with urn: prefix. Stripping.", dataType);
 					referenceString = stripUrnScheme(referenceString);
 				}
 
@@ -255,9 +253,9 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 							referenceString.length());
 				}
 
-				if (!referenceString.equals((String) contextValue)) {
+				if (!referenceString.equals(contextValue)) {
 					logger.debug("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
-							referenceString, (String) contextValue);
+							referenceString, contextValue);
 					return false;
 				}
 			}

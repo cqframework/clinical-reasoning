@@ -2,7 +2,11 @@ package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -30,27 +34,34 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 	private final CodeUtil codeUtil;
 	private final IFhirPath fhirPath;
 
+	private final Map<String, List<IBaseResource>> resourceMap = new HashMap<>();
+
 	public BundleRetrieveProvider(final FhirContext fhirContext, final IBaseBundle iBaseBundle) {
-		
+
 		this.fhirContext = requireNonNull(fhirContext, "bundle can not be null.");
 		this.bundle = requireNonNull(iBaseBundle, "bundle can not be null.");
 		this.codeUtil = new CodeUtil(fhirContext);
 		this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
+
+		var resources = BundleUtil.toListOfResources(fhirContext, iBaseBundle);
+		for (var r : resources) {
+			resourceMap.computeIfAbsent(r.fhirType(), k -> new ArrayList<>()).add(r);
+		}
 	}
 
 	@Override
-	public Iterable<Object> retrieve(final String context, final String contextPath, final Object contextValue, final String dataType,
-			final String templateId, final String codePath, final Iterable<Code> codes, final String valueSet, final String datePath,
+	public Iterable<Object> retrieve(final String context, final String contextPath, final Object contextValue,
+			final String dataType,
+			final String templateId, final String codePath, final Iterable<Code> codes, final String valueSet,
+			final String datePath,
 			final String dateLowPath, final String dateHighPath, final Interval dateRange) {
 
-		return BundleUtil.toListOfResourcesOfType(
-				this.fhirContext, this.bundle,
-				this.fhirContext.getResourceDefinition(dataType).getImplementingClass())
-			.stream()
-			.filter(filterByTemplateId(dataType, templateId))
-			.filter(filterByContext(dataType, context, contextPath, contextValue))
-			.filter(filterByTerminology(dataType, codePath, codes, valueSet))
-			.collect(Collectors.<Object>toList());
+		return resourceMap.computeIfAbsent(dataType, k -> Collections.emptyList())
+				.stream()
+				.filter(filterByTemplateId(dataType, templateId))
+				.filter(filterByContext(dataType, context, contextPath, contextValue))
+				.filter(filterByTerminology(dataType, codePath, codes, valueSet))
+				.collect(Collectors.<Object>toList());
 	}
 
 	private boolean anyCodeMatch(final Iterable<Code> left, final Iterable<Code> right) {
@@ -60,7 +71,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 
 		for (final Code code : left) {
 			for (final Code otherCode : right) {
-				if (code.getCode() != null && code.getCode().equals(otherCode.getCode()) && code.getSystem() != null && code.getSystem().equals(otherCode.getSystem())) {
+				if (code.getCode() != null && code.getCode().equals(otherCode.getCode()) && code.getSystem() != null
+						&& code.getSystem().equals(otherCode.getSystem())) {
 					return true;
 				}
 			}
@@ -111,7 +123,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return false;
 	}
 
-	private Predicate<? super IBaseResource> filterByTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
+	private Predicate<? super IBaseResource> filterByTerminology(final String dataType, final String codePath,
+			final Iterable<Code> codes,
 			final String valueSet) {
 		if (codes == null && valueSet == null) {
 			return resource -> true;
@@ -132,7 +145,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 				if (values.get(0).fhirType().equals("CodeableConcept")) {
 					String codeValueSet = getValueSetFromCode(values.get(0));
 					if (codeValueSet != null) {
-						// TODO: If the value sets are not equal by name, test whether they have the same expansion...
+						// TODO: If the value sets are not equal by name, test whether they have the
+						// same expansion...
 						return valueSet != null && codeValueSet.equals(valueSet);
 					}
 				}
@@ -144,7 +158,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 	}
 
 	private Predicate<? super IBaseResource> filterByTemplateId(final String dataType, final String templateId) {
-		if (templateId == null || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
+		if (templateId == null
+				|| templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
 			logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
 			return resource -> true;
 		}
@@ -164,8 +179,9 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 	// Super hackery, just to get this running for connectathon
 	private String getValueSetFromCode(IBase base) {
 		if (base instanceof org.hl7.fhir.r4.model.CodeableConcept) {
-			org.hl7.fhir.r4.model.CodeableConcept cc = (org.hl7.fhir.r4.model.CodeableConcept)base;
-			org.hl7.fhir.r4.model.Extension e = cc.getExtensionByUrl("http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
+			org.hl7.fhir.r4.model.CodeableConcept cc = (org.hl7.fhir.r4.model.CodeableConcept) base;
+			org.hl7.fhir.r4.model.Extension e = cc
+					.getExtensionByUrl("http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
 			if (e != null && e.hasValue()) {
 				return e.getValueAsPrimitive().getValueAsString();
 			}
@@ -173,7 +189,8 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return null;
 	}
 
-	private Predicate<? super IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,
+	private Predicate<? super IBaseResource> filterByContext(final String dataType, final String context,
+			final String contextPath,
 			final Object contextValue) {
 		if (context == null || contextValue == null || contextPath == null) {
 			logger.debug(
@@ -185,7 +202,7 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		return (IBaseResource res) -> {
 			final Optional<IBase> resContextValue = this.fhirPath.evaluateFirst(res, contextPath, IBase.class);
 			if (resContextValue.isPresent() && resContextValue.get() instanceof IIdType) {
-				String id = ((IIdType)resContextValue.get()).getIdPart();
+				String id = ((IIdType) resContextValue.get()).getIdPart();
 
 				if (id == null) {
 					logger.debug("Found null id for {} resource. Skipping.", dataType);
@@ -200,36 +217,34 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 					logger.debug("Found {} with id {}. Skipping.", dataType, id);
 					return false;
 				}
-			}
-			else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
-					String reference = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
-					if (reference == null) {
-						logger.debug("Found null reference for {} resource. Skipping.", dataType);
-						return false;
-					}
-
-					if (reference.startsWith("urn:")) {
-						logger.debug("Found reference with urn: prefix. Stripping.", dataType);
-						reference = stripUrnScheme(reference);
-					}
-	
-					if (reference.contains("/")) {
-						reference = reference.split("/")[1];
-					}
-					
-					if (!reference.equals(contextValue)) {
-						logger.debug("Found {} with reference {}. Skipping.", dataType, reference);
-						return false;
-					}
+			} else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
+				String reference = ((IBaseReference) resContextValue.get()).getReferenceElement().getValue();
+				if (reference == null) {
+					logger.debug("Found null reference for {} resource. Skipping.", dataType);
+					return false;
 				}
-			else {
+
+				if (reference.startsWith("urn:")) {
+					logger.debug("Found reference with urn: prefix. Stripping.", dataType);
+					reference = stripUrnScheme(reference);
+				}
+
+				if (reference.contains("/")) {
+					reference = reference.split("/")[1];
+				}
+
+				if (!reference.equals(contextValue)) {
+					logger.debug("Found {} with reference {}. Skipping.", dataType, reference);
+					return false;
+				}
+			} else {
 				final Optional<IBase> reference = this.fhirPath.evaluateFirst(res, "reference", IBase.class);
 				if (!reference.isPresent()) {
 					logger.debug("Found {} resource unrelated to context. Skipping.", dataType);
 					return false;
 				}
 
-				String referenceString = ((IPrimitiveType<?>)reference.get()).getValueAsString();
+				String referenceString = ((IPrimitiveType<?>) reference.get()).getValueAsString();
 				if (referenceString.startsWith("urn:")) {
 					logger.debug("Found reference with urn: prefix. Stripping.", dataType);
 					referenceString = stripUrnScheme(referenceString);
@@ -251,15 +266,13 @@ public class BundleRetrieveProvider extends TerminologyAwareRetrieveProvider {
 		};
 	}
 
-    private String stripUrnScheme(String uri) {
-        if (uri.startsWith("urn:uuid:")) {
-            return uri.substring(9);
-        }
-        else if (uri.startsWith("urn:oid:")) {
-            return uri.substring(8);
-        }
-        else {
-            return uri;
-        }
-    }
+	private String stripUrnScheme(String uri) {
+		if (uri.startsWith("urn:uuid:")) {
+			return uri.substring(9);
+		} else if (uri.startsWith("urn:oid:")) {
+			return uri.substring(8);
+		} else {
+			return uri;
+		}
+	}
 }

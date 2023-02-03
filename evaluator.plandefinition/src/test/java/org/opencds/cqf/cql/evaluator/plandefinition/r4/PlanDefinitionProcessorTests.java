@@ -123,17 +123,18 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
                 .isEqualsTo("prepopulate/prepopulate-bundle.json");
     }
 
-    @Test (enabled = false)
+    @Test
     public void testQuestionnaireResponse() {
-        var planDefinitionID = "";
-        var patientID = "";
-        var data = "";
-        var library = "";
+        var planDefinitionID = "prepopulate";
+        var patientID = "OPA-Patient1";
+        var data = "extract-questionnaireresponse/patient-data.json";
+        var library = "prepopulate/prepopulate-content-bundle.json";
+        var parameters = new Parameters().addParameter("ClaimId", "OPA-Claim1");
         PlanDefinition.Assert.that(planDefinitionID, patientID, null)
-                .withData(data).withLibrary(library).apply()
-                .isEqualsTo("");
+                .withData(data).withLibrary(library).withParameters(parameters).apply()
+                .isEqualsTo("extract-questionnaireresponse/careplan.json");
         PlanDefinition.Assert.that(planDefinitionID, patientID, null)
-                .withData(data).withLibrary(library).applyR5()
-                .isEqualsTo("");
+                .withData(data).withLibrary(library).withParameters(parameters).applyR5()
+                .isEqualsTo("extract-questionnaireresponse/bundle.json");
     }
 }

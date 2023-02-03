@@ -74,7 +74,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var planDefinition = castOrThrow(basePlanDefinition, PlanDefinition.class,
                 "The planDefinition passed to FhirDal was not a valid instance of PlanDefinition.class").get();
 
-        logger.info("Performing $apply operation on PlanDefinition/{}", theId);
+        logger.info("Performing $apply operation on {}", theId);
 
         return planDefinition;
     }

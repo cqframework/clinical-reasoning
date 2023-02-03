@@ -59,6 +59,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
    protected IBaseResource terminologyEndpoint;
    protected Boolean containResources;
    protected final Collection<IBaseResource> requestResources;
+   protected final Collection<IBaseResource> extractedResources;
    protected final ModelResolver modelResolver;
 
    protected BasePlanDefinitionProcessor(
@@ -75,6 +76,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
       this.expressionEvaluator = expressionEvaluator;
       this.operationParametersParser = operationParametersParser;
       this.requestResources = new ArrayList<>();
+      this.extractedResources = new ArrayList<>();
       modelResolver = new FhirModelResolverFactory().create(fhirContext.getVersion().getVersion().getFhirVersionString());
    }
 

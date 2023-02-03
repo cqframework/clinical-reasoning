@@ -17,6 +17,8 @@ import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
+
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
     public QuestionnaireProcessor(
             FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor,
@@ -64,8 +66,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             } else {
                 if (item.hasExtension(Constants.CQF_EXPRESSION)) {
                     // evaluate expression and set the result as the initialAnswer on the item
-                    var expression = item.getExtensionsByUrl(Constants.CQF_EXPRESSION).get(0).getValue().toString();
-                    var language = item.getExtensionsByUrl(Constants.CQF_EXPRESSION_LANGUAGE).get(0).getValue().toString();
+                    var expressionExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION);
+                    var expression = expressionExtension.getValue().toString();
+                    var languageExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION_LANGUAGE);
+                    var language = languageExtension.getValue().toString();
                     var result = getExpressionResult(expression, language, defaultLibrary, this.parameters);
                     item.setInitial((Type) result);
                 }

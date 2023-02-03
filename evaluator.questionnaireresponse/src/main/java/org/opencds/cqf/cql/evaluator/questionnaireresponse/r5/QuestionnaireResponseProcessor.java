@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.r5;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.google.gson.JsonObject;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
@@ -11,6 +10,8 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,82 +91,107 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         return Enumerations.FHIRTypes.fromCode(((CodeType) extension.getValue()).getCode());
     }
 
-    private String getSubjectProperty(StructureDefinition resourceDefinition) {
-        if (resourceDefinition.getSnapshot().getElement().stream().anyMatch(e -> e.getPath().equals("subject"))) {
-            return "subject";
-        } else if (resourceDefinition.getSnapshot().getElement().stream().anyMatch(e -> e.getPath().equals("patient"))) {
-            return "patient";
-        } else {
-            return "";
+    private Property getSubjectProperty(Resource resource) {
+        var property = resource.getNamedProperty("subject");
+        if (property == null) {
+            property = resource.getNamedProperty("patient");
         }
+
+        return property;
     }
 
     private void processDefinitionItem(Extension itemExtractionContext, String linkId,
-            List<QuestionnaireResponseItemComponent> items, QuestionnaireResponse questionnaireResponse,
-            List<IBaseResource> resources, Reference subject) {
+                                       List<QuestionnaireResponse.QuestionnaireResponseItemComponent> items, QuestionnaireResponse questionnaireResponse,
+                                       List<IBaseResource> resources, Reference subject) {
         // Definition-based extraction - http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
-        var resourceType = getFhirType(itemExtractionContext);
-        var resourceDefinition = (StructureDefinition) this.fhirContext.getResourceDefinition(resourceType.toCode()).toProfile("");
-        var resourceBuilder = new JsonObject();
-        resourceBuilder.addProperty("id", "qr" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
-        resourceBuilder.addProperty("resourceType", resourceType.toCode());
-        var subjectProperty = getSubjectProperty(resourceDefinition);
-        if (!subjectProperty.isEmpty()) {
-            resourceBuilder.addProperty(subjectProperty, convertToJson(subject));
+        var resourceType = getFhirType(itemExtractionContext).toCode();
+        var resource = (Resource) this.fhirContext.getResourceDefinition(resourceType).newInstance();
+        resource.setId(new IdType(resourceType, "extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId));
+        var subjectProperty = getSubjectProperty(resource);
+        if (subjectProperty != null) {
+            resource.setProperty(subjectProperty.getName(), subject);
         }
         items.forEach(childItem -> {
             if (childItem.hasDefinition()) {
                 var definition = childItem.getDefinition().split("#");
                 var path = definition[1];
-                var profileDefinition = (StructureDefinition) fhirDal.read(new IdType("StructureDefinition", resourceType.toCode()));
-                // var profile = definition[0];
-//                var searchResults = fhirDal.read(new IdType("StructureDefinition", resourceType.toCode()));
-//                var profileDefinition = searchResults.iterator().hasNext() ? (StructureDefinition) searchResults.iterator().next() : resourceDefinition;
                 var pathElements = path.split("\\.");
-                var elementCount = pathElements.length;
-                var answerValue = transformAnswerValue(childItem.getAnswerFirstRep(), profileDefinition);
+                if (pathElements.length < 2) {
+                    throw new RuntimeException(String.format("Unable to determine path from definition: %s", childItem.getDefinition()));
+                }
+                var answerValue = childItem.getAnswerFirstRep().getValue();
                 if (answerValue != null) {
                     // First element is always the resource type, so it can be ignored
-                    if (elementCount == 2) {
-                        resourceBuilder.addProperty(pathElements[1], answerValue);
-                    } else if (elementCount > 2) {
-                        // Nested properties may already exist
-                        var existingProperty = (JsonObject) resourceBuilder.get(pathElements[1]);
-                        if (existingProperty != null) {
-                            existingProperty.getAsJsonObject().addProperty(pathElements[2], answerValue);
-                        } else {
-                            existingProperty = new JsonObject();
-                            existingProperty.addProperty(pathElements[2], answerValue);
-                        }
+                    if (pathElements.length == 2) {
+                        setProperty(resource, pathElements[1], answerValue);
+                    } else {
+                        processNestedItem(pathElements, resource, answerValue);
                     }
                 }
             }
         });
 
-        resources.add(parser.parseResource(resourceBuilder.toString()));
+        resources.add(resource);
     }
 
-    private String transformAnswerValue(QuestionnaireResponseItemAnswerComponent itemAnswer, StructureDefinition resourceDefinition) {
-        if (!itemAnswer.hasValue()) { return null; }
+    private void processNestedItem(String[] pathElements, Base base, DataType answerValue ) {
+        var nestedPropertyName = pathElements[1];
+        var nestedElements = new ArrayList<String>();
+        for (int i = 2; i < pathElements.length; i++) {
+            nestedElements.add(pathElements[i]);
+        }
+        var nestedProperty = base.getNamedProperty(nestedPropertyName);
+        if (nestedProperty.getMaxCardinality() > 1 && nestedProperty.hasValues() && nestedProperty.getValues().size() > 1 ) {
+            var newValues = nestedProperty.getValues();
+        } else {
+            var hasExisting = nestedProperty.hasValues();
+            var newValue = hasExisting ? nestedProperty.getValues().get(0) : newValue(nestedProperty);
+            if (nestedElements.size() == 1) {
+                setProperty(newValue, pathElements[2], answerValue);
+            } else {
+                processNestedItem((String[]) nestedElements.toArray(), newValue, answerValue);
+            }
+            if (!hasExisting) {
+                setProperty(base, nestedPropertyName, newValue);
+            }
+        }
+    }
 
-        var answerValue = itemAnswer.getValue();
+    private void setProperty(Base base, String propertyName, Base answerValue) {
+        var property = base.getNamedProperty(propertyName);
+        base.setProperty(propertyName, transformAnswerValue(answerValue, property));
+    }
 
-        String retVal = convertToJson(answerValue);
+    private Base newValue(Property property) {
+        try {
+            var newValue = (Base) Class.forName("org.hl7.fhir.r5.model." + property.getTypeCode()).getConstructor().newInstance();
 
-        if (resourceDefinition != null) {
-            retVal = retVal;
+            return newValue;
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Base transformAnswerValue(Base answerValue, Property property) {
+        if (answerValue.fhirType().equals(property.getTypeCode())) {
+            return answerValue;
         }
 
-        return retVal;
-    }
+        // TODO: Need to define each of these potential cases?
+        if (answerValue.fhirType().equals("Coding") && property.getTypeCode().equals("code")) {
+            return ((Coding)answerValue).getCodeElement();
+        }
 
-//    private Resource createResource(String resourceType) {
-//        switch (resourceType) {
-//            case "Patient": return new Patient();
-//            case "Organization": return new Organization();
-//            default: return null;
-//        }
-//    }
+        throw new RuntimeException(String.format("Unable to transform answer of type (%s) to value of type (%s)", answerValue.fhirType(), property.getTypeCode()));
+    }
 
     private void processItem(
             QuestionnaireResponseItemComponent item, QuestionnaireResponse questionnaireResponse,
@@ -183,12 +209,6 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
                 }
             });
         }
-
-//        if (item.hasItem()) {
-//            item.getItem().forEach(itemItem -> {
-//                processItem(itemItem, questionnaireResponse, questionnaireCodeMap, resources, subject);
-//            });
-//        }
     }
 
     private Observation createObservationFromItemAnswer(
@@ -196,7 +216,7 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
             Reference subject, Map<String, List<Coding>> questionnaireCodeMap) {
         // Observation-based extraction - http://build.fhir.org/ig/HL7/sdc/extraction.html#observation-based-extraction
         var obs = new Observation();
-        obs.setId("qr" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
+        obs.setId("extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
         obs.setBasedOn(questionnaireResponse.getBasedOn());
         obs.setPartOf(questionnaireResponse.getPartOf());
         obs.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -210,8 +230,9 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         obs.setSubject(subject);
         // obs.setFocus();
         obs.setEncounter(questionnaireResponse.getEncounter());
-        obs.setEffective(new DateTimeType(questionnaireResponse.getAuthored()));
-        obs.setIssued(questionnaireResponse.getAuthored());
+        var authoredDate = new DateTimeType((questionnaireResponse.hasAuthored() ? questionnaireResponse.getAuthored().toInstant() : Instant.now()).toString());
+        obs.setEffective(authoredDate);
+        obs.setIssuedElement(new InstantType(authoredDate));
         obs.setPerformer(Collections.singletonList(questionnaireResponse.getAuthor()));
 
         switch (answer.getValue().fhirType()) {

@@ -69,9 +69,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             .collect(Collectors.toList());
     if (questionnaireResponses != null && questionnaireResponses.size() > 0) {
       for (var questionnaireResponse : questionnaireResponses) {
-        var extractedResources = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
-        for (var entry : extractedResources.getEntry()) {
+        var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
+        extractedResources.add(questionnaireResponse);
+        for (var entry : extractBundle.getEntry()) {
           ((Bundle) bundle).addEntry(entry);
+          extractedResources.add(entry.getResource());
         }
       }
     }
@@ -86,7 +88,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var planDefinition = castOrThrow(basePlanDefinition, PlanDefinition.class,
             "The planDefinition passed to FhirDal was not a valid instance of PlanDefinition.class").orElse(null);
 
-    logger.info("Performing $apply operation on PlanDefinition/{}", theId);
+    logger.info("Performing $apply operation on {}", theId);
 
     return planDefinition;
   }
@@ -161,6 +163,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     carePlan.addActivity().setReference(new Reference("#" + requestGroup.getIdElement().getIdPart()));
     carePlan.addContained(requestGroup);
 
+    for (var resource : extractedResources) {
+      carePlan.addSupportingInfo(new Reference((Resource)resource));
+      carePlan.addContained((Resource)resource);
+    }
+
     return (CarePlan)ContainedHelper.liftContainedResourcesToParent(carePlan);
   }
 
@@ -169,6 +176,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var resultBundle = new Bundle().setType(BundleType.COLLECTION);
     resultBundle.addEntry().setResource((Resource) requestGroup);
     for (var resource : requestResources) {
+      resultBundle.addEntry().setResource((Resource) resource);
+    }
+    for (var resource : extractedResources) {
       resultBundle.addEntry().setResource((Resource) resource);
     }
 
@@ -308,8 +318,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       } else {
         requestResources.add(result);
       }
-      // TODO: Add Contained or Add to RequestResources?
-      // requestGroup.addContained((Resource) result);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -477,14 +485,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     Bundle bundle = null;
     // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as the order id to pass
     var prepopulateExtension = action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE);
-    var parameterName = prepopulateExtension.getValue().toString();
+    var parameterExtension = prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER);
+    var parameterName = parameterExtension.getValue().toString();
     var prepopulateParameter = this.parameters != null ? ((Parameters) this.parameters).getParameter(parameterName) : null;
     if (prepopulateParameter == null) {
       throw new IllegalArgumentException(String.format("Parameter not found: %s ", parameterName));
     }
     var orderId = prepopulateParameter.toString();
 
-    var questionnaireUrl = ((CanonicalType) action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).getValue()).getValue();
+    var questionnaireUrl = ((CanonicalType) prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE).getValue()).getValue();
 
     if (questionnaireUrl.contains("$")) {
       var urlSplit = questionnaireUrl.split("$");

@@ -62,12 +62,6 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
         return createResourceBundle(questionnaireResponse, resources);
     }
 
-    protected String convertToJson(IBase b) {
-        var gson = new Gson();
-
-        return b == null ? null : gson.toJson(b);
-    }
-
     protected abstract IBaseBundle createResourceBundle(T questionnaireResponse, List<IBaseResource> resources);
 
     public abstract List<IBaseResource> processItems(T questionnaireResponse);

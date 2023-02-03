@@ -15,8 +15,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cql-translator.version>2.5.0</cql-translator.version>
-        <cql-engine.version>2.5.0</cql-engine.version>
+        <cql.version>2.6.0-SNAPSHOT</cql.version>
         <spring.version>5.3.19</spring.version>
         <dagger.version>2.34.1</dagger.version>
         <fhir-core.version>5.6.68</fhir-core.version>
@@ -109,87 +108,87 @@
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>engine</artifactId>
-                <version>${cql-engine.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>model</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>model-jackson</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm-jackson</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>model-jaxb</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm-jaxb</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
-                <artifactId>engine.fhir</artifactId>
-                <version>${cql-engine.version}</version>
+                <artifactId>engine-fhir</artifactId>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>engine-jaxb</artifactId>
-                <version>${cql-engine.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>engine-jackson</artifactId>
-                <version>${cql-engine.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>qdm</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>quick</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>fhir-r4</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm-fhir</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cqf-fhir</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cqf-fhir-npm</artifactId>
-                <version>${cql-translator.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <!-- Core FHIR dependencies -->

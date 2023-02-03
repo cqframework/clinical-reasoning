@@ -49,17 +49,20 @@
         "**/pom.xml",
         "checkstyle.xml"
     ],
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.dependency.packagePresentation": "hierarchical",
-    "editor.formatOnSave": true,
     "files.exclude": {
         "**/.classpath": true,
         "**/.project": true,
         "**/.settings": true,
         "**/.factorypath": true
     },
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.dependency.packagePresentation": "hierarchical",
     "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication",
     "java.compile.nullAnalysis.mode": "automatic",
+    "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
     "java.format.settings.profile": "GoogleStyle",
     "commandOnAllFiles.commands": {
         "Format Java File": {

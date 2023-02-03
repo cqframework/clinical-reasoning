@@ -449,7 +449,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void buildMeasureObservations(BuilderContext bc, String observationName, List<Object> resources) {
+    protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
             Observation observation = createMeasureObservation(bc,
@@ -479,7 +479,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected void addEvaluatedResourceReferences(BuilderContext bc, String criteriaId,
-            List<Object> evaluatedResources) {
+            Set<Object> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
         }

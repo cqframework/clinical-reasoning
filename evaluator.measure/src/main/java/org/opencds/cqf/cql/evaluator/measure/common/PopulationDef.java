@@ -12,11 +12,9 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
 
-
-    protected List<Object> evaluatedResources;
-    protected List<Object> resources;
+    protected Set<Object> evaluatedResources;
+    protected Set<Object> resources;
     protected Set<String> subjects;
-
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
         this.id = id;
@@ -24,7 +22,6 @@ public class PopulationDef {
         this.measurePopulationType = measurePopulationType;
         this.expression = expression;
     }
-
 
     public MeasurePopulationType type() {
         return this.measurePopulationType;
@@ -42,9 +39,9 @@ public class PopulationDef {
         this.getEvaluatedResources().add(resource);
     }
 
-    public List<Object> getEvaluatedResources() {
+    public Set<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
-            this.evaluatedResources = new ArrayList<>();
+            this.evaluatedResources = new HashSet<>();
         }
 
         return this.evaluatedResources;
@@ -74,9 +71,9 @@ public class PopulationDef {
         this.getResources().remove(resource);
     }
 
-    public List<Object> getResources() {
+    public Set<Object> getResources() {
         if (this.resources == null) {
-            this.resources = new ArrayList<>();
+            this.resources = new HashSet<>();
         }
 
         return this.resources;

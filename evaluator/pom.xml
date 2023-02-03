@@ -46,25 +46,25 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>engine-fhir</artifactId>
-            <version>${cql-engine.version}</version>
+            <version>${cql.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>qdm</artifactId>
-            <version>${cql-translator.version}</version>
+            <version>${cql.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>quick</artifactId>
-            <version>${cql-translator.version}</version>
+            <version>${cql.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-fhir</artifactId>
-            <version>${cql-translator.version}</version>
+            <version>${cql.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

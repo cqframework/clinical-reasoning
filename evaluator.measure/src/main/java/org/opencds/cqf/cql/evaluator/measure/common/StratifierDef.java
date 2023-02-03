@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class StratifierDef {
 
@@ -42,7 +43,7 @@ public class StratifierDef {
         return this.components;
     }
 
-    public void putResult(String subject, Object value, List<Object> evaluatedResources) {
+    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
         this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
     }
 

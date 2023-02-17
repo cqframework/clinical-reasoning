@@ -22,9 +22,11 @@ public class FhirResourceLoader implements ResourceLoader{
         List<String> locations = new ArrayList<>();
 
         directoryList.forEach(dir -> {
+            System.out.println("dir:" + dir);
             locations.addAll(getFilePaths(getDirectoryLocation(clazz, dir), recursive));
         });
 
+        System.out.println(locations);
         locations.forEach(item -> {
             IBaseResource resource = loadTestResources(item);
             resources.add( resource);
@@ -39,7 +41,10 @@ public class FhirResourceLoader implements ResourceLoader{
     }
 
     private String getDirectoryLocation(Class<?> clazz, String relativePath) {
+        System.out.println("rel path:" + relativePath);
         String directoryLocationUrl = clazz.getResource(relativePath).toString();
+
+        System.out.println("DIR URL:"+directoryLocationUrl);
         if (directoryLocationUrl.startsWith("file:/")) {
             directoryLocationUrl = directoryLocationUrl.substring("file:/".length() - 1);
         }

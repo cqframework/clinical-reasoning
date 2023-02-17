@@ -42,6 +42,7 @@ public class FhirRepository implements Repository {
             resourceMap.put(new IdType(resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()), resource);
         });
 
+        System.out.println(list.size());
     }
 
     @Override
@@ -135,16 +136,19 @@ public class FhirRepository implements Repository {
 
         List<IBaseResource> resourceList = new ArrayList<>();
         for(IBaseResource resource : resourceMap.values()) {
-            if(resource.getIdElement().getResourceType().equals(resourceType.getSimpleName())) {
+            if(resource.getIdElement().equals(resourceType.getSimpleName()) ||
+                    resource.getIdElement().getResourceType().equals(resourceType.getSimpleName())) {
                 resourceList.add(resource);
             }
         }
 
-        if(searchParameters.containsKey("url")) {
+        if (searchParameters != null && searchParameters.containsKey("url")) {
             Iterable<IBaseResource> bundleResources = searchByUrl(resourceList, searchParameters.get("url").get(0)
                     .getValueAsQueryToken(context));
-
             bundleResources.forEach(resource -> bundle.addEntry(
+                    new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+        } else {
+            resourceList.forEach(resource -> bundle.addEntry(
                     new Bundle.BundleEntryComponent().setResource((Resource) resource)));
         }
 

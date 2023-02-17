@@ -43,7 +43,7 @@ public class R4RepositoryTest {
 
     @Test
     public void testSearch() {
-        IBaseBundle bundle = repository.search(Bundle.class, Patient.class, null, null);
+        IBaseBundle bundle = repository.search(IBaseBundle.class, Patient.class, null, null);
         assertEquals(((Bundle) bundle).getEntry().size(), 3);
     }
 }

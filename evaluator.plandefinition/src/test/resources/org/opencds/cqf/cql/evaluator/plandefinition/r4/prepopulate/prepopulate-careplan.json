@@ -33,6 +33,12 @@
         {
           "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
           "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/extension-prepopulate.operationOutcome.reference",
+          "valueReference": {
+            "reference": "#prepopulate-outcome-1903"
+          }
         }
       ],
       "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
@@ -108,6 +114,15 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql.identifier",
+                    "expression": "FacilityPTAN"
+                  }
+                }
+              ],
               "linkId": "1.3",
               "text": "PTAN",
               "type": "string",
@@ -347,6 +362,15 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql.identifier",
+                    "expression": "OperatingPhysicianPTAN"
+                  }
+                }
+              ],
               "linkId": "3.4",
               "text": "PTAN",
               "type": "string",
@@ -555,6 +579,15 @@
                   ]
                 },
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql.identifier",
+                        "expression": "AttendingPhysicianPTAN"
+                      }
+                    }
+                  ],
                   "linkId": "4.2.4",
                   "text": "PTAN",
                   "type": "string",
@@ -687,6 +720,27 @@
       "for": {
         "reference": "OPA-Patient1"
       }
+    },
+    {
+      "resourceType": "OperationOutcome",
+      "id": "prepopulate-outcome-1903",
+      "issue": [
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (FacilityPTAN) for item (1.3): Could not resolve expression reference 'FacilityPTAN' in library 'OutpatientPriorAuthorizationPrepopulation'."
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianPTAN) for item (3.4): Could not resolve expression reference 'OperatingPhysicianPTAN' in library 'OutpatientPriorAuthorizationPrepopulation'."
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianPTAN) for item (4.2.4): Could not resolve expression reference 'AttendingPhysicianPTAN' in library 'OutpatientPriorAuthorizationPrepopulation'."
+        }
+      ]
     }
   ],
   "instantiatesCanonical": [

@@ -1,26 +1,89 @@
 {
   "resourceType": "Bundle",
-  "type": "collection",
+  "id": "prepopulate-content-bundle",
+  "type": "transaction",
   "entry": [
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "PlanDefinition",
         "id": "prepopulate",
-        "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
-        ],
-        "status": "draft",
-        "intent": "proposal",
-        "subject": {
-          "reference": "OPA-Patient1"
+        "meta": {
+          "profile": [ "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition" ]
         },
-        "action": [
-          {
-            "resource": {
-              "reference": "Task/complete-questionnaire"
-            }
+        "url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate",
+        "identifier": [ {
+          "use": "official",
+          "value": "prepopulate-sample"
+        } ],
+        "version": "1.0.0",
+        "name": "Prepopulate",
+        "title": "Prepopulate",
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+            "code": "eca-rule",
+            "display": "ECA Rule"
+          } ]
+        },
+        "status": "draft",
+        "experimental": true,
+        "date": "2021-05-26T00:00:00-08:00",
+        "publisher": "Alphora",
+        "description": "This PlanDefinition defines a simple recommendation to fill out a prepopulated Questionnaire.",
+        "useContext": [ {
+          "code": {
+            "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+            "version": "4.0.1",
+            "code": "focus",
+            "display": "Clinical Focus"
           }
-        ]
+        } ],
+        "jurisdiction": [ {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/ValueSet/iso3166-1-3",
+            "version": "4.0.1",
+            "code": "USA",
+            "display": "United States of America"
+          } ]
+        } ],
+        "purpose": "The purpose of this is to test the system to make sure we have complete end-to-end functionality",
+        "usage": "This is to be used in conjunction with a patient-facing FHIR application.",
+        "copyright": "© CDC 2016+.",
+        "library": [ "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation" ],
+        "action": [ {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",
+              "valueString": "ClaimId"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
+              "valueCanonical": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+            }
+          ],
+          "title": "Prepopulate!",
+          "description": "A simple recommendation to complete a prepopulated Questionnaire",
+          "definitionCanonical": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire"
+        } ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ActivityDefinition",
+        "id": "complete-questionnaire",
+        "url": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire",
+        "name": "ActivityDefinition_CompleteQuestionnaire",
+        "title": "CompleteQuestionnaire",
+        "status": "draft",
+        "description": "Create a task to complete a Questionnaire.",
+        "library": [],
+        "kind": "RequestOrchestration",
+        "productCodeableConcept": {
+          "coding": [{
+            "system": "http://hl7.org/fhir/CodeSystem/task-code",
+            "code": "collect-information"
+          }]
+        }
       }
     },
     {
@@ -35,39 +98,10 @@
             "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire-r4"
           ]
         },
-        "contained": [
-          {
-            "resourceType": "OperationOutcome",
-            "id": "prepopulate-outcome-1903",
-            "issue": [
-              {
-                "severity": "error",
-                "code": "exception",
-                "diagnostics": "Error encountered evaluating expression (FacilityPTAN) for item (1.3): Could not resolve expression reference 'FacilityPTAN' in library 'OutpatientPriorAuthorizationPrepopulation'."
-              },
-              {
-                "severity": "error",
-                "code": "exception",
-                "diagnostics": "Error encountered evaluating expression (OperatingPhysicianPTAN) for item (3.4): Could not resolve expression reference 'OperatingPhysicianPTAN' in library 'OutpatientPriorAuthorizationPrepopulation'."
-              },
-              {
-                "severity": "error",
-                "code": "exception",
-                "diagnostics": "Error encountered evaluating expression (AttendingPhysicianPTAN) for item (4.2.4): Could not resolve expression reference 'AttendingPhysicianPTAN' in library 'OutpatientPriorAuthorizationPrepopulation'."
-              }
-            ]
-          }
-        ],
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
             "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/extension-prepopulate.operationOutcome.reference",
-            "valueReference": {
-              "reference": "#prepopulate-outcome-1903"
-            }
           }
         ],
         "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
@@ -115,12 +149,7 @@
                 "linkId": "1.1",
                 "text": "Name",
                 "type": "string",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "Acme Clinic"
-                  }
-                ]
+                "required": true
               },
               {
                 "extension": [
@@ -135,23 +164,9 @@
                 "linkId": "1.2",
                 "text": "NPI",
                 "type": "text",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "1407071236"
-                  }
-                ]
+                "required": true
               },
               {
-                "extension": [
-                  {
-                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "FacilityPTAN"
-                    }
-                  }
-                ],
                 "linkId": "1.3",
                 "text": "PTAN",
                 "type": "string",
@@ -160,7 +175,7 @@
               {
                 "linkId": "1.4",
                 "text": "Contract/Region",
-                "type": "choice",
+                "type": "question",
                 "required": false,
                 "answerOption": [
                   {
@@ -205,12 +220,7 @@
                 "linkId": "2.1",
                 "text": "First Name",
                 "type": "string",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "Peter"
-                  }
-                ]
+                "required": true
               },
               {
                 "extension": [
@@ -225,12 +235,7 @@
                 "linkId": "2.2",
                 "text": "Last Name",
                 "type": "text",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "Chalmers"
-                  }
-                ]
+                "required": true
               },
               {
                 "extension": [
@@ -245,12 +250,7 @@
                 "linkId": "2.3",
                 "text": "Date of Birth",
                 "type": "date",
-                "required": true,
-                "initial": [
-                  {
-                    "valueDate": "1974-12-25"
-                  }
-                ]
+                "required": true
               },
               {
                 "extension": [
@@ -265,12 +265,7 @@
                 "linkId": "2.4",
                 "text": "Medicare ID",
                 "type": "string",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "525697298M"
-                  }
-                ]
+                "required": true
               },
               {
                 "extension": [
@@ -284,7 +279,7 @@
                 ],
                 "linkId": "2.5",
                 "text": "Gender",
-                "type": "choice",
+                "type": "question",
                 "required": true,
                 "answerOption": [
                   {
@@ -316,11 +311,6 @@
                       "display": "Unknown"
                     }
                   }
-                ],
-                "initial": [
-                  {
-                    "valueString": "male"
-                  }
                 ]
               }
             ]
@@ -343,12 +333,7 @@
                 "linkId": "3.1",
                 "text": "First Name",
                 "type": "string",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "Fielding"
-                  }
-                ]
+                "required": true
               },
               {
                 "extension": [
@@ -363,12 +348,7 @@
                 "linkId": "3.2",
                 "text": "Last Name",
                 "type": "text",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "Kathy"
-                  }
-                ]
+                "required": true
               },
               {
                 "extension": [
@@ -383,23 +363,9 @@
                 "linkId": "3.3",
                 "text": "NPI",
                 "type": "string",
-                "required": true,
-                "initial": [
-                  {
-                    "valueString": "1245319599"
-                  }
-                ]
+                "required": true
               },
               {
-                "extension": [
-                  {
-                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                    "valueExpression": {
-                      "language": "text/cql.identifier",
-                      "expression": "OperatingPhysicianPTAN"
-                    }
-                  }
-                ],
                 "linkId": "3.4",
                 "text": "PTAN",
                 "type": "string",
@@ -424,12 +390,7 @@
                     "linkId": "3.5.1",
                     "text": "Address1",
                     "type": "string",
-                    "required": true,
-                    "initial": [
-                      {
-                        "valueString": "1080 FIRST COLONIAL RD"
-                      }
-                    ]
+                    "required": true
                   },
                   {
                     "extension": [
@@ -459,12 +420,7 @@
                     "linkId": "3.5.3",
                     "text": "City",
                     "type": "string",
-                    "required": true,
-                    "initial": [
-                      {
-                        "valueString": "Virginia Beach"
-                      }
-                    ]
+                    "required": true
                   },
                   {
                     "extension": [
@@ -479,12 +435,7 @@
                     "linkId": "3.5.4",
                     "text": "State",
                     "type": "string",
-                    "required": true,
-                    "initial": [
-                      {
-                        "valueString": "VA"
-                      }
-                    ]
+                    "required": true
                   },
                   {
                     "extension": [
@@ -499,12 +450,7 @@
                     "linkId": "3.5.5",
                     "text": "Zip",
                     "type": "string",
-                    "required": true,
-                    "initial": [
-                      {
-                        "valueString": "21454-2406"
-                      }
-                    ]
+                    "required": true
                   }
                 ]
               }
@@ -528,12 +474,7 @@
                 "linkId": "4.1",
                 "text": "Same as Operating Physician?",
                 "type": "boolean",
-                "required": false,
-                "initial": [
-                  {
-                    "valueBoolean": false
-                  }
-                ]
+                "required": false
               },
               {
                 "linkId": "4.2",
@@ -560,12 +501,7 @@
                     "linkId": "4.2.1",
                     "text": "First Name",
                     "type": "string",
-                    "required": true,
-                    "initial": [
-                      {
-                        "valueString": "Ronald"
-                      }
-                    ]
+                    "required": true
                   },
                   {
                     "extension": [
@@ -580,12 +516,7 @@
                     "linkId": "4.2.2",
                     "text": "Last Name",
                     "type": "text",
-                    "required": true,
-                    "initial": [
-                      {
-                        "valueString": "Bone"
-                      }
-                    ]
+                    "required": true
                   },
                   {
                     "extension": [
@@ -600,23 +531,9 @@
                     "linkId": "4.2.3",
                     "text": "NPI",
                     "type": "string",
-                    "required": true,
-                    "initial": [
-                      {
-                        "valueString": "9941339108"
-                      }
-                    ]
+                    "required": true
                   },
                   {
-                    "extension": [
-                      {
-                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                        "valueExpression": {
-                          "language": "text/cql.identifier",
-                          "expression": "AttendingPhysicianPTAN"
-                        }
-                      }
-                    ],
                     "linkId": "4.2.4",
                     "text": "PTAN",
                     "type": "string",
@@ -641,12 +558,7 @@
                         "linkId": "4.2.5.1",
                         "text": "Address1",
                         "type": "string",
-                        "required": true,
-                        "initial": [
-                          {
-                            "valueString": "1003 Healthcare Drive"
-                          }
-                        ]
+                        "required": true
                       },
                       {
                         "extension": [
@@ -676,12 +588,7 @@
                         "linkId": "4.2.5.3",
                         "text": "City",
                         "type": "string",
-                        "required": true,
-                        "initial": [
-                          {
-                            "valueString": "Amherst"
-                          }
-                        ]
+                        "required": true
                       },
                       {
                         "extension": [
@@ -696,12 +603,7 @@
                         "linkId": "4.2.5.4",
                         "text": "State",
                         "type": "string",
-                        "required": true,
-                        "initial": [
-                          {
-                            "valueString": "MA"
-                          }
-                        ]
+                        "required": true
                       },
                       {
                         "extension": [
@@ -716,12 +618,7 @@
                         "linkId": "4.2.5.5",
                         "text": "Zip",
                         "type": "string",
-                        "required": true,
-                        "initial": [
-                          {
-                            "valueString": "01002"
-                          }
-                        ]
+                        "required": true
                       }
                     ]
                   }
@@ -730,181 +627,6 @@
             ]
           }
         ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "Task",
-        "id": "complete-questionnaire",
-        "basedOn": [
-          {
-            "reference": "RequestGroup/prepopulate",
-            "type": "RequestGroup"
-          }
-        ],
-        "status": "draft",
-        "intent": "proposal",
-        "description": "Create a task to complete a Questionnaire.",
-        "focus": {
-          "reference": "Questionnaire/1903"
-        },
-        "for": {
-          "reference": "OPA-Patient1"
-        }
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "QuestionnaireResponse",
-        "id": "1903",
-        "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
-        "status": "completed",
-        "subject": {
-          "reference": "Patient/12345"
-        },
-        "authored": "2021-12-01",
-        "item": [
-          {
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-                "valueCode": "Organization"
-              }
-            ],
-            "linkId": "1",
-            "text": "Facility Information",
-            "item": [
-              {
-                "linkId": "1.1",
-                "definition": "http://hl7.org/fhir/Organization#Organization.name",
-                "text": "Name",
-                "answer": [
-                  {
-                    "valueString": "Test Facility"
-                  }
-                ]
-              },
-              {
-                "linkId": "1.2",
-                "definition": "http://hl7.org/fhir/Organization#Organization.identifier",
-                "text": "NPI"
-              },
-              {
-                "linkId": "1.3",
-                "definition": "http://hl7.org/fhir/Organization#Organization.identifier",
-                "text": "PTAN"
-              },
-              {
-                "linkId": "1.4",
-                "text": "Contract/Region"
-              }
-            ]
-          },
-          {
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-                "valueCode": "Patient"
-              }
-            ],
-            "linkId": "2",
-            "text": "Beneficiary Information",
-            "item": [
-              {
-                "linkId": "2.1",
-                "definition": "http://hl7.org/fhir/Patient#Patient.name.given",
-                "text": "First Name",
-                "answer": [
-                  {
-                    "valueString": "Test"
-                  }
-                ]
-              },
-              {
-                "linkId": "2.2",
-                "definition": "http://hl7.org/fhir/Patient#Patient.name.family",
-                "text": "Last Name",
-                "answer": [
-                  {
-                    "valueString": "Man"
-                  }
-                ]
-              },
-              {
-                "linkId": "2.3",
-                "definition": "http://hl7.org/fhir/Patient#Patient.birthDate",
-                "text": "Date of Birth",
-                "answer": [
-                  {
-                    "valueDate": "1950-01-01"
-                  }
-                ]
-              },
-              {
-                "linkId": "2.4.0",
-                "definition": "http://hl7.org/fhir/Patient#Patient.identifier.system",
-                "answer": [
-                  {
-                    "valueUri": "http://hl7.org/fhir/sid/us-medicare"
-                  }
-                ]
-              },
-              {
-                "linkId": "2.4",
-                "definition": "http://hl7.org/fhir/Patient#Patient.identifier.value",
-                "text": "Medicare ID",
-                "answer": [
-                  {
-                    "valueString": "123456789"
-                  }
-                ]
-              },
-              {
-                "linkId": "2.5",
-                "definition": "http://hl7.org/fhir/Patient#Patient.gender",
-                "text": "Gender",
-                "answer": [
-                  {
-                    "valueCoding": {
-                      "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
-                      "code": "male",
-                      "display": "Male"
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "Organization",
-        "id": "extract-1903.1",
-        "name": "Test Facility"
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "extract-1903.2",
-        "identifier": [
-          {
-            "system": "http://hl7.org/fhir/sid/us-medicare",
-            "value": "123456789"
-          }
-        ],
-        "name": [
-          {
-            "family": "Man",
-            "given": [
-              "Test"
-            ]
-          }
-        ],
-        "gender": "male",
-        "birthDate": "1950-01-01"
       }
     }
   ]

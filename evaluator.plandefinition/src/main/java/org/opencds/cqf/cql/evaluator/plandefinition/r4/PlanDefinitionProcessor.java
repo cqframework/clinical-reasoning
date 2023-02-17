@@ -48,8 +48,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           OperationParametersParser operationParametersParser) {
     super(fhirContext, fhirDal, libraryProcessor, expressionEvaluator, operationParametersParser);
     this.activityDefinitionProcessor = activityDefinitionProcessor;
-    this.questionnaireProcessor = new QuestionnaireProcessor(fhirContext, fhirDal, libraryProcessor, expressionEvaluator);
-    this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(fhirContext, fhirDal);
+    this.questionnaireProcessor = new QuestionnaireProcessor(this.fhirContext, this.fhirDal, this.libraryProcessor, this.expressionEvaluator);
+    this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.fhirContext, this.fhirDal);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
@@ -77,6 +77,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
       }
     }
+  }
+
+  @Override
+  public void createDynamicQuestionnaire(String theId) {
+    this.questionnaire = questionnaireProcessor.generateQuestionnaire(theId, patientId, parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint);
   }
 
   @Override
@@ -124,8 +129,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       requestResources.add(goal);
     }
 
-    // TODO: Create Questionnaire for the RequestGroup if using Modular
-    // Questionnaires. Grab the session Questionnaire if doing Dynamic.
+    // Create Questionnaire for the RequestGroup if using Modular Questionnaires.
+    // Assuming Dynamic until a use case for modular arises
 
     var metConditions = new HashMap<String, PlanDefinition.PlanDefinitionActionComponent>();
 
@@ -157,15 +162,19 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
     for (var goal : requestResources) {
       if (goal.fhirType().equals("Goal")) {
-        carePlan.addGoal(new Reference((Resource)goal));
+        carePlan.addGoal(new Reference((Resource) goal));
       }
     }
     carePlan.addActivity().setReference(new Reference("#" + requestGroup.getIdElement().getIdPart()));
     carePlan.addContained(requestGroup);
 
     for (var resource : extractedResources) {
-      carePlan.addSupportingInfo(new Reference((Resource)resource));
-      carePlan.addContained((Resource)resource);
+      carePlan.addSupportingInfo(new Reference((Resource) resource));
+      carePlan.addContained((Resource) resource);
+    }
+
+    if (((Questionnaire)this.questionnaire).hasItem()) {
+      carePlan.addContained((Resource) this.questionnaire);
     }
 
     return (CarePlan)ContainedHelper.liftContainedResourcesToParent(carePlan);
@@ -180,6 +189,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
     for (var resource : extractedResources) {
       resultBundle.addEntry().setResource((Resource) resource);
+    }
+    if (((Questionnaire)this.questionnaire).hasItem()) {
+      resultBundle.addEntry().setResource((Resource) this.questionnaire);
     }
 
     return resultBundle;
@@ -240,7 +252,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup,
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
-    // TODO: If action has inputs generate QuestionnaireItems
+    if (action.hasInput()) {
+      for (var actionInput : action.getInput()) {
+        if (actionInput.hasProfile()) {
+          ((Questionnaire) this.questionnaire).addItem(this.questionnaireProcessor.generateItem(actionInput, ((Questionnaire) this.questionnaire).getItem().size()));
+        }
+      }
+    }
 
     if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, action))) {
       if (action.hasRelatedAction()) {
@@ -457,8 +475,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private void resolvePrepopulateAction(PlanDefinition.PlanDefinitionActionComponent action, RequestGroup requestGroup, Task task) {
     var questionnaireBundles = getQuestionnaireForOrder(action);
     for (var questionnaireBundle : questionnaireBundles) {
-      // Each bundle should contain a Questionnaire and supporting Library and ValueSet resources
       var questionnaire = (Questionnaire) questionnaireBundle.getEntry().get(0).getResource();
+      // Each bundle should contain a Questionnaire and supporting Library and ValueSet resources
       var libraries = questionnaireBundle.getEntry().stream()
               .filter(e -> e.hasResource() && (e.getResource().fhirType() == Enumerations.FHIRAllTypes.LIBRARY.toCode()))
               .map(e -> (Library) e.getResource())
@@ -470,13 +488,31 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       var additionalData = ((Bundle) bundle).copy();
       libraries.forEach(library -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(library)); });
       valueSets.forEach(valueSet -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)); });
-      var prepopResult = questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters, additionalData, dataEndpoint, contentEndpoint, terminologyEndpoint);
-      if (Boolean.TRUE.equals(containResources)) {
-        requestGroup.addContained((Resource) prepopResult);
-      } else {
-        requestResources.add(prepopResult);
+
+      var oc = new OperationOutcome();
+      oc.setId("prepopulate-outcome-" + questionnaire.getId());
+      try {
+        questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters, additionalData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+      } catch (Exception ex) {
+        var message = ex.getMessage();
+        logger.error("Error encountered while attempting to prepopulate questionnaire: %s", message);
+        oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION).setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
       }
-      task.setFocus(new Reference(prepopResult.getIdElement()));
+      if (oc.getIssue().size() > 0) {
+        if (Boolean.TRUE.equals(containResources)) {
+          requestGroup.addContained(oc);
+          requestGroup.addExtension(Constants.EXT_PREPOPULATE_OPERATION_OUTCOME, new Reference("#" + oc.getId()));
+        } else {
+          requestResources.add(oc);
+          requestGroup.addExtension(Constants.EXT_PREPOPULATE_OPERATION_OUTCOME, new Reference(oc.getIdElement()));
+        }
+      }
+      if (Boolean.TRUE.equals(containResources)) {
+        requestGroup.addContained(questionnaire);
+      } else {
+        requestResources.add(questionnaire);
+      }
+      task.setFocus(new Reference(questionnaire.getIdElement()));
       task.setFor(requestGroup.getSubject());
     }
   }

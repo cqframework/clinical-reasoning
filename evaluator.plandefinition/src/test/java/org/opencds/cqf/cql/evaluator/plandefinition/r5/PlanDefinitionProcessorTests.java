@@ -98,7 +98,21 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
                 .isEqualsTo("prepopulate/prepopulate-bundle.json");
     }
 
-    @Test (enabled = false) // Need better error handling, coming with task #235
+    @Test (enabled = false) // Need valid r5 content for this test
+    public void testQuestionnairePrepopulate_NoLibrary() {
+        PlanDefinition.Assert.that(
+                        "prepopulate",
+                        "OPA-Patient1",
+                        null
+                )
+                .withData("prepopulate/prepopulate-patient-data.json")
+                .withLibrary("prepopulate/prepopulate-content-bundle-noLibrary.json")
+                .withParameters(new Parameters().addParameter("ClaimId", "OPA-Claim1"))
+                .apply()
+                .isEqualsTo("prepopulate/prepopulate-bundle-noLibrary.json");
+    }
+
+    @Test
     public void testQuestionnaireResponse() {
         PlanDefinition.Assert.that(
                         "prepopulate",
@@ -110,5 +124,19 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
                 .withParameters(new Parameters().addParameter("ClaimId", "OPA-Claim1"))
                 .apply()
                 .isEqualsTo("extract-questionnaireresponse/bundle.json");
+    }
+
+    @Test (enabled = false) // Not implemented
+    public void testGenerateQuestionnaire() {
+        PlanDefinition.Assert.that(
+                        "generate-questionnaire",
+                        "OPA-Patient1",
+                        null
+                )
+                .withData("generate-questionnaire/patient-data.json")
+                .withLibrary("generate-questionnaire/content-bundle.json")
+                .withParameters(new Parameters().addParameter("ClaimId", "OPA-Claim1"))
+                .apply()
+                .isEqualsTo("generate-questionnaire/bundle.json");
     }
 }

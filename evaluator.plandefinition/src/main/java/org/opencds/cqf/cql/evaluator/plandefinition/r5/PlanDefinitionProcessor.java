@@ -52,8 +52,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             OperationParametersParser operationParametersParser) {
         super(fhirContext, fhirDal, libraryProcessor, expressionEvaluator, operationParametersParser);
         this.activityDefinitionProcessor = activityDefinitionProcessor;
-        this.questionnaireProcessor = new QuestionnaireProcessor(fhirContext, fhirDal, libraryProcessor, expressionEvaluator);
-        this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(fhirContext, fhirDal);
+        this.questionnaireProcessor = new QuestionnaireProcessor(this.fhirContext, this.fhirDal, this.libraryProcessor, this.expressionEvaluator);
+        this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.fhirContext, this.fhirDal);
     }
 
     public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
@@ -63,6 +63,29 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             return Optional.of(type.cast(obj));
         }
         throw new IllegalArgumentException(errorMessage);
+    }
+
+    @Override
+    public void extractQuestionnaireResponse() {
+        var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
+                .filter(entry -> entry.getResource().fhirType() == Enumerations.FHIRTypes.QUESTIONNAIRERESPONSE.toCode())
+                .map(entry -> (QuestionnaireResponse) entry.getResource())
+                .collect(Collectors.toList());
+        if (questionnaireResponses != null && questionnaireResponses.size() > 0) {
+            for (var questionnaireResponse : questionnaireResponses) {
+                var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
+                extractedResources.add(questionnaireResponse);
+                for (var entry : extractBundle.getEntry()) {
+                    ((Bundle) bundle).addEntry(entry);
+                    extractedResources.add(entry.getResource());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void createDynamicQuestionnaire(String theId) {
+        this.questionnaire = questionnaireProcessor.generateQuestionnaire(theId, patientId, parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint);
     }
 
     @Override
@@ -106,8 +129,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             requestResources.add(goal);
         }
 
-        // TODO: Create Questionnaire for the RequestGroup if using Modular
-        // Questionnaires. Grab the session Questionnaire if doing Dynamic.
+        // Create Questionnaire for the RequestGroup if using Modular Questionnaires.
+        // Assuming Dynamic until a use case for modular arises
 
         var metConditions = new HashMap<String, PlanDefinition.PlanDefinitionActionComponent>();
 
@@ -146,6 +169,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 .setPlannedActivityReference(new Reference("#" + requestGroup.getIdElement().getIdPart()));
         carePlan.addContained(requestGroup);
 
+        for (var resource : extractedResources) {
+            carePlan.addSupportingInfo(new Reference((Resource) resource));
+            carePlan.addContained((Resource) resource);
+        }
+
+        if (((Questionnaire)this.questionnaire).hasItem()) {
+            carePlan.addContained((Resource) this.questionnaire);
+        }
+
         return (CarePlan) ContainedHelper.liftContainedResourcesToParent(carePlan);
     }
 
@@ -155,6 +187,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         resultBundle.addEntry().setResource((Resource) requestGroup);
         for (var resource : requestResources) {
             resultBundle.addEntry().setResource((Resource) resource);
+        }
+        for (var resource : extractedResources) {
+            resultBundle.addEntry().setResource((Resource) resource);
+        }
+        if (((Questionnaire)this.questionnaire).hasItem()) {
+            resultBundle.addEntry().setResource((Resource) this.questionnaire);
         }
 
         return resultBundle;
@@ -190,22 +228,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         return this.fhirDal.read(new IdType("Patient", this.patientId));
     }
 
-    @Override
-    public void extractQuestionnaireResponse() {
-        var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
-                .filter(entry -> entry.getResource().fhirType() == Enumerations.FHIRTypes.QUESTIONNAIRERESPONSE.toCode())
-                .map(entry -> (QuestionnaireResponse) entry.getResource())
-                .collect(Collectors.toList());
-        if (questionnaireResponses != null && questionnaireResponses.size() > 0) {
-            for (var questionnaireResponse : questionnaireResponses) {
-                var extractedResources = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
-                for (var entry : extractedResources.getEntry()) {
-                    ((Bundle) bundle).addEntry(entry);
-                }
-            }
-        }
-    }
-
     private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
         var myGoal = new Goal();
         myGoal.setCategory(Collections.singletonList(goal.getCategory()));
@@ -228,7 +250,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup,
             Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
             PlanDefinition.PlanDefinitionActionComponent action) {
-        // TODO: If action has inputs generate QuestionnaireItems
+        if (action.hasInput()) {
+            for (var actionInput : action.getInput()) {
+                if (actionInput.hasRequirement() && actionInput.getRequirement().hasProfile()) {
+                    ((Questionnaire) this.questionnaire).addItem(this.questionnaireProcessor.generateItem(actionInput.getRequirement(), ((Questionnaire) this.questionnaire).getItem().size()));
+                }
+            }
+        }
+
         if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, action))) {
             if (action.hasRelatedAction()) {
                 for (var relatedActionComponent : action.getRelatedAction()) {
@@ -445,13 +474,31 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             var additionalData = ((Bundle) bundle).copy();
             libraries.forEach(library -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(library)); });
             valueSets.forEach(valueSet -> { additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)); });
-            var prepopResult = questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters, additionalData, dataEndpoint, contentEndpoint, terminologyEndpoint);
-            if (Boolean.TRUE.equals(containResources)) {
-                requestGroup.addContained((Resource) prepopResult);
-            } else {
-                requestResources.add(prepopResult);
+
+            var oc = new OperationOutcome();
+            oc.setId("prepopulate-outcome-" + questionnaire.getId());
+            try {
+                questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters, additionalData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+            } catch (Exception ex) {
+                var message = ex.getMessage();
+                logger.error("Error encountered while attempting to prepopulate questionnaire: %s", message);
+                oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION).setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
             }
-            task.setFocus(new Reference(prepopResult.getIdElement()));
+            if (oc.getIssue().size() > 0) {
+                if (Boolean.TRUE.equals(containResources)) {
+                    requestGroup.addContained(oc);
+                    requestGroup.addExtension(Constants.EXT_PREPOPULATE_OPERATION_OUTCOME, new Reference("#" + oc.getId()));
+                } else {
+                    requestResources.add(oc);
+                    requestGroup.addExtension(Constants.EXT_PREPOPULATE_OPERATION_OUTCOME, new Reference(oc.getIdElement()));
+                }
+            }
+            if (Boolean.TRUE.equals(containResources)) {
+                requestGroup.addContained(questionnaire);
+            } else {
+                requestResources.add(questionnaire);
+            }
+            task.setFocus(new Reference(questionnaire.getIdElement()));
             task.setFor(requestGroup.getSubject());
         }
     }

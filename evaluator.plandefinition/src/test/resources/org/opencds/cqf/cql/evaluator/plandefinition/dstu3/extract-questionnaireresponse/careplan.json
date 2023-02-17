@@ -5,7 +5,9 @@
       "resourceType": "RequestGroup",
       "id": "prepopulate",
       "definition": [
-        { "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate" }
+        {
+          "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
+        }
       ],
       "status": "draft",
       "intent": "proposal",
@@ -15,7 +17,7 @@
       "action": [
         {
           "resource": {
-            "reference": "Task/complete-questionnaire"
+            "reference": "Task"
           }
         }
       ]
@@ -23,7 +25,9 @@
     {
       "resourceType": "QuestionnaireResponse",
       "id": "1903",
-      "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+      "questionnaire": {
+        "reference": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+      },
       "status": "completed",
       "subject": {
         "reference": "Patient/12345"
@@ -172,7 +176,6 @@
       "resourceType": "Questionnaire",
       "id": "1903",
       "meta": {
-        "source": "#Szj0RYKKLb3zYK89",
         "profile": [
           "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire-r4"
         ]
@@ -180,24 +183,20 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-          "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+          "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/extension-prepopulate.operationOutcome.reference",
+          "valueReference": {
+            "reference": "#prepopulate-outcome-1903"
+          }
         }
       ],
       "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
       "name": "OutpatientPriorAuthorizationRequest",
       "title": "Outpatient Prior Authorization Request",
       "status": "active",
-      "subjectType": [
-        "Patient",
-        "Organization",
-        "Claim"
-      ],
       "date": "2022-01-04T00:00:00+00:00",
-      "contact": [
-        {
-          "name": "Palmetto GBA"
-        }
-      ],
       "description": "Testing the form",
       "jurisdiction": [
         {
@@ -209,6 +208,16 @@
           ]
         }
       ],
+      "contact": [
+        {
+          "name": "Palmetto GBA"
+        }
+      ],
+      "subjectType": [
+        "Patient",
+        "Organization",
+        "Claim"
+      ],
       "item": [
         {
           "linkId": "1",
@@ -219,41 +228,33 @@
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "FacilityName"
-                  }
+                  "valueString": "FacilityName"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "1.1",
               "text": "Name",
               "type": "string",
-              "required": true,
-              "initial": [
-                {
-                  "valueString": "Acme Clinic"
-                }
-              ]
+              "required": true
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "FacilityNPI"
-                  }
+                  "valueString": "FacilityNPI"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "1.2",
               "text": "NPI",
               "type": "text",
-              "required": true,
-              "initial": [
-                {
-                  "valueString": "1407071236"
-                }
-              ]
+              "required": true
             },
             {
               "linkId": "1.3",
@@ -265,29 +266,7 @@
               "linkId": "1.4",
               "text": "Contract/Region",
               "type": "choice",
-              "required": false,
-              "answerOption": [
-                {
-                  "id": "FacilityContractRegion-11501",
-                  "valueCoding": {
-                    "code": "11001",
-                    "display": "Part A South Carolina"
-                  }
-                },
-                {
-                  "id": "FacilityContractRegion-11003",
-                  "valueCoding": {
-                    "code": "11501",
-                    "display": "Part A North Carolina"
-                  }
-                },
-                {
-                  "valueCoding": {
-                    "code": "11003",
-                    "display": "Part A Virginia/West Virginia"
-                  }
-                }
-              ]
+              "required": false
             }
           ]
         },
@@ -300,132 +279,85 @@
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "BeneficiaryFirstName"
-                  }
+                  "valueString": "BeneficiaryFirstName"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "2.1",
               "text": "First Name",
               "type": "string",
               "required": true,
-              "initial": [
-                {
-                  "valueString": "Peter"
-                }
-              ]
+              "initialString": "Peter"
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "BeneficiaryLastName"
-                  }
+                  "valueString": "BeneficiaryLastName"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "2.2",
               "text": "Last Name",
               "type": "text",
               "required": true,
-              "initial": [
-                {
-                  "valueString": "Chalmers"
-                }
-              ]
+              "initialString": "Chalmers"
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "BeneficiaryDOB"
-                  }
+                  "valueString": "BeneficiaryDOB"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "2.3",
               "text": "Date of Birth",
               "type": "date",
               "required": true,
-              "initial": [
-                {
-                  "valueDate": "1974-12-25"
-                }
-              ]
+              "initialDate": "1974-12-25"
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "BeneficiaryMedicareID"
-                  }
+                  "valueString": "BeneficiaryMedicareID"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "2.4",
               "text": "Medicare ID",
               "type": "string",
-              "required": true,
-              "initial": [
-                {
-                  "valueString": "525697298M"
-                }
-              ]
+              "required": true
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "BeneficiaryGender"
-                  }
+                  "valueString": "BeneficiaryGender"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "2.5",
               "text": "Gender",
               "type": "choice",
               "required": true,
-              "answerOption": [
-                {
-                  "id": "unknown",
-                  "valueCoding": {
-                    "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
-                    "code": "male",
-                    "display": "Male"
-                  }
-                },
-                {
-                  "valueCoding": {
-                    "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
-                    "code": "female",
-                    "display": "Female"
-                  }
-                },
-                {
-                  "valueCoding": {
-                    "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
-                    "code": "other",
-                    "display": "Other"
-                  }
-                },
-                {
-                  "valueCoding": {
-                    "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
-                    "code": "unknown",
-                    "display": "Unknown"
-                  }
-                }
-              ],
-              "initial": [
-                {
-                  "valueString": "male"
-                }
-              ]
+              "initialString": "male"
             }
           ]
         },
@@ -438,61 +370,49 @@
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "OperatingPhysicianFirstName"
-                  }
+                  "valueString": "OperatingPhysicianFirstName"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "3.1",
               "text": "First Name",
               "type": "string",
-              "required": true,
-              "initial": [
-                {
-                  "valueString": "Fielding"
-                }
-              ]
+              "required": true
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "OperatingPhysicianLastName"
-                  }
+                  "valueString": "OperatingPhysicianLastName"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "3.2",
               "text": "Last Name",
               "type": "text",
-              "required": true,
-              "initial": [
-                {
-                  "valueString": "Kathy"
-                }
-              ]
+              "required": true
             },
             {
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "OperatingPhysicianNPI"
-                  }
+                  "valueString": "OperatingPhysicianNPI"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "3.3",
               "text": "NPI",
               "type": "string",
-              "required": true,
-              "initial": [
-                {
-                  "valueString": "1245319599"
-                }
-              ]
+              "required": true
             },
             {
               "linkId": "3.4",
@@ -510,30 +430,27 @@
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "OperatingPhysicianAddress1"
-                      }
+                      "valueString": "OperatingPhysicianAddress1"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "3.5.1",
                   "text": "Address1",
                   "type": "string",
-                  "required": true,
-                  "initial": [
-                    {
-                      "valueString": "1080 FIRST COLONIAL RD"
-                    }
-                  ]
+                  "required": true
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "OperatingPhysicianAddress2"
-                      }
+                      "valueString": "OperatingPhysicianAddress2"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "3.5.2",
@@ -545,61 +462,49 @@
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "OperatingPhysicianAddressCity"
-                      }
+                      "valueString": "OperatingPhysicianAddressCity"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "3.5.3",
                   "text": "City",
                   "type": "string",
-                  "required": true,
-                  "initial": [
-                    {
-                      "valueString": "Virginia Beach"
-                    }
-                  ]
+                  "required": true
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "OperatingPhysicianAddressState"
-                      }
+                      "valueString": "OperatingPhysicianAddressState"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "3.5.4",
                   "text": "State",
                   "type": "string",
-                  "required": true,
-                  "initial": [
-                    {
-                      "valueString": "VA"
-                    }
-                  ]
+                  "required": true
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "OperatingPhysicianAddressZip"
-                      }
+                      "valueString": "OperatingPhysicianAddressZip"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "3.5.5",
                   "text": "Zip",
                   "type": "string",
-                  "required": true,
-                  "initial": [
-                    {
-                      "valueString": "21454-2406"
-                    }
-                  ]
+                  "required": true
                 }
               ]
             }
@@ -614,21 +519,17 @@
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueExpression": {
-                    "language": "text/cql.identifier",
-                    "expression": "AttendingPhysicianSame"
-                  }
+                  "valueString": "AttendingPhysicianSame"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                  "valueString": "text/cql.identifier"
                 }
               ],
               "linkId": "4.1",
               "text": "Same as Operating Physician?",
               "type": "boolean",
-              "required": false,
-              "initial": [
-                {
-                  "valueBoolean": false
-                }
-              ]
+              "required": false
             },
             {
               "linkId": "4.2",
@@ -637,7 +538,6 @@
               "enableWhen": [
                 {
                   "question": "4.1",
-                  "operator": "=",
                   "answerBoolean": false
                 }
               ],
@@ -646,61 +546,49 @@
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "AttendingPhysicianFirstName"
-                      }
+                      "valueString": "AttendingPhysicianFirstName"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "4.2.1",
                   "text": "First Name",
                   "type": "string",
-                  "required": true,
-                  "initial": [
-                    {
-                      "valueString": "Ronald"
-                    }
-                  ]
+                  "required": true
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "AttendingPhysicianLastName"
-                      }
+                      "valueString": "AttendingPhysicianLastName"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "4.2.2",
                   "text": "Last Name",
                   "type": "text",
-                  "required": true,
-                  "initial": [
-                    {
-                      "valueString": "Bone"
-                    }
-                  ]
+                  "required": true
                 },
                 {
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueExpression": {
-                        "language": "text/cql.identifier",
-                        "expression": "AttendingPhysicianNPI"
-                      }
+                      "valueString": "AttendingPhysicianNPI"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                      "valueString": "text/cql.identifier"
                     }
                   ],
                   "linkId": "4.2.3",
                   "text": "NPI",
                   "type": "string",
-                  "required": true,
-                  "initial": [
-                    {
-                      "valueString": "9941339108"
-                    }
-                  ]
+                  "required": true
                 },
                 {
                   "linkId": "4.2.4",
@@ -718,30 +606,27 @@
                       "extension": [
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                          "valueExpression": {
-                            "language": "text/cql.identifier",
-                            "expression": "AttendingPhysicianAddress1"
-                          }
+                          "valueString": "AttendingPhysicianAddress1"
+                        },
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                          "valueString": "text/cql.identifier"
                         }
                       ],
                       "linkId": "4.2.5.1",
                       "text": "Address1",
                       "type": "string",
-                      "required": true,
-                      "initial": [
-                        {
-                          "valueString": "1003 Healthcare Drive"
-                        }
-                      ]
+                      "required": true
                     },
                     {
                       "extension": [
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                          "valueExpression": {
-                            "language": "text/cql.identifier",
-                            "expression": "AttendingPhysicianAddress2"
-                          }
+                          "valueString": "AttendingPhysicianAddress2"
+                        },
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                          "valueString": "text/cql.identifier"
                         }
                       ],
                       "linkId": "4.2.5.2",
@@ -753,61 +638,49 @@
                       "extension": [
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                          "valueExpression": {
-                            "language": "text/cql.identifier",
-                            "expression": "AttendingPhysicianAddressCity"
-                          }
+                          "valueString": "AttendingPhysicianAddressCity"
+                        },
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                          "valueString": "text/cql.identifier"
                         }
                       ],
                       "linkId": "4.2.5.3",
                       "text": "City",
                       "type": "string",
-                      "required": true,
-                      "initial": [
-                        {
-                          "valueString": "Amherst"
-                        }
-                      ]
+                      "required": true
                     },
                     {
                       "extension": [
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                          "valueExpression": {
-                            "language": "text/cql.identifier",
-                            "expression": "AttendingPhysicianAddressState"
-                          }
+                          "valueString": "AttendingPhysicianAddressState"
+                        },
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                          "valueString": "text/cql.identifier"
                         }
                       ],
                       "linkId": "4.2.5.4",
                       "text": "State",
                       "type": "string",
-                      "required": true,
-                      "initial": [
-                        {
-                          "valueString": "MA"
-                        }
-                      ]
+                      "required": true
                     },
                     {
                       "extension": [
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                          "valueExpression": {
-                            "language": "text/cql.identifier",
-                            "expression": "AttendingPhysicianAddressZip"
-                          }
+                          "valueString": "AttendingPhysicianAddressZip"
+                        },
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+                          "valueString": "text/cql.identifier"
                         }
                       ],
                       "linkId": "4.2.5.5",
                       "text": "Zip",
                       "type": "string",
-                      "required": true,
-                      "initial": [
-                        {
-                          "valueString": "01002"
-                        }
-                      ]
+                      "required": true
                     }
                   ]
                 }
@@ -819,11 +692,10 @@
     },
     {
       "resourceType": "Task",
-      "id": "complete-questionnaire",
+      "id": "Task",
       "basedOn": [
         {
-          "reference": "#RequestGroup/prepopulate",
-          "type": "RequestGroup"
+          "reference": "#RequestGroup/prepopulate"
         }
       ],
       "status": "draft",
@@ -835,10 +707,118 @@
       "for": {
         "reference": "OPA-Patient1"
       }
+    },
+    {
+      "resourceType": "OperationOutcome",
+      "id": "prepopulate-outcome-1903",
+      "issue": [
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (FacilityName) for item (1.1): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (FacilityNPI) for item (1.2): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (BeneficiaryMedicareID) for item (2.4): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianFirstName) for item (3.1): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianLastName) for item (3.2): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianNPI) for item (3.3): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress1) for item (3.5.1): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress2) for item (3.5.2): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressCity) for item (3.5.3): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressState) for item (3.5.4): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressZip) for item (3.5.5): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianSame) for item (4.1): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianFirstName) for item (4.2.1): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianLastName) for item (4.2.2): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianNPI) for item (4.2.3): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress1) for item (4.2.5.1): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress2) for item (4.2.5.2): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressCity) for item (4.2.5.3): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressState) for item (4.2.5.4): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        },
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressZip) for item (4.2.5.5): Could not resolve type AdverseEventActuality. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+        }
+      ]
     }
   ],
-  "instantiatesCanonical": [
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
+  "definition": [
+    {
+      "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
+    }
   ],
   "status": "draft",
   "intent": "proposal",

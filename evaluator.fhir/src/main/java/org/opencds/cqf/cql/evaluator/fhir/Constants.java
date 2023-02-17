@@ -11,6 +11,8 @@ public class Constants {
     public static final String CQF_EXPRESSION_LANGUAGE = "http://hl7.org/fhir/StructureDefinition/cqf-expression-language";
     public static final String CQF_LIBRARY =  "http://hl7.org/fhir/StructureDefinition/cqf-library";
 
+    public static final String EXT_POPULATE_OPERATION_OUTCOME = "http://hl7.org/fhir/StructureDefinition/extension-populate.operationOutcome.reference";
+    public static final String EXT_PREPOPULATE_OPERATION_OUTCOME = "http://hl7.org/fhir/StructureDefinition/extension-prepopulate.operationOutcome.reference";
     public static final String SDC_QUESTIONNAIRE_HIDDEN = "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden";
     public static final String SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT = "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext";
     public static final String SDC_QUESTIONNAIRE_IS_SUBJECT = "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject";

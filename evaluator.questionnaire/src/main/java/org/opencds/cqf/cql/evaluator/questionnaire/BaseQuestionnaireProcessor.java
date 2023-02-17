@@ -4,10 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.ParametersUtil;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
@@ -19,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseQuestionnaireProcessor<T> {
-    private static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
+    protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
 
     protected LibraryProcessor libraryProcessor;
     protected ExpressionEvaluator expressionEvaluator;
@@ -45,14 +42,15 @@ public abstract class BaseQuestionnaireProcessor<T> {
     }
 
     public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
-    public abstract IBaseResource populate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
-    public abstract T generateQuestionnaire();
+    public abstract IBaseResource populate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
+    public abstract T generateQuestionnaire(String theId, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
+    // public abstract IBackboneElement generateItem(ICompositeType actionInput, Integer itemCount);
     public abstract Object resolveParameterValue(IBase value);
     public abstract IBaseResource getSubject();
 
     public IBase getExpressionResult(
             String expression, String language, String libraryToBeEvaluated, IBaseParameters params) {
-        validateExpression(language, expression);
+        validateExpression(language, expression, libraryToBeEvaluated);
         IBase result = null;
         IBaseParameters parametersResult;
         switch (language) {
@@ -96,14 +94,16 @@ public abstract class BaseQuestionnaireProcessor<T> {
         return result;
     }
 
-    public void validateExpression(String language, String expression) {
+    public void validateExpression(String language, String expression, String libraryUrl) {
         if (language == null) {
             logger.error("Missing language type for the Expression");
             throw new IllegalArgumentException("Missing language type for the Expression");
-        }
-        else if (expression == null) {
+        } else if (expression == null) {
             logger.error("Missing expression for the Expression");
             throw new IllegalArgumentException("Missing expression for the Expression");
+        } else if (libraryUrl == null) {
+            logger.error("Missing library for the Expression");
+            throw new IllegalArgumentException("Missing library for the Expression");
         }
     }
 }

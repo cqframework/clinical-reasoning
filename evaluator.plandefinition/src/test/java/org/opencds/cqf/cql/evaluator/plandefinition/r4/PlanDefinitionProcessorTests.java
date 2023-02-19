@@ -124,6 +124,21 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     }
 
     @Test
+    public void testQuestionnairePrepopulate_NoLibrary() {
+        var planDefinitionID = "prepopulate";
+        var patientID = "OPA-Patient1";
+        var data = "prepopulate/prepopulate-patient-data.json";
+        var library = "prepopulate/prepopulate-content-bundle-noLibrary.json";
+        var parameters = new Parameters().addParameter("ClaimId", "OPA-Claim1");
+        PlanDefinition.Assert.that(planDefinitionID, patientID, null)
+                .withData(data).withLibrary(library).withParameters(parameters).apply()
+                .isEqualsTo("prepopulate/prepopulate-careplan-noLibrary.json");
+        PlanDefinition.Assert.that(planDefinitionID, patientID, null)
+                .withData(data).withLibrary(library).withParameters(parameters).applyR5()
+                .isEqualsTo("prepopulate/prepopulate-bundle-noLibrary.json");
+    }
+
+    @Test
     public void testQuestionnaireResponse() {
         var planDefinitionID = "prepopulate";
         var patientID = "OPA-Patient1";
@@ -136,5 +151,20 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
         PlanDefinition.Assert.that(planDefinitionID, patientID, null)
                 .withData(data).withLibrary(library).withParameters(parameters).applyR5()
                 .isEqualsTo("extract-questionnaireresponse/bundle.json");
+    }
+
+    @Test
+    public void testGenerateQuestionnaire() {
+        var planDefinitionID = "generate-questionnaire";
+        var patientID = "OPA-Patient1";
+        var data = "generate-questionnaire/patient-data.json";
+        var library = "generate-questionnaire/content-bundle.json";
+        var parameters = new Parameters().addParameter("ClaimId", "OPA-Claim1");
+        PlanDefinition.Assert.that(planDefinitionID, patientID, null)
+                .withData(data).withLibrary(library).withParameters(parameters).apply()
+                .isEqualsTo("generate-questionnaire/careplan.json");
+        PlanDefinition.Assert.that(planDefinitionID, patientID, null)
+                .withData(data).withLibrary(library).withParameters(parameters).applyR5()
+                .isEqualsTo("generate-questionnaire/bundle.json");
     }
 }

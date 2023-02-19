@@ -203,7 +203,7 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
                         processItem(answerItem, questionnaireResponse, questionnaireCodeMap, resources, subject);
                     });
                 } else {
-                    if (questionnaireCodeMap.get(item.getLinkId()).size() > 0) {
+                    if (questionnaireCodeMap != null && questionnaireCodeMap.get(item.getLinkId()).size() > 0) {
                         resources.add(createObservationFromItemAnswer(answer, item.getLinkId(), questionnaireResponse, subject, questionnaireCodeMap));
                     }
                 }
@@ -296,7 +296,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
             }
         } catch (Exception e) {
             logger.error(String.format("Error encountered searching for Questionnaire during extract operation: %s", e.getMessage()));
-            throw new IllegalArgumentException(String.format("Unable to find resource by URL %s", questionnaireUrl));
+            // throw new IllegalArgumentException(String.format("Unable to find resource by URL %s", questionnaireUrl));
+            return null;
         }
 
         return createCodeMap(questionnaire);

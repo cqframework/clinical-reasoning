@@ -172,6 +172,15 @@
                 "required": true
               },
               {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                    "valueExpression": {
+                      "language": "text/cql.identifier",
+                      "expression": "FacilityPTAN"
+                    }
+                  }
+                ],
                 "linkId": "1.3",
                 "text": "PTAN",
                 "type": "string",
@@ -371,6 +380,15 @@
                 "required": true
               },
               {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                    "valueExpression": {
+                      "language": "text/cql.identifier",
+                      "expression": "OperatingPhysicianPTAN"
+                    }
+                  }
+                ],
                 "linkId": "3.4",
                 "text": "PTAN",
                 "type": "string",
@@ -539,6 +557,15 @@
                     "required": true
                   },
                   {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                        "valueExpression": {
+                          "language": "text/cql.identifier",
+                          "expression": "AttendingPhysicianPTAN"
+                        }
+                      }
+                    ],
                     "linkId": "4.2.4",
                     "text": "PTAN",
                     "type": "string",

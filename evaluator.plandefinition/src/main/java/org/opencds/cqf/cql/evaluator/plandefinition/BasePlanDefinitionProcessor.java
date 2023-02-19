@@ -58,6 +58,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
    protected IBaseResource contentEndpoint;
    protected IBaseResource terminologyEndpoint;
    protected Boolean containResources;
+   protected IBaseResource questionnaire;
    protected final Collection<IBaseResource> requestResources;
    protected final Collection<IBaseResource> extractedResources;
    protected final ModelResolver modelResolver;
@@ -88,6 +89,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
    public abstract void resolveCdsHooksDynamicValue(IBaseResource requestGroup, Object value, String path);
    public abstract IBaseResource getSubject();
    public abstract void extractQuestionnaireResponse();
+   public abstract void createDynamicQuestionnaire(String theId);
 
    public IBaseResource apply(
            IIdType theId, String patientId, String encounterId, String practitionerId,
@@ -119,6 +121,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
       this.terminologyEndpoint = terminologyEndpoint;
       this.containResources = true;
       extractQuestionnaireResponse();
+      createDynamicQuestionnaire(theId.getIdPart());
       return transformToCarePlan(applyPlanDefinition(resolvePlanDefinition(theId)));
    }
 
@@ -147,6 +150,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
       this.terminologyEndpoint = terminologyEndpoint;
       this.containResources = false;
       extractQuestionnaireResponse();
+      createDynamicQuestionnaire(theId.getIdPart());
       return transformToBundle(applyPlanDefinition(resolvePlanDefinition(theId)));
    }
 

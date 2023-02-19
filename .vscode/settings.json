@@ -5,6 +5,7 @@
         "Codeable",
         "Configurer",
         "CONTINUOUSVARIABLE",
+        "CRMI",
         "DENOMINATOREXCEPTION",
         "DENOMINATOREXCLUSION",
         "dstu",

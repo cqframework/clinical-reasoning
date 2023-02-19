@@ -64,7 +64,7 @@
                         "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
                     },
                     {
-                        "url": "http://hl7.org/fhir/StructureDefinition/extension-prepopulate.operationOutcome.reference",
+                        "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
                         "valueReference": {
                             "reference": "#prepopulate-outcome-1903"
                         }

@@ -22,15 +22,15 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-    public QuestionnaireProcessor(
-            FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor,
-            ExpressionEvaluator expressionEvaluator) {
+    public QuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal,
+            LibraryProcessor libraryProcessor, ExpressionEvaluator expressionEvaluator) {
         super(fhirContext, fhirDal, libraryProcessor, expressionEvaluator);
     }
 
     @Override
     public Object resolveParameterValue(IBase value) {
-        if (value == null) return null;
+        if (value == null)
+            return null;
         return ((Parameters.ParametersParameterComponent) value).getValue();
     }
 
@@ -40,7 +40,9 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     }
 
     @Override
-    public Questionnaire prePopulate(Questionnaire questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+    public Questionnaire prePopulate(Questionnaire questionnaire, String patientId,
+            IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint,
+            IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
         if (questionnaire == null) {
             throw new IllegalArgumentException("No questionnaire passed in");
         }
@@ -64,13 +66,15 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
 
         if (oc.getIssue().size() > 0) {
             questionnaire.addContained(oc);
-            questionnaire.addExtension().setUrl(Constants.EXT_PREPOPULATE_OPERATION_OUTCOME).setValue(new Reference("#" + oc.getIdPart()));
+            questionnaire.addExtension().setUrl(Constants.EXT_CRMI_MESSAGES)
+                    .setValue(new Reference("#" + oc.getIdPart()));
         }
 
         return questionnaire;
     }
 
-    protected void processItems(List<QuestionnaireItemComponent> items, String defaultLibrary, OperationOutcome oc) {
+    protected void processItems(List<QuestionnaireItemComponent> items, String defaultLibrary,
+            OperationOutcome oc) {
         items.forEach(item -> {
             if (item.hasItem()) {
                 processItems(item.getItem(), defaultLibrary, oc);
@@ -79,17 +83,19 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
                     // evaluate expression and set the result as the initialAnswer on the item
                     var expressionExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION);
                     var expression = expressionExtension.getValue().toString();
-                    var languageExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION_LANGUAGE);
+                    var languageExtension =
+                            getExtensionByUrl(item, Constants.CQF_EXPRESSION_LANGUAGE);
                     var language = languageExtension.getValue().toString();
                     try {
-                        var result = getExpressionResult(expression, language, defaultLibrary, this.parameters);
+                        var result = getExpressionResult(expression, language, defaultLibrary,
+                                this.parameters);
                         item.setInitial((Type) result);
                     } catch (Exception ex) {
-                        var message = String.format("Error encountered evaluating expression (%s) for item (%s): %s",
+                        var message = String.format(
+                                "Error encountered evaluating expression (%s) for item (%s): %s",
                                 expression, item.getLinkId(), ex.getMessage());
                         logger.error(message);
-                        oc.addIssue()
-                                .setCode(OperationOutcome.IssueType.EXCEPTION)
+                        oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
                                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                                 .setDiagnostics(message);
                     }
@@ -99,19 +105,25 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     }
 
     @Override
-    public IBaseResource populate(Questionnaire questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-        var populatedQuestionnaire = prePopulate(questionnaire, patientId, parameters, bundle, dataEndpopint, contentEndpoint, terminologyEndpoint);
+    public IBaseResource populate(Questionnaire questionnaire, String patientId,
+            IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint,
+            IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+        var populatedQuestionnaire = prePopulate(questionnaire, patientId, parameters, bundle,
+                dataEndpopint, contentEndpoint, terminologyEndpoint);
         var response = new QuestionnaireResponse();
         response.setId(populatedQuestionnaire.getIdPart() + "-response");
-        var ocExt = getExtensionByUrl(questionnaire, Constants.EXT_PREPOPULATE_OPERATION_OUTCOME);
+        var ocExt = getExtensionByUrl(questionnaire, Constants.EXT_CRMI_MESSAGES);
         if (ocExt != null) {
             var ocId = ((Reference) ocExt.getValue()).getReference().replaceFirst("#", "");
-            var ocList = questionnaire.getContained().stream().filter(resource -> resource.getIdPart().equals(ocId)).collect(Collectors.toList());
+            var ocList = questionnaire.getContained().stream()
+                    .filter(resource -> resource.getIdPart().equals(ocId))
+                    .collect(Collectors.toList());
             var oc = ocList == null || ocList.size() == 0 ? null : ocList.get(0);
             if (oc != null) {
                 oc.setId("populate-outcome-" + populatedQuestionnaire.getIdPart());
                 response.addContained(oc);
-                response.addExtension().setUrl(Constants.EXT_POPULATE_OPERATION_OUTCOME).setValue(new Reference("#" + oc.getIdPart()));
+                response.addExtension().setUrl(Constants.EXT_CRMI_MESSAGES)
+                        .setValue(new Reference("#" + oc.getIdPart()));
             }
         }
         response.setQuestionnaire(new Reference(populatedQuestionnaire));
@@ -124,7 +136,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         return response;
     }
 
-    protected void processResponseItems(List<QuestionnaireItemComponent> items, List<QuestionnaireResponseItemComponent> responseItems) {
+    protected void processResponseItems(List<QuestionnaireItemComponent> items,
+            List<QuestionnaireResponseItemComponent> responseItems) {
         items.forEach(item -> {
             var responseItem = new QuestionnaireResponseItemComponent(item.getLinkIdElement());
             responseItem.setDefinition(item.getDefinition());
@@ -135,14 +148,18 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
                 responseItem.setItem(nestedResponseItems);
             } else if (item.hasInitial()) {
                 var answer = item.getInitial();
-                responseItem.addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent().setValue(answer));
+                responseItem.addAnswer(
+                        new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                                .setValue(answer));
             }
             responseItems.add(responseItem);
         });
     }
 
     @Override
-    public Questionnaire generateQuestionnaire(String theId, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+    public Questionnaire generateQuestionnaire(String theId, String patientId,
+            IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
+            IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
         this.patientId = patientId;
         this.parameters = parameters;
         this.bundle = bundle;
@@ -156,7 +173,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         return questionnaire;
     }
 
-    public Questionnaire.QuestionnaireItemComponent generateItem(DataRequirement actionInput, Integer itemCount) {
+    public Questionnaire.QuestionnaireItemComponent generateItem(DataRequirement actionInput,
+            Integer itemCount) {
         throw new NotImplementedException();
     }
 }

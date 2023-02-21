@@ -5,6 +5,10 @@ import static org.testng.Assert.assertThrows;
 import org.hl7.fhir.r4.model.Parameters;
 import org.testng.annotations.Test;
 
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
+import static org.testng.Assert.assertThrows;
+
 public class QuestionnaireProcessorTests {
   @Test
   void testPrePopulate() {
@@ -14,13 +18,14 @@ public class QuestionnaireProcessorTests {
         .isEqualsTo("questionnaire-for-order-populated.json");
   }
 
-  @Test
-  void testPrePopulate_NoLibrary() {
-    TestQuestionnaire.Assert.that("questionnaire-for-order.json", "OPA-Patient1")
-        .withData("o2_peter_bundle.json")
-        .withParameters(new Parameters().addParameter("ClaimId", "OPA-Claim1")).prePopulate()
-        .isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
-  }
+    @Test
+    void testPrePopulate_NoLibrary() {
+        TestQuestionnaire.Assert.that("questionnaire-for-order.json", "OPA-Patient1")
+                .withData("o2_peter_bundle.json")
+                .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+                .prePopulate()
+                .isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
+    }
 
   @Test
   void testPrePopulate_HasErrors() {

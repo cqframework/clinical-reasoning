@@ -1,16 +1,19 @@
 
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -74,8 +77,7 @@ public class BundleRetrieveProviderTests {
 
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
         assertNotNull(results);
-        List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 0);
+        assertThat(results, is(emptyIterable()));
     }
 
 
@@ -84,10 +86,7 @@ public class BundleRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null);
-        List<Object> resultList = Lists.newArrayList(results);
-        
-        assertEquals(resultList.size(), 2);
-        assertThat(resultList.get(0), instanceOf(Patient.class));
+        assertThat(results, allOf(iterableWithSize(2), hasItem(instanceOf(Patient.class))));
     }
 
     @Test
@@ -95,9 +94,7 @@ public class BundleRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
-        List<Object> resultList = Lists.newArrayList(results);
-        
-        assertEquals(resultList.size(), 0);
+        assertThat(results, is(emptyIterable()));
     }
 
     @Test
@@ -105,11 +102,12 @@ public class BundleRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, null, null, null, null, null, null, null);
-        List<Object> resultList = Lists.newArrayList(results);
         
-        assertEquals(resultList.size(),2);
-        assertThat(resultList.get(0), instanceOf(Condition.class));
-        assertEquals("test-one-r4", ((Condition)resultList.get(0)).getSubject().getReferenceElement().getIdPart());
+        assertThat(results, is(iterableWithSize((2))));
+
+        Object firstEntry = results.iterator().next();
+        assertThat(firstEntry, is(instanceOf(Condition.class)));
+        assertEquals("test-one-r4", ((Condition)firstEntry).getSubject().getReferenceElement().getIdPart());
     }
 
     @Test
@@ -117,10 +115,7 @@ public class BundleRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, null, null, null, null, null, null, null);
-        List<Object> resultList = Lists.newArrayList(results);
-        
-        assertEquals(resultList.size(), 1);
-        assertThat(resultList.get(0), instanceOf(Medication.class));
+        assertThat(results, contains(instanceOf(Medication.class)));
     }
 
     // This test covers a special case that's outside of normal usage, which is supplying
@@ -133,15 +128,12 @@ public class BundleRetrieveProviderTests {
         // Id does exist
         Iterable<Code> codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med");
         Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
-        List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 1);
-        assertThat(resultList.get(0), instanceOf(Medication.class));
+        assertThat(results, contains(instanceOf(Medication.class)));
 
         // Id does not exist
         codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med-does-exist");
         results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
-        resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 0);
+        assertThat(results, is(emptyIterable()));
     }
 
     @Test
@@ -152,17 +144,14 @@ public class BundleRetrieveProviderTests {
         Code code = new Code().withCode("not-a-code").withSystem("not-a-system");
         Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results); 
-        List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 0);
+        assertThat(results, is(emptyIterable()));
 
         // Codes does match
         code = new Code().withCode("10327003").withSystem("http://snomed.info/sct");
         results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results);
-        resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 1);
-        assertThat(resultList.get(0), instanceOf(Condition.class));
-        assertEquals("test-one-r4", ((Condition)resultList.get(0)).getSubject().getReferenceElement().getIdPart());
+        assertThat(results, contains(instanceOf(Condition.class)));
+        assertEquals(((Condition)results.iterator().next()).getSubject().getReferenceElement().getIdPart(), "test-one-r4");
     }
 
 
@@ -185,16 +174,13 @@ public class BundleRetrieveProviderTests {
         Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
         "http://localhost/fhir/ValueSet/value-set-three", null, null, null, null);
         assertNotNull(results); 
-        List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 0);
+        assertThat(results, is(emptyIterable()));
 
 
         // In the value set
         results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
         "http://localhost/fhir/ValueSet/value-set-one", null, null, null, null);
-        assertNotNull(results); 
-        resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 1);
+        assertThat(results, is(iterableWithSize(1)));
     }
 
     @Test
@@ -204,14 +190,9 @@ public class BundleRetrieveProviderTests {
 
         Iterable<Object> results = brp.retrieve("Patient", "id", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Patient", null, null, null, null, null, null, null, null);
         assertNotNull(results);
-
-        List<Object> resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 1);
-        assertThat(resultList.get(0), instanceOf(Patient.class));
+        assertThat(results, contains(instanceOf(Patient.class)));
 
         results = brp.retrieve("Patient", "subject", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Condition", null, null, null, null, null, null, null, null);
-        resultList = Lists.newArrayList(results);
-        assertEquals(resultList.size(), 1);
-        assertThat(resultList.get(0), instanceOf(Condition.class));
+        assertThat(results, contains(instanceOf(Condition.class)));
     }
 }

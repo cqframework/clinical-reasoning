@@ -10,15 +10,15 @@ public class RetrieveProviderConfig {
         return DEFAULT_CONFIG;
     }
 
-    private int maxCodesPerQuery = 64;
+    private Integer maxCodesPerQuery = 64;
     private SearchStyleEnum searchStyle = SearchStyleEnum.GET;
     private boolean expandValueSets = true;
 
-    public int getMaxCodesPerQuery() {
+    public Integer getMaxCodesPerQuery() {
         return this.maxCodesPerQuery;
     }
 
-    public RetrieveProviderConfig setMaxCodesPerQuery(int value) {
+    public RetrieveProviderConfig setMaxCodesPerQuery(Integer value) {
         this.maxCodesPerQuery = value;
         return this;
     }

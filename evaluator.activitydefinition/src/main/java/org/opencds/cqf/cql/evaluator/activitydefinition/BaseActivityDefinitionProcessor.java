@@ -32,7 +32,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
    public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
    public static final String MISSING_CODE_PROPERTY = "Missing required code property";
    private final FhirContext fhirContext;
-   private final FhirDal fhirDal;
+   protected final FhirDal fhirDal;
    private final LibraryProcessor libraryProcessor;
    private final IFhirPath fhirPath;
    private final ModelResolver modelResolver;
@@ -48,7 +48,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       modelResolver = new FhirModelResolverFactory().create(fhirContext.getVersion().getVersion().getFhirVersionString());
    }
 
-   private String subjectId;
+   protected String subjectId;
    private IBaseParameters parameters;
    private IBaseResource contentEndpoint;
    private IBaseResource terminologyEndpoint;
@@ -77,8 +77,10 @@ public abstract class BaseActivityDefinitionProcessor<T> {
 
    public abstract Object resolveParameterValue(IBase value);
 
+   public abstract IBaseResource getSubject(String subjectType);
+
    public void resolveDynamicValue(String language, String expression, String libraryUrl,
-                                   String path, IBaseResource resource) {
+                                   String path, IBaseResource resource, String subjectType) {
       if (language == null) {
          logger.error("Missing language type for the dynamicValue");
          throw new IllegalArgumentException("Missing language type for the dynamicValue");
@@ -113,7 +115,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
          case "text/fhirpath":
             List<IBase> outputs;
             try {
-               outputs = fhirPath.evaluate(null, expression, IBase.class);
+               outputs = fhirPath.evaluate(getSubject(subjectType), expression, IBase.class);
             } catch (FhirPathExecutionException e) {
                throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
             }

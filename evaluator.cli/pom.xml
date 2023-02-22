@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>evaluator.cli</name>
-    <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
+    <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
 
     <parent>
         <groupId>org.opencds.cqf.cql</groupId>
@@ -36,8 +36,8 @@
             <version>2.7.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-jackson</artifactId>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.jackson-deps</artifactId>
             <version>2.7.0-SNAPSHOT</version>
             <type>pom</type>
         </dependency>

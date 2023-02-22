@@ -275,7 +275,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    protected void buildMeasureObservations(String observationName, List<Object> resources) {
+    protected void buildMeasureObservations(String observationName, Set<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
             Observation observation = createMeasureObservation("measure-observation-" + observationName + "-" + (i + 1),
@@ -303,7 +303,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return referenceList;
     }
 
-    private void addResourceReferences(MeasurePopulationType measurePopulationType, List<Object> evaluatedResources) {
+    private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Object> evaluatedResources) {
         if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
                 Resource resource = (Resource) object;

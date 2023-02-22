@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.elm.execution.ExpressionDef;
@@ -177,7 +178,7 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void captureEvaluatedResources(List<Object> outEvaluatedResources) {
+    protected void captureEvaluatedResources(Set<Object> outEvaluatedResources) {
         if (outEvaluatedResources != null && this.context.getEvaluatedResources() != null) {
             for (Object o : this.context.getEvaluatedResources()) {
                 outEvaluatedResources.add(o);
@@ -222,7 +223,7 @@ public class MeasureEvaluator {
 
     @SuppressWarnings("unchecked")
     protected Iterable<Object> evaluatePopulationCriteria(String subjectType, String subjectId,
-            String criteriaExpression, List<Object> outEvaluatedResources) {
+            String criteriaExpression, Set<Object> outEvaluatedResources) {
         if (criteriaExpression == null || criteriaExpression.isEmpty()) {
             return Collections.emptyList();
         }
@@ -246,7 +247,7 @@ public class MeasureEvaluator {
         return (Iterable<Object>) result;
     }
 
-    protected Object evaluateCriteria(String criteriaExpression, List<Object> outEvaluatedResources) {
+    protected Object evaluateCriteria(String criteriaExpression, Set<Object> outEvaluatedResources) {
         Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
 
         captureEvaluatedResources(outEvaluatedResources);
@@ -255,7 +256,7 @@ public class MeasureEvaluator {
     }
 
     protected Object evaluateObservationCriteria(Object resource, String criteriaExpression,
-            List<Object> outEvaluatedResources) {
+            Set<Object> outEvaluatedResources) {
 
         ExpressionDef ed = context.resolveExpressionRef(criteriaExpression);
         if (!(ed instanceof FunctionDef)) {

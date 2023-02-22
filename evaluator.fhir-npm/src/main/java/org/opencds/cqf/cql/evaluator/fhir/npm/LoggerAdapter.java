@@ -9,6 +9,7 @@ public class LoggerAdapter implements IWorkerContext.ILoggingService {
     public LoggerAdapter(Logger innerLogger) {
         this.innerLogger = innerLogger;
     }
+
     @Override
     public void logMessage(String s) {
         innerLogger.info(s);

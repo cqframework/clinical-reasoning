@@ -21,9 +21,10 @@ public class ProxyRepository implements Repository {
 
     @Override
     public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id, Map<String, String> headers) {
-        if (isTerminologyResource(id.getResourceType())) {
+
+       if (isTerminologyResource(resourceType.getSimpleName())) {
             return terminology.read(resourceType, id, headers);
-        } else if (isContentResource(id.getResourceType())) {
+        } else if (isContentResource(resourceType.getSimpleName())) {
             return content.read(resourceType, id, headers);
         } else {
             return data.read(resourceType, id, headers);

@@ -7,13 +7,13 @@ import org.opencds.cqf.fhir.api.Repository;
 
 import java.util.*;
 
-public class FederatedRepository implements Repository {
+public class ProxyRepository implements Repository {
 
     private Repository data;
     private Repository content;
     private Repository terminology;
 
-    public FederatedRepository(Repository data, Repository content, Repository terminology) {
+    public ProxyRepository(Repository data, Repository content, Repository terminology) {
         this.data = data;
         this.content = content;
         this.terminology = terminology;

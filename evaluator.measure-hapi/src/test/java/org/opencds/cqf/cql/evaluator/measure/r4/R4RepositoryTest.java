@@ -23,10 +23,17 @@ import java.util.List;
 public class R4RepositoryTest {
 
     FhirRepository repository;
+    FhirRepository data;
+    FhirRepository content;
+    FhirRepository terminology;
 
     public R4RepositoryTest() {
-        repository = new FhirRepository(this.getClass(),
-                List.of("res/tests", "res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/", "res/content/"), false);
+        data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
+        content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
+        terminology = new FhirRepository(this.getClass(), List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
+        repository = new ProxyRepository(data, content, terminology);
+//        repository = new FhirRepository(this.getClass(),
+//                List.of("res/tests", "res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/", "res/content/"), false);
     }
 
     @Test

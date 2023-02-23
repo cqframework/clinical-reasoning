@@ -105,7 +105,11 @@
         }
       ],
       "status": "ready",
-      "description": "This action represents the start of the reporting workflow in response to the encounter-start event"
+      "intent": "proposal",
+      "description": "This action represents the start of the reporting workflow in response to the encounter-start event",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -290,7 +294,11 @@
         }
       ],
       "status": "draft",
-      "description": "Check Encounter Reportable"
+      "intent": "proposal",
+      "description": "Check Encounter Reportable",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -340,7 +348,11 @@
         }
       ],
       "status": "draft",
-      "description": "Check Reportable Is Encounter in progress"
+      "intent": "proposal",
+      "description": "Check Reportable Is Encounter in progress",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -352,7 +364,11 @@
         }
       ],
       "status": "draft",
-      "description": "This action represents the check for suspected reportability of the eICR."
+      "intent": "proposal",
+      "description": "This action represents the check for suspected reportability of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -377,7 +393,11 @@
         }
       ],
       "status": "draft",
-      "description": "Report Eicr"
+      "intent": "proposal",
+      "description": "Report Eicr",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -427,7 +447,11 @@
         }
       ],
       "status": "draft",
-      "description": "Check If Encounter Complete"
+      "intent": "proposal",
+      "description": "Check If Encounter Complete",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -477,7 +501,11 @@
         }
       ],
       "status": "draft",
-      "description": "Check If Encounter In Progress"
+      "intent": "proposal",
+      "description": "Check If Encounter In Progress",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -489,7 +517,11 @@
         }
       ],
       "status": "draft",
-      "description": "This action represents the creation and reporting of the eICR."
+      "intent": "proposal",
+      "description": "This action represents the creation and reporting of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -514,7 +546,11 @@
         }
       ],
       "status": "draft",
-      "description": "This action represents the creation of the eICR."
+      "intent": "proposal",
+      "description": "This action represents the creation of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -539,7 +575,11 @@
         }
       ],
       "status": "draft",
-      "description": "This action represents the validation of the eICR."
+      "intent": "proposal",
+      "description": "This action represents the validation of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
     },
     {
       "resourceType": "Task",
@@ -551,7 +591,11 @@
         }
       ],
       "status": "draft",
-      "description": "This action represents the routing and sending of the eICR."
+      "intent": "proposal",
+      "description": "This action represents the routing and sending of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
     }
   ],
   "instantiatesCanonical": [

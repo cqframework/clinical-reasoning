@@ -16,6 +16,7 @@ import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
    protected IBaseResource contentEndpoint;
    protected IBaseResource terminologyEndpoint;
    protected Boolean containResources;
+   protected IBaseResource questionnaire;
    protected final Collection<IBaseResource> requestResources;
+   protected final Collection<IBaseResource> extractedResources;
    protected final ModelResolver modelResolver;
 
    protected BasePlanDefinitionProcessor(
@@ -74,6 +77,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
       this.expressionEvaluator = expressionEvaluator;
       this.operationParametersParser = operationParametersParser;
       this.requestResources = new ArrayList<>();
+      this.extractedResources = new ArrayList<>();
       modelResolver = new FhirModelResolverFactory().create(fhirContext.getVersion().getVersion().getFhirVersionString());
    }
 
@@ -83,6 +87,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
    public abstract IBaseResource transformToBundle(IBaseResource requestGroup);
    public abstract Object resolveParameterValue(IBase value);
    public abstract void resolveCdsHooksDynamicValue(IBaseResource requestGroup, Object value, String path);
+   public abstract IBaseResource getSubject();
+   public abstract void extractQuestionnaireResponse();
+   public abstract void createDynamicQuestionnaire(String theId);
 
    public IBaseResource apply(
            IIdType theId, String patientId, String encounterId, String practitionerId,
@@ -113,6 +120,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
       this.contentEndpoint = contentEndpoint;
       this.terminologyEndpoint = terminologyEndpoint;
       this.containResources = true;
+      extractQuestionnaireResponse();
+      createDynamicQuestionnaire(theId.getIdPart());
       return transformToCarePlan(applyPlanDefinition(resolvePlanDefinition(theId)));
    }
 
@@ -140,10 +149,12 @@ public abstract class BasePlanDefinitionProcessor<T> {
       this.contentEndpoint = contentEndpoint;
       this.terminologyEndpoint = terminologyEndpoint;
       this.containResources = false;
+      extractQuestionnaireResponse();
+      createDynamicQuestionnaire(theId.getIdPart());
       return transformToBundle(applyPlanDefinition(resolvePlanDefinition(theId)));
    }
 
-   public Object getExpressionResult(
+   public IBase getExpressionResult(
            String expression, String language, String libraryToBeEvaluated, IBaseParameters params) {
       validateExpression(language, expression);
       IBase result = null;
@@ -171,7 +182,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
          case "text/fhirpath":
             List<IBase> outputs;
             try {
-               outputs = fhirPath.evaluate(null, expression, IBase.class);
+               outputs = fhirPath.evaluate(getSubject(), expression, IBase.class);
             } catch (FhirPathExecutionException e) {
                throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
             }

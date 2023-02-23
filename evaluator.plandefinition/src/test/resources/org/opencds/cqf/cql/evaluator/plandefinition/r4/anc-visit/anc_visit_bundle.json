@@ -25,7 +25,7 @@
         "action": [
           {
             "resource": {
-              "reference": "Task"
+              "reference": "Task/careplan-activity"
             }
           }
         ]
@@ -69,6 +69,7 @@
     {
       "resource": {
         "resourceType": "Task",
+        "id": "careplan-activity",
         "extension": [
           {
             "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus",
@@ -82,6 +83,7 @@
           }
         ],
         "status": "ready",
+        "intent": "proposal",
         "code": {
           "coding": [
             {
@@ -92,7 +94,10 @@
           ],
           "text": "Pregnant (ANC) Monthly Routine visit"
         },
-        "description": "This action will performed every month for a pregnant woman"
+        "description": "This action will performed every month for a pregnant woman",
+        "for": {
+          "reference": "Patient/TEST_PATIENT"
+        }
       }
     }
   ]

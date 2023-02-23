@@ -6,11 +6,13 @@
         "Codeable",
         "Configurer",
         "CONTINUOUSVARIABLE",
+        "CRMI",
         "DENOMINATOREXCEPTION",
         "DENOMINATOREXCLUSION",
         "dstu",
         "Fhir",
         "fhirpath",
+        "Gson",
         "INITIALPOPULATION",
         "JXSON",
         "MEASUREOBSERVATION",
@@ -29,6 +31,7 @@
         "plandefinition",
         "ppca",
         "qicore",
+        "questionnaireresponse",
         "sdes",
         "sgpc",
         "SUBJECTLIST",
@@ -48,37 +51,40 @@
         "**/pom.xml",
         "checkstyle.xml"
     ],
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.dependency.packagePresentation": "hierarchical",
-    "editor.formatOnSave": true,
     "files.exclude": {
         "**/.classpath": true,
         "**/.project": true,
         "**/.settings": true,
         "**/.factorypath": true
     },
-    "java.compile.nullAnalysis.nonnull": [
-        "javax.annotation.Nonnull",
-        "org.eclipse.jdt.annotation.NonNull",
-        "org.springframework.lang.NonNull"
-    ],
-    "java.compile.nullAnalysis.nullable": [
-        "javax.annotation.Nullable",
-        "org.eclipse.jdt.annotation.Nullable",
-        "org.springframework.lang.Nullable"
-    ],
-    "java.format.settings.profile": "GoogleStyle",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.dependency.packagePresentation": "hierarchical",
+    "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication",
     "java.compile.nullAnalysis.mode": "automatic",
-    "yaml.schemas": {
-        "https://squidfunk.github.io/mkdocs-material/schema.json": "cqf-fhir-docs/src/doc/mkdocs.yml",
-        "https://json.schemastore.org/github-workflow.json": ".github/workflows/deploy.yml"
-      },
-      "yaml.customTags": [
-        "tag:yaml.org,2002:python/name:materialx.emoji.to_svg",
-        "tag:yaml.org,2002:python/name:materialx.emoji.twemoji",
-        "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
-      ],
-      "markdownlint.ignore": [
-        "**/CNAME"
-      ]
+    "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+    "java.format.settings.profile": "GoogleStyle",
+    "commandOnAllFiles.commands": {
+        "Format Java File": {
+            "command": "editor.action.formatDocument",
+            "includeFileExtensions": [
+                ".java"
+            ]
+        },
+        "Format JSON and XML Files": {
+            "command": "editor.action.formatDocument",
+            "includeFileExtensions": [
+                ".json",
+                ".xml"
+            ]
+        },
+        "Format Markdown Files": {
+            "command": "editor.action.formatDocument",
+            "includeFileExtensions": [
+                ".md"
+            ]
+        }
+    }
 }

@@ -20,10 +20,8 @@ import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
-import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
-import org.hl7.fhir.r5.context.IWorkerContext;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
@@ -99,7 +97,7 @@ public class CqlEvaluatorBuilder {
      * LibrarySourceProvider added is the last to be searched for a Library.
      *
      * @param librarySourceProvider the librarySourceProvider to add to the
-     *                               evaluation context
+     *                              evaluation context
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withLibrarySourceProvider(LibrarySourceProvider librarySourceProvider) {
@@ -198,17 +196,20 @@ public class CqlEvaluatorBuilder {
 
     /**
      * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation
-     * context from the supplied DataProviderComponents  There may only be one ModelResolver for a given model. This function
+     * context from the supplied DataProviderComponents There may only be one
+     * ModelResolver for a given model. This function
      * uses FILO semantics. The first RetrieveProvider added is the last to be used
      * for retrieves.
      *
-     * @param dataProviderComponents the model with a uri, ModelResolver, and RetrieveProvider
+     * @param dataProviderComponents the model with a uri, ModelResolver, and
+     *                               RetrieveProvider
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withDataProviderComponents(
             DataProviderComponents dataProviderComponents) {
         requireNonNull(dataProviderComponents, "dataProviderComponents can not be null");
-        this.withModelResolverAndRetrieveProvider(dataProviderComponents.getModelUri(), dataProviderComponents.getModelResolver(), dataProviderComponents.getRetrieveProvider());
+        this.withModelResolverAndRetrieveProvider(dataProviderComponents.getModelUri(),
+                dataProviderComponents.getModelResolver(), dataProviderComponents.getRetrieveProvider());
         return this;
     }
 
@@ -224,9 +225,12 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Sets the NamespaceInfo to use for the evaluator. If provided, this is the default
-     * namespace for translation. If library sources are provided without namespaces associated,
+     * Sets the NamespaceInfo to use for the evaluator. If provided, this is the
+     * default
+     * namespace for translation. If library sources are provided without namespaces
+     * associated,
      * they will be considered as part of this namespace.
+     * 
      * @param namespaceInfo the namespaceInfo to use
      * @return this CqlEvaluatorBuilder
      */
@@ -236,8 +240,11 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Sets the NpmProcessor to use for the evaluator. If provided the NpmProcessor is
-     * used to establish IG context and provide Fhir Npm package lookup for Cql libraries
+     * Sets the NpmProcessor to use for the evaluator. If provided the NpmProcessor
+     * is
+     * used to establish IG context and provide Fhir Npm package lookup for Cql
+     * libraries
+     * 
      * @param npmProcessor
      * @return
      */
@@ -309,15 +316,20 @@ public class CqlEvaluatorBuilder {
     private LibraryLoader buildLibraryLoader() {
         Collections.reverse(this.librarySourceProviders);
         ModelManager modelManager = new CacheAwareModelManager(globalModelCache);
-        // TODO: Would be good to plug this in through DI, but I ran into so many issues doing that, I just went this route
+        // TODO: Would be good to plug this in through DI, but I ran into so many issues
+        // doing that, I just went this route
         if (npmProcessor != null) {
-            ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(npmProcessor.getIgContext().getFhirVersion());
+            ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
+                    npmProcessor.getIgContext().getFhirVersion());
             LoggerAdapter adapter = new LoggerAdapter(logger);
-            this.librarySourceProviders.add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
-            modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+            this.librarySourceProviders
+                    .add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+            modelManager.getModelInfoLoader().registerModelInfoProvider(
+                    new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
         }
 
-        // Put this after the NPM provider so that if an embedded library is found on the NPM pat, it will be used first
+        // Put this after the NPM provider so that if an embedded library is found on
+        // the NPM pat, it will be used first
         if (this.cqlOptions.useEmbeddedLibraries()) {
             this.librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
@@ -385,7 +397,8 @@ public class CqlEvaluatorBuilder {
         TerminologyProvider terminologyProvider = this.buildTerminologyProvider();
         Map<String, DataProvider> dataProviders = this.buildDataProviders(terminologyProvider);
 
-        return new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider, this.cqlOptions.getCqlEngineOptions().getOptions());
+        return new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
+                this.cqlOptions.getCqlEngineOptions().getOptions());
     }
 
 }

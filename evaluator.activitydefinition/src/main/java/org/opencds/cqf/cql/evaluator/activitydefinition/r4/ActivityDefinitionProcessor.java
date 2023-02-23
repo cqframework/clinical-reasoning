@@ -6,22 +6,8 @@ import java.util.List;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Communication;
-import org.hl7.fhir.r4.model.CommunicationRequest;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.SupplyRequest;
-import org.hl7.fhir.r4.model.Task;
-import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
@@ -89,13 +75,21 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
                 throw new FHIRException(msg);
         }
 
+        String subjectCode = null;
+        if (activityDefinition.hasSubjectCodeableConcept()) {
+            var concept = activityDefinition.getSubjectCodeableConcept();
+            if (concept.hasCoding()) {
+                subjectCode = concept.getCoding().get(0).getCode();
+            }
+        }
+        var subjectType = subjectCode != null ? subjectCode : "Patient";
         for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition
                 .getDynamicValue()) {
             if (dynamicValue.hasExpression()) {
                 resolveDynamicValue(dynamicValue.getExpression().getLanguage(),
                         dynamicValue.getExpression().getExpression(),
                         activityDefinition.getLibrary().get(0).getValueAsString(),
-                        dynamicValue.getPath(), result);
+                        dynamicValue.getPath(), result, subjectType);
             }
         }
 
@@ -106,6 +100,11 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
     public Object resolveParameterValue(IBase value) {
         if (value == null) return null;
         return ((Parameters.ParametersParameterComponent) value).getValue();
+    }
+
+    @Override
+    public IBaseResource getSubject(String subjectType) {
+        return this.fhirDal.read(new IdType(subjectType, this.subjectId));
     }
 
     private Task resolveTask(ActivityDefinition activityDefinition) {
@@ -122,6 +121,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         } else {
             task.setStatus(Task.TaskStatus.DRAFT);
         }
+
+        task.setIntent(Task.TaskIntent.PROPOSAL);
 
         if (activityDefinition.hasCode()) {
             task.setCode(activityDefinition.getCode());

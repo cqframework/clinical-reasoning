@@ -3,46 +3,42 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencds.cqf.fhir</groupId>
-    <artifactId>cqf-fhir-jaxb</artifactId>
+    <groupId>org.opencds.cqf.cql</groupId>
+    <artifactId>evaluator.jaxb-deps</artifactId>
     <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>FHIR Clinical Reasoning (JAXB Dependencies)</name>
-    <description>Grouper module for JAXB serialization dependencies</description>
+
+    <name>evaluator.jaxb-deps</name>
+    <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
+
+    <description>CQL Evaluator - JAXB Dependencies</description>
 
     <parent>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir</artifactId>
+        <groupId>org.opencds.cqf.cql</groupId>
+        <artifactId>evaluator.shared</artifactId>
         <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../cqf-fhir/pom.xml</relativePath>
     </parent>
-
 
     <dependencies>
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.jaxb</artifactId>
-            <version>${cql-runtime.version}</version>
+            <groupId>info.cqframework</groupId>
+            <artifactId>engine-jaxb</artifactId>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model-jaxb</artifactId>
-            <version>${cql-compiler.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-jaxb</artifactId>
-            <version>${cql-compiler.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.moxy</artifactId>
-            <version>2.7.7</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
-            <version>1.1.4</version>
         </dependency>
     </dependencies>
 </project>

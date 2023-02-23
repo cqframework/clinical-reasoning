@@ -1,0 +1,23 @@
+name: Publish Snapshot
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  maven:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 11
+        server-id: ossrh
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+    - name: Publish snapshot
+      run: mvn --batch-mode -no-transfer-progress --update-snapshots deploy
+      env:
+        MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

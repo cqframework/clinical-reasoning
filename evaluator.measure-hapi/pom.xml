@@ -39,8 +39,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-jackson</artifactId>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.jackson-deps</artifactId>
             <version>3.0.0-SNAPSHOT</version>
             <type>pom</type>
             <scope>test</scope>
@@ -48,6 +48,12 @@
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-api</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.fhir</groupId>
+            <artifactId>cqf-fhir-utility</artifactId>
             <version>3.0.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

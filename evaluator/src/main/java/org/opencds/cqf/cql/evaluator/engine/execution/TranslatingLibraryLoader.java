@@ -127,7 +127,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
             library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier),
                     this.cqlTranslatorOptions, errors);
         } catch (Exception e) {
-            throw new CqlException(String.format("Unable translate library %s", libraryIdentifier.getId()), e);
+            throw new CqlException(String.format("Unable to resolve library (%s): %s", libraryIdentifier.getId(), e.getMessage()), e);
         }
 
         if (!errors.isEmpty()) {

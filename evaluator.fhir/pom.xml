@@ -25,16 +25,19 @@
         </dependency>
         <!-- Engine Dependencies for FHIR -->
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.fhir</artifactId>
+            <groupId>info.cqframework</groupId>
+            <artifactId>engine-fhir</artifactId>
+            <version>${cql.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-fhir</artifactId>
+            <version>${cql.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>quick</artifactId>
+            <version>${cql.version}</version>
         </dependency>
 
 

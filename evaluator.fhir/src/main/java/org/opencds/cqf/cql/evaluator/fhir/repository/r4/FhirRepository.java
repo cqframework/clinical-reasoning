@@ -41,8 +41,6 @@ public class FhirRepository implements Repository {
         list.forEach(resource -> {
             resourceMap.put(new IdType(resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()), resource);
         });
-
-        System.out.println(list.size());
     }
 
     @Override

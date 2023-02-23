@@ -1,0 +1,58 @@
+{
+  "resourceType": "ValueSet",
+  "id": "value-set-one",
+  "url": "http://localhost/fhir/ValueSet/value-set-one",
+  "name": "ValueSetOne",
+  "title": "ValueSetOne",
+  "status": "active",
+  "expansion": {
+    "contains": [
+      {
+        "system": "http://localhost/unit-test",
+        "version": "2018-03",
+        "code": "000",
+        "display": "000 Code"
+      },
+      {
+        "system": "http://localhost/unit-test",
+        "version": "2018-03",
+        "code": "111",
+        "display": "111 Code"
+      },
+      {
+        "system": "http://localhost/unit-test-2",
+        "version": "2018-03",
+        "code": "333",
+        "display": "333 Code"
+      }
+    ]
+  },
+  "compose": {
+    "include": [
+      {
+        "system": "http://localhost/unit-test",
+        "version": "2018-03",
+        "concept": [
+          {
+            "code": "000",
+            "display": "000 Code"
+          },
+          {
+            "code": "111",
+            "display": "111 Code"
+          }
+        ]
+      },
+      {
+        "system": "http://localhost/unit-test-2",
+        "version": "2018-03",
+        "concept": [
+          {
+            "code": "333",
+            "display": "333 Code"
+          }
+        ]
+      }
+    ]
+  }
+}

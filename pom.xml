@@ -651,10 +651,6 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>ca.jd.cdr</groupId>
-                    <artifactId>cdr-build-plugins</artifactId>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>

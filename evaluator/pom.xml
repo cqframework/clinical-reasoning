@@ -75,6 +75,18 @@
             <artifactId>reflections</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.fhir</groupId>
+            <artifactId>cqf-fhir-api</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.fhir</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

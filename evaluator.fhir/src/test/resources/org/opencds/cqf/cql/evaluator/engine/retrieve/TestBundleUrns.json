@@ -4,7 +4,8 @@
   "type": "collection",
   "entry": [
     {
-      "resource": {
+      "resource":
+      {
         "resourceType": "Condition",
         "id": "urn:uuid:a68581ea-fb8d-4a21-acd5-4c5a0c8f8472",
         "meta": {
@@ -47,7 +48,8 @@
       }
     },
     {
-      "resource": {
+      "resource":
+      {
         "resourceType": "Patient",
         "id": "urn:uuid:e527283b-e4b1-4f4e-9aef-8a5162816e32",
         "meta": {

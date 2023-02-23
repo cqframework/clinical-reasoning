@@ -1,0 +1,53 @@
+site_name: CQF Clinical Reasoning
+site_url: https://docs.cqframework.org/clinical-reasoning
+site_author: Smile Digital Health
+site_description: >-
+  Documentation for CQF Clinical Reasoning on FHIR
+
+copyright: Copyright &copy; 2022 Smile Digital Health
+
+repo_url: https://github.com/cqframework/clinical-reasoning
+repo_name: CQF Clinical Reasoning
+
+edit_uri: edit/main/docs/src/doc/docs
+
+
+theme:
+  favicon: assets/images/icon/favicon.ico
+
+  logo: assets/images/logo.svg
+  name: material
+  palette:
+    scheme: default
+    primary: white
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/regular/comments
+      link: https://chat.fhir.org/#narrow/stream/179220-cql
+    - icon: fontawesome/brands/github
+      link: https://github.com/cqframework/clinical-reasoning
+
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: [".", "../main/java/docs", "../main/resources"]
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - CQL: cql.md
+  - Operations: operations.md
+  - Developer Guide: developer-guide.md
+
+
+
+

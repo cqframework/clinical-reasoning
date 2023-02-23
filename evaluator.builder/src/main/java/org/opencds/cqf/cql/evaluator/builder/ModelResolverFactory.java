@@ -4,5 +4,6 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 public interface ModelResolverFactory {
     public String getModelUri();
+
     public ModelResolver create(String version);
 }

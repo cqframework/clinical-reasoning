@@ -17,8 +17,7 @@ public class Dstu3MeasureReportBuilderTest {
     protected FhirContext fhirContext;
 
     @BeforeClass
-    public void setup()
-    {
+    public void setup() {
         this.measureReportBuilder = new Dstu3MeasureReportBuilder();
         this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
     }
@@ -26,15 +25,21 @@ public class Dstu3MeasureReportBuilderTest {
     @Test
     public void checkIfNotBooleanBasedMeasure() {
         IParser parser = fhirContext.newJsonParser();
-        Measure measureEncounterBias = (Measure)parser.parseResource(Dstu3MeasureReportBuilderTest.class.getResourceAsStream("EXM105FHIR3Sample.json"));
-        Measure measureWithoutExtension = (Measure)parser.parseResource(Dstu3MeasureReportBuilderTest.class.getResourceAsStream("EXM105FHIR3SampleWithoutExtension.json"));
-        Measure measureBooleanBias = (Measure)parser.parseResource(Dstu3MeasureReportBuilderTest.class.getResourceAsStream("EXM105FHIR3SampleWithBoolenPopulationBias.json"));
+        Measure measureEncounterBias = (Measure) parser.parseResource(
+                Dstu3MeasureReportBuilderTest.class.getResourceAsStream("EXM105FHIR3Sample.json"));
+        Measure measureWithoutExtension =
+                (Measure) parser.parseResource(Dstu3MeasureReportBuilderTest.class
+                        .getResourceAsStream("EXM105FHIR3SampleWithoutExtension.json"));
+        Measure measureBooleanBias =
+                (Measure) parser.parseResource(Dstu3MeasureReportBuilderTest.class
+                        .getResourceAsStream("EXM105FHIR3SampleWithBoolenPopulationBias.json"));
 
         assertNotNull(measureEncounterBias);
         assertTrue(this.measureReportBuilder.checkIfNotBooleanBasedMeasure(measureEncounterBias));
 
         assertNotNull(measureWithoutExtension);
-        assertFalse(this.measureReportBuilder.checkIfNotBooleanBasedMeasure(measureWithoutExtension));
+        assertFalse(
+                this.measureReportBuilder.checkIfNotBooleanBasedMeasure(measureWithoutExtension));
 
         assertNotNull(measureBooleanBias);
         assertFalse(this.measureReportBuilder.checkIfNotBooleanBasedMeasure(measureBooleanBias));

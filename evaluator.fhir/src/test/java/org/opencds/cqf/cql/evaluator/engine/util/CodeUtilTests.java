@@ -129,7 +129,8 @@ public class CodeUtilTests {
 
     @Test
     public void TestGetCodesFromEnumeration() {
-        Code expected = new Code().withCode("active").withSystem("http://hl7.org/fhir/CodeSystem/medicationrequest-status");
+        Code expected = new Code().withCode("active")
+                .withSystem("http://hl7.org/fhir/CodeSystem/medicationrequest-status");
 
         MedicationRequest mr = new MedicationRequest();
         mr.setStatus(MedicationRequestStatus.ACTIVE);

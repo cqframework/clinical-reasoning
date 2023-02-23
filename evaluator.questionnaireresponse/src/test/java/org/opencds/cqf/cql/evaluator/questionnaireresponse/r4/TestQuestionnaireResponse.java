@@ -19,13 +19,17 @@ public class TestQuestionnaireResponse {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
 
-    private static InputStream open(String asset) { return TestQuestionnaireResponse.class.getResourceAsStream(asset); }
+    private static InputStream open(String asset) {
+        return TestQuestionnaireResponse.class.getResourceAsStream(asset);
+    }
 
     public static String load(InputStream asset) throws IOException {
         return new String(asset.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    public static String load(String asset) throws IOException { return load(open(asset)); }
+    public static String load(String asset) throws IOException {
+        return load(open(asset));
+    }
 
     public static IBaseResource parse(String asset) {
         return jsonParser.parseResource(open(asset));
@@ -55,28 +59,24 @@ public class TestQuestionnaireResponse {
         }
 
         public Extract withData(String dataAssetName) {
-            dataEndpoint = new Endpoint()
-                    .setAddress(dataAssetName)
-                    .setConnectionType(new Coding().setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
+            dataEndpoint = new Endpoint().setAddress(dataAssetName).setConnectionType(new Coding()
+                    .setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
 
             fhirDal.addAll(parse(dataAssetName));
             return this;
         }
 
         public Extract withLibrary(String dataAssetName) {
-            libraryEndpoint = new Endpoint()
-                    .setAddress(dataAssetName)
-                    .setConnectionType(new Coding().setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
+            libraryEndpoint =
+                    new Endpoint().setAddress(dataAssetName).setConnectionType(new Coding().setCode(
+                            org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
 
             fhirDal.addAll(parse(dataAssetName));
             return this;
         }
 
         public GeneratedBundle extract() {
-            return new GeneratedBundle(
-                    (Bundle) buildProcessor(fhirDal)
-                            .extract(baseResource)
-            );
+            return new GeneratedBundle((Bundle) buildProcessor(fhirDal).extract(baseResource));
         }
     }
 
@@ -89,11 +89,8 @@ public class TestQuestionnaireResponse {
 
         public void isEqualsTo(String expectedBundleAssetName) {
             try {
-                JSONAssert.assertEquals(
-                        load(expectedBundleAssetName),
-                        jsonParser.encodeResourceToString(bundle),
-                        true
-                );
+                JSONAssert.assertEquals(load(expectedBundleAssetName),
+                        jsonParser.encodeResourceToString(bundle), true);
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());

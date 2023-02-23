@@ -9,8 +9,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Library;
 
-class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter
-{
+class LibraryAdapter extends ResourceAdapter
+        implements org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter {
 
     private Library library;
 
@@ -18,7 +18,8 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.cql.eval
         super(library);
 
         if (!library.fhirType().equals("Library")) {
-            throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
+            throw new IllegalArgumentException(
+                    "resource passed as library argument is not a Library resource");
         }
 
         this.library = (Library) library;
@@ -85,7 +86,8 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.cql.eval
 
     @Override
     public void setContent(List<ICompositeType> attachments) {
-        List<Attachment> castAttachments = attachments.stream().map(x -> (Attachment) x).collect(Collectors.toList());
+        List<Attachment> castAttachments =
+                attachments.stream().map(x -> (Attachment) x).collect(Collectors.toList());
         this.getLibrary().setContent(castAttachments);
     }
 

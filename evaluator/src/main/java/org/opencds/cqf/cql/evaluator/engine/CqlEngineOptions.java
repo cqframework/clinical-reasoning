@@ -38,19 +38,34 @@ public class CqlEngineOptions {
         this.shouldExpandValueSets = shouldExpandValueSets;
     }
 
-    public Integer getPageSize() { return this.pageSize; }
-    public void setPageSize(Integer value) { this.pageSize = value; }
+    public Integer getPageSize() {
+        return this.pageSize;
+    }
 
-    public Integer getMaxCodesPerQuery() { return this.maxCodesPerQuery; }
-    public void setMaxCodesPerQuery(Integer value) { this.maxCodesPerQuery = value; }
+    public void setPageSize(Integer value) {
+        this.pageSize = value;
+    }
 
-    public Integer getQueryBatchThreshold() { return this.queryBatchThreshold; }
-    public void setQueryBatchThreshold(Integer value) { this.queryBatchThreshold = value; }
+    public Integer getMaxCodesPerQuery() {
+        return this.maxCodesPerQuery;
+    }
+
+    public void setMaxCodesPerQuery(Integer value) {
+        this.maxCodesPerQuery = value;
+    }
+
+    public Integer getQueryBatchThreshold() {
+        return this.queryBatchThreshold;
+    }
+
+    public void setQueryBatchThreshold(Integer value) {
+        this.queryBatchThreshold = value;
+    }
 
     public static CqlEngineOptions defaultOptions() {
         CqlEngineOptions result = new CqlEngineOptions();
         result.options.add(CqlEngine.Options.EnableExpressionCaching);
         return result;
-    }  
-    
+    }
+
 }

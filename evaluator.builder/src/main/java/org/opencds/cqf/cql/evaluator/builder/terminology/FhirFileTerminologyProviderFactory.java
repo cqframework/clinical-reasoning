@@ -22,9 +22,11 @@ public class FhirFileTerminologyProviderFactory implements TypedTerminologyProvi
     private DirectoryBundler directoryBundler;
 
     @Inject
-    public FhirFileTerminologyProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler) {
+    public FhirFileTerminologyProviderFactory(FhirContext fhirContext,
+            DirectoryBundler directoryBundler) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.directoryBundler = requireNonNull(directoryBundler, "directoryBundler can not be null");
+        this.directoryBundler =
+                requireNonNull(directoryBundler, "directoryBundler can not be null");
     }
 
     @Override
@@ -37,5 +39,5 @@ public class FhirFileTerminologyProviderFactory implements TypedTerminologyProvi
         IBaseBundle bundle = this.directoryBundler.bundle(url);
         return new BundleTerminologyProvider(this.fhirContext, bundle);
     }
-    
+
 }

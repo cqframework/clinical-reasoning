@@ -24,10 +24,12 @@ public class FhirRestLibrarySourceProviderFactory implements TypedLibrarySourceP
     private LibraryVersionSelector libraryVersionSelector;
 
     @Inject
-    public FhirRestLibrarySourceProviderFactory(ClientFactory clientFactory, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+    public FhirRestLibrarySourceProviderFactory(ClientFactory clientFactory,
+            AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
         this.clientFactory = requireNonNull(clientFactory, "clientFactory can not be null");
         this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
-        this.libraryVersionSelector = requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
+        this.libraryVersionSelector =
+                requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
     }
 
     @Override
@@ -38,6 +40,7 @@ public class FhirRestLibrarySourceProviderFactory implements TypedLibrarySourceP
     @Override
     public LibrarySourceProvider create(String url, List<String> headers) {
         IGenericClient client = this.clientFactory.create(url, headers);
-        return new FhirClientFhirLibrarySourceProvider(client, this.adapterFactory, this.libraryVersionSelector);
+        return new FhirClientFhirLibrarySourceProvider(client, this.adapterFactory,
+                this.libraryVersionSelector);
     }
 }

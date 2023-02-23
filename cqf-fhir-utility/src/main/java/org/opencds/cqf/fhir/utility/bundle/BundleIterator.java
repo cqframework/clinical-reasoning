@@ -21,7 +21,8 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
     protected FhirContext fhirContext;
     protected Class<B> bundleType;
 
-    public BundleIterator(FhirContext fhirContext, Repository repository, Class<B> bundleType, B bundle) {
+    public BundleIterator(FhirContext fhirContext, Repository repository, Class<B> bundleType,
+            B bundle) {
         this.fhirContext = fhirContext;
         this.repository = repository;
         this.bundle = bundle;

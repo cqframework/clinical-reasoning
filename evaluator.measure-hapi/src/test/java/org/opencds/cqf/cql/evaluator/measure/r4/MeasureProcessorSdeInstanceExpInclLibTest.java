@@ -13,10 +13,9 @@ public class MeasureProcessorSdeInstanceExpInclLibTest extends BaseMeasureProces
     @Test
     public void measure_eval_non_retrieve_resource_incl_lib_ref() {
         MeasureReport report = this.measureProcessor.evaluateMeasure(
-                "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
-                "2020-01-01", "2022-06-29", "subject",
-                "Patient/DM1-patient-1", null, null,
-                endpoint, endpoint, endpoint, null);
+                "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure", "2020-01-01",
+                "2022-06-29", "subject", "Patient/DM1-patient-1", null, null, endpoint, endpoint,
+                endpoint, null);
 
         assertEquals(3, report.getContained().size());
     }

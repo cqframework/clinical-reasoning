@@ -35,7 +35,7 @@ public class VersionUtilitiesTests {
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("5.0.1"));
     }
 
-    @Test(expectedExceptions  = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void TestNull() {
         VersionUtilities.enumForVersion(null);
     }
@@ -49,5 +49,5 @@ public class VersionUtilitiesTests {
     public void TestUnsupported() {
         VersionUtilities.enumForVersion("R6");
     }
-    
+
 }

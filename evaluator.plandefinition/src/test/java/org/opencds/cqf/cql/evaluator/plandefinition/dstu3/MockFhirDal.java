@@ -16,14 +16,17 @@ import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 public class MockFhirDal implements FhirDal {
 
     private final Map<String, IBaseResource> cacheById = new HashMap<String, IBaseResource>();
-    private final Map<String, List<IBaseResource>> cacheByURL = new HashMap<String, List<IBaseResource>>();
-    private final Map<String, List<IBaseResource>> cacheByType = new HashMap<String, List<IBaseResource>>();
+    private final Map<String, List<IBaseResource>> cacheByURL =
+            new HashMap<String, List<IBaseResource>>();
+    private final Map<String, List<IBaseResource>> cacheByType =
+            new HashMap<String, List<IBaseResource>>();
 
     private String toKey(IIdType resource) {
         return resource.getResourceType() + "/" + resource.getIdPart();
     }
 
-    private void insertOrUpdate(Map<String, List<IBaseResource>> list, String key, IBaseResource element) {
+    private void insertOrUpdate(Map<String, List<IBaseResource>> list, String key,
+            IBaseResource element) {
         if (list.containsKey(key))
             list.get(key).add(element);
         else
@@ -33,14 +36,15 @@ public class MockFhirDal implements FhirDal {
     private void putIntoCache(IBaseResource resource) {
         cacheById.put(toKey(resource.getIdElement()), resource);
         insertOrUpdate(cacheByType, resource.getIdElement().getResourceType(), resource);
-     
+
         if (resource instanceof MetadataResource) {
-            insertOrUpdate(cacheByURL, ((MetadataResource)resource).getUrl(), resource);
+            insertOrUpdate(cacheByURL, ((MetadataResource) resource).getUrl(), resource);
         }
     }
 
     public void addAll(IBaseResource resource) {
-        if (resource == null) return;
+        if (resource == null)
+            return;
 
         if (resource instanceof Bundle) {
             ((Bundle) resource).getEntry().forEach(entry -> {
@@ -50,7 +54,7 @@ public class MockFhirDal implements FhirDal {
             putIntoCache(resource);
         }
     }
-    
+
     @Override
     public IBaseResource read(IIdType id) {
         return cacheById.get(toKey(id));
@@ -73,8 +77,8 @@ public class MockFhirDal implements FhirDal {
     @Override
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url) {
         return cacheByURL.get(url).stream()
-            .filter(resource -> resourceType.equals(resource.getIdElement().getResourceType()))
-            .collect(Collectors.toList());
+                .filter(resource -> resourceType.equals(resource.getIdElement().getResourceType()))
+                .collect(Collectors.toList());
     }
-    
+
 }

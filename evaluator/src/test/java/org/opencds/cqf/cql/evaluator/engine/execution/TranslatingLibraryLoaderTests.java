@@ -4,7 +4,8 @@
 // import static org.testng.Assert.assertNotNull;
 // import static org.mockito.Mockito.times;
 
-// import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
+// import static
+// org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
 
 // import java.io.InputStream;
 // import java.io.InputStreamReader;
@@ -31,99 +32,102 @@
 
 // public class TranslatingLibraryLoaderTests {
 
-//     private static FhirContext fhirContext;
-//     private static IParser parser;
-//     private static ModelManager modelManger;
-//     private BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider;
-//     private LibraryLoader libraryLoader;
+// private static FhirContext fhirContext;
+// private static IParser parser;
+// private static ModelManager modelManger;
+// private BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider;
+// private LibraryLoader libraryLoader;
 
-//     @BeforeClass
-//     public void setup() {
-//         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-//         modelManger = new ModelManager();
-//         parser = fhirContext.newJsonParser();
-//     }
+// @BeforeClass
+// public void setup() {
+// fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+// modelManger = new ModelManager();
+// parser = fhirContext.newJsonParser();
+// }
 
-//     @BeforeMethod
-//     public void initialize() {
-//         this.testFhirLibrarySourceProvider = Mockito.spy(new BaseFhirLibrarySourceProvider(new AdapterFactory()) {
-//             @Override
-//             public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
-//                 String name = versionedIdentifier.getId();
+// @BeforeMethod
+// public void initialize() {
+// this.testFhirLibrarySourceProvider = Mockito.spy(new BaseFhirLibrarySourceProvider(new
+// AdapterFactory()) {
+// @Override
+// public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
+// String name = versionedIdentifier.getId();
 
-//                 InputStream libraryStream = TranslatingLibraryLoaderTests.class.getResourceAsStream(name + ".json");
+// InputStream libraryStream = TranslatingLibraryLoaderTests.class.getResourceAsStream(name +
+// ".json");
 
-//                 return parser.parseResource(new InputStreamReader(libraryStream));
-//             }
-//         });
+// return parser.parseResource(new InputStreamReader(libraryStream));
+// }
+// });
 
-//         this.libraryLoader = new TranslatingLibraryLoader(modelManger,
-//                 Collections.singletonList(testFhirLibrarySourceProvider), CqlTranslatorOptions.defaultOptions());
-//     }
+// this.libraryLoader = new TranslatingLibraryLoader(modelManger,
+// Collections.singletonList(testFhirLibrarySourceProvider), CqlTranslatorOptions.defaultOptions());
+// }
 
-//     // Disabled due to engine issue https://github.com/DBCG/cql_engine/issues/436
-//     // @Test
-//     public void canUseXml() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryXml");
-//         Library library = this.libraryLoader.load(libraryIdentifier);
-//         assertNotNull(library);
-//     }
+// // Disabled due to engine issue https://github.com/DBCG/cql_engine/issues/436
+// // @Test
+// public void canUseXml() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryXml");
+// Library library = this.libraryLoader.load(libraryIdentifier);
+// assertNotNull(library);
+// }
 
-//     @Test
-//     public void canUseJson() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
-//         Library library = this.libraryLoader.load(libraryIdentifier);
-//         assertNotNull(library);
-//     }
+// @Test
+// public void canUseJson() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
+// Library library = this.libraryLoader.load(libraryIdentifier);
+// assertNotNull(library);
+// }
 
-//     @Test
-//     public void usesJsonIfBothPresent() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryBoth");
-//         Library library = this.libraryLoader.load(libraryIdentifier);
-//         assertNotNull(library);
+// @Test
+// public void usesJsonIfBothPresent() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryBoth");
+// Library library = this.libraryLoader.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
-//                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
+// Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
+// .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
 
-//         Mockito.verify(this.testFhirLibrarySourceProvider, times(0))
-//                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.XML);
-//     }
+// Mockito.verify(this.testFhirLibrarySourceProvider, times(0))
+// .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.XML);
+// }
 
-//     @Test
-//     public void doesNotTranslateIfOptionsMatch() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryDefaultOptions");
-//         Library library = this.libraryLoader.load(libraryIdentifier);
-//         assertNotNull(library);
+// @Test
+// public void doesNotTranslateIfOptionsMatch() {
+// VersionedIdentifier libraryIdentifier = new
+// VersionedIdentifier().withId("LibraryDefaultOptions");
+// Library library = this.libraryLoader.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
-//                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
+// Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
+// .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
 
-//         Mockito.verify(this.testFhirLibrarySourceProvider, times(0))
-//                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
-//     }
+// Mockito.verify(this.testFhirLibrarySourceProvider, times(0))
+// .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
+// }
 
-//     @Test
-//     public void translateIfOptionsDontMatch() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoOptions");
-//         Library library = this.libraryLoader.load(libraryIdentifier);
-//         assertNotNull(library);
+// @Test
+// public void translateIfOptionsDontMatch() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoOptions");
+// Library library = this.libraryLoader.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
-//                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
+// Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
+// .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.JXSON);
 
-//         Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
-//                 .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
-//     }
+// Mockito.verify(this.testFhirLibrarySourceProvider, times(1))
+// .getLibraryContent(toElmIdentifier(libraryIdentifier), LibraryContentType.CQL);
+// }
 
-//     @Test(expectedExceptions = CqlException.class)
-//     public void throwsExceptionIfNoContent() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
-//         this.libraryLoader.load(libraryIdentifier);
-//     }
+// @Test(expectedExceptions = CqlException.class)
+// public void throwsExceptionIfNoContent() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
+// this.libraryLoader.load(libraryIdentifier);
+// }
 
-//     @Test(expectedExceptions = CqlException.class)
-//     public void throwsExceptionIfBadElmAndNoCql() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
-//         this.libraryLoader.load(libraryIdentifier);
-//     }
+// @Test(expectedExceptions = CqlException.class)
+// public void throwsExceptionIfBadElmAndNoCql() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryNoContent");
+// this.libraryLoader.load(libraryIdentifier);
+// }
 // }

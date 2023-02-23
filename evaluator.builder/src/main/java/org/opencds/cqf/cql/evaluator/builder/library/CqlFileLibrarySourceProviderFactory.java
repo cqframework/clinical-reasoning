@@ -29,7 +29,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvid
 public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {
 
     @Inject
-    CqlFileLibrarySourceProviderFactory(){}
+    CqlFileLibrarySourceProviderFactory() {}
 
     @Override
     public String getType() {
@@ -44,24 +44,22 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
 
     protected List<String> getLibrariesFromPath(String path) {
         URI uri;
-        try{
+        try {
             if (!isUri(path)) {
                 File file = new File(path);
                 uri = file.toURI();
-            }
-            else {
+            } else {
                 uri = new URI(path);
             }
-        }
-        catch(URISyntaxException e) {
-            throw new IllegalArgumentException(String.format("error attempting to bundle path: %s", path),e);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(
+                    String.format("error attempting to bundle path: %s", path), e);
         }
 
         Collection<File> files;
         if (uri.getScheme() != null && uri.getScheme().startsWith("jar")) {
             files = this.listJar(uri, path);
-        }
-        else {
+        } else {
             files = this.listDirectory(uri.getPath());
         }
 
@@ -71,32 +69,34 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
 
 
     private Collection<File> listJar(URI uri, String path) {
-        try (var fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())){
+        try (var fileSystem =
+                FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())) {
             Path jarPath = fileSystem.getPath(path);
-            try(Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
-                return walk.map(x -> x.toFile()).filter(x -> x.isFile()).filter(
-                    x -> x.getName().endsWith("json") || x.getName().endsWith("xml")).collect(Collectors.toList());
+            try (Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
+                return walk.map(x -> x.toFile()).filter(x -> x.isFile())
+                        .filter(x -> x.getName().endsWith("json") || x.getName().endsWith("xml"))
+                        .collect(Collectors.toList());
             }
-        }
-        catch (IOException e) {
-            throw new IllegalArgumentException(String.format("error attempting to list jar: %s", uri.toString()),e);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(
+                    String.format("error attempting to list jar: %s", uri.toString()), e);
         }
     }
 
     private Collection<File> listDirectory(String path) {
         File resourceDirectory = new File(path);
         if (!resourceDirectory.getAbsoluteFile().exists()) {
-            throw new IllegalArgumentException(String.format("The specified path to resource files does not exist: %s", path));
+            throw new IllegalArgumentException(
+                    String.format("The specified path to resource files does not exist: %s", path));
         }
 
         if (resourceDirectory.getAbsoluteFile().isDirectory()) {
-            return FileUtils.listFiles(resourceDirectory, new String[] { "cql" }, true);
-        }
-        else if (path.toLowerCase().endsWith("cql")) {
+            return FileUtils.listFiles(resourceDirectory, new String[] {"cql"}, true);
+        } else if (path.toLowerCase().endsWith("cql")) {
             return Collections.singletonList(resourceDirectory);
-        }
-        else {
-            throw new IllegalArgumentException(String.format("path was not a directory or a recognized CQL file format (.cql) : %s", path));
+        } else {
+            throw new IllegalArgumentException(String.format(
+                    "path was not a directory or a recognized CQL file format (.cql) : %s", path));
         }
     }
 
@@ -108,7 +108,8 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
                 e.printStackTrace();
                 return null;
             }
-        }).filter(x -> x != null).map(x -> new String(x, StandardCharsets.UTF_8)).collect(Collectors.toList());
+        }).filter(x -> x != null).map(x -> new String(x, StandardCharsets.UTF_8))
+                .collect(Collectors.toList());
     }
 
 }

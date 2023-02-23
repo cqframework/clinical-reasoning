@@ -39,8 +39,8 @@ public class R4FhirDalSubjectProvider implements SubjectProvider {
             if (r == null) {
                 throw new ResourceNotFoundException(id);
             }
-            return Collections
-                    .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+            return Collections.singletonList(
+                    r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
         } else if (subjectId.startsWith("Group")) {
             IdType id = new IdType(subjectId);
             Group r = (Group) fhirDal.read(id);
@@ -62,8 +62,8 @@ public class R4FhirDalSubjectProvider implements SubjectProvider {
             if (r == null) {
                 throw new ResourceNotFoundException(id);
             }
-            return Collections
-                    .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+            return Collections.singletonList(
+                    r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter;
 
 import org.hl7.fhir.instance.model.api.ICompositeType;
+
 /**
  * This interface exposes common functionality across all FHIR Attachment versions.
  */

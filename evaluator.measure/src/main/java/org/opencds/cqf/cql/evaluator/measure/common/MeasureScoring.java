@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum MeasureScoring {
-    PROPORTION("proportion", "Proportion", "The measure score is defined using a proportion"),
-    RATIO("ratio", "Ratio", "The measure score is defined using a ratio"),
-    CONTINUOUSVARIABLE("continuous-variable", "Continuous Variable", "The score is defined by a calculation of some quantity"),
-    COHORT("cohort", "Cohort", "The measure is a cohort definition");
+    PROPORTION("proportion", "Proportion",
+            "The measure score is defined using a proportion"), RATIO("ratio", "Ratio",
+                    "The measure score is defined using a ratio"), CONTINUOUSVARIABLE(
+                            "continuous-variable", "Continuous Variable",
+                            "The score is defined by a calculation of some quantity"), COHORT(
+                                    "cohort", "Cohort", "The measure is a cohort definition");
 
     private String code;
     private String display;

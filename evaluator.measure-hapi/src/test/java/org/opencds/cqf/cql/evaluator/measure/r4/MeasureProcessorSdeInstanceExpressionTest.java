@@ -22,24 +22,25 @@ public class MeasureProcessorSdeInstanceExpressionTest extends BaseMeasureProces
     public void measure_eval_non_retrieve_resource() {
 
         assertThrows(ResourceNotFoundException.class,
-                () -> this.measureProcessor.evaluateMeasure("https://build.fhir.org/ig/HL7/davinci-ra/ConditionCategoryPOC",
-                        "2022-01-01", "2022-12-31", "subject",
-                        "Patient/hist-open-HCC189", null, null,
-                        endpoint, endpoint, endpoint, null));
+                () -> this.measureProcessor.evaluateMeasure(
+                        "https://build.fhir.org/ig/HL7/davinci-ra/ConditionCategoryPOC",
+                        "2022-01-01", "2022-12-31", "subject", "Patient/hist-open-HCC189", null,
+                        null, endpoint, endpoint, endpoint, null));
 
-        MeasureReport report = this.measureProcessor.evaluateMeasure("https://build.fhir.org/ig/HL7/davinci-ra/ConditionCategoryPOC",
-                "2022-01-01", "2022-12-31", "subject",
-                "Patient/hist-closed-HCC189", null, null,
-                endpoint, endpoint, endpoint, null);
+        MeasureReport report = this.measureProcessor.evaluateMeasure(
+                "https://build.fhir.org/ig/HL7/davinci-ra/ConditionCategoryPOC", "2022-01-01",
+                "2022-12-31", "subject", "Patient/hist-closed-HCC189", null, null, endpoint,
+                endpoint, endpoint, null);
 
         assertNotNull(report);
 
-        assertTrue(report.getContained().stream().anyMatch(
-                item -> item.getId().startsWith("hist-closed-HCC189-suspecting-algorithm-encounter")));
+        assertTrue(report.getContained().stream().anyMatch(item -> item.getId()
+                .startsWith("hist-closed-HCC189-suspecting-algorithm-encounter")));
 
-        assertEquals(report.getExtension().stream().filter(item -> item.getValue().getClass() == Reference.class &&
-                        ((StringType) ((Reference) (item.getValue())).getExtension().get(0).getValue()).getValue()
-                                .equalsIgnoreCase("SDE-MedicationRequests"))
+        assertEquals(report.getExtension().stream().filter(item -> item.getValue()
+                .getClass() == Reference.class
+                && ((StringType) ((Reference) (item.getValue())).getExtension().get(0).getValue())
+                        .getValue().equalsIgnoreCase("SDE-MedicationRequests"))
                 .collect(Collectors.toList()).size(), 2);
     }
 }

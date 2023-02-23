@@ -22,10 +22,12 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
     }
 
     protected void scoreGroup(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc) {
-        switch(measureScoring) {
+        switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(getPopulationCount(mrgc, MeasurePopulationType.NUMERATOR), getPopulationCount(mrgc, MeasurePopulationType.DENOMINATOR));
+                Double score = this.calcProportionScore(
+                        getPopulationCount(mrgc, MeasurePopulationType.NUMERATOR),
+                        getPopulationCount(mrgc, MeasurePopulationType.DENOMINATOR));
                 if (score != null) {
                     mrgc.setMeasureScore(score);
                 }
@@ -40,10 +42,12 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
     }
 
     protected void scoreStratum(MeasureScoring measureScoring, StratifierGroupComponent stratum) {
-        switch(measureScoring) {
+        switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(getPopulationCount(stratum, MeasurePopulationType.NUMERATOR), getPopulationCount(stratum, MeasurePopulationType.DENOMINATOR));
+                Double score = this.calcProportionScore(
+                        getPopulationCount(stratum, MeasurePopulationType.NUMERATOR),
+                        getPopulationCount(stratum, MeasurePopulationType.DENOMINATOR));
                 if (score != null) {
                     stratum.setMeasureScore(score);
                 }
@@ -53,8 +57,11 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
         }
     }
 
-    protected Integer getPopulationCount(MeasureReportGroupComponent mrgc, MeasurePopulationType populationType) {
-        Optional<MeasureReportGroupPopulationComponent> pop = mrgc.getPopulation().stream().filter(x -> x.getCode().getCodingFirstRep().getCode().equals(populationType.toCode())).findFirst();
+    protected Integer getPopulationCount(MeasureReportGroupComponent mrgc,
+            MeasurePopulationType populationType) {
+        Optional<MeasureReportGroupPopulationComponent> pop = mrgc.getPopulation().stream().filter(
+                x -> x.getCode().getCodingFirstRep().getCode().equals(populationType.toCode()))
+                .findFirst();
         if (pop.isPresent()) {
             return pop.get().getCount();
         }
@@ -62,8 +69,11 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
         return null;
     }
 
-    protected Integer getPopulationCount(StratifierGroupComponent sgc, MeasurePopulationType populationType) {
-        Optional<StratifierGroupPopulationComponent> pop = sgc.getPopulation().stream().filter(x -> x.getCode().getCodingFirstRep().getCode().equals(populationType.toCode())).findFirst();
+    protected Integer getPopulationCount(StratifierGroupComponent sgc,
+            MeasurePopulationType populationType) {
+        Optional<StratifierGroupPopulationComponent> pop = sgc.getPopulation().stream().filter(
+                x -> x.getCode().getCodingFirstRep().getCode().equals(populationType.toCode()))
+                .findFirst();
         if (pop.isPresent()) {
             return pop.get().getCount();
         }
@@ -71,7 +81,8 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
         return null;
     }
 
-    protected void scoreStratifier(MeasureScoring measureScoring, MeasureReportGroupStratifierComponent stratifierComponent) {
+    protected void scoreStratifier(MeasureScoring measureScoring,
+            MeasureReportGroupStratifierComponent stratifierComponent) {
         for (StratifierGroupComponent sgc : stratifierComponent.getStratum()) {
             scoreStratum(measureScoring, sgc);
         }

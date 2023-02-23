@@ -9,12 +9,13 @@ public class DataProviderComponents {
     protected ModelResolver modelResolver;
     protected RetrieveProvider retrieveProvider;
 
-    public DataProviderComponents(String modelUri, ModelResolver modelResolver, RetrieveProvider retrieveProvider) {
+    public DataProviderComponents(String modelUri, ModelResolver modelResolver,
+            RetrieveProvider retrieveProvider) {
         this.modelUri = modelUri;
         this.modelResolver = modelResolver;
         this.retrieveProvider = retrieveProvider;
     }
-    
+
     public String getModelUri() {
         return this.modelUri;
     }

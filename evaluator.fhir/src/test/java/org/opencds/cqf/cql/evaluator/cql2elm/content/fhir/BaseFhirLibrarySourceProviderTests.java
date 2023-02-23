@@ -45,13 +45,14 @@ public class BaseFhirLibrarySourceProviderTests {
     }
 
     private String readToString(InputStream inputStream) {
-        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
-                .collect(Collectors.joining("\n"));
+        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                .lines().collect(Collectors.joining("\n"));
     }
 
     private String getContent(String libraryName, LibraryContentType libraryContentType) {
         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId(libraryName);
-        InputStream stream = testFhirLibrarySourceProvider.getLibraryContent(libraryIdentifier, libraryContentType);
+        InputStream stream = testFhirLibrarySourceProvider.getLibraryContent(libraryIdentifier,
+                libraryContentType);
         if (stream == null) {
             return null;
         }
@@ -97,8 +98,8 @@ public class BaseFhirLibrarySourceProviderTests {
 
     @Test
     public void getSourceReturnsCql() {
-        String actual = this.readToString(
-                testFhirLibrarySourceProvider.getLibrarySource(new VersionedIdentifier().withId("AllContent")));
+        String actual = this.readToString(testFhirLibrarySourceProvider
+                .getLibrarySource(new VersionedIdentifier().withId("AllContent")));
         assertEquals(actual, "CQL");
     }
 }

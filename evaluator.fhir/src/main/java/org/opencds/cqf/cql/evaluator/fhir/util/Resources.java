@@ -9,11 +9,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public class Resources {
 
-    private Resources() {
-    }
+    private Resources() {}
 
-    public static <T extends IBaseResource, I extends IIdType> T newResource(Class<T> theResourceClass,
-            String theIdPart) {
+    public static <T extends IBaseResource, I extends IIdType> T newResource(
+            Class<T> theResourceClass, String theIdPart) {
         checkNotNull(theResourceClass);
         checkNotNull(theIdPart);
         checkArgument(!theIdPart.contains("/"),
@@ -39,7 +38,8 @@ public class Resources {
         return resource;
     }
 
-    public static <T extends IBaseBackboneElement> T newBackboneElement(Class<T> theBackboneElementClass) {
+    public static <T extends IBaseBackboneElement> T newBackboneElement(
+            Class<T> theBackboneElementClass) {
         checkNotNull(theBackboneElementClass);
         T backboneElement = null;
         try {

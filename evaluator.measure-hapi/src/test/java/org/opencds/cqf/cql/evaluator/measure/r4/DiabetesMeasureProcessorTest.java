@@ -12,7 +12,7 @@ import java.io.IOException;
 @Test(singleThreaded = true)
 public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
 
-        
+
     public DiabetesMeasureProcessorTest() {
         super("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR-bundle.json");
     }
@@ -20,14 +20,17 @@ public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
     @Test
     public void a1c_singlePatient_numerator() {
 
-        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR", "2019-01-01", "2020-01-01", "patient", "numer-CMS122-Patient", null, null, endpoint, endpoint, endpoint, null);
+        MeasureReport report = this.measureProcessor.evaluateMeasure(
+                "http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR",
+                "2019-01-01", "2020-01-01", "patient", "numer-CMS122-Patient", null, null, endpoint,
+                endpoint, endpoint, null);
         assertNotNull(report);
 
         validateGroup(report.getGroup().get(0), "numerator", 1);
         validateGroup(report.getGroup().get(0), "denominator", 1);
 
         // java.io.File yourFile = new java.io.File("target/sample.json");
-        // yourFile.createNewFile(); // if file already exists will do nothing 
+        // yourFile.createNewFile(); // if file already exists will do nothing
 
         // ca.uhn.fhir.parser.IParser parser = fhirContext.newJsonParser();
         // parser.setPrettyPrint(true);
@@ -43,7 +46,10 @@ public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
     @Test
     public void a1c_population() throws IOException {
 
-        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR", "2019-01-01", "2020-01-01", "population", null, null, null, endpoint, endpoint, endpoint, null);
+        MeasureReport report = this.measureProcessor.evaluateMeasure(
+                "http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR",
+                "2019-01-01", "2020-01-01", "population", null, null, null, endpoint, endpoint,
+                endpoint, null);
         assertNotNull(report);
 
         validateGroup(report.getGroup().get(0), "numerator", 1);
@@ -56,11 +62,14 @@ public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
     // TODO: Work on the additional data Bundle integration with the Subject provider
     @Test(enabled = false)
     public void a1c_additionalData() {
-        Bundle additionalData = 
-        (Bundle) fhirContext.newJsonParser()
-                .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream("CMS122-AdditionalData-bundle.json"));
+        Bundle additionalData =
+                (Bundle) fhirContext.newJsonParser().parseResource(BaseMeasureProcessorTest.class
+                        .getResourceAsStream("CMS122-AdditionalData-bundle.json"));
 
-        MeasureReport report = this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR", "2019-01-01", "2020-01-01", "patient", "numer-CMS122-2-Patient", null, null, endpoint, endpoint, null, additionalData);
+        MeasureReport report = this.measureProcessor.evaluateMeasure(
+                "http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR",
+                "2019-01-01", "2020-01-01", "patient", "numer-CMS122-2-Patient", null, null,
+                endpoint, endpoint, null, additionalData);
         assertNotNull(report);
 
         validateGroup(report.getGroup().get(0), "numerator", 1);

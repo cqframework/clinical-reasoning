@@ -28,8 +28,8 @@ public class DirectoryBundlerTests {
 
         assertNotNull(bundle);
 
-        List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(fhirContext, bundle,
-                fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
+        List<? extends IBaseResource> resources = BundleUtil.toListOfResourcesOfType(fhirContext,
+                bundle, fhirContext.getResourceDefinition("ValueSet").getImplementingClass());
 
         assertNotNull(resources);
         assertEquals(1, resources.size());

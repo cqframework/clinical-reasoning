@@ -23,11 +23,12 @@ public interface ResourceLoader {
         if (theLocation.endsWith("json")) {
             return parseResource(context, "json", resourceString);
         } else {
-            return parseResource(context,"xml", resourceString);
+            return parseResource(context, "xml", resourceString);
         }
     }
 
-    public default IBaseResource parseResource(FhirContext context, String encoding, String resourceString) {
+    public default IBaseResource parseResource(FhirContext context, String encoding,
+            String resourceString) {
         IParser parser;
         switch (encoding.toLowerCase()) {
             case "json":
@@ -37,8 +38,8 @@ public interface ResourceLoader {
                 parser = context.newXmlParser();
                 break;
             default:
-                throw new IllegalArgumentException(
-                        String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
+                throw new IllegalArgumentException(String.format(
+                        "Expected encoding xml, or json.  %s is not a valid encoding", encoding));
         }
 
         return parser.parseResource(resourceString);
@@ -47,13 +48,14 @@ public interface ResourceLoader {
     default IBaseResource loadResource(FhirContext context, String theLocation) {
         String resourceString = stringFromResource(theLocation);
         if (theLocation.endsWith("json")) {
-            return loadResource(context,"json", resourceString);
+            return loadResource(context, "json", resourceString);
         } else {
-            return loadResource(context,"xml", resourceString);
+            return loadResource(context, "xml", resourceString);
         }
     }
 
-    default IBaseResource loadResource(FhirContext context, String encoding, String resourceString) {
+    default IBaseResource loadResource(FhirContext context, String encoding,
+            String resourceString) {
         IBaseResource resource = parseResource(context, encoding, resourceString);
         return resource;
     }
@@ -69,7 +71,8 @@ public interface ResourceLoader {
             }
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
+            throw new RuntimeException(String.format("Error loading resource from %s", theLocation),
+                    e);
         }
 
     }

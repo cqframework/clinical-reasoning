@@ -18,7 +18,8 @@ public class PriorityTerminologyProvider implements TerminologyProvider {
     List<TerminologyProvider> terminologyProviders;
 
     public PriorityTerminologyProvider(List<TerminologyProvider> terminologyProviders) {
-        this.terminologyProviders = requireNonNull(terminologyProviders, "terminologyProviders can not be null");
+        this.terminologyProviders =
+                requireNonNull(terminologyProviders, "terminologyProviders can not be null");
     }
 
     @Override
@@ -29,8 +30,7 @@ public class PriorityTerminologyProvider implements TerminologyProvider {
                 if (in) {
                     return true;
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.warn("inner provider threw an Exception, continuing: %s", e.getMessage());
             }
         }
@@ -52,6 +52,7 @@ public class PriorityTerminologyProvider implements TerminologyProvider {
 
     @Override
     public Code lookup(Code code, CodeSystemInfo codeSystem) {
-        return this.terminologyProviders.stream().map(x -> x.lookup(code, codeSystem)).findFirst().orElseGet(null);
+        return this.terminologyProviders.stream().map(x -> x.lookup(code, codeSystem)).findFirst()
+                .orElseGet(null);
     }
 }

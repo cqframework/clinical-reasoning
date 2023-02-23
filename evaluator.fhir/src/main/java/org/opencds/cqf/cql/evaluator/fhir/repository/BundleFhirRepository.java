@@ -29,31 +29,33 @@ public class BundleFhirRepository implements Repository {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id, Map<String, String> headers) {
-        List<IBaseResource> resources = (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context,
-                this.bundle,
+    public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
+            Map<String, String> headers) {
+        List<IBaseResource> resources = (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(
+                this.context, this.bundle,
                 this.context.getResourceDefinition(id.getResourceType()).getImplementingClass());
 
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart().equals(id.getIdPart())) {
-                return (T)resource;
+                return (T) resource;
             }
         }
         return null;
     }
 
-    //wip: search
+    // wip: search
     @Override
     @SuppressWarnings("unchecked")
-    public <B extends IBaseBundle, T extends IBaseResource> B search(
-            Class<B> bundleType,
-            Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+    public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
+            Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
-        IBaseResource bundle = Resources.newResource(IBaseBundle.class, UUID.randomUUID().toString());
-        //HashMap<String, List<List<IQueryParameterType>>>
-        Iterable<IBaseResource> iterable = (Iterable<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
-                this.context.getResourceDefinition(resourceType).getImplementingClass());
+        IBaseResource bundle =
+                Resources.newResource(IBaseBundle.class, UUID.randomUUID().toString());
+        // HashMap<String, List<List<IQueryParameterType>>>
+        Iterable<IBaseResource> iterable =
+                (Iterable<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context,
+                        this.bundle,
+                        this.context.getResourceDefinition(resourceType).getImplementingClass());
 
 
 
@@ -61,7 +63,8 @@ public class BundleFhirRepository implements Repository {
     }
 
     @Override
-    public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
+    public <B extends IBaseBundle> B link(Class<B> bundleType, String url,
+            Map<String, String> headers) {
         return null;
     }
 
@@ -71,7 +74,8 @@ public class BundleFhirRepository implements Repository {
     }
 
     @Override
-    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters, Map<String, String> headers) {
+    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id,
+            P patchParameters, Map<String, String> headers) {
         return null;
     }
 
@@ -81,12 +85,14 @@ public class BundleFhirRepository implements Repository {
     }
 
     @Override
-    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType, I id, Map<String, String> headers) {
+    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
+            I id, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
+    public <C extends IBaseConformance> C capabilities(Class<C> resourceType,
+            Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
@@ -96,47 +102,57 @@ public class BundleFhirRepository implements Repository {
     }
 
     @Override
-    public <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+    public <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
+            Class<R> returnType, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
+    public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters,
+            Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+    public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
+            Class<T> resourceType, String name, P parameters, Class<R> returnType,
+            Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
+    public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
+            Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+    public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
+            String name, P parameters, Class<R> returnType, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name, P parameters, Map<String, String> headers) {
+    public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
+            P parameters, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters, Class<B> returnType, Map<String, String> headers) {
+    public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters,
+            Class<B> returnType, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
+    public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
+            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id, P parameters, Class<B> returnType, Map<String, String> headers) {
+    public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
+            P parameters, Class<B> returnType, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 }

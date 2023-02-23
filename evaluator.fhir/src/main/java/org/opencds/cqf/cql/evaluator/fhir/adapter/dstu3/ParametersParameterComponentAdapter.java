@@ -17,16 +17,18 @@ class ParametersParameterComponentAdapter
 
     private Parameters.ParametersParameterComponent parametersParametersComponent;
 
-    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent){
+    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent) {
         if (parametersParametersComponent == null) {
             throw new IllegalArgumentException("parametersParametersComponent can not be null");
         }
 
         if (!parametersParametersComponent.fhirType().equals("Parameters.parameter")) {
-            throw new IllegalArgumentException("element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
+            throw new IllegalArgumentException(
+                    "element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
         }
 
-        this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
+        this.parametersParametersComponent =
+                (ParametersParameterComponent) parametersParametersComponent;
 
     }
 
@@ -52,8 +54,8 @@ class ParametersParameterComponentAdapter
 
     @Override
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
-        this.parametersParametersComponent.setPart(parametersParameterComponents.stream().map(x -> (ParametersParameterComponent) x)
-                .collect(Collectors.toList()));
+        this.parametersParametersComponent.setPart(parametersParameterComponents.stream()
+                .map(x -> (ParametersParameterComponent) x).collect(Collectors.toList()));
     }
 
     @Override
@@ -109,7 +111,8 @@ class ParametersParameterComponentAdapter
     @Override
     @SuppressWarnings("unchecked")
     public List<IBaseExtension<?, ?>> getExtension() {
-        return (List<IBaseExtension<?, ?>>)(List<?>)this.parametersParametersComponent.getExtension();
+        return (List<IBaseExtension<?, ?>>) (List<?>) this.parametersParametersComponent
+                .getExtension();
     }
 
 }

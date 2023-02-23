@@ -55,12 +55,16 @@ import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
 import com.google.common.collect.Lists;
 
-public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
+public class Dstu3MeasureReportBuilder
+        implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
-    protected static final String EXT_POPULATION_DESCRIPTION_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
-    protected static final String EXT_SDE_REFERENCE_URL = "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
-    protected static final String POPULATION_BASIS_URL = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
+    protected static final String EXT_POPULATION_DESCRIPTION_URL =
+            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
+    protected static final String EXT_SDE_REFERENCE_URL =
+            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
+    protected static final String POPULATION_BASIS_URL =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
 
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
@@ -79,12 +83,14 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     @Override
-    public MeasureReport build(Measure measure, MeasureDef measureDef, MeasureReportType measureReportType,
-            Interval measurementPeriod, List<String> subjectIds) {
+    public MeasureReport build(Measure measure, MeasureDef measureDef,
+            MeasureReportType measureReportType, Interval measurementPeriod,
+            List<String> subjectIds) {
         this.reset();
 
         this.measure = measure;
-        this.report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
+        this.report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds,
+                measurementPeriod);
 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
@@ -132,18 +138,19 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportGroup.setId(measureGroup.getId());
 
         if (measureGroup.hasDescription()) {
-            reportGroup.addExtension(
-                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measureGroup.getDescription()));
+            reportGroup.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL,
+                    measureGroup.getDescription()));
         }
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
-            buildPopulation(groupKey, mgpc, reportGroup.addPopulation(),
-                    groupDef.getSingle(MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())));
+            buildPopulation(groupKey, mgpc, reportGroup.addPopulation(), groupDef.getSingle(
+                    MeasurePopulationType.fromCode(mgpc.getCode().getCodingFirstRep().getCode())));
         }
 
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
-            buildStratifier(groupKey, i, measureGroup.getStratifier().get(i), reportGroup.addStratifier(),
-                    groupDef.stratifiers().get(i), measureGroup.getPopulation());
+            buildStratifier(groupKey, i, measureGroup.getStratifier().get(i),
+                    reportGroup.addStratifier(), groupDef.stratifiers().get(i),
+                    measureGroup.getPopulation());
         }
     }
 
@@ -161,37 +168,41 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildStratifier(String groupKey, Integer stratIndex,
-            MeasureGroupStratifierComponent measureStratifier, MeasureReportGroupStratifierComponent reportStratifier,
-            StratifierDef stratifierDef, List<MeasureGroupPopulationComponent> populations) {
+            MeasureGroupStratifierComponent measureStratifier,
+            MeasureReportGroupStratifierComponent reportStratifier, StratifierDef stratifierDef,
+            List<MeasureGroupPopulationComponent> populations) {
         reportStratifier.setId(measureStratifier.getId());
 
         // NOTE: DSTU3 does not support descriptions
 
-        String stratifierKey = this.getKey("stratifier", measureStratifier.getId(), null, stratIndex);
+        String stratifierKey =
+                this.getKey("stratifier", measureStratifier.getId(), null, stratIndex);
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
         // Because most of the types we're dealing with don't implement hashCode or
         // equals
         // the ValueWrapper does it for them.
-        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .collect(Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream().collect(
+                Collectors.groupingBy(x -> new ValueWrapper(subjectValues.get(x).rawValue())));
 
         for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
-            buildStratum(groupKey, stratifierKey, reportStratifier.addStratum(), stratValue.getKey(),
-                    stratValue.getValue(), populations);
+            buildStratum(groupKey, stratifierKey, reportStratifier.addStratum(),
+                    stratValue.getKey(), stratValue.getValue(), populations);
         }
     }
 
-    protected void buildStratum(String groupKey, String stratifierKey, StratifierGroupComponent stratum,
-            ValueWrapper value, List<String> subjectIds, List<MeasureGroupPopulationComponent> populations) {
+    protected void buildStratum(String groupKey, String stratifierKey,
+            StratifierGroupComponent stratum, ValueWrapper value, List<String> subjectIds,
+            List<MeasureGroupPopulationComponent> populations) {
 
         String stratumKey = this.escapeForFhirId(value.getKey());
 
         stratum.setValue(value.getValueAsString());
 
         for (MeasureGroupPopulationComponent mgpc : populations) {
-            buildStratumPopulation(groupKey, stratifierKey, stratumKey, stratum.addPopulation(), subjectIds, mgpc);
+            buildStratumPopulation(groupKey, stratifierKey, stratumKey, stratum.addPopulation(),
+                    subjectIds, mgpc);
         }
     }
 
@@ -203,7 +214,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         sgpc.setId(population.getId());
 
         if (population.hasDescription()) {
-            sgpc.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, population.getDescription()));
+            sgpc.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL,
+                    population.getDescription()));
         }
 
         // This is a temporary resource that was carried by the population component
@@ -218,16 +230,19 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
-        if (intersection.size() > 0
-                && this.report.getType() == org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.PATIENTLIST) {
-            ListResource popSubjectList = this.createIdList("subject-list-" + groupKey + "-" + stratifierKey + "-"
-                    + "stratum-" + stratumKey + "-" + population.getCode().getCodingFirstRep().getCode(), intersection);
+        if (intersection.size() > 0 && this.report
+                .getType() == org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.PATIENTLIST) {
+            ListResource popSubjectList = this.createIdList(
+                    "subject-list-" + groupKey + "-" + stratifierKey + "-" + "stratum-" + stratumKey
+                            + "-" + population.getCode().getCodingFirstRep().getCode(),
+                    intersection);
             this.report.addContained(popSubjectList);
             sgpc.setPatients(new Reference().setReference("#" + popSubjectList.getId()));
         }
     }
 
-    protected void buildPopulation(String groupKey, MeasureGroupPopulationComponent measurePopulation,
+    protected void buildPopulation(String groupKey,
+            MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
 
         reportPopulation.setCode(measurePopulation.getCode());
@@ -240,8 +255,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
 
         if (measurePopulation.hasDescription()) {
-            reportPopulation.addExtension(
-                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
+            reportPopulation.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL,
+                    measurePopulation.getDescription()));
         }
 
         addResourceReferences(populationDef.type(), populationDef.getEvaluatedResources());
@@ -255,7 +270,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             case PATIENTLIST:
                 if (populationSet.size() > 0) {
                     ListResource subjectList = createIdList(
-                            "subject-list-" + groupKey + "-" + populationDef.type().toCode(), populationSet);
+                            "subject-list-" + groupKey + "-" + populationDef.type().toCode(),
+                            populationSet);
                     this.report.addContained(subjectList);
                     reportPopulation.setPatients(new Reference("#" + subjectList.getId()));
                 }
@@ -278,8 +294,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     protected void buildMeasureObservations(String observationName, Set<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
-            Observation observation = createMeasureObservation("measure-observation-" + observationName + "-" + (i + 1),
-                    observationName);
+            Observation observation = createMeasureObservation(
+                    "measure-observation-" + observationName + "-" + (i + 1), observationName);
             this.report.addContained(observation);
         }
     }
@@ -291,7 +307,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected ListResource createIdList(String id, Collection<String> ids) {
-        return this.createReferenceList(id, ids.stream().map(x -> new Reference(x)).collect(Collectors.toList()));
+        return this.createReferenceList(id,
+                ids.stream().map(x -> new Reference(x)).collect(Collectors.toList()));
     }
 
     protected ListResource createReferenceList(String id, Collection<Reference> references) {
@@ -303,14 +320,16 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return referenceList;
     }
 
-    private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Object> evaluatedResources) {
+    private void addResourceReferences(MeasurePopulationType measurePopulationType,
+            Set<Object> evaluatedResources) {
         if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
                 Resource resource = (Resource) object;
                 String resourceId = resource.getId();
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
-                Extension ext = createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
-                        measurePopulationType.toCode());
+                Extension ext =
+                        createStringExtension(MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE,
+                                measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);
             }
         }
@@ -384,11 +403,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                         obs = createPatientObservation(sdeKey + "-" + valueKey, sdeId, valueCoding);
                         break;
                     default:
-                        obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeId, valueCoding, valueCount);
+                        obs = createPopulationObservation(sdeKey + "-" + valueKey, sdeId,
+                                valueCoding, valueCount);
                         break;
                 }
 
-                report.addExtension(this.createReferenceExtension(EXT_SDE_REFERENCE_URL, "#" + obs.getId()));
+                report.addExtension(
+                        this.createReferenceExtension(EXT_SDE_REFERENCE_URL, "#" + obs.getId()));
                 report.addContained(obs);
             }
         }
@@ -403,12 +424,10 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     IBaseResource iBaseResource = (IBaseResource) o;
 
                     // adding value to extension
-                    extension.setValue(
-                            new StringType(
-                                    new StringBuilder(iBaseResource.getIdElement().getResourceType())
-                                            .append("/")
-                                            .append(iBaseResource.getIdElement().getIdPart())
-                                            .toString()));
+                    extension.setValue(new StringType(
+                            new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                                    .append("/").append(iBaseResource.getIdElement().getIdPart())
+                                    .toString()));
 
                     // adding item extension to MR extension list
                     report.getExtension().add(extension);
@@ -434,11 +453,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    protected MeasureReport createMeasureReport(Measure measure, MeasureDef measureDef, MeasureReportType type,
-            List<String> subjectIds, Interval measurementPeriod) {
+    protected MeasureReport createMeasureReport(Measure measure, MeasureDef measureDef,
+            MeasureReportType type, List<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
-        report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
+        report.setType(
+                org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
 
         if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {
             report.setPatient(new Reference(subjectIds.get(0)));
@@ -455,7 +475,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         report.setLanguage(measure.getLanguage());
 
         if (measure.hasDescription()) {
-            report.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measure.getDescription()));
+            report.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL,
+                    measure.getDescription()));
         }
 
         // TODO: Allow a way to pass in or set a default reporter
@@ -472,7 +493,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     // * African American" } } ] }
     // */
 
-    protected Coding getExtensionCoding(DomainResource patient, String coreCategory, String sdeCode) {
+    protected Coding getExtensionCoding(DomainResource patient, String coreCategory,
+            String sdeCode) {
         Coding valueCoding = new Coding();
 
         patient.getExtension().forEach((ptExt) -> {
@@ -530,9 +552,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     private boolean checkForNotBoolean(Extension item) {
-        return (item.getUrl() != null &&
-                StringUtils.equalsIgnoreCase(item.getUrl(), POPULATION_BASIS_URL) &&
-                !StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
+        return (item.getUrl() != null
+                && StringUtils.equalsIgnoreCase(item.getUrl(), POPULATION_BASIS_URL)
+                && !StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
     }
 
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {
@@ -550,8 +572,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return obsExtension;
     }
 
-    protected DomainResource createPopulationObservation(String id, String populationId, Coding valueCoding,
-            Long sdeAccumulatorValue) {
+    protected DomainResource createPopulationObservation(String id, String populationId,
+            Coding valueCoding, Long sdeAccumulatorValue) {
 
         Observation obs = createObservation(id, populationId);
 
@@ -564,7 +586,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return obs;
     }
 
-    protected DomainResource createPatientObservation(String id, String populationId, Coding valueCoding) {
+    protected DomainResource createPatientObservation(String id, String populationId,
+            Coding valueCoding) {
 
         Observation obs = createObservation(id, populationId);
 
@@ -578,10 +601,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected Observation createObservation(String id, String populationId) {
-        MeasureInfo measureInfo = new MeasureInfo()
-                .withMeasure(this.measure.hasUrl() ? measure.getUrl()
-                        : (measure.hasId() ? MeasureInfo.MEASURE_PREFIX + measure.getIdElement().getIdPart() : ""))
-                .withPopulationId(populationId);
+        MeasureInfo measureInfo =
+                new MeasureInfo().withMeasure(this.measure.hasUrl() ? measure.getUrl()
+                        : (measure.hasId()
+                                ? MeasureInfo.MEASURE_PREFIX + measure.getIdElement().getIdPart()
+                                : ""))
+                        .withPopulationId(populationId);
 
         Observation obs = new Observation();
         obs.setStatus(Observation.ObservationStatus.FINAL);

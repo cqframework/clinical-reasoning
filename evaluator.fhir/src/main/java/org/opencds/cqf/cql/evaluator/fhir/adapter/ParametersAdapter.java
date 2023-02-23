@@ -14,5 +14,5 @@ public interface ParametersAdapter extends ResourceAdapter {
     public void setParameter(List<IBaseBackboneElement> parametersParameterComponents);
 
     public IBaseBackboneElement addParameter();
-    
+
 }

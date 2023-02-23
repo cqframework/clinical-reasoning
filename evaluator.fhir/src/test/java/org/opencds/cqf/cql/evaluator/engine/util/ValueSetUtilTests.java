@@ -21,23 +21,28 @@ public class ValueSetUtilTests {
     private static final String R4_PATH = "r4/TestValueSet.json";
     private static final String DSTU3_PATH = "dstu3/TestValueSet.json";
 
-    private static final FhirContext DSTU3_CONTEXT  = FhirContext.forCached(FhirVersionEnum.DSTU3);
+    private static final FhirContext DSTU3_CONTEXT = FhirContext.forCached(FhirVersionEnum.DSTU3);
     private static final FhirContext R4_CONTEXT = FhirContext.forCached(FhirVersionEnum.R4);
 
     private IBaseResource loadValueSet(FhirContext fhirContext, String path) {
         InputStream stream = ValueSetUtilTests.class.getResourceAsStream(path);
-        IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
+        IParser parser =
+                path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
 
         if (resource == null) {
-            throw new IllegalArgumentException(String.format("Unable to read a resource from %s.", path));
+            throw new IllegalArgumentException(
+                    String.format("Unable to read a resource from %s.", path));
         }
 
-        Class<?> valueSetClass = fhirContext.getResourceDefinition("ValueSet").getImplementingClass();
+        Class<?> valueSetClass =
+                fhirContext.getResourceDefinition("ValueSet").getImplementingClass();
         if (!valueSetClass.equals(resource.getClass())) {
-            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s ValueSet", path, fhirContext.getVersion().getVersion().getFhirVersionString()));
+            throw new IllegalArgumentException(
+                    String.format("Resource at %s is not FHIR %s ValueSet", path,
+                            fhirContext.getVersion().getVersion().getFhirVersionString()));
         }
-        
+
         return resource;
     }
 
@@ -142,55 +147,55 @@ public class ValueSetUtilTests {
     @Test
     public void testGetInclude() {
         this.testGetInclude(DSTU3_CONTEXT, DSTU3_PATH);
-        this.testGetInclude(R4_CONTEXT, R4_PATH);  
+        this.testGetInclude(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetIncludeConcepts() {
-        this.testGetIncludeConcepts(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetIncludeConcepts(R4_CONTEXT, R4_PATH);  
+        this.testGetIncludeConcepts(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetIncludeConcepts(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetExpansion() {
-        this.testGetExpansion(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetExpansion(R4_CONTEXT, R4_PATH);  
+        this.testGetExpansion(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetExpansion(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetContains() {
-        this.testGetContains(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetContains(R4_CONTEXT, R4_PATH); 
+        this.testGetContains(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetContains(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetCodesInExpansion() {
-        this.testGetCodesInExpansion(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetCodesInExpansion(R4_CONTEXT, R4_PATH); 
+        this.testGetCodesInExpansion(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetCodesInExpansion(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetCodesInCompose() {
-        this.testGetCodesInCompose(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetCodesInCompose(R4_CONTEXT, R4_PATH); 
+        this.testGetCodesInCompose(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetCodesInCompose(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetUrl() {
-        this.testGetUrl(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetUrl(R4_CONTEXT, R4_PATH); 
+        this.testGetUrl(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetUrl(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetId() {
-        this.testGetId(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetId(R4_CONTEXT, R4_PATH); 
+        this.testGetId(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetId(R4_CONTEXT, R4_PATH);
     }
 
     @Test
     public void testGetResourceType() {
-        this.testGetResourceType(DSTU3_CONTEXT, DSTU3_PATH);  
-        this.testGetResourceType(R4_CONTEXT, R4_PATH); 
+        this.testGetResourceType(DSTU3_CONTEXT, DSTU3_PATH);
+        this.testGetResourceType(R4_CONTEXT, R4_PATH);
     }
 
 

@@ -55,8 +55,8 @@ public class CqlFhirParametersConverter {
     public IBaseParameters toFhirParameters(EvaluationResult evaluationResult) {
         IBaseParameters params = null;
         try {
-            params = (IBaseParameters) this.fhirContext.getResourceDefinition("Parameters").getImplementingClass()
-                    .getConstructor().newInstance();
+            params = (IBaseParameters) this.fhirContext.getResourceDefinition("Parameters")
+                    .getImplementingClass().getConstructor().newInstance();
         } catch (Exception e) {
             logger.error("Error trying to create Parameters resource", e);
             throw new RuntimeException(e);
@@ -64,7 +64,8 @@ public class CqlFhirParametersConverter {
 
         ParametersAdapter pa = this.adapterFactory.createParameters(params);
 
-        for (Map.Entry<String, ExpressionResult> entry : evaluationResult.expressionResults.entrySet()) {
+        for (Map.Entry<String, ExpressionResult> entry : evaluationResult.expressionResults
+                .entrySet()) {
             String name = entry.getKey();
             Object value = entry.getValue().value();
 
@@ -88,7 +89,8 @@ public class CqlFhirParametersConverter {
 
     protected ParametersParameterComponentAdapter addPart(ParametersAdapter pa, String name) {
         IBaseBackboneElement ppc = pa.addParameter();
-        ParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
+        ParametersParameterComponentAdapter ppca =
+                this.adapterFactory.createParametersParameters(ppc);
         ppca.setName(name);
 
         return ppca;
@@ -120,22 +122,25 @@ public class CqlFhirParametersConverter {
         } else if (value instanceof IBaseResource) {
             ppca.setResource((IBaseResource) value);
         } else {
-            throw new IllegalArgumentException(String.format("unknown type when trying to convert to parameters: %s",
-                    value.getClass().getSimpleName()));
+            throw new IllegalArgumentException(
+                    String.format("unknown type when trying to convert to parameters: %s",
+                            value.getClass().getSimpleName()));
         }
     }
 
-    protected ParametersParameterComponentAdapter addSubPart(ParametersParameterComponentAdapter ppcAdapter,
-            String name) {
+    protected ParametersParameterComponentAdapter addSubPart(
+            ParametersParameterComponentAdapter ppcAdapter, String name) {
         IBaseBackboneElement ppc = ppcAdapter.addPart();
-        ParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
+        ParametersParameterComponentAdapter ppca =
+                this.adapterFactory.createParametersParameters(ppc);
         ppca.setName(name);
 
         return ppca;
     }
 
     @SuppressWarnings("unchecked")
-    protected void addSubPart(ParametersParameterComponentAdapter ppcAdapter, String name, Object value) {
+    protected void addSubPart(ParametersParameterComponentAdapter ppcAdapter, String name,
+            Object value) {
         ParametersParameterComponentAdapter ppca = this.addSubPart(ppcAdapter, name);
 
         if (value == null) {
@@ -160,8 +165,9 @@ public class CqlFhirParametersConverter {
         } else if (value instanceof IBaseResource) {
             ppca.setResource((IBaseResource) value);
         } else {
-            throw new IllegalArgumentException(String.format("unknown type when trying to convert to parameters: %s",
-                    value.getClass().getSimpleName()));
+            throw new IllegalArgumentException(
+                    String.format("unknown type when trying to convert to parameters: %s",
+                            value.getClass().getSimpleName()));
         }
     }
 
@@ -172,22 +178,24 @@ public class CqlFhirParametersConverter {
 
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
 
-        Map<String, List<ParametersParameterComponentAdapter>> children = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x)).filter(x -> x.getName() != null)
+        Map<String, List<ParametersParameterComponentAdapter>> children = parametersAdapter
+                .getParameter().stream().map(x -> this.adapterFactory.createParametersParameters(x))
+                .filter(x -> x.getName() != null)
                 .collect(Collectors.groupingBy(ParametersParameterComponentAdapter::getName));
 
         List<CqlParameterDefinition> cqlParameterDefinitions = new ArrayList<>();
-        for (Map.Entry<String, List<ParametersParameterComponentAdapter>> entry : children.entrySet()) {
+        for (Map.Entry<String, List<ParametersParameterComponentAdapter>> entry : children
+                .entrySet()) {
             // Meta data extension, if present
-            Optional<IBaseExtension<?, ?>> ext = entry.getValue().stream().filter(x -> x.hasExtension())
-                    .flatMap(x -> x.getExtension().stream())
-                    .filter(x -> x.getUrl() != null && x.getUrl()
-                            .equals("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition"))
+            Optional<IBaseExtension<?, ?>> ext = entry.getValue().stream()
+                    .filter(x -> x.hasExtension()).flatMap(x -> x.getExtension().stream())
+                    .filter(x -> x.getUrl() != null && x.getUrl().equals(
+                            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition"))
                     .findFirst();
 
             // Actual values. if present
-            List<Object> values = entry.getValue().stream().map(x -> convertToCql(x)).filter(x -> x != null)
-            .collect(Collectors.toList());
+            List<Object> values = entry.getValue().stream().map(x -> convertToCql(x))
+                    .filter(x -> x != null).collect(Collectors.toList());
 
             String name = entry.getKey();
 
@@ -200,22 +208,20 @@ public class CqlFhirParametersConverter {
             // So infer based on the values.
             if (isList == null) {
                 if (values.isEmpty()) {
-                    throw new IllegalArgumentException(
-                        String.format("Unable to determine if parameter %s is meant to be collection. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
-                                entry.getKey()));
-                }
-                else if (values.size() == 1) {
+                    throw new IllegalArgumentException(String.format(
+                            "Unable to determine if parameter %s is meant to be collection. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
+                            entry.getKey()));
+                } else if (values.size() == 1) {
                     isList = false;
-                }
-                else {
+                } else {
                     isList = true;
                 }
             }
 
             if (!isList && entry.getValue().size() > 1) {
-                throw new IllegalArgumentException(
-                        String.format("The parameter %s was defined as a single value but multiple values were passed",
-                                entry.getKey()));
+                throw new IllegalArgumentException(String.format(
+                        "The parameter %s was defined as a single value but multiple values were passed",
+                        entry.getKey()));
             }
 
             String type = null;
@@ -229,17 +235,15 @@ public class CqlFhirParametersConverter {
             }
 
             if (type == null) {
-                throw new IllegalArgumentException(
-                    String.format("Unable to infer type for parameter %s. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
-                            entry.getKey()));
+                throw new IllegalArgumentException(String.format(
+                        "Unable to infer type for parameter %s. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
+                        entry.getKey()));
             }
 
             Object value = null;
-            if (isList)
-            {
+            if (isList) {
                 value = values;
-            }
-            else if (!values.isEmpty()) {
+            } else if (!values.isEmpty()) {
                 value = values.get(0);
             }
 
@@ -250,7 +254,8 @@ public class CqlFhirParametersConverter {
     }
 
     public Map<String, Object> toCqlParameters(IBaseParameters parameters) {
-        List<CqlParameterDefinition> cqlParameterDefinitions = this.toCqlParameterDefinitions(parameters);
+        List<CqlParameterDefinition> cqlParameterDefinitions =
+                this.toCqlParameterDefinitions(parameters);
         if (cqlParameterDefinitions == null || cqlParameterDefinitions.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -265,8 +270,8 @@ public class CqlFhirParametersConverter {
 
     private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
         @SuppressWarnings("rawtypes")
-        Optional<IPrimitiveType> type = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "type",
-                IPrimitiveType.class);
+        Optional<IPrimitiveType> type = this.fhirPath.evaluateFirst(
+                parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
         if (type.isPresent()) {
             return type.get().getValueAsString();
         }
@@ -276,8 +281,8 @@ public class CqlFhirParametersConverter {
 
     private Boolean isListType(IBaseExtension<?, ?> parameterDefinitionExtension) {
         @SuppressWarnings("rawtypes")
-        Optional<IPrimitiveType> max = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "max",
-                IPrimitiveType.class);
+        Optional<IPrimitiveType> max = this.fhirPath.evaluateFirst(
+                parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
         if (max.isPresent()) {
             String maxString = max.get().getValueAsString();
             if (maxString.equals("1")) {
@@ -287,8 +292,8 @@ public class CqlFhirParametersConverter {
             return true;
         }
 
-        Optional<IBaseIntegerDatatype> min = this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "min",
-                IBaseIntegerDatatype.class);
+        Optional<IBaseIntegerDatatype> min = this.fhirPath.evaluateFirst(
+                parameterDefinitionExtension.getValue(), "min", IBaseIntegerDatatype.class);
         if (min.isPresent()) {
             return min.get().getValue() > 1;
         }

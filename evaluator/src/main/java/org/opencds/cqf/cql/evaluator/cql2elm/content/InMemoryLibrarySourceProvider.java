@@ -9,8 +9,8 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 
 /**
- * This class implements the LibrarySourceProvider API, using a
- * set of strings representing CQL library content as a source.
+ * This class implements the LibrarySourceProvider API, using a set of strings representing CQL
+ * library content as a source.
  */
 public class InMemoryLibrarySourceProvider implements LibrarySourceProvider {
 
@@ -43,7 +43,8 @@ public class InMemoryLibrarySourceProvider implements LibrarySourceProvider {
     }
 
     @Override
-    public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType libraryContentType) {
+    public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier,
+            LibraryContentType libraryContentType) {
         if (libraryContentType == LibraryContentType.CQL) {
             return this.getLibrarySource(libraryIdentifier);
         }

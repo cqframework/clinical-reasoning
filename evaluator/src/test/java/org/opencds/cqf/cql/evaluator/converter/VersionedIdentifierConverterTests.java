@@ -12,8 +12,10 @@ public class VersionedIdentifierConverterTests {
 
     @Test
     public void toElmIdentifierTest() {
-        VersionedIdentifier test = new VersionedIdentifier().withId("1").withSystem("2").withVersion("3");
-        org.hl7.elm.r1.VersionedIdentifier expected = new org.hl7.elm.r1.VersionedIdentifier().withId("1").withSystem("2").withVersion("3");
+        VersionedIdentifier test =
+                new VersionedIdentifier().withId("1").withSystem("2").withVersion("3");
+        org.hl7.elm.r1.VersionedIdentifier expected = new org.hl7.elm.r1.VersionedIdentifier()
+                .withId("1").withSystem("2").withVersion("3");
 
         org.hl7.elm.r1.VersionedIdentifier actual = toElmIdentifier(test);
 
@@ -26,8 +28,10 @@ public class VersionedIdentifierConverterTests {
 
     @Test
     public void toEngineIdentifierTest() {
-        org.hl7.elm.r1.VersionedIdentifier test = new org.hl7.elm.r1.VersionedIdentifier().withId("1").withSystem("2").withVersion("3");
-        VersionedIdentifier expected = new VersionedIdentifier().withId("1").withSystem("2").withVersion("3");
+        org.hl7.elm.r1.VersionedIdentifier test = new org.hl7.elm.r1.VersionedIdentifier()
+                .withId("1").withSystem("2").withVersion("3");
+        VersionedIdentifier expected =
+                new VersionedIdentifier().withId("1").withSystem("2").withVersion("3");
 
         VersionedIdentifier actual = toEngineIdentifier(test);
 
@@ -37,5 +41,5 @@ public class VersionedIdentifierConverterTests {
         actual = toEngineIdentifier(null);
         assertNull(actual);
     }
-    
+
 }

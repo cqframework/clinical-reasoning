@@ -38,10 +38,12 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
 
         MeasureReport carry = iterator.next();
         if (carry.hasType() && carry.getType().equals(MeasureReportType.INDIVIDUAL)) {
-            throw new IllegalArgumentException(String.format("Can not aggregate MeasureReports of type: %s", MeasureReportType.INDIVIDUAL.toCode()));
+            throw new IllegalArgumentException(
+                    String.format("Can not aggregate MeasureReports of type: %s",
+                            MeasureReportType.INDIVIDUAL.toCode()));
         }
-        
-        while(iterator.hasNext()) {
+
+        while (iterator.hasNext()) {
             merge(carry, iterator.next());
         }
 
@@ -53,16 +55,25 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        if (carry.hasMeasure() ^ current.hasMeasure() || (carry.hasMeasure() && !carry.getMeasure().equals(current.getMeasure()))) {
-            throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be for the same Measure. carry: %s, current: %s", carry.getMeasure(), current.getMeasure()));
+        if (carry.hasMeasure() ^ current.hasMeasure()
+                || (carry.hasMeasure() && !carry.getMeasure().equals(current.getMeasure()))) {
+            throw new IllegalArgumentException(String.format(
+                    "Aggregated MeasureReports must all be for the same Measure. carry: %s, current: %s",
+                    carry.getMeasure(), current.getMeasure()));
         }
 
-        if ((carry.hasPeriod() ^ current.hasPeriod()) || (carry.hasPeriod() && !carry.getPeriod().equalsDeep(current.getPeriod()))) {
-            throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be for the same Period. carry: %s, current: %s", carry.getPeriod().toString(), current.getPeriod().toString()));  
+        if ((carry.hasPeriod() ^ current.hasPeriod())
+                || (carry.hasPeriod() && !carry.getPeriod().equalsDeep(current.getPeriod()))) {
+            throw new IllegalArgumentException(String.format(
+                    "Aggregated MeasureReports must all be for the same Period. carry: %s, current: %s",
+                    carry.getPeriod().toString(), current.getPeriod().toString()));
         }
 
-        if (carry.hasType() ^ current.hasType() || (carry.hasType() && !carry.getType().equals(current.getType()))) {
-            throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be of the same type. carry: %s, current: %s", carry.getType().toCode(), current.getType().toCode()));  
+        if (carry.hasType() ^ current.hasType()
+                || (carry.hasType() && !carry.getType().equals(current.getType()))) {
+            throw new IllegalArgumentException(String.format(
+                    "Aggregated MeasureReports must all be of the same type. carry: %s, current: %s",
+                    carry.getType().toCode(), current.getType().toCode()));
         }
 
         mergePopulation(carry, current);
@@ -79,7 +90,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        //this map will store population code as key and subjectReference as list item
+        // this map will store population code as key and subjectReference as list item
         Map<String, List<Reference>> populationCodeSubjectsReferenceMap = new HashMap<>();
 
         harvestSubjectReferencesAgainstPopulationCode(populationCodeSubjectsReferenceMap, carry);
@@ -94,9 +105,9 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         populateMapsWithResource(current, resourceMap, currentListResourceMap);
 
 
-        //this map will contain the added and vanished observations new id reference
+        // this map will contain the added and vanished observations new id reference
         Map<String, String> changedIdMap = new HashMap<>();
-        //this map will contain resources and summed observation where applicable
+        // this map will contain resources and summed observation where applicable
         Map<String, Resource> reducedMap = new HashMap<>();
         addObservationIfApplicable(resourceMap, reducedMap, changedIdMap);
 
@@ -114,7 +125,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 String reference = extractId(list.get(0).getReference());
 
                 carryList = getMatchedListResource(carryListResourceMap, reference);
-                if(carryList == null) {
+                if (carryList == null) {
                     carryList = getMatchedListResource(currentListResourceMap, reference);
                 }
             }
@@ -123,7 +134,8 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 mergeList(carryList, currentList);
             }
             if (carryList != null) {
-                reducedMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(), carryList);
+                reducedMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(),
+                        carryList);
             }
         });
 
@@ -136,7 +148,7 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
     }
 
     private void addObservationIfApplicable(Map<String, Resource> resourceMap,
-        Map<String, Resource> reducedMap, Map<String, String> changedIdMap) {
+            Map<String, Resource> reducedMap, Map<String, String> changedIdMap) {
 
         Map<String, Observation> codeReducedMap = new HashMap<>();
 
@@ -149,8 +161,9 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                         if (!codeReducedMap.containsKey(code)) {
                             codeReducedMap.put(code, observation);
                         } else {
-                            int sum = observation.getValueIntegerType().getValue().intValue() +
-                                    codeReducedMap.get(code).getValueIntegerType().getValue().intValue();
+                            int sum = observation.getValueIntegerType().getValue().intValue()
+                                    + codeReducedMap.get(code).getValueIntegerType().getValue()
+                                            .intValue();
                             codeReducedMap.get(code).setValue(new IntegerType(sum));
                             changedIdMap.put(observation.getId(), codeReducedMap.get(code).getId());
                         }
@@ -160,16 +173,18 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                 reducedMap.put(resource.getId(), resource);
             }
         });
-        codeReducedMap.values().forEach(resource -> {  reducedMap.put(resource.getId(), resource);});
+        codeReducedMap.values().forEach(resource -> {
+            reducedMap.put(resource.getId(), resource);
+        });
     }
 
     private boolean checkIfObservationIsAdditive(Observation observation) {
         return (observation.getValue() instanceof IntegerType);
     }
 
-    private void updateExtensionListResourceReference(MeasureReport report, Map<String, String> changedIdMap) {
-        report.getExtension().forEach(extension ->
-        {
+    private void updateExtensionListResourceReference(MeasureReport report,
+            Map<String, String> changedIdMap) {
+        report.getExtension().forEach(extension -> {
             if (extension.getValue() instanceof Reference) {
                 Reference reference = (Reference) extension.getValue();
                 String key = reference.getReference();
@@ -181,7 +196,8 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
     }
 
     private String extractId(String reference) {
-        return (reference != null && reference.startsWith("#")) ? reference.substring(1) : reference;
+        return (reference != null && reference.startsWith("#")) ? reference.substring(1)
+                : reference;
     }
 
     private ListResource getMatchedListResource(Map<String, Resource> listResourceMap, String key) {
@@ -193,15 +209,15 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         return listResource;
     }
 
-    //eligible means having id, it is important having id as population subjectReference will match this id
+    // eligible means having id, it is important having id as population subjectReference will match
+    // this id
     private boolean isEligibleListResourceType(Resource resource) {
-        return resource.hasId() &&
-                (resource.getResourceType() != null &&
-                        resource.getResourceType().equals(ResourceType.List));
+        return resource.hasId() && (resource.getResourceType() != null
+                && resource.getResourceType().equals(ResourceType.List));
     }
 
     private void populateMapsWithResource(MeasureReport measureReport,
-        Map<String, Resource> resourceMap, Map<String, Resource> listResourceMap) {
+            Map<String, Resource> resourceMap, Map<String, Resource> listResourceMap) {
         measureReport.getContained().forEach(resource -> {
             if (!isEligibleListResourceType(resource)) {
                 if (!resourceMap.containsKey(extractId(resource.getId()))) {
@@ -213,8 +229,9 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
         });
     }
 
-    private void harvestSubjectReferencesAgainstPopulationCode(Map<String, List<Reference>> populationCodeSubjectsReferenceMap,
-                                                               MeasureReport measureReport) {
+    private void harvestSubjectReferencesAgainstPopulationCode(
+            Map<String, List<Reference>> populationCodeSubjectsReferenceMap,
+            MeasureReport measureReport) {
         measureReport.getGroupFirstRep().getPopulation().forEach(populationComponent -> {
             if (populationComponent.hasCode()) {
                 CodeableConcept codeableConcept = populationComponent.getCode();
@@ -257,14 +274,17 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             if (extension.hasValue()) {
                 String key;
                 if (extension.getValue() instanceof StringType) {
-                    key = generateKey(extension.getUrl(), ((StringType) extension.getValue()).getValue(), "");
+                    key = generateKey(extension.getUrl(),
+                            ((StringType) extension.getValue()).getValue(), "");
                     if (!extensionMap.containsKey(key)) {
                         extensionMap.put(key, extension);
                     }
                 } else if (extension.getValue() instanceof Reference) {
-                    key = generateKey(extension.getUrl(), ((Reference) extension.getValue()).getReference(), "");
+                    key = generateKey(extension.getUrl(),
+                            ((Reference) extension.getValue()).getReference(), "");
                     if (extensionMap.containsKey(key)) {
-                        extensionMap.get(key).getValue().getExtension().addAll(extension.getValue().getExtension());
+                        extensionMap.get(key).getValue().getExtension()
+                                .addAll(extension.getValue().getExtension());
                     } else {
                         extensionMap.put(key, extension);
                     }
@@ -294,9 +314,11 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             } else {
                 List<Extension> list = extensionMap.get(reference.getReference());
                 Set<String> mergeSet = new HashSet<>();
-                list.forEach(item -> mergeSet.add(generateKey(item.getUrl(), ((StringType) item.getValue()).getValue(), "")));
+                list.forEach(item -> mergeSet.add(
+                        generateKey(item.getUrl(), ((StringType) item.getValue()).getValue(), "")));
                 reference.getExtension().forEach(item -> {
-                    if (!mergeSet.contains(generateKey(item.getUrl(), ((StringType) item.getValue()).getValue(), ""))) {
+                    if (!mergeSet.contains(generateKey(item.getUrl(),
+                            ((StringType) item.getValue()).getValue(), ""))) {
                         list.add(item);
                     }
                 });
@@ -311,7 +333,8 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        HashMap<String, MeasureReport.MeasureReportGroupPopulationComponent> codeScore = new HashMap<>();
+        HashMap<String, MeasureReport.MeasureReportGroupPopulationComponent> codeScore =
+                new HashMap<>();
 
         current.getGroupFirstRep().getPopulation().forEach(populationComponent -> {
             String code = populationComponent.getCode().getCodingFirstRep().getCode();
@@ -324,8 +347,8 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             String code = populationComponent.getCode().getCodingFirstRep().getCode();
             if (StringUtils.isNotBlank(code)) {
                 if (codeScore.get(code) != null) {
-                    populationComponent.setCount(populationComponent.getCount() +
-                            codeScore.get(code).getCount());
+                    populationComponent.setCount(
+                            populationComponent.getCount() + codeScore.get(code).getCount());
                     codeScore.remove(code);
                 }
             }
@@ -339,7 +362,8 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
             return;
         }
 
-        HashMap<String, MeasureReport.StratifierGroupPopulationComponent> codeScore = new HashMap<>();
+        HashMap<String, MeasureReport.StratifierGroupPopulationComponent> codeScore =
+                new HashMap<>();
 
         AtomicReference<String> stratifierCodeKey = new AtomicReference<>("");
         AtomicReference<String> stratifierStratumKey = new AtomicReference<>("");
@@ -362,11 +386,16 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                         if (stratumComponent.hasPopulation()) {
                             stratumComponent.getPopulation().forEach(stratumPopulationComp -> {
                                 if (stratumPopulationComp.hasCode()) {
-                                    CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
-                                    stratifierStratumPopulationKey.set(getKeyValue(populationCodeableConcept));
+                                    CodeableConcept populationCodeableConcept =
+                                            stratumPopulationComp.getCode();
+                                    stratifierStratumPopulationKey
+                                            .set(getKeyValue(populationCodeableConcept));
 
                                     if (stratumPopulationComp.hasCount()) {
-                                        codeScore.put(generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get()),
+                                        codeScore.put(
+                                                generateKey(stratifierCodeKey.get(),
+                                                        stratifierStratumKey.get(),
+                                                        stratifierStratumPopulationKey.get()),
                                                 stratumPopulationComp);
                                     }
                                 }
@@ -398,24 +427,38 @@ public class R4MeasureReportAggregator implements MeasureReportAggregator<Measur
                         if (stratumComponent.hasPopulation()) {
                             stratumComponent.getPopulation().forEach(stratumPopulationComp -> {
                                 if (stratumPopulationComp.hasCode()) {
-                                    CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
-                                    stratifierStratumPopulationKey.set(getKeyValue(populationCodeableConcept));
+                                    CodeableConcept populationCodeableConcept =
+                                            stratumPopulationComp.getCode();
+                                    stratifierStratumPopulationKey
+                                            .set(getKeyValue(populationCodeableConcept));
 
                                     if (stratumPopulationComp.hasCount()) {
-                                        String key = generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get());
+                                        String key = generateKey(stratifierCodeKey.get(),
+                                                stratifierStratumKey.get(),
+                                                stratifierStratumPopulationKey.get());
                                         if (codeScore.containsKey(key)) {
-                                            stratumPopulationComp.setCount(stratumPopulationComp.getCount() +
-                                                    codeScore.get(key).getCount());
+                                            stratumPopulationComp
+                                                    .setCount(stratumPopulationComp.getCount()
+                                                            + codeScore.get(key).getCount());
                                             codeScore.remove(key);
                                         }
                                     }
 
                                 }
                             });
-                            stratumComponent.getPopulation().addAll(codeScore.entrySet()
-                                    .stream().filter(map -> map.getKey().startsWith(
-                                            generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), "")))
-                                    .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue())).values());
+                            stratumComponent
+                                    .getPopulation().addAll(
+                                            codeScore
+                                                    .entrySet().stream().filter(
+                                                            map -> map.getKey()
+                                                                    .startsWith(generateKey(
+                                                                            stratifierCodeKey.get(),
+                                                                            stratifierStratumKey
+                                                                                    .get(),
+                                                                            "")))
+                                                    .collect(Collectors.toMap(map -> map.getKey(),
+                                                            map -> map.getValue()))
+                                                    .values());
                         }
                     });
                 }

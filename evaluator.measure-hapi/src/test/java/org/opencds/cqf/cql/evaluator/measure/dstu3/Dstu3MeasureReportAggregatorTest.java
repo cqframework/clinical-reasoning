@@ -24,8 +24,7 @@ public class Dstu3MeasureReportAggregatorTest {
     protected FhirContext fhirContext;
 
     @BeforeClass
-    public void setup()
-    {
+    public void setup() {
         this.aggregator = new Dstu3MeasureReportAggregator();
         this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
     }
@@ -90,18 +89,24 @@ public class Dstu3MeasureReportAggregatorTest {
 
         aggregator.aggregate(Lists.newArrayList(one, two));
     }
-    
-    
-    @Test 
+
+
+    @Test
     public void aggregateReports_combines_reports() {
         IParser parser = fhirContext.newJsonParser();
-        MeasureReport left = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport1.json"));
+        MeasureReport left =
+                (MeasureReport) parser.parseResource(Dstu3MeasureReportAggregatorTest.class
+                        .getResourceAsStream("AggregateReport1.json"));
         assertNotNull(left);
 
-        MeasureReport right = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport2.json"));
+        MeasureReport right =
+                (MeasureReport) parser.parseResource(Dstu3MeasureReportAggregatorTest.class
+                        .getResourceAsStream("AggregateReport2.json"));
         assertNotNull(right);
 
-        MeasureReport expected = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregatedReport.json"));
+        MeasureReport expected =
+                (MeasureReport) parser.parseResource(Dstu3MeasureReportAggregatorTest.class
+                        .getResourceAsStream("AggregatedReport.json"));
         assertNotNull(expected);
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
@@ -126,13 +131,19 @@ public class Dstu3MeasureReportAggregatorTest {
     @Test
     public void aggregateReports_subject_listType_combines_reports() {
         IParser parser = fhirContext.newJsonParser();
-        MeasureReport left = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list1.json"));
+        MeasureReport left =
+                (MeasureReport) parser.parseResource(Dstu3MeasureReportAggregatorTest.class
+                        .getResourceAsStream("AggregateReport-subject-list1.json"));
         assertNotNull(left);
 
-        MeasureReport right = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list2.json"));
+        MeasureReport right =
+                (MeasureReport) parser.parseResource(Dstu3MeasureReportAggregatorTest.class
+                        .getResourceAsStream("AggregateReport-subject-list2.json"));
         assertNotNull(right);
 
-        MeasureReport expected = (MeasureReport)parser.parseResource(Dstu3MeasureReportAggregatorTest.class.getResourceAsStream("AggregateReport-subject-list.json"));
+        MeasureReport expected =
+                (MeasureReport) parser.parseResource(Dstu3MeasureReportAggregatorTest.class
+                        .getResourceAsStream("AggregateReport-subject-list.json"));
         assertNotNull(expected);
 
         MeasureReport actual = this.aggregator.aggregate(Arrays.asList(left, right));
@@ -142,17 +153,25 @@ public class Dstu3MeasureReportAggregatorTest {
         MeasureReport.MeasureReportGroupComponent actualMrgc = actual.getGroup().get(0);
         MeasureReport.MeasureReportGroupComponent expectedMrgc = actual.getGroup().get(0);
 
-        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "true", "initial-population", 500);
-        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "true", "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "true",
+                "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "true",
+                "initial-population", 500);
 
-        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "true", "numerator", 200);
-        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "true", "numerator", 200);
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "true",
+                "numerator", 200);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "true",
+                "numerator", 200);
 
-        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "false", "initial-population", 500);
-        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "false", "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifierFirstRep(), "false",
+                "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifierFirstRep(), "false",
+                "initial-population", 500);
 
-        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true", "initial-population", 500);
-        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true", "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(actualMrgc.getStratifier().get(1), "true",
+                "initial-population", 500);
+        MeasureValidationUtils.validateStratifier(expectedMrgc.getStratifier().get(1), "true",
+                "initial-population", 500);
 
     }
 }

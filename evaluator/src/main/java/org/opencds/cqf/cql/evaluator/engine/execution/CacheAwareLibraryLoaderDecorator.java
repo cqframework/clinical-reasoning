@@ -12,11 +12,12 @@ import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
 
 /**
- * The CacheAwareLibraryLoaderDecorator wraps a TranslatorOptionAwareLibraryLoader with a cache layer. The cache can either
- * be provided by the user (e.g. a global cache of libraries) or if one is not provided it will be created by the
- * CacheAwareLibraryLoaderDecorator. The cached Library is checked to see if has been translated with the correct options
- * before being returned. If it has been translated with a different set of options the cache is invalidated and the Library
- * is loaded from the inner LibraryLoader.
+ * The CacheAwareLibraryLoaderDecorator wraps a TranslatorOptionAwareLibraryLoader with a cache
+ * layer. The cache can either be provided by the user (e.g. a global cache of libraries) or if one
+ * is not provided it will be created by the CacheAwareLibraryLoaderDecorator. The cached Library is
+ * checked to see if has been translated with the correct options before being returned. If it has
+ * been translated with a different set of options the cache is invalidated and the Library is
+ * loaded from the inner LibraryLoader.
  */
 public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLibraryLoader {
 
@@ -27,11 +28,9 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
     public CacheAwareLibraryLoaderDecorator(TranslatorOptionAwareLibraryLoader libraryLoader,
             Map<VersionedIdentifier, Library> libraryCache) {
         this.innerLoader = libraryLoader;
-        if (libraryCache == null)
-        {
+        if (libraryCache == null) {
             this.libraryCache = new HashMap<>();
-        }
-        else {
+        } else {
             this.libraryCache = libraryCache;
         }
     }
@@ -43,7 +42,8 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
     @Override
     public Library load(VersionedIdentifier libraryIdentifier) {
         Library library = this.libraryCache.get(libraryIdentifier);
-        if (library != null && this.translatorOptionsMatch(library)) { // Bug on xml libraries not getting annotations
+        if (library != null && this.translatorOptionsMatch(library)) { // Bug on xml libraries not
+                                                                       // getting annotations
             return library;
         }
 
@@ -57,7 +57,8 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
     }
 
     protected Boolean translatorOptionsMatch(Library library) {
-        EnumSet<CqlTranslatorOptions.Options> options = TranslatorOptionsUtil.getTranslatorOptions(library);
+        EnumSet<CqlTranslatorOptions.Options> options =
+                TranslatorOptionsUtil.getTranslatorOptions(library);
         if (options == null) {
             return false;
         }

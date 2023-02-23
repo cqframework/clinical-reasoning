@@ -33,11 +33,10 @@ public class Dstu3FhirDalSubjectProvider implements SubjectProvider {
             return ids;
         } else if (subjectId.indexOf("/") == -1) {
             IBaseResource r = fhirDal.read(new IdType("Patient/" + subjectId));
-            return Collections
-                    .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-        }
-        else if (subjectId.startsWith("Group")) {
-            Group r = (Group)fhirDal.read(new IdType(subjectId));
+            return Collections.singletonList(
+                    r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+        } else if (subjectId.startsWith("Group")) {
+            Group r = (Group) fhirDal.read(new IdType(subjectId));
             List<String> subjectIds = new ArrayList<>();
 
             for (GroupMemberComponent gmc : r.getMember()) {
@@ -48,8 +47,8 @@ public class Dstu3FhirDalSubjectProvider implements SubjectProvider {
             return subjectIds;
         } else {
             IBaseResource r = fhirDal.read(new IdType(subjectId));
-            return Collections
-                    .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+            return Collections.singletonList(
+                    r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
         }
     }
 }

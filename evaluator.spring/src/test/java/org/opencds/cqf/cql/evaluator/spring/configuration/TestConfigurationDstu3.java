@@ -16,5 +16,5 @@ public class TestConfigurationDstu3 {
     FhirContext fhirContext() {
         return FhirContext.forCached(FhirVersionEnum.DSTU3);
     }
-    
+
 }

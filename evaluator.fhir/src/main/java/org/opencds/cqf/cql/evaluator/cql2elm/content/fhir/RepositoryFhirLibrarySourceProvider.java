@@ -21,16 +21,21 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
     private FhirContext fhirContext;
     private LibraryVersionSelector libraryVersionSelector;
 
-    public RepositoryFhirLibrarySourceProvider(FhirContext fhirContext, Repository repository, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+    public RepositoryFhirLibrarySourceProvider(FhirContext fhirContext, Repository repository,
+            AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
         super(adapterFactory);
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.libraryVersionSelector = requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
+        this.libraryVersionSelector =
+                requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
 
-        //todo: need to match version
-//        if (!this.repository..getStructureFhirVersionEnum().equals(fhirContext.getVersion().getVersion())) {
-//            throw new IllegalArgumentException("the FHIR versions of bundle and fhirContext must match");
-//        }
+        // todo: need to match version
+        // if
+        // (!this.repository..getStructureFhirVersionEnum().equals(fhirContext.getVersion().getVersion()))
+        // {
+        // throw new IllegalArgumentException("the FHIR versions of bundle and fhirContext must
+        // match");
+        // }
     }
 
     protected Repository getRepository() {
@@ -43,14 +48,16 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
 
     @Override
     protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
-        List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
-                this.fhirContext.getResourceDefinition("Library").getImplementingClass(),
-                null, null));
+        List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext,
+                repository.search(IBaseBundle.class,
+                        this.fhirContext.getResourceDefinition("Library").getImplementingClass(),
+                        null, null));
         if (resources == null || resources.isEmpty()) {
             return null;
         }
 
-        Collection<IBaseResource> libraries = resources.stream().map(x -> (IBaseResource) x).collect(Collectors.toList());
+        Collection<IBaseResource> libraries =
+                resources.stream().map(x -> (IBaseResource) x).collect(Collectors.toList());
 
         if (libraries == null || libraries.isEmpty()) {
             return null;

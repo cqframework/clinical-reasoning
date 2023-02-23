@@ -15,7 +15,7 @@ public interface LibraryAdapter extends ResourceAdapter {
 
     IIdType getId();
 
-    void setId( IIdType id);
+    void setId(IIdType id);
 
     String getName();
 

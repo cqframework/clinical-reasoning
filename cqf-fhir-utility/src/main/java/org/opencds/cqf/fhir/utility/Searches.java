@@ -10,8 +10,7 @@ public class Searches {
 
     public static final Map<String, List<IQueryParameterType>> ALL = Collections.emptyMap();
 
-    private Searches() {
-    }
+    private Searches() {}
 
     public static SearchBuilder builder() {
         return new SearchBuilder();
@@ -25,11 +24,9 @@ public class Searches {
         return builder().withToken("name", name).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> byNameAndVersion(String name, String version) {
-        return builder()
-                .withToken("name", name)
-                .withToken("version", version)
-                .build();
+    public static Map<String, List<IQueryParameterType>> byNameAndVersion(String name,
+            String version) {
+        return builder().withToken("name", name).withToken("version", version).build();
     }
 
     public static class SearchBuilder {

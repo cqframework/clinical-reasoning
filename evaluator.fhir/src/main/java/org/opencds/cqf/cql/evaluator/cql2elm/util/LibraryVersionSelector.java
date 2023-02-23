@@ -24,13 +24,15 @@ public class LibraryVersionSelector {
         this.adapterFactory = adapterFactory;
     }
 
-    public IBaseResource select(VersionedIdentifier libraryIdentifier, Collection<IBaseResource> libraries) {
+    public IBaseResource select(VersionedIdentifier libraryIdentifier,
+            Collection<IBaseResource> libraries) {
         requireNonNull(libraries, "libraries can not be null");
         requireNonNull(libraryIdentifier, "libraryIdentifier can not be null");
 
         String targetVersion = libraryIdentifier.getVersion();
 
-        List<LibraryAdapter> adapters = libraries.stream().map(x -> this.adapterFactory.createLibrary(x)).collect(Collectors.toList());
+        List<LibraryAdapter> adapters = libraries.stream()
+                .map(x -> this.adapterFactory.createLibrary(x)).collect(Collectors.toList());
 
         LibraryAdapter library = null;
         LibraryAdapter maxLibrary = null;
@@ -42,12 +44,14 @@ public class LibraryVersionSelector {
             }
 
             String currentVersion = l.getVersion();
-            if ((targetVersion != null && currentVersion != null && currentVersion.equals(targetVersion)) || 
-                (targetVersion == null && currentVersion == null)) {
+            if ((targetVersion != null && currentVersion != null
+                    && currentVersion.equals(targetVersion))
+                    || (targetVersion == null && currentVersion == null)) {
                 library = l;
             }
 
-            if (maxLibrary == null || compareVersions(maxLibrary.getVersion(), currentVersion) < 0) {
+            if (maxLibrary == null
+                    || compareVersions(maxLibrary.getVersion(), currentVersion) < 0) {
                 maxLibrary = l;
             }
         }
@@ -99,5 +103,5 @@ public class LibraryVersionSelector {
         // Both are equal
         return 0;
     }
-    
+
 }

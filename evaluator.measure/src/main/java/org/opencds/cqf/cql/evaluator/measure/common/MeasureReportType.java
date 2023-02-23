@@ -4,11 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum MeasureReportType {
-    INDIVIDUAL("individual", "Individual","An individual report that provides information on the performance for a given measure with respect to a single patient"), 
-    PATIENTLIST("patient-list", "Patient List","A patient list report that includes a listing of patients that satisfied each population criteria in the measure"), 
-    SUBJECTLIST("subject-list", "Subject List","A subject list report that includes a listing of subjects that satisfied each population criteria in the measure."),
-    SUMMARY("summary", "Summary","A summary report that returns the number of patients in each population criteria for the measure"),
-    DATACOLLECTION("data-collection", "Data Collection", "A data collection report that contains data-of-interest for the measure.");
+    INDIVIDUAL("individual", "Individual",
+            "An individual report that provides information on the performance for a given measure with respect to a single patient"), PATIENTLIST(
+                    "patient-list", "Patient List",
+                    "A patient list report that includes a listing of patients that satisfied each population criteria in the measure"), SUBJECTLIST(
+                            "subject-list", "Subject List",
+                            "A subject list report that includes a listing of subjects that satisfied each population criteria in the measure."), SUMMARY(
+                                    "summary", "Summary",
+                                    "A summary report that returns the number of patients in each population criteria for the measure"), DATACOLLECTION(
+                                            "data-collection", "Data Collection",
+                                            "A data collection report that contains data-of-interest for the measure.");
 
     private String code;
     private String display;

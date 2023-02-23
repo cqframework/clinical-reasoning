@@ -21,14 +21,17 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 public class MeasureOperationParameterConverterTests {
 
     static MeasureOperationParameterConverter measureOperationParameterConverter;
-    
+
     @BeforeClass
     public void setup() {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-        AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+        AdapterFactory adapterFactory =
+                new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        FhirTypeConverter fhirTypeConverter =
+                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
-        measureOperationParameterConverter = new MeasureOperationParameterConverter(adapterFactory, fhirTypeConverter);
+        measureOperationParameterConverter =
+                new MeasureOperationParameterConverter(adapterFactory, fhirTypeConverter);
 
     }
 
@@ -39,10 +42,11 @@ public class MeasureOperationParameterConverterTests {
 
         measureOperationParameterConverter.addProductLine(parameters, "Medicare");
 
-        ParametersParameterComponent ppc = parameters.getParameter().stream().filter(x -> x.getName().equals("Product Line")).findFirst().get();
+        ParametersParameterComponent ppc = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Product Line")).findFirst().get();
         assertNotNull(ppc);
 
-        IPrimitiveType<String> actual = (IPrimitiveType<String>)ppc.getValue();
+        IPrimitiveType<String> actual = (IPrimitiveType<String>) ppc.getValue();
         assertNotNull(actual);
 
         assertTrue(actual.getValue().equals("Medicare"));
@@ -54,7 +58,8 @@ public class MeasureOperationParameterConverterTests {
 
         measureOperationParameterConverter.addProductLine(parameters, null);
 
-        long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Product Line")).count();
+        long actualCount = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Product Line")).count();
         assertEquals(0, actualCount);
     }
 
@@ -66,13 +71,15 @@ public class MeasureOperationParameterConverterTests {
 
         measureOperationParameterConverter.addProductLine(parameters, "Medicare");
 
-        long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Product Line")).count();
+        long actualCount = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Product Line")).count();
         assertEquals(1, actualCount);
 
-        ParametersParameterComponent ppc = parameters.getParameter().stream().filter(x -> x.getName().equals("Product Line")).findFirst().get();
+        ParametersParameterComponent ppc = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Product Line")).findFirst().get();
         assertNotNull(ppc);
 
-        IPrimitiveType<String> actualValue = (IPrimitiveType<String>)ppc.getValue();
+        IPrimitiveType<String> actualValue = (IPrimitiveType<String>) ppc.getValue();
         assertNotNull(actualValue);
 
         assertTrue(actualValue.getValue().equals("Medicare"));
@@ -86,12 +93,14 @@ public class MeasureOperationParameterConverterTests {
         expected.setStartElement(new DateTimeType("2019-01-01"));
         expected.setEndElement(new DateTimeType("2020-01-01"));
 
-        measureOperationParameterConverter.addMeasurementPeriod(parameters, "2019-01-01", "2020-01-01");
+        measureOperationParameterConverter.addMeasurementPeriod(parameters, "2019-01-01",
+                "2020-01-01");
 
-        ParametersParameterComponent ppc = parameters.getParameter().stream().filter(x -> x.getName().equals("Measurement Period")).findFirst().get();
+        ParametersParameterComponent ppc = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Measurement Period")).findFirst().get();
         assertNotNull(ppc);
 
-        Period actual = (Period)ppc.getValue();
+        Period actual = (Period) ppc.getValue();
         assertNotNull(actual);
 
 
@@ -112,15 +121,18 @@ public class MeasureOperationParameterConverterTests {
         expected.setStartElement(new DateTimeType("2019-01-01"));
         expected.setEndElement(new DateTimeType("2020-01-01"));
 
-        measureOperationParameterConverter.addMeasurementPeriod(parameters, "2019-01-01", "2020-01-01");
+        measureOperationParameterConverter.addMeasurementPeriod(parameters, "2019-01-01",
+                "2020-01-01");
 
-        long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Measurement Period")).count();
+        long actualCount = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Measurement Period")).count();
         assertEquals(1, actualCount);
 
-        ParametersParameterComponent ppc = parameters.getParameter().stream().filter(x -> x.getName().equals("Measurement Period")).findFirst().get();
+        ParametersParameterComponent ppc = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Measurement Period")).findFirst().get();
         assertNotNull(ppc);
 
-        Period actual = (Period)ppc.getValue();
+        Period actual = (Period) ppc.getValue();
         assertNotNull(actual);
 
 
@@ -134,7 +146,8 @@ public class MeasureOperationParameterConverterTests {
 
         measureOperationParameterConverter.addMeasurementPeriod(parameters, null, null);
 
-        long actualCount = parameters.getParameter().stream().filter(x -> x.getName().equals("Measurement Period")).count();
+        long actualCount = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Measurement Period")).count();
         assertEquals(0, actualCount);
     }
 }

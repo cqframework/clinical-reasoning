@@ -13,11 +13,13 @@ class AttachmentAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.At
         }
 
         if (!attachment.fhirType().equals("Attachment")) {
-            throw new IllegalArgumentException("resource passed as attachment argument is not an Attachment resource");
+            throw new IllegalArgumentException(
+                    "resource passed as attachment argument is not an Attachment resource");
         }
 
         if (!(attachment instanceof Attachment)) {
-            throw new IllegalArgumentException("attachment is incorrect fhir version for this adapter");
+            throw new IllegalArgumentException(
+                    "attachment is incorrect fhir version for this adapter");
         }
 
         this.attachment = (Attachment) attachment;

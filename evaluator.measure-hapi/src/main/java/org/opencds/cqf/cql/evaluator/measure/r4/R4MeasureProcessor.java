@@ -87,7 +87,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     private CqlOptions cqlOptions = CqlOptions.defaultOptions();
 
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
-    private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+    private MeasureEvaluationOptions measureEvaluationOptions =
+            MeasureEvaluationOptions.defaultOptions();
 
     private ResourceValidator validator;
 
@@ -99,18 +100,22 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     @Inject
     public R4MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
-                              DataProviderFactory dataProviderFactory, LibrarySourceProviderFactory librarySourceProviderFactory,
-                              FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
-        this(terminologyProviderFactory, dataProviderFactory, librarySourceProviderFactory, fhirDalFactory,
-                endpointConverter, null, null, null, null, null, null, null);
+            DataProviderFactory dataProviderFactory,
+            LibrarySourceProviderFactory librarySourceProviderFactory,
+            FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
+        this(terminologyProviderFactory, dataProviderFactory, librarySourceProviderFactory,
+                fhirDalFactory, endpointConverter, null, null, null, null, null, null, null);
     }
 
     public R4MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
-                              DataProviderFactory dataProviderFactory, LibrarySourceProviderFactory librarySourceProviderFactory,
-                              FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
-                              TerminologyProvider localTerminologyProvider, LibrarySourceProvider localLibrarySourceProvider,
-                              DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvaluationOptions measureEvaluationOptions, CqlOptions cqlOptions,
-                              Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
+            DataProviderFactory dataProviderFactory,
+            LibrarySourceProviderFactory librarySourceProviderFactory,
+            FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
+            TerminologyProvider localTerminologyProvider,
+            LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider,
+            FhirDal localFhirDal, MeasureEvaluationOptions measureEvaluationOptions,
+            CqlOptions cqlOptions,
+            Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
         this.dataProviderFactory = dataProviderFactory;
         this.librarySourceProviderFactory = librarySourceProviderFactory;
@@ -138,13 +143,15 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
 
     public R4MeasureProcessor(TerminologyProvider localTerminologyProvider,
-                              LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
-        this(null, null, null, null, null, localTerminologyProvider, localLibrarySourceProvider, localDataProvider,
-                localFhirDal, null, null, null);
+            LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider,
+            FhirDal localFhirDal) {
+        this(null, null, null, null, null, localTerminologyProvider, localLibrarySourceProvider,
+                localDataProvider, localFhirDal, null, null, null);
     }
 
     protected void createValidator() {
-        this.validator = new ResourceValidator(FhirVersionEnum.R4, this.measureEvaluationOptions.getValidationProfiles(), this.localFhirDal);
+        this.validator = new ResourceValidator(FhirVersionEnum.R4,
+                this.measureEvaluationOptions.getValidationProfiles(), this.localFhirDal);
     }
 
     public void setValidationEnabled(boolean value) {
@@ -156,9 +163,10 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
     }
 
-    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
-                                         String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
-                                         Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
+    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd,
+            String reportType, String subject, String practitioner, String lastReceivedOn,
+            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
+            Bundle additionalData) {
 
         List<String> subjectIds = this.getSubjects(reportType,
                 subject != null ? subject : practitioner, dataEndpoint, additionalData);
@@ -167,22 +175,27 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
     }
 
-    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
-                                         List<String> subjectIds, String lastReceivedOn, Endpoint contentEndpoint,
-                                         Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
+    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd,
+            String reportType, List<String> subjectIds, String lastReceivedOn,
+            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
+            Bundle additionalData) {
 
         // TODO: Need a federated FhirDal..
-        FhirDal fhirDal = contentEndpoint != null
-                ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
-                : localFhirDal;
+        FhirDal fhirDal =
+                contentEndpoint != null
+                        ? this.fhirDalFactory
+                                .create(this.endpointConverter.getEndpointInfo(contentEndpoint))
+                        : localFhirDal;
 
         measureEvalValidation(lastReceivedOn, fhirDal);
 
         Measure measure = getMeasure(fhirDal, url);
 
-        MeasureReport measureReport = this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
-                fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
-        MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
+        MeasureReport measureReport = this.evaluateMeasure(measure, periodStart, periodEnd,
+                reportType, subjectIds, fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint,
+                additionalData);
+        MeasureScoring measureScoring =
+                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoring, measureReport);
 
@@ -196,15 +209,17 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         }
 
         if (fhirDal == null) {
-            throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a fhirDal was not provided and one could not be constructed");
         }
     }
 
-    private  Measure getMeasure(FhirDal fhirDal, String url) {
+    private Measure getMeasure(FhirDal fhirDal, String url) {
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
         Iterator<IBaseResource> measureIter = measures.iterator();
         if (!measureIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate Measure with url %s", url));
+            throw new IllegalArgumentException(
+                    String.format("Unable to locate Measure with url %s", url));
         }
 
         return (Measure) measureIter.next();
@@ -233,21 +248,25 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         return getSubjects(measureEvalType, subjectId, null, additionalData);
     }
 
-    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
+    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint,
+            Bundle additionalData) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         return getSubjects(measureEvalType, subjectId, dataEndpoint, additionalData);
     }
 
-    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId,
+            Endpoint dataEndpoint, Bundle additionalData) {
         CompositeFhirDal compositeFhirDal;
         BundleFhirDal bundleDal = null;
         FhirDal endpointDal = null;
 
         if (this.fhirDalFactory != null && dataEndpoint != null) {
-            endpointDal = this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint));
+            endpointDal = this.fhirDalFactory
+                    .create(this.endpointConverter.getEndpointInfo(dataEndpoint));
         }
         if (additionalData != null) {
-            bundleDal = new BundleFhirDal(FhirContext.forCached(FhirVersionEnum.R4), additionalData);
+            bundleDal =
+                    new BundleFhirDal(FhirContext.forCached(FhirVersionEnum.R4), additionalData);
         }
 
         compositeFhirDal = new CompositeFhirDal(bundleDal, endpointDal, localFhirDal);
@@ -256,13 +275,14 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     }
 
-    public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
-                                         List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-                                         Endpoint dataEndpoint, Bundle additionalData) {
+    public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd,
+            String reportType, List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
         if (Boolean.TRUE.equals(this.measureEvaluationOptions.isValidationEnabled())) {
             if (this.validator == null) {
                 // Throw or log?
-                logger.error("Validation is enabled and no validator has been found. Check measure validation configuration.");
+                logger.error(
+                        "Validation is enabled and no validator has been found. Check measure validation configuration.");
             } else {
                 this.validator.validate(measure, true);
             }
@@ -270,30 +290,33 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         if (this.measureEvaluationOptions.isThreadedEnabled()
                 && subjectIds.size() > this.measureEvaluationOptions.getThreadedBatchSize()) {
-            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds,
+                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
         } else {
-            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint,
-                    terminologyEndpoint, dataEndpoint, additionalData);
+            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
 
         }
 
     }
 
-    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
-                                                    String reportType,
-                                                    List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-                                                    Endpoint dataEndpoint, Bundle additionalData) {
-        List<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
-        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart,
+            String periodEnd, String reportType, List<String> subjectIds, FhirDal fhirDal,
+            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
+            Bundle additionalData) {
+        List<List<String>> batches =
+                getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
+        ExecutorService executor =
+                Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
         List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
         for (List<String> idBatch : batches) {
             futures.add(
-                    CompletableFuture.supplyAsync(
-                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
-                                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
-                            executor));
+                    CompletableFuture
+                            .supplyAsync(
+                                    () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd,
+                                            reportType, idBatch, fhirDal, contentEndpoint,
+                                            terminologyEndpoint, dataEndpoint, additionalData),
+                                    executor));
         }
 
         List<MeasureReport> reports = new ArrayList<>();
@@ -302,14 +325,14 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         return reportAggregator.aggregate(reports);
     }
 
-    protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd,
-                                                 String reportType,
-                                                 List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-                                                 Endpoint dataEndpoint, Bundle additionalData) {
+    protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart,
+            String periodEnd, String reportType, List<String> subjectIds, FhirDal fhirDal,
+            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
+            Bundle additionalData) {
 
         if (!measure.hasLibrary()) {
-            throw new IllegalArgumentException(
-                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+            throw new IllegalArgumentException(String.format(
+                    "Measure %s does not have a primary library specified", measure.getUrl()));
         }
 
         CanonicalType libraryUrl = measure.getLibrary().get(0);
@@ -317,14 +340,16 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         Iterable<IBaseResource> libraries = fhirDal.searchByUrl("Library", libraryUrl.getValue());
         Iterator<IBaseResource> libraryIter = libraries.iterator();
         if (!libraryIter.hasNext()) {
-            throw new IllegalArgumentException(
-                    String.format("Unable to locate primary Library with url %s", libraryUrl.getValue()));
+            throw new IllegalArgumentException(String
+                    .format("Unable to locate primary Library with url %s", libraryUrl.getValue()));
         }
 
-        org.hl7.fhir.r4.model.Library primaryLibrary = (org.hl7.fhir.r4.model.Library) libraryIter.next();
+        org.hl7.fhir.r4.model.Library primaryLibrary =
+                (org.hl7.fhir.r4.model.Library) libraryIter.next();
 
         LibrarySourceProvider librarySourceProvider = contentEndpoint != null
-                ? this.librarySourceProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
+                ? this.librarySourceProviderFactory
+                        .create(this.endpointConverter.getEndpointInfo(contentEndpoint))
                 : localLibrarySourceProvider;
 
         if (librarySourceProvider == null) {
@@ -334,15 +359,16 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
         LibraryLoader libraryLoader = this.buildLibraryLoader(librarySourceProvider);
 
-        Library library = libraryLoader.load(
-                new VersionedIdentifier().withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
+        Library library = libraryLoader.load(new VersionedIdentifier()
+                .withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
 
-        TerminologyProvider terminologyProvider = terminologyEndpoint != null
-                ? this.buildTerminologyProvider(terminologyEndpoint)
-                : this.localTerminologyProvider;
+        TerminologyProvider terminologyProvider =
+                terminologyEndpoint != null ? this.buildTerminologyProvider(terminologyEndpoint)
+                        : this.localTerminologyProvider;
 
         if (terminologyProvider == null) {
-            throw new IllegalStateException("a terminologyProvider was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a terminologyProvider was not provided and one could not be constructed");
         }
 
         DataProvider dataProvider = (dataEndpoint != null || additionalData != null)
@@ -350,7 +376,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 : this.localDataProvider;
 
         if (dataProvider == null) {
-            throw new IllegalStateException("a dataProvider was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a dataProvider was not provided and one could not be constructed");
         }
 
 
@@ -359,9 +386,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         }
 
-        Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
+        Context context =
+                this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
         R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
-        return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds, measurementPeriod);
+        return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds,
+                measurementPeriod);
     }
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
@@ -389,8 +418,9 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
             librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
 
-        TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), null);
+        TranslatorOptionAwareLibraryLoader libraryLoader =
+                new TranslatingLibraryLoader(new CacheAwareModelManager(globalModelCache),
+                        librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), null);
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
@@ -401,34 +431,39 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
         // resolve the measurement period
-        return new Interval(DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)), true,
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)), true);
+        return new Interval(DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
+                true, DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)), true);
     }
 
     // TODO: This is duplicate logic from the evaluator builder
     private DataProvider buildDataProvider(Endpoint dataEndpoint, Bundle additionalData,
-                                           TerminologyProvider terminologyProvider) {
+            TerminologyProvider terminologyProvider) {
         if (dataEndpoint != null && additionalData != null) {
             throw new IllegalArgumentException(
                     "dataEndpoint and additionalData parameters are currently mutually exclusive. Use only one.");
         }
 
         if (dataEndpoint == null && additionalData == null) {
-            throw new IllegalArgumentException("Either dataEndpoint or additionalData must be specified");
+            throw new IllegalArgumentException(
+                    "Either dataEndpoint or additionalData must be specified");
         }
 
         DataProviderComponents dataProvider;
         if (dataEndpoint != null) {
-            dataProvider = this.dataProviderFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint));
+            dataProvider = this.dataProviderFactory
+                    .create(this.endpointConverter.getEndpointInfo(dataEndpoint));
         } else {
             dataProvider = this.dataProviderFactory.create(additionalData);
         }
 
-        RetrieveProviderConfigurer retrieveProviderConfigurer = new RetrieveProviderConfigurer(retrieveProviderConfig);
+        RetrieveProviderConfigurer retrieveProviderConfigurer =
+                new RetrieveProviderConfigurer(retrieveProviderConfig);
 
-        retrieveProviderConfigurer.configure(dataProvider.getRetrieveProvider(), terminologyProvider);
+        retrieveProviderConfigurer.configure(dataProvider.getRetrieveProvider(),
+                terminologyProvider);
 
-        return new CompositeDataProvider(dataProvider.getModelResolver(), dataProvider.getRetrieveProvider());
+        return new CompositeDataProvider(dataProvider.getModelResolver(),
+                dataProvider.getRetrieveProvider());
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -443,14 +478,15 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     // TODO: This is duplicate logic from the evaluator builder
     private Context buildMeasureContext(Library primaryLibrary, LibraryLoader libraryLoader,
-                                        TerminologyProvider terminologyProvider, DataProvider dataProvider) {
+            TerminologyProvider terminologyProvider, DataProvider dataProvider) {
         Context context = new Context(primaryLibrary);
         context.registerLibraryLoader(libraryLoader);
         context.registerTerminologyProvider(terminologyProvider);
         context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
         context.setDebugMap(new DebugMap());
 
-        if (this.cqlOptions.getCqlEngineOptions().getOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
+        if (this.cqlOptions.getCqlEngineOptions().getOptions()
+                .contains(CqlEngine.Options.EnableExpressionCaching)) {
             context.setExpressionCaching(true);
         }
 

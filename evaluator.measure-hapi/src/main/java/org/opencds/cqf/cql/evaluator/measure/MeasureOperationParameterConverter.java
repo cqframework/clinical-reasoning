@@ -20,7 +20,8 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAdapter;
 
 /**
- * This class maps the standard input parameters of the Measure evaluate operation to FHIR parameters
+ * This class maps the standard input parameters of the Measure evaluate operation to FHIR
+ * parameters
  */
 @Named
 public class MeasureOperationParameterConverter {
@@ -29,19 +30,22 @@ public class MeasureOperationParameterConverter {
     protected FhirTypeConverter fhirTypeConverter;
 
     @Inject
-    public MeasureOperationParameterConverter(AdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
+    public MeasureOperationParameterConverter(AdapterFactory adapterFactory,
+            FhirTypeConverter fhirTypeConverter) {
         this.adapterFactory = adapterFactory;
         this.fhirTypeConverter = fhirTypeConverter;
-    } 
+    }
 
-    public void addMeasurementPeriod(IBaseParameters parameters, String periodStart, String periodEnd) {
+    public void addMeasurementPeriod(IBaseParameters parameters, String periodStart,
+            String periodEnd) {
         requireNonNull(parameters);
 
         if (periodStart == null || periodEnd == null) {
             return;
         }
 
-        ICompositeType measurementPeriodFhir = this.fhirTypeConverter.toFhirPeriod(new Interval(new Date(periodStart), true, new Date(periodEnd), true));
+        ICompositeType measurementPeriodFhir = this.fhirTypeConverter
+                .toFhirPeriod(new Interval(new Date(periodStart), true, new Date(periodEnd), true));
 
         this.addChild(parameters, "Measurement Period", measurementPeriodFhir);
     }
@@ -61,12 +65,14 @@ public class MeasureOperationParameterConverter {
     protected void addChild(IBaseParameters parameters, String name, IBaseDatatype value) {
         ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .collect(Collectors.toList());
 
-        ParametersParameterComponentAdapter part = parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
+        ParametersParameterComponentAdapter part =
+                parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
             part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
-         
+
         }
 
         part.setName(name);

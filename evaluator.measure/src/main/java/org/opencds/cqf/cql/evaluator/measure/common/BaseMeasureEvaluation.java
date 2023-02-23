@@ -14,18 +14,21 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
     protected MeasureT measure;
     protected String measurementPeriodParameterName;
 
-    protected BaseMeasureEvaluation(Context context, MeasureT measure, MeasureDefBuilder<MeasureT> measureDefBuilder,
+    protected BaseMeasureEvaluation(Context context, MeasureT measure,
+            MeasureDefBuilder<MeasureT> measureDefBuilder,
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder) {
         this(context, measure, measureDefBuilder, measureReportBuilder,
                 MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
     }
 
-    protected BaseMeasureEvaluation(Context context, MeasureT measure, MeasureDefBuilder<MeasureT> measureDefBuilder,
+    protected BaseMeasureEvaluation(Context context, MeasureT measure,
+            MeasureDefBuilder<MeasureT> measureDefBuilder,
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
             String measurementPeriodParameterName) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
         this.measure = Objects.requireNonNull(measure, "measure is a required argument");
-        this.measureDefBuilder = Objects.requireNonNull(measureDefBuilder, "measureDefBuilder is a required argument");
+        this.measureDefBuilder = Objects.requireNonNull(measureDefBuilder,
+                "measureDefBuilder is a required argument");
         this.measureReportBuilder = Objects.requireNonNull(measureReportBuilder,
                 "measureReportBuilder is a required argument");
         this.measurementPeriodParameterName = Objects.requireNonNull(measurementPeriodParameterName,
@@ -41,30 +44,33 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         Objects.requireNonNull(subjectIds, "subjectIds is a required parameter");
 
         if (measureEvalType == null) {
-            measureEvalType = subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
+            measureEvalType =
+                    subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
         }
 
         MeasureDef measureDef = this.measureDefBuilder.build(measure);
-        MeasureEvaluator measureEvaluation = new MeasureEvaluator(context, this.measurementPeriodParameterName);
-        measureDef = measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod);
-        return this.measureReportBuilder.build(measure, measureDef, this.evalTypeToReportType(measureEvalType),
-                measurementPeriod, subjectIds);
+        MeasureEvaluator measureEvaluation =
+                new MeasureEvaluator(context, this.measurementPeriodParameterName);
+        measureDef = measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds,
+                measurementPeriod);
+        return this.measureReportBuilder.build(measure, measureDef,
+                this.evalTypeToReportType(measureEvalType), measurementPeriod, subjectIds);
     }
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
         switch (measureEvalType) {
-        case PATIENT:
-        case SUBJECT:
-            return MeasureReportType.INDIVIDUAL;
-        case PATIENTLIST:
-            return MeasureReportType.PATIENTLIST;
-        case SUBJECTLIST:
-            return MeasureReportType.SUBJECTLIST;
-        case POPULATION:
-            return MeasureReportType.SUMMARY;
-        default:
-            throw new IllegalArgumentException(
-                    String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+            case PATIENT:
+            case SUBJECT:
+                return MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST:
+                return MeasureReportType.PATIENTLIST;
+            case SUBJECTLIST:
+                return MeasureReportType.SUBJECTLIST;
+            case POPULATION:
+                return MeasureReportType.SUMMARY;
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
         }
     }
 }

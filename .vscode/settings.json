@@ -57,7 +57,7 @@
     "**/.settings": true,
     "**/.factorypath": true
   },
-  "editor.formatOnSave": false,
+  "editor.formatOnSave": true,
   "editor.detectIndentation": false,
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.dependency.packagePresentation": "hierarchical",
@@ -72,11 +72,16 @@
         ".java"
       ]
     },
-    "Format JSON and XML Files": {
+    "Format XML Files": {
       "command": "editor.action.formatDocument",
       "includeFileExtensions": [
-        ".json",
         ".xml"
+      ]
+    },
+    "Format JSON Files": {
+      "command": "editor.action.formatDocument",
+      "includeFileExtensions": [
+        ".json"
       ]
     },
     "Format Markdown Files": {

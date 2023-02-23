@@ -50,10 +50,13 @@ public class ActivityDefinitionProcessorTests {
     public void setup() {
         fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
         FhirDal fhirDal = new MockFhirDal();
-        AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
+        AdapterFactory adapterFactory =
+                new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+        FhirTypeConverter fhirTypeConverter =
+                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+        CqlFhirParametersConverter cqlFhirParametersConverter =
+                new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
         Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<>() {
             /**
              *
@@ -71,7 +74,8 @@ public class ActivityDefinitionProcessorTests {
                     public LibrarySourceProvider create(String url, List<String> headers) {
                         return new BundleFhirLibrarySourceProvider(fhirContext,
                                 (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(ActivityDefinitionProcessorTests.class.getResourceAsStream(url)),
+                                        .parseResource(ActivityDefinitionProcessorTests.class
+                                                .getResourceAsStream(url)),
                                 adapterFactory, libraryVersionSelector);
                     }
                 });
@@ -91,8 +95,10 @@ public class ActivityDefinitionProcessorTests {
             }
         };
 
-        LibrarySourceProviderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
-                fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
+        LibrarySourceProviderFactory libraryLoaderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
+                        fhirContext, adapterFactory, librarySourceProviderFactories,
+                        libraryVersionSelector);
         Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<>() {
             /**
              *
@@ -109,15 +115,18 @@ public class ActivityDefinitionProcessorTests {
                     @Override
                     public RetrieveProvider create(String url, List<String> headers) {
 
-                        return new BundleRetrieveProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(ActivityDefinitionProcessorTests.class.getResourceAsStream(url)));
+                        return new BundleRetrieveProvider(fhirContext,
+                                (IBaseBundle) fhirContext.newJsonParser()
+                                        .parseResource(ActivityDefinitionProcessorTests.class
+                                                .getResourceAsStream(url)));
                     }
                 });
             }
         };
 
-        DataProviderFactory dataProviderFactory = new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(
-                fhirContext, modelResolverFactories, retrieveProviderFactories);
+        DataProviderFactory dataProviderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+                        modelResolverFactories, retrieveProviderFactories);
 
         Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = new HashSet<>() {
             /**
@@ -134,36 +143,47 @@ public class ActivityDefinitionProcessorTests {
 
                     @Override
                     public TerminologyProvider create(String url, List<String> headers) {
-                        return new BundleTerminologyProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(ActivityDefinitionProcessorTests.class.getResourceAsStream(url)));
+                        return new BundleTerminologyProvider(fhirContext,
+                                (IBaseBundle) fhirContext.newJsonParser()
+                                        .parseResource(ActivityDefinitionProcessorTests.class
+                                                .getResourceAsStream(url)));
                     }
                 });
             }
         };
 
-        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
-                fhirContext, typedTerminologyProviderFactories);
+        TerminologyProviderFactory terminologyProviderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+                        fhirContext, typedTerminologyProviderFactories);
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        LibraryProcessor libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
+        LibraryProcessor libraryProcessor =
+                new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
+                        dataProviderFactory, terminologyProviderFactory, endpointConverter,
+                        fhirModelResolverFactory, CqlEvaluatorBuilder::new);
 
-        activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
+        activityDefinitionProcessor =
+                new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
     }
 
     @Test
     public void testActivityDefinitionApply() throws FHIRException {
-        Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
-        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+        Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
+                .setAddress("bundle-activityDefinitionTest.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
-        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+        Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
+                .setAddress("bundle-activityDefinitionTest.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE).setAddress("bundle-activityDefinitionTest.json")
-        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+        Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
+                .setAddress("bundle-activityDefinitionTest.json")
+                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        var result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"), "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint, terminologyEndpoint, dataEndpoint);
+        var result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),
+                "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint,
+                terminologyEndpoint, dataEndpoint);
         Assert.assertTrue(result instanceof ProcedureRequest);
         var request = (ProcedureRequest) result;
         Assert.assertTrue(request.getDoNotPerform());

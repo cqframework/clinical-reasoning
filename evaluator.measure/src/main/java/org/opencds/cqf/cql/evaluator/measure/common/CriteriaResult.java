@@ -12,7 +12,8 @@ public class CriteriaResult {
 
     public static final Object NULL_VALUE = new Object();
 
-    public static final CriteriaResult EMPTY_RESULT = new CriteriaResult(NULL_VALUE, Collections.emptySet());
+    public static final CriteriaResult EMPTY_RESULT =
+            new CriteriaResult(NULL_VALUE, Collections.emptySet());
 
     public CriteriaResult(Object value, Set<Object> evaluatedResources) {
         this.value = value;
@@ -23,7 +24,7 @@ public class CriteriaResult {
         return this.value;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Iterable<Object> iterableValue() {
         if (this.rawValue() instanceof Iterable<?>) {
             return (Iterable) this.rawValue();

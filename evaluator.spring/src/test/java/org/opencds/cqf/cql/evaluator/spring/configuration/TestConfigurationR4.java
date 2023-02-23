@@ -16,5 +16,5 @@ public class TestConfigurationR4 {
     FhirContext fhirContext() {
         return FhirContext.forCached(FhirVersionEnum.R4);
     }
-    
+
 }

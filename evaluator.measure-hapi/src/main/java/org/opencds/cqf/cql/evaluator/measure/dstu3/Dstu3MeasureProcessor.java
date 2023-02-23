@@ -84,7 +84,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
     private CqlOptions cqlOptions = CqlOptions.defaultOptions();
     private RetrieveProviderConfig retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
-    private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+    private MeasureEvaluationOptions measureEvaluationOptions =
+            MeasureEvaluationOptions.defaultOptions();
 
     // TODO: This should all be collapsed down to FhirDal
     protected LibrarySourceProvider localLibrarySourceProvider;
@@ -94,17 +95,20 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
     @Inject
     public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
-            DataProviderFactory dataProviderFactory, LibrarySourceProviderFactory librarySourceProviderFactory,
+            DataProviderFactory dataProviderFactory,
+            LibrarySourceProviderFactory librarySourceProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter) {
-        this(terminologyProviderFactory, dataProviderFactory, librarySourceProviderFactory, fhirDalFactory,
-                endpointConverter, null, null, null, null, null, null, null);
+        this(terminologyProviderFactory, dataProviderFactory, librarySourceProviderFactory,
+                fhirDalFactory, endpointConverter, null, null, null, null, null, null, null);
     }
 
     public Dstu3MeasureProcessor(TerminologyProviderFactory terminologyProviderFactory,
-            DataProviderFactory dataProviderFactory, LibrarySourceProviderFactory librarySourceProviderFactory,
+            DataProviderFactory dataProviderFactory,
+            LibrarySourceProviderFactory librarySourceProviderFactory,
             FhirDalFactory fhirDalFactory, EndpointConverter endpointConverter,
-            TerminologyProvider localTerminologyProvider, LibrarySourceProvider localLibrarySourceProvider,
-            DataProvider localDataProvider, FhirDal localFhirDal, MeasureEvaluationOptions measureEvaluationOptions,
+            TerminologyProvider localTerminologyProvider,
+            LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider,
+            FhirDal localFhirDal, MeasureEvaluationOptions measureEvaluationOptions,
             CqlOptions cqlOptions,
             Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache) {
         this.terminologyProviderFactory = terminologyProviderFactory;
@@ -130,26 +134,31 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
     }
 
     public Dstu3MeasureProcessor(TerminologyProvider localTerminologyProvider,
-            LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider, FhirDal localFhirDal) {
-        this(null, null, null, null, null, localTerminologyProvider, localLibrarySourceProvider, localDataProvider,
-                localFhirDal, null, null, null);
+            LibrarySourceProvider localLibrarySourceProvider, DataProvider localDataProvider,
+            FhirDal localFhirDal) {
+        this(null, null, null, null, null, localTerminologyProvider, localLibrarySourceProvider,
+                localDataProvider, localFhirDal, null, null, null);
     }
 
-    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
-            String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
+    public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd,
+            String reportType, String subject, String practitioner, String lastReceivedOn,
+            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
+            Bundle additionalData) {
 
         if (lastReceivedOn != null) {
             logger.warn(
                     "the Measure evaluate implementation does not yet support the lastReceivedOn parameter. Ignoring.");
         }
 
-        FhirDal fhirDal = contentEndpoint != null
-                ? this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
-                : localFhirDal;
+        FhirDal fhirDal =
+                contentEndpoint != null
+                        ? this.fhirDalFactory
+                                .create(this.endpointConverter.getEndpointInfo(contentEndpoint))
+                        : localFhirDal;
 
         if (fhirDal == null) {
-            throw new IllegalStateException("a fhirDal was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a fhirDal was not provided and one could not be constructed");
         }
 
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
@@ -159,15 +168,18 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         Iterable<IBaseResource> measures = fhirDal.searchByUrl("Measure", url);
         Iterator<IBaseResource> measureIter = measures.iterator();
         if (!measureIter.hasNext()) {
-            throw new IllegalArgumentException(String.format("Unable to locate Measure with url %s", url));
+            throw new IllegalArgumentException(
+                    String.format("Unable to locate Measure with url %s", url));
         }
 
         Measure measure = (Measure) measureIter.next();
 
-        MeasureReport measureReport = evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+        MeasureReport measureReport =
+                evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
+                        contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
 
-        MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
+        MeasureScoring measureScoring =
+                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
         Dstu3MeasureReportScorer scorer = new Dstu3MeasureReportScorer();
         scorer.score(measureScoring, measureReport);
         return measureReport;
@@ -177,22 +189,25 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         return this.getSubjects(reportType, subjectId, null, null);
     }
 
-    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
+    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint,
+            Bundle additionalData) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         return getSubjects(measureEvalType, subjectId, dataEndpoint, additionalData);
     }
 
-    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint,
-            Bundle additionalData) {
+    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId,
+            Endpoint dataEndpoint, Bundle additionalData) {
         CompositeFhirDal compositeFhirDal;
         BundleFhirDal bundleDal = null;
         FhirDal endpointDal = null;
 
         if (this.fhirDalFactory != null && dataEndpoint != null) {
-            endpointDal = this.fhirDalFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint));
+            endpointDal = this.fhirDalFactory
+                    .create(this.endpointConverter.getEndpointInfo(dataEndpoint));
         }
         if (additionalData != null) {
-            bundleDal = new BundleFhirDal(FhirContext.forCached(FhirVersionEnum.DSTU3), additionalData);
+            bundleDal =
+                    new BundleFhirDal(FhirContext.forCached(FhirVersionEnum.DSTU3), additionalData);
         }
 
         compositeFhirDal = new CompositeFhirDal(bundleDal, endpointDal, localFhirDal);
@@ -200,33 +215,38 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         return subjectProvider.getSubjects(measureEvalType, subjectId);
     }
 
-    public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
-            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint, Bundle additionalData) {
+    public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd,
+            String reportType, List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
         if (this.measureEvaluationOptions.isThreadedEnabled()
                 && subjectIds.size() > this.measureEvaluationOptions.getThreadedBatchSize()) {
-            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds,
+                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
         } else {
-            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
+            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
         }
 
     }
 
-    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
-            String reportType, List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
-        List<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
-        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart,
+            String periodEnd, String reportType, List<String> subjectIds, FhirDal fhirDal,
+            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
+            Bundle additionalData) {
+        List<List<String>> batches =
+                getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
+        ExecutorService executor =
+                Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
         List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
         for (List<String> idBatch : batches) {
             futures.add(
-                    CompletableFuture.supplyAsync(
-                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
-                                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
-                            executor));
+                    CompletableFuture
+                            .supplyAsync(
+                                    () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd,
+                                            reportType, idBatch, fhirDal, contentEndpoint,
+                                            terminologyEndpoint, dataEndpoint, additionalData),
+                                    executor));
         }
 
         List<MeasureReport> reports = new ArrayList<>();
@@ -248,20 +268,23 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         return batches;
     }
 
-    protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd,
-            String reportType, List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
+    protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart,
+            String periodEnd, String reportType, List<String> subjectIds, FhirDal fhirDal,
+            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
+            Bundle additionalData) {
 
         if (!measure.hasLibrary()) {
-            throw new IllegalArgumentException(
-                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+            throw new IllegalArgumentException(String.format(
+                    "Measure %s does not have a primary library specified", measure.getUrl()));
         }
 
         Reference libraryUrl = measure.getLibrary().get(0);
 
-        var primaryLibrary = (org.hl7.fhir.dstu3.model.Library) fhirDal.read(libraryUrl.getReferenceElement());
+        var primaryLibrary =
+                (org.hl7.fhir.dstu3.model.Library) fhirDal.read(libraryUrl.getReferenceElement());
         LibrarySourceProvider librarySourceProvider = contentEndpoint != null
-                ? this.librarySourceProviderFactory.create(this.endpointConverter.getEndpointInfo(contentEndpoint))
+                ? this.librarySourceProviderFactory
+                        .create(this.endpointConverter.getEndpointInfo(contentEndpoint))
                 : localLibrarySourceProvider;
 
         if (librarySourceProvider == null) {
@@ -271,15 +294,16 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
         LibraryLoader libraryLoader = this.buildLibraryLoader(librarySourceProvider);
 
-        Library library = libraryLoader.load(
-                new VersionedIdentifier().withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
+        Library library = libraryLoader.load(new VersionedIdentifier()
+                .withId(primaryLibrary.getName()).withVersion(primaryLibrary.getVersion()));
 
-        TerminologyProvider terminologyProvider = terminologyEndpoint != null
-                ? this.buildTerminologyProvider(terminologyEndpoint)
-                : this.localTerminologyProvider;
+        TerminologyProvider terminologyProvider =
+                terminologyEndpoint != null ? this.buildTerminologyProvider(terminologyEndpoint)
+                        : this.localTerminologyProvider;
 
         if (terminologyProvider == null) {
-            throw new IllegalStateException("a terminologyProvider was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a terminologyProvider was not provided and one could not be constructed");
         }
 
         DataProvider dataProvider = (dataEndpoint != null || additionalData != null)
@@ -287,7 +311,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
                 : this.localDataProvider;
 
         if (dataProvider == null) {
-            throw new IllegalStateException("a dataProvider was not provided and one could not be constructed");
+            throw new IllegalStateException(
+                    "a dataProvider was not provided and one could not be constructed");
         }
 
         Interval measurementPeriod = null;
@@ -295,10 +320,12 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
             measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         }
 
-        Context context = this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
+        Context context =
+                this.buildMeasureContext(library, libraryLoader, terminologyProvider, dataProvider);
 
         Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure);
-        return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds, measurementPeriod);
+        return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds,
+                measurementPeriod);
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -310,9 +337,9 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         }
 
         /* NOTE: Npm package support not implemented for Dstu3 measure processing */
-        TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), librarySourceProviders,
-                this.cqlOptions.getCqlTranslatorOptions(), null);
+        TranslatorOptionAwareLibraryLoader libraryLoader =
+                new TranslatingLibraryLoader(new CacheAwareModelManager(globalModelCache),
+                        librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), null);
 
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
@@ -323,8 +350,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
         // resolve the measurement period
-        return new Interval(DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)), true,
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)), true);
+        return new Interval(DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
+                true, DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)), true);
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -336,21 +363,26 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         }
 
         if (dataEndpoint == null && additionalData == null) {
-            throw new IllegalArgumentException("Either dataEndpoint or additionalData must be specified");
+            throw new IllegalArgumentException(
+                    "Either dataEndpoint or additionalData must be specified");
         }
 
         DataProviderComponents dataProvider = null;
         if (dataEndpoint != null) {
-            dataProvider = this.dataProviderFactory.create(this.endpointConverter.getEndpointInfo(dataEndpoint));
+            dataProvider = this.dataProviderFactory
+                    .create(this.endpointConverter.getEndpointInfo(dataEndpoint));
         } else {
             dataProvider = this.dataProviderFactory.create(additionalData);
         }
 
-        RetrieveProviderConfigurer retrieveProviderConfigurer = new RetrieveProviderConfigurer(retrieveProviderConfig);
+        RetrieveProviderConfigurer retrieveProviderConfigurer =
+                new RetrieveProviderConfigurer(retrieveProviderConfig);
 
-        retrieveProviderConfigurer.configure(dataProvider.getRetrieveProvider(), terminologyProvider);
+        retrieveProviderConfigurer.configure(dataProvider.getRetrieveProvider(),
+                terminologyProvider);
 
-        return new CompositeDataProvider(dataProvider.getModelResolver(), dataProvider.getRetrieveProvider());
+        return new CompositeDataProvider(dataProvider.getModelResolver(),
+                dataProvider.getRetrieveProvider());
     }
 
     // TODO: This is duplicate logic from the evaluator builder
@@ -372,7 +404,8 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
         context.setDebugMap(new DebugMap());
 
-        if (this.cqlOptions.getCqlEngineOptions().getOptions().contains(CqlEngine.Options.EnableExpressionCaching)) {
+        if (this.cqlOptions.getCqlEngineOptions().getOptions()
+                .contains(CqlEngine.Options.EnableExpressionCaching)) {
             context.setExpressionCaching(true);
         }
 

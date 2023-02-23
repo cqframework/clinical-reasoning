@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("org.opencds.cqf.cql.evaluator.builder")
 public class BuilderConfiguration {
-    
+
     @Bean
     RetrieveProviderConfig retrieveProviderConfig() {
         return RetrieveProviderConfig.defaultConfig();

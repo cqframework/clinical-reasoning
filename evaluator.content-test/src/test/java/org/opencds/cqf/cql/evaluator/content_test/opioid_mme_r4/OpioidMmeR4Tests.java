@@ -28,14 +28,15 @@ public class OpioidMmeR4Tests {
 
     private Endpoint libraryEndpoint;
     private Endpoint terminologyEndpoint;
-    
+
     private VersionedIdentifier id;
 
     @BeforeClass
     public void setup() {
         this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-        this.libraryProcessor = DaggerCqlEvaluatorComponent.builder().fhirContext(fhirContext).build().createLibraryProcessor();
+        this.libraryProcessor = DaggerCqlEvaluatorComponent.builder().fhirContext(fhirContext)
+                .build().createLibraryProcessor();
         this.terminologyEndpoint = createEndpoint("vocabulary/valueset", Constants.HL7_FHIR_FILES);
         this.libraryEndpoint = createEndpoint("cql", Constants.HL7_CQL_FILES);
 
@@ -43,18 +44,21 @@ public class OpioidMmeR4Tests {
     }
 
     private Endpoint createEndpoint(String url, String type) {
-        return new Endpoint().setAddress(getJarPath(url)).setConnectionType(new Coding().setCode(type));
+        return new Endpoint().setAddress(getJarPath(url))
+                .setConnectionType(new Coding().setCode(type));
     }
 
     private Parameters getParameters(String path) {
-        IParser parser = path.endsWith(".json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
+        IParser parser =
+                path.endsWith(".json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
 
-        Parameters parameters = (Parameters) parser.parseResource(OpioidMmeR4Tests.class.getResourceAsStream(path));
+        Parameters parameters =
+                (Parameters) parser.parseResource(OpioidMmeR4Tests.class.getResourceAsStream(path));
         return this.clearParserData(parameters);
     }
 
     private String getSubject(Parameters parameters) {
-        StringType subject = (StringType)parameters.getParameter("subject");
+        StringType subject = (StringType) parameters.getParameter("subject");
 
         return subject.getValue().replace("Patient/", "");
     }
@@ -62,8 +66,7 @@ public class OpioidMmeR4Tests {
     private String getJarPath(String resourcePath) {
         try {
             return OpioidMmeR4Tests.class.getResource(resourcePath).toURI().toString();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -89,29 +92,36 @@ public class OpioidMmeR4Tests {
     }
 
     @Test
-    public void patientMmeLessThan50() { 
-        Parameters expected = getParameters("tests/MMECalculatorTests/patient-mme-less-than-fifty/Parameters-patient-mme-less-than-fifty-output.json");
+    public void patientMmeLessThan50() {
+        Parameters expected = getParameters(
+                "tests/MMECalculatorTests/patient-mme-less-than-fifty/Parameters-patient-mme-less-than-fifty-output.json");
 
-        Endpoint dataEndpoint = createEndpoint("tests/MMECalculatorTests/patient-mme-less-than-fifty", Constants.HL7_FHIR_FILES);
-        Parameters test = this.getParameters("tests/MMECalculatorTests/patient-mme-less-than-fifty/Parameters-patient-mme-less-than-fifty-input.json");
+        Endpoint dataEndpoint = createEndpoint(
+                "tests/MMECalculatorTests/patient-mme-less-than-fifty", Constants.HL7_FHIR_FILES);
+        Parameters test = this.getParameters(
+                "tests/MMECalculatorTests/patient-mme-less-than-fifty/Parameters-patient-mme-less-than-fifty-input.json");
 
 
-        Parameters actual = (Parameters)libraryProcessor.evaluate(id, 
-        this.getSubject(test), null, libraryEndpoint, terminologyEndpoint, dataEndpoint, null, asSet("TotalMME"));
+        Parameters actual = (Parameters) libraryProcessor.evaluate(id, this.getSubject(test), null,
+                libraryEndpoint, terminologyEndpoint, dataEndpoint, null, asSet("TotalMME"));
 
         assertTrue(expected.equalsDeep(actual));
     }
 
     @Test
-    public void patientMmeGreaterThan50() { 
-        Parameters expected = this.getParameters("tests/MMECalculatorTests/patient-mme-greater-than-fifty/Parameters-patient-mme-greater-than-fifty-output.json");
+    public void patientMmeGreaterThan50() {
+        Parameters expected = this.getParameters(
+                "tests/MMECalculatorTests/patient-mme-greater-than-fifty/Parameters-patient-mme-greater-than-fifty-output.json");
 
-        Endpoint dataEndpoint = createEndpoint("tests/MMECalculatorTests/patient-mme-greater-than-fifty", Constants.HL7_FHIR_FILES);
-        Parameters test = this.getParameters("tests/MMECalculatorTests/patient-mme-greater-than-fifty/Parameters-patient-mme-greater-than-fifty-input.json");
+        Endpoint dataEndpoint =
+                createEndpoint("tests/MMECalculatorTests/patient-mme-greater-than-fifty",
+                        Constants.HL7_FHIR_FILES);
+        Parameters test = this.getParameters(
+                "tests/MMECalculatorTests/patient-mme-greater-than-fifty/Parameters-patient-mme-greater-than-fifty-input.json");
 
 
-        Parameters actual = (Parameters)libraryProcessor.evaluate(id, 
-        this.getSubject(test), null, libraryEndpoint, terminologyEndpoint, dataEndpoint, null, asSet("TotalMME"));
+        Parameters actual = (Parameters) libraryProcessor.evaluate(id, this.getSubject(test), null,
+                libraryEndpoint, terminologyEndpoint, dataEndpoint, null, asSet("TotalMME"));
 
         assertTrue(expected.equalsDeep(actual));
     }

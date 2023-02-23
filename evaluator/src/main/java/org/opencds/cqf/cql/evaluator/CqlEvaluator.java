@@ -27,13 +27,12 @@ public class CqlEvaluator {
         this(libraryLoader, null, null, null);
     }
 
-    public CqlEvaluator(LibraryLoader libraryLoader,  Map<String, DataProvider> dataProviders,
+    public CqlEvaluator(LibraryLoader libraryLoader, Map<String, DataProvider> dataProviders,
             TerminologyProvider terminologyProvider) {
         this(libraryLoader, dataProviders, terminologyProvider, null);
     }
 
-    public CqlEvaluator(LibraryLoader libraryLoader,
-            EnumSet<Options> engineOptions) {
+    public CqlEvaluator(LibraryLoader libraryLoader, EnumSet<Options> engineOptions) {
         this(libraryLoader, null, null, engineOptions);
     }
 
@@ -49,43 +48,50 @@ public class CqlEvaluator {
         return this.terminologyProvider;
     }
 
-    public CqlEvaluator(LibraryLoader libraryLoader,
-            Map<String, DataProvider> dataProviders, TerminologyProvider terminologyProvider,
-            Set<Options> engineOptions) {
+    public CqlEvaluator(LibraryLoader libraryLoader, Map<String, DataProvider> dataProviders,
+            TerminologyProvider terminologyProvider, Set<Options> engineOptions) {
         this.libraryLoader = requireNonNull(libraryLoader, "libraryLoader can not be null.");
-        this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider, EnumSet.copyOf(engineOptions));
+        this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider,
+                EnumSet.copyOf(engineOptions));
     }
 
     public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier) {
         return this.evaluate(libraryIdentifier, null, null, null);
     }
 
-    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Set<String> expressions) {
+    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
+            Set<String> expressions) {
         return this.evaluate(libraryIdentifier, expressions, null, null);
     }
 
-    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Set<String> expressions, Pair<String, Object> contextParameter) {
+    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Set<String> expressions,
+            Pair<String, Object> contextParameter) {
         return this.evaluate(libraryIdentifier, expressions, contextParameter, null);
     }
 
-    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Set<String> expressions, Map<String, Object> parameters) {
+    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Set<String> expressions,
+            Map<String, Object> parameters) {
         return this.evaluate(libraryIdentifier, expressions, null, parameters);
     }
 
-    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Pair<String, Object> contextParameter) {
+    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
+            Pair<String, Object> contextParameter) {
         return this.evaluate(libraryIdentifier, null, contextParameter, null);
     }
 
-    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Pair<String, Object> contextParameter, Map<String, Object> parameters) {
+    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
+            Pair<String, Object> contextParameter, Map<String, Object> parameters) {
         return this.evaluate(libraryIdentifier, null, contextParameter, parameters);
     }
 
-    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Map<String, Object> parameters) {
+    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
+            Map<String, Object> parameters) {
         return this.evaluate(libraryIdentifier, null, null, parameters);
     }
 
-    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier,
-    Set<String> expressions, Pair<String, Object> contextParameter, Map<String, Object> parameters) {
-        return this.cqlEngine.evaluate(libraryIdentifier, expressions, contextParameter, parameters, null);
+    public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier, Set<String> expressions,
+            Pair<String, Object> contextParameter, Map<String, Object> parameters) {
+        return this.cqlEngine.evaluate(libraryIdentifier, expressions, contextParameter, parameters,
+                null);
     }
 }

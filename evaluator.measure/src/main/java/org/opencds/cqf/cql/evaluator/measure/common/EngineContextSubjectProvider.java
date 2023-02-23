@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory;
 
 public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(EngineContextSubjectProvider.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(EngineContextSubjectProvider.class);
 
     protected Context context;
     protected String modelUri;
@@ -20,7 +21,8 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
 
     protected Function<SubjectT, String> getId;
 
-    public EngineContextSubjectProvider(Context context, String modelUri, Function<SubjectT, String> getId) {
+    public EngineContextSubjectProvider(Context context, String modelUri,
+            Function<SubjectT, String> getId) {
         this.context = context;
         this.modelUri = modelUri;
         this.getId = getId;
@@ -73,8 +75,8 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
     protected List<String> getAllSubjectIds() {
         this.subjectType = "Patient";
         List<String> subjectIds = new ArrayList<>();
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null, subjectType, null, null,
-                null, null, null, null, null, null);
+        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null,
+                subjectType, null, null, null, null, null, null, null, null);
         subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
         return subjectIds;
     }
@@ -93,8 +95,9 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
             practitionerRef = "Practitioner/" + practitionerRef;
         }
 
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
-                practitionerRef, subjectType, null, null, null, null, null, null, null, null);
+        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner",
+                "generalPractitioner", practitionerRef, subjectType, null, null, null, null, null,
+                null, null, null);
         subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
         return subjectIds;
     }

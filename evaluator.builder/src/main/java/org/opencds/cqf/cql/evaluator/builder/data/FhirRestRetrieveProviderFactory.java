@@ -21,7 +21,7 @@ public class FhirRestRetrieveProviderFactory implements TypedRetrieveProviderFac
     ClientFactory clientFactory;
 
     @Inject
-    public FhirRestRetrieveProviderFactory(FhirContext fhirContext, ClientFactory clientFactory){
+    public FhirRestRetrieveProviderFactory(FhirContext fhirContext, ClientFactory clientFactory) {
         this.fhirContext = fhirContext;
         this.clientFactory = clientFactory;
     }
@@ -33,8 +33,9 @@ public class FhirRestRetrieveProviderFactory implements TypedRetrieveProviderFac
 
     @Override
     public RetrieveProvider create(String url, List<String> headers) {
-       IGenericClient fhirClient = this.clientFactory.create(url, headers);
-       return new RestFhirRetrieveProvider(new SearchParameterResolver(this.fhirContext), fhirClient);
+        IGenericClient fhirClient = this.clientFactory.create(url, headers);
+        return new RestFhirRetrieveProvider(new SearchParameterResolver(this.fhirContext),
+                fhirClient);
     }
-    
+
 }

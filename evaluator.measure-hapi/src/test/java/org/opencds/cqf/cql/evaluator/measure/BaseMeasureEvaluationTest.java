@@ -27,26 +27,30 @@ public abstract class BaseMeasureEvaluationTest {
     protected static final String BLACK_OR_AFRICAN_AMERICAN = "Black or African American";
     protected static final String URL_SYSTEM_RACE = "urn:oid:2.16.840.1.113883.6.238";
     protected static final String OMB_CATEGORY = "ombCategory";
-    protected static final String EXT_URL_US_CORE_RACE = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race";
+    protected static final String EXT_URL_US_CORE_RACE =
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race";
 
     protected List<Library> translate(String cql) throws Exception {
         ModelManager modelManager = new ModelManager();
         LibraryManager libraryManager = new LibraryManager(modelManager);
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
-        CqlTranslator translator = CqlTranslator.fromStream(new ByteArrayInputStream(cql.getBytes()), modelManager, libraryManager);
+        CqlTranslator translator = CqlTranslator
+                .fromStream(new ByteArrayInputStream(cql.getBytes()), modelManager, libraryManager);
 
         List<CqlCompilerException> badStuff = new ArrayList<>();
-        // the translator will duplicate exceptions with assigned severity in the errors, warnings, and messages lists
-        badStuff.addAll(translator.getExceptions().stream().filter( e -> e.getSeverity() == null ).collect(Collectors.toList()));
+        // the translator will duplicate exceptions with assigned severity in the errors, warnings,
+        // and messages lists
+        badStuff.addAll(translator.getExceptions().stream().filter(e -> e.getSeverity() == null)
+                .collect(Collectors.toList()));
         badStuff.addAll(translator.getErrors());
-        if( badStuff.size() > 0 ) {
+        if (badStuff.size() > 0) {
             throw new Exception("Translation failed - " + formatMsg(badStuff));
         }
 
         List<org.cqframework.cql.elm.execution.Library> cqlLibraries = new ArrayList<>();
         var reader = CqlLibraryReaderFactory.getReader(LibraryContentType.XML.mimeType());
         cqlLibraries.add(reader.read(new StringReader(translator.toXml())));
-        for( String text : translator.getLibrariesAsXML().values() ) {
+        for (String text : translator.getLibrariesAsXML().values()) {
             cqlLibraries.add(reader.read(new StringReader(text)));
         }
         return cqlLibraries;
@@ -58,7 +62,7 @@ public abstract class BaseMeasureEvaluationTest {
         DateTime start = new DateTime(periodStart, offset);
         DateTime end = new DateTime(periodEnd, offset);
 
-        return new Interval( start, true, end, true );
+        return new Interval(start, true, end, true);
     }
 
     public String cql_with_date() {
@@ -70,7 +74,9 @@ public abstract class BaseMeasureEvaluationTest {
     }
 
     public String library_header() {
-        return String.format("library Test version '1.0.0'\n\nusing FHIR version '%1$s'\ninclude FHIRHelpers version '%1$s'\n\n", getFhirVersion());
+        return String.format(
+                "library Test version '1.0.0'\n\nusing FHIR version '%1$s'\ninclude FHIRHelpers version '%1$s'\n\n",
+                getFhirVersion());
     }
 
     public String measurement_period_date() {
@@ -88,15 +94,11 @@ public abstract class BaseMeasureEvaluationTest {
     public abstract String getFhirVersion();
 
     protected String sde_race() {
-        return "define \"SDE Race\":\n" +
-                "  (flatten (\n" +
-                "    Patient.extension Extension\n" +
-                "      where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'\n" +
-                "        return Extension.extension\n" +
-                "  )) E\n" +
-                "    where E.url = 'ombCategory'\n" +
-                "      or E.url = 'detailed'\n" +
-                "    return E.value as Coding\n\n";
+        return "define \"SDE Race\":\n" + "  (flatten (\n" + "    Patient.extension Extension\n"
+                + "      where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'\n"
+                + "        return Extension.extension\n" + "  )) E\n"
+                + "    where E.url = 'ombCategory'\n" + "      or E.url = 'detailed'\n"
+                + "    return E.value as Coding\n\n";
     }
 
     protected static String formatMsg(List<CqlCompilerException> translationErrs) {
@@ -105,8 +107,8 @@ public abstract class BaseMeasureEvaluationTest {
         for (CqlCompilerException error : translationErrs) {
             TrackBack tb = error.getLocator();
             String lines = tb == null ? "[n/a]"
-                    : String.format("[%d:%d, %d:%d]", tb.getStartLine(), tb.getStartChar(), tb.getEndLine(),
-                            tb.getEndChar());
+                    : String.format("[%d:%d, %d:%d]", tb.getStartLine(), tb.getStartChar(),
+                            tb.getEndLine(), tb.getEndChar());
             msg.append(String.format("%s %s%n", lines, error.getMessage()));
         }
         return msg.toString();

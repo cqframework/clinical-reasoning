@@ -16,29 +16,34 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor<ActivityDefinition> {
+public class ActivityDefinitionProcessor
+        extends BaseActivityDefinitionProcessor<ActivityDefinition> {
     private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
-    public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor) {
+    public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal,
+            LibraryProcessor libraryProcessor) {
         super(fhirContext, fhirDal, libraryProcessor);
     }
 
     // For library use
     @Override
-    public Resource resolveActivityDefinition(ActivityDefinition activityDefinition, String patientId,
-            String practitionerId, String organizationId) {
+    public Resource resolveActivityDefinition(ActivityDefinition activityDefinition,
+            String patientId, String practitionerId, String organizationId) {
         Resource result;
         try {
-            result = (Resource) Class.forName("org.hl7.fhir.r4.model." + activityDefinition.getKind().toCode())
+            result = (Resource) Class
+                    .forName("org.hl7.fhir.r4.model." + activityDefinition.getKind().toCode())
                     .getConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new FHIRException("Could not find org.hl7.fhir.r4.model." + activityDefinition.getKind().toCode());
+            throw new FHIRException("Could not find org.hl7.fhir.r4.model."
+                    + activityDefinition.getKind().toCode());
         }
 
         switch (result.fhirType()) {
             case "ServiceRequest":
-                result = resolveServiceRequest(activityDefinition, patientId, practitionerId, organizationId);
+                result = resolveServiceRequest(activityDefinition, patientId, practitionerId,
+                        organizationId);
                 break;
 
             case "MedicationRequest":
@@ -98,7 +103,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
 
     @Override
     public Object resolveParameterValue(IBase value) {
-        if (value == null) return null;
+        if (value == null)
+            return null;
         return ((Parameters.ParametersParameterComponent) value).getValue();
     }
 
@@ -110,9 +116,12 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
     private Task resolveTask(ActivityDefinition activityDefinition) {
         Task task = new Task();
         if (activityDefinition.hasExtension(BaseActivityDefinitionProcessor.TARGET_STATUS_URL)) {
-            Type value = activityDefinition.getExtensionByUrl(BaseActivityDefinitionProcessor.TARGET_STATUS_URL).getValue();
+            Type value = activityDefinition
+                    .getExtensionByUrl(BaseActivityDefinitionProcessor.TARGET_STATUS_URL)
+                    .getValue();
             if (value instanceof StringType) {
-                task.setStatus(Task.TaskStatus.valueOf(((StringType)value).asStringValue().toUpperCase()));
+                task.setStatus(Task.TaskStatus
+                        .valueOf(((StringType) value).asStringValue().toUpperCase()));
             } else {
                 logger.debug("Extension {} should have a value of type {}",
                         BaseActivityDefinitionProcessor.TARGET_STATUS_URL,
@@ -134,12 +143,12 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
 
         if (activityDefinition.hasDescription()) {
             task.setDescription(activityDefinition.getDescription());
-        }  
+        }
         return task;
     }
 
-    private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition, String patientId,
-            String practitionerId, String organizationId) {
+    private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition,
+            String patientId, String practitionerId, String organizationId) {
         // status, intent, code, and subject are required
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
@@ -182,7 +191,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return serviceRequest;
     }
 
-    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId) {
+    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition,
+            String patientId) {
         // intent, medication, and subject are required
         MedicationRequest medicationRequest = new MedicationRequest();
         medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
@@ -215,8 +225,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return medicationRequest;
     }
 
-    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition, String practitionerId,
-            String organizationId) {
+    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition,
+            String practitionerId, String organizationId) {
         SupplyRequest supplyRequest = new SupplyRequest();
 
         if (practitionerId != null) {
@@ -271,7 +281,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return procedure;
     }
 
-    private DiagnosticReport resolveDiagnosticReport(ActivityDefinition activityDefinition, String patientId) {
+    private DiagnosticReport resolveDiagnosticReport(ActivityDefinition activityDefinition,
+            String patientId) {
         DiagnosticReport diagnosticReport = new DiagnosticReport();
 
         diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
@@ -282,7 +293,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         }
 
         else {
-            throw new FHIRException("Missing required ActivityDefinition.code property for DiagnosticReport");
+            throw new FHIRException(
+                    "Missing required ActivityDefinition.code property for DiagnosticReport");
         }
 
         if (activityDefinition.hasRelatedArtifact()) {
@@ -305,7 +317,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return diagnosticReport;
     }
 
-    private Communication resolveCommunication(ActivityDefinition activityDefinition, String patientId) {
+    private Communication resolveCommunication(ActivityDefinition activityDefinition,
+            String patientId) {
         Communication communication = new Communication();
 
         communication.setStatus(Communication.CommunicationStatus.UNKNOWN);
@@ -323,8 +336,11 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
                         attachment.setTitle(artifact.getDisplay());
                     }
 
-                    Communication.CommunicationPayloadComponent payload = new Communication.CommunicationPayloadComponent();
-                    payload.setContent(artifact.hasDisplay() ? attachment.setTitle(artifact.getDisplay()) : attachment);
+                    Communication.CommunicationPayloadComponent payload =
+                            new Communication.CommunicationPayloadComponent();
+                    payload.setContent(
+                            artifact.hasDisplay() ? attachment.setTitle(artifact.getDisplay())
+                                    : attachment);
                     communication.setPayload(Collections.singletonList(payload));
                 }
 
@@ -334,14 +350,16 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return communication;
     }
 
-    private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition, String patientId) {
+    private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition,
+            String patientId) {
         CommunicationRequest communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.UNKNOWN);
         communicationRequest.setSubject(new Reference(patientId));
 
         if (activityDefinition.hasCode() && activityDefinition.getCode().hasText()) {
-            communicationRequest.addPayload().setContent(new StringType(activityDefinition.getCode().getText()));
+            communicationRequest.addPayload()
+                    .setContent(new StringType(activityDefinition.getCode().getText()));
         }
 
         return communicationRequest;

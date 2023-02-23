@@ -50,10 +50,9 @@ public class BundleTerminologyProvider implements TerminologyProvider {
 
     /**
      * This method checks for membership of a Code in a ValueSet
-     * 
-     * @param code     The Code to check.
-     * @param valueSet The ValueSetInfo for the ValueSet to check membership of. Can
-     *                 not be null.
+     *
+     * @param code The Code to check.
+     * @param valueSet The ValueSetInfo for the ValueSet to check membership of. Can not be null.
      * @return True if code is in the ValueSet.
      */
     @Override
@@ -73,15 +72,13 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     }
 
     /**
-     * This method expands a ValueSet into a list of Codes. It will use the
-     * "expansion" element of the ValueSet if present.
-     * It will fall back the to "compose" element if not present. <b>NOTE:</b> This
-     * provider does not provide a full expansion
-     * of the "compose" element. If only lists the codes present in the "compose".
-     * 
+     * This method expands a ValueSet into a list of Codes. It will use the "expansion" element of
+     * the ValueSet if present. It will fall back the to "compose" element if not present.
+     * <b>NOTE:</b> This provider does not provide a full expansion of the "compose" element. If
+     * only lists the codes present in the "compose".
+     *
      * @param valueSet The ValueSetInfo of the ValueSet to expand
-     * @return The Codes in the ValueSet. <b>NOTE:</b> This method never returns
-     *         null.
+     * @return The Codes in the ValueSet. <b>NOTE:</b> This method never returns null.
      */
     @Override
 
@@ -91,23 +88,22 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         this.initialize();
 
         if (!this.valueSetIndex.containsKey(valueSet.getId())) {
-            throw new IllegalArgumentException(String.format("Unable to locate ValueSet %s", valueSet.getId()));
+            throw new IllegalArgumentException(
+                    String.format("Unable to locate ValueSet %s", valueSet.getId()));
         }
 
         return this.valueSetIndex.get(valueSet.getId());
     }
 
     /**
-     * Lookup is only partially implemented for this TerminologyProvider. Full
-     * implementation requires the ability to
-     * access the full CodeSystem. This implementation only checks the code system
-     * of the code matches the CodeSystemInfo
-     * url, and verifies the version if present.
-     * 
-     * @param code       The Code to lookup
+     * Lookup is only partially implemented for this TerminologyProvider. Full implementation
+     * requires the ability to access the full CodeSystem. This implementation only checks the code
+     * system of the code matches the CodeSystemInfo url, and verifies the version if present.
+     *
+     * @param code The Code to lookup
      * @param codeSystem The CodeSystemInfo of the CodeSystem to check.
-     * @return The Code if the system of the Code (and version if specified) matches
-     *         the CodeSystemInfo url (and version)
+     * @return The Code if the system of the Code (and version if specified) matches the
+     *         CodeSystemInfo url (and version)
      */
     @Override
     public Code lookup(Code code, CodeSystemInfo codeSystem) {
@@ -115,9 +111,10 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             return null;
         }
 
-        if (code.getSystem().equals(codeSystem.getId())
-                && (code.getVersion() == null || code.getVersion().equals(codeSystem.getVersion()))) {
-            logger.warn("Unvalidated CodeSystem lookup: {} in {}", code.toString(), codeSystem.getId());
+        if (code.getSystem().equals(codeSystem.getId()) && (code.getVersion() == null
+                || code.getVersion().equals(codeSystem.getVersion()))) {
+            logger.warn("Unvalidated CodeSystem lookup: {} in {}", code.toString(),
+                    codeSystem.getId());
             return code;
         }
 
@@ -141,7 +138,8 @@ public class BundleTerminologyProvider implements TerminologyProvider {
             } else {
                 Boolean isNaiveExpansion = isNaiveExpansion(resource);
                 if (isNaiveExpansion != null && isNaiveExpansion) {
-                    logger.warn("Codes expanded without a terminology server, some results may not be correct.");
+                    logger.warn(
+                            "Codes expanded without a terminology server, some results may not be correct.");
                 }
             }
 
@@ -159,7 +157,8 @@ public class BundleTerminologyProvider implements TerminologyProvider {
     private Boolean isNaiveExpansion(IBaseResource resource) {
         IBase expansion = ValueSetUtil.getExpansion(this.fhirContext, resource);
         if (expansion != null) {
-            Object object = ValueSetUtil.getExpansionParameters(expansion, fhirPath, ".where(name = 'naive').value");
+            Object object = ValueSetUtil.getExpansionParameters(expansion, fhirPath,
+                    ".where(name = 'naive').value");
             if (object instanceof IBase) {
                 return resolveNaiveBoolean((IBase) object);
             } else if (object instanceof Iterable) {
@@ -196,7 +195,8 @@ public class BundleTerminologyProvider implements TerminologyProvider {
         }
 
         if (resource == null) {
-            throw new IllegalArgumentException(String.format("Unable to locate ValueSet %s", valueSet.getId()));
+            throw new IllegalArgumentException(
+                    String.format("Unable to locate ValueSet %s", valueSet.getId()));
         }
 
         if (containsExpansionLogic(resource)) {

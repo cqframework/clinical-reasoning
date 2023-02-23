@@ -28,8 +28,8 @@ public class BundleFhirDal implements FhirDal {
     @Override
     @SuppressWarnings("unchecked")
     public IBaseResource read(IIdType id) {
-        List<IBaseResource> resources = (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context,
-                this.bundle,
+        List<IBaseResource> resources = (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(
+                this.context, this.bundle,
                 this.context.getResourceDefinition(id.getResourceType()).getImplementingClass());
 
         for (IBaseResource resource : resources) {
@@ -59,15 +59,17 @@ public class BundleFhirDal implements FhirDal {
     @Override
     @SuppressWarnings("unchecked")
     public Iterable<IBaseResource> search(String resourceType) {
-        return (Iterable<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
+        return (Iterable<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context,
+                this.bundle,
                 this.context.getResourceDefinition(resourceType).getImplementingClass());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url) {
-        List<IBaseResource> resources = (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context,
-                this.bundle, this.context.getResourceDefinition(resourceType).getImplementingClass());
+        List<IBaseResource> resources =
+                (List<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
+                        this.context.getResourceDefinition(resourceType).getImplementingClass());
 
         List<IBaseResource> returnList = new ArrayList<>();
         for (IBaseResource resource : resources) {
@@ -89,8 +91,8 @@ public class BundleFhirDal implements FhirDal {
                     break;
 
                 default:
-                    throw new IllegalArgumentException(
-                            String.format("Unsupported FHIR version %s", this.context.getVersion().getVersion()));
+                    throw new IllegalArgumentException(String.format("Unsupported FHIR version %s",
+                            this.context.getVersion().getVersion()));
             }
         }
 

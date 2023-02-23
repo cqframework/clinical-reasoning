@@ -21,16 +21,18 @@ class ParametersParameterComponentAdapter
         return this.parametersParametersComponent;
     }
 
-    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent){
+    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent) {
         if (parametersParametersComponent == null) {
             throw new IllegalArgumentException("parametersParametersComponent can not be null");
         }
 
         if (!parametersParametersComponent.fhirType().equals("Parameters.parameter")) {
-            throw new IllegalArgumentException("element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
+            throw new IllegalArgumentException(
+                    "element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
         }
 
-        this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
+        this.parametersParametersComponent =
+                (ParametersParameterComponent) parametersParametersComponent;
 
     }
 
@@ -51,13 +53,14 @@ class ParametersParameterComponentAdapter
 
     @Override
     public List<IBaseBackboneElement> getPart() {
-        return this.getParametersParameterComponent().getPart().stream().collect(Collectors.toList());
+        return this.getParametersParameterComponent().getPart().stream()
+                .collect(Collectors.toList());
     }
 
     @Override
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
-        this.getParametersParameterComponent().setPart(parametersParameterComponents.stream().map(x -> (ParametersParameterComponent) x)
-                .collect(Collectors.toList()));
+        this.getParametersParameterComponent().setPart(parametersParameterComponents.stream()
+                .map(x -> (ParametersParameterComponent) x).collect(Collectors.toList()));
     }
 
     @Override
@@ -113,6 +116,7 @@ class ParametersParameterComponentAdapter
     @Override
     @SuppressWarnings("unchecked")
     public List<IBaseExtension<?, ?>> getExtension() {
-        return (List<IBaseExtension<?, ?>>)(List<?>)this.parametersParametersComponent.getExtension();
+        return (List<IBaseExtension<?, ?>>) (List<?>) this.parametersParametersComponent
+                .getExtension();
     }
 }

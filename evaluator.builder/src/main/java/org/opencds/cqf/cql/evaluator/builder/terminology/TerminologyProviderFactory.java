@@ -20,15 +20,18 @@ import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvide
 import ca.uhn.fhir.context.FhirContext;
 
 @Named
-public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory {
+public class TerminologyProviderFactory
+        implements org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory {
 
     private Set<TypedTerminologyProviderFactory> terminologyProviderFactories;
     private FhirContext fhirContext;
 
     @Inject
-    public TerminologyProviderFactory(FhirContext fhirContext, Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
+    public TerminologyProviderFactory(FhirContext fhirContext,
+            Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.terminologyProviderFactories = requireNonNull(terminologyProviderFactories, "terminologyProviderFactories can not be null");
+        this.terminologyProviderFactories = requireNonNull(terminologyProviderFactories,
+                "terminologyProviderFactories can not be null");
     }
 
     public TerminologyProvider create(EndpointInfo endpointInfo) {
@@ -55,7 +58,8 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
         }
     }
 
-    protected TerminologyProvider create(IBaseCoding connectionType, String url, List<String> headers) {
+    protected TerminologyProvider create(IBaseCoding connectionType, String url,
+            List<String> headers) {
         requireNonNull(url, "url can not be null");
         requireNonNull(connectionType, "connectionType can not be null");
 
@@ -65,7 +69,8 @@ public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator
             }
         }
 
-        throw new IllegalArgumentException("unsupported or unknown connectionType for loading FHIR terminology");
+        throw new IllegalArgumentException(
+                "unsupported or unknown connectionType for loading FHIR terminology");
     }
 
     @Override

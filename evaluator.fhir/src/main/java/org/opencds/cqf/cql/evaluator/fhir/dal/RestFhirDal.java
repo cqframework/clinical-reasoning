@@ -50,8 +50,9 @@ public class RestFhirDal implements FhirDal {
     public Iterable<IBaseResource> searchByUrl(String resourceType, String url) {
         Map<String, List<String>> params = new HashMap<>();
         params.put("url", Arrays.asList(url));
-        IBaseBundle bundle = this.client.search().forResource(resourceType).whereMap(params).execute();
+        IBaseBundle bundle =
+                this.client.search().forResource(resourceType).whereMap(params).execute();
         return BundleUtil.toListOfResources(this.client.getFhirContext(), bundle);
     }
-    
+
 }

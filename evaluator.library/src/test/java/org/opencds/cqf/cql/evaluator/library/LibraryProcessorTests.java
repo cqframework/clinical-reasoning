@@ -49,28 +49,31 @@ public class LibraryProcessorTests {
     public void setup() {
         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-        AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        AdapterFactory adapterFactory =
+                new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
 
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
 
-        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<TypedLibrarySourceProviderFactory>() {
-            {
-                add(new TypedLibrarySourceProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories =
+                new HashSet<TypedLibrarySourceProviderFactory>() {
+                    {
+                        add(new TypedLibrarySourceProviderFactory() {
+                            @Override
+                            public String getType() {
+                                return Constants.HL7_FHIR_FILES;
+                            }
 
-                    @Override
-                    public LibrarySourceProvider create(String url, List<String> headers) {
-                        return new BundleFhirLibrarySourceProvider(fhirContext,
-                                (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)),
-                                adapterFactory, libraryVersionSelector);
+                            @Override
+                            public LibrarySourceProvider create(String url, List<String> headers) {
+                                return new BundleFhirLibrarySourceProvider(fhirContext,
+                                        (IBaseBundle) fhirContext.newJsonParser()
+                                                .parseResource(LibraryProcessorTests.class
+                                                        .getResourceAsStream(url)),
+                                        adapterFactory, libraryVersionSelector);
+                            }
+                        });
                     }
-                });
-            }
-        };
+                };
 
         ModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
 
@@ -80,59 +83,70 @@ public class LibraryProcessorTests {
             }
         };
 
-        LibrarySourceProviderFactory libraryLoaderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
-                fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
-        Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
-            {
-                add(new TypedRetrieveProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
+        LibrarySourceProviderFactory libraryLoaderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
+                        fhirContext, adapterFactory, librarySourceProviderFactories,
+                        libraryVersionSelector);
+        Set<TypedRetrieveProviderFactory> retrieveProviderFactories =
+                new HashSet<TypedRetrieveProviderFactory>() {
+                    {
+                        add(new TypedRetrieveProviderFactory() {
+                            @Override
+                            public String getType() {
+                                return Constants.HL7_FHIR_FILES;
+                            }
+
+                            @Override
+                            public RetrieveProvider create(String url, List<String> headers) {
+
+                                return new BundleRetrieveProvider(fhirContext,
+                                        (IBaseBundle) fhirContext.newJsonParser()
+                                                .parseResource(LibraryProcessorTests.class
+                                                        .getResourceAsStream(url)));
+                            }
+                        });
                     }
+                };
 
-                    @Override
-                    public RetrieveProvider create(String url, List<String> headers) {
+        DataProviderFactory dataProviderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+                        modelResolverFactories, retrieveProviderFactories);
 
-                        return new BundleRetrieveProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)));
+        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories =
+                new HashSet<TypedTerminologyProviderFactory>() {
+                    {
+                        add(new TypedTerminologyProviderFactory() {
+                            @Override
+                            public String getType() {
+                                return Constants.HL7_FHIR_FILES;
+                            }
+
+                            @Override
+                            public TerminologyProvider create(String url, List<String> headers) {
+                                return new BundleTerminologyProvider(fhirContext,
+                                        (IBaseBundle) fhirContext.newJsonParser()
+                                                .parseResource(LibraryProcessorTests.class
+                                                        .getResourceAsStream(url)));
+                            }
+                        });
                     }
-                });
-            }
-        };
+                };
 
-        DataProviderFactory dataProviderFactory = new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(
-                fhirContext, modelResolverFactories, retrieveProviderFactories);
-
-        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = new HashSet<TypedTerminologyProviderFactory>() {
-            {
-                add(new TypedTerminologyProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
-
-                    @Override
-                    public TerminologyProvider create(String url, List<String> headers) {
-                        return new BundleTerminologyProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)));
-                    }
-                });
-            }
-        };
-
-        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
-                fhirContext, typedTerminologyProviderFactories);
+        TerminologyProviderFactory terminologyProviderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+                        fhirContext, typedTerminologyProviderFactories);
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory()
-                .create(fhirContext.getVersion().getVersion());
+        FhirTypeConverter fhirTypeConverter =
+                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
-        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext,
-                adapterFactory, fhirTypeConverter);
+        CqlFhirParametersConverter cqlFhirParametersConverter =
+                new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
 
-        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
+                libraryLoaderFactory, dataProviderFactory, terminologyProviderFactory,
+                endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
     }
 
     @Test
@@ -147,8 +161,8 @@ public class LibraryProcessorTests {
         expressions.add("Numerator");
 
         Parameters actual = (Parameters) libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("EXM125").withVersion("8.0.000"), "numer-EXM125", null, endpoint,
-                endpoint, endpoint, null, expressions);
+                new VersionedIdentifier().withId("EXM125").withVersion("8.0.000"), "numer-EXM125",
+                null, endpoint, endpoint, endpoint, null, expressions);
 
         assertTrue(expected.equalsDeep(actual));
     }
@@ -168,8 +182,8 @@ public class LibraryProcessorTests {
         expressions.add("IsReportable");
 
         Parameters actual = (Parameters) libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Reportable", null, endpoint,
-                endpoint, dataEndpoint, null, expressions);
+                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Reportable",
+                null, endpoint, endpoint, dataEndpoint, null, expressions);
 
         assertTrue(expected.equalsDeep(actual));
     }
@@ -189,8 +203,8 @@ public class LibraryProcessorTests {
         expressions.add("IsReportable");
 
         Parameters actual = (Parameters) libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "NotReportable", null, endpoint,
-                endpoint, dataEndpoint, null, expressions);
+                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"),
+                "NotReportable", null, endpoint, endpoint, dataEndpoint, null, expressions);
 
         assertTrue(expected.equalsDeep(actual));
     }

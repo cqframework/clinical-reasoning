@@ -43,17 +43,19 @@ public class BundleRetrieveProviderTests {
 
     private IBaseBundle loadBundle(String path) {
         InputStream stream = BundleRetrieveProviderTests.class.getResourceAsStream(path);
-        IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
+        IParser parser =
+                path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
 
         if (resource == null) {
-            throw new IllegalArgumentException(String.format("Unable to read a resource from %s.", path));
+            throw new IllegalArgumentException(
+                    String.format("Unable to read a resource from %s.", path));
         }
 
         Class<?> bundleClass = fhirContext.getResourceDefinition("Bundle").getImplementingClass();
         if (!bundleClass.equals(resource.getClass())) {
-            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s Bundle", path,
-                    fhirContext.getVersion().getVersion().getFhirVersionString()));
+            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s Bundle",
+                    path, fhirContext.getVersion().getVersion().getFhirVersionString()));
         }
 
         return (IBaseBundle) resource;
@@ -75,7 +77,8 @@ public class BundleRetrieveProviderTests {
     public void test_noResults_returnsEmptySet() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null,
+                null, null, null, null, null, null);
         assertNotNull(results);
         assertThat(results, is(emptyIterable()));
     }
@@ -85,7 +88,8 @@ public class BundleRetrieveProviderTests {
     public void test_filterToDataType() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null,
+                null, null, null, null, null);
         assertThat(results, allOf(iterableWithSize(2), hasItem(instanceOf(Patient.class))));
     }
 
@@ -93,7 +97,8 @@ public class BundleRetrieveProviderTests {
     public void test_filterToDataType_dataTypeNotPresent() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null,
+                null, null, null, null, null, null);
         assertThat(results, is(emptyIterable()));
     }
 
@@ -101,20 +106,23 @@ public class BundleRetrieveProviderTests {
     public void test_filterToContext() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, null, null, null, null, null, null, null);
-        
+        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4",
+                "Condition", null, null, null, null, null, null, null, null);
+
         assertThat(results, is(iterableWithSize((2))));
 
         Object firstEntry = results.iterator().next();
         assertThat(firstEntry, is(instanceOf(Condition.class)));
-        assertEquals("test-one-r4", ((Condition)firstEntry).getSubject().getReferenceElement().getIdPart());
+        assertEquals("test-one-r4",
+                ((Condition) firstEntry).getSubject().getReferenceElement().getIdPart());
     }
 
     @Test
     public void test_filterToContext_noContextRelation() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication",
+                null, null, null, null, null, null, null, null);
         assertThat(results, contains(instanceOf(Medication.class)));
     }
 
@@ -126,13 +134,15 @@ public class BundleRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         // Id does exist
-        Iterable<Code> codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med");
-        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
+        Iterable<Code> codes = (Iterable<Code>) (Iterable<?>) Collections.singletonList("test-med");
+        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication",
+                null, "id", codes, null, null, null, null, null);
         assertThat(results, contains(instanceOf(Medication.class)));
 
         // Id does not exist
-        codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med-does-exist");
-        results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
+        codes = (Iterable<Code>) (Iterable<?>) Collections.singletonList("test-med-does-exist");
+        results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes,
+                null, null, null, null, null);
         assertThat(results, is(emptyIterable()));
     }
 
@@ -142,16 +152,20 @@ public class BundleRetrieveProviderTests {
 
         // Code doesn't match
         Code code = new Code().withCode("not-a-code").withSystem("not-a-system");
-        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
-        assertNotNull(results); 
+        Iterable<Object> results =
+                retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code",
+                        Collections.singleton(code), null, null, null, null, null);
+        assertNotNull(results);
         assertThat(results, is(emptyIterable()));
 
         // Codes does match
         code = new Code().withCode("10327003").withSystem("http://snomed.info/sct");
-        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
+        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code",
+                Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results);
         assertThat(results, contains(instanceOf(Condition.class)));
-        assertEquals(((Condition)results.iterator().next()).getSubject().getReferenceElement().getIdPart(), "test-one-r4");
+        assertEquals(((Condition) results.iterator().next()).getSubject().getReferenceElement()
+                .getIdPart(), "test-one-r4");
     }
 
 
@@ -159,27 +173,29 @@ public class BundleRetrieveProviderTests {
     public void test_filterToValueSet_noTerminologyProvider() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
-            "value-set-url", null, null, null, null);
+        retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null,
+                "value-set-url", null, null, null, null);
     }
 
     @Test
     public void test_filterToValueSet() {
         IBaseBundle bundle = this.loadBundle("../util/r4/TestBundleValueSets.json");
-        TerminologyProvider terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
+        TerminologyProvider terminologyProvider =
+                new BundleTerminologyProvider(fhirContext, bundle);
 
         RetrieveProvider retrieve = this.getBundleRetrieveProvider(terminologyProvider);
 
         // Not in the value set
-        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
-        "http://localhost/fhir/ValueSet/value-set-three", null, null, null, null);
-        assertNotNull(results); 
+        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4",
+                "Condition", null, "code", null, "http://localhost/fhir/ValueSet/value-set-three",
+                null, null, null, null);
+        assertNotNull(results);
         assertThat(results, is(emptyIterable()));
 
 
         // In the value set
-        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null, 
-        "http://localhost/fhir/ValueSet/value-set-one", null, null, null, null);
+        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code",
+                null, "http://localhost/fhir/ValueSet/value-set-one", null, null, null, null);
         assertThat(results, is(iterableWithSize(1)));
     }
 
@@ -188,11 +204,14 @@ public class BundleRetrieveProviderTests {
         IBaseBundle bundle = this.loadBundle("TestBundleUrns.json");
         BundleRetrieveProvider brp = new BundleRetrieveProvider(fhirContext, bundle);
 
-        Iterable<Object> results = brp.retrieve("Patient", "id", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Patient", null, null, null, null, null, null, null, null);
+        Iterable<Object> results =
+                brp.retrieve("Patient", "id", "e527283b-e4b1-4f4e-9aef-8a5162816e32", "Patient",
+                        null, null, null, null, null, null, null, null);
         assertNotNull(results);
         assertThat(results, contains(instanceOf(Patient.class)));
 
-        results = brp.retrieve("Patient", "subject", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Condition", null, null, null, null, null, null, null, null);
+        results = brp.retrieve("Patient", "subject", "e527283b-e4b1-4f4e-9aef-8a5162816e32",
+                "Condition", null, null, null, null, null, null, null, null);
         assertThat(results, contains(instanceOf(Condition.class)));
     }
 }

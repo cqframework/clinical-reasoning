@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.fhir.helper.r5;
 
-// TODO: remove this once the R5 model resolver is available in the engine (This is just for testing purposes)
+// TODO: remove this once the R5 model resolver is available in the engine (This is just for testing
+// purposes)
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -77,10 +78,11 @@ public class R5FhirModelResolver extends
         try {
             Field f = this.fhirContext.getClass().getDeclaredField("myNameToResourceType");
             f.setAccessible(true);
-            myNameToResourceType = (Map<String, Class<? extends IBaseResource>>) f.get(this.fhirContext);
+            myNameToResourceType =
+                    (Map<String, Class<? extends IBaseResource>>) f.get(this.fhirContext);
 
-            List<Class<? extends IBaseResource>> toLoad = new ArrayList<Class<? extends IBaseResource>>(
-                    myNameToResourceType.size());
+            List<Class<? extends IBaseResource>> toLoad =
+                    new ArrayList<Class<? extends IBaseResource>>(myNameToResourceType.size());
 
             for (Enumerations.AllResourceTypes type : Enumerations.AllResourceTypes.values()) {
                 // These are abstract types that should never be resolved directly.
@@ -96,7 +98,8 @@ public class R5FhirModelResolver extends
             }
 
             // Sends a list of all classes to be loaded in bulk.
-            Method m = this.fhirContext.getClass().getDeclaredMethod("scanResourceTypes", Collection.class);
+            Method m = this.fhirContext.getClass().getDeclaredMethod("scanResourceTypes",
+                    Collection.class);
             m.setAccessible(true);
             m.invoke(this.fhirContext, toLoad);
         } catch (IllegalArgumentException e) {
@@ -142,7 +145,8 @@ public class R5FhirModelResolver extends
             sq.setCodeElement(q.getCodeElement());
             return sq;
         } else
-            throw new FHIRException("Unable to convert a " + base.getClass().getName() + " to an SimpleQuantity");
+            throw new FHIRException(
+                    "Unable to convert a " + base.getClass().getName() + " to an SimpleQuantity");
     }
 
     protected Calendar getCalendar(BaseDateTimeType dateTime) {
@@ -238,19 +242,11 @@ public class R5FhirModelResolver extends
     }
 
     /*
-     * Casting of derived primitives:
-     * Datatypes that derive from datatypes other than Element are actually profiles
-     * // Types that exhibit this behavior are:
-     * // url: uri
-     * // canonical: uri
-     * // uuid: uri
-     * // oid: uri
-     * // positiveInt: integer
-     * // unsignedInt: integer
-     * // code: string
-     * // markdown: string
-     * // id: string
-     * 
+     * Casting of derived primitives: Datatypes that derive from datatypes other than Element are
+     * actually profiles // Types that exhibit this behavior are: // url: uri // canonical: uri //
+     * uuid: uri // oid: uri // positiveInt: integer // unsignedInt: integer // code: string //
+     * markdown: string // id: string
+     *
      */
 
     @Override
@@ -335,9 +331,11 @@ public class R5FhirModelResolver extends
             UriType uriType = (UriType) value;
             switch (type.getSimpleName()) {
                 case "UrlType":
-                    return uriType.hasPrimitiveValue() ? new UrlType(uriType.primitiveValue()) : null;
+                    return uriType.hasPrimitiveValue() ? new UrlType(uriType.primitiveValue())
+                            : null;
                 case "CanonicalType":
-                    return uriType.hasPrimitiveValue() ? new CanonicalType(uriType.primitiveValue()) : null;
+                    return uriType.hasPrimitiveValue() ? new CanonicalType(uriType.primitiveValue())
+                            : null;
                 case "AnnotatedUuidType":
                 case "UuidType":
                     return uriType.hasPrimitiveValue() && uriType.getValue().startsWith("urn:uuid:")
@@ -358,12 +356,14 @@ public class R5FhirModelResolver extends
                 case "PositiveIntType":
                     return integerType.hasPrimitiveValue() && integerType.getValue() > 0
                             ? new PositiveIntType(integerType.primitiveValue())
-                            : null; // integerType.castToPositiveInt(integerType); Throws an exception, not
+                            : null; // integerType.castToPositiveInt(integerType); Throws an
+                                    // exception, not
                                     // implemented
                 case "UnsignedIntType":
                     return integerType.hasPrimitiveValue() && integerType.getValue() >= 0
                             ? new UnsignedIntType(integerType.primitiveValue())
-                            : null; // castToUnsignedInt(integerType); Throws an exception, not implemented
+                            : null; // castToUnsignedInt(integerType); Throws an exception, not
+                                    // implemented
                 default:
                     break;
             }
@@ -373,15 +373,20 @@ public class R5FhirModelResolver extends
             StringType stringType = (StringType) value;
             switch (type.getSimpleName()) {
                 case "CodeType":
-                    return stringType.hasPrimitiveValue() ? new CodeType(stringType.primitiveValue()) : null;
+                    return stringType.hasPrimitiveValue()
+                            ? new CodeType(stringType.primitiveValue())
+                            : null;
                 case "MarkdownType":
-                    return stringType.hasPrimitiveValue() ? new MarkdownType(stringType.primitiveValue()) : null;
+                    return stringType.hasPrimitiveValue()
+                            ? new MarkdownType(stringType.primitiveValue())
+                            : null;
                 case "IdType":
-                    return stringType.hasPrimitiveValue() ? new IdType(stringType.primitiveValue()) : null; // stringType.castToId(stringType);
-                                                                                                            // Throws an
-                                                                                                            // exception,
-                                                                                                            // not
-                                                                                                            // implemented
+                    return stringType.hasPrimitiveValue() ? new IdType(stringType.primitiveValue())
+                            : null; // stringType.castToId(stringType);
+                                    // Throws an
+                                    // exception,
+                                    // not
+                                    // implemented
                 default:
                     break;
             }
@@ -415,8 +420,10 @@ public class R5FhirModelResolver extends
                     // TODO: Ensure count constraints are met, else return null
                     return count;
                 case "SimpleQuantity":
-                    return castToSimpleQuantity(quantity); // NOTE: This is wrong in that it is copying the comparator,
-                                                           // it should be ensuring comparator is not set...
+                    return castToSimpleQuantity(quantity); // NOTE: This is wrong in that it is
+                                                           // copying the comparator,
+                                                           // it should be ensuring comparator is
+                                                           // not set...
                 case "MoneyQuantity":
                     MoneyQuantity moneyQuantity = new MoneyQuantity();
                     moneyQuantity.setValue(quantity.getValue());
@@ -429,8 +436,8 @@ public class R5FhirModelResolver extends
         }
 
         if (isStrict) {
-            throw new InvalidCast(
-                    String.format("Cannot cast a value of type %s as %s.", value.getClass().getName(), type.getName()));
+            throw new InvalidCast(String.format("Cannot cast a value of type %s as %s.",
+                    value.getClass().getName(), type.getName()));
         }
 
         return null;

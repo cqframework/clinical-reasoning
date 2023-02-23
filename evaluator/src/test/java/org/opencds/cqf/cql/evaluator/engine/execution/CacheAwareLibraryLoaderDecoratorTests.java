@@ -30,115 +30,119 @@
 // import ca.uhn.fhir.parser.IParser;
 
 // public class CacheAwareLibraryLoaderDecoratorTests {
-//     private FhirContext fhirContext;
-//     private IParser parser;
-//     private ModelManager modelManger;
-//     private TranslatorOptionAwareLibraryLoader libraryLoader;
-//     private Map<VersionedIdentifier, Library> libraryCache;
-//     private CacheAwareLibraryLoaderDecorator libraryLoaderDecorator;
+// private FhirContext fhirContext;
+// private IParser parser;
+// private ModelManager modelManger;
+// private TranslatorOptionAwareLibraryLoader libraryLoader;
+// private Map<VersionedIdentifier, Library> libraryCache;
+// private CacheAwareLibraryLoaderDecorator libraryLoaderDecorator;
 
-//     @BeforeClass
-//     public void setup() {
-//         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-//         modelManger = new ModelManager();
-//         parser = fhirContext.newJsonParser();
-//     }
+// @BeforeClass
+// public void setup() {
+// fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+// modelManger = new ModelManager();
+// parser = fhirContext.newJsonParser();
+// }
 
-//     private TranslatorOptionAwareLibraryLoader createLibraryLoader(CqlTranslatorOptions translatorOptions) {
-//         BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider = new BaseFhirLibrarySourceProvider(
-//                 new AdapterFactory()) {
-//             @Override
-//             public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
-//                 String name = versionedIdentifier.getId();
+// private TranslatorOptionAwareLibraryLoader createLibraryLoader(CqlTranslatorOptions
+// translatorOptions) {
+// BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider = new BaseFhirLibrarySourceProvider(
+// new AdapterFactory()) {
+// @Override
+// public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
+// String name = versionedIdentifier.getId();
 
-//                 InputStream libraryStream = CacheAwareLibraryLoaderDecoratorTests.class
-//                         .getResourceAsStream(name + ".json");
+// InputStream libraryStream = CacheAwareLibraryLoaderDecoratorTests.class
+// .getResourceAsStream(name + ".json");
 
-//                 return parser.parseResource(new InputStreamReader(libraryStream));
-//             }
-//         };
+// return parser.parseResource(new InputStreamReader(libraryStream));
+// }
+// };
 
-//         return new TranslatingLibraryLoader(modelManger, Collections.singletonList(testFhirLibrarySourceProvider),
-//                 translatorOptions);
-//     }
+// return new TranslatingLibraryLoader(modelManger,
+// Collections.singletonList(testFhirLibrarySourceProvider),
+// translatorOptions);
+// }
 
-//     @BeforeMethod
-//     public void initialize() {
-//         this.libraryLoader = Mockito.spy(this.createLibraryLoader(CqlTranslatorOptions.defaultOptions()));
+// @BeforeMethod
+// public void initialize() {
+// this.libraryLoader =
+// Mockito.spy(this.createLibraryLoader(CqlTranslatorOptions.defaultOptions()));
 
-//         this.libraryCache = Mockito.spy(new HashMap<>());
+// this.libraryCache = Mockito.spy(new HashMap<>());
 
-//         this.libraryLoaderDecorator = Mockito.spy(new CacheAwareLibraryLoaderDecorator(libraryLoader, libraryCache));
-//     }
+// this.libraryLoaderDecorator = Mockito.spy(new CacheAwareLibraryLoaderDecorator(libraryLoader,
+// libraryCache));
+// }
 
-//     @Test
-//     public void cachesLibrary() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
-//         Library library = this.libraryLoaderDecorator.load(libraryIdentifier);
-//         assertNotNull(library);
+// @Test
+// public void cachesLibrary() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
+// Library library = this.libraryLoaderDecorator.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
+// Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
 
-//         assertEquals(this.libraryCache.size(), 1);
+// assertEquals(this.libraryCache.size(), 1);
 
-//         // Load from cache, should not have requested another load
-//         library = this.libraryLoaderDecorator.load(libraryIdentifier);
-//         assertNotNull(library);
+// // Load from cache, should not have requested another load
+// library = this.libraryLoaderDecorator.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
-//     }
+// Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
+// }
 
-//     @Test
-//     public void recachesAfterInvalidation() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
-//         Library library = this.libraryLoaderDecorator.load(libraryIdentifier);
-//         assertNotNull(library);
+// @Test
+// public void recachesAfterInvalidation() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
+// Library library = this.libraryLoaderDecorator.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
+// Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
 
-//         assertEquals(this.libraryCache.size(), 1);
+// assertEquals(this.libraryCache.size(), 1);
 
-//         this.libraryCache.clear();
-//         ;
+// this.libraryCache.clear();
+// ;
 
-//         // Cache is empty, should have reloaded.
-//         library = this.libraryLoaderDecorator.load(libraryIdentifier);
-//         assertNotNull(library);
+// // Cache is empty, should have reloaded.
+// library = this.libraryLoaderDecorator.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.libraryLoader, times(2)).load(libraryIdentifier);
-//     }
+// Mockito.verify(this.libraryLoader, times(2)).load(libraryIdentifier);
+// }
 
-//     @Test
-//     public void usesCacheIfSupplied() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
-//         Library library = this.libraryLoader.load(libraryIdentifier);
-//         assertNotNull(library);
+// @Test
+// public void usesCacheIfSupplied() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryJson");
+// Library library = this.libraryLoader.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         this.libraryCache.put(libraryIdentifier, library);
+// this.libraryCache.put(libraryIdentifier, library);
 
-//         // Cache is not empty, should use it
-//         library = this.libraryLoaderDecorator.load(libraryIdentifier);
-//         assertNotNull(library);
+// // Cache is not empty, should use it
+// library = this.libraryLoaderDecorator.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
-//     }
+// Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
+// }
 
-//     @Test
-//     public void doesNotUseCacheIfTranslatorMismatch() {
-//         VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryBoth");
+// @Test
+// public void doesNotUseCacheIfTranslatorMismatch() {
+// VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("LibraryBoth");
 
-//         LibraryLoader nonDefaultLibraryLoader = this.createLibraryLoader(
-//                 CqlTranslatorOptions.defaultOptions().withOptions(CqlTranslator.Options.RequireFromKeyword));
+// LibraryLoader nonDefaultLibraryLoader = this.createLibraryLoader(
+// CqlTranslatorOptions.defaultOptions().withOptions(CqlTranslator.Options.RequireFromKeyword));
 
-//         Library library = nonDefaultLibraryLoader.load(libraryIdentifier);
-//         assertNotNull(library);
+// Library library = nonDefaultLibraryLoader.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         this.libraryCache.put(libraryIdentifier, library);
+// this.libraryCache.put(libraryIdentifier, library);
 
-//         // Cache has a bad library, so this should still call the library loader
-//         library = this.libraryLoaderDecorator.load(libraryIdentifier);
-//         assertNotNull(library);
+// // Cache has a bad library, so this should still call the library loader
+// library = this.libraryLoaderDecorator.load(libraryIdentifier);
+// assertNotNull(library);
 
-//         Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
-//     }
+// Mockito.verify(this.libraryLoader, times(1)).load(libraryIdentifier);
+// }
 // }

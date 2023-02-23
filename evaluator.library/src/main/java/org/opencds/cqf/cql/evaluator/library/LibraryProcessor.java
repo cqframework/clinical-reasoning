@@ -47,100 +47,103 @@ public class LibraryProcessor {
     protected Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier;
 
     @Inject
-    public LibraryProcessor(FhirContext fhirContext, CqlFhirParametersConverter cqlFhirParametersConverter,
-            LibrarySourceProviderFactory libraryLoaderFactory, DataProviderFactory dataProviderFactory,
-            TerminologyProviderFactory terminologyProviderFactory, EndpointConverter endpointConverter,
-            ModelResolverFactory fhirModelResolverFactory,
+    public LibraryProcessor(FhirContext fhirContext,
+            CqlFhirParametersConverter cqlFhirParametersConverter,
+            LibrarySourceProviderFactory libraryLoaderFactory,
+            DataProviderFactory dataProviderFactory,
+            TerminologyProviderFactory terminologyProviderFactory,
+            EndpointConverter endpointConverter, ModelResolverFactory fhirModelResolverFactory,
             Supplier<CqlEvaluatorBuilder> cqlEvaluatorBuilderSupplier) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.cqlFhirParametersConverter = requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
-        this.librarySourceProviderFactory = requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
-        this.dataProviderFactory = requireNonNull(dataProviderFactory, "dataProviderFactory can not be null");
+        this.cqlFhirParametersConverter =
+                requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter");
+        this.librarySourceProviderFactory =
+                requireNonNull(libraryLoaderFactory, "libraryLoaderFactory can not be null");
+        this.dataProviderFactory =
+                requireNonNull(dataProviderFactory, "dataProviderFactory can not be null");
         this.terminologyProviderFactory = requireNonNull(terminologyProviderFactory,
                 "terminologyProviderFactory can not be null");
 
-        this.endpointConverter = requireNonNull(endpointConverter, "endpointConverter can not be null");
-        this.cqlEvaluatorBuilderSupplier = requireNonNull(cqlEvaluatorBuilderSupplier, "cqlEvaluatorBuilder can not be null");
-        this.fhirModelResolverFactory = requireNonNull(fhirModelResolverFactory, "fhirModelResolverFactory can not be null");
+        this.endpointConverter =
+                requireNonNull(endpointConverter, "endpointConverter can not be null");
+        this.cqlEvaluatorBuilderSupplier =
+                requireNonNull(cqlEvaluatorBuilderSupplier, "cqlEvaluatorBuilder can not be null");
+        this.fhirModelResolverFactory = requireNonNull(fhirModelResolverFactory,
+                "fhirModelResolverFactory can not be null");
 
         if (!this.fhirModelResolverFactory.getModelUri().equals(Constants.FHIR_MODEL_URI)) {
-            throw new IllegalArgumentException("fhirModelResolverFactory was a FHIR modelResolverFactory");
+            throw new IllegalArgumentException(
+                    "fhirModelResolverFactory was a FHIR modelResolverFactory");
         }
     }
 
     /**
-     * The function evaluates a FHIR library by the Canonical Url and returns a
-     * Parameters resource that contains the evaluation result
+     * The function evaluates a FHIR library by the Canonical Url and returns a Parameters resource
+     * that contains the evaluation result
      *
-     * @param url                 the url of the Library to evaluate
-     * @param patientId           the patient Id to use for evaluation, if
-     *                            applicable
-     * @param parameters          additional Parameters to set for the Library
-     * @param libraryEndpoint     the Endpoint to use for loading Library resources,
-     *                            if applicable
-     * @param terminologyEndpoint the Endpoint to use for Terminology operations, if
-     *                            applicable
-     * @param dataEndpoint        the Endpoint to use for data, if applicable
-     * @param additionalData      additional data to use during evaluation
-     * @param expressions         names of expressions in the Library to evaluate.
-     *                            if omitted all expressions are evaluated.
+     * @param url the url of the Library to evaluate
+     * @param patientId the patient Id to use for evaluation, if applicable
+     * @param parameters additional Parameters to set for the Library
+     * @param libraryEndpoint the Endpoint to use for loading Library resources, if applicable
+     * @param terminologyEndpoint the Endpoint to use for Terminology operations, if applicable
+     * @param dataEndpoint the Endpoint to use for data, if applicable
+     * @param additionalData additional data to use during evaluation
+     * @param expressions names of expressions in the Library to evaluate. if omitted all
+     *        expressions are evaluated.
      * @return IBaseParameters
      */
     public IBaseParameters evaluate(String url, String patientId, IBaseParameters parameters,
-            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
-            IBaseBundle additionalData, Set<String> expressions) {
+            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
+            IBaseResource dataEndpoint, IBaseBundle additionalData, Set<String> expressions) {
 
-        return this.evaluate(this.getVersionedIdentifer(url, libraryEndpoint, additionalData), patientId, parameters,
-                libraryEndpoint, terminologyEndpoint, dataEndpoint, additionalData, expressions);
+        return this.evaluate(this.getVersionedIdentifer(url, libraryEndpoint, additionalData),
+                patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint,
+                additionalData, expressions);
     }
 
     /**
-     * The function evaluates a FHIR library by Id and returns a Parameters resource
-     * that contains the evaluation result
+     * The function evaluates a FHIR library by Id and returns a Parameters resource that contains
+     * the evaluation result
      *
-     * @param id                  the Id of the Library to evaluate
-     * @param patientId           the patient Id to use for evaluation, if
-     *                            applicable
-     * @param parameters          additional Parameters to set for the Library
-     * @param libraryEndpoint     the Endpoint to use for loading Library resources,
-     *                            if applicable
-     * @param terminologyEndpoint the Endpoint to use for Terminology operations, if
-     *                            applicable
-     * @param dataEndpoint        the Endpoint to use for data, if applicable
-     * @param additionalData      additional data to use during evaluation
-     * @param expressions         names of expressions in the Library to evaluate.
-     *                            if omitted all expressions are evaluated.
+     * @param id the Id of the Library to evaluate
+     * @param patientId the patient Id to use for evaluation, if applicable
+     * @param parameters additional Parameters to set for the Library
+     * @param libraryEndpoint the Endpoint to use for loading Library resources, if applicable
+     * @param terminologyEndpoint the Endpoint to use for Terminology operations, if applicable
+     * @param dataEndpoint the Endpoint to use for data, if applicable
+     * @param additionalData additional data to use during evaluation
+     * @param expressions names of expressions in the Library to evaluate. if omitted all
+     *        expressions are evaluated.
      * @return IBaseParameters
      */
     public IBaseParameters evaluate(IIdType id, String patientId, IBaseParameters parameters,
-            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
-            IBaseBundle additionalData, Set<String> expressions) {
+            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint,
+            IBaseResource dataEndpoint, IBaseBundle additionalData, Set<String> expressions) {
 
-        return this.evaluate(this.getVersionedIdentifer(id, libraryEndpoint, additionalData), patientId, parameters,
-                libraryEndpoint, terminologyEndpoint, dataEndpoint, additionalData, expressions);
+        return this.evaluate(this.getVersionedIdentifer(id, libraryEndpoint, additionalData),
+                patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint,
+                additionalData, expressions);
     }
 
     /**
-     * The function evaluates a CQL / FHIR library by VersionedIdentifier and
-     * returns a Parameters resource that contains the evaluation result
+     * The function evaluates a CQL / FHIR library by VersionedIdentifier and returns a Parameters
+     * resource that contains the evaluation result
      *
-     * @param id                  the VersionedIdentifier of the Library to evaluate
-     * @param patientId           the patient Id to use for evaluation, if
-     *                            applicable
-     * @param parameters          additional Parameters to set for the Library
-     * @param libraryEndpoint     the Endpoint to use for loading Library resources,
-     *                            if applicable
-     * @param terminologyEndpoint the Endpoint to use for Terminology operations, if
-     *                            applicable
-     * @param dataEndpoint        the Endpoint to use for data, if applicable
-     * @param additionalData      additional data to use during evaluation
-     * @param expressions         names of expressions in the Library to evaluate.
-     *                            if omitted all expressions are evaluated.
+     * @param id the VersionedIdentifier of the Library to evaluate
+     * @param patientId the patient Id to use for evaluation, if applicable
+     * @param parameters additional Parameters to set for the Library
+     * @param libraryEndpoint the Endpoint to use for loading Library resources, if applicable
+     * @param terminologyEndpoint the Endpoint to use for Terminology operations, if applicable
+     * @param dataEndpoint the Endpoint to use for data, if applicable
+     * @param additionalData additional data to use during evaluation
+     * @param expressions names of expressions in the Library to evaluate. if omitted all
+     *        expressions are evaluated.
      * @return IBaseParameters
      */
-    public IBaseParameters evaluate(VersionedIdentifier id, String patientId, IBaseParameters parameters,
-            IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
+    public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
+            IBaseParameters parameters, IBaseResource libraryEndpoint,
+            IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
             IBaseBundle additionalData, Set<String> expressions) {
 
         this.cqlEvaluatorBuilder = this.cqlEvaluatorBuilderSupplier.get();
@@ -149,8 +152,8 @@ public class LibraryProcessor {
         this.addTerminologyProviders(terminologyEndpoint, additionalData);
         this.addDataProviders(dataEndpoint, additionalData);
 
-        LibraryEvaluator libraryEvaluator = new LibraryEvaluator(this.cqlFhirParametersConverter,
-                cqlEvaluatorBuilder.build());
+        LibraryEvaluator libraryEvaluator =
+                new LibraryEvaluator(this.cqlFhirParametersConverter, cqlEvaluatorBuilder.build());
 
         Pair<String, Object> contextParameter = null;
         if (patientId != null) {
@@ -163,7 +166,8 @@ public class LibraryProcessor {
         return libraryEvaluator.evaluate(id, contextParameter, parameters, expressions);
     }
 
-    protected void addLibrarySourceProviders(IBaseResource libraryEndpoint, IBaseBundle additionalData) {
+    protected void addLibrarySourceProviders(IBaseResource libraryEndpoint,
+            IBaseBundle additionalData) {
         if (libraryEndpoint != null) {
             LibrarySourceProvider librarySourceProvider = this.librarySourceProviderFactory
                     .create(endpointConverter.getEndpointInfo(libraryEndpoint));
@@ -171,38 +175,40 @@ public class LibraryProcessor {
         }
 
         if (additionalData != null) {
-            this.cqlEvaluatorBuilder
-                    .withLibrarySourceProvider(this.librarySourceProviderFactory.create(additionalData));
+            this.cqlEvaluatorBuilder.withLibrarySourceProvider(
+                    this.librarySourceProviderFactory.create(additionalData));
         }
     }
 
-    protected void addTerminologyProviders(IBaseResource terminologyEndpoint, IBaseBundle additionalData) {
+    protected void addTerminologyProviders(IBaseResource terminologyEndpoint,
+            IBaseBundle additionalData) {
         if (terminologyEndpoint != null) {
-            this.cqlEvaluatorBuilder.withTerminologyProvider(
-                    this.terminologyProviderFactory.create(endpointConverter.getEndpointInfo(terminologyEndpoint)));
+            this.cqlEvaluatorBuilder.withTerminologyProvider(this.terminologyProviderFactory
+                    .create(endpointConverter.getEndpointInfo(terminologyEndpoint)));
         }
 
         if (additionalData != null) {
-            this.cqlEvaluatorBuilder.withTerminologyProvider(this.terminologyProviderFactory.create(additionalData));
+            this.cqlEvaluatorBuilder.withTerminologyProvider(
+                    this.terminologyProviderFactory.create(additionalData));
         }
     }
 
     protected void addDataProviders(IBaseResource dataEndpoint, IBaseBundle additionalData) {
         if (dataEndpoint != null) {
-           DataProviderComponents dataProvider = this.dataProviderFactory
+            DataProviderComponents dataProvider = this.dataProviderFactory
                     .create(endpointConverter.getEndpointInfo(dataEndpoint));
             this.cqlEvaluatorBuilder.withDataProviderComponents(dataProvider);
         }
 
         if (additionalData != null) {
-            DataProviderComponents dataProvider = this.dataProviderFactory
-                    .create(additionalData);
+            DataProviderComponents dataProvider = this.dataProviderFactory.create(additionalData);
             this.cqlEvaluatorBuilder.withDataProviderComponents(dataProvider);
         }
 
         if (additionalData == null && dataEndpoint == null) {
             // Set up a FHIR resolver in the event we don't have any data
-            ModelResolver modelResolver = this.fhirModelResolverFactory.create(fhirContext.getVersion().getVersion().getFhirVersionString());
+            ModelResolver modelResolver = this.fhirModelResolverFactory
+                    .create(fhirContext.getVersion().getVersion().getFhirVersionString());
             this.cqlEvaluatorBuilder.withModelResolver(Constants.FHIR_MODEL_URI, modelResolver);
         }
     }
@@ -215,11 +221,13 @@ public class LibraryProcessor {
     protected VersionedIdentifier getVersionedIdentifer(String url, IBaseResource libraryEndpoint,
             IBaseBundle additionalData) {
         if (!url.contains("/Library/")) {
-            throw new IllegalArgumentException("Invalid resource type for determining library version identifier: Library");
+            throw new IllegalArgumentException(
+                    "Invalid resource type for determining library version identifier: Library");
         }
-        String [] urlSplit = url.split("/Library/");
+        String[] urlSplit = url.split("/Library/");
         if (urlSplit.length != 2) {
-            throw new IllegalArgumentException("Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
+            throw new IllegalArgumentException(
+                    "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 
         String cqlNamespaceUrl = urlSplit[0];

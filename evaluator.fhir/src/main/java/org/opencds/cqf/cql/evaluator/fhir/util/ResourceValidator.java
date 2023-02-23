@@ -30,14 +30,16 @@ public class ResourceValidator {
     protected Map<String, ValidationProfile> profiles;
 
 
-    public ResourceValidator(FhirContext context, Map<String, ValidationProfile> profiles, FhirDal fhirDal) {
+    public ResourceValidator(FhirContext context, Map<String, ValidationProfile> profiles,
+            FhirDal fhirDal) {
         this.fhirDal = fhirDal;
         this.context = context;
         this.profiles = profiles == null ? new HashMap<>() : profiles;
         setValidator();
     }
 
-    public ResourceValidator(FhirVersionEnum version, Map<String, ValidationProfile> profiles, FhirDal fhirDal) {
+    public ResourceValidator(FhirVersionEnum version, Map<String, ValidationProfile> profiles,
+            FhirDal fhirDal) {
         this.fhirDal = fhirDal;
         this.context = FhirContext.forCached(version);
         this.profiles = profiles == null ? new HashMap<>() : profiles;
@@ -50,20 +52,24 @@ public class ResourceValidator {
         } else {
             var supportChain = new ValidationSupportChain();
             supportChain.addValidationSupport(new DefaultProfileValidationSupport(this.context));
-            supportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(this.context));
-            supportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(this.context));
+            supportChain
+                    .addValidationSupport(new CommonCodeSystemsTerminologyService(this.context));
+            supportChain.addValidationSupport(
+                    new InMemoryTerminologyServerValidationSupport(this.context));
 
             var profileSupport = new PrePopulatedValidationSupport(this.context);
             for (var profile : this.profiles.entrySet()) {
-                var ig = (ImplementationGuide) this.fhirDal.read(new IdType("ImplementationGuide", profile.getValue().getName()));
+                var ig = (ImplementationGuide) this.fhirDal
+                        .read(new IdType("ImplementationGuide", profile.getValue().getName()));
                 if (ig == null) {
                     continue;
                 }
                 for (var resourceComponent : ig.getDefinition().getResource()) {
-                    if (Arrays.asList("CodeSystem", "StructureDefinition", "ValueSet")
-                            .contains(resourceComponent.getReference().getReference().split("/")[0])) {
+                    if (Arrays.asList("CodeSystem", "StructureDefinition", "ValueSet").contains(
+                            resourceComponent.getReference().getReference().split("/")[0])) {
                         try {
-                            var resource = this.fhirDal.read(new IdType(resourceComponent.getReference().getReference()));
+                            var resource = this.fhirDal.read(
+                                    new IdType(resourceComponent.getReference().getReference()));
                             if (resource != null) {
                                 profileSupport.addResource(resource);
                             }
@@ -73,10 +79,11 @@ public class ResourceValidator {
                     }
                 }
             }
-            
+
             supportChain.addValidationSupport(profileSupport);
 
-            this.validator = this.context.newValidator().registerValidatorModule(new FhirInstanceValidator(new CachingValidationSupport(supportChain)));
+            this.validator = this.context.newValidator().registerValidatorModule(
+                    new FhirInstanceValidator(new CachingValidationSupport(supportChain)));
         }
     }
 
@@ -86,19 +93,22 @@ public class ResourceValidator {
 
     public IBaseResource validate(IBaseResource resource, Boolean error) {
         var validationResult = this.validator.validateWithResult(resource);
-        var errors = validationResult.getMessages().stream().filter(m ->
-            m.getSeverity().compareTo(ResultSeverityEnum.ERROR) > -1 &&
-            this.profiles.entrySet().stream().flatMap(p -> p.getValue().getIgnoreKeys().stream()).noneMatch(m.getMessage()::contains)
-        ).collect(Collectors.toList());
+        var errors = validationResult.getMessages().stream().filter(
+                m -> m.getSeverity().compareTo(ResultSeverityEnum.ERROR) > -1 && this.profiles
+                        .entrySet().stream().flatMap(p -> p.getValue().getIgnoreKeys().stream())
+                        .noneMatch(m.getMessage()::contains))
+                .collect(Collectors.toList());
 
         if (errors.isEmpty()) {
             return resource;
         }
 
         if (Boolean.TRUE.equals(error)) {
-            var messages = errors.stream().map(SingleValidationMessage::getMessage).collect(Collectors.toList());
+            var messages = errors.stream().map(SingleValidationMessage::getMessage)
+                    .collect(Collectors.toList());
             var issues = String.join("; ", messages);
-            throw new RuntimeException("Unable to validate resource. The following problems were found: " + issues);
+            throw new RuntimeException(
+                    "Unable to validate resource. The following problems were found: " + issues);
         } else {
             return validationResult.toOperationOutcome();
         }

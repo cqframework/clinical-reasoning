@@ -16,9 +16,9 @@ public interface ResourceAdapter extends Adapter<IBaseResource> {
 
     public IBase[] getProperty(String name) throws FHIRException;
 
-	public IBase[] getProperty(String name, boolean checkValid) throws FHIRException;
+    public IBase[] getProperty(String name, boolean checkValid) throws FHIRException;
 
-	public IBase makeProperty(String name) throws FHIRException;
+    public IBase makeProperty(String name) throws FHIRException;
 
     public String[] getTypesForProperty(String name) throws FHIRException;
 

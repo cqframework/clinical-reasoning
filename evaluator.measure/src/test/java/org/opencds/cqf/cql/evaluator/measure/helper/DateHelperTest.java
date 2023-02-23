@@ -7,7 +7,8 @@ import java.util.Date;
 
 import org.testng.annotations.Test;
 
-// TODO: These tests are only partially complete. We need to actually verify that resolved dates are correct.
+// TODO: These tests are only partially complete. We need to actually verify that resolved dates are
+// correct.
 public class DateHelperTest {
 
     @Test

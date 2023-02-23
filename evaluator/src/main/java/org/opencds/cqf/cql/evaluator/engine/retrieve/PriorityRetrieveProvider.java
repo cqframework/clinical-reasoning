@@ -11,8 +11,8 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class PriorityRetrieveProvider implements RetrieveProvider {
 
-    private List<RetrieveProvider> retrieveProviders;
-;
+    private List<RetrieveProvider> retrieveProviders;;
+
     public PriorityRetrieveProvider(List<RetrieveProvider> retrieveProviders) {
         requireNonNull(retrieveProviders, "retrieveProviders can not be null.");
 
@@ -20,17 +20,21 @@ public class PriorityRetrieveProvider implements RetrieveProvider {
     }
 
     @Override
-    public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
-            String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
-            String dateLowPath, String dateHighPath, Interval dateRange) {
+    public Iterable<Object> retrieve(String context, String contextPath, Object contextValue,
+            String dataType, String templateId, String codePath, Iterable<Code> codes,
+            String valueSet, String datePath, String dateLowPath, String dateHighPath,
+            Interval dateRange) {
 
-        for (RetrieveProvider rp : retrieveProviders){
-            Iterable<Object> result = rp.retrieve(context, contextPath, contextValue, dataType, templateId, codePath, codes, 
-                valueSet, datePath, dateLowPath, dateHighPath, dateRange);
+        for (RetrieveProvider rp : retrieveProviders) {
+            Iterable<Object> result =
+                    rp.retrieve(context, contextPath, contextValue, dataType, templateId, codePath,
+                            codes, valueSet, datePath, dateLowPath, dateHighPath, dateRange);
 
             if (result == null) {
-                // TODO: Change the semantics such that null means unknown while empty set means known empty
-                throw new IllegalStateException("retrieveProvider unexpectedly returned null. Should be an empty set.");
+                // TODO: Change the semantics such that null means unknown while empty set means
+                // known empty
+                throw new IllegalStateException(
+                        "retrieveProvider unexpectedly returned null. Should be an empty set.");
             }
 
             if (result.iterator().hasNext()) {

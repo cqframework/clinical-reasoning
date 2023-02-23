@@ -25,18 +25,20 @@ import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import dagger.multibindings.IntoSet;
 
-@Module(includes = { BuilderBindingModule.class, AdapterModule.class })
+@Module(includes = {BuilderBindingModule.class, AdapterModule.class})
 public class BuilderModule {
     @Provides
     @IntoSet
     @Singleton
-    ModelResolverFactory fhirModelResolverFactorySet(FhirModelResolverFactory fhirModelResolverFactory) {
+    ModelResolverFactory fhirModelResolverFactorySet(
+            FhirModelResolverFactory fhirModelResolverFactory) {
         return fhirModelResolverFactory;
     }
 
     @Provides
     @Singleton
-    ModelResolverFactory fhirModelResolverFactory(FhirModelResolverFactory fhirModelResolverFactory) {
+    ModelResolverFactory fhirModelResolverFactory(
+            FhirModelResolverFactory fhirModelResolverFactory) {
         return fhirModelResolverFactory;
     }
 
@@ -50,22 +52,32 @@ public class BuilderModule {
     @Provides
     @ElementsIntoSet
     @Singleton
-    Set<TypedLibrarySourceProviderFactory> typedLibrarySourceProviderFactories(CqlFileLibrarySourceProviderFactory cqlFileLibrarySourceProviderFactory, FhirFileLibrarySourceProviderFactory fhirFileLibrarySourceProviderFactory, FhirRestLibrarySourceProviderFactory fhirRestLibrarySourceProviderFactory) {
-        return new HashSet<>(Arrays.asList(cqlFileLibrarySourceProviderFactory, fhirFileLibrarySourceProviderFactory, fhirRestLibrarySourceProviderFactory));
+    Set<TypedLibrarySourceProviderFactory> typedLibrarySourceProviderFactories(
+            CqlFileLibrarySourceProviderFactory cqlFileLibrarySourceProviderFactory,
+            FhirFileLibrarySourceProviderFactory fhirFileLibrarySourceProviderFactory,
+            FhirRestLibrarySourceProviderFactory fhirRestLibrarySourceProviderFactory) {
+        return new HashSet<>(Arrays.asList(cqlFileLibrarySourceProviderFactory,
+                fhirFileLibrarySourceProviderFactory, fhirRestLibrarySourceProviderFactory));
     }
 
     @Provides
     @ElementsIntoSet
     @Singleton
-    Set<TypedRetrieveProviderFactory> typedRetrieveProviderFactories(FhirRestRetrieveProviderFactory fhirRestRetrieveProviderFactory, FhirFileRetrieveProviderFactory fhirFileRetrieveProviderFactory) {
-        return new HashSet<>(Arrays.asList(fhirRestRetrieveProviderFactory, fhirFileRetrieveProviderFactory));
+    Set<TypedRetrieveProviderFactory> typedRetrieveProviderFactories(
+            FhirRestRetrieveProviderFactory fhirRestRetrieveProviderFactory,
+            FhirFileRetrieveProviderFactory fhirFileRetrieveProviderFactory) {
+        return new HashSet<>(
+                Arrays.asList(fhirRestRetrieveProviderFactory, fhirFileRetrieveProviderFactory));
     }
 
     @Provides
     @ElementsIntoSet
     @Singleton
-    Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories(FhirFileTerminologyProviderFactory fhirFileTerminologyProviderFactory, FhirRestTerminologyProviderFactory fhirRestTerminologyProviderFactory) {
-        return new HashSet<>(Arrays.asList(fhirFileTerminologyProviderFactory, fhirRestTerminologyProviderFactory));
+    Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories(
+            FhirFileTerminologyProviderFactory fhirFileTerminologyProviderFactory,
+            FhirRestTerminologyProviderFactory fhirRestTerminologyProviderFactory) {
+        return new HashSet<>(Arrays.asList(fhirFileTerminologyProviderFactory,
+                fhirRestTerminologyProviderFactory));
     }
 
     @Provides

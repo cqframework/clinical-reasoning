@@ -38,13 +38,16 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
     }
 
     @Override
-    public Iterable<Object> retrieve(final String context, final String contextPath, final Object contextValue, final String dataType,
-                                     final String templateId, final String codePath, final Iterable<Code> codes, final String valueSet, final String datePath,
-                                     final String dateLowPath, final String dateHighPath, final Interval dateRange) {
+    public Iterable<Object> retrieve(final String context, final String contextPath,
+            final Object contextValue, final String dataType, final String templateId,
+            final String codePath, final Iterable<Code> codes, final String valueSet,
+            final String datePath, final String dateLowPath, final String dateHighPath,
+            final Interval dateRange) {
 
-        List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
-                this.fhirContext.getResourceDefinition(dataType).getImplementingClass(),
-                null, null));
+        List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext,
+                repository.search(IBaseBundle.class,
+                        this.fhirContext.getResourceDefinition(dataType).getImplementingClass(),
+                        null, null));
 
         resources = this.filterByTemplateId(dataType, templateId, resources);
         resources = this.filterByContext(dataType, context, contextPath, contextValue, resources);
@@ -60,7 +63,9 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
 
         for (final Code code : left) {
             for (final Code otherCode : right) {
-                if (code.getCode() != null && code.getCode().equals(otherCode.getCode()) && code.getSystem() != null && code.getSystem().equals(otherCode.getSystem())) {
+                if (code.getCode() != null && code.getCode().equals(otherCode.getCode())
+                        && code.getSystem() != null
+                        && code.getSystem().equals(otherCode.getSystem())) {
                     return true;
                 }
             }
@@ -76,7 +81,8 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
 
         if (this.terminologyProvider == null) {
             throw new IllegalStateException(String.format(
-                    "Unable to check code membership for in ValueSet %s. terminologyProvider is null.", valueSet));
+                    "Unable to check code membership for in ValueSet %s. terminologyProvider is null.",
+                    valueSet));
         }
 
         final ValueSetInfo valueSetInfo = new ValueSetInfo().withId(valueSet);
@@ -91,7 +97,8 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
 
     // Special case filtering to handle "codes" that are actually ids. This is a
     // workaround to handle filtering by Id.
-    private boolean isPrimitiveMatch(final String dataType, final IPrimitiveType<?> code, final Iterable<Code> codes) {
+    private boolean isPrimitiveMatch(final String dataType, final IPrimitiveType<?> code,
+            final Iterable<Code> codes) {
         if (code == null || codes == null) {
             return false;
         }
@@ -111,8 +118,9 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
         return false;
     }
 
-    private List<? extends IBaseResource> filterByTerminology(final String dataType, final String codePath, final Iterable<Code> codes,
-                                                              final String valueSet, final List<? extends IBaseResource> resources) {
+    private List<? extends IBaseResource> filterByTerminology(final String dataType,
+            final String codePath, final Iterable<Code> codes, final String valueSet,
+            final List<? extends IBaseResource> resources) {
         if (codes == null && valueSet == null) {
             return resources;
         }
@@ -133,13 +141,15 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
                 continue;
             }
 
-            if (values != null && values.size() == 1 && values.get(0).fhirType().equals("CodeableConcept")) {
+            if (values != null && values.size() == 1
+                    && values.get(0).fhirType().equals("CodeableConcept")) {
                 String codeValueSet = getValueSetFromCode(values.get(0));
                 if (codeValueSet != null) {
                     if (valueSet != null && codeValueSet.equals(valueSet)) {
                         filtered.add(res);
                     }
-                    // TODO: If the value sets are not equal by name, test whether they have the same expansion...
+                    // TODO: If the value sets are not equal by name, test whether they have the
+                    // same expansion...
                     continue;
                 }
             }
@@ -163,9 +173,12 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
         return filtered;
     }
 
-    private List<? extends IBaseResource> filterByTemplateId(final String dataType, final String templateId, final List<? extends IBaseResource> resources) {
-        if (templateId == null || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
-            logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
+    private List<? extends IBaseResource> filterByTemplateId(final String dataType,
+            final String templateId, final List<? extends IBaseResource> resources) {
+        if (templateId == null || templateId.startsWith(
+                String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
+            logger.debug(
+                    "No profile-specific template id specified. Returning unfiltered resources.");
             return resources;
         }
 
@@ -186,8 +199,9 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
     // Super hackery, just to get this running for connectathon
     private String getValueSetFromCode(IBase base) {
         if (base instanceof org.hl7.fhir.r4.model.CodeableConcept) {
-            org.hl7.fhir.r4.model.CodeableConcept cc = (org.hl7.fhir.r4.model.CodeableConcept)base;
-            org.hl7.fhir.r4.model.Extension e = cc.getExtensionByUrl("http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
+            org.hl7.fhir.r4.model.CodeableConcept cc = (org.hl7.fhir.r4.model.CodeableConcept) base;
+            org.hl7.fhir.r4.model.Extension e = cc.getExtensionByUrl(
+                    "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
             if (e != null && e.hasValue()) {
                 return e.getValueAsPrimitive().getValueAsString();
             }
@@ -195,8 +209,9 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
         return null;
     }
 
-    private List<? extends IBaseResource> filterByContext(final String dataType, final String context, final String contextPath,
-                                                          final Object contextValue, final List<? extends IBaseResource> resources) {
+    private List<? extends IBaseResource> filterByContext(final String dataType,
+            final String context, final String contextPath, final Object contextValue,
+            final List<? extends IBaseResource> resources) {
         if (context == null || contextValue == null || contextPath == null) {
             logger.debug(
                     "Unable to relate {} to {} context with contextPath: {} and contextValue: {}. Returning unfiltered resources.",
@@ -207,9 +222,10 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
         final List<IBaseResource> filtered = new ArrayList<>();
 
         for (final IBaseResource res : resources) {
-            final Optional<IBase> resContextValue = this.fhirPath.evaluateFirst(res, contextPath, IBase.class);
+            final Optional<IBase> resContextValue =
+                    this.fhirPath.evaluateFirst(res, contextPath, IBase.class);
             if (resContextValue.isPresent() && resContextValue.get() instanceof IIdType) {
-                String id = ((IIdType)resContextValue.get()).getIdPart();
+                String id = ((IIdType) resContextValue.get()).getIdPart();
 
                 if (id == null) {
                     logger.debug("Found null id for {} resource. Skipping.", dataType);
@@ -224,9 +240,10 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
                     logger.debug("Found {} with id {}. Skipping.", dataType, id);
                     continue;
                 }
-            }
-            else if (resContextValue.isPresent() && resContextValue.get() instanceof IBaseReference) {
-                String reference = ((IBaseReference)resContextValue.get()).getReferenceElement().getValue();
+            } else if (resContextValue.isPresent()
+                    && resContextValue.get() instanceof IBaseReference) {
+                String reference =
+                        ((IBaseReference) resContextValue.get()).getReferenceElement().getValue();
                 if (reference == null) {
                     logger.debug("Found null reference for {} resource. Skipping.", dataType);
                     continue;
@@ -245,15 +262,15 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
                     logger.debug("Found {} with reference {}. Skipping.", dataType, reference);
                     continue;
                 }
-            }
-            else {
-                final Optional<IBase> reference = this.fhirPath.evaluateFirst(res, "reference", IBase.class);
+            } else {
+                final Optional<IBase> reference =
+                        this.fhirPath.evaluateFirst(res, "reference", IBase.class);
                 if (!reference.isPresent()) {
                     logger.debug("Found {} resource unrelated to context. Skipping.", dataType);
                     continue;
                 }
 
-                String referenceString = ((IPrimitiveType<?>)reference.get()).getValueAsString();
+                String referenceString = ((IPrimitiveType<?>) reference.get()).getValueAsString();
                 if (referenceString.startsWith("urn:")) {
                     logger.debug("Found reference with urn: prefix. Stripping.", dataType);
                     referenceString = stripUrnScheme(referenceString);
@@ -265,8 +282,9 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
                 }
 
                 if (!referenceString.equals((String) contextValue)) {
-                    logger.debug("Found {} resource for context value: {} when expecting: {}. Skipping.", dataType,
-                            referenceString, (String) contextValue);
+                    logger.debug(
+                            "Found {} resource for context value: {} when expecting: {}. Skipping.",
+                            dataType, referenceString, (String) contextValue);
                     continue;
                 }
             }
@@ -280,11 +298,9 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
     private String stripUrnScheme(String uri) {
         if (uri.startsWith("urn:uuid:")) {
             return uri.substring(9);
-        }
-        else if (uri.startsWith("urn:oid:")) {
+        } else if (uri.startsWith("urn:oid:")) {
             return uri.substring(8);
-        }
-        else {
+        } else {
             return uri;
         }
     }

@@ -16,7 +16,8 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseQuestionnaireProcessor<T> {
-    protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
+    protected static final Logger logger =
+            LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
 
     protected LibraryProcessor libraryProcessor;
     protected ExpressionEvaluator expressionEvaluator;
@@ -31,9 +32,8 @@ public abstract class BaseQuestionnaireProcessor<T> {
     protected IBaseResource contentEndpoint;
     protected IBaseResource terminologyEndpoint;
 
-    public BaseQuestionnaireProcessor(
-            FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor,
-            ExpressionEvaluator expressionEvaluator) {
+    public BaseQuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal,
+            LibraryProcessor libraryProcessor, ExpressionEvaluator expressionEvaluator) {
         this.fhirContext = fhirContext;
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
         this.fhirDal = fhirDal;
@@ -41,15 +41,25 @@ public abstract class BaseQuestionnaireProcessor<T> {
         this.expressionEvaluator = expressionEvaluator;
     }
 
-    public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
-    public abstract IBaseResource populate(T questionnaire, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
-    public abstract T generateQuestionnaire(String theId, String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
+    public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
+            IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+            IBaseResource terminologyEndpoint);
+
+    public abstract IBaseResource populate(T questionnaire, String patientId,
+            IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
+            IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
+
+    public abstract T generateQuestionnaire(String theId, String patientId,
+            IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
+            IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
+
     // public abstract IBackboneElement generateItem(ICompositeType actionInput, Integer itemCount);
     public abstract Object resolveParameterValue(IBase value);
+
     public abstract IBaseResource getSubject();
 
-    public IBase getExpressionResult(
-            String expression, String language, String libraryToBeEvaluated, IBaseParameters params) {
+    public IBase getExpressionResult(String expression, String language,
+            String libraryToBeEvaluated, IBaseParameters params) {
         validateExpression(language, expression, libraryToBeEvaluated);
         IBase result = null;
         IBaseParameters parametersResult;
@@ -59,19 +69,21 @@ public abstract class BaseQuestionnaireProcessor<T> {
             case "text/cql-expression":
                 parametersResult = expressionEvaluator.evaluate(expression, params);
                 // The expression is assumed to be the parameter component name
-                // The expression evaluator creates a library with a single expression defined as "return"
+                // The expression evaluator creates a library with a single expression defined as
+                // "return"
                 expression = "return";
-                result = (IBase) resolveParameterValue(ParametersUtil.getNamedParameter(
-                        fhirContext, parametersResult, expression).orElse(null));
+                result = (IBase) resolveParameterValue(ParametersUtil
+                        .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
                 break;
             case "text/cql-identifier":
             case "text/cql.identifier":
             case "text/cql.name":
             case "text/cql-name":
-                parametersResult = libraryProcessor.evaluate(libraryToBeEvaluated, patientId, parameters,
-                        contentEndpoint, terminologyEndpoint, dataEndpoint, bundle, Collections.singleton(expression));
-                result = (IBase) resolveParameterValue(ParametersUtil.getNamedParameter(
-                        fhirContext, parametersResult, expression).orElse(null));
+                parametersResult = libraryProcessor.evaluate(libraryToBeEvaluated, patientId,
+                        parameters, contentEndpoint, terminologyEndpoint, dataEndpoint, bundle,
+                        Collections.singleton(expression));
+                result = (IBase) resolveParameterValue(ParametersUtil
+                        .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
                 break;
             case "text/fhirpath":
                 List<IBase> outputs;
@@ -84,7 +96,8 @@ public abstract class BaseQuestionnaireProcessor<T> {
                     result = outputs.get(0);
                 } else {
                     throw new IllegalArgumentException(
-                            "Expected only one value when evaluating FHIRPath expression: " + expression);
+                            "Expected only one value when evaluating FHIRPath expression: "
+                                    + expression);
                 }
                 break;
             default:

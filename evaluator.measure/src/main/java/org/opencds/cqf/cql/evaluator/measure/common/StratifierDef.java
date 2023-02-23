@@ -20,7 +20,8 @@ public class StratifierDef {
         this(id, code, expression, Collections.emptyList());
     }
 
-    public StratifierDef(String id, ConceptDef code, String expression, List<StratifierComponentDef> components) {
+    public StratifierDef(String id, ConceptDef code, String expression,
+            List<StratifierComponentDef> components) {
         this.id = id;
         this.code = code;
         this.expression = expression;

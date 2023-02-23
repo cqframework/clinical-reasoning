@@ -34,7 +34,9 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
 
         MeasureReport carry = iterator.next();
         if (carry.hasType() && carry.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
-            throw new IllegalArgumentException(String.format("Can not aggregate MeasureReports of type: %s", MeasureReport.MeasureReportType.INDIVIDUAL.toCode()));
+            throw new IllegalArgumentException(
+                    String.format("Can not aggregate MeasureReports of type: %s",
+                            MeasureReport.MeasureReportType.INDIVIDUAL.toCode()));
         }
 
         while (iterator.hasNext()) {
@@ -49,16 +51,25 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
             return;
         }
 
-        if (carry.hasMeasure() ^ current.hasMeasure() || (carry.hasMeasure() && !carry.getMeasure().equals(current.getMeasure()))) {
-            throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be for the same Measure. carry: %s, current: %s", carry.getMeasure(), current.getMeasure()));
+        if (carry.hasMeasure() ^ current.hasMeasure()
+                || (carry.hasMeasure() && !carry.getMeasure().equals(current.getMeasure()))) {
+            throw new IllegalArgumentException(String.format(
+                    "Aggregated MeasureReports must all be for the same Measure. carry: %s, current: %s",
+                    carry.getMeasure(), current.getMeasure()));
         }
 
-        if ((carry.hasPeriod() ^ current.hasPeriod()) || (carry.hasPeriod() && !carry.getPeriod().equalsDeep(current.getPeriod()))) {
-            throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be for the same Period. carry: %s, current: %s", carry.getPeriod().toString(), current.getPeriod().toString()));
+        if ((carry.hasPeriod() ^ current.hasPeriod())
+                || (carry.hasPeriod() && !carry.getPeriod().equalsDeep(current.getPeriod()))) {
+            throw new IllegalArgumentException(String.format(
+                    "Aggregated MeasureReports must all be for the same Period. carry: %s, current: %s",
+                    carry.getPeriod().toString(), current.getPeriod().toString()));
         }
 
-        if (carry.hasType() ^ current.hasType() || (carry.hasType() && !carry.getType().equals(current.getType()))) {
-            throw new IllegalArgumentException(String.format("Aggregated MeasureReports must all be of the same type. carry: %s, current: %s", carry.getType().toCode(), current.getType().toCode()));
+        if (carry.hasType() ^ current.hasType()
+                || (carry.hasType() && !carry.getType().equals(current.getType()))) {
+            throw new IllegalArgumentException(String.format(
+                    "Aggregated MeasureReports must all be of the same type. carry: %s, current: %s",
+                    carry.getType().toCode(), current.getType().toCode()));
         }
 
         mergeContained(carry, current);
@@ -75,7 +86,7 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
             return;
         }
 
-        //this map will store population code as key and subjectReference as list item
+        // this map will store population code as key and subjectReference as list item
         Map<String, List<Reference>> populationCodeSubjectsReferenceMap = new HashMap<>();
 
         harvestSubjectReferencesAgainstPopulationCode(populationCodeSubjectsReferenceMap, carry);
@@ -113,7 +124,9 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
                 mergeList(carryList, currentList);
             }
             if (carryList != null) {
-                resourceMap.put(carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(), carryList);
+                resourceMap.put(
+                        carryList.hasId() ? carryList.getId() : UUID.randomUUID().toString(),
+                        carryList);
             }
         });
 
@@ -144,16 +157,15 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
         return listResource;
     }
 
-    //eligible means having id, it is important having id as population subjectReference will match this id
+    // eligible means having id, it is important having id as population subjectReference will match
+    // this id
     private boolean isEligibleListResourceType(Resource resource) {
-        return resource.hasId() &&
-                (resource.getResourceType() != null &&
-                        resource.getResourceType().equals(ResourceType.List));
+        return resource.hasId() && (resource.getResourceType() != null
+                && resource.getResourceType().equals(ResourceType.List));
     }
 
     private void populateMapsWithResourceAndListResource(MeasureReport measureReport,
-                                                         Map<String, Resource> resourceMap,
-                                                         Map<String, Resource> listResourceMap) {
+            Map<String, Resource> resourceMap, Map<String, Resource> listResourceMap) {
         measureReport.getContained().forEach(resource -> {
             String id = extractId(resource.getId());
             if (!isEligibleListResourceType(resource)) {
@@ -166,8 +178,9 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
         });
     }
 
-    private void harvestSubjectReferencesAgainstPopulationCode(Map<String, List<Reference>> populationCodeSubjectsReferenceMap,
-                                                               MeasureReport measureReport) {
+    private void harvestSubjectReferencesAgainstPopulationCode(
+            Map<String, List<Reference>> populationCodeSubjectsReferenceMap,
+            MeasureReport measureReport) {
         measureReport.getGroupFirstRep().getPopulation().forEach(populationComponent -> {
             if (populationComponent.hasCode()) {
                 CodeableConcept codeableConcept = populationComponent.getCode();
@@ -220,11 +233,13 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
         for (Extension extension : current.getExtension()) {
             if (extension.hasValue()) {
                 if (extension.getValue() instanceof StringType) {
-                    if (!extensionDummyIds.contains(((StringType) extension.getValue()).getValue())) {
+                    if (!extensionDummyIds
+                            .contains(((StringType) extension.getValue()).getValue())) {
                         carry.getExtension().add(extension);
                     }
                 } else if (extension.getValue() instanceof Reference) {
-                    if (!extensionDummyIds.contains(((Reference) extension.getValue()).getReference())) {
+                    if (!extensionDummyIds
+                            .contains(((Reference) extension.getValue()).getReference())) {
                         carry.getExtension().add(extension);
                     }
                 }
@@ -240,19 +255,22 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
 
         HashMap<String, String> codeScore = new HashMap<>();
 
-        for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : current.getGroupFirstRep().getPopulation()) {
+        for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : current
+                .getGroupFirstRep().getPopulation()) {
             CodeableConcept codeableConcept = populationComponent.getCode();
             if (StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
-                codeScore.put(codeableConcept.getCodingFirstRep().getCode(), Integer.toString(populationComponent.getCount()));
+                codeScore.put(codeableConcept.getCodingFirstRep().getCode(),
+                        Integer.toString(populationComponent.getCount()));
             }
         }
 
-        for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : carry.getGroupFirstRep().getPopulation()) {
+        for (MeasureReport.MeasureReportGroupPopulationComponent populationComponent : carry
+                .getGroupFirstRep().getPopulation()) {
             CodeableConcept codeableConcept = populationComponent.getCode();
             if (StringUtils.isNotBlank(codeableConcept.getCodingFirstRep().getCode())) {
                 if (codeScore.get(codeableConcept.getCodingFirstRep().getCode()) != null) {
-                    populationComponent.setCount(populationComponent.getCount() +
-                            Integer.parseInt(codeScore.get(codeableConcept.getCodingFirstRep().getCode())));
+                    populationComponent.setCount(populationComponent.getCount() + Integer.parseInt(
+                            codeScore.get(codeableConcept.getCodingFirstRep().getCode())));
                 }
             }
         }
@@ -271,7 +289,8 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
         AtomicReference<String> stratifierStratumPopulationKey = new AtomicReference<>("");
 
         current.getGroupFirstRep().getStratifier().forEach(stratifierComponent -> {
-            if (stratifierComponent.hasIdentifier() && stratifierComponent.getIdentifier().hasValue()) {
+            if (stratifierComponent.hasIdentifier()
+                    && stratifierComponent.getIdentifier().hasValue()) {
                 String key = stratifierComponent.getIdentifier().getValue();
                 if (StringUtils.isNotBlank(key)) {
                     stratifierCodeKey.set(key);
@@ -287,11 +306,16 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
                         if (stratumComponent.hasPopulation()) {
                             stratumComponent.getPopulation().forEach(stratumPopulationComp -> {
                                 if (stratumPopulationComp.hasCode()) {
-                                    CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
-                                    stratifierStratumPopulationKey.set(getKeyValue(populationCodeableConcept));
+                                    CodeableConcept populationCodeableConcept =
+                                            stratumPopulationComp.getCode();
+                                    stratifierStratumPopulationKey
+                                            .set(getKeyValue(populationCodeableConcept));
 
                                     if (stratumPopulationComp.hasCount()) {
-                                        codeScore.put(generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get()),
+                                        codeScore.put(
+                                                generateKey(stratifierCodeKey.get(),
+                                                        stratifierStratumKey.get(),
+                                                        stratifierStratumPopulationKey.get()),
                                                 Integer.toString(stratumPopulationComp.getCount()));
                                     }
                                 }
@@ -307,7 +331,8 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
         stratifierStratumPopulationKey.set("");
 
         carry.getGroupFirstRep().getStratifier().forEach(stratifierComponent -> {
-            if (stratifierComponent.hasIdentifier() && stratifierComponent.getIdentifier().hasValue()) {
+            if (stratifierComponent.hasIdentifier()
+                    && stratifierComponent.getIdentifier().hasValue()) {
                 String key = stratifierComponent.getIdentifier().getValue();
                 if (StringUtils.isNotBlank(key)) {
                     stratifierCodeKey.set(key);
@@ -323,14 +348,19 @@ public class Dstu3MeasureReportAggregator implements MeasureReportAggregator<Mea
                         if (stratumComponent.hasPopulation()) {
                             stratumComponent.getPopulation().forEach(stratumPopulationComp -> {
                                 if (stratumPopulationComp.hasCode()) {
-                                    CodeableConcept populationCodeableConcept = stratumPopulationComp.getCode();
-                                    stratifierStratumPopulationKey.set(getKeyValue(populationCodeableConcept));
+                                    CodeableConcept populationCodeableConcept =
+                                            stratumPopulationComp.getCode();
+                                    stratifierStratumPopulationKey
+                                            .set(getKeyValue(populationCodeableConcept));
 
                                     if (stratumPopulationComp.hasCount()) {
-                                        String combinedKey = generateKey(stratifierCodeKey.get(), stratifierStratumKey.get(), stratifierStratumPopulationKey.get());
+                                        String combinedKey = generateKey(stratifierCodeKey.get(),
+                                                stratifierStratumKey.get(),
+                                                stratifierStratumPopulationKey.get());
                                         if (codeScore.containsKey(combinedKey)) {
-                                            stratumPopulationComp.setCount(stratumPopulationComp.getCount() +
-                                                    Integer.parseInt(codeScore.get(combinedKey)));
+                                            stratumPopulationComp.setCount(
+                                                    stratumPopulationComp.getCount() + Integer
+                                                            .parseInt(codeScore.get(combinedKey)));
                                         }
                                     }
 

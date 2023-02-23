@@ -18,7 +18,7 @@ public class CqlParameterDefinition {
     private String type;
     private Object value;
     private Boolean isList;
-    
+
     public String getName() {
         return this.name;
     }
@@ -34,5 +34,5 @@ public class CqlParameterDefinition {
     public Object getValue() {
         return this.value;
     }
-    
+
 }

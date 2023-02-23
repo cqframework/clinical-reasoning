@@ -16,7 +16,8 @@ public class CqlEvaluatorR4Test extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canInstantiateMeasureProcessor() {
-        R4MeasureProcessor measureProcessor = this.applicationContext.getBean(R4MeasureProcessor.class);
+        R4MeasureProcessor measureProcessor =
+                this.applicationContext.getBean(R4MeasureProcessor.class);
         assertNotNull(measureProcessor);
     }
 
@@ -28,13 +29,15 @@ public class CqlEvaluatorR4Test extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canInstantiateExpressionEvaluator() {
-        ExpressionEvaluator expressionEvaluator = this.applicationContext.getBean(ExpressionEvaluator.class);
+        ExpressionEvaluator expressionEvaluator =
+                this.applicationContext.getBean(ExpressionEvaluator.class);
         assertNotNull(expressionEvaluator);
     }
 
     @Test
     public void canInstantiateBuilder() {
-        CqlEvaluatorBuilder evaluatorBuilder = this.applicationContext.getBean(CqlEvaluatorBuilder.class);
+        CqlEvaluatorBuilder evaluatorBuilder =
+                this.applicationContext.getBean(CqlEvaluatorBuilder.class);
         assertNotNull(evaluatorBuilder);
     }
 }

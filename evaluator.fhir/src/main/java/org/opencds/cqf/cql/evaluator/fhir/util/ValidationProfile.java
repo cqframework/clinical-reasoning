@@ -6,7 +6,7 @@ public class ValidationProfile {
     private String name;
     private List<String> ignoreKeys;
 
-    public ValidationProfile() { }
+    public ValidationProfile() {}
 
     public ValidationProfile(String name, List<String> ignoreKeys) {
         this.name = name;

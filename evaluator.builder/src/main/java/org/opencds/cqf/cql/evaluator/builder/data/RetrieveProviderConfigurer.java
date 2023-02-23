@@ -14,7 +14,8 @@ import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
  * This class is used to apply configuration to a RetrieveProvider
  */
 @Named
-public class RetrieveProviderConfigurer implements org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer {
+public class RetrieveProviderConfigurer
+        implements org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer {
 
     RetrieveProviderConfig retrieveProviderConfig;
 
@@ -27,10 +28,11 @@ public class RetrieveProviderConfigurer implements org.opencds.cqf.cql.evaluator
     // Maybe it "accepts" a DataProvider config
     // Or if justified pushing that up to the base class
     @Override
-    public void configure(RetrieveProvider retrieveProvider, TerminologyProvider terminologyProvider) {
+    public void configure(RetrieveProvider retrieveProvider,
+            TerminologyProvider terminologyProvider) {
         if (retrieveProvider instanceof TerminologyAwareRetrieveProvider) {
             ((TerminologyAwareRetrieveProvider) retrieveProvider)
-            .setTerminologyProvider(terminologyProvider);
+                    .setTerminologyProvider(terminologyProvider);
             ((TerminologyAwareRetrieveProvider) retrieveProvider)
                     .setExpandValueSets(retrieveProviderConfig.getExpandValueSets());
         }
@@ -41,7 +43,8 @@ public class RetrieveProviderConfigurer implements org.opencds.cqf.cql.evaluator
         }
 
         if (retrieveProvider instanceof RestFhirRetrieveProvider) {
-            ((RestFhirRetrieveProvider) retrieveProvider).setSearchStyle(retrieveProviderConfig.getSearchStyle());
+            ((RestFhirRetrieveProvider) retrieveProvider)
+                    .setSearchStyle(retrieveProviderConfig.getSearchStyle());
         }
     }
 }

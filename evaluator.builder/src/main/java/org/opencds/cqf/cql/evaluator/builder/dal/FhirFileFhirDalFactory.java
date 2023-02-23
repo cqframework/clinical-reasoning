@@ -24,7 +24,8 @@ public class FhirFileFhirDalFactory implements TypedFhirDalFactory {
     @Inject
     public FhirFileFhirDalFactory(FhirContext fhirContent, DirectoryBundler directoryBundler) {
         this.fhirContext = requireNonNull(fhirContent, "fhirContext can not be null");
-        this.directoryBundler = requireNonNull(directoryBundler, "directoryBundler can not be null");
+        this.directoryBundler =
+                requireNonNull(directoryBundler, "directoryBundler can not be null");
     }
 
     @Override
@@ -37,5 +38,5 @@ public class FhirFileFhirDalFactory implements TypedFhirDalFactory {
         IBaseBundle bundle = this.directoryBundler.bundle(url);
         return new BundleFhirDal(this.fhirContext, bundle);
     }
-    
+
 }

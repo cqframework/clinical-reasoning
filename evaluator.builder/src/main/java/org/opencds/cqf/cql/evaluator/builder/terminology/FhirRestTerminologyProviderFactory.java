@@ -24,7 +24,8 @@ public class FhirRestTerminologyProviderFactory implements TypedTerminologyProvi
     private ClientFactory clientFactory;
 
     @Inject
-    public FhirRestTerminologyProviderFactory(FhirContext fhirContext, ClientFactory clientFactory) {
+    public FhirRestTerminologyProviderFactory(FhirContext fhirContext,
+            ClientFactory clientFactory) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.clientFactory = requireNonNull(clientFactory, "clientFactory can not be null");
     }
@@ -44,7 +45,8 @@ public class FhirRestTerminologyProviderFactory implements TypedTerminologyProvi
             case R4:
                 return new R4FhirTerminologyProvider(client);
             default:
-                throw new IllegalArgumentException(String.format("unsupported FHIR version: %s", fhirContext));
+                throw new IllegalArgumentException(
+                        String.format("unsupported FHIR version: %s", fhirContext));
         }
-    }  
+    }
 }

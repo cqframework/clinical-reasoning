@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ComponentScan("org.opencds.cqf.cql.evaluator.fhir")
-@Import({ AdapterConfiguration.class, NpmConfiguration.class })
+@Import({AdapterConfiguration.class, NpmConfiguration.class})
 public class FhirConfiguration {
-    
+
 }

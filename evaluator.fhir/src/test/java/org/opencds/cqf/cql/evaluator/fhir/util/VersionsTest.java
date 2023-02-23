@@ -41,8 +41,8 @@ public class VersionsTest {
 
     @Test
     public void testSelectFromList() {
-        List<Library> libraries = Arrays.asList(new Library().setVersion("1.0.0"), new Library().setVersion("0.0.1"),
-                new Library());
+        List<Library> libraries = Arrays.asList(new Library().setVersion("1.0.0"),
+                new Library().setVersion("0.0.1"), new Library());
 
         Function<Library, String> getVersion = l -> l.getVersion();
 

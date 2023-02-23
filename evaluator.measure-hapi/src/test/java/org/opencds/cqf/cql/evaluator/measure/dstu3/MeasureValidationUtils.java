@@ -17,35 +17,64 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 
 public class MeasureValidationUtils {
 
-    protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group, BigDecimal score) {
-        assertTrue(group.hasMeasureScore(), String.format("group \"%s\" does not have a score", group.getId()));
+    protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group,
+            BigDecimal score) {
+        assertTrue(group.hasMeasureScore(),
+                String.format("group \"%s\" does not have a score", group.getId()));
         assertEquals(group.getMeasureScore(), score);
     }
-    public static void validateGroup(MeasureReport.MeasureReportGroupComponent group, String populationName, int count) {
-        Optional<MeasureReport.MeasureReportGroupPopulationComponent> population = group.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
 
-        assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
-        assertEquals(population.get().getCount(), count, String.format("expected count for population \"%s\" did not match", populationName));
+    public static void validateGroup(MeasureReport.MeasureReportGroupComponent group,
+            String populationName, int count) {
+        Optional<MeasureReport.MeasureReportGroupPopulationComponent> population =
+                group.getPopulation().stream()
+                        .filter(x -> x.hasCode() && x.getCode().hasCoding()
+                                && x.getCode().getCoding().get(0).getCode().equals(populationName))
+                        .findFirst();
+
+        assertTrue(population.isPresent(),
+                String.format("Unable to locate a population with id \"%s\"", populationName));
+        assertEquals(population.get().getCount(), count, String
+                .format("expected count for population \"%s\" did not match", populationName));
     }
 
-    protected static void validateStratifier(MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue, String populationName, int count) {
-        Optional<MeasureReport.StratifierGroupComponent> stratumOpt = stratifierComponent.getStratum().stream().filter(x -> x.hasValue() && x.getValue().equals(stratumValue)).findFirst();
-        assertTrue(stratumOpt.isPresent(), String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
+    protected static void validateStratifier(
+            MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent,
+            String stratumValue, String populationName, int count) {
+        Optional<MeasureReport.StratifierGroupComponent> stratumOpt =
+                stratifierComponent.getStratum().stream()
+                        .filter(x -> x.hasValue() && x.getValue().equals(stratumValue)).findFirst();
+        assertTrue(stratumOpt.isPresent(),
+                String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
 
         MeasureReport.StratifierGroupComponent stratum = stratumOpt.get();
-        Optional<MeasureReport.StratifierGroupPopulationComponent> population = stratum.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding() && x.getCode().getCoding().get(0).getCode().equals(populationName)).findFirst();
+        Optional<MeasureReport.StratifierGroupPopulationComponent> population =
+                stratum.getPopulation().stream()
+                        .filter(x -> x.hasCode() && x.getCode().hasCoding()
+                                && x.getCode().getCoding().get(0).getCode().equals(populationName))
+                        .findFirst();
 
-        assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
+        assertTrue(population.isPresent(),
+                String.format("Unable to locate a population with id \"%s\"", populationName));
 
-        assertEquals(population.get().getCount(), count, String.format("expected count for stratum value \"%s\" population \"%s\" did not match", stratumValue, populationName));
+        assertEquals(population.get().getCount(), count,
+                String.format(
+                        "expected count for stratum value \"%s\" population \"%s\" did not match",
+                        stratumValue, populationName));
     }
 
-    protected static void validateStratumScore(MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue, BigDecimal score) {
-        Optional<MeasureReport.StratifierGroupComponent> stratumOpt = stratifierComponent.getStratum().stream().filter(x -> x.hasValue() && x.getValue().equals(stratumValue)).findFirst();
-        assertTrue(stratumOpt.isPresent(), String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
+    protected static void validateStratumScore(
+            MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent,
+            String stratumValue, BigDecimal score) {
+        Optional<MeasureReport.StratifierGroupComponent> stratumOpt =
+                stratifierComponent.getStratum().stream()
+                        .filter(x -> x.hasValue() && x.getValue().equals(stratumValue)).findFirst();
+        assertTrue(stratumOpt.isPresent(),
+                String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
 
         MeasureReport.StratifierGroupComponent stratum = stratumOpt.get();
-        assertTrue(stratum.hasMeasureScore(), String.format("stratum \"%s\" does not have a score", stratum.getId()));
+        assertTrue(stratum.hasMeasureScore(),
+                String.format("stratum \"%s\" does not have a score", stratum.getId()));
         assertEquals(stratum.getMeasureScore(), score);
     }
 
@@ -59,12 +88,14 @@ public class MeasureValidationUtils {
             }
         }
 
-        for(ListResource.ListEntryComponent comp : expected.getEntry()) {
-            assertTrue(actual.getEntry().stream().anyMatch(x -> listItems.contains(comp.getItem().getReference())));
+        for (ListResource.ListEntryComponent comp : expected.getEntry()) {
+            assertTrue(actual.getEntry().stream()
+                    .anyMatch(x -> listItems.contains(comp.getItem().getReference())));
         }
     }
 
-    public static void validateMeasureReportContained(MeasureReport actual, MeasureReport expected) {
+    public static void validateMeasureReportContained(MeasureReport actual,
+            MeasureReport expected) {
         assertEquals(actual.getContained().size(), expected.getContained().size());
 
         Map<String, Resource> listResources = new HashMap<>();
@@ -78,8 +109,10 @@ public class MeasureValidationUtils {
         for (Resource resource : expected.getContained()) {
             if (resource.hasId() && listResources.containsKey(resource.getId())) {
                 if (resource.getResourceType().equals(ResourceType.List)) {
-                    validateListEquality((ListResource) listResources.get(resource.getId()), (ListResource) resource);
-                    validateListEquality((ListResource) resource, (ListResource) listResources.get(resource.getId()));
+                    validateListEquality((ListResource) listResources.get(resource.getId()),
+                            (ListResource) resource);
+                    validateListEquality((ListResource) resource,
+                            (ListResource) listResources.get(resource.getId()));
                 }
             }
         }

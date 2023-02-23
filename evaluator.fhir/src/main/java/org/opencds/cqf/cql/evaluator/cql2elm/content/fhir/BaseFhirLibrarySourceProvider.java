@@ -15,11 +15,10 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.AttachmentAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
 
 /**
- * This class implements logic for extracting content from a FHIR Library resource and provides an extension point
- * for implementing the fetch of a FHIR library matching a specific identifier.
+ * This class implements logic for extracting content from a FHIR Library resource and provides an
+ * extension point for implementing the fetch of a FHIR library matching a specific identifier.
  */
-public abstract class BaseFhirLibrarySourceProvider
-        implements LibrarySourceProvider {
+public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProvider {
 
     protected AdapterFactory adapterFactory;
 
@@ -28,7 +27,8 @@ public abstract class BaseFhirLibrarySourceProvider
     }
 
     @Override
-    public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType libraryContentType) {
+    public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier,
+            LibraryContentType libraryContentType) {
         requireNonNull(libraryIdentifier, "versionedIdentifier can not be null.");
         requireNonNull(libraryContentType, "libraryContentType can not be null.");
 
@@ -46,7 +46,8 @@ public abstract class BaseFhirLibrarySourceProvider
 
         if (libraryAdapter.hasContent()) {
             for (ICompositeType attachment : libraryAdapter.getContent()) {
-                AttachmentAdapter attachmentAdapter = this.adapterFactory.createAttachment(attachment);
+                AttachmentAdapter attachmentAdapter =
+                        this.adapterFactory.createAttachment(attachment);
                 if (attachmentAdapter.getContentType().equals(contentType)) {
                     return new ByteArrayInputStream(attachmentAdapter.getData());
                 }

@@ -12,9 +12,8 @@ import java.util.List;
 import java.util.TimeZone;
 
 /**
- * Helper class to resolve measurement period start and end dates. If a timezone
- * is specified in a datetime, it's used. If not the timezone of the local
- * system is used.
+ * Helper class to resolve measurement period start and end dates. If a timezone is specified in a
+ * datetime, it's used. If not the timezone of the local system is used.
  */
 public class DateHelper {
     public static Date resolveRequestDate(String date, boolean start) {

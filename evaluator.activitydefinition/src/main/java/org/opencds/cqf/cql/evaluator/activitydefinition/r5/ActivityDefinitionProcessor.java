@@ -34,29 +34,34 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor<ActivityDefinition> {
+public class ActivityDefinitionProcessor
+        extends BaseActivityDefinitionProcessor<ActivityDefinition> {
     private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
-    public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal, LibraryProcessor libraryProcessor) {
+    public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal,
+            LibraryProcessor libraryProcessor) {
         super(fhirContext, fhirDal, libraryProcessor);
     }
 
     // For library use
     @Override
-    public Resource resolveActivityDefinition(ActivityDefinition activityDefinition, String patientId,
-            String practitionerId, String organizationId) throws FHIRException {
+    public Resource resolveActivityDefinition(ActivityDefinition activityDefinition,
+            String patientId, String practitionerId, String organizationId) throws FHIRException {
         Resource result;
         try {
-            result = (Resource) Class.forName("org.hl7.fhir.r5.model." + activityDefinition.getKind().toCode())
+            result = (Resource) Class
+                    .forName("org.hl7.fhir.r5.model." + activityDefinition.getKind().toCode())
                     .getConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new FHIRException("Could not find org.hl7.fhir.r5.model." + activityDefinition.getKind().toCode());
+            throw new FHIRException("Could not find org.hl7.fhir.r5.model."
+                    + activityDefinition.getKind().toCode());
         }
 
         switch (result.fhirType()) {
             case "ServiceRequest":
-                result = resolveServiceRequest(activityDefinition, patientId, practitionerId, organizationId);
+                result = resolveServiceRequest(activityDefinition, patientId, practitionerId,
+                        organizationId);
                 break;
 
             case "MedicationRequest":
@@ -93,7 +98,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
                 throw new FHIRException(msg);
         }
 
-        var subjectCode = activityDefinition.getSubjectCodeableConcept().getCoding().get(0).getCode();
+        var subjectCode =
+                activityDefinition.getSubjectCodeableConcept().getCoding().get(0).getCode();
         var subjectType = subjectCode != null ? subjectCode : "Patient";
         for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition
                 .getDynamicValue()) {
@@ -125,7 +131,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         if (activityDefinition.hasExtension(TARGET_STATUS_URL)) {
             var value = activityDefinition.getExtensionByUrl(TARGET_STATUS_URL).getValue();
             if (value instanceof StringType) {
-                task.setStatus(Task.TaskStatus.valueOf(((StringType) value).asStringValue().toUpperCase()));
+                task.setStatus(Task.TaskStatus
+                        .valueOf(((StringType) value).asStringValue().toUpperCase()));
             } else {
                 logger.debug("Extension {} should have a value of type {}", TARGET_STATUS_URL,
                         StringType.class.getName());
@@ -150,8 +157,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return task;
     }
 
-    private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition, String patientId,
-            String practitionerId, String organizationId) throws FHIRException {
+    private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition,
+            String patientId, String practitionerId, String organizationId) throws FHIRException {
         // status, intent, code, and subject are required
         var serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(RequestStatus.DRAFT);
@@ -170,7 +177,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
             serviceRequest.setExtension(activityDefinition.getExtension());
         }
 
-        serviceRequest.setCode(new CodeableReference().setReference(new Reference(activityDefinition.getIdElement())));
+        serviceRequest.setCode(new CodeableReference()
+                .setReference(new Reference(activityDefinition.getIdElement())));
 
         // Is this still needed?
         // // code can be set as a dynamicValue
@@ -194,8 +202,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return serviceRequest;
     }
 
-    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition, String patientId)
-            throws FHIRException {
+    private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition,
+            String patientId) throws FHIRException {
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
         medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
@@ -216,8 +224,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         }
 
         if (activityDefinition.hasDosage()) {
-            medicationRequest
-                    .setDose(new MedicationRequestDoseComponent().setDosageInstruction(activityDefinition.getDosage()));
+            medicationRequest.setDose(new MedicationRequestDoseComponent()
+                    .setDosageInstruction(activityDefinition.getDosage()));
         }
 
         if (activityDefinition.hasBodySite()) {
@@ -235,8 +243,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return medicationRequest;
     }
 
-    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition, String practitionerId,
-            String organizationId) throws FHIRException {
+    private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition,
+            String practitionerId, String organizationId) throws FHIRException {
         var supplyRequest = new SupplyRequest();
 
         if (practitionerId != null) {
@@ -291,7 +299,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return procedure;
     }
 
-    private DiagnosticReport resolveDiagnosticReport(ActivityDefinition activityDefinition, String patientId) {
+    private DiagnosticReport resolveDiagnosticReport(ActivityDefinition activityDefinition,
+            String patientId) {
         var diagnosticReport = new DiagnosticReport();
 
         diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
@@ -302,7 +311,8 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         }
 
         else {
-            throw new FHIRException("Missing required ActivityDefinition.code property for DiagnosticReport");
+            throw new FHIRException(
+                    "Missing required ActivityDefinition.code property for DiagnosticReport");
         }
 
         if (activityDefinition.hasRelatedArtifact()) {
@@ -325,27 +335,31 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return diagnosticReport;
     }
 
-    private Communication resolveCommunication(ActivityDefinition activityDefinition, String patientId) {
+    private Communication resolveCommunication(ActivityDefinition activityDefinition,
+            String patientId) {
         var communication = new Communication();
 
         communication.setStatus(EventStatus.UNKNOWN);
         communication.setSubject(new Reference(patientId));
 
         if (activityDefinition.hasCode()) {
-            communication.setReason(
-                    Collections.singletonList(new CodeableReference().setConcept(activityDefinition.getCode())));
+            communication.setReason(Collections.singletonList(
+                    new CodeableReference().setConcept(activityDefinition.getCode())));
         }
 
         if (activityDefinition.hasRelatedArtifact()) {
             for (var artifact : activityDefinition.getRelatedArtifact()) {
                 if (artifact.hasResourceReference()) {
-                    var attachment = new Attachment().setUrl(artifact.getResourceReference().getReference());
+                    var attachment =
+                            new Attachment().setUrl(artifact.getResourceReference().getReference());
                     if (artifact.hasDisplay()) {
                         attachment.setTitle(artifact.getDisplay());
                     }
 
                     var payload = new Communication.CommunicationPayloadComponent();
-                    payload.setContent(artifact.hasDisplay() ? attachment.setTitle(artifact.getDisplay()) : attachment);
+                    payload.setContent(
+                            artifact.hasDisplay() ? attachment.setTitle(artifact.getDisplay())
+                                    : attachment);
                     communication.setPayload(Collections.singletonList(payload));
                 }
 
@@ -355,14 +369,16 @@ public class ActivityDefinitionProcessor extends BaseActivityDefinitionProcessor
         return communication;
     }
 
-    private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition, String patientId) {
+    private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition,
+            String patientId) {
         var communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(RequestStatus.UNKNOWN);
         communicationRequest.setSubject(new Reference(patientId));
 
         if (activityDefinition.hasCode() && activityDefinition.getCode().hasText()) {
-            communicationRequest.addPayload().setContent(new StringType(activityDefinition.getCode().getText()));
+            communicationRequest.addPayload()
+                    .setContent(new StringType(activityDefinition.getCode().getText()));
         }
 
         return communicationRequest;

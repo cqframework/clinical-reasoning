@@ -44,26 +44,23 @@ class ParametersTest {
     void testParametersPartTypes() {
         org.hl7.fhir.dstu3.model.Parameters parameters = parameters(
                 base64BinaryPart("stu3Base64BinaryPart", "SGVsbG8gV29ybGQh"),
-                booleanPart("stu3BooleanPart", true),
-                codePart("stu3CodePart", "active"),
+                booleanPart("stu3BooleanPart", true), codePart("stu3CodePart", "active"),
                 datePart("stu3DatePart", "2012-12-31"),
                 dateTimePart("stu3DateTimePart", "2015-02-07T13:28:17-05:00"),
-                decimalPart("stu3DecimalPart", 72.42),
-                idPart("stu3IdPart", "example-id"),
+                decimalPart("stu3DecimalPart", 72.42), idPart("stu3IdPart", "example-id"),
                 instantPart("stu3InstantPart", "2015-02-07T13:28:17.239+02:00"),
-                integerPart("stu3IntegerPart", 72),
-                oidPart("stu3OidPart", "urn:oid:1.2.3.4.5"),
+                integerPart("stu3IntegerPart", 72), oidPart("stu3OidPart", "urn:oid:1.2.3.4.5"),
                 positiveIntPart("stu3PositiveIntPart", 1),
                 stringPart("stu3StringPart", "example string"),
-                timePart("stu3TimePart", "12:30:30.500"),
-                unsignedIntPart("stu3UnsignedIntPart", 0),
+                timePart("stu3TimePart", "12:30:30.500"), unsignedIntPart("stu3UnsignedIntPart", 0),
                 uriPart("stu3UriPart", "news:comp.infosystems.www.servers.unix"));
 
         for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent stu3Component : parameters
                 .getParameter()) {
             if (stu3Component.getName().equals("stu3Base64BinaryPart")) {
                 assertTrue(stu3Component.getValue() instanceof Base64BinaryType);
-                assertEquals("SGVsbG8gV29ybGQh", ((Base64BinaryType) stu3Component.getValue()).getValueAsString());
+                assertEquals("SGVsbG8gV29ybGQh",
+                        ((Base64BinaryType) stu3Component.getValue()).getValueAsString());
             } else if (stu3Component.getName().equals("stu3BooleanPart")) {
                 assertTrue(stu3Component.getValue() instanceof BooleanType);
                 assertTrue(((BooleanType) stu3Component.getValue()).getValue());
@@ -72,10 +69,12 @@ class ParametersTest {
                 assertEquals("active", ((CodeType) stu3Component.getValue()).getValueAsString());
             } else if (stu3Component.getName().equals("stu3DatePart")) {
                 assertTrue(stu3Component.getValue() instanceof DateType);
-                assertEquals("2012-12-31", ((DateType) stu3Component.getValue()).getValueAsString());
+                assertEquals("2012-12-31",
+                        ((DateType) stu3Component.getValue()).getValueAsString());
             } else if (stu3Component.getName().equals("stu3DateTimePart")) {
                 assertTrue(stu3Component.getValue() instanceof DateTimeType);
-                assertEquals("2015-02-07T13:28:17-05:00", ((DateTimeType) stu3Component.getValue()).getValueAsString());
+                assertEquals("2015-02-07T13:28:17-05:00",
+                        ((DateTimeType) stu3Component.getValue()).getValueAsString());
             } else if (stu3Component.getName().equals("stu3DecimalPart")) {
                 assertTrue(stu3Component.getValue() instanceof DecimalType);
                 assertEquals("72.42", ((DecimalType) stu3Component.getValue()).getValueAsString());
@@ -91,16 +90,19 @@ class ParametersTest {
                 assertEquals((Integer) 72, ((IntegerType) stu3Component.getValue()).getValue());
             } else if (stu3Component.getName().equals("stu3OidPart")) {
                 assertTrue(stu3Component.getValue() instanceof OidType);
-                assertEquals("urn:oid:1.2.3.4.5", ((OidType) stu3Component.getValue()).getValueAsString());
+                assertEquals("urn:oid:1.2.3.4.5",
+                        ((OidType) stu3Component.getValue()).getValueAsString());
             } else if (stu3Component.getName().equals("stu3PositiveIntPart")) {
                 assertTrue(stu3Component.getValue() instanceof PositiveIntType);
                 assertEquals((Integer) 1, ((PositiveIntType) stu3Component.getValue()).getValue());
             } else if (stu3Component.getName().equals("stu3StringPart")) {
                 assertTrue(stu3Component.getValue() instanceof StringType);
-                assertEquals("example string", ((StringType) stu3Component.getValue()).getValueAsString());
+                assertEquals("example string",
+                        ((StringType) stu3Component.getValue()).getValueAsString());
             } else if (stu3Component.getName().equals("stu3TimePart")) {
                 assertTrue(stu3Component.getValue() instanceof TimeType);
-                assertEquals("12:30:30.500", ((TimeType) stu3Component.getValue()).getValueAsString());
+                assertEquals("12:30:30.500",
+                        ((TimeType) stu3Component.getValue()).getValueAsString());
             } else if (stu3Component.getName().equals("stu3UnsignedIntPart")) {
                 assertTrue(stu3Component.getValue() instanceof UnsignedIntType);
                 assertEquals((Integer) 0, ((UnsignedIntType) stu3Component.getValue()).getValue());
@@ -115,17 +117,14 @@ class ParametersTest {
     @Test
     void getParameterByNameTest() {
         org.hl7.fhir.dstu3.model.Parameters parameters = parameters(
-                stringPart("testName", "testValue"),
-                stringPart("testName1", "testValue1"));
+                stringPart("testName", "testValue"), stringPart("testName1", "testValue1"));
 
-        List<org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent> parts = getPartsByName(parameters,
-                "testName");
+        List<org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent> parts =
+                getPartsByName(parameters, "testName");
         assertEquals(1, parts.size());
 
-        parameters = parameters(
-                stringPart("testName", "testValue"),
-                stringPart("testName", "testValue"),
-                stringPart("testName1", "testValue1"));
+        parameters = parameters(stringPart("testName", "testValue"),
+                stringPart("testName", "testValue"), stringPart("testName1", "testValue1"));
 
         parts = getPartsByName(parameters, "testName");
         assertEquals(2, parts.size());

@@ -14,7 +14,8 @@ public class MeasureDef {
     private final List<SdeDef> sdes;
 
 
-    public MeasureDef(String id, String url, String version, MeasureScoring scoring, List<GroupDef> groups, List<SdeDef> sdes) {
+    public MeasureDef(String id, String url, String version, MeasureScoring scoring,
+            List<GroupDef> groups, List<SdeDef> sdes) {
         this.id = id;
         this.url = url;
         this.version = version;

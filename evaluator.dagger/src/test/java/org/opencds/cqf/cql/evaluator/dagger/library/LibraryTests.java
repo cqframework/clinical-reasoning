@@ -14,8 +14,7 @@ public class LibraryTests {
     @Test
     public void canInstantiateDstu3() {
         LibraryProcessor libraryProcessor = DaggerCqlEvaluatorComponent.builder()
-                .fhirContext(FhirContext.forCached(FhirVersionEnum.DSTU3))
-                .build()
+                .fhirContext(FhirContext.forCached(FhirVersionEnum.DSTU3)).build()
                 .createLibraryProcessor();
 
         assertNotNull(libraryProcessor);
@@ -24,9 +23,8 @@ public class LibraryTests {
     @Test
     public void canInstantiateR4() {
         LibraryProcessor libraryProcessor = DaggerCqlEvaluatorComponent.builder()
-        .fhirContext(FhirContext.forCached(FhirVersionEnum.R4))
-        .build()
-        .createLibraryProcessor();
+                .fhirContext(FhirContext.forCached(FhirVersionEnum.R4)).build()
+                .createLibraryProcessor();
 
         assertNotNull(libraryProcessor);
     }

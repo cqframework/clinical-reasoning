@@ -57,17 +57,19 @@ public class ExpressionEvaluatorTest {
 
     private IBaseBundle loadBundle(String path) {
         InputStream stream = ExpressionEvaluatorTest.class.getResourceAsStream(path);
-        IParser parser = path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
+        IParser parser =
+                path.endsWith("json") ? fhirContext.newJsonParser() : fhirContext.newXmlParser();
         IBaseResource resource = parser.parseResource(stream);
 
         if (resource == null) {
-            throw new IllegalArgumentException(String.format("Unable to read a resource from %s.", path));
+            throw new IllegalArgumentException(
+                    String.format("Unable to read a resource from %s.", path));
         }
 
         Class<?> bundleClass = fhirContext.getResourceDefinition("Bundle").getImplementingClass();
         if (!bundleClass.equals(resource.getClass())) {
-            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s Bundle", path,
-                    fhirContext.getVersion().getVersion().getFhirVersionString()));
+            throw new IllegalArgumentException(String.format("Resource at %s is not FHIR %s Bundle",
+                    path, fhirContext.getVersion().getVersion().getFhirVersionString()));
         }
 
         return (IBaseBundle) resource;
@@ -82,29 +84,32 @@ public class ExpressionEvaluatorTest {
     public void setup() {
         fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-        AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        AdapterFactory adapterFactory =
+                new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
 
         LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
 
         @SuppressWarnings("serial")
-        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<TypedLibrarySourceProviderFactory>() {
-            {
-                add(new TypedLibrarySourceProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories =
+                new HashSet<TypedLibrarySourceProviderFactory>() {
+                    {
+                        add(new TypedLibrarySourceProviderFactory() {
+                            @Override
+                            public String getType() {
+                                return Constants.HL7_FHIR_FILES;
+                            }
 
-                    @Override
-                    public LibrarySourceProvider create(String url, List<String> headers) {
-                        return new BundleFhirLibrarySourceProvider(fhirContext,
-                                (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(ExpressionEvaluatorTest.class.getResourceAsStream(url)),
-                                adapterFactory, libraryVersionSelector);
+                            @Override
+                            public LibrarySourceProvider create(String url, List<String> headers) {
+                                return new BundleFhirLibrarySourceProvider(fhirContext,
+                                        (IBaseBundle) fhirContext.newJsonParser()
+                                                .parseResource(ExpressionEvaluatorTest.class
+                                                        .getResourceAsStream(url)),
+                                        adapterFactory, libraryVersionSelector);
+                            }
+                        });
                     }
-                });
-            }
-        };
+                };
 
         FhirModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
 
@@ -114,66 +119,79 @@ public class ExpressionEvaluatorTest {
             }
         };
 
-        LibrarySourceProviderFactory librarySourceProviderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
-                fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
-        Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
-            {
-                add(new TypedRetrieveProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
+        LibrarySourceProviderFactory librarySourceProviderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
+                        fhirContext, adapterFactory, librarySourceProviderFactories,
+                        libraryVersionSelector);
+        Set<TypedRetrieveProviderFactory> retrieveProviderFactories =
+                new HashSet<TypedRetrieveProviderFactory>() {
+                    {
+                        add(new TypedRetrieveProviderFactory() {
+                            @Override
+                            public String getType() {
+                                return Constants.HL7_FHIR_FILES;
+                            }
+
+                            @Override
+                            public RetrieveProvider create(String url, List<String> headers) {
+
+                                return new BundleRetrieveProvider(fhirContext,
+                                        (IBaseBundle) fhirContext.newJsonParser()
+                                                .parseResource(ExpressionEvaluatorTest.class
+                                                        .getResourceAsStream(url)));
+                            }
+                        });
                     }
+                };
 
-                    @Override
-                    public RetrieveProvider create(String url, List<String> headers) {
+        DataProviderFactory dataProviderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+                        modelResolverFactories, retrieveProviderFactories);
 
-                        return new BundleRetrieveProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(ExpressionEvaluatorTest.class.getResourceAsStream(url)));
+        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories =
+                new HashSet<TypedTerminologyProviderFactory>() {
+                    {
+                        add(new TypedTerminologyProviderFactory() {
+                            @Override
+                            public String getType() {
+                                return Constants.HL7_FHIR_FILES;
+                            }
+
+                            @Override
+                            public TerminologyProvider create(String url, List<String> headers) {
+                                return new BundleTerminologyProvider(fhirContext,
+                                        (IBaseBundle) fhirContext.newJsonParser()
+                                                .parseResource(ExpressionEvaluatorTest.class
+                                                        .getResourceAsStream(url)));
+                            }
+                        });
                     }
-                });
-            }
-        };
+                };
 
-        DataProviderFactory dataProviderFactory = new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(
-                fhirContext, modelResolverFactories, retrieveProviderFactories);
-
-        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = new HashSet<TypedTerminologyProviderFactory>() {
-            {
-                add(new TypedTerminologyProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
-
-                    @Override
-                    public TerminologyProvider create(String url, List<String> headers) {
-                        return new BundleTerminologyProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(ExpressionEvaluatorTest.class.getResourceAsStream(url)));
-                    }
-                });
-            }
-        };
-
-        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
-                fhirContext, typedTerminologyProviderFactories);
+        TerminologyProviderFactory terminologyProviderFactory =
+                new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+                        fhirContext, typedTerminologyProviderFactories);
 
         EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        FhirTypeConverter fhirTypeConverter = new FhirTypeConverterFactory()
-                .create(fhirContext.getVersion().getVersion());
+        FhirTypeConverter fhirTypeConverter =
+                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
-        CqlFhirParametersConverter cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext,
-                adapterFactory, fhirTypeConverter);
+        CqlFhirParametersConverter cqlFhirParametersConverter =
+                new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
 
-        evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter, librarySourceProviderFactory,
-            dataProviderFactory, terminologyProviderFactory, endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+        evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter,
+                librarySourceProviderFactory, dataProviderFactory, terminologyProviderFactory,
+                endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
     }
+
     @Test
     public void testSimpleExpressionEvaluate() {
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new IntegerType(4));
 
-        Parameters actual = (Parameters) evaluator.evaluate("1 + 3", null, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate("1 + 3", null, null, null, null, null,
+                null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -185,9 +203,11 @@ public class ExpressionEvaluatorTest {
         Endpoint endpoint = new Endpoint().setAddress("EXM125-8.0.000-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Pair<String, String> library = Pair.of("http://localhost/fhir/Library/EXM125|8.0.000", "EXM125");
+        Pair<String, String> library =
+                Pair.of("http://localhost/fhir/Library/EXM125|8.0.000", "EXM125");
         IBaseBundle bundle = readBundle("EXM125-8.0.000-bundle.json");
-        Parameters actual = (Parameters) evaluator.evaluate("not \"EXM125\".\"Numerator\"", null, null, Arrays.asList(library), null, bundle, null, endpoint, null, endpoint);
+        Parameters actual = (Parameters) evaluator.evaluate("not \"EXM125\".\"Numerator\"", null,
+                null, Arrays.asList(library), null, bundle, null, endpoint, null, endpoint);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -199,8 +219,10 @@ public class ExpressionEvaluatorTest {
         Endpoint endpoint = new Endpoint().setAddress("EXM125-8.0.000-bundle.json")
                 .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Pair<String, String> library = Pair.of("http://localhost/fhir/Library/EXM125|8.0.000", "EXM125");
-        Parameters actual = (Parameters) evaluator.evaluate("not \"EXM125\".\"Numerator\"", null, null, Arrays.asList(library), null, null, null, endpoint, endpoint, endpoint);
+        Pair<String, String> library =
+                Pair.of("http://localhost/fhir/Library/EXM125|8.0.000", "EXM125");
+        Parameters actual = (Parameters) evaluator.evaluate("not \"EXM125\".\"Numerator\"", null,
+                null, Arrays.asList(library), null, null, null, endpoint, endpoint, endpoint);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -214,7 +236,8 @@ public class ExpressionEvaluatorTest {
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new IntegerType(2));
 
-        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null,
+                null, null, null, null, null, null, null);
 
         assertTrue(expected.equalsDeep(actual));
     }
@@ -224,13 +247,15 @@ public class ExpressionEvaluatorTest {
         Parameters input = new Parameters();
         ParametersParameterComponent ppc = input.addParameter();
         ppc.setName("%encounters").setResource(new Encounter().setId("1"));
-        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters"));
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMax("*").setName("%encounters"));
 
 
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new IntegerType(1));
 
-        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null,
+                null, null, null, null, null, null, null);
 
         assertTrue(expected.equalsDeep(actual));
     }
@@ -241,7 +266,8 @@ public class ExpressionEvaluatorTest {
         input.addParameter().setName("%notUsed").setResource(new Encounter().setId("1"));
         input.addParameter().setName("%notUsed").setResource(new Encounter().setId("2"));
 
-        evaluator.evaluate("%procedures.count()", null, null, null, null, null, null, null, null, null);
+        evaluator.evaluate("%procedures.count()", null, null, null, null, null, null, null, null,
+                null);
     }
 
     @Test
@@ -249,13 +275,15 @@ public class ExpressionEvaluatorTest {
         Parameters input = new Parameters();
         ParametersParameterComponent ppc = input.addParameter();
         ppc.setName("%encounters");
-        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters").setType("Encounter"));
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMax("*").setName("%encounters").setType("Encounter"));
 
 
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new IntegerType(0));
 
-        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count()", input, null,
+                null, null, null, null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -264,13 +292,15 @@ public class ExpressionEvaluatorTest {
         Parameters input = new Parameters();
         ParametersParameterComponent ppc = input.addParameter();
         ppc.setName("%encounters");
-        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("*").setName("%encounters").setType("Encounter"));
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMax("*").setName("%encounters").setType("Encounter"));
 
 
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new BooleanType(false));
 
-        Parameters actual = (Parameters) evaluator.evaluate("%encounters.exists()", input, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate("%encounters.exists()", input, null,
+                null, null, null, null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -279,12 +309,14 @@ public class ExpressionEvaluatorTest {
         Parameters input = new Parameters();
         ParametersParameterComponent ppc = input.addParameter();
         ppc.setName("%encounter");
-        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("1").setName("%encounter").setType("Encounter"));
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMax("1").setName("%encounter").setType("Encounter"));
 
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new BooleanType(true));
 
-        Parameters actual = (Parameters) evaluator.evaluate("IsNull(%encounter)", input, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate("IsNull(%encounter)", input, null, null,
+                null, null, null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -297,7 +329,8 @@ public class ExpressionEvaluatorTest {
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new BooleanType(false));
 
-        Parameters actual = (Parameters) evaluator.evaluate("IsNull(%encounter)", input, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate("IsNull(%encounter)", input, null, null,
+                null, null, null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -312,7 +345,9 @@ public class ExpressionEvaluatorTest {
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new BooleanType(true));
 
-        Parameters actual = (Parameters) evaluator.evaluate("%encounters.count() > 1 and not IsNull(%procedure)", input, null, null, null, null, null, null, null, null);
+        Parameters actual = (Parameters) evaluator.evaluate(
+                "%encounters.count() > 1 and not IsNull(%procedure)", input, null, null, null, null,
+                null, null, null, null);
         assertTrue(expected.equalsDeep(actual));
     }
 
@@ -334,12 +369,16 @@ public class ExpressionEvaluatorTest {
         Parameters input = new Parameters();
         ParametersParameterComponent ppc = input.addParameter();
         ppc.setName("%measurereport");
-        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition", new ParameterDefinition().setMax("1").setName("%measurereport").setType("MeasureReport"));
+        ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMax("1").setName("%measurereport")
+                        .setType("MeasureReport"));
 
         Parameters expected = new Parameters();
         expected.addParameter().setName("return").setValue(new BooleanType(false));
 
-        Parameters actual = (Parameters) evaluator.evaluate("%measurereport.group.select(population).where(code.coding[0].code = 'initial-population' and count > 0).exists()", input);
+        Parameters actual = (Parameters) evaluator.evaluate(
+                "%measurereport.group.select(population).where(code.coding[0].code = 'initial-population' and count > 0).exists()",
+                input);
         assertTrue(expected.equalsDeep(actual));
     }
 

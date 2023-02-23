@@ -15,7 +15,8 @@ public class CqlEvaluatorDstu3Test extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canInstantiateMeasureProcessor() {
-        Dstu3MeasureProcessor measureProcessor = this.applicationContext.getBean(Dstu3MeasureProcessor.class);
+        Dstu3MeasureProcessor measureProcessor =
+                this.applicationContext.getBean(Dstu3MeasureProcessor.class);
         assertNotNull(measureProcessor);
     }
 
@@ -27,7 +28,8 @@ public class CqlEvaluatorDstu3Test extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canInstantiateExpressionEvaluator() {
-        ExpressionEvaluator expressionEvaluator = this.applicationContext.getBean(ExpressionEvaluator.class);
+        ExpressionEvaluator expressionEvaluator =
+                this.applicationContext.getBean(ExpressionEvaluator.class);
         assertNotNull(expressionEvaluator);
     }
 }

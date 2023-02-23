@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
+  <groupId>org.opencds.cqf.cql</groupId>
+  <artifactId>evaluator.jackson-deps</artifactId>
+  <version>3.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+
+  <name>evaluator.jackson-deps</name>
+  <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
+
+  <description>CQL Evaluator - Jackson Dependencies</description>
+
+  <parent>
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.jackson-deps</artifactId>
+    <artifactId>evaluator.shared</artifactId>
     <version>3.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+  </parent>
 
-
-    <name>evaluator.jackson-deps</name>
-    <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
-
-    <description>CQL Evaluator - Jackson Dependencies</description>
-
-    <parent>
-        <groupId>org.opencds.cqf.cql</groupId>
-        <artifactId>evaluator.shared</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
-    </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>model-jackson</artifactId>
-            <version>${cql.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>elm-jackson</artifactId>
-            <version>${cql.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>engine-jackson</artifactId>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>model-jackson</artifactId>
+      <version>${cql.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>elm-jackson</artifactId>
+      <version>${cql.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>engine-jackson</artifactId>
+    </dependency>
+  </dependencies>
 </project>

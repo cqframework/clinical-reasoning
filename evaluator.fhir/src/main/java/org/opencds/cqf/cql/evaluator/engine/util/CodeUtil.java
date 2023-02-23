@@ -29,7 +29,8 @@ public class CodeUtil {
                 .getElementDefinition("CodeableConcept");
         this.conceptCodingChild = conceptDefinition.getChildByName("coding");
 
-        this.codingDefinition = (RuntimeCompositeDatatypeDefinition) fhirContext.getElementDefinition("Coding");
+        this.codingDefinition =
+                (RuntimeCompositeDatatypeDefinition) fhirContext.getElementDefinition("Coding");
         this.versionDefinition = codingDefinition.getChildByName("version");
         this.codeDefinition = codingDefinition.getChildByName("code");
         this.systemDefinition = codingDefinition.getChildByName("system");
@@ -76,7 +77,7 @@ public class CodeUtil {
     private List<Code> getCodesFromBase(IBase object) {
         if (object instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration<?>) {
             @SuppressWarnings("unchecked")
-            IBaseEnumeration<Enum<?>> enumeration = ((IBaseEnumeration<Enum<?>>)object);
+            IBaseEnumeration<Enum<?>> enumeration = ((IBaseEnumeration<Enum<?>>) object);
             return this.getCodeFromEnumeration(enumeration);
         } else if (object.fhirType().equals("CodeableConcept")) {
             return this.getCodesInConcept(object);
@@ -98,7 +99,8 @@ public class CodeUtil {
 
         String system = enumFactory.toSystem(enumeration.getValue());
         String codeAsString = enumFactory.toCode(enumeration.getValue());
-        if (system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()) {
+        if (system != null && !system.isEmpty() && codeAsString != null
+                && !codeAsString.isEmpty()) {
             Code code = new Code();
             code.setCode(codeAsString);
             code.setSystem(system);
@@ -124,7 +126,8 @@ public class CodeUtil {
             String display = getStringValueFromPrimitiveDefinition(this.displayDefinition, coding);
             String system = getStringValueFromPrimitiveDefinition(this.systemDefinition, coding);
             String version = getStringValueFromPrimitiveDefinition(this.versionDefinition, coding);
-            codes.add(new Code().withSystem(system).withCode(code).withDisplay(display).withVersion(version));
+            codes.add(new Code().withSystem(system).withCode(code).withDisplay(display)
+                    .withVersion(version));
         }
         return codes;
     }
@@ -139,7 +142,8 @@ public class CodeUtil {
         return codingObject;
     }
 
-    private String getStringValueFromPrimitiveDefinition(BaseRuntimeChildDefinition definition, IBase value) {
+    private String getStringValueFromPrimitiveDefinition(BaseRuntimeChildDefinition definition,
+            IBase value) {
         IAccessor accessor = definition.getAccessor();
         if (value == null || accessor == null) {
             return null;

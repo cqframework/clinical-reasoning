@@ -44,9 +44,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         List<SdeDef> sdes = new ArrayList<>();
         for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
             checkId(s);
-            SdeDef sdeDef = new SdeDef(
-                    s.getId(),
-                    null, // No code on sde in dstu3
+            SdeDef sdeDef = new SdeDef(s.getId(), null, // No code on sde in dstu3
                     s.getCriteria());
             sdes.add(sdeDef);
 
@@ -61,41 +59,30 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             List<PopulationDef> populations = new ArrayList<>();
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 checkId(pop);
-                var populationType = MeasurePopulationType
-                        .fromCode(pop.getCode().getCodingFirstRep().getCode());
+                var populationType =
+                        MeasurePopulationType.fromCode(pop.getCode().getCodingFirstRep().getCode());
 
-                populations.add(new PopulationDef(
-                        pop.getId(),
-                        conceptToConceptDef(pop.getCode()),
-                        populationType,
-                        pop.getCriteria()));
+                populations.add(new PopulationDef(pop.getId(), conceptToConceptDef(pop.getCode()),
+                        populationType, pop.getCriteria()));
             }
 
             // Stratifiers
             List<StratifierDef> stratifiers = new ArrayList<>();
             for (MeasureGroupStratifierComponent mgsc : group.getStratifier()) {
                 checkId(mgsc);
-                var stratifierDef = new StratifierDef(
-                        mgsc.getId(),
-                        null, // No code on stratifier in dstu3
+                var stratifierDef = new StratifierDef(mgsc.getId(), null, // No code on stratifier
+                                                                          // in dstu3
                         mgsc.getCriteria());
 
                 stratifiers.add(stratifierDef);
             }
 
-            groups.add(new GroupDef(
-                    group.getId(),
-                    null, // No code on group in dstu3
-                    stratifiers,
-                    populations));
+            groups.add(new GroupDef(group.getId(), null, // No code on group in dstu3
+                    stratifiers, populations));
         }
 
-        return new MeasureDef(
-                measure.getId(),
-                measure.getUrl(),
-                measure.getVersion(),
-                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-                groups,
+        return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(),
+                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()), groups,
                 sdes);
     }
 
@@ -113,18 +100,21 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private CodeDef codeToCodeDef(Coding coding) {
-        return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(), coding.getDisplay());
+        return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(),
+                coding.getDisplay());
     }
 
     private void checkId(Element e) {
         if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
-            throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
+            throw new NullPointerException(
+                    "id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
         if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
-            throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
+            throw new NullPointerException(
+                    "id is required on all Resources of type: " + r.fhirType());
         }
     }
 }

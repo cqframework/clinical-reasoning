@@ -7,7 +7,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CompositeFhirDal implements FhirDal{
+public class CompositeFhirDal implements FhirDal {
     private static final Logger logger = LoggerFactory.getLogger(CompositeFhirDal.class);
 
     protected BundleFhirDal bundleFhirDal;
@@ -20,16 +20,16 @@ public class CompositeFhirDal implements FhirDal{
 
     @Override
     public IBaseResource read(IIdType id) {
-        IBaseResource resource =  null;
+        IBaseResource resource = null;
 
-        for(FhirDal fhirDal : fhirDals ) {
+        for (FhirDal fhirDal : fhirDals) {
             resource = read(fhirDal, id);
-            if(resource != null) {
+            if (resource != null) {
                 return resource;
             }
         }
 
-        if(bundleFhirDal != null) {
+        if (bundleFhirDal != null) {
             return bundleFhirDal.read(id);
         }
 
@@ -124,8 +124,7 @@ public class CompositeFhirDal implements FhirDal{
         }
 
         if (bundleFhirDal != null) {
-            returnResources = concat(returnResources,
-                    bundleFhirDal.searchByUrl(resourceType, url));
+            returnResources = concat(returnResources, bundleFhirDal.searchByUrl(resourceType, url));
         }
         return returnResources;
     }
@@ -168,10 +167,10 @@ public class CompositeFhirDal implements FhirDal{
         return returnResources;
     }
 
-    private Iterable<IBaseResource> concat(Iterable<IBaseResource> a, Iterable<IBaseResource> b){
-        if( a == null) {
+    private Iterable<IBaseResource> concat(Iterable<IBaseResource> a, Iterable<IBaseResource> b) {
+        if (a == null) {
             return b;
-        } else if(b == null) {
+        } else if (b == null) {
             return a;
         }
         return Iterables.concat(a, b);

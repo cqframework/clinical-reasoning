@@ -21,7 +21,8 @@ public class FhirFileRetrieveProviderFactory implements TypedRetrieveProviderFac
     DirectoryBundler directoryBundler;
 
     @Inject
-    public FhirFileRetrieveProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler){
+    public FhirFileRetrieveProviderFactory(FhirContext fhirContext,
+            DirectoryBundler directoryBundler) {
         this.fhirContext = fhirContext;
         this.directoryBundler = directoryBundler;
     }
@@ -36,5 +37,5 @@ public class FhirFileRetrieveProviderFactory implements TypedRetrieveProviderFac
         IBaseBundle bundle = this.directoryBundler.bundle(url);
         return new BundleRetrieveProvider(fhirContext, bundle);
     }
-    
+
 }

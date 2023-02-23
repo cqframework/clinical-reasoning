@@ -13,10 +13,9 @@ public class Dstu3MeasureProcessorTest extends BaseMeasureProcessorTest {
     @Test
     public void testMeasureEvaluate() {
         var report = this.measureProcessor.evaluateMeasure(
-                "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM105-FHIR3-8.0.000",
-                "2019-01-01", "2020-01-01", "subject", "Patient/denom-EXM105-FHIR3", null, null, endpoint, endpoint,
-                endpoint,
-                null);
+                "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM105-FHIR3-8.0.000", "2019-01-01",
+                "2020-01-01", "subject", "Patient/denom-EXM105-FHIR3", null, null, endpoint,
+                endpoint, endpoint, null);
 
         assertNotNull(report);
     }

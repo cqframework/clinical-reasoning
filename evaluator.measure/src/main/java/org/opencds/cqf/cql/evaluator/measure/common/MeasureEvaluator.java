@@ -32,13 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements the core Measure evaluation logic that's defined in the
- * Quality Measure implementation guide and HQMF specifications. There are a
- * number of model-independent concepts such as "groups", "populations", and
- * "stratifiers" that can be used across a number of different data models
- * including FHIR, QDM, and QICore. To the extent feasible, this class is
- * intended to be model-independent so that it can be used in any Java-based
- * implementation of Quality Measure evaluation.
+ * This class implements the core Measure evaluation logic that's defined in the Quality Measure
+ * implementation guide and HQMF specifications. There are a number of model-independent concepts
+ * such as "groups", "populations", and "stratifiers" that can be used across a number of different
+ * data models including FHIR, QDM, and QICore. To the extent feasible, this class is intended to be
+ * model-independent so that it can be used in any Java-based implementation of Quality Measure
+ * evaluation.
  *
  * @see <a href=
  *      "http://hl7.org/fhir/us/cqfmeasures/introduction.html">http://hl7.org/fhir/us/cqfmeasures/introduction.html</a>
@@ -58,14 +57,15 @@ public class MeasureEvaluator {
                 "measurementPeriodParameterName is a required argument");
     }
 
-    public MeasureDef evaluate(MeasureDef measureDef, MeasureEvalType measureEvalType, List<String> subjectIds,
-            Interval measurementPeriod) {
+    public MeasureDef evaluate(MeasureDef measureDef, MeasureEvalType measureEvalType,
+            List<String> subjectIds, Interval measurementPeriod) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
 
         // default behavior is population for many subjects, individual for one subject
         if (measureEvalType == null) {
-            measureEvalType = subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
+            measureEvalType =
+                    subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
         }
 
         // measurementPeriod is not required, because it's often defaulted in CQL
@@ -82,13 +82,14 @@ public class MeasureEvaluator {
             case POPULATION:
                 return this.evaluate(measureDef, MeasureReportType.SUMMARY, subjectIds);
             default:
-                throw new IllegalArgumentException(
-                        String.format("Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
+                throw new IllegalArgumentException(String.format(
+                        "Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
         }
     }
 
     protected Interval getMeasurementPeriod() {
-        return (Interval) this.context.resolveParameterRef(null, this.measurementPeriodParameterName);
+        return (Interval) this.context.resolveParameterRef(null,
+                this.measurementPeriodParameterName);
     }
 
     protected ParameterDef getMeasurementPeriodParameterDef() {
@@ -100,8 +101,8 @@ public class MeasureEvaluator {
         }
 
         for (ParameterDef pd : lib.getParameters().getDef()) {
-            if (this.measurementPeriodParameterName != null &&
-                    pd.getName().equals(this.measurementPeriodParameterName)) {
+            if (this.measurementPeriodParameterName != null
+                    && pd.getName().equals(this.measurementPeriodParameterName)) {
                 return pd;
             }
         }
@@ -127,7 +128,8 @@ public class MeasureEvaluator {
             return;
         }
 
-        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
+        IntervalTypeSpecifier intervalTypeSpecifier =
+                (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
         if (intervalTypeSpecifier == null) {
             logger.debug("No ELM type information available. Unable to validate type of \"{}\"",
                     this.measurementPeriodParameterName);
@@ -153,8 +155,9 @@ public class MeasureEvaluator {
         if (sourceType.equals("DateTime") && targetType.equals("Date")) {
             logger.debug(
                     "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
-            return new Interval(truncateDateTime((DateTime) interval.getLow()), interval.getLowClosed(),
-                    truncateDateTime((DateTime) interval.getHigh()), interval.getHighClosed());
+            return new Interval(truncateDateTime((DateTime) interval.getLow()),
+                    interval.getLowClosed(), truncateDateTime((DateTime) interval.getHigh()),
+                    interval.getHighClosed());
         }
 
         throw new IllegalArgumentException(String.format(
@@ -192,10 +195,11 @@ public class MeasureEvaluator {
         this.context.clearEvaluatedResources();
     }
 
-    protected MeasureDef evaluate(MeasureDef measureDef, MeasureReportType type, List<String> subjectIds) {
+    protected MeasureDef evaluate(MeasureDef measureDef, MeasureReportType type,
+            List<String> subjectIds) {
 
-        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.url(), type.toCode(),
-                subjectIds.size());
+        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.url(),
+                type.toCode(), subjectIds.size());
 
         MeasureScoring scoring = measureDef.scoring();
         if (scoring == null) {
@@ -213,8 +217,8 @@ public class MeasureEvaluator {
         return measureDef;
     }
 
-    protected void evaluateSubject(MeasureDef measureDef, MeasureScoring scoring, String subjectType,
-            String subjectId) {
+    protected void evaluateSubject(MeasureDef measureDef, MeasureScoring scoring,
+            String subjectType, String subjectId) {
         evaluateSdes(subjectId, measureDef.sdes());
         for (GroupDef groupDef : measureDef.groups()) {
             evaluateGroup(scoring, groupDef, subjectType, subjectId);
@@ -236,7 +240,8 @@ public class MeasureEvaluator {
 
         if (result instanceof Boolean) {
             if ((Boolean.TRUE.equals(result))) {
-                Object booleanResult = this.context.resolveExpressionRef(subjectType).evaluate(this.context);
+                Object booleanResult =
+                        this.context.resolveExpressionRef(subjectType).evaluate(this.context);
                 clearEvaluatedResources();
                 return Collections.singletonList(booleanResult);
             } else {
@@ -247,7 +252,8 @@ public class MeasureEvaluator {
         return (Iterable<Object>) result;
     }
 
-    protected Object evaluateCriteria(String criteriaExpression, Set<Object> outEvaluatedResources) {
+    protected Object evaluateCriteria(String criteriaExpression,
+            Set<Object> outEvaluatedResources) {
         Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
 
         captureEvaluatedResources(outEvaluatedResources);
@@ -260,14 +266,16 @@ public class MeasureEvaluator {
 
         ExpressionDef ed = context.resolveExpressionRef(criteriaExpression);
         if (!(ed instanceof FunctionDef)) {
-            throw new IllegalArgumentException(String
-                    .format("Measure observation %s does not reference a function definition", criteriaExpression));
+            throw new IllegalArgumentException(
+                    String.format("Measure observation %s does not reference a function definition",
+                            criteriaExpression));
         }
 
         Object result = null;
         context.pushWindow();
         try {
-            context.push(new Variable().withName(((FunctionDef) ed).getOperand().get(0).getName()).withValue(resource));
+            context.push(new Variable().withName(((FunctionDef) ed).getOperand().get(0).getName())
+                    .withValue(resource));
             result = ed.getExpression().evaluate(context);
         } finally {
             context.popWindow();
@@ -278,11 +286,11 @@ public class MeasureEvaluator {
         return result;
     }
 
-    protected boolean evaluatePopulationMembership(String subjectType, String subjectId, PopulationDef inclusionDef,
-            PopulationDef exclusionDef) {
+    protected boolean evaluatePopulationMembership(String subjectType, String subjectId,
+            PopulationDef inclusionDef, PopulationDef exclusionDef) {
         boolean inPopulation = false;
-        for (Object resource : evaluatePopulationCriteria(subjectType, subjectId, inclusionDef.expression(),
-                inclusionDef.getEvaluatedResources())) {
+        for (Object resource : evaluatePopulationCriteria(subjectType, subjectId,
+                inclusionDef.expression(), inclusionDef.getEvaluatedResources())) {
             inPopulation = true;
             inclusionDef.addResource(resource);
         }
@@ -314,14 +322,12 @@ public class MeasureEvaluator {
         if (inInitialPopulation) {
             // Are they in the denominator?
             boolean inDenominator = evaluatePopulationMembership(subjectType, subjectId,
-                    groupDef.getSingle(DENOMINATOR),
-                    groupDef.getSingle(DENOMINATOREXCLUSION));
+                    groupDef.getSingle(DENOMINATOR), groupDef.getSingle(DENOMINATOREXCLUSION));
 
             if (inDenominator) {
                 // Are they in the numerator?
                 boolean inNumerator = evaluatePopulationMembership(subjectType, subjectId,
-                        groupDef.getSingle(NUMERATOR),
-                        groupDef.getSingle(NUMERATOREXCLUSION));
+                        groupDef.getSingle(NUMERATOR), groupDef.getSingle(NUMERATOREXCLUSION));
 
                 if (!inNumerator && groupDef.getSingle(DENOMINATOREXCEPTION) != null) {
                     // Are they in the denominator exception?
@@ -347,22 +353,24 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void evaluateContinuousVariable(GroupDef groupDef, String subjectType, String subjectId) {
+    protected void evaluateContinuousVariable(GroupDef groupDef, String subjectType,
+            String subjectId) {
         boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
                 groupDef.getSingle(INITIALPOPULATION), null);
 
         if (inInitialPopulation) {
             // Are they in the MeasureType population?
             PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
-            boolean inMeasurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation,
-                    groupDef.getSingle(MEASUREPOPULATIONEXCLUSION));
+            boolean inMeasurePopulation = evaluatePopulationMembership(subjectType, subjectId,
+                    measurePopulation, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION));
 
             if (inMeasurePopulation) {
                 PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
                 if (measureObservation != null) {
                     for (Object resource : measurePopulation.getResources()) {
                         Object observationResult = evaluateObservationCriteria(resource,
-                                measureObservation.expression(), measureObservation.getEvaluatedResources());
+                                measureObservation.expression(),
+                                measureObservation.getEvaluatedResources());
                         measureObservation.addResource(observationResult);
                     }
                 }
@@ -371,7 +379,8 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(GroupDef groupDef, String subjectType, String subjectId) {
-        evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION), null);
+        evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION),
+                null);
     }
 
     protected void evaluateGroup(MeasureScoring measureScoring, GroupDef groupDef,
@@ -405,11 +414,13 @@ public class MeasureEvaluator {
     protected void evaluateStratifiers(String subjectId, List<StratifierDef> stratifierDefs) {
         for (StratifierDef sd : stratifierDefs) {
             if (!sd.components().isEmpty()) {
-                throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
+                throw new UnsupportedOperationException(
+                        "multi-component stratifiers are not yet supported.");
             }
 
             // TODO: Handle list values as components?
-            Object result = this.context.resolveExpressionRef(sd.expression()).evaluate(this.context);
+            Object result =
+                    this.context.resolveExpressionRef(sd.expression()).evaluate(this.context);
             if (result instanceof Iterable) {
                 var resultIter = ((Iterable<?>) result).iterator();
                 if (!resultIter.hasNext()) {
@@ -419,7 +430,8 @@ public class MeasureEvaluator {
                 }
 
                 if (resultIter.hasNext()) {
-                    throw new IllegalArgumentException("stratifiers may not return multiple values");
+                    throw new IllegalArgumentException(
+                            "stratifiers may not return multiple values");
                 }
             }
 

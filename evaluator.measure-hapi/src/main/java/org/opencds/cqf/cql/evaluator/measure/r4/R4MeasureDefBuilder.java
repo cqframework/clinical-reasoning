@@ -46,9 +46,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         List<SdeDef> sdes = new ArrayList<>();
         for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
             checkId(s);
-            var sdeDef = new SdeDef(
-                    s.getId(),
-                    conceptToConceptDef(s.getCode()),
+            var sdeDef = new SdeDef(s.getId(), conceptToConceptDef(s.getCode()),
                     s.getCriteria().getExpression());
             sdes.add(sdeDef);
         }
@@ -62,14 +60,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             List<PopulationDef> populations = new ArrayList<>();
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 checkId(pop);
-                MeasurePopulationType populationType = MeasurePopulationType
-                        .fromCode(pop.getCode().getCodingFirstRep().getCode());
+                MeasurePopulationType populationType =
+                        MeasurePopulationType.fromCode(pop.getCode().getCodingFirstRep().getCode());
 
-                populations.add(new PopulationDef(
-                        pop.getId(),
-                        conceptToConceptDef(pop.getCode()),
-                        populationType,
-                        pop.getCriteria().getExpression()));
+                populations.add(new PopulationDef(pop.getId(), conceptToConceptDef(pop.getCode()),
+                        populationType, pop.getCriteria().getExpression()));
             }
 
             // Stratifiers
@@ -81,37 +76,27 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 var components = new ArrayList<StratifierComponentDef>();
                 for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
                     checkId(scc);
-                    var scd = new StratifierComponentDef(
-                            scc.getId(),
+                    var scd = new StratifierComponentDef(scc.getId(),
                             conceptToConceptDef(scc.getCode()),
                             scc.hasCriteria() ? scc.getCriteria().getExpression() : null);
 
                     components.add(scd);
                 }
 
-                var stratifierDef = new StratifierDef(
-                        mgsc.getId(),
-                        conceptToConceptDef(mgsc.getCode()),
-                        mgsc.getCriteria().getExpression(),
-                        components);
+                var stratifierDef =
+                        new StratifierDef(mgsc.getId(), conceptToConceptDef(mgsc.getCode()),
+                                mgsc.getCriteria().getExpression(), components);
 
                 stratifiers.add(stratifierDef);
             }
 
-            groups.add(new GroupDef(
-                    group.getId(),
-                    conceptToConceptDef(group.getCode()),
-                    stratifiers,
-                    populations));
+            groups.add(new GroupDef(group.getId(), conceptToConceptDef(group.getCode()),
+                    stratifiers, populations));
 
         }
 
-        return new MeasureDef(
-                measure.getId(),
-                measure.getUrl(),
-                measure.getVersion(),
-                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-                groups,
+        return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(),
+                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()), groups,
                 sdes);
     }
 
@@ -129,18 +114,21 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private CodeDef codeToCodeDef(Coding coding) {
-        return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(), coding.getDisplay());
+        return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(),
+                coding.getDisplay());
     }
 
     private void checkId(Element e) {
         if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
-            throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
+            throw new NullPointerException(
+                    "id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
         if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
-            throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
+            throw new NullPointerException(
+                    "id is required on all Resources of type: " + r.fhirType());
         }
     }
 }

@@ -14,7 +14,8 @@ public class GroupDef {
 
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
-    public GroupDef(String id, ConceptDef code, List<StratifierDef> stratifiers, List<PopulationDef> populations) {
+    public GroupDef(String id, ConceptDef code, List<StratifierDef> stratifiers,
+            List<PopulationDef> populations) {
         this.id = id;
         this.code = code;
         this.stratifiers = stratifiers;
@@ -45,7 +46,8 @@ public class GroupDef {
 
         List<PopulationDef> defs = this.populationIndex.get(type);
         if (defs.size() > 1) {
-            throw new IllegalStateException("There is more than one PopulationDef of type: " + type.toCode());
+            throw new IllegalStateException(
+                    "There is more than one PopulationDef of type: " + type.toCode());
         }
 
         return defs.get(0);

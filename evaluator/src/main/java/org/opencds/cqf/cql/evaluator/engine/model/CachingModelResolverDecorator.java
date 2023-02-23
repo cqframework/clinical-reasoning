@@ -6,9 +6,12 @@ import java.util.Map;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 public class CachingModelResolverDecorator implements ModelResolver {
-    private static Map<String, Map<String,Map<String, Object>>> perPackageContextResolutions = new HashMap<>();
-    private static Map<String, Map<String,Class<?>>> perPackageTypeResolutionsByTypeName = new HashMap<>();
-    private static Map<String, Map<Class<?>,Class<?>>> perPackageTypeResolutionsByClass = new HashMap<>();
+    private static Map<String, Map<String, Map<String, Object>>> perPackageContextResolutions =
+            new HashMap<>();
+    private static Map<String, Map<String, Class<?>>> perPackageTypeResolutionsByTypeName =
+            new HashMap<>();
+    private static Map<String, Map<Class<?>, Class<?>>> perPackageTypeResolutionsByClass =
+            new HashMap<>();
 
     private ModelResolver innerResolver;
 
@@ -36,10 +39,11 @@ public class CachingModelResolverDecorator implements ModelResolver {
     @Override
     public Object getContextPath(String contextType, String targetType) {
         if (!perPackageContextResolutions.containsKey(this.getPackageName())) {
-            perPackageContextResolutions.put(this.getPackageName(),  new HashMap<>());
+            perPackageContextResolutions.put(this.getPackageName(), new HashMap<>());
         }
 
-        Map<String,Map<String, Object>> packageContextResolutions = perPackageContextResolutions.get(this.getPackageName());
+        Map<String, Map<String, Object>> packageContextResolutions =
+                perPackageContextResolutions.get(this.getPackageName());
 
         if (!packageContextResolutions.containsKey(contextType)) {
             packageContextResolutions.put(contextType, new HashMap<>());
@@ -47,7 +51,8 @@ public class CachingModelResolverDecorator implements ModelResolver {
 
         Map<String, Object> contextTypeResolutions = packageContextResolutions.get(contextType);
         if (!contextTypeResolutions.containsKey(targetType)) {
-            contextTypeResolutions.put(targetType, this.innerResolver.getContextPath(contextType, targetType));
+            contextTypeResolutions.put(targetType,
+                    this.innerResolver.getContextPath(contextType, targetType));
         }
 
         return contextTypeResolutions.get(targetType);
@@ -59,7 +64,8 @@ public class CachingModelResolverDecorator implements ModelResolver {
             perPackageTypeResolutionsByTypeName.put(this.getPackageName(), new HashMap<>());
         }
 
-        Map<String, Class<?>> packageTypeResolutions = perPackageTypeResolutionsByTypeName.get(this.getPackageName());
+        Map<String, Class<?>> packageTypeResolutions =
+                perPackageTypeResolutionsByTypeName.get(this.getPackageName());
         if (!packageTypeResolutions.containsKey(typeName)) {
             packageTypeResolutions.put(typeName, this.innerResolver.resolveType(typeName));
         }
@@ -73,7 +79,8 @@ public class CachingModelResolverDecorator implements ModelResolver {
             perPackageTypeResolutionsByClass.put(this.getPackageName(), new HashMap<>());
         }
 
-        Map<Class<?>, Class<?>> packageTypeResolutions = perPackageTypeResolutionsByClass.get(this.getPackageName());
+        Map<Class<?>, Class<?>> packageTypeResolutions =
+                perPackageTypeResolutionsByClass.get(this.getPackageName());
 
         Class<?> valueClass = value.getClass();
         if (!packageTypeResolutions.containsKey(valueClass)) {

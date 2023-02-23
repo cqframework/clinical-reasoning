@@ -40,9 +40,11 @@ public class RepositoryRetrieveProviderTests {
         return this.getRepositoryRetrieveProvider(null);
     }
 
-    private RetrieveProvider getRepositoryRetrieveProvider(TerminologyProvider terminologyProvider) {
-        RepositoryRetrieveProvider brp = new RepositoryRetrieveProvider(fhirContext,
-                new FhirRepository(this.getClass(), List.of("test1/", "../terminology/test1/"), false));
+    private RetrieveProvider getRepositoryRetrieveProvider(
+            TerminologyProvider terminologyProvider) {
+        RepositoryRetrieveProvider brp =
+                new RepositoryRetrieveProvider(fhirContext, new FhirRepository(this.getClass(),
+                        List.of("test1/", "../terminology/test1/"), false));
         brp.setTerminologyProvider(terminologyProvider);
 
         return brp;
@@ -52,7 +54,8 @@ public class RepositoryRetrieveProviderTests {
     public void test_noResults_returnsEmptySet() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null,
+                null, null, null, null, null, null);
         assertNotNull(results);
         List<Object> resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 0);
@@ -62,7 +65,8 @@ public class RepositoryRetrieveProviderTests {
     public void test_filterToDataType() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null,
+                null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
 
         assertEquals(resultList.size(), 2);
@@ -73,7 +77,8 @@ public class RepositoryRetrieveProviderTests {
     public void test_filterToDataType_dataTypeNotPresent() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null,
+                null, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
 
         assertEquals(resultList.size(), 0);
@@ -83,19 +88,22 @@ public class RepositoryRetrieveProviderTests {
     public void test_filterToContext() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4",
+                "Condition", null, null, null, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
 
-        assertEquals(resultList.size(),2);
+        assertEquals(resultList.size(), 2);
         assertThat(resultList.get(0), instanceOf(Condition.class));
-        assertEquals("test-one-r4", ((Condition)resultList.get(0)).getSubject().getReferenceElement().getIdPart());
+        assertEquals("test-one-r4",
+                ((Condition) resultList.get(0)).getSubject().getReferenceElement().getIdPart());
     }
 
     @Test
     public void test_filterToContext_noContextRelation() {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
-        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, null, null, null, null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication",
+                null, null, null, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
 
         assertEquals(resultList.size(), 1);
@@ -110,15 +118,17 @@ public class RepositoryRetrieveProviderTests {
         RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
         // Id does exist
-        Iterable<Code> codes = (Iterable<Code>)(Iterable<?>) Collections.singletonList("test-med");
-        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
+        Iterable<Code> codes = (Iterable<Code>) (Iterable<?>) Collections.singletonList("test-med");
+        Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication",
+                null, "id", codes, null, null, null, null, null);
         List<Object> resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 1);
         assertThat(resultList.get(0), instanceOf(Medication.class));
 
         // Id does not exist
-        codes = (Iterable<Code>)(Iterable<?>)Collections.singletonList("test-med-does-exist");
-        results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes, null, null, null, null, null);
+        codes = (Iterable<Code>) (Iterable<?>) Collections.singletonList("test-med-does-exist");
+        results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null, "id", codes,
+                null, null, null, null, null);
         resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 0);
     }
@@ -129,19 +139,23 @@ public class RepositoryRetrieveProviderTests {
 
         // Code doesn't match
         Code code = new Code().withCode("not-a-code").withSystem("not-a-system");
-        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
+        Iterable<Object> results =
+                retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code",
+                        Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results);
         List<Object> resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 0);
 
         // Codes does match
         code = new Code().withCode("10327003").withSystem("http://snomed.info/sct");
-        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", Collections.singleton(code), null, null, null, null, null);
+        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code",
+                Collections.singleton(code), null, null, null, null, null);
         assertNotNull(results);
         resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 1);
         assertThat(resultList.get(0), instanceOf(Condition.class));
-        assertEquals("test-one-r4", ((Condition)resultList.get(0)).getSubject().getReferenceElement().getIdPart());
+        assertEquals("test-one-r4",
+                ((Condition) resultList.get(0)).getSubject().getReferenceElement().getIdPart());
     }
 
 
@@ -155,43 +169,47 @@ public class RepositoryRetrieveProviderTests {
 
     @Test
     public void test_filterToValueSet() {
-        TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(fhirContext, new FhirRepository(this.getClass(),
-                List.of("../terminology/test1/"), false));
+        TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(fhirContext,
+                new FhirRepository(this.getClass(), List.of("../terminology/test1/"), false));
 
         RetrieveProvider retrieve = this.getRepositoryRetrieveProvider(terminologyProvider);
 
         // Not in the value set
-        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null,
-                "http://localhost/fhir/ValueSet/value-set-three", null, null, null, null);
+        Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4",
+                "Condition", null, "code", null, "http://localhost/fhir/ValueSet/value-set-three",
+                null, null, null, null);
         assertNotNull(results);
         List<Object> resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 0);
 
 
         // In the value set
-        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null,
-                "http://localhost/fhir/ValueSet/value-set-one", null, null, null, null);
+        results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code",
+                null, "http://localhost/fhir/ValueSet/value-set-one", null, null, null, null);
         assertNotNull(results);
         resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 1);
     }
 
-// todo : handle Urn id  in repository
-//    @Test
-//    public void test_retrieveByUrn() {
-//        RepositoryRetrieveProvider brp = new RepositoryRetrieveProvider(fhirContext,
-//                new FhirRepository(this.getClass(), List.of("test2/"), false));
-//
-//        Iterable<Object> results = brp.retrieve("Patient", "id", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Patient", null, null, null, null, null, null, null, null);
-//        assertNotNull(results);
-//
-//        List<Object> resultList = Lists.newArrayList(results);
-//        assertEquals(resultList.size(), 1);
-//        assertThat(resultList.get(0), instanceOf(Patient.class));
-//
-//        results = brp.retrieve("Patient", "subject", "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Condition", null, null, null, null, null, null, null, null);
-//        resultList = Lists.newArrayList(results);
-//        assertEquals(resultList.size(), 1);
-//        assertThat(resultList.get(0), instanceOf(Condition.class));
-//    }
+    // todo : handle Urn id in repository
+    // @Test
+    // public void test_retrieveByUrn() {
+    // RepositoryRetrieveProvider brp = new RepositoryRetrieveProvider(fhirContext,
+    // new FhirRepository(this.getClass(), List.of("test2/"), false));
+    //
+    // Iterable<Object> results = brp.retrieve("Patient", "id",
+    // "e527283b-e4b1-4f4e-9aef-8a5162816e32" , "Patient", null, null, null, null, null, null, null,
+    // null);
+    // assertNotNull(results);
+    //
+    // List<Object> resultList = Lists.newArrayList(results);
+    // assertEquals(resultList.size(), 1);
+    // assertThat(resultList.get(0), instanceOf(Patient.class));
+    //
+    // results = brp.retrieve("Patient", "subject", "e527283b-e4b1-4f4e-9aef-8a5162816e32" ,
+    // "Condition", null, null, null, null, null, null, null, null);
+    // resultList = Lists.newArrayList(results);
+    // assertEquals(resultList.size(), 1);
+    // assertThat(resultList.get(0), instanceOf(Condition.class));
+    // }
 }

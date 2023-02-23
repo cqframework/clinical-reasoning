@@ -15,7 +15,7 @@ import dagger.Provides;
 public class LibraryModule {
 
     @Provides
-    protected  FhirTypeConverter providesFhirTypeConverter(FhirContext fhirContext) {
+    protected FhirTypeConverter providesFhirTypeConverter(FhirContext fhirContext) {
         return new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
     }
 }

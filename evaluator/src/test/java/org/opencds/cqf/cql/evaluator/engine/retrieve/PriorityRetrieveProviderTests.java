@@ -25,7 +25,8 @@ public class PriorityRetrieveProviderTests {
     @Test
     public void test_noProviders_returnsEmptySet() {
         RetrieveProvider retrieve = new PriorityRetrieveProvider(Collections.emptyList());
-        Iterable<Object> result= retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
+        Iterable<Object> result = retrieve.retrieve(null, null, null, null, null, null, null, null,
+                null, null, null, null);
         assertNotNull(result);
         List<Object> resultList = Lists.newArrayList(result);
         assertEquals(resultList.size(), 0);
@@ -34,51 +35,58 @@ public class PriorityRetrieveProviderTests {
     @Test(expectedExceptions = IllegalStateException.class)
     public void test_badProvider_throwsException() {
 
-        RetrieveProvider badProvider = new RetrieveProvider(){
+        RetrieveProvider badProvider = new RetrieveProvider() {
             @Override
-            public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
-                    String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
-                    String dateLowPath, String dateHighPath, Interval dateRange) {
+            public Iterable<Object> retrieve(String context, String contextPath,
+                    Object contextValue, String dataType, String templateId, String codePath,
+                    Iterable<Code> codes, String valueSet, String datePath, String dateLowPath,
+                    String dateHighPath, Interval dateRange) {
 
                 // This is an invalid results. Providers should return an empty set.
                 return null;
             }
         };
-        RetrieveProvider retrieve = new PriorityRetrieveProvider(Collections.singletonList(badProvider));
+        RetrieveProvider retrieve =
+                new PriorityRetrieveProvider(Collections.singletonList(badProvider));
         retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test
     public void test_retrieve_returnsFirstNonEmpty() {
-        RetrieveProvider providerOne = new RetrieveProvider(){
+        RetrieveProvider providerOne = new RetrieveProvider() {
             @Override
-            public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
-                    String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
-                    String dateLowPath, String dateHighPath, Interval dateRange) {
+            public Iterable<Object> retrieve(String context, String contextPath,
+                    Object contextValue, String dataType, String templateId, String codePath,
+                    Iterable<Code> codes, String valueSet, String datePath, String dateLowPath,
+                    String dateHighPath, Interval dateRange) {
                 return Collections.emptySet();
             }
         };
 
-        RetrieveProvider providerTwo = new RetrieveProvider(){
+        RetrieveProvider providerTwo = new RetrieveProvider() {
             @Override
-            public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
-                    String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
-                    String dateLowPath, String dateHighPath, Interval dateRange) {
+            public Iterable<Object> retrieve(String context, String contextPath,
+                    Object contextValue, String dataType, String templateId, String codePath,
+                    Iterable<Code> codes, String valueSet, String datePath, String dateLowPath,
+                    String dateHighPath, Interval dateRange) {
                 return Lists.newArrayList(1, 2, 3);
             }
         };
 
-        RetrieveProvider providerThree = new RetrieveProvider(){
+        RetrieveProvider providerThree = new RetrieveProvider() {
             @Override
-            public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
-                    String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
-                    String dateLowPath, String dateHighPath, Interval dateRange) {
+            public Iterable<Object> retrieve(String context, String contextPath,
+                    Object contextValue, String dataType, String templateId, String codePath,
+                    Iterable<Code> codes, String valueSet, String datePath, String dateLowPath,
+                    String dateHighPath, Interval dateRange) {
                 return Lists.newArrayList(5, 4, 3, 2, 1);
             }
         };
 
-        RetrieveProvider retrieve = new PriorityRetrieveProvider(Lists.newArrayList(providerOne, providerTwo, providerThree));
-        Iterable<Object> results = retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
+        RetrieveProvider retrieve = new PriorityRetrieveProvider(
+                Lists.newArrayList(providerOne, providerTwo, providerThree));
+        Iterable<Object> results = retrieve.retrieve(null, null, null, null, null, null, null, null,
+                null, null, null, null);
         assertNotNull(results);
         List<Object> resultList = Lists.newArrayList(results);
         assertEquals(resultList.size(), 3);

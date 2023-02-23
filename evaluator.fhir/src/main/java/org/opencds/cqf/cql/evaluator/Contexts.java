@@ -26,15 +26,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Contexts {
 
-    public static Context forRepository(FhirContext fhirContext, Library library, Repository repository) {
+    public static Context forRepository(FhirContext fhirContext, Library library,
+            Repository repository) {
         Context context = new Context(library);
-        TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(fhirContext, repository);
-        LibrarySourceProvider librarySourceProvider = buildLibrarySource(fhirContext,terminologyProvider, repository);
+        TerminologyProvider terminologyProvider =
+                new RepositoryTerminologyProvider(fhirContext, repository);
+        LibrarySourceProvider librarySourceProvider =
+                buildLibrarySource(fhirContext, terminologyProvider, repository);
         LibraryLoader libraryLoader = buildLibraryLoader(librarySourceProvider);
 
         context.registerLibraryLoader(libraryLoader);
         context.registerTerminologyProvider(terminologyProvider);
-        //context.registerDataProvider("", dataProvider);
+        // context.registerDataProvider("", dataProvider);
 
         return context;
     }
@@ -46,7 +49,8 @@ public class Contexts {
 
     private static CqlOptions cqlOptions = CqlOptions.defaultOptions();
 
-    private static LibrarySourceProvider buildLibrarySource(FhirContext fhirContext, TerminologyProvider terminologyProvider, Repository repository) {
+    private static LibrarySourceProvider buildLibrarySource(FhirContext fhirContext,
+            TerminologyProvider terminologyProvider, Repository repository) {
         AdapterFactory adapterFactory = getAdapterFactory(fhirContext);
         return new RepositoryFhirLibrarySourceProvider(fhirContext, repository, adapterFactory,
                 new LibraryVersionSelector(adapterFactory));
@@ -62,8 +66,9 @@ public class Contexts {
             librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
 
-        TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                new CacheAwareModelManager(globalModelCache), librarySourceProviders, cqlOptions.getCqlTranslatorOptions(), null);
+        TranslatorOptionAwareLibraryLoader libraryLoader =
+                new TranslatingLibraryLoader(new CacheAwareModelManager(globalModelCache),
+                        librarySourceProviders, cqlOptions.getCqlTranslatorOptions(), null);
 
         if (libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, libraryCache);
@@ -81,7 +86,8 @@ public class Contexts {
             case R5:
                 return new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
             default:
-                throw new IllegalArgumentException(String.format("unsupported FHIR version: %s", fhirContext));
+                throw new IllegalArgumentException(
+                        String.format("unsupported FHIR version: %s", fhirContext));
         }
 
     }

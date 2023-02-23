@@ -35,5 +35,5 @@ public class FhirRestFhirDalFactory implements TypedFhirDalFactory {
         IGenericClient client = this.clientFactory.create(url, headers);
 
         return new RestFhirDal(client);
-    }  
+    }
 }

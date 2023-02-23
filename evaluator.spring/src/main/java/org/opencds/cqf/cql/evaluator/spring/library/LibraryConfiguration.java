@@ -16,5 +16,5 @@ public class LibraryConfiguration {
     FhirTypeConverter fhirTypeConverter(FhirContext fhirContext) {
         return new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
     }
-    
+
 }

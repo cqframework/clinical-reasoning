@@ -12,7 +12,9 @@ public class MultipleRateMeasureProcessorTest extends BaseMeasureProcessorTest {
 
     @Test
     public void fhir347_singlePatient() {
-        MeasureReport report = this.measureProcessor.evaluateMeasure("http://ecqi.healthit.gov/ecqms/Measure/FHIR347", "2019-01-01", "2020-01-01", "subject", "numer1-EXM347", null, null, endpoint, endpoint, endpoint, null);
+        MeasureReport report = this.measureProcessor.evaluateMeasure(
+                "http://ecqi.healthit.gov/ecqms/Measure/FHIR347", "2019-01-01", "2020-01-01",
+                "subject", "numer1-EXM347", null, null, endpoint, endpoint, endpoint, null);
         validateGroup(report.getGroup().get(0), "initial-population", 1);
     }
 }

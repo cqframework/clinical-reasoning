@@ -8,8 +8,7 @@ import ca.uhn.fhir.model.api.Tag;
 
 public class Constants {
 
-    private Constants() {
-    }
+    private Constants() {}
 
     public static final String HL7_FHIR_REST = "hl7-fhir-rest";
     public static final String HL7_FHIR_FILES = "hl7-fhir-files";
@@ -22,8 +21,6 @@ public class Constants {
     public static final String FHIR_MODEL_URI = "http://hl7.org/fhir";
     public static final String QDM_MODEL_URI = "urn:healthit-gov:qdm:v5_4";
 
-    public static final Map<String, String> ALIAS_MAP = ImmutableMap.of(
-        "FHIR", FHIR_MODEL_URI, 
-        "QUICK", FHIR_MODEL_URI,
-        "QDM", QDM_MODEL_URI);
+    public static final Map<String, String> ALIAS_MAP =
+            ImmutableMap.of("FHIR", FHIR_MODEL_URI, "QUICK", FHIR_MODEL_URI, "QDM", QDM_MODEL_URI);
 }

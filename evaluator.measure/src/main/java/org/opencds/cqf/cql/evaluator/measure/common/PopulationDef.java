@@ -16,7 +16,8 @@ public class PopulationDef {
     protected Set<Object> resources;
     protected Set<String> subjects;
 
-    public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
+    public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType,
+            String expression) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;

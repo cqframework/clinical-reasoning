@@ -5,5 +5,6 @@ import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
 public interface FhirDalFactory {
     public FhirDal create(EndpointInfo endpointInfo);
+
     public FhirDal create(IBaseBundle resourceBundle);
 }

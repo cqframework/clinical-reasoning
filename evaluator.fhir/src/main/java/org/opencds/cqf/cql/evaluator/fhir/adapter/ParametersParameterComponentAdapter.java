@@ -19,8 +19,8 @@ public interface ParametersParameterComponentAdapter extends Adapter<IBaseBackbo
 
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents);
 
-    public IBaseBackboneElement addPart(); 
-    
+    public IBaseBackboneElement addPart();
+
     public boolean hasPart();
 
     public boolean hasResource();
@@ -39,5 +39,5 @@ public interface ParametersParameterComponentAdapter extends Adapter<IBaseBackbo
 
     public Boolean hasExtension();
 
-    public List<IBaseExtension<?,?>> getExtension();
+    public List<IBaseExtension<?, ?>> getExtension();
 }

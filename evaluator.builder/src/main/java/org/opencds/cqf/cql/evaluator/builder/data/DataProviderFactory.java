@@ -24,17 +24,20 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import ca.uhn.fhir.context.FhirContext;
 
 @Named
-public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builder.DataProviderFactory {
+public class DataProviderFactory
+        implements org.opencds.cqf.cql.evaluator.builder.DataProviderFactory {
 
     private FhirContext fhirContext;
     private Set<ModelResolverFactory> modelResolverFactories;
     private Set<TypedRetrieveProviderFactory> retrieveProviderFactories;
 
     @Inject
-    public DataProviderFactory(FhirContext fhirContext, Set<ModelResolverFactory> modelResolverFactories,
+    public DataProviderFactory(FhirContext fhirContext,
+            Set<ModelResolverFactory> modelResolverFactories,
             Set<TypedRetrieveProviderFactory> retrieveProviderFactories) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.modelResolverFactories = requireNonNull(modelResolverFactories, "modelResolverFactory can not be null");
+        this.modelResolverFactories =
+                requireNonNull(modelResolverFactories, "modelResolverFactory can not be null");
         this.retrieveProviderFactories = requireNonNull(retrieveProviderFactories,
                 "retrieveResolverFactory can not be null");
 
@@ -49,8 +52,8 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
         }
 
         String modelUri = detectModel(endpointInfo.getAddress(), endpointInfo.getType());
-        Pair<ModelResolver, RetrieveProvider> dp = create(modelUri, endpointInfo.getType(), endpointInfo.getAddress(),
-                endpointInfo.getHeaders());
+        Pair<ModelResolver, RetrieveProvider> dp = create(modelUri, endpointInfo.getType(),
+                endpointInfo.getAddress(), endpointInfo.getHeaders());
 
         return new DataProviderComponents(modelUri, dp.getLeft(), dp.getRight());
     }
@@ -71,7 +74,7 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
         if (connectionType == null) {
             return null;
         }
-        
+
         switch (connectionType.getCode()) {
             case Constants.HL7_FHIR_FILES:
             case Constants.HL7_FHIR_REST:
@@ -92,8 +95,8 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
                 String.format("no registered ModelResolverFactory for modelUri: %s", modelUri));
     }
 
-    protected Pair<ModelResolver, RetrieveProvider> create(String modelUri, IBaseCoding connectionType, String url,
-            List<String> headers) {
+    protected Pair<ModelResolver, RetrieveProvider> create(String modelUri,
+            IBaseCoding connectionType, String url, List<String> headers) {
         ModelResolver modelResolver = this.getFactory(modelUri)
                 .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
 
@@ -110,8 +113,9 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
             }
 
             if (retrieveProvider == null) {
-                throw new IllegalArgumentException(
-                        String.format("unsupported or unknown connectionType for loading FHIR Resources: %s", connectionType));
+                throw new IllegalArgumentException(String.format(
+                        "unsupported or unknown connectionType for loading FHIR Resources: %s",
+                        connectionType));
             }
         }
 
@@ -122,13 +126,16 @@ public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builde
     public DataProviderComponents create(IBaseBundle dataBundle) {
         requireNonNull(dataBundle, "dataBundle can not be null");
 
-        if (!dataBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
-            throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");
+        if (!dataBundle.getStructureFhirVersionEnum()
+                .equals(this.fhirContext.getVersion().getVersion())) {
+            throw new IllegalArgumentException(
+                    "The FHIR version of dataBundle and the FHIR context do not match");
         }
 
         ModelResolver modelResolver = this.getFactory(Constants.FHIR_MODEL_URI)
                 .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
 
-        return new DataProviderComponents(Constants.FHIR_MODEL_URI, modelResolver, new BundleRetrieveProvider(fhirContext, dataBundle));
+        return new DataProviderComponents(Constants.FHIR_MODEL_URI, modelResolver,
+                new BundleRetrieveProvider(fhirContext, dataBundle));
     }
 }

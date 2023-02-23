@@ -18,7 +18,8 @@ class ResourceAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.Reso
         }
 
         if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R5)) {
-            throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
+            throw new IllegalArgumentException(
+                    "resource is incorrect fhir version for this adapter");
         }
 
         this.resource = (Resource) resource;
@@ -53,7 +54,8 @@ class ResourceAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.Reso
         }
 
         if (values.length > 1) {
-            throw new IllegalArgumentException(String.format("more than one value found for property: %s", name));
+            throw new IllegalArgumentException(
+                    String.format("more than one value found for property: %s", name));
         }
 
         return values[0];

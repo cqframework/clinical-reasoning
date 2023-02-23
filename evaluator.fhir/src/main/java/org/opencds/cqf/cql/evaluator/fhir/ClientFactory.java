@@ -11,8 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
- * This class creates a FHIR Rest API IGenericClient for a given fhirContext an
- * url.
+ * This class creates a FHIR Rest API IGenericClient for a given fhirContext an url.
  */
 @Named
 public class ClientFactory {
@@ -20,10 +19,10 @@ public class ClientFactory {
     protected FhirContext fhirContext;
 
     @Inject
-	public ClientFactory(FhirContext fhirContext) {
+    public ClientFactory(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
     }
-    
+
     public IGenericClient create(String url, List<String> headers) {
         IGenericClient client = this.fhirContext.newRestfulGenericClient(url);
         registerAuth(client, headers);

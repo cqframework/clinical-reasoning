@@ -14,7 +14,8 @@ public class ExpressionTests {
     @Test
     public void canInstantiateDstu3() {
         ExpressionEvaluator expressionEvaluator = DaggerCqlEvaluatorComponent.builder()
-                .fhirContext(FhirContext.forCached(FhirVersionEnum.DSTU3)).build().createExpressionEvaluator();
+                .fhirContext(FhirContext.forCached(FhirVersionEnum.DSTU3)).build()
+                .createExpressionEvaluator();
 
         assertNotNull(expressionEvaluator);
     }
@@ -22,7 +23,8 @@ public class ExpressionTests {
     @Test
     public void canInstantiateR4() {
         ExpressionEvaluator expressionEvaluator = DaggerCqlEvaluatorComponent.builder()
-                .fhirContext(FhirContext.forCached(FhirVersionEnum.R4)).build().createExpressionEvaluator();
+                .fhirContext(FhirContext.forCached(FhirVersionEnum.R4)).build()
+                .createExpressionEvaluator();
 
         assertNotNull(expressionEvaluator);
     }

@@ -20,7 +20,8 @@ import org.opencds.cqf.cql.evaluator.fhir.util.VersionUtilities;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
 @Named
-public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory {
+public class FhirModelResolverFactory
+        implements org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory {
 
     @Inject
     public FhirModelResolverFactory() {}
@@ -29,10 +30,10 @@ public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.b
 
     @Override
     public ModelResolver create(String version) {
-       requireNonNull(version, "version can not be null");
+        requireNonNull(version, "version can not be null");
 
-       FhirVersionEnum fhirVersionEnum = VersionUtilities.enumForVersion(version);
-       return this.fhirModelResolverForVersion(fhirVersionEnum);
+        FhirVersionEnum fhirVersionEnum = VersionUtilities.enumForVersion(version);
+        return this.fhirModelResolverForVersion(fhirVersionEnum);
     }
 
     protected ModelResolver fhirModelResolverForVersion(FhirVersionEnum fhirVersionEnum) {
@@ -65,5 +66,5 @@ public class FhirModelResolverFactory implements org.opencds.cqf.cql.evaluator.b
     @Override
     public String getModelUri() {
         return Constants.FHIR_MODEL_URI;
-    }    
+    }
 }

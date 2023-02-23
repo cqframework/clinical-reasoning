@@ -17,19 +17,17 @@ public class LibraryEngine {
     }
 
     private void initContext() {
-       cqlEngine = Contexts.forRepository(this.fhirContext, null, repository);
+        cqlEngine = Contexts.forRepository(this.fhirContext, null, repository);
     }
 
-    public Parameters evaluate(
-            String url,
-            String subject,
-            String[] expression,
+    public Parameters evaluate(String url, String subject, String[] expression,
             Parameters parameters) {
         /*
-        var library = repository.search(Library.class, Searches.byUrl(url)).first();
-        return cqlEngine.evaluate(new VersionedIdentifier().withName(library.name).withVersion(library.version),
-                expressions, parameters, new Context("Patient", subjectId));
-        */
+         * var library = repository.search(Library.class, Searches.byUrl(url)).first(); return
+         * cqlEngine.evaluate(new
+         * VersionedIdentifier().withName(library.name).withVersion(library.version), expressions,
+         * parameters, new Context("Patient", subjectId));
+         */
         return null;
     }
 

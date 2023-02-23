@@ -26,12 +26,15 @@ public class FhirFileLibrarySourceProviderFactory implements TypedLibrarySourceP
     LibraryVersionSelector libraryVersionSelector;
 
     @Inject
-    public FhirFileLibrarySourceProviderFactory(FhirContext fhirContext, DirectoryBundler directoryBundler,
-            AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+    public FhirFileLibrarySourceProviderFactory(FhirContext fhirContext,
+            DirectoryBundler directoryBundler, AdapterFactory adapterFactory,
+            LibraryVersionSelector libraryVersionSelector) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.directoryBundler = requireNonNull(directoryBundler, "directoryBundler can not be null");
+        this.directoryBundler =
+                requireNonNull(directoryBundler, "directoryBundler can not be null");
         this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
-        this.libraryVersionSelector = requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
+        this.libraryVersionSelector =
+                requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
     }
 
     @Override
@@ -42,6 +45,7 @@ public class FhirFileLibrarySourceProviderFactory implements TypedLibrarySourceP
     @Override
     public LibrarySourceProvider create(String url, List<String> headers) {
         IBaseBundle bundle = this.directoryBundler.bundle(url);
-        return new BundleFhirLibrarySourceProvider(fhirContext, bundle, adapterFactory, this.libraryVersionSelector);
+        return new BundleFhirLibrarySourceProvider(fhirContext, bundle, adapterFactory,
+                this.libraryVersionSelector);
     }
 }

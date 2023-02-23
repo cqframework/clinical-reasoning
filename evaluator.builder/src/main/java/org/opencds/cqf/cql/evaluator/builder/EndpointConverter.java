@@ -34,9 +34,9 @@ public class EndpointConverter {
 
         ResourceAdapter adapter = this.adapterFactory.createResource(endpoint);
 
-        IPrimitiveType<?> url = (IPrimitiveType<?>)adapter.getSingleProperty("address");
+        IPrimitiveType<?> url = (IPrimitiveType<?>) adapter.getSingleProperty("address");
         IBase[] headerArray = adapter.getProperty("header");
-        IBaseCoding connectionType = (IBaseCoding)adapter.getSingleProperty("connectionType");
+        IBaseCoding connectionType = (IBaseCoding) adapter.getSingleProperty("connectionType");
 
         if (url == null) {
             throw new IllegalArgumentException("endpoint does not have address specified");
@@ -50,6 +50,7 @@ public class EndpointConverter {
             }
         }
 
-        return new EndpointInfo().setAddress(url.getValueAsString()).setType(connectionType).setHeaders(headers);
+        return new EndpointInfo().setAddress(url.getValueAsString()).setType(connectionType)
+                .setHeaders(headers);
     }
 }

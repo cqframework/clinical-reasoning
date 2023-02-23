@@ -45,13 +45,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is used to construct a CqlEvaluator that may have multiple
- * content, data, and terminology sources NOTE: The CqlEngine and
- * RetrieveProviders use terminology at two separate levels. The CqlEngine uses
- * a TerminologyProvider directly to evaluate CQL that deals with Terminology,
- * and RetrieveProviders can also use a TerminologyProvider to support filtering
- * during retrieves. The configuration of RetrieveProviders is done via the
- * RetrieveProviderConfigurer class.
+ * This class is used to construct a CqlEvaluator that may have multiple content, data, and
+ * terminology sources NOTE: The CqlEngine and RetrieveProviders use terminology at two separate
+ * levels. The CqlEngine uses a TerminologyProvider directly to evaluate CQL that deals with
+ * Terminology, and RetrieveProviders can also use a TerminologyProvider to support filtering during
+ * retrieves. The configuration of RetrieveProviders is done via the RetrieveProviderConfigurer
+ * class.
  */
 @Named
 public class CqlEvaluatorBuilder {
@@ -92,15 +91,15 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Adds a LibrarySourceProvider to the list of LibrarySourceProviders that may
-     * be used during evaluation. This function uses FILO semantics. The first
-     * LibrarySourceProvider added is the last to be searched for a Library.
+     * Adds a LibrarySourceProvider to the list of LibrarySourceProviders that may be used during
+     * evaluation. This function uses FILO semantics. The first LibrarySourceProvider added is the
+     * last to be searched for a Library.
      *
-     * @param librarySourceProvider the librarySourceProvider to add to the
-     *                              evaluation context
+     * @param librarySourceProvider the librarySourceProvider to add to the evaluation context
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withLibrarySourceProvider(LibrarySourceProvider librarySourceProvider) {
+    public CqlEvaluatorBuilder withLibrarySourceProvider(
+            LibrarySourceProvider librarySourceProvider) {
         requireNonNull(librarySourceProvider, "libraryLoader can not be null");
 
         this.librarySourceProviders.add(librarySourceProvider);
@@ -108,12 +107,11 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Adds a TerminologyProvider to the list of TerminologyProviders that may be
-     * used during evaluation. This function uses FILO semantics. The first
-     * TerminologyProvider added is the last to be used for Terminology.
+     * Adds a TerminologyProvider to the list of TerminologyProviders that may be used during
+     * evaluation. This function uses FILO semantics. The first TerminologyProvider added is the
+     * last to be used for Terminology.
      *
-     * @param terminologyProvider the TerminologyProvider to add to the evaluation
-     *                            context
+     * @param terminologyProvider the TerminologyProvider to add to the evaluation context
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withTerminologyProvider(TerminologyProvider terminologyProvider) {
@@ -124,10 +122,10 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Adds a ModelResolver for a given model to the evaluation context. There may
-     * only be one ModelResolver for a given model.
+     * Adds a ModelResolver for a given model to the evaluation context. There may only be one
+     * ModelResolver for a given model.
      *
-     * @param model         the modelUri
+     * @param model the modelUri
      * @param modelResolver the resolver to use
      * @return this CqlEvaluatorBuilder
      */
@@ -138,26 +136,28 @@ public class CqlEvaluatorBuilder {
         if (!this.dataProviderParts.containsKey(model)) {
             this.dataProviderParts.put(model, Pair.of(modelResolver, new ArrayList<>()));
         } else if (this.dataProviderParts.get(model).getLeft() == null) {
-            this.dataProviderParts.put(model, Pair.of(modelResolver, this.dataProviderParts.get(model).getRight()));
+            this.dataProviderParts.put(model,
+                    Pair.of(modelResolver, this.dataProviderParts.get(model).getRight()));
         } else if (this.dataProviderParts.get(model).getLeft().equals(modelResolver)) {
             logger.debug("modelResolver is the same as pre-existing one. Ignoring.");
         } else {
-            throw new IllegalArgumentException(String.format("ModelResolver already specified for model %s", model));
+            throw new IllegalArgumentException(
+                    String.format("ModelResolver already specified for model %s", model));
         }
 
         return this;
     }
 
     /**
-     * Adds a RetrieveProvider for a given model to the evaluation context. This
-     * function uses FILO semantics. The first RetrieveProvider added is the last to
-     * be used for retrieves.
+     * Adds a RetrieveProvider for a given model to the evaluation context. This function uses FILO
+     * semantics. The first RetrieveProvider added is the last to be used for retrieves.
      *
-     * @param model            the modelUri
+     * @param model the modelUri
      * @param retrieveProvider the provider to use
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withRetrieveProvider(String model, RetrieveProvider retrieveProvider) {
+    public CqlEvaluatorBuilder withRetrieveProvider(String model,
+            RetrieveProvider retrieveProvider) {
         requireNonNull(model, "model can not be null");
         requireNonNull(retrieveProvider, "retrieveProvider can not be null");
 
@@ -173,18 +173,17 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation
-     * context. There may only be one ModelResolver for a given model. This function
-     * uses FILO semantics. The first RetrieveProvider added is the last to be used
-     * for retrieves.
+     * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation context. There
+     * may only be one ModelResolver for a given model. This function uses FILO semantics. The first
+     * RetrieveProvider added is the last to be used for retrieves.
      *
-     * @param model            the modelUri
-     * @param modelResolver    the resolver to use
+     * @param model the modelUri
+     * @param modelResolver the resolver to use
      * @param retrieveProvider the provider to use
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withModelResolverAndRetrieveProvider(String model, ModelResolver modelResolver,
-            RetrieveProvider retrieveProvider) {
+    public CqlEvaluatorBuilder withModelResolverAndRetrieveProvider(String model,
+            ModelResolver modelResolver, RetrieveProvider retrieveProvider) {
         requireNonNull(model, "model can not be null");
         requireNonNull(modelResolver, "modelResolver can not be null");
         requireNonNull(retrieveProvider, "retrieveProvider can not be null");
@@ -195,21 +194,20 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation
-     * context from the supplied DataProviderComponents There may only be one
-     * ModelResolver for a given model. This function
-     * uses FILO semantics. The first RetrieveProvider added is the last to be used
+     * Adds a ModelResolver and RetrieveProvider for a given model to the evaluation context from
+     * the supplied DataProviderComponents There may only be one ModelResolver for a given model.
+     * This function uses FILO semantics. The first RetrieveProvider added is the last to be used
      * for retrieves.
      *
-     * @param dataProviderComponents the model with a uri, ModelResolver, and
-     *                               RetrieveProvider
+     * @param dataProviderComponents the model with a uri, ModelResolver, and RetrieveProvider
      * @return this CqlEvaluatorBuilder
      */
     public CqlEvaluatorBuilder withDataProviderComponents(
             DataProviderComponents dataProviderComponents) {
         requireNonNull(dataProviderComponents, "dataProviderComponents can not be null");
         this.withModelResolverAndRetrieveProvider(dataProviderComponents.getModelUri(),
-                dataProviderComponents.getModelResolver(), dataProviderComponents.getRetrieveProvider());
+                dataProviderComponents.getModelResolver(),
+                dataProviderComponents.getRetrieveProvider());
         return this;
     }
 
@@ -225,12 +223,10 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Sets the NamespaceInfo to use for the evaluator. If provided, this is the
-     * default
-     * namespace for translation. If library sources are provided without namespaces
-     * associated,
-     * they will be considered as part of this namespace.
-     * 
+     * Sets the NamespaceInfo to use for the evaluator. If provided, this is the default namespace
+     * for translation. If library sources are provided without namespaces associated, they will be
+     * considered as part of this namespace.
+     *
      * @param namespaceInfo the namespaceInfo to use
      * @return this CqlEvaluatorBuilder
      */
@@ -240,11 +236,9 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Sets the NpmProcessor to use for the evaluator. If provided the NpmProcessor
-     * is
-     * used to establish IG context and provide Fhir Npm package lookup for Cql
-     * libraries
-     * 
+     * Sets the NpmProcessor to use for the evaluator. If provided the NpmProcessor is used to
+     * establish IG context and provide Fhir Npm package lookup for Cql libraries
+     *
      * @param npmProcessor
      * @return
      */
@@ -255,9 +249,8 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Set the Library cache to use when loading CQL libraries. A cached library
-     * will be verified to make sure versions match and that it was translated with
-     * the same CQL options.
+     * Set the Library cache to use when loading CQL libraries. A cached library will be verified to
+     * make sure versions match and that it was translated with the same CQL options.
      *
      * @param libraryCache the library cache
      * @return this CqlEvaluatorBuilder
@@ -269,15 +262,15 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Specifies the configuration to use for the RetrieveProviders. This will be
-     * applied to all registered RetrieveProviders. If you want to configure each
-     * individually do so directly on the RetrieveProvider prior to registering it
-     * with the builder.
+     * Specifies the configuration to use for the RetrieveProviders. This will be applied to all
+     * registered RetrieveProviders. If you want to configure each individually do so directly on
+     * the RetrieveProvider prior to registering it with the builder.
      *
      * @param retrieveProviderConfig the retrieveProviderConfig to use
      * @return this CqlEvaluatorBuilder
      */
-    public CqlEvaluatorBuilder withRetrieveProviderConfig(RetrieveProviderConfig retrieveProviderConfig) {
+    public CqlEvaluatorBuilder withRetrieveProviderConfig(
+            RetrieveProviderConfig retrieveProviderConfig) {
         this.retrieveProviderConfig = retrieveProviderConfig;
         return this;
     }
@@ -285,7 +278,8 @@ public class CqlEvaluatorBuilder {
     private Map<String, DataProvider> buildDataProviders(TerminologyProvider terminologyProvider) {
         Map<String, DataProvider> dataProviders = new HashMap<>();
 
-        for (Map.Entry<String, Pair<ModelResolver, List<RetrieveProvider>>> entry : this.dataProviderParts.entrySet()) {
+        for (Map.Entry<String, Pair<ModelResolver, List<RetrieveProvider>>> entry : this.dataProviderParts
+                .entrySet()) {
             ModelResolver modelResolver = entry.getValue().getLeft();
             if (modelResolver == null) {
                 throw new IllegalArgumentException(String.format(
@@ -300,14 +294,14 @@ public class CqlEvaluatorBuilder {
                 providers.add(new NoOpRetrieveProvider());
             }
 
-            RetrieveProviderConfigurer retrieveProviderConfigurer = new RetrieveProviderConfigurer(
-                    retrieveProviderConfig);
+            RetrieveProviderConfigurer retrieveProviderConfigurer =
+                    new RetrieveProviderConfigurer(retrieveProviderConfig);
             for (RetrieveProvider provider : providers) {
                 retrieveProviderConfigurer.configure(provider, terminologyProvider);
             }
 
-            dataProviders.put(entry.getKey(),
-                    this.decorate(new CompositeDataProvider(modelResolver, new PriorityRetrieveProvider(providers))));
+            dataProviders.put(entry.getKey(), this.decorate(new CompositeDataProvider(modelResolver,
+                    new PriorityRetrieveProvider(providers))));
         }
 
         return dataProviders;
@@ -322,10 +316,10 @@ public class CqlEvaluatorBuilder {
             ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
                     npmProcessor.getIgContext().getFhirVersion());
             LoggerAdapter adapter = new LoggerAdapter(logger);
-            this.librarySourceProviders
-                    .add(new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
-            modelManager.getModelInfoLoader().registerModelInfoProvider(
-                    new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+            this.librarySourceProviders.add(new NpmLibrarySourceProvider(
+                    npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+            modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(
+                    npmProcessor.getPackageManager().getNpmList(), reader, adapter));
         }
 
         // Put this after the NPM provider so that if an embedded library is found on
@@ -334,8 +328,9 @@ public class CqlEvaluatorBuilder {
             this.librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
 
-        TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(
-                modelManager, librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.namespaceInfo);
+        TranslatorOptionAwareLibraryLoader libraryLoader =
+                new TranslatingLibraryLoader(modelManager, librarySourceProviders,
+                        this.cqlOptions.getCqlTranslatorOptions(), this.namespaceInfo);
         if (this.libraryCache != null) {
             libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
         }
@@ -376,12 +371,11 @@ public class CqlEvaluatorBuilder {
     }
 
     /**
-     * Builds a CqlEvaluator that uses all content, data, terminology sources
-     * supplied, and has the appropriate configuration applied.
+     * Builds a CqlEvaluator that uses all content, data, terminology sources supplied, and has the
+     * appropriate configuration applied.
      *
-     * NOTE: The CqlEvaluator created by this default implementation is meant to be
-     * short-lived (e.g. for the duration of a request). It won't pick up changes to
-     * underlying content.
+     * NOTE: The CqlEvaluator created by this default implementation is meant to be short-lived
+     * (e.g. for the duration of a request). It won't pick up changes to underlying content.
      *
      * @return a CqlEvaluator
      */

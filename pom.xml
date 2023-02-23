@@ -83,37 +83,19 @@
         <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
     </scm>
 
-    <repositories>
-        <repository>
-            <id>smilecdr-api-public-maven</id>
-            <url>https://gitlab.com/api/v4/projects/24364373/packages/maven</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>gitlab-maven</id>
-            <url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
-        </repository>
-        <repository>
-            <id>cda2fhir-maven</id>
-            <url>https://gitlab.com/api/v4/projects/31768607/packages/maven</url>
-        </repository>
-        <repository>
-            <id>oss-sonatype</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>oss-sonatype-public</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-    </repositories>
+  <repositories>
+    <repository>
+      <id>oss-sonatype</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>oss-sonatype-public</id>
+      <url>https://oss.sonatype.org/content/groups/public/</url>
+    </repository>
+  </repositories>
 
     <distributionManagement>
         <snapshotRepository>

@@ -27,6 +27,7 @@ public class FhirResourceLoader implements ResourceLoader{
             locations.addAll(getFilePaths(getDirectoryOrFileLocation(dir), recursive));
         });
 
+        System.out.println(locations);
         locations.forEach(item -> {
             IBaseResource resource = loadTestResources(item);
             resources.add( resource);
@@ -42,6 +43,7 @@ public class FhirResourceLoader implements ResourceLoader{
 
     private String getDirectoryOrFileLocation(String relativePath) {
         String directoryLocationUrl = this.relativeToClazz.getResource(relativePath).toString();
+
 
         if (directoryLocationUrl.startsWith("file:/")) {
             directoryLocationUrl = directoryLocationUrl.substring("file:/".length() - 1);

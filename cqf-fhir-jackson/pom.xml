@@ -24,12 +24,12 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model-jackson</artifactId>
-            <version>${cql-compiler.version}</version>
+            <version>${cql.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-jackson</artifactId>
-            <version>${cql-compiler.version}</version>
+            <version>${cql.version}</version>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>

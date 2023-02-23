@@ -4,6 +4,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+
 jobs:
   maven:
     runs-on: ubuntu-latest
@@ -21,3 +24,14 @@ jobs:
       env:
         MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.x
+    - uses: actions/cache@v2
+      with:
+        key: ${{ github.ref }}
+        path: .cache
+    - run: pip install -r requirements.txt
+      working-directory: ./docs/src/doc
+    - run: mkdocs gh-deploy --force
+      working-directory: ./docs/src/doc

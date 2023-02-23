@@ -42,6 +42,7 @@
     <module>cqf-fhir-jackson</module>
     <module>cqf-fhir-jaxb</module>
     <module>cqf-fhir-bom</module>
+    <!-- doesn't publish a module, but ensures documentation snippets build correctly -->
     <module>docs</module>
 
     <!-- old modules we are replacing -->

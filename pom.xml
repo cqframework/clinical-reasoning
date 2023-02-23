@@ -27,6 +27,7 @@
     <guava.version>31.0.1-jre</guava.version>
   </properties>
   <modules>
+    <!-- new modules we are building -->
     <module>cqf-fhir</module>
     <module>cqf-fhir-api</module>
     <module>cqf-fhir-utility</module>
@@ -43,6 +44,7 @@
     <module>cqf-fhir-bom</module>
     <module>docs</module>
 
+    <!-- old modules we are replacing -->
     <module>evaluator</module>
     <module>evaluator.fhir</module>
     <module>evaluator.fhir-npm</module>

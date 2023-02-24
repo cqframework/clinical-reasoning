@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({ExpressionConfiguration.class, LibraryConfiguration.class, Cql2ElmConfiguration.class,
-        FhirConfiguration.class, BuilderConfiguration.class, MeasureConfiguration.class})
+    FhirConfiguration.class, BuilderConfiguration.class, MeasureConfiguration.class})
 public class EvaluatorConfiguration {
 
 }

@@ -15,36 +15,36 @@ import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
  */
 @Named
 public class RetrieveProviderConfigurer
-        implements org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer {
+    implements org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfigurer {
 
-    RetrieveProviderConfig retrieveProviderConfig;
+  RetrieveProviderConfig retrieveProviderConfig;
 
-    @Inject
-    public RetrieveProviderConfigurer(RetrieveProviderConfig dataProviderConfig) {
-        this.retrieveProviderConfig = dataProviderConfig;
+  @Inject
+  public RetrieveProviderConfigurer(RetrieveProviderConfig dataProviderConfig) {
+    this.retrieveProviderConfig = dataProviderConfig;
+  }
+
+  // TODO: Consider making an interface for a "Configurable" DataProvider
+  // Maybe it "accepts" a DataProvider config
+  // Or if justified pushing that up to the base class
+  @Override
+  public void configure(RetrieveProvider retrieveProvider,
+      TerminologyProvider terminologyProvider) {
+    if (retrieveProvider instanceof TerminologyAwareRetrieveProvider) {
+      ((TerminologyAwareRetrieveProvider) retrieveProvider)
+          .setTerminologyProvider(terminologyProvider);
+      ((TerminologyAwareRetrieveProvider) retrieveProvider)
+          .setExpandValueSets(retrieveProviderConfig.getExpandValueSets());
     }
 
-    // TODO: Consider making an interface for a "Configurable" DataProvider
-    // Maybe it "accepts" a DataProvider config
-    // Or if justified pushing that up to the base class
-    @Override
-    public void configure(RetrieveProvider retrieveProvider,
-            TerminologyProvider terminologyProvider) {
-        if (retrieveProvider instanceof TerminologyAwareRetrieveProvider) {
-            ((TerminologyAwareRetrieveProvider) retrieveProvider)
-                    .setTerminologyProvider(terminologyProvider);
-            ((TerminologyAwareRetrieveProvider) retrieveProvider)
-                    .setExpandValueSets(retrieveProviderConfig.getExpandValueSets());
-        }
-
-        if (retrieveProvider instanceof SearchParamFhirRetrieveProvider) {
-            ((SearchParamFhirRetrieveProvider) retrieveProvider)
-                    .setMaxCodesPerQuery(retrieveProviderConfig.getMaxCodesPerQuery());
-        }
-
-        if (retrieveProvider instanceof RestFhirRetrieveProvider) {
-            ((RestFhirRetrieveProvider) retrieveProvider)
-                    .setSearchStyle(retrieveProviderConfig.getSearchStyle());
-        }
+    if (retrieveProvider instanceof SearchParamFhirRetrieveProvider) {
+      ((SearchParamFhirRetrieveProvider) retrieveProvider)
+          .setMaxCodesPerQuery(retrieveProviderConfig.getMaxCodesPerQuery());
     }
+
+    if (retrieveProvider instanceof RestFhirRetrieveProvider) {
+      ((RestFhirRetrieveProvider) retrieveProvider)
+          .setSearchStyle(retrieveProviderConfig.getSearchStyle());
+    }
+  }
 }

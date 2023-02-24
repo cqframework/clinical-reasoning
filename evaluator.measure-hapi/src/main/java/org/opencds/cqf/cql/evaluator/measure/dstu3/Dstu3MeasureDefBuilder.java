@@ -26,95 +26,92 @@ import org.opencds.cqf.cql.evaluator.measure.common.StratifierDef;
 
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
-    private final boolean enforceIds;
+  private final boolean enforceIds;
 
-    public Dstu3MeasureDefBuilder() {
-        this(false);
+  public Dstu3MeasureDefBuilder() {
+    this(false);
+  }
+
+  public Dstu3MeasureDefBuilder(boolean enforceIds) {
+    this.enforceIds = enforceIds;
+  }
+
+  @Override
+  public MeasureDef build(Measure measure) {
+    checkId(measure);
+
+    // SDES
+    List<SdeDef> sdes = new ArrayList<>();
+    for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
+      checkId(s);
+      SdeDef sdeDef = new SdeDef(s.getId(), null, // No code on sde in dstu3
+          s.getCriteria());
+      sdes.add(sdeDef);
+
     }
 
-    public Dstu3MeasureDefBuilder(boolean enforceIds) {
-        this.enforceIds = enforceIds;
+    // Groups
+    List<GroupDef> groups = new ArrayList<>();
+    for (MeasureGroupComponent group : measure.getGroup()) {
+      checkId(group);
+
+      // Populations
+      List<PopulationDef> populations = new ArrayList<>();
+      for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
+        checkId(pop);
+        var populationType =
+            MeasurePopulationType.fromCode(pop.getCode().getCodingFirstRep().getCode());
+
+        populations.add(new PopulationDef(pop.getId(), conceptToConceptDef(pop.getCode()),
+            populationType, pop.getCriteria()));
+      }
+
+      // Stratifiers
+      List<StratifierDef> stratifiers = new ArrayList<>();
+      for (MeasureGroupStratifierComponent mgsc : group.getStratifier()) {
+        checkId(mgsc);
+        var stratifierDef = new StratifierDef(mgsc.getId(), null, // No code on stratifier
+                                                                  // in dstu3
+            mgsc.getCriteria());
+
+        stratifiers.add(stratifierDef);
+      }
+
+      groups.add(new GroupDef(group.getId(), null, // No code on group in dstu3
+          stratifiers, populations));
     }
 
-    @Override
-    public MeasureDef build(Measure measure) {
-        checkId(measure);
+    return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(),
+        MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()), groups, sdes);
+  }
 
-        // SDES
-        List<SdeDef> sdes = new ArrayList<>();
-        for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
-            checkId(s);
-            SdeDef sdeDef = new SdeDef(s.getId(), null, // No code on sde in dstu3
-                    s.getCriteria());
-            sdes.add(sdeDef);
-
-        }
-
-        // Groups
-        List<GroupDef> groups = new ArrayList<>();
-        for (MeasureGroupComponent group : measure.getGroup()) {
-            checkId(group);
-
-            // Populations
-            List<PopulationDef> populations = new ArrayList<>();
-            for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
-                checkId(pop);
-                var populationType =
-                        MeasurePopulationType.fromCode(pop.getCode().getCodingFirstRep().getCode());
-
-                populations.add(new PopulationDef(pop.getId(), conceptToConceptDef(pop.getCode()),
-                        populationType, pop.getCriteria()));
-            }
-
-            // Stratifiers
-            List<StratifierDef> stratifiers = new ArrayList<>();
-            for (MeasureGroupStratifierComponent mgsc : group.getStratifier()) {
-                checkId(mgsc);
-                var stratifierDef = new StratifierDef(mgsc.getId(), null, // No code on stratifier
-                                                                          // in dstu3
-                        mgsc.getCriteria());
-
-                stratifiers.add(stratifierDef);
-            }
-
-            groups.add(new GroupDef(group.getId(), null, // No code on group in dstu3
-                    stratifiers, populations));
-        }
-
-        return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(),
-                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()), groups,
-                sdes);
+  private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
+    if (codeable == null) {
+      return null;
     }
 
-    private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
-        if (codeable == null) {
-            return null;
-        }
-
-        List<CodeDef> codes = new ArrayList<>();
-        for (var c : codeable.getCoding()) {
-            codes.add(codeToCodeDef(c));
-        }
-
-        return new ConceptDef(codes, codeable.getText());
+    List<CodeDef> codes = new ArrayList<>();
+    for (var c : codeable.getCoding()) {
+      codes.add(codeToCodeDef(c));
     }
 
-    private CodeDef codeToCodeDef(Coding coding) {
-        return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(),
-                coding.getDisplay());
-    }
+    return new ConceptDef(codes, codeable.getText());
+  }
 
-    private void checkId(Element e) {
-        if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
-            throw new NullPointerException(
-                    "id is required on all Elements of type: " + e.fhirType());
-        }
-    }
+  private CodeDef codeToCodeDef(Coding coding) {
+    return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(),
+        coding.getDisplay());
+  }
 
-    private void checkId(Resource r) {
-        if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
-            throw new NullPointerException(
-                    "id is required on all Resources of type: " + r.fhirType());
-        }
+  private void checkId(Element e) {
+    if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
+      throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
     }
+  }
+
+  private void checkId(Resource r) {
+    if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
+      throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
+    }
+  }
 }

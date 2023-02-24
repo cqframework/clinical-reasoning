@@ -22,84 +22,84 @@ import ca.uhn.fhir.parser.IParser;
 
 public class BaseFhirLibrarySourceProviderTests {
 
-    private static BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider;
-    private static FhirContext fhirContext;
-    private static IParser parser;
+  private static BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider;
+  private static FhirContext fhirContext;
+  private static IParser parser;
 
-    @BeforeClass
-    public void setup() {
-        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-        parser = fhirContext.newJsonParser();
+  @BeforeClass
+  public void setup() {
+    fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+    parser = fhirContext.newJsonParser();
 
-        testFhirLibrarySourceProvider = new BaseFhirLibrarySourceProvider(new AdapterFactory()) {
-            @Override
-            public IBaseResource getLibrary(VersionedIdentifier versionedIdentifier) {
-                String name = versionedIdentifier.getId();
+    testFhirLibrarySourceProvider = new BaseFhirLibrarySourceProvider(new AdapterFactory()) {
+      @Override
+      public IBaseResource getLibrary(VersionedIdentifier versionedIdentifier) {
+        String name = versionedIdentifier.getId();
 
-                InputStream libraryStream = BaseFhirLibrarySourceProviderTests.class
-                        .getResourceAsStream(name + ".json");
+        InputStream libraryStream =
+            BaseFhirLibrarySourceProviderTests.class.getResourceAsStream(name + ".json");
 
-                return parser.parseResource(new InputStreamReader(libraryStream));
-            }
-        };
+        return parser.parseResource(new InputStreamReader(libraryStream));
+      }
+    };
+  }
+
+  private String readToString(InputStream inputStream) {
+    return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
+        .collect(Collectors.joining("\n"));
+  }
+
+  private String getContent(String libraryName, LibraryContentType libraryContentType) {
+    VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId(libraryName);
+    InputStream stream =
+        testFhirLibrarySourceProvider.getLibraryContent(libraryIdentifier, libraryContentType);
+    if (stream == null) {
+      return null;
     }
 
-    private String readToString(InputStream inputStream) {
-        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-                .lines().collect(Collectors.joining("\n"));
-    }
+    return readToString(stream);
+  }
 
-    private String getContent(String libraryName, LibraryContentType libraryContentType) {
-        VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId(libraryName);
-        InputStream stream = testFhirLibrarySourceProvider.getLibraryContent(libraryIdentifier,
-                libraryContentType);
-        if (stream == null) {
-            return null;
-        }
+  @Test
+  public void allSupportedContentReturnsContent() {
+    String libraryName = "AllContent";
+    String actual = this.getContent(libraryName, LibraryContentType.CQL);
+    assertEquals(actual, "CQL");
 
-        return readToString(stream);
-    }
+    actual = this.getContent(libraryName, LibraryContentType.JSON);
+    assertEquals(actual, "JSON");
 
-    @Test
-    public void allSupportedContentReturnsContent() {
-        String libraryName = "AllContent";
-        String actual = this.getContent(libraryName, LibraryContentType.CQL);
-        assertEquals(actual, "CQL");
+    actual = this.getContent(libraryName, LibraryContentType.XML);
+    assertEquals(actual, "XML");
+  }
 
-        actual = this.getContent(libraryName, LibraryContentType.JSON);
-        assertEquals(actual, "JSON");
+  public void coffeeContentIsNull() {
+    String libraryName = "AllContent";
+    String content = this.getContent(libraryName, LibraryContentType.COFFEE);
+    assertNull(content);
+  }
 
-        actual = this.getContent(libraryName, LibraryContentType.XML);
-        assertEquals(actual, "XML");
-    }
+  @Test
+  public void missingContentReturnsNull() {
+    String libraryName = "CqlContent";
+    String actual = this.getContent(libraryName, LibraryContentType.CQL);
+    assertEquals(actual, "CQL");
 
-    public void coffeeContentIsNull() {
-        String libraryName = "AllContent";
-        String content = this.getContent(libraryName, LibraryContentType.COFFEE);
-        assertNull(content);
-    }
+    actual = this.getContent(libraryName, LibraryContentType.JSON);
+    assertNull(actual);
 
-    @Test
-    public void missingContentReturnsNull() {
-        String libraryName = "CqlContent";
-        String actual = this.getContent(libraryName, LibraryContentType.CQL);
-        assertEquals(actual, "CQL");
+    libraryName = "JsonContent";
+    actual = this.getContent(libraryName, LibraryContentType.JSON);
+    assertEquals(actual, "JSON");
 
-        actual = this.getContent(libraryName, LibraryContentType.JSON);
-        assertNull(actual);
+    actual = this.getContent(libraryName, LibraryContentType.CQL);
+    assertNull(actual);
+  }
 
-        libraryName = "JsonContent";
-        actual = this.getContent(libraryName, LibraryContentType.JSON);
-        assertEquals(actual, "JSON");
-
-        actual = this.getContent(libraryName, LibraryContentType.CQL);
-        assertNull(actual);
-    }
-
-    @Test
-    public void getSourceReturnsCql() {
-        String actual = this.readToString(testFhirLibrarySourceProvider
-                .getLibrarySource(new VersionedIdentifier().withId("AllContent")));
-        assertEquals(actual, "CQL");
-    }
+  @Test
+  public void getSourceReturnsCql() {
+    String actual = this.readToString(testFhirLibrarySourceProvider
+        .getLibrarySource(new VersionedIdentifier().withId("AllContent")));
+    assertEquals(actual, "CQL");
+  }
 }

@@ -41,171 +41,167 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class LibraryProcessorTests {
 
-    static LibraryProcessor libraryProcessor = null;
-    static FhirContext fhirContext = null;
+  static LibraryProcessor libraryProcessor = null;
+  static FhirContext fhirContext = null;
 
-    @BeforeTest
-    @SuppressWarnings("serial")
-    public void setup() {
-        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+  @BeforeTest
+  @SuppressWarnings("serial")
+  public void setup() {
+    fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-        AdapterFactory adapterFactory =
-                new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+    AdapterFactory adapterFactory =
+        new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
 
-        LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
+    LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
 
-        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories =
-                new HashSet<TypedLibrarySourceProviderFactory>() {
-                    {
-                        add(new TypedLibrarySourceProviderFactory() {
-                            @Override
-                            public String getType() {
-                                return Constants.HL7_FHIR_FILES;
-                            }
+    Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories =
+        new HashSet<TypedLibrarySourceProviderFactory>() {
+          {
+            add(new TypedLibrarySourceProviderFactory() {
+              @Override
+              public String getType() {
+                return Constants.HL7_FHIR_FILES;
+              }
 
-                            @Override
-                            public LibrarySourceProvider create(String url, List<String> headers) {
-                                return new BundleFhirLibrarySourceProvider(fhirContext,
-                                        (IBaseBundle) fhirContext.newJsonParser()
-                                                .parseResource(LibraryProcessorTests.class
-                                                        .getResourceAsStream(url)),
-                                        adapterFactory, libraryVersionSelector);
-                            }
-                        });
-                    }
-                };
-
-        ModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
-
-        Set<ModelResolverFactory> modelResolverFactories = new HashSet<ModelResolverFactory>() {
-            {
-                add(fhirModelResolverFactory);
-            }
+              @Override
+              public LibrarySourceProvider create(String url, List<String> headers) {
+                return new BundleFhirLibrarySourceProvider(fhirContext,
+                    (IBaseBundle) fhirContext.newJsonParser()
+                        .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)),
+                    adapterFactory, libraryVersionSelector);
+              }
+            });
+          }
         };
 
-        LibrarySourceProviderFactory libraryLoaderFactory =
-                new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
-                        fhirContext, adapterFactory, librarySourceProviderFactories,
-                        libraryVersionSelector);
-        Set<TypedRetrieveProviderFactory> retrieveProviderFactories =
-                new HashSet<TypedRetrieveProviderFactory>() {
-                    {
-                        add(new TypedRetrieveProviderFactory() {
-                            @Override
-                            public String getType() {
-                                return Constants.HL7_FHIR_FILES;
-                            }
+    ModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
 
-                            @Override
-                            public RetrieveProvider create(String url, List<String> headers) {
+    Set<ModelResolverFactory> modelResolverFactories = new HashSet<ModelResolverFactory>() {
+      {
+        add(fhirModelResolverFactory);
+      }
+    };
 
-                                return new BundleRetrieveProvider(fhirContext,
-                                        (IBaseBundle) fhirContext.newJsonParser()
-                                                .parseResource(LibraryProcessorTests.class
-                                                        .getResourceAsStream(url)));
-                            }
-                        });
-                    }
-                };
+    LibrarySourceProviderFactory libraryLoaderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(fhirContext,
+            adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
+    Set<TypedRetrieveProviderFactory> retrieveProviderFactories =
+        new HashSet<TypedRetrieveProviderFactory>() {
+          {
+            add(new TypedRetrieveProviderFactory() {
+              @Override
+              public String getType() {
+                return Constants.HL7_FHIR_FILES;
+              }
 
-        DataProviderFactory dataProviderFactory =
-                new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
-                        modelResolverFactories, retrieveProviderFactories);
+              @Override
+              public RetrieveProvider create(String url, List<String> headers) {
 
-        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories =
-                new HashSet<TypedTerminologyProviderFactory>() {
-                    {
-                        add(new TypedTerminologyProviderFactory() {
-                            @Override
-                            public String getType() {
-                                return Constants.HL7_FHIR_FILES;
-                            }
+                return new BundleRetrieveProvider(fhirContext,
+                    (IBaseBundle) fhirContext.newJsonParser()
+                        .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)));
+              }
+            });
+          }
+        };
 
-                            @Override
-                            public TerminologyProvider create(String url, List<String> headers) {
-                                return new BundleTerminologyProvider(fhirContext,
-                                        (IBaseBundle) fhirContext.newJsonParser()
-                                                .parseResource(LibraryProcessorTests.class
-                                                        .getResourceAsStream(url)));
-                            }
-                        });
-                    }
-                };
+    DataProviderFactory dataProviderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+            modelResolverFactories, retrieveProviderFactories);
 
-        TerminologyProviderFactory terminologyProviderFactory =
-                new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
-                        fhirContext, typedTerminologyProviderFactories);
+    Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories =
+        new HashSet<TypedTerminologyProviderFactory>() {
+          {
+            add(new TypedTerminologyProviderFactory() {
+              @Override
+              public String getType() {
+                return Constants.HL7_FHIR_FILES;
+              }
 
-        EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
+              @Override
+              public TerminologyProvider create(String url, List<String> headers) {
+                return new BundleTerminologyProvider(fhirContext,
+                    (IBaseBundle) fhirContext.newJsonParser()
+                        .parseResource(LibraryProcessorTests.class.getResourceAsStream(url)));
+              }
+            });
+          }
+        };
 
-        FhirTypeConverter fhirTypeConverter =
-                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+    TerminologyProviderFactory terminologyProviderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+            fhirContext, typedTerminologyProviderFactories);
 
-        CqlFhirParametersConverter cqlFhirParametersConverter =
-                new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+    EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
-                libraryLoaderFactory, dataProviderFactory, terminologyProviderFactory,
-                endpointConverter, fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
-    }
+    FhirTypeConverter fhirTypeConverter =
+        new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
-    @Test
-    public void TestEXM125() {
-        Parameters expected = new Parameters();
-        expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
+    CqlFhirParametersConverter cqlFhirParametersConverter =
+        new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
 
-        Endpoint endpoint = new Endpoint().setAddress("r4/EXM125-8.0.000-bundle.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
+        libraryLoaderFactory, dataProviderFactory, terminologyProviderFactory, endpointConverter,
+        fhirModelResolverFactory, () -> new CqlEvaluatorBuilder());
+  }
 
-        Set<String> expressions = new HashSet<String>();
-        expressions.add("Numerator");
+  @Test
+  public void TestEXM125() {
+    Parameters expected = new Parameters();
+    expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
 
-        Parameters actual = (Parameters) libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("EXM125").withVersion("8.0.000"), "numer-EXM125",
-                null, endpoint, endpoint, endpoint, null, expressions);
+    Endpoint endpoint = new Endpoint().setAddress("r4/EXM125-8.0.000-bundle.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        assertTrue(expected.equalsDeep(actual));
-    }
+    Set<String> expressions = new HashSet<String>();
+    expressions.add("Numerator");
 
-    @Test
-    public void TestRuleFiltersReportable() {
-        Parameters expected = new Parameters();
-        expected.addParameter().setName("IsReportable").setValue(new BooleanType(true));
+    Parameters actual = (Parameters) libraryProcessor.evaluate(
+        new VersionedIdentifier().withId("EXM125").withVersion("8.0.000"), "numer-EXM125", null,
+        endpoint, endpoint, endpoint, null, expressions);
 
-        Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    assertTrue(expected.equalsDeep(actual));
+  }
 
-        Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-Reportable-bundle.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+  @Test
+  public void TestRuleFiltersReportable() {
+    Parameters expected = new Parameters();
+    expected.addParameter().setName("IsReportable").setValue(new BooleanType(true));
 
-        Set<String> expressions = new HashSet<String>();
-        expressions.add("IsReportable");
+    Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Parameters actual = (Parameters) libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Reportable",
-                null, endpoint, endpoint, dataEndpoint, null, expressions);
+    Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-Reportable-bundle.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        assertTrue(expected.equalsDeep(actual));
-    }
+    Set<String> expressions = new HashSet<String>();
+    expressions.add("IsReportable");
 
-    @Test
-    public void TestRuleFiltersNotReportable() {
-        Parameters expected = new Parameters();
-        expected.addParameter().setName("IsReportable").setValue(new BooleanType(false));
+    Parameters actual = (Parameters) libraryProcessor.evaluate(
+        new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "Reportable", null,
+        endpoint, endpoint, dataEndpoint, null, expressions);
 
-        Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    assertTrue(expected.equalsDeep(actual));
+  }
 
-        Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-NotReportable-bundle.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+  @Test
+  public void TestRuleFiltersNotReportable() {
+    Parameters expected = new Parameters();
+    expected.addParameter().setName("IsReportable").setValue(new BooleanType(false));
 
-        Set<String> expressions = new HashSet<String>();
-        expressions.add("IsReportable");
+    Endpoint endpoint = new Endpoint().setAddress("r4/RuleFilters-1.0.0-bundle.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Parameters actual = (Parameters) libraryProcessor.evaluate(
-                new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"),
-                "NotReportable", null, endpoint, endpoint, dataEndpoint, null, expressions);
+    Endpoint dataEndpoint = new Endpoint().setAddress("r4/tests-NotReportable-bundle.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        assertTrue(expected.equalsDeep(actual));
-    }
+    Set<String> expressions = new HashSet<String>();
+    expressions.add("IsReportable");
+
+    Parameters actual = (Parameters) libraryProcessor.evaluate(
+        new VersionedIdentifier().withId("RuleFilters").withVersion("1.0.0"), "NotReportable", null,
+        endpoint, endpoint, dataEndpoint, null, expressions);
+
+    assertTrue(expected.equalsDeep(actual));
+  }
 }

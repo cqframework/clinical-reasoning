@@ -18,446 +18,442 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 
 public class ValueSetUtil {
 
-    public static IBase getCompose(FhirContext fhirContext, IBaseResource valueSet) {
-        BaseRuntimeChildDefinition composeChild = getComposeDefinition(fhirContext);
-        List<IBase> compose = composeChild.getAccessor().getValues(valueSet);
+  public static IBase getCompose(FhirContext fhirContext, IBaseResource valueSet) {
+    BaseRuntimeChildDefinition composeChild = getComposeDefinition(fhirContext);
+    List<IBase> compose = composeChild.getAccessor().getValues(valueSet);
 
-        if (compose.isEmpty()) {
-            return null;
-        }
-
-        if (compose.size() > 1) {
-            throw new IllegalArgumentException("ValueSet has multiple compose definitions.");
-        }
-
-        return compose.get(0);
+    if (compose.isEmpty()) {
+      return null;
     }
 
-    public static List<IBase> getIncludes(FhirContext fhirContext, IBaseResource valueSet) {
-        IBase compose = getCompose(fhirContext, valueSet);
-
-        if (compose == null) {
-            return null;
-        }
-
-        BaseRuntimeChildDefinition includeChild = getIncludeDefinition(fhirContext);
-        List<IBase> includeComponents = includeChild.getAccessor().getValues(compose);
-
-        if (includeComponents.isEmpty()) {
-            return null;
-        }
-
-        return includeComponents;
+    if (compose.size() > 1) {
+      throw new IllegalArgumentException("ValueSet has multiple compose definitions.");
     }
 
-    public static List<IBase> getExcludes(FhirContext fhirContext, IBaseResource valueSet) {
-        IBase compose = getCompose(fhirContext, valueSet);
+    return compose.get(0);
+  }
 
-        if (compose == null) {
-            return null;
-        }
+  public static List<IBase> getIncludes(FhirContext fhirContext, IBaseResource valueSet) {
+    IBase compose = getCompose(fhirContext, valueSet);
 
-        BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
-        List<IBase> excludeComponents = excludeChild.getAccessor().getValues(compose);
-
-        if (excludeComponents == null || excludeComponents.isEmpty()) {
-            return null;
-        }
-
-        return excludeComponents;
+    if (compose == null) {
+      return null;
     }
 
-    public static List<IBase> getIncludeConcepts(FhirContext fhirContext, IBaseResource valueSet) {
-        List<IBase> includes = getIncludes(fhirContext, valueSet);
+    BaseRuntimeChildDefinition includeChild = getIncludeDefinition(fhirContext);
+    List<IBase> includeComponents = includeChild.getAccessor().getValues(compose);
 
-        if (includes == null) {
-            return null;
-        }
-
-        BaseRuntimeChildDefinition conceptChild = getIncludeConceptDefinition(fhirContext);
-
-
-        // TODO: The system is defined at the include level, while codes are at the concept level
-        // Need to return a class that represents that.
-        List<IBase> concepts = new ArrayList<>();
-        for (IBase include : includes) {
-            List<IBase> currentConcepts = conceptChild.getAccessor().getValues(include);
-            if (currentConcepts != null) {
-                concepts.addAll(currentConcepts);
-            }
-        }
-
-        return concepts;
+    if (includeComponents.isEmpty()) {
+      return null;
     }
 
-    public static List<IBase> getIncludeFilters(FhirContext fhirContext, IBaseResource valueSet) {
-        List<IBase> includes = getIncludes(fhirContext, valueSet);
+    return includeComponents;
+  }
 
-        if (includes == null) {
-            return null;
-        }
+  public static List<IBase> getExcludes(FhirContext fhirContext, IBaseResource valueSet) {
+    IBase compose = getCompose(fhirContext, valueSet);
 
-        BaseRuntimeChildDefinition filterChild = getIncludeFilterDefinition(fhirContext);
-
-        // TODO: The system is defined at the include level, while codes are at the concept level
-        // Need to return a class that represents that.
-        List<IBase> filters = new ArrayList<>();
-        for (IBase include : includes) {
-            List<IBase> currentFilters = filterChild.getAccessor().getValues(include);
-            if (currentFilters != null) {
-                filters.addAll(currentFilters);
-            }
-        }
-
-        return filters;
+    if (compose == null) {
+      return null;
     }
 
-    public static List<IBase> getExcludeConcepts(FhirContext fhirContext, IBaseResource valueSet) {
-        List<IBase> excludes = getExcludes(fhirContext, valueSet);
+    BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
+    List<IBase> excludeComponents = excludeChild.getAccessor().getValues(compose);
 
-        if (excludes == null) {
-            return null;
-        }
-
-        BaseRuntimeChildDefinition conceptChild = getExcludeConceptDefinition(fhirContext);
-
-        // TODO: The system is defined at the include level, while codes are at the concept level
-        // Need to return a class that represents that.
-        List<IBase> concepts = new ArrayList<>();
-        for (IBase exclude : excludes) {
-            List<IBase> currentConcepts = conceptChild.getAccessor().getValues(exclude);
-            if (currentConcepts != null) {
-                concepts.addAll(currentConcepts);
-            }
-        }
-
-        return concepts;
+    if (excludeComponents == null || excludeComponents.isEmpty()) {
+      return null;
     }
 
-    public static List<IBase> getExcludeFilters(FhirContext fhirContext, IBaseResource valueSet) {
-        List<IBase> excludes = getExcludes(fhirContext, valueSet);
+    return excludeComponents;
+  }
 
-        if (excludes == null) {
-            return null;
-        }
+  public static List<IBase> getIncludeConcepts(FhirContext fhirContext, IBaseResource valueSet) {
+    List<IBase> includes = getIncludes(fhirContext, valueSet);
 
-        BaseRuntimeChildDefinition filterChild = getExcludeFilterDefinition(fhirContext);
-
-        // TODO: The system is defined at the include level, while codes are at the concept level
-        // Need to return a class that represents that.
-        List<IBase> filters = new ArrayList<>();
-        for (IBase exclude : excludes) {
-            List<IBase> currentFilters = filterChild.getAccessor().getValues(exclude);
-            if (currentFilters != null) {
-                filters.addAll(currentFilters);
-            }
-        }
-
-        return filters;
+    if (includes == null) {
+      return null;
     }
 
-    public static IBase getExpansion(FhirContext fhirContext, IBaseResource valueSet) {
-        BaseRuntimeChildDefinition expansionChild = getExpansionDefinition(fhirContext);
-        List<IBase> expansion = expansionChild.getAccessor().getValues(valueSet);
+    BaseRuntimeChildDefinition conceptChild = getIncludeConceptDefinition(fhirContext);
 
-        if (expansion == null || expansion.isEmpty()) {
-            return null;
-        }
 
-        if (expansion.size() > 1) {
-            throw new IllegalArgumentException("ValueSet has multiple expansion definitions.");
-        }
-
-        return expansion.get(0);
+    // TODO: The system is defined at the include level, while codes are at the concept level
+    // Need to return a class that represents that.
+    List<IBase> concepts = new ArrayList<>();
+    for (IBase include : includes) {
+      List<IBase> currentConcepts = conceptChild.getAccessor().getValues(include);
+      if (currentConcepts != null) {
+        concepts.addAll(currentConcepts);
+      }
     }
 
-    public static List<IBase> getContains(FhirContext fhirContext, IBaseResource valueSet) {
-        IBase expansion = getExpansion(fhirContext, valueSet);
+    return concepts;
+  }
 
-        if (expansion == null) {
-            return null;
-        }
+  public static List<IBase> getIncludeFilters(FhirContext fhirContext, IBaseResource valueSet) {
+    List<IBase> includes = getIncludes(fhirContext, valueSet);
 
-        BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
-
-        List<IBase> contains = containsDefinition.getAccessor().getValues(expansion);
-
-        if (contains == null || contains.isEmpty()) {
-            return null;
-        }
-
-        return contains;
+    if (includes == null) {
+      return null;
     }
 
-    public static Iterable<Code> getCodesInCompose(FhirContext fhirContext,
-            IBaseResource valueSet) {
-        List<IBase> includes = getIncludes(fhirContext, valueSet);
+    BaseRuntimeChildDefinition filterChild = getIncludeFilterDefinition(fhirContext);
 
-        if (includes == null) {
-            return null;
-        }
-
-        BaseRuntimeChildDefinition conceptChild = getIncludeConceptDefinition(fhirContext);
-
-        IAccessor versionAccessor = getIncludeVersionDefinition(fhirContext).getAccessor();
-        IAccessor systemAccessor = getIncludeSystemDefinition(fhirContext).getAccessor();
-        IAccessor codeAccessor = getIncludeConceptCodeDefinition(fhirContext).getAccessor();
-        IAccessor displayAccessor = getIncludeConceptDisplayDefinition(fhirContext).getAccessor();
-
-        List<Code> codes = new ArrayList<>();
-        for (IBase include : includes) {
-
-            String version = getStringValueFromPrimitiveAccessor(include, versionAccessor);
-            String system = getStringValueFromPrimitiveAccessor(include, systemAccessor);
-
-            List<IBase> concepts = conceptChild.getAccessor().getValues(include);
-
-            for (IBase c : concepts) {
-
-                String code = getStringValueFromPrimitiveAccessor(c, codeAccessor);
-                String display = getStringValueFromPrimitiveAccessor(c, displayAccessor);
-                codes.add(new Code().withSystem(system).withCode(code).withDisplay(display)
-                        .withVersion(version));
-            }
-        }
-
-        return codes;
+    // TODO: The system is defined at the include level, while codes are at the concept level
+    // Need to return a class that represents that.
+    List<IBase> filters = new ArrayList<>();
+    for (IBase include : includes) {
+      List<IBase> currentFilters = filterChild.getAccessor().getValues(include);
+      if (currentFilters != null) {
+        filters.addAll(currentFilters);
+      }
     }
 
-    public static Iterable<Code> getCodesInExpansion(FhirContext fhirContext,
-            IBaseResource valueSet) {
-        List<IBase> contains = getContains(fhirContext, valueSet);
+    return filters;
+  }
 
-        if (contains == null) {
-            return null;
-        }
+  public static List<IBase> getExcludeConcepts(FhirContext fhirContext, IBaseResource valueSet) {
+    List<IBase> excludes = getExcludes(fhirContext, valueSet);
 
-        IAccessor systemAccessor = getSystemDefinition(fhirContext).getAccessor();
-        IAccessor codeAccessor = getCodeDefinition(fhirContext).getAccessor();
-        IAccessor displayAccessor = getDisplayDefinition(fhirContext).getAccessor();
-        IAccessor versionAccessor = getVersionDefinition(fhirContext).getAccessor();
-
-
-        List<Code> codes = new ArrayList<>();
-        for (IBase c : contains) {
-
-            String system = getStringValueFromPrimitiveAccessor(c, systemAccessor);
-            String code = getStringValueFromPrimitiveAccessor(c, codeAccessor);
-            String display = getStringValueFromPrimitiveAccessor(c, displayAccessor);
-            String version = getStringValueFromPrimitiveAccessor(c, versionAccessor);
-
-            codes.add(new Code().withSystem(system).withCode(code).withDisplay(display)
-                    .withVersion(version));
-        }
-
-        return codes;
+    if (excludes == null) {
+      return null;
     }
 
-    public static String getUrl(FhirContext fhirContext, IBaseResource valueSet) {
-        BaseRuntimeChildDefinition urlDef = getUrlDefinition(fhirContext);
-        return getStringValueFromPrimitiveAccessor(valueSet, urlDef.getAccessor());
+    BaseRuntimeChildDefinition conceptChild = getExcludeConceptDefinition(fhirContext);
+
+    // TODO: The system is defined at the include level, while codes are at the concept level
+    // Need to return a class that represents that.
+    List<IBase> concepts = new ArrayList<>();
+    for (IBase exclude : excludes) {
+      List<IBase> currentConcepts = conceptChild.getAccessor().getValues(exclude);
+      if (currentConcepts != null) {
+        concepts.addAll(currentConcepts);
+      }
     }
 
-    public static String getId(FhirContext fhirContext, IBaseResource valueSet) {
-        BaseRuntimeChildDefinition idDef = getIdDefinition(fhirContext);
-        return getStringValueFromPrimitiveAccessor(valueSet, idDef.getAccessor());
+    return concepts;
+  }
+
+  public static List<IBase> getExcludeFilters(FhirContext fhirContext, IBaseResource valueSet) {
+    List<IBase> excludes = getExcludes(fhirContext, valueSet);
+
+    if (excludes == null) {
+      return null;
     }
 
-    public static String getResourceType(FhirContext fhirContext, IBaseResource resource) {
-        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(resource);
-        return def.getName();
+    BaseRuntimeChildDefinition filterChild = getExcludeFilterDefinition(fhirContext);
+
+    // TODO: The system is defined at the include level, while codes are at the concept level
+    // Need to return a class that represents that.
+    List<IBase> filters = new ArrayList<>();
+    for (IBase exclude : excludes) {
+      List<IBase> currentFilters = filterChild.getAccessor().getValues(exclude);
+      if (currentFilters != null) {
+        filters.addAll(currentFilters);
+      }
     }
 
-    private static String getStringValueFromPrimitiveAccessor(IBase value, IAccessor accessor) {
-        if (value == null || accessor == null) {
-            return null;
-        }
+    return filters;
+  }
 
-        List<IBase> values = accessor.getValues(value);
-        if (values == null || values.isEmpty()) {
-            return null;
-        }
+  public static IBase getExpansion(FhirContext fhirContext, IBaseResource valueSet) {
+    BaseRuntimeChildDefinition expansionChild = getExpansionDefinition(fhirContext);
+    List<IBase> expansion = expansionChild.getAccessor().getValues(valueSet);
 
-        if (values.size() > 1) {
-            throw new IllegalArgumentException(
-                    "More than one value returned while attempting to access primitive value.");
-        }
-
-        IBase baseValue = values.get(0);
-
-        if (!(baseValue instanceof IPrimitiveType)) {
-            throw new IllegalArgumentException(
-                    "Non-primitive value encountered while trying to access primitive value.");
-        } else {
-            return ((IPrimitiveType<?>) baseValue).getValueAsString();
-        }
+    if (expansion == null || expansion.isEmpty()) {
+      return null;
     }
 
-    private static BaseRuntimeChildDefinition getComposeDefinition(FhirContext fhirContext) {
-        RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
-        return def.getChildByName("compose");
+    if (expansion.size() > 1) {
+      throw new IllegalArgumentException("ValueSet has multiple expansion definitions.");
     }
 
-    private static BaseRuntimeChildDefinition getIncludeDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition composeChild = getComposeDefinition(fhirContext);
-        return getIncludeDefinition(composeChild);
+    return expansion.get(0);
+  }
+
+  public static List<IBase> getContains(FhirContext fhirContext, IBaseResource valueSet) {
+    IBase expansion = getExpansion(fhirContext, valueSet);
+
+    if (expansion == null) {
+      return null;
     }
 
+    BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
 
-    private static BaseRuntimeChildDefinition getIncludeDefinition(
-            BaseRuntimeChildDefinition composeChild) {
-        RuntimeResourceBlockDefinition composeBlockChild =
-                (RuntimeResourceBlockDefinition) composeChild.getChildByName("compose");
-        BaseRuntimeChildDefinition includeChild = composeBlockChild.getChildByName("include");
-        return includeChild;
+    List<IBase> contains = containsDefinition.getAccessor().getValues(expansion);
+
+    if (contains == null || contains.isEmpty()) {
+      return null;
     }
 
-    private static BaseRuntimeChildDefinition getIncludeConceptDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition includeChild = getIncludeDefinition(fhirContext);
-        RuntimeResourceBlockDefinition includeBlockChild =
-                (RuntimeResourceBlockDefinition) includeChild.getChildByName("include");
-        return getConceptDefinition(includeBlockChild);
+    return contains;
+  }
+
+  public static Iterable<Code> getCodesInCompose(FhirContext fhirContext, IBaseResource valueSet) {
+    List<IBase> includes = getIncludes(fhirContext, valueSet);
+
+    if (includes == null) {
+      return null;
     }
 
-    private static BaseRuntimeChildDefinition getIncludeFilterDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition includeChild = getIncludeDefinition(fhirContext);
-        RuntimeResourceBlockDefinition includeBlockChild =
-                (RuntimeResourceBlockDefinition) includeChild.getChildByName("include");
-        return getFilterDefinition(includeBlockChild);
+    BaseRuntimeChildDefinition conceptChild = getIncludeConceptDefinition(fhirContext);
+
+    IAccessor versionAccessor = getIncludeVersionDefinition(fhirContext).getAccessor();
+    IAccessor systemAccessor = getIncludeSystemDefinition(fhirContext).getAccessor();
+    IAccessor codeAccessor = getIncludeConceptCodeDefinition(fhirContext).getAccessor();
+    IAccessor displayAccessor = getIncludeConceptDisplayDefinition(fhirContext).getAccessor();
+
+    List<Code> codes = new ArrayList<>();
+    for (IBase include : includes) {
+
+      String version = getStringValueFromPrimitiveAccessor(include, versionAccessor);
+      String system = getStringValueFromPrimitiveAccessor(include, systemAccessor);
+
+      List<IBase> concepts = conceptChild.getAccessor().getValues(include);
+
+      for (IBase c : concepts) {
+
+        String code = getStringValueFromPrimitiveAccessor(c, codeAccessor);
+        String display = getStringValueFromPrimitiveAccessor(c, displayAccessor);
+        codes.add(
+            new Code().withSystem(system).withCode(code).withDisplay(display).withVersion(version));
+      }
     }
 
-    private static RuntimeChildResourceBlockDefinition getConceptDefinition(
-            RuntimeResourceBlockDefinition includeOrExcludeChild) {
-        return (RuntimeChildResourceBlockDefinition) includeOrExcludeChild
-                .getChildByName("concept");
+    return codes;
+  }
+
+  public static Iterable<Code> getCodesInExpansion(FhirContext fhirContext,
+      IBaseResource valueSet) {
+    List<IBase> contains = getContains(fhirContext, valueSet);
+
+    if (contains == null) {
+      return null;
     }
 
-    private static RuntimeChildResourceBlockDefinition getFilterDefinition(
-            RuntimeResourceBlockDefinition includeOrExcludeChild) {
-        return (RuntimeChildResourceBlockDefinition) includeOrExcludeChild.getChildByName("filter");
+    IAccessor systemAccessor = getSystemDefinition(fhirContext).getAccessor();
+    IAccessor codeAccessor = getCodeDefinition(fhirContext).getAccessor();
+    IAccessor displayAccessor = getDisplayDefinition(fhirContext).getAccessor();
+    IAccessor versionAccessor = getVersionDefinition(fhirContext).getAccessor();
+
+
+    List<Code> codes = new ArrayList<>();
+    for (IBase c : contains) {
+
+      String system = getStringValueFromPrimitiveAccessor(c, systemAccessor);
+      String code = getStringValueFromPrimitiveAccessor(c, codeAccessor);
+      String display = getStringValueFromPrimitiveAccessor(c, displayAccessor);
+      String version = getStringValueFromPrimitiveAccessor(c, versionAccessor);
+
+      codes.add(
+          new Code().withSystem(system).withCode(code).withDisplay(display).withVersion(version));
     }
 
-    private static BaseRuntimeChildDefinition getExcludeDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition composeChild = getComposeDefinition(fhirContext);
-        return getExcludeDefinition(composeChild);
+    return codes;
+  }
+
+  public static String getUrl(FhirContext fhirContext, IBaseResource valueSet) {
+    BaseRuntimeChildDefinition urlDef = getUrlDefinition(fhirContext);
+    return getStringValueFromPrimitiveAccessor(valueSet, urlDef.getAccessor());
+  }
+
+  public static String getId(FhirContext fhirContext, IBaseResource valueSet) {
+    BaseRuntimeChildDefinition idDef = getIdDefinition(fhirContext);
+    return getStringValueFromPrimitiveAccessor(valueSet, idDef.getAccessor());
+  }
+
+  public static String getResourceType(FhirContext fhirContext, IBaseResource resource) {
+    RuntimeResourceDefinition def = fhirContext.getResourceDefinition(resource);
+    return def.getName();
+  }
+
+  private static String getStringValueFromPrimitiveAccessor(IBase value, IAccessor accessor) {
+    if (value == null || accessor == null) {
+      return null;
     }
 
-    private static BaseRuntimeChildDefinition getExcludeDefinition(
-            BaseRuntimeChildDefinition composeChild) {
-        RuntimeResourceBlockDefinition composeBlockChild =
-                (RuntimeResourceBlockDefinition) composeChild.getChildByName("compose");
-        BaseRuntimeChildDefinition excludeChild = composeBlockChild.getChildByName("exclude");
-        return excludeChild;
+    List<IBase> values = accessor.getValues(value);
+    if (values == null || values.isEmpty()) {
+      return null;
     }
 
-    private static BaseRuntimeChildDefinition getExcludeConceptDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
-        RuntimeResourceBlockDefinition excludeBlockChild =
-                (RuntimeResourceBlockDefinition) excludeChild.getChildByName("exclude");
-        return getConceptDefinition(excludeBlockChild);
+    if (values.size() > 1) {
+      throw new IllegalArgumentException(
+          "More than one value returned while attempting to access primitive value.");
     }
 
-    private static BaseRuntimeChildDefinition getExcludeFilterDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
-        RuntimeResourceBlockDefinition excludeBlockChild =
-                (RuntimeResourceBlockDefinition) excludeChild.getChildByName("exclude");
-        return getFilterDefinition(excludeBlockChild);
-    }
+    IBase baseValue = values.get(0);
 
-    private static BaseRuntimeChildDefinition getExpansionDefinition(FhirContext fhirContext) {
-        RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
-        return def.getChildByName("expansion");
+    if (!(baseValue instanceof IPrimitiveType)) {
+      throw new IllegalArgumentException(
+          "Non-primitive value encountered while trying to access primitive value.");
+    } else {
+      return ((IPrimitiveType<?>) baseValue).getValueAsString();
     }
+  }
 
-    private static BaseRuntimeChildDefinition getContainsDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition expansionChild = getExpansionDefinition(fhirContext);
-        RuntimeResourceBlockDefinition expansionBlockChild =
-                (RuntimeResourceBlockDefinition) expansionChild.getChildByName("expansion");
-        return getContainsDefinition(expansionBlockChild);
-    }
+  private static BaseRuntimeChildDefinition getComposeDefinition(FhirContext fhirContext) {
+    RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
+    return def.getChildByName("compose");
+  }
 
-    private static BaseRuntimeChildDefinition getContainsDefinition(
-            RuntimeResourceBlockDefinition expansionChild) {
-        return expansionChild.getChildByName("contains");
-    }
+  private static BaseRuntimeChildDefinition getIncludeDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition composeChild = getComposeDefinition(fhirContext);
+    return getIncludeDefinition(composeChild);
+  }
 
-    private static BaseRuntimeChildDefinition getSystemDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
-        RuntimeResourceBlockDefinition containsBlockDefinition =
-                (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
-        return containsBlockDefinition.getChildByName("system");
-    }
 
-    private static BaseRuntimeChildDefinition getVersionDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
-        RuntimeResourceBlockDefinition containsBlockDefinition =
-                (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
-        return containsBlockDefinition.getChildByName("version");
-    }
+  private static BaseRuntimeChildDefinition getIncludeDefinition(
+      BaseRuntimeChildDefinition composeChild) {
+    RuntimeResourceBlockDefinition composeBlockChild =
+        (RuntimeResourceBlockDefinition) composeChild.getChildByName("compose");
+    BaseRuntimeChildDefinition includeChild = composeBlockChild.getChildByName("include");
+    return includeChild;
+  }
 
-    private static BaseRuntimeChildDefinition getCodeDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
-        RuntimeResourceBlockDefinition containsBlockDefinition =
-                (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
-        return containsBlockDefinition.getChildByName("code");
-    }
+  private static BaseRuntimeChildDefinition getIncludeConceptDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition includeChild = getIncludeDefinition(fhirContext);
+    RuntimeResourceBlockDefinition includeBlockChild =
+        (RuntimeResourceBlockDefinition) includeChild.getChildByName("include");
+    return getConceptDefinition(includeBlockChild);
+  }
 
-    private static BaseRuntimeChildDefinition getDisplayDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
-        RuntimeResourceBlockDefinition containsBlockDefinition =
-                (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
-        return containsBlockDefinition.getChildByName("display");
-    }
+  private static BaseRuntimeChildDefinition getIncludeFilterDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition includeChild = getIncludeDefinition(fhirContext);
+    RuntimeResourceBlockDefinition includeBlockChild =
+        (RuntimeResourceBlockDefinition) includeChild.getChildByName("include");
+    return getFilterDefinition(includeBlockChild);
+  }
 
-    private static BaseRuntimeChildDefinition getIncludeConceptCodeDefinition(
-            FhirContext fhirContext) {
-        BaseRuntimeChildDefinition includeConceptDefinition =
-                getIncludeConceptDefinition(fhirContext);
-        RuntimeResourceBlockDefinition containsBlockDefinition =
-                (RuntimeResourceBlockDefinition) includeConceptDefinition.getChildByName("concept");
-        return containsBlockDefinition.getChildByName("code");
-    }
+  private static RuntimeChildResourceBlockDefinition getConceptDefinition(
+      RuntimeResourceBlockDefinition includeOrExcludeChild) {
+    return (RuntimeChildResourceBlockDefinition) includeOrExcludeChild.getChildByName("concept");
+  }
 
-    private static BaseRuntimeChildDefinition getIncludeConceptDisplayDefinition(
-            FhirContext fhirContext) {
-        BaseRuntimeChildDefinition includeConceptDefinition =
-                getIncludeConceptDefinition(fhirContext);
-        RuntimeResourceBlockDefinition containsBlockDefinition =
-                (RuntimeResourceBlockDefinition) includeConceptDefinition.getChildByName("concept");
-        return containsBlockDefinition.getChildByName("display");
-    }
+  private static RuntimeChildResourceBlockDefinition getFilterDefinition(
+      RuntimeResourceBlockDefinition includeOrExcludeChild) {
+    return (RuntimeChildResourceBlockDefinition) includeOrExcludeChild.getChildByName("filter");
+  }
 
-    private static BaseRuntimeChildDefinition getIncludeSystemDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition includeDefinition = getIncludeDefinition(fhirContext);
-        RuntimeResourceBlockDefinition includeBlockDefinition =
-                (RuntimeResourceBlockDefinition) includeDefinition.getChildByName("include");
-        return includeBlockDefinition.getChildByName("system");
-    }
+  private static BaseRuntimeChildDefinition getExcludeDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition composeChild = getComposeDefinition(fhirContext);
+    return getExcludeDefinition(composeChild);
+  }
 
-    private static BaseRuntimeChildDefinition getIncludeVersionDefinition(FhirContext fhirContext) {
-        BaseRuntimeChildDefinition includeDefinition = getIncludeDefinition(fhirContext);
-        RuntimeResourceBlockDefinition includeBlockDefinition =
-                (RuntimeResourceBlockDefinition) includeDefinition.getChildByName("include");
-        return includeBlockDefinition.getChildByName("version");
-    }
+  private static BaseRuntimeChildDefinition getExcludeDefinition(
+      BaseRuntimeChildDefinition composeChild) {
+    RuntimeResourceBlockDefinition composeBlockChild =
+        (RuntimeResourceBlockDefinition) composeChild.getChildByName("compose");
+    BaseRuntimeChildDefinition excludeChild = composeBlockChild.getChildByName("exclude");
+    return excludeChild;
+  }
 
-    private static BaseRuntimeChildDefinition getUrlDefinition(FhirContext fhirContext) {
-        RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
-        return def.getChildByName("url");
-    }
+  private static BaseRuntimeChildDefinition getExcludeConceptDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
+    RuntimeResourceBlockDefinition excludeBlockChild =
+        (RuntimeResourceBlockDefinition) excludeChild.getChildByName("exclude");
+    return getConceptDefinition(excludeBlockChild);
+  }
 
-    private static BaseRuntimeChildDefinition getIdDefinition(FhirContext fhirContext) {
-        RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
-        return def.getChildByName("id");
-    }
+  private static BaseRuntimeChildDefinition getExcludeFilterDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition excludeChild = getExcludeDefinition(fhirContext);
+    RuntimeResourceBlockDefinition excludeBlockChild =
+        (RuntimeResourceBlockDefinition) excludeChild.getChildByName("exclude");
+    return getFilterDefinition(excludeBlockChild);
+  }
 
-    public static <T extends IBase> List<IBase> getExpansionParameters(IBase expansion,
-            IFhirPath fhirPath, String filterExpression) {
-        // String expression = "expansion.parameter";
-        // if (filterExpression != null) { expression = expression + filterExpression; }
-        String expression = String.format("parameter%s", filterExpression);
-        // String expression = (filterExpression == null) ? "expansion.parameter" :
-        // "expansion.parameter" + filterExpression;
-        return fhirPath.evaluate(expansion, expression, IBase.class);
-    }
+  private static BaseRuntimeChildDefinition getExpansionDefinition(FhirContext fhirContext) {
+    RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
+    return def.getChildByName("expansion");
+  }
+
+  private static BaseRuntimeChildDefinition getContainsDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition expansionChild = getExpansionDefinition(fhirContext);
+    RuntimeResourceBlockDefinition expansionBlockChild =
+        (RuntimeResourceBlockDefinition) expansionChild.getChildByName("expansion");
+    return getContainsDefinition(expansionBlockChild);
+  }
+
+  private static BaseRuntimeChildDefinition getContainsDefinition(
+      RuntimeResourceBlockDefinition expansionChild) {
+    return expansionChild.getChildByName("contains");
+  }
+
+  private static BaseRuntimeChildDefinition getSystemDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
+    RuntimeResourceBlockDefinition containsBlockDefinition =
+        (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
+    return containsBlockDefinition.getChildByName("system");
+  }
+
+  private static BaseRuntimeChildDefinition getVersionDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
+    RuntimeResourceBlockDefinition containsBlockDefinition =
+        (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
+    return containsBlockDefinition.getChildByName("version");
+  }
+
+  private static BaseRuntimeChildDefinition getCodeDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
+    RuntimeResourceBlockDefinition containsBlockDefinition =
+        (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
+    return containsBlockDefinition.getChildByName("code");
+  }
+
+  private static BaseRuntimeChildDefinition getDisplayDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition containsDefinition = getContainsDefinition(fhirContext);
+    RuntimeResourceBlockDefinition containsBlockDefinition =
+        (RuntimeResourceBlockDefinition) containsDefinition.getChildByName("contains");
+    return containsBlockDefinition.getChildByName("display");
+  }
+
+  private static BaseRuntimeChildDefinition getIncludeConceptCodeDefinition(
+      FhirContext fhirContext) {
+    BaseRuntimeChildDefinition includeConceptDefinition = getIncludeConceptDefinition(fhirContext);
+    RuntimeResourceBlockDefinition containsBlockDefinition =
+        (RuntimeResourceBlockDefinition) includeConceptDefinition.getChildByName("concept");
+    return containsBlockDefinition.getChildByName("code");
+  }
+
+  private static BaseRuntimeChildDefinition getIncludeConceptDisplayDefinition(
+      FhirContext fhirContext) {
+    BaseRuntimeChildDefinition includeConceptDefinition = getIncludeConceptDefinition(fhirContext);
+    RuntimeResourceBlockDefinition containsBlockDefinition =
+        (RuntimeResourceBlockDefinition) includeConceptDefinition.getChildByName("concept");
+    return containsBlockDefinition.getChildByName("display");
+  }
+
+  private static BaseRuntimeChildDefinition getIncludeSystemDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition includeDefinition = getIncludeDefinition(fhirContext);
+    RuntimeResourceBlockDefinition includeBlockDefinition =
+        (RuntimeResourceBlockDefinition) includeDefinition.getChildByName("include");
+    return includeBlockDefinition.getChildByName("system");
+  }
+
+  private static BaseRuntimeChildDefinition getIncludeVersionDefinition(FhirContext fhirContext) {
+    BaseRuntimeChildDefinition includeDefinition = getIncludeDefinition(fhirContext);
+    RuntimeResourceBlockDefinition includeBlockDefinition =
+        (RuntimeResourceBlockDefinition) includeDefinition.getChildByName("include");
+    return includeBlockDefinition.getChildByName("version");
+  }
+
+  private static BaseRuntimeChildDefinition getUrlDefinition(FhirContext fhirContext) {
+    RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
+    return def.getChildByName("url");
+  }
+
+  private static BaseRuntimeChildDefinition getIdDefinition(FhirContext fhirContext) {
+    RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
+    return def.getChildByName("id");
+  }
+
+  public static <T extends IBase> List<IBase> getExpansionParameters(IBase expansion,
+      IFhirPath fhirPath, String filterExpression) {
+    // String expression = "expansion.parameter";
+    // if (filterExpression != null) { expression = expression + filterExpression; }
+    String expression = String.format("parameter%s", filterExpression);
+    // String expression = (filterExpression == null) ? "expansion.parameter" :
+    // "expansion.parameter" + filterExpression;
+    return fhirPath.evaluate(expansion, expression, IBase.class);
+  }
 }

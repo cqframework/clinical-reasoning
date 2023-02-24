@@ -20,256 +20,256 @@ import ca.uhn.fhir.util.ParametersUtil;
 
 public class RestRepository implements Repository {
 
-    public RestRepository(IGenericClient client) {
-        this.client = client;
+  public RestRepository(IGenericClient client) {
+    this.client = client;
+  }
+
+  private IGenericClient client;
+
+  protected IGenericClient getClient() {
+    return this.client;
+  }
+
+  @Override
+  public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
+      Map<String, String> headers) {
+    var op = this.client.read().resource(resourceType).withId(id);
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    private IGenericClient client;
+    return op.execute();
+  }
 
-    protected IGenericClient getClient() {
-        return this.client;
+  @Override
+  public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
+    var op = this.client.create().resource(resource);
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
-            Map<String, String> headers) {
-        var op = this.client.read().resource(resourceType).withId(id);
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+    return op.execute();
+  }
 
-        return op.execute();
+  @Override
+  public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters,
+      Map<String, String> headers) {
+    var op = this.client.patch().withFhirPatch(patchParameters).withId(id);
+
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        var op = this.client.create().resource(resource);
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+    return op.execute();
+  }
 
-        return op.execute();
+  @Override
+  public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
+    var op = this.client.update().resource(resource).withId(resource.getIdElement());
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id,
-            P patchParameters, Map<String, String> headers) {
-        var op = this.client.patch().withFhirPatch(patchParameters).withId(id);
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
-
-        return op.execute();
+  @Override
+  public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
+      I id, Map<String, String> headers) {
+    var op = this.client.delete().resourceById(id);
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-        var op = this.client.update().resource(resource).withId(resource.getIdElement());
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+    return op.execute();
+  }
 
-        return op.execute();
+  @Override
+  public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
+      Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
+      Map<String, String> headers) {
+
+    var op = this.client.search().forResource(resourceType).where(searchParameters)
+        .returnBundle(bundleType);
+
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
-            I id, Map<String, String> headers) {
-        var op = this.client.delete().resourceById(id);
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+    return op.execute();
+  }
 
-        return op.execute();
+  @Override
+  public <C extends IBaseConformance> C capabilities(Class<C> resourceType,
+      Map<String, String> headers) {
+    var op = this.client.capabilities().ofType(resourceType);
+
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
-            Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
+    return op.execute();
+  }
 
-        var op = this.client.search().forResource(resourceType).where(searchParameters)
-                .returnBundle(bundleType);
+  @Override
+  public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
+    var op = this.client.transaction().withBundle(transaction);
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
-
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <C extends IBaseConformance> C capabilities(Class<C> resourceType,
-            Map<String, String> headers) {
-        var op = this.client.capabilities().ofType(resourceType);
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <B extends IBaseBundle> B link(Class<B> bundleType, String url,
+      Map<String, String> headers) {
+    var op = this.client.loadPage().byUrl(url).andReturnBundle(bundleType);
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        var op = this.client.transaction().withBundle(transaction);
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
+      Class<R> returnType, Map<String, String> headers) {
+    var op = this.client.operation().onServer().named(name).withParameters(parameters)
+        .returnResourceType(returnType);
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <B extends IBaseBundle> B link(Class<B> bundleType, String url,
-            Map<String, String> headers) {
-        var op = this.client.loadPage().byUrl(url).andReturnBundle(bundleType);
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters,
+      Map<String, String> headers) {
+    var op = this.client.operation().onServer().named(name).withParameters(parameters)
+        .returnMethodOutcome();
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
-            Class<R> returnType, Map<String, String> headers) {
-        var op = this.client.operation().onServer().named(name).withParameters(parameters)
-                .returnResourceType(returnType);
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
+      Class<T> resourceType, String name, P parameters, Class<R> returnType,
+      Map<String, String> headers) {
+    var op = this.client.operation().onType(resourceType).named(name).withParameters(parameters)
+        .returnResourceType(returnType);
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters,
-            Map<String, String> headers) {
-        var op = this.client.operation().onServer().named(name).withParameters(parameters)
-                .returnMethodOutcome();
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
+      Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
+    var op = this.client.operation().onType(resourceType).named(name).withParameters(parameters)
+        .returnMethodOutcome();
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-            Class<T> resourceType, String name, P parameters, Class<R> returnType,
-            Map<String, String> headers) {
-        var op = this.client.operation().onType(resourceType).named(name).withParameters(parameters)
-                .returnResourceType(returnType);
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
+      String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+    var op = this.client.operation().onInstance(id).named(name).withParameters(parameters)
+        .returnResourceType(returnType);
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-            Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-        var op = this.client.operation().onType(resourceType).named(name).withParameters(parameters)
-                .returnMethodOutcome();
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
+      P parameters, Map<String, String> headers) {
+    var op = this.client.operation().onInstance(id).named(name).withParameters(parameters)
+        .returnMethodOutcome();
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
-            String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        var op = this.client.operation().onInstance(id).named(name).withParameters(parameters)
-                .returnResourceType(returnType);
+    return op.execute();
+  }
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+  @Override
+  public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters,
+      Class<B> returnType, Map<String, String> headers) {
+    var op = this.client.history().onServer().returnBundle(returnType);
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
-            P parameters, Map<String, String> headers) {
-        var op = this.client.operation().onInstance(id).named(name).withParameters(parameters)
-                .returnMethodOutcome();
+    this.applyHistoryParams(op, parameters);
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+    return op.execute();
+  }
 
-        return op.execute();
+  @Override
+  public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
+      Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
+    var op = this.client.history().onType(resourceType).returnBundle(returnType);
+
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters,
-            Class<B> returnType, Map<String, String> headers) {
-        var op = this.client.history().onServer().returnBundle(returnType);
+    this.applyHistoryParams(op, parameters);
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+    return op.execute();
+  }
 
-        this.applyHistoryParams(op, parameters);
+  @Override
+  public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
+      P parameters, Class<B> returnType, Map<String, String> headers) {
+    var op = this.client.history().onInstance(id).returnBundle(returnType);
 
-        return op.execute();
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-        var op = this.client.history().onType(resourceType).returnBundle(returnType);
+    this.applyHistoryParams(op, parameters);
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
+    return op.execute();
+  }
 
-        this.applyHistoryParams(op, parameters);
+  @SuppressWarnings("unchecked")
+  protected <B extends IBaseBundle, P extends IBaseParameters> void applyHistoryParams(
+      IHistoryTyped<B> operation, P parameters) {
 
-        return op.execute();
+    var ctx = this.client.getFhirContext();
+    var count = ParametersUtil.getNamedParameterValuesAsInteger(ctx, parameters, "_count");
+    if (count != null && !count.isEmpty()) {
+      operation.count(count.get(0));
     }
 
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
-            P parameters, Class<B> returnType, Map<String, String> headers) {
-        var op = this.client.history().onInstance(id).returnBundle(returnType);
+    // TODO: Figure out how to handle date ranges for the _at parameter
 
-        for (var entry : headers.entrySet()) {
-            op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-        }
-
-        this.applyHistoryParams(op, parameters);
-
-        return op.execute();
+    var since = ParametersUtil.getNamedParameter(ctx, parameters, "_since");
+    if (since.isPresent()) {
+      operation.since((IPrimitiveType<Date>) since.get());
     }
-
-    @SuppressWarnings("unchecked")
-    protected <B extends IBaseBundle, P extends IBaseParameters> void applyHistoryParams(
-            IHistoryTyped<B> operation, P parameters) {
-
-        var ctx = this.client.getFhirContext();
-        var count = ParametersUtil.getNamedParameterValuesAsInteger(ctx, parameters, "_count");
-        if (count != null && !count.isEmpty()) {
-            operation.count(count.get(0));
-        }
-
-        // TODO: Figure out how to handle date ranges for the _at parameter
-
-        var since = ParametersUtil.getNamedParameter(ctx, parameters, "_since");
-        if (since.isPresent()) {
-            operation.since((IPrimitiveType<Date>) since.get());
-        }
-    }
+  }
 }

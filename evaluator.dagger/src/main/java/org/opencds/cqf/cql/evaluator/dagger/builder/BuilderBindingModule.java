@@ -13,24 +13,24 @@ import dagger.Module;
 @Module
 public abstract class BuilderBindingModule {
 
-    @Binds
-    @Singleton
-    abstract LibrarySourceProviderFactory libraryLoaderFactory(
-            org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory libraryLoaderFactory);
+  @Binds
+  @Singleton
+  abstract LibrarySourceProviderFactory libraryLoaderFactory(
+      org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory libraryLoaderFactory);
 
 
-    @Binds
-    @Singleton
-    abstract DataProviderFactory dataProviderFactory(
-            org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory dataProviderFactory);
+  @Binds
+  @Singleton
+  abstract DataProviderFactory dataProviderFactory(
+      org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory dataProviderFactory);
 
-    @Binds
-    @Singleton
-    abstract TerminologyProviderFactory terminologyProviderFactory(
-            org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory terminologyProviderFactory);
+  @Binds
+  @Singleton
+  abstract TerminologyProviderFactory terminologyProviderFactory(
+      org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory terminologyProviderFactory);
 
-    @Binds
-    @Singleton
-    abstract RetrieveProviderConfigurer retrieveProviderConfigurer(
-            org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer retrieveProviderConfigurer);
+  @Binds
+  @Singleton
+  abstract RetrieveProviderConfigurer retrieveProviderConfigurer(
+      org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer retrieveProviderConfigurer);
 }

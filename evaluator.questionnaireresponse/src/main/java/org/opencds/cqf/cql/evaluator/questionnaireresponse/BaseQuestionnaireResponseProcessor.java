@@ -1,16 +1,15 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import com.google.gson.Gson;
-import org.hl7.fhir.instance.model.api.IBase;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 
 /*
  * https://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse- extract.html
@@ -32,33 +31,32 @@ import java.util.List;
  */
 
 public abstract class BaseQuestionnaireResponseProcessor<T> {
-    protected static final Logger logger =
-            LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
-    protected IParser parser;
-    protected FhirContext fhirContext;
-    protected FhirDal fhirDal;
+  protected static final Logger logger =
+      LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
+  protected IParser parser;
+  protected FhirContext fhirContext;
+  protected FhirDal fhirDal;
 
-    protected BaseQuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-        this.fhirContext = fhirContext;
-        this.fhirDal = fhirDal;
-        this.parser = this.fhirContext.newJsonParser();
+  protected BaseQuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
+    this.fhirContext = fhirContext;
+    this.fhirDal = fhirDal;
+    this.parser = this.fhirContext.newJsonParser();
+  }
+
+  public IBaseBundle extract(T questionnaireResponse) {
+    if (questionnaireResponse == null) {
+      var message = "Unable to perform operation $extract.  The QuestionnaireResponse was null";
+      logger.error(message);
+      throw new IllegalArgumentException(message);
     }
 
-    public IBaseBundle extract(T questionnaireResponse) {
-        if (questionnaireResponse == null) {
-            var message =
-                    "Unable to perform operation $extract.  The QuestionnaireResponse was null";
-            logger.error(message);
-            throw new IllegalArgumentException(message);
-        }
+    var resources = processItems(questionnaireResponse);
 
-        var resources = processItems(questionnaireResponse);
+    return createResourceBundle(questionnaireResponse, resources);
+  }
 
-        return createResourceBundle(questionnaireResponse, resources);
-    }
+  protected abstract IBaseBundle createResourceBundle(T questionnaireResponse,
+      List<IBaseResource> resources);
 
-    protected abstract IBaseBundle createResourceBundle(T questionnaireResponse,
-            List<IBaseResource> resources);
-
-    public abstract List<IBaseResource> processItems(T questionnaireResponse);
+  public abstract List<IBaseResource> processItems(T questionnaireResponse);
 }

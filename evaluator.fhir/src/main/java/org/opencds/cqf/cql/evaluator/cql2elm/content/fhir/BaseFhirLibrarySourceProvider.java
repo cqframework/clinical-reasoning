@@ -20,47 +20,46 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
  */
 public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProvider {
 
-    protected AdapterFactory adapterFactory;
+  protected AdapterFactory adapterFactory;
 
-    protected BaseFhirLibrarySourceProvider(AdapterFactory adapterFactory) {
-        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
+  protected BaseFhirLibrarySourceProvider(AdapterFactory adapterFactory) {
+    this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
+  }
+
+  @Override
+  public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier,
+      LibraryContentType libraryContentType) {
+    requireNonNull(libraryIdentifier, "versionedIdentifier can not be null.");
+    requireNonNull(libraryContentType, "libraryContentType can not be null.");
+
+    IBaseResource library = this.getLibrary(libraryIdentifier);
+    if (library == null) {
+      return null;
     }
 
-    @Override
-    public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier,
-            LibraryContentType libraryContentType) {
-        requireNonNull(libraryIdentifier, "versionedIdentifier can not be null.");
-        requireNonNull(libraryContentType, "libraryContentType can not be null.");
+    return this.getContentStream(library, libraryContentType.mimeType());
+  }
 
-        IBaseResource library = this.getLibrary(libraryIdentifier);
-        if (library == null) {
-            return null;
+  protected InputStream getContentStream(IBaseResource library, String contentType) {
+
+    LibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
+
+    if (libraryAdapter.hasContent()) {
+      for (ICompositeType attachment : libraryAdapter.getContent()) {
+        AttachmentAdapter attachmentAdapter = this.adapterFactory.createAttachment(attachment);
+        if (attachmentAdapter.getContentType().equals(contentType)) {
+          return new ByteArrayInputStream(attachmentAdapter.getData());
         }
-
-        return this.getContentStream(library, libraryContentType.mimeType());
+      }
     }
 
-    protected InputStream getContentStream(IBaseResource library, String contentType) {
+    return null;
+  }
 
-        LibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
+  @Override
+  public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
+    return getLibraryContent(libraryIdentifier, LibraryContentType.CQL);
+  }
 
-        if (libraryAdapter.hasContent()) {
-            for (ICompositeType attachment : libraryAdapter.getContent()) {
-                AttachmentAdapter attachmentAdapter =
-                        this.adapterFactory.createAttachment(attachment);
-                if (attachmentAdapter.getContentType().equals(contentType)) {
-                    return new ByteArrayInputStream(attachmentAdapter.getData());
-                }
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
-        return getLibraryContent(libraryIdentifier, LibraryContentType.CQL);
-    }
-
-    protected abstract IBaseResource getLibrary(VersionedIdentifier libraryIdentifier);
+  protected abstract IBaseResource getLibrary(VersionedIdentifier libraryIdentifier);
 }

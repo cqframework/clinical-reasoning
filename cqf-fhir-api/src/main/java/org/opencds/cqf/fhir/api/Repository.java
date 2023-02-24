@@ -59,144 +59,144 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 @Beta
 public interface Repository {
 
-    // CRUD starts here
-    default <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id) {
-        return this.read(resourceType, id, Collections.emptyMap());
-    }
+  // CRUD starts here
+  default <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id) {
+    return this.read(resourceType, id, Collections.emptyMap());
+  }
 
-    <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
-            Map<String, String> headers);
+  <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
+      Map<String, String> headers);
 
-    default <T extends IBaseResource> MethodOutcome create(T resource) {
-        return this.create(resource, Collections.emptyMap());
-    }
+  default <T extends IBaseResource> MethodOutcome create(T resource) {
+    return this.create(resource, Collections.emptyMap());
+  }
 
-    <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers);
+  <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers);
 
-    default <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id,
-            P patchParameters) {
-        return this.patch(id, patchParameters, Collections.emptyMap());
-    }
+  default <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id,
+      P patchParameters) {
+    return this.patch(id, patchParameters, Collections.emptyMap());
+  }
 
-    <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters,
-            Map<String, String> headers);
+  <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters,
+      Map<String, String> headers);
 
-    default <T extends IBaseResource> MethodOutcome update(T resource) {
-        return this.update(resource, Collections.emptyMap());
-    }
+  default <T extends IBaseResource> MethodOutcome update(T resource) {
+    return this.update(resource, Collections.emptyMap());
+  }
 
-    <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers);
+  <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers);
 
-    default <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
-            I id) {
-        return this.delete(resourceType, id, Collections.emptyMap());
-    }
+  default <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
+      I id) {
+    return this.delete(resourceType, id, Collections.emptyMap());
+  }
 
-    <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType, I id,
-            Map<String, String> headers);
+  <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType, I id,
+      Map<String, String> headers);
 
-    // Querying starts here
-    default <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
-            Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
-        return this.search(bundleType, resourceType, searchParameters, Collections.emptyMap());
-    }
+  // Querying starts here
+  default <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
+      Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters) {
+    return this.search(bundleType, resourceType, searchParameters, Collections.emptyMap());
+  }
 
-    <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
-            Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers);
+  <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
+      Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
+      Map<String, String> headers);
 
-    // Paging starts here
-    default <B extends IBaseBundle> B link(Class<B> bundleType, String url) {
-        return this.link(bundleType, url, Collections.emptyMap());
-    }
+  // Paging starts here
+  default <B extends IBaseBundle> B link(Class<B> bundleType, String url) {
+    return this.link(bundleType, url, Collections.emptyMap());
+  }
 
-    <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers);
+  <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers);
 
-    // Metadata starts here
-    default <C extends IBaseConformance> C capabilities(Class<C> resourceType) {
-        return this.capabilities(resourceType, Collections.emptyMap());
-    }
+  // Metadata starts here
+  default <C extends IBaseConformance> C capabilities(Class<C> resourceType) {
+    return this.capabilities(resourceType, Collections.emptyMap());
+  }
 
-    <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers);
+  <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers);
 
-    // Transactions starts here
-    default <B extends IBaseBundle> B transaction(B transaction) {
-        return this.transaction(transaction, Collections.emptyMap());
-    }
+  // Transactions starts here
+  default <B extends IBaseBundle> B transaction(B transaction) {
+    return this.transaction(transaction, Collections.emptyMap());
+  }
 
-    <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers);
+  <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers);
 
-    // Operations starts here
-    default <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
-            Class<R> returnType) {
-        return this.invoke(name, parameters, returnType, Collections.emptyMap());
-    }
+  // Operations starts here
+  default <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
+      Class<R> returnType) {
+    return this.invoke(name, parameters, returnType, Collections.emptyMap());
+  }
 
-    <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
-            Class<R> returnType, Map<String, String> headers);
+  <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
+      Class<R> returnType, Map<String, String> headers);
 
-    default <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters) {
-        return this.invoke(name, parameters, Collections.emptyMap());
-    }
+  default <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters) {
+    return this.invoke(name, parameters, Collections.emptyMap());
+  }
 
-    <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters,
-            Map<String, String> headers);
+  <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters,
+      Map<String, String> headers);
 
-    default <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-            Class<T> resourceType, String name, P parameters, Class<R> returnType) {
-        return this.invoke(resourceType, name, parameters, returnType, Collections.emptyMap());
-    }
+  default <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
+      Class<T> resourceType, String name, P parameters, Class<R> returnType) {
+    return this.invoke(resourceType, name, parameters, returnType, Collections.emptyMap());
+  }
 
-    <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-            Class<T> resourceType, String name, P parameters, Class<R> returnType,
-            Map<String, String> headers);
+  <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
+      Class<T> resourceType, String name, P parameters, Class<R> returnType,
+      Map<String, String> headers);
 
-    default <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-            Class<T> resourceType, String name, P parameters) {
-        return this.invoke(name, parameters, Collections.emptyMap());
-    }
+  default <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
+      Class<T> resourceType, String name, P parameters) {
+    return this.invoke(name, parameters, Collections.emptyMap());
+  }
 
-    <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(Class<T> resourceType,
-            String name, P parameters, Map<String, String> headers);
+  <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(Class<T> resourceType,
+      String name, P parameters, Map<String, String> headers);
 
-    default <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
-            String name, P parameters, Class<R> returnType) {
-        return this.invoke(id, name, parameters, returnType, Collections.emptyMap());
-    }
+  default <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
+      String name, P parameters, Class<R> returnType) {
+    return this.invoke(id, name, parameters, returnType, Collections.emptyMap());
+  }
 
-    <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
-            String name, P parameters, Class<R> returnType, Map<String, String> headers);
+  <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
+      String name, P parameters, Class<R> returnType, Map<String, String> headers);
 
-    default <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
-            P parameters) {
-        return this.invoke(name, parameters, Collections.emptyMap());
-    }
+  default <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
+      P parameters) {
+    return this.invoke(name, parameters, Collections.emptyMap());
+  }
 
-    <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
-            P parameters, Map<String, String> headers);
+  <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
+      P parameters, Map<String, String> headers);
 
-    // History starts here
-    default <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters,
-            Class<B> returnType) {
-        return this.history(parameters, returnType, Collections.emptyMap());
-    }
+  // History starts here
+  default <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters,
+      Class<B> returnType) {
+    return this.history(parameters, returnType, Collections.emptyMap());
+  }
 
-    <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters, Class<B> returnType,
-            Map<String, String> headers);
+  <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters, Class<B> returnType,
+      Map<String, String> headers);
 
-    default <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-            Class<T> resourceType, P parameters, Class<B> returnType) {
-        return this.history(resourceType, parameters, returnType, Collections.emptyMap());
-    }
+  default <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
+      Class<T> resourceType, P parameters, Class<B> returnType) {
+    return this.history(resourceType, parameters, returnType, Collections.emptyMap());
+  }
 
-    <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers);
+  <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
+      Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers);
 
-    default <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
-            P parameters, Class<B> returnType) {
-        return this.history(id, parameters, returnType, Collections.emptyMap());
-    }
+  default <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
+      P parameters, Class<B> returnType) {
+    return this.history(id, parameters, returnType, Collections.emptyMap());
+  }
 
-    <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
-            P parameters, Class<B> returnType, Map<String, String> headers);
+  <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
+      P parameters, Class<B> returnType, Map<String, String> headers);
 }

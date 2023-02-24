@@ -26,57 +26,56 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAd
 @Named
 public class MeasureOperationParameterConverter {
 
-    protected AdapterFactory adapterFactory;
-    protected FhirTypeConverter fhirTypeConverter;
+  protected AdapterFactory adapterFactory;
+  protected FhirTypeConverter fhirTypeConverter;
 
-    @Inject
-    public MeasureOperationParameterConverter(AdapterFactory adapterFactory,
-            FhirTypeConverter fhirTypeConverter) {
-        this.adapterFactory = adapterFactory;
-        this.fhirTypeConverter = fhirTypeConverter;
+  @Inject
+  public MeasureOperationParameterConverter(AdapterFactory adapterFactory,
+      FhirTypeConverter fhirTypeConverter) {
+    this.adapterFactory = adapterFactory;
+    this.fhirTypeConverter = fhirTypeConverter;
+  }
+
+  public void addMeasurementPeriod(IBaseParameters parameters, String periodStart,
+      String periodEnd) {
+    requireNonNull(parameters);
+
+    if (periodStart == null || periodEnd == null) {
+      return;
     }
 
-    public void addMeasurementPeriod(IBaseParameters parameters, String periodStart,
-            String periodEnd) {
-        requireNonNull(parameters);
+    ICompositeType measurementPeriodFhir = this.fhirTypeConverter
+        .toFhirPeriod(new Interval(new Date(periodStart), true, new Date(periodEnd), true));
 
-        if (periodStart == null || periodEnd == null) {
-            return;
-        }
+    this.addChild(parameters, "Measurement Period", measurementPeriodFhir);
+  }
 
-        ICompositeType measurementPeriodFhir = this.fhirTypeConverter
-                .toFhirPeriod(new Interval(new Date(periodStart), true, new Date(periodEnd), true));
+  public void addProductLine(IBaseParameters parameters, String productLine) {
+    requireNonNull(parameters);
 
-        this.addChild(parameters, "Measurement Period", measurementPeriodFhir);
+    if (productLine == null) {
+      return;
     }
 
-    public void addProductLine(IBaseParameters parameters, String productLine) {
-        requireNonNull(parameters);
+    IPrimitiveType<String> productLineFhir = this.fhirTypeConverter.toFhirString(productLine);
 
-        if (productLine == null) {
-            return;
-        }
+    this.addChild(parameters, "Product Line", productLineFhir);
+  }
 
-        IPrimitiveType<String> productLineFhir = this.fhirTypeConverter.toFhirString(productLine);
+  protected void addChild(IBaseParameters parameters, String name, IBaseDatatype value) {
+    ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-        this.addChild(parameters, "Product Line", productLineFhir);
+    ParametersParameterComponentAdapter part =
+        parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
+    if (part == null) {
+      part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
+
     }
 
-    protected void addChild(IBaseParameters parameters, String name, IBaseDatatype value) {
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
-                .collect(Collectors.toList());
-
-        ParametersParameterComponentAdapter part =
-                parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
-        if (part == null) {
-            part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
-
-        }
-
-        part.setName(name);
-        part.setResource(null);
-        part.setValue(value);
-    }
+    part.setName(name);
+    part.setResource(null);
+    part.setValue(value);
+  }
 }

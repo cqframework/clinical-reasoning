@@ -18,22 +18,22 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 @Named
 public class FhirRestFhirDalFactory implements TypedFhirDalFactory {
 
-    private ClientFactory clientFactory;
+  private ClientFactory clientFactory;
 
-    @Inject
-    public FhirRestFhirDalFactory(ClientFactory clientFactory) {
-        this.clientFactory = requireNonNull(clientFactory, "clientFactory can not be null");
-    }
+  @Inject
+  public FhirRestFhirDalFactory(ClientFactory clientFactory) {
+    this.clientFactory = requireNonNull(clientFactory, "clientFactory can not be null");
+  }
 
-    @Override
-    public String getType() {
-        return Constants.HL7_FHIR_REST;
-    }
+  @Override
+  public String getType() {
+    return Constants.HL7_FHIR_REST;
+  }
 
-    @Override
-    public FhirDal create(String url, List<String> headers) {
-        IGenericClient client = this.clientFactory.create(url, headers);
+  @Override
+  public FhirDal create(String url, List<String> headers) {
+    IGenericClient client = this.clientFactory.create(url, headers);
 
-        return new RestFhirDal(client);
-    }
+    return new RestFhirDal(client);
+  }
 }

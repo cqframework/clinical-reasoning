@@ -452,7 +452,7 @@
             <source>11</source>
             <target>11</target>
             <failOnError>true</failOnError>
-            <failOnWarning>false</failOnWarning>
+            <failOnWarning>true</failOnWarning>
             <showWarnings>true</showWarnings>
             <compilerArgs>
               <arg>-Xlint:all,-processing</arg>
@@ -655,6 +655,10 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>animal-sniffer-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

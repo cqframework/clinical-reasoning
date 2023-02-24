@@ -17,25 +17,25 @@ import ca.uhn.fhir.context.FhirContext;
 @Named
 public class FhirFileRetrieveProviderFactory implements TypedRetrieveProviderFactory {
 
-    FhirContext fhirContext;
-    DirectoryBundler directoryBundler;
+  FhirContext fhirContext;
+  DirectoryBundler directoryBundler;
 
-    @Inject
-    public FhirFileRetrieveProviderFactory(FhirContext fhirContext,
-            DirectoryBundler directoryBundler) {
-        this.fhirContext = fhirContext;
-        this.directoryBundler = directoryBundler;
-    }
+  @Inject
+  public FhirFileRetrieveProviderFactory(FhirContext fhirContext,
+      DirectoryBundler directoryBundler) {
+    this.fhirContext = fhirContext;
+    this.directoryBundler = directoryBundler;
+  }
 
-    @Override
-    public String getType() {
-        return Constants.HL7_FHIR_FILES;
-    }
+  @Override
+  public String getType() {
+    return Constants.HL7_FHIR_FILES;
+  }
 
-    @Override
-    public RetrieveProvider create(String url, List<String> headers) {
-        IBaseBundle bundle = this.directoryBundler.bundle(url);
-        return new BundleRetrieveProvider(fhirContext, bundle);
-    }
+  @Override
+  public RetrieveProvider create(String url, List<String> headers) {
+    IBaseBundle bundle = this.directoryBundler.bundle(url);
+    return new BundleRetrieveProvider(fhirContext, bundle);
+  }
 
 }

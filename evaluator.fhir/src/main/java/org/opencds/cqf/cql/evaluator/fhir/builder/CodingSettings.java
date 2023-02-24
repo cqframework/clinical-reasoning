@@ -2,30 +2,30 @@ package org.opencds.cqf.cql.evaluator.fhir.builder;
 
 public class CodingSettings {
 
-    private String system;
-    private String code;
-    private String display;
+  private String system;
+  private String code;
+  private String display;
 
-    public CodingSettings(String theSystem, String theCode) {
-        this(theSystem, theCode, null);
-    }
+  public CodingSettings(String theSystem, String theCode) {
+    this(theSystem, theCode, null);
+  }
 
-    public CodingSettings(String theSystem, String theCode, String theDisplay) {
-        this.system = theSystem;
-        this.code = theCode;
-        this.display = theDisplay;
-    }
+  public CodingSettings(String theSystem, String theCode, String theDisplay) {
+    this.system = theSystem;
+    this.code = theCode;
+    this.display = theDisplay;
+  }
 
-    public String getSystem() {
-        return this.system;
-    }
+  public String getSystem() {
+    return this.system;
+  }
 
-    public String getCode() {
-        return this.code;
-    }
+  public String getCode() {
+    return this.code;
+  }
 
-    public String getDisplay() {
-        return this.display;
-    }
+  public String getDisplay() {
+    return this.display;
+  }
 
 }

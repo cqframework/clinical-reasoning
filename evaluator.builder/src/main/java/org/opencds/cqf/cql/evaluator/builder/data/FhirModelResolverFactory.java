@@ -21,50 +21,50 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 @Named
 public class FhirModelResolverFactory
-        implements org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory {
+    implements org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory {
 
-    @Inject
-    public FhirModelResolverFactory() {}
+  @Inject
+  public FhirModelResolverFactory() {}
 
-    private static Map<FhirVersionEnum, ModelResolver> cache = new HashMap<>();
+  private static Map<FhirVersionEnum, ModelResolver> cache = new HashMap<>();
 
-    @Override
-    public ModelResolver create(String version) {
-        requireNonNull(version, "version can not be null");
+  @Override
+  public ModelResolver create(String version) {
+    requireNonNull(version, "version can not be null");
 
-        FhirVersionEnum fhirVersionEnum = VersionUtilities.enumForVersion(version);
-        return this.fhirModelResolverForVersion(fhirVersionEnum);
+    FhirVersionEnum fhirVersionEnum = VersionUtilities.enumForVersion(version);
+    return this.fhirModelResolverForVersion(fhirVersionEnum);
+  }
+
+  protected ModelResolver fhirModelResolverForVersion(FhirVersionEnum fhirVersionEnum) {
+    requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
+    if (!cache.containsKey(fhirVersionEnum)) {
+      ModelResolver resolver = null;
+      switch (fhirVersionEnum) {
+        case DSTU2:
+          resolver = new CachingModelResolverDecorator(new Dstu2FhirModelResolver());
+          break;
+        case DSTU3:
+          resolver = new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
+          break;
+        case R4:
+          resolver = new CachingModelResolverDecorator(new R4FhirModelResolver());
+          break;
+        case R5:
+          resolver = new CachingModelResolverDecorator(new R5FhirModelResolver());
+          break;
+        default:
+          throw new IllegalArgumentException("unknown or unsupported FHIR version");
+      }
+
+      cache.put(fhirVersionEnum, resolver);
     }
 
-    protected ModelResolver fhirModelResolverForVersion(FhirVersionEnum fhirVersionEnum) {
-        requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
-        if (!cache.containsKey(fhirVersionEnum)) {
-            ModelResolver resolver = null;
-            switch (fhirVersionEnum) {
-                case DSTU2:
-                    resolver = new CachingModelResolverDecorator(new Dstu2FhirModelResolver());
-                    break;
-                case DSTU3:
-                    resolver = new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
-                    break;
-                case R4:
-                    resolver = new CachingModelResolverDecorator(new R4FhirModelResolver());
-                    break;
-                case R5:
-                    resolver = new CachingModelResolverDecorator(new R5FhirModelResolver());
-                    break;
-                default:
-                    throw new IllegalArgumentException("unknown or unsupported FHIR version");
-            }
+    return cache.get(fhirVersionEnum);
+  }
 
-            cache.put(fhirVersionEnum, resolver);
-        }
-
-        return cache.get(fhirVersionEnum);
-    }
-
-    @Override
-    public String getModelUri() {
-        return Constants.FHIR_MODEL_URI;
-    }
+  @Override
+  public String getModelUri() {
+    return Constants.FHIR_MODEL_URI;
+  }
 }

@@ -14,30 +14,29 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = TestConfigurationR4.class)
 public class CqlEvaluatorR4Test extends AbstractTestNGSpringContextTests {
 
-    @Test
-    public void canInstantiateMeasureProcessor() {
-        R4MeasureProcessor measureProcessor =
-                this.applicationContext.getBean(R4MeasureProcessor.class);
-        assertNotNull(measureProcessor);
-    }
+  @Test
+  public void canInstantiateMeasureProcessor() {
+    R4MeasureProcessor measureProcessor = this.applicationContext.getBean(R4MeasureProcessor.class);
+    assertNotNull(measureProcessor);
+  }
 
-    @Test
-    public void canInstantiateLibraryProcessor() {
-        LibraryProcessor libraryProcessor = this.applicationContext.getBean(LibraryProcessor.class);
-        assertNotNull(libraryProcessor);
-    }
+  @Test
+  public void canInstantiateLibraryProcessor() {
+    LibraryProcessor libraryProcessor = this.applicationContext.getBean(LibraryProcessor.class);
+    assertNotNull(libraryProcessor);
+  }
 
-    @Test
-    public void canInstantiateExpressionEvaluator() {
-        ExpressionEvaluator expressionEvaluator =
-                this.applicationContext.getBean(ExpressionEvaluator.class);
-        assertNotNull(expressionEvaluator);
-    }
+  @Test
+  public void canInstantiateExpressionEvaluator() {
+    ExpressionEvaluator expressionEvaluator =
+        this.applicationContext.getBean(ExpressionEvaluator.class);
+    assertNotNull(expressionEvaluator);
+  }
 
-    @Test
-    public void canInstantiateBuilder() {
-        CqlEvaluatorBuilder evaluatorBuilder =
-                this.applicationContext.getBean(CqlEvaluatorBuilder.class);
-        assertNotNull(evaluatorBuilder);
-    }
+  @Test
+  public void canInstantiateBuilder() {
+    CqlEvaluatorBuilder evaluatorBuilder =
+        this.applicationContext.getBean(CqlEvaluatorBuilder.class);
+    assertNotNull(evaluatorBuilder);
+  }
 }

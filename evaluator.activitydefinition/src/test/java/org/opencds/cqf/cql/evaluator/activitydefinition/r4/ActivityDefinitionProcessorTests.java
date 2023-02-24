@@ -43,150 +43,145 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ActivityDefinitionProcessorTests {
-    private static FhirContext fhirContext;
-    private ActivityDefinitionProcessor activityDefinitionProcessor;
+  private static FhirContext fhirContext;
+  private ActivityDefinitionProcessor activityDefinitionProcessor;
 
-    @BeforeClass
-    public void setup() {
-        fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-        FhirDal fhirDal = new MockFhirDal();
-        AdapterFactory adapterFactory =
-                new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
-        LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-        FhirTypeConverter fhirTypeConverter =
-                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-        CqlFhirParametersConverter cqlFhirParametersConverter =
-                new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
-        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<>() {
-            /**
-             *
-             */
-            private static final long serialVersionUID = 1L;
+  @BeforeClass
+  public void setup() {
+    fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+    FhirDal fhirDal = new MockFhirDal();
+    AdapterFactory adapterFactory =
+        new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+    LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
+    FhirTypeConverter fhirTypeConverter =
+        new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+    CqlFhirParametersConverter cqlFhirParametersConverter =
+        new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+    Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<>() {
+      /**
+       *
+       */
+      private static final long serialVersionUID = 1L;
 
-            {
-                add(new TypedLibrarySourceProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+      {
+        add(new TypedLibrarySourceProviderFactory() {
+          @Override
+          public String getType() {
+            return Constants.HL7_FHIR_FILES;
+          }
 
-                    @Override
-                    public LibrarySourceProvider create(String url, List<String> headers) {
-                        return new BundleFhirLibrarySourceProvider(fhirContext,
-                                (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(ActivityDefinitionProcessorTests.class
-                                                .getResourceAsStream(url)),
-                                adapterFactory, libraryVersionSelector);
-                    }
-                });
-            }
-        };
+          @Override
+          public LibrarySourceProvider create(String url, List<String> headers) {
+            return new BundleFhirLibrarySourceProvider(fhirContext,
+                (IBaseBundle) fhirContext.newJsonParser()
+                    .parseResource(ActivityDefinitionProcessorTests.class.getResourceAsStream(url)),
+                adapterFactory, libraryVersionSelector);
+          }
+        });
+      }
+    };
 
-        ModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
+    ModelResolverFactory fhirModelResolverFactory = new FhirModelResolverFactory();
 
-        Set<ModelResolverFactory> modelResolverFactories = new HashSet<>() {
-            /**
-             *
-             */
-            private static final long serialVersionUID = 1L;
+    Set<ModelResolverFactory> modelResolverFactories = new HashSet<>() {
+      /**
+       *
+       */
+      private static final long serialVersionUID = 1L;
 
-            {
-                add(fhirModelResolverFactory);
-            }
-        };
+      {
+        add(fhirModelResolverFactory);
+      }
+    };
 
-        LibrarySourceProviderFactory libraryLoaderFactory =
-                new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
-                        fhirContext, adapterFactory, librarySourceProviderFactories,
-                        libraryVersionSelector);
-        Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<>() {
-            /**
-             *
-             */
-            private static final long serialVersionUID = 1L;
+    LibrarySourceProviderFactory libraryLoaderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(fhirContext,
+            adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
+    Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<>() {
+      /**
+       *
+       */
+      private static final long serialVersionUID = 1L;
 
-            {
-                add(new TypedRetrieveProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+      {
+        add(new TypedRetrieveProviderFactory() {
+          @Override
+          public String getType() {
+            return Constants.HL7_FHIR_FILES;
+          }
 
-                    @Override
-                    public RetrieveProvider create(String url, List<String> headers) {
+          @Override
+          public RetrieveProvider create(String url, List<String> headers) {
 
-                        return new BundleRetrieveProvider(fhirContext,
-                                (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(ActivityDefinitionProcessorTests.class
-                                                .getResourceAsStream(url)));
-                    }
-                });
-            }
-        };
+            return new BundleRetrieveProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
+                .parseResource(ActivityDefinitionProcessorTests.class.getResourceAsStream(url)));
+          }
+        });
+      }
+    };
 
-        DataProviderFactory dataProviderFactory =
-                new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
-                        modelResolverFactories, retrieveProviderFactories);
+    DataProviderFactory dataProviderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+            modelResolverFactories, retrieveProviderFactories);
 
-        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = new HashSet<>() {
-            /**
-             *
-             */
-            private static final long serialVersionUID = 1L;
+    Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = new HashSet<>() {
+      /**
+       *
+       */
+      private static final long serialVersionUID = 1L;
 
-            {
-                add(new TypedTerminologyProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+      {
+        add(new TypedTerminologyProviderFactory() {
+          @Override
+          public String getType() {
+            return Constants.HL7_FHIR_FILES;
+          }
 
-                    @Override
-                    public TerminologyProvider create(String url, List<String> headers) {
-                        return new BundleTerminologyProvider(fhirContext,
-                                (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(ActivityDefinitionProcessorTests.class
-                                                .getResourceAsStream(url)));
-                    }
-                });
-            }
-        };
+          @Override
+          public TerminologyProvider create(String url, List<String> headers) {
+            return new BundleTerminologyProvider(fhirContext,
+                (IBaseBundle) fhirContext.newJsonParser().parseResource(
+                    ActivityDefinitionProcessorTests.class.getResourceAsStream(url)));
+          }
+        });
+      }
+    };
 
-        TerminologyProviderFactory terminologyProviderFactory =
-                new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
-                        fhirContext, typedTerminologyProviderFactories);
+    TerminologyProviderFactory terminologyProviderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+            fhirContext, typedTerminologyProviderFactories);
 
-        EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
+    EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-        LibraryProcessor libraryProcessor =
-                new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
-                        dataProviderFactory, terminologyProviderFactory, endpointConverter,
-                        fhirModelResolverFactory, CqlEvaluatorBuilder::new);
+    LibraryProcessor libraryProcessor =
+        new LibraryProcessor(fhirContext, cqlFhirParametersConverter, libraryLoaderFactory,
+            dataProviderFactory, terminologyProviderFactory, endpointConverter,
+            fhirModelResolverFactory, CqlEvaluatorBuilder::new);
 
-        activityDefinitionProcessor =
-                new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
-    }
+    activityDefinitionProcessor =
+        new ActivityDefinitionProcessor(fhirContext, fhirDal, libraryProcessor);
+  }
 
-    @Test
-    public void testActivityDefinitionApply() throws FHIRException {
-        Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
-                .setAddress("bundle-activityDefinitionTest.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+  @Test
+  public void testActivityDefinitionApply() throws FHIRException {
+    Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
+        .setAddress("bundle-activityDefinitionTest.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
-                .setAddress("bundle-activityDefinitionTest.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
+        .setAddress("bundle-activityDefinitionTest.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
-                .setAddress("bundle-activityDefinitionTest.json")
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
+        .setAddress("bundle-activityDefinitionTest.json")
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-        Object result = this.activityDefinitionProcessor.apply(
-                new IdType("activityDefinition-test"), "patient-1", null, null, null, null, null,
-                null, null, null, null, contentEndpoint, terminologyEndpoint, dataEndpoint);
-        Assert.assertTrue(result instanceof MedicationRequest);
-        MedicationRequest request = (MedicationRequest) result;
-        Assert.assertTrue(request.getDoNotPerform());
-    }
+    Object result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),
+        "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint,
+        terminologyEndpoint, dataEndpoint);
+    Assert.assertTrue(result instanceof MedicationRequest);
+    MedicationRequest request = (MedicationRequest) result;
+    Assert.assertTrue(request.getDoNotPerform());
+  }
 
 }

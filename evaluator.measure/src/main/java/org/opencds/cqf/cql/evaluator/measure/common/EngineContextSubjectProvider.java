@@ -12,93 +12,92 @@ import org.slf4j.LoggerFactory;
 
 public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(EngineContextSubjectProvider.class);
+  private static final Logger logger = LoggerFactory.getLogger(EngineContextSubjectProvider.class);
 
-    protected Context context;
-    protected String modelUri;
-    protected String subjectType;
+  protected Context context;
+  protected String modelUri;
+  protected String subjectType;
 
-    protected Function<SubjectT, String> getId;
+  protected Function<SubjectT, String> getId;
 
-    public EngineContextSubjectProvider(Context context, String modelUri,
-            Function<SubjectT, String> getId) {
-        this.context = context;
-        this.modelUri = modelUri;
-        this.getId = getId;
-    }
+  public EngineContextSubjectProvider(Context context, String modelUri,
+      Function<SubjectT, String> getId) {
+    this.context = context;
+    this.modelUri = modelUri;
+    this.getId = getId;
+  }
 
-    public List<String> getSubjects(MeasureEvalType type, String subjectId) {
-        switch (type) {
-            case PATIENT:
-            case SUBJECT:
-                return getIndividualSubjectId(subjectId);
-            case SUBJECTLIST:
-            case PATIENTLIST:
-                return this.getPractitionerSubjectIds(subjectId);
-            case POPULATION:
-                return this.getAllSubjectIds();
-            default:
-                if (subjectId != null) {
-                    return getIndividualSubjectId(subjectId);
-                } else {
-                    return getAllSubjectIds();
-                }
-        }
-    }
-
-
-    protected DataProvider getDataProvider() {
-        return this.context.resolveDataProviderByModelUri(this.modelUri);
-    }
-
-    protected List<String> getIndividualSubjectId(String subjectId) {
-        String parsedSubjectId = null;
-        if (subjectId != null && subjectId.contains("/")) {
-            String[] subjectIdParts = subjectId.split("/");
-            parsedSubjectId = subjectIdParts[1];
+  public List<String> getSubjects(MeasureEvalType type, String subjectId) {
+    switch (type) {
+      case PATIENT:
+      case SUBJECT:
+        return getIndividualSubjectId(subjectId);
+      case SUBJECTLIST:
+      case PATIENTLIST:
+        return this.getPractitionerSubjectIds(subjectId);
+      case POPULATION:
+        return this.getAllSubjectIds();
+      default:
+        if (subjectId != null) {
+          return getIndividualSubjectId(subjectId);
         } else {
-            parsedSubjectId = subjectId;
-            logger.info("Could not determine subjectType. Defaulting to Patient");
+          return getAllSubjectIds();
         }
+    }
+  }
 
-        if (parsedSubjectId == null) {
-            throw new IllegalArgumentException("subjectId is required for individual reports.");
-        }
 
-        return Collections.singletonList(this.subjectType + "/" + parsedSubjectId);
+  protected DataProvider getDataProvider() {
+    return this.context.resolveDataProviderByModelUri(this.modelUri);
+  }
+
+  protected List<String> getIndividualSubjectId(String subjectId) {
+    String parsedSubjectId = null;
+    if (subjectId != null && subjectId.contains("/")) {
+      String[] subjectIdParts = subjectId.split("/");
+      parsedSubjectId = subjectIdParts[1];
+    } else {
+      parsedSubjectId = subjectId;
+      logger.info("Could not determine subjectType. Defaulting to Patient");
     }
 
-
-
-    @SuppressWarnings("unchecked")
-    protected List<String> getAllSubjectIds() {
-        this.subjectType = "Patient";
-        List<String> subjectIds = new ArrayList<>();
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null,
-                subjectType, null, null, null, null, null, null, null, null);
-        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
-        return subjectIds;
+    if (parsedSubjectId == null) {
+      throw new IllegalArgumentException("subjectId is required for individual reports.");
     }
 
-    @SuppressWarnings("unchecked")
-    protected List<String> getPractitionerSubjectIds(String practitionerRef) {
-        this.subjectType = "Patient";
+    return Collections.singletonList(this.subjectType + "/" + parsedSubjectId);
+  }
 
-        if (practitionerRef == null) {
-            return getAllSubjectIds();
-        }
 
-        List<String> subjectIds = new ArrayList<>();
 
-        if (!practitionerRef.contains("/")) {
-            practitionerRef = "Practitioner/" + practitionerRef;
-        }
+  @SuppressWarnings("unchecked")
+  protected List<String> getAllSubjectIds() {
+    this.subjectType = "Patient";
+    List<String> subjectIds = new ArrayList<>();
+    Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null,
+        subjectType, null, null, null, null, null, null, null, null);
+    subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+    return subjectIds;
+  }
 
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner",
-                "generalPractitioner", practitionerRef, subjectType, null, null, null, null, null,
-                null, null, null);
-        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
-        return subjectIds;
+  @SuppressWarnings("unchecked")
+  protected List<String> getPractitionerSubjectIds(String practitionerRef) {
+    this.subjectType = "Patient";
+
+    if (practitionerRef == null) {
+      return getAllSubjectIds();
     }
+
+    List<String> subjectIds = new ArrayList<>();
+
+    if (!practitionerRef.contains("/")) {
+      practitionerRef = "Practitioner/" + practitionerRef;
+    }
+
+    Iterable<Object> subjectRetrieve =
+        this.getDataProvider().retrieve("Practitioner", "generalPractitioner", practitionerRef,
+            subjectType, null, null, null, null, null, null, null, null);
+    subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+    return subjectIds;
+  }
 }

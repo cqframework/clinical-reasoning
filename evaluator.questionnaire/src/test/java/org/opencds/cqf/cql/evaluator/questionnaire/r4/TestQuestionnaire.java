@@ -1,12 +1,23 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
@@ -33,195 +44,188 @@ import org.opencds.cqf.cql.evaluator.library.CqlFhirParametersConverter;
 import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static org.testng.Assert.fail;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
 
 public class TestQuestionnaire {
-    private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-    private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+  private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
 
-    private static InputStream open(String asset) {
-        return TestQuestionnaire.class.getResourceAsStream(asset);
+  private static InputStream open(String asset) {
+    return TestQuestionnaire.class.getResourceAsStream(asset);
+  }
+
+  public static String load(InputStream asset) throws IOException {
+    return new String(asset.readAllBytes(), StandardCharsets.UTF_8);
+  }
+
+  public static String load(String asset) throws IOException {
+    return load(open(asset));
+  }
+
+  public static IBaseResource parse(String asset) {
+    return jsonParser.parseResource(open(asset));
+  }
+
+
+  public static QuestionnaireProcessor buildProcessor(FhirDal fhirDal) {
+    var adapterFactory = new AdapterFactory();
+    var libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
+    var fhirTypeConverter =
+        new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+    var cqlFhirParametersConverter =
+        new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+
+    var fhirModelResolverFactory = new FhirModelResolverFactory();
+    Set<ModelResolverFactory> modelResolverFactories =
+        Collections.singleton(fhirModelResolverFactory);
+
+    Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories =
+        Collections.singleton(new TypedLibrarySourceProviderFactory() {
+          @Override
+          public String getType() {
+            return Constants.HL7_FHIR_FILES;
+          }
+
+          @Override
+          public LibrarySourceProvider create(String url, List<String> headers) {
+            return new BundleFhirLibrarySourceProvider(fhirContext, (IBaseBundle) parse(url),
+                adapterFactory, libraryVersionSelector);
+          }
+        });
+
+    var librarySourceProviderFactory = new LibrarySourceProviderFactory(fhirContext, adapterFactory,
+        librarySourceProviderFactories, libraryVersionSelector);
+
+    Set<TypedRetrieveProviderFactory> retrieveProviderFactories =
+        Collections.singleton(new TypedRetrieveProviderFactory() {
+          @Override
+          public String getType() {
+            return Constants.HL7_FHIR_FILES;
+          }
+
+          @Override
+          public RetrieveProvider create(String url, List<String> headers) {
+            return new BundleRetrieveProvider(fhirContext, (IBaseBundle) parse(url));
+          }
+        });
+
+    var dataProviderFactory =
+        new DataProviderFactory(fhirContext, modelResolverFactories, retrieveProviderFactories);
+
+    Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories =
+        Collections.singleton(new TypedTerminologyProviderFactory() {
+          @Override
+          public String getType() {
+            return Constants.HL7_FHIR_FILES;
+          }
+
+          @Override
+          public TerminologyProvider create(String url, List<String> headers) {
+            return new BundleTerminologyProvider(fhirContext, (IBaseBundle) parse(url));
+          }
+        });
+
+    var terminologyProviderFactory =
+        new TerminologyProviderFactory(fhirContext, typedTerminologyProviderFactories);
+
+    var endpointConverter = new EndpointConverter(adapterFactory);
+
+    var libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
+        librarySourceProviderFactory, dataProviderFactory, terminologyProviderFactory,
+        endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
+
+    var evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter,
+        librarySourceProviderFactory, dataProviderFactory, terminologyProviderFactory,
+        endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
+
+    return new QuestionnaireProcessor(fhirContext, fhirDal, libraryProcessor, evaluator);
+  }
+
+  /** Fluent interface starts here **/
+
+  static class Assert {
+    public static QuestionnaireResult that(String questionnaireName, String patientId) {
+      return new QuestionnaireResult(questionnaireName, patientId);
+    }
+  }
+
+  static class QuestionnaireResult {
+    private MockFhirDal fhirDal = new MockFhirDal();
+    private Bundle bundle;
+    private Endpoint dataEndpoint;
+    private Parameters parameters;
+    private Questionnaire baseResource;
+    private String patientId;
+
+    public QuestionnaireResult(String questionnaireName, String patientId) {
+      baseResource = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
+      this.patientId = patientId;
     }
 
-    public static String load(InputStream asset) throws IOException {
-        return new String(asset.readAllBytes(), StandardCharsets.UTF_8);
+    public QuestionnaireResult withData(String dataAssetName) {
+      dataEndpoint = new Endpoint().setAddress(dataAssetName).setConnectionType(
+          new Coding().setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
+
+      fhirDal.addAll(parse(dataAssetName));
+      return this;
     }
 
-    public static String load(String asset) throws IOException {
-        return load(open(asset));
+    public QuestionnaireResult withLibrary(String dataAssetName) {
+      bundle = (Bundle) parse(dataAssetName);
+      return this;
     }
 
-    public static IBaseResource parse(String asset) {
-        return jsonParser.parseResource(open(asset));
+    public QuestionnaireResult withParameters(Parameters params) {
+      parameters = params;
+      return this;
     }
 
-
-    public static QuestionnaireProcessor buildProcessor(FhirDal fhirDal) {
-        var adapterFactory = new AdapterFactory();
-        var libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-        var fhirTypeConverter =
-                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-        var cqlFhirParametersConverter =
-                new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
-
-        var fhirModelResolverFactory = new FhirModelResolverFactory();
-        Set<ModelResolverFactory> modelResolverFactories =
-                Collections.singleton(fhirModelResolverFactory);
-
-        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories =
-                Collections.singleton(new TypedLibrarySourceProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
-
-                    @Override
-                    public LibrarySourceProvider create(String url, List<String> headers) {
-                        return new BundleFhirLibrarySourceProvider(fhirContext,
-                                (IBaseBundle) parse(url), adapterFactory, libraryVersionSelector);
-                    }
-                });
-
-        var librarySourceProviderFactory = new LibrarySourceProviderFactory(fhirContext,
-                adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
-
-        Set<TypedRetrieveProviderFactory> retrieveProviderFactories =
-                Collections.singleton(new TypedRetrieveProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
-
-                    @Override
-                    public RetrieveProvider create(String url, List<String> headers) {
-                        return new BundleRetrieveProvider(fhirContext, (IBaseBundle) parse(url));
-                    }
-                });
-
-        var dataProviderFactory = new DataProviderFactory(fhirContext, modelResolverFactories,
-                retrieveProviderFactories);
-
-        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories =
-                Collections.singleton(new TypedTerminologyProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
-
-                    @Override
-                    public TerminologyProvider create(String url, List<String> headers) {
-                        return new BundleTerminologyProvider(fhirContext, (IBaseBundle) parse(url));
-                    }
-                });
-
-        var terminologyProviderFactory =
-                new TerminologyProviderFactory(fhirContext, typedTerminologyProviderFactories);
-
-        var endpointConverter = new EndpointConverter(adapterFactory);
-
-        var libraryProcessor = new LibraryProcessor(fhirContext, cqlFhirParametersConverter,
-                librarySourceProviderFactory, dataProviderFactory, terminologyProviderFactory,
-                endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
-
-        var evaluator = new ExpressionEvaluator(fhirContext, cqlFhirParametersConverter,
-                librarySourceProviderFactory, dataProviderFactory, terminologyProviderFactory,
-                endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
-
-        return new QuestionnaireProcessor(fhirContext, fhirDal, libraryProcessor, evaluator);
+    public GeneratedQuestionnaire prePopulate() {
+      return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId,
+          parameters, bundle, dataEndpoint, null, null));
     }
 
-    /** Fluent interface starts here **/
+    public GeneratedQuestionnaireResponse populate() {
+      return new GeneratedQuestionnaireResponse((QuestionnaireResponse) buildProcessor(fhirDal)
+          .populate(baseResource, patientId, parameters, bundle, dataEndpoint, null, null));
+    }
+  }
 
-    static class Assert {
-        public static QuestionnaireResult that(String questionnaireName, String patientId) {
-            return new QuestionnaireResult(questionnaireName, patientId);
-        }
+  static class GeneratedQuestionnaire {
+    Questionnaire questionnaire;
+
+    public GeneratedQuestionnaire(Questionnaire questionnaire) {
+      this.questionnaire = questionnaire;
     }
 
-    static class QuestionnaireResult {
-        private MockFhirDal fhirDal = new MockFhirDal();
-        private Bundle bundle;
-        private Endpoint dataEndpoint;
-        private Parameters parameters;
-        private Questionnaire baseResource;
-        private String patientId;
+    public void isEqualsTo(String expectedQuestionnaireAssetName) {
+      try {
+        JSONAssert.assertEquals(load(expectedQuestionnaireAssetName),
+            jsonParser.encodeResourceToString(questionnaire), true);
+      } catch (JSONException | IOException e) {
+        e.printStackTrace();
+        fail("Unable to compare Jsons: " + e.getMessage());
+      }
+    }
+  }
 
-        public QuestionnaireResult(String questionnaireName, String patientId) {
-            baseResource =
-                    questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
-            this.patientId = patientId;
-        }
+  static class GeneratedQuestionnaireResponse {
+    QuestionnaireResponse questionnaireResponse;
 
-        public QuestionnaireResult withData(String dataAssetName) {
-            dataEndpoint = new Endpoint().setAddress(dataAssetName).setConnectionType(new Coding()
-                    .setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
-
-            fhirDal.addAll(parse(dataAssetName));
-            return this;
-        }
-
-        public QuestionnaireResult withLibrary(String dataAssetName) {
-            bundle = (Bundle) parse(dataAssetName);
-            return this;
-        }
-
-        public QuestionnaireResult withParameters(Parameters params) {
-            parameters = params;
-            return this;
-        }
-
-        public GeneratedQuestionnaire prePopulate() {
-            return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource,
-                    patientId, parameters, bundle, dataEndpoint, null, null));
-        }
-
-        public GeneratedQuestionnaireResponse populate() {
-            return new GeneratedQuestionnaireResponse(
-                    (QuestionnaireResponse) buildProcessor(fhirDal).populate(baseResource,
-                            patientId, parameters, bundle, dataEndpoint, null, null));
-        }
+    public GeneratedQuestionnaireResponse(QuestionnaireResponse questionnaireResponse) {
+      this.questionnaireResponse = questionnaireResponse;
     }
 
-    static class GeneratedQuestionnaire {
-        Questionnaire questionnaire;
-
-        public GeneratedQuestionnaire(Questionnaire questionnaire) {
-            this.questionnaire = questionnaire;
-        }
-
-        public void isEqualsTo(String expectedQuestionnaireAssetName) {
-            try {
-                JSONAssert.assertEquals(load(expectedQuestionnaireAssetName),
-                        jsonParser.encodeResourceToString(questionnaire), true);
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-                fail("Unable to compare Jsons: " + e.getMessage());
-            }
-        }
+    public void isEqualsTo(String expectedQuestionnaireResponseAssetName) {
+      try {
+        JSONAssert.assertEquals(load(expectedQuestionnaireResponseAssetName),
+            jsonParser.encodeResourceToString(questionnaireResponse), true);
+      } catch (JSONException | IOException e) {
+        e.printStackTrace();
+        fail("Unable to compare Jsons: " + e.getMessage());
+      }
     }
-
-    static class GeneratedQuestionnaireResponse {
-        QuestionnaireResponse questionnaireResponse;
-
-        public GeneratedQuestionnaireResponse(QuestionnaireResponse questionnaireResponse) {
-            this.questionnaireResponse = questionnaireResponse;
-        }
-
-        public void isEqualsTo(String expectedQuestionnaireResponseAssetName) {
-            try {
-                JSONAssert.assertEquals(load(expectedQuestionnaireResponseAssetName),
-                        jsonParser.encodeResourceToString(questionnaireResponse), true);
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-                fail("Unable to compare Jsons: " + e.getMessage());
-            }
-        }
-    }
+  }
 }

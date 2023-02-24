@@ -28,70 +28,70 @@ import ca.uhn.fhir.util.BundleUtil;
  */
 public class FhirClientFhirLibrarySourceProvider extends BaseFhirLibrarySourceProvider {
 
-    Logger logger = LoggerFactory.getLogger(FhirClientFhirLibrarySourceProvider.class);
+  Logger logger = LoggerFactory.getLogger(FhirClientFhirLibrarySourceProvider.class);
 
-    private IGenericClient client;
-    private AdapterFactory adapterFactory;
-    private LibraryVersionSelector libraryVersionSelector;
+  private IGenericClient client;
+  private AdapterFactory adapterFactory;
+  private LibraryVersionSelector libraryVersionSelector;
 
-    private Map<VersionedIdentifier, IBaseResource> cache;
+  private Map<VersionedIdentifier, IBaseResource> cache;
 
-    /**
-     * @param client pre-configured and authorized FHIR server client
-     * @param adapterFactory factory for HL7 Structure adapters
-     * @param libraryVersionSelector logic for selecting a specific library
-     */
-    public FhirClientFhirLibrarySourceProvider(IGenericClient client, AdapterFactory adapterFactory,
-            LibraryVersionSelector libraryVersionSelector) {
-        super(adapterFactory);
-        this.client = client;
-        this.adapterFactory = adapterFactory;
-        this.libraryVersionSelector = libraryVersionSelector;
-        this.cache = new HashMap<>();
+  /**
+   * @param client pre-configured and authorized FHIR server client
+   * @param adapterFactory factory for HL7 Structure adapters
+   * @param libraryVersionSelector logic for selecting a specific library
+   */
+  public FhirClientFhirLibrarySourceProvider(IGenericClient client, AdapterFactory adapterFactory,
+      LibraryVersionSelector libraryVersionSelector) {
+    super(adapterFactory);
+    this.client = client;
+    this.adapterFactory = adapterFactory;
+    this.libraryVersionSelector = libraryVersionSelector;
+    this.cache = new HashMap<>();
+  }
+
+  protected IBaseResource getLibrary(IIdType id) {
+    try {
+      return this.client.read().resource("Library").withId(id)
+          .elementsSubset("name", "version", "content", "type").encodedJson().execute();
+    } catch (Exception e) {
+      logger.error(String.format("error while getting library with id %s", id), e);
     }
 
-    protected IBaseResource getLibrary(IIdType id) {
-        try {
-            return this.client.read().resource("Library").withId(id)
-                    .elementsSubset("name", "version", "content", "type").encodedJson().execute();
-        } catch (Exception e) {
-            logger.error(String.format("error while getting library with id %s", id), e);
-        }
+    return null;
+  }
 
-        return null;
+  @Override
+  public IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
+    IBaseResource library = this.cache.get(libraryIdentifier);
+    if (library != null) {
+      return library;
     }
 
-    @Override
-    public IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
-        IBaseResource library = this.cache.get(libraryIdentifier);
-        if (library != null) {
-            return library;
-        }
+    IBaseBundle result =
+        this.client.search().forResource("Library").elementsSubset("name", "version")
+            .where(new TokenClientParam("name").exactly().code(libraryIdentifier.getId()))
+            .encodedJson().execute();
 
-        IBaseBundle result = this.client.search().forResource("Library")
-                .elementsSubset("name", "version")
-                .where(new TokenClientParam("name").exactly().code(libraryIdentifier.getId()))
-                .encodedJson().execute();
+    List<? extends IBaseResource> resources =
+        BundleUtil.toListOfResourcesOfType(this.client.getFhirContext(), result,
+            this.client.getFhirContext().getResourceDefinition("Library").getImplementingClass());
 
-        List<? extends IBaseResource> resources =
-                BundleUtil.toListOfResourcesOfType(this.client.getFhirContext(), result, this.client
-                        .getFhirContext().getResourceDefinition("Library").getImplementingClass());
-
-        if (resources == null || resources.isEmpty()) {
-            return null;
-        }
-
-        Collection<IBaseResource> libraries =
-                resources.stream().map(x -> (IBaseResource) x).collect(Collectors.toList());
-
-        library = this.libraryVersionSelector.select(libraryIdentifier, libraries);
-
-        // This is a subsetted resource, so we get the full version here.
-        if (library != null) {
-            library = getLibrary(this.adapterFactory.createLibrary(library).getId());
-            this.cache.put(libraryIdentifier, library);
-        }
-
-        return library;
+    if (resources == null || resources.isEmpty()) {
+      return null;
     }
+
+    Collection<IBaseResource> libraries =
+        resources.stream().map(x -> (IBaseResource) x).collect(Collectors.toList());
+
+    library = this.libraryVersionSelector.select(libraryIdentifier, libraries);
+
+    // This is a subsetted resource, so we get the full version here.
+    if (library != null) {
+      library = getLibrary(this.adapterFactory.createLibrary(library).getId());
+      this.cache.put(libraryIdentifier, library);
+    }
+
+    return library;
+  }
 }

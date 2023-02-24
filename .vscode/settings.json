@@ -58,36 +58,57 @@
     "**/.factorypath": true
   },
   "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
   "editor.detectIndentation": false,
+  "editor.foldingImportsByDefault": true,
+  "editor.tabSize": 2,
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.dependency.packagePresentation": "hierarchical",
   "java.jdt.ls.vmargs": "-noverify -Xmx16G -XX:+UseG1GC -XX:+UseStringDeduplication",
   "java.compile.nullAnalysis.mode": "automatic",
-  "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+  "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
   "java.format.settings.profile": "GoogleStyle",
   "commandOnAllFiles.commands": {
     "Format Java File": {
       "command": "editor.action.formatDocument",
       "includeFileExtensions": [
         ".java"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
       ]
     },
     "Format XML Files": {
       "command": "editor.action.formatDocument",
       "includeFileExtensions": [
         ".xml"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
       ]
     },
     "Format JSON Files": {
       "command": "editor.action.formatDocument",
       "includeFileExtensions": [
         ".json"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
       ]
     },
     "Format Markdown Files": {
       "command": "editor.action.formatDocument",
       "includeFileExtensions": [
         ".md"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
       ]
     }
   }

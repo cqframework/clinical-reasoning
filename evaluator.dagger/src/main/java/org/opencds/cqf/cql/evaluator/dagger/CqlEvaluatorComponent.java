@@ -17,24 +17,24 @@ import dagger.Component;
 @Component(modules = {LibraryModule.class})
 @Singleton
 public interface CqlEvaluatorComponent {
-    // MeasureProcessor createMeasureProcessor();
-    LibraryProcessor createLibraryProcessor();
+  // MeasureProcessor createMeasureProcessor();
+  LibraryProcessor createLibraryProcessor();
 
-    CqlEvaluatorBuilder createBuilder();
+  CqlEvaluatorBuilder createBuilder();
 
-    DataProviderFactory createDataProviderFactory();
+  DataProviderFactory createDataProviderFactory();
 
-    TerminologyProviderFactory createTerminologyProviderFactory();
+  TerminologyProviderFactory createTerminologyProviderFactory();
 
-    LibrarySourceProviderFactory createLibrarySourceProviderFactory();
+  LibrarySourceProviderFactory createLibrarySourceProviderFactory();
 
-    ExpressionEvaluator createExpressionEvaluator();
+  ExpressionEvaluator createExpressionEvaluator();
 
-    @Component.Builder
-    public interface Builder {
-        @BindsInstance
-        Builder fhirContext(FhirContext fhirContext);
+  @Component.Builder
+  public interface Builder {
+    @BindsInstance
+    Builder fhirContext(FhirContext fhirContext);
 
-        CqlEvaluatorComponent build();
-    }
+    CqlEvaluatorComponent build();
+  }
 }

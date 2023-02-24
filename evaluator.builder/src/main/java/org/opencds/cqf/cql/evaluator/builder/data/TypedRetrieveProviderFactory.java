@@ -5,8 +5,7 @@ import java.util.List;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 
 public interface TypedRetrieveProviderFactory {
+  public String getType();
 
-    public String getType();
-
-    public RetrieveProvider create(String url, List<String> headers);
+  public RetrieveProvider create(String url, List<String> headers);
 }

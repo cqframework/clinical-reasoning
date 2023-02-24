@@ -13,23 +13,23 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = TestConfigurationDstu3.class)
 public class CqlEvaluatorDstu3Test extends AbstractTestNGSpringContextTests {
 
-    @Test
-    public void canInstantiateMeasureProcessor() {
-        Dstu3MeasureProcessor measureProcessor =
-                this.applicationContext.getBean(Dstu3MeasureProcessor.class);
-        assertNotNull(measureProcessor);
-    }
+  @Test
+  public void canInstantiateMeasureProcessor() {
+    Dstu3MeasureProcessor measureProcessor =
+        this.applicationContext.getBean(Dstu3MeasureProcessor.class);
+    assertNotNull(measureProcessor);
+  }
 
-    @Test
-    public void canInstantiateLibraryProcessor() {
-        LibraryProcessor libraryProcessor = this.applicationContext.getBean(LibraryProcessor.class);
-        assertNotNull(libraryProcessor);
-    }
+  @Test
+  public void canInstantiateLibraryProcessor() {
+    LibraryProcessor libraryProcessor = this.applicationContext.getBean(LibraryProcessor.class);
+    assertNotNull(libraryProcessor);
+  }
 
-    @Test
-    public void canInstantiateExpressionEvaluator() {
-        ExpressionEvaluator expressionEvaluator =
-                this.applicationContext.getBean(ExpressionEvaluator.class);
-        assertNotNull(expressionEvaluator);
-    }
+  @Test
+  public void canInstantiateExpressionEvaluator() {
+    ExpressionEvaluator expressionEvaluator =
+        this.applicationContext.getBean(ExpressionEvaluator.class);
+    assertNotNull(expressionEvaluator);
+  }
 }

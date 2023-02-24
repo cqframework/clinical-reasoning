@@ -1,10 +1,10 @@
 package org.opencds.cqf.cql.evaluator.cql2elm.model;
 
+import java.util.Map;
+
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.cql.model.ModelIdentifier;
-
-import java.util.Map;
 
 /**
  * This class extends the CQL translator {@link org.cqframework.cql.cql2elm.ModelManager} class to
@@ -19,10 +19,10 @@ import java.util.Map;
  */
 public class CacheAwareModelManager extends ModelManager {
 
-    /**
-     * @param globalCache cache for Models by ModelIdentifier. Expected to be thread-safe.
-     */
-    public CacheAwareModelManager(Map<ModelIdentifier, Model> globalCache) {
-        super(globalCache);
-    }
+  /**
+   * @param globalCache cache for Models by ModelIdentifier. Expected to be thread-safe.
+   */
+  public CacheAwareModelManager(Map<ModelIdentifier, Model> globalCache) {
+    super(globalCache);
+  }
 }

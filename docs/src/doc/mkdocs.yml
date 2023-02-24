@@ -1,8 +1,8 @@
-site_name: CQF Clinical Reasoning
+site_name: CQF Clinical Reasoning for Java
 site_url: https://docs.cqframework.org/clinical-reasoning
 site_author: Smile Digital Health
 site_description: >-
-  Documentation for CQF Clinical Reasoning on FHIR
+  Documentation for CQF Clinical Reasoning on FHIR for Java
 
 copyright: Copyright &copy; 2022 Smile Digital Health
 

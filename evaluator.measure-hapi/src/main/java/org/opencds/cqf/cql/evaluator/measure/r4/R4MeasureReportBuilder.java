@@ -208,7 +208,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     @Override
     public MeasureReport build(Measure measure, MeasureDef measureDef, MeasureReportType measureReportType,
-            Interval measurementPeriod, List<String> subjectIds) {
+            Interval measurementPeriod, Iterable<String> subjectIds) {
 
         var report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
 
@@ -640,13 +640,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected MeasureReport createMeasureReport(Measure measure, MeasureDef measureDef, MeasureReportType type,
-            List<String> subjectIds, Interval measurementPeriod) {
+            Iterable<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.COMPLETE);
         report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
 
-        if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {
-            report.setSubject(new Reference(subjectIds.get(0)));
+        if (type == MeasureReportType.INDIVIDUAL && subjectIds.iterator().hasNext()) {
+            report.setSubject(new Reference(subjectIds.iterator().next()));
         }
 
         if (measurementPeriod != null) {

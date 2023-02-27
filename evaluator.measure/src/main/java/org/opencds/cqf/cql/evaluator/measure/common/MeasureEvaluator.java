@@ -58,14 +58,24 @@ public class MeasureEvaluator {
                 "measurementPeriodParameterName is a required argument");
     }
 
-    public MeasureDef evaluate(MeasureDef measureDef, MeasureEvalType measureEvalType, List<String> subjectIds,
+    public MeasureDef evaluate(MeasureDef measureDef, MeasureEvalType measureEvalType, Iterable<String> subjectIds,
             Interval measurementPeriod) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
 
         // default behavior is population for many subjects, individual for one subject
+        int i =0;
         if (measureEvalType == null) {
-            measureEvalType = subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
+            while (subjectIds.iterator().hasNext()){
+                i = i++;
+                if (i>1){
+                    measureEvalType = MeasureEvalType.POPULATION;
+                    break; // exit once we know >1
+                }
+            }
+        if (i == 0){
+            measureEvalType = MeasureEvalType.SUBJECT;
+        }
         }
 
         // measurementPeriod is not required, because it's often defaulted in CQL
@@ -192,10 +202,9 @@ public class MeasureEvaluator {
         this.context.clearEvaluatedResources();
     }
 
-    protected MeasureDef evaluate(MeasureDef measureDef, MeasureReportType type, List<String> subjectIds) {
+    protected MeasureDef evaluate(MeasureDef measureDef, MeasureReportType type, Iterable<String> subjectIds) {
 
-        logger.info("Evaluating Measure {}, report type {}, with {} subject(s)", measureDef.url(), type.toCode(),
-                subjectIds.size());
+        logger.info("Evaluating Measure {}, report type {}", measureDef.url(), type.toCode());
 
         MeasureScoring scoring = measureDef.scoring();
         if (scoring == null) {

@@ -36,12 +36,22 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         return this.evaluate(measureEvalType, subjectIds, null);
     }
 
-    public MeasureReportT evaluate(MeasureEvalType measureEvalType, List<String> subjectIds,
+    public MeasureReportT evaluate(MeasureEvalType measureEvalType, Iterable<String> subjectIds,
             Interval measurementPeriod) {
         Objects.requireNonNull(subjectIds, "subjectIds is a required parameter");
 
+        int i =0;
         if (measureEvalType == null) {
-            measureEvalType = subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
+            while (subjectIds.iterator().hasNext()){
+                i = i++;
+                if (i>1){
+                    measureEvalType = MeasureEvalType.POPULATION;
+                    break; // exit once we know >1
+                }
+            }
+            if (i == 0){
+                measureEvalType = MeasureEvalType.SUBJECT;
+            }
         }
 
         MeasureDef measureDef = this.measureDefBuilder.build(measure);

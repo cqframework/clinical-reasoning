@@ -19,23 +19,23 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
     protected String subjectType;
 
     protected Function<SubjectT, String> getId;
-
+    Function<Object, String> idGet;
     public EngineContextSubjectProvider(Context context, String modelUri, Function<SubjectT, String> getId) {
         this.context = context;
         this.modelUri = modelUri;
         this.getId = getId;
     }
 
-    public List<String> getSubjects(MeasureEvalType type, String subjectId) {
+    public Iterable<String> getSubjects(MeasureEvalType type, String subjectId) {
         switch (type) {
             case PATIENT:
             case SUBJECT:
                 return getIndividualSubjectId(subjectId);
             case SUBJECTLIST:
             case PATIENTLIST:
-                return this.getPractitionerSubjectIds(subjectId);
+                return this.getPractitionerSubjectIds(subjectId); //here
             case POPULATION:
-                return this.getAllSubjectIds();
+                return this.getAllSubjectIds(); //here
             default:
                 if (subjectId != null) {
                     return getIndividualSubjectId(subjectId);
@@ -67,20 +67,39 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
         return Collections.singletonList(this.subjectType + "/" + parsedSubjectId);
     }
 
-
-
     @SuppressWarnings("unchecked")
-    protected List<String> getAllSubjectIds() {
+    protected Iterable<String> getAllSubjectIds() {
         this.subjectType = "Patient";
+
         List<String> subjectIds = new ArrayList<>();
         Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null, subjectType, null, null,
                 null, null, null, null, null, null);
-        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+
+        IdExtractingIterable extractIds = new IdExtractingIterable(subjectRetrieve, idGet);
+        while (extractIds.hasNext()){
+            subjectIds.add(extractIds.getNext());
+        }
         return subjectIds;
     }
 
+    public class IdExtractingIterable{
+        Iterable<Object> iterableToWrap;
+        Function<Object,String> idExtractor;
+
+        public IdExtractingIterable(Iterable<Object> iterableToWrap, Function<Object,String> idExtractor){
+            this.iterableToWrap = iterableToWrap;
+            this.idExtractor = idExtractor;
+        }
+        boolean hasNext() {
+            return this.iterableToWrap.iterator().hasNext();
+        }
+        String getNext() {
+            return this.idExtractor.apply(this.iterableToWrap.iterator().next());
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    protected List<String> getPractitionerSubjectIds(String practitionerRef) {
+    protected Iterable<String> getPractitionerSubjectIds(String practitionerRef) {
         this.subjectType = "Patient";
 
         if (practitionerRef == null) {
@@ -95,7 +114,7 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
 
         Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
                 practitionerRef, subjectType, null, null, null, null, null, null, null, null);
-        subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
+        //subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
         return subjectIds;
     }
 }

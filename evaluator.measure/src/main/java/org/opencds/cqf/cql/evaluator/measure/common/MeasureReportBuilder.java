@@ -5,5 +5,5 @@ import java.util.List;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public interface MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> {
-    MeasureReportT build(MeasureT measure, MeasureDef def, MeasureReportType measureReportType, Interval measurementPeriod, List<String> subjectIds);
+    MeasureReportT build(MeasureT measure, MeasureDef def, MeasureReportType measureReportType, Interval measurementPeriod, Iterable<String> subjectIds);
 }

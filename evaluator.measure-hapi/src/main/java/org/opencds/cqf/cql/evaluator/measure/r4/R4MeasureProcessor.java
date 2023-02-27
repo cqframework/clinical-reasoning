@@ -1,17 +1,17 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -160,7 +160,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
          String subject, String practitioner, String lastReceivedOn, Endpoint contentEndpoint,
          Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
-        List<String> subjectIds = this.getSubjects(reportType,
+        Iterable<String> subjectIds = this.getSubjects(reportType,
                 subject != null ? subject : practitioner, dataEndpoint, additionalData);
 
         return evaluateMeasure(url, periodStart, periodEnd, reportType, subjectIds, lastReceivedOn,
@@ -168,7 +168,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
 
     public MeasureReport evaluateMeasure(String url, String periodStart, String periodEnd, String reportType,
-         List<String> subjectIds, String lastReceivedOn, Endpoint contentEndpoint,
+         Iterable<String> subjectIds, String lastReceivedOn, Endpoint contentEndpoint,
          Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
 
         // TODO: Need a federated FhirDal..
@@ -210,35 +210,41 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         return (Measure) measureIter.next();
     }
 
-    public static <T> List<List<T>> getBatches(List<T> collection, int batchSize) {
-        int i = 0;
-        List<List<T>> batches = new ArrayList<>();
-        while (i < collection.size()) {
-            int nextInc = Math.min(collection.size() - i, batchSize);
-            List<T> batch = collection.subList(i, i + nextInc);
-            batches.add(batch);
-            i = i + nextInc;
-        }
+    public Stream<List<String>> getBatches(Iterable<String> stream, int size) {
+        Iterator<String> iterator = stream.iterator();
+        Iterator<List<String>> listIterator = new Iterator<>() {
 
-        return batches;
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            public List<String> next() {
+                List<String> result = new ArrayList<>(size);
+                for (int i = 0; i < size && iterator.hasNext(); i++) {
+                    result.add(iterator.next());
+                }
+                return result;
+            }
+        };
+        return StreamSupport.stream(((Iterable<List<String>>) () -> listIterator).spliterator(), false);
     }
 
-    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint) {
+    public Iterable<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         return getSubjects(measureEvalType, subjectId, dataEndpoint, null);
     }
 
-    public List<String> getSubjects(String reportType, String subjectId, Bundle additionalData) {
+    public Iterable<String> getSubjects(String reportType, String subjectId, Bundle additionalData) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         return getSubjects(measureEvalType, subjectId, null, additionalData);
     }
 
-    public List<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
+    public Iterable<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         return getSubjects(measureEvalType, subjectId, dataEndpoint, additionalData);
     }
 
-    public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
+    public Iterable<String> getSubjects(MeasureEvalType measureEvalType, String subjectId, Endpoint dataEndpoint, Bundle additionalData) {
         CompositeFhirDal compositeFhirDal;
         BundleFhirDal bundleDal = null;
         FhirDal endpointDal = null;
@@ -257,7 +263,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
 
    public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
-            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
         if (Boolean.TRUE.equals(this.measureEvaluationOptions.isValidationEnabled())) {
             if (this.validator == null) {
@@ -267,34 +273,47 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 this.validator.validate(measure, true);
             }
         }
-
+       int threadBatchSize = this.measureEvaluationOptions.getThreadedBatchSize();
         if (this.measureEvaluationOptions.isThreadedEnabled()
-                && subjectIds.size() > this.measureEvaluationOptions.getThreadedBatchSize()) {
+                && sizeOfSubjects(subjectIds, threadBatchSize) > threadBatchSize) {
             return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
                     contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
         } else {
             return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
                     contentEndpoint,
                     terminologyEndpoint, dataEndpoint, additionalData);
-
         }
+    }
 
+    public static int sizeOfSubjects(Iterable<String> subjects, int batchSize) {
+        if (subjects instanceof Collection) {
+            return ((Collection<?>) subjects).size();
+        }
+        int counter = 0;
+        for (Object i : subjects) {
+            if (counter <= batchSize) {
+                counter++;
+            }
+            // Only checking if bigger than batch size
+            else return counter;
+        }
+        return counter;
     }
 
     protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
             String reportType,
-            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
-        List<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
+        Stream<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
         ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
         List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
-        for (List<String> idBatch : batches) {
+        batches.forEach(x -> {
             futures.add(
                     CompletableFuture.supplyAsync(
-                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, idBatch,
+                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, x,
                                     fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
                             executor));
-        }
+        });
 
         List<MeasureReport> reports = new ArrayList<>();
         futures.forEach(x -> reports.add(x.join()));
@@ -304,7 +323,7 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
 
     protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd,
             String reportType,
-            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
 
         if (!measure.hasLibrary()) {

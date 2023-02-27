@@ -80,7 +80,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     @Override
     public MeasureReport build(Measure measure, MeasureDef measureDef, MeasureReportType measureReportType,
-            Interval measurementPeriod, List<String> subjectIds) {
+            Interval measurementPeriod, Iterable<String> subjectIds) {
         this.reset();
 
         this.measure = measure;
@@ -328,7 +328,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.getEvaluatedResourceReferences().computeIfAbsent(id, Reference::new);
     }
 
-    protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
+    protected void processSdes(Measure measure, MeasureDef measureDef, Iterable<String> subjectIds) {
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc = measure.getSupplementalData().get(i);
@@ -435,13 +435,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected MeasureReport createMeasureReport(Measure measure, MeasureDef measureDef, MeasureReportType type,
-            List<String> subjectIds, Interval measurementPeriod) {
+            Iterable<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
 
-        if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {
-            report.setPatient(new Reference(subjectIds.get(0)));
+        if (type == MeasureReportType.INDIVIDUAL && subjectIds.iterator().hasNext()) {
+            report.setPatient(new Reference(subjectIds.iterator().next()));
         }
 
         if (measurementPeriod != null) {

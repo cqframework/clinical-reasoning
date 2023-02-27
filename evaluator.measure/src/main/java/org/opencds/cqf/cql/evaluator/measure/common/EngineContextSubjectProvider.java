@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -71,18 +72,13 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
     protected Iterable<String> getAllSubjectIds() {
         this.subjectType = "Patient";
 
-        List<String> subjectIds = new ArrayList<>();
         Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null, subjectType, null, null,
                 null, null, null, null, null, null);
 
-        IdExtractingIterable extractIds = new IdExtractingIterable(subjectRetrieve, idGet);
-        while (extractIds.hasNext()){
-            subjectIds.add(extractIds.getNext());
-        }
-        return subjectIds;
+        return new IdExtractingIterable(subjectRetrieve, idGet);
     }
 
-    public class IdExtractingIterable{
+    public class IdExtractingIterable implements Iterable<String> {
         Iterable<Object> iterableToWrap;
         Function<Object,String> idExtractor;
 
@@ -90,13 +86,33 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
             this.iterableToWrap = iterableToWrap;
             this.idExtractor = idExtractor;
         }
-        boolean hasNext() {
-            return this.iterableToWrap.iterator().hasNext();
+
+
+        @Override
+        public Iterator<String> iterator() {
+            return new SubjectIterator(this.iterableToWrap.iterator(), this.idExtractor);
         }
-        String getNext() {
-            return this.idExtractor.apply(this.iterableToWrap.iterator().next());
-        }
+
+            class SubjectIterator implements Iterator<String> {
+                Iterator<Object> iteratorToWrap;
+                Function<Object,String> idExtractor;
+
+                public SubjectIterator(Iterator<Object> iteratorToWrap, Function<Object, String> idExtractor) {
+                    this.iteratorToWrap = iteratorToWrap;
+                    this.idExtractor = idExtractor;
+                }
+                @Override
+                public boolean hasNext() {
+                    return this.iteratorToWrap.hasNext();
+                }
+                @Override
+                public String next() {
+                    return this.idExtractor.apply(this.iteratorToWrap.next());
+                }
+            }
+
     }
+
 
     @SuppressWarnings("unchecked")
     protected Iterable<String> getPractitionerSubjectIds(String practitionerRef) {
@@ -106,15 +122,13 @@ public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
             return getAllSubjectIds();
         }
 
-        List<String> subjectIds = new ArrayList<>();
-
         if (!practitionerRef.contains("/")) {
             practitionerRef = "Practitioner/" + practitionerRef;
         }
 
         Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
                 practitionerRef, subjectType, null, null, null, null, null, null, null, null);
-        //subjectRetrieve.forEach(x -> subjectIds.add(this.getId.apply((SubjectT) x)));
-        return subjectIds;
+
+        return new IdExtractingIterable(subjectRetrieve, idGet);
     }
 }

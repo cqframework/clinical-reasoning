@@ -1,3 +1,5 @@
+root = true
+
 [*]
 charset = utf-8
 end_of_line = lf
@@ -18,6 +20,24 @@ end_of_line = lf
 indent_size = 4
 insert_final_newline = true
 tab_width = 4
+
+[*.json]
+end_of_line = lf
+indent_size = 2
+insert_final_newline = true
+tab_width = 2
+max_line_length = 80
+ij_json_keep_blank_lines_in_code = 0
+ij_json_keep_indents_on_empty_lines = false
+ij_json_keep_line_breaks = true
+ij_json_space_after_colon = true
+ij_json_space_after_comma = true
+ij_json_space_before_colon = false
+ij_json_space_before_comma = false
+ij_json_spaces_within_braces = true
+ij_json_spaces_within_brackets = true
+ij_json_wrap_long_lines = false
+
 
 [*.css]
 ij_css_align_closing_brace_with_properties = false
@@ -1330,7 +1350,7 @@ ij_shell_minify_program = false
 ij_shell_redirect_followed_by_space = false
 ij_shell_switch_cases_indented = false
 
-[{.eslintrc,.babelrc,jest.config,.stylelintrc,*.bowerrc,*.jsb3,*.jsb2,*.json}]
+[{.eslintrc,.babelrc,jest.config,.stylelintrc,*.bowerrc,*.jsb3,*.jsb2}]
 ij_json_keep_blank_lines_in_code = 0
 ij_json_keep_indents_on_empty_lines = false
 ij_json_keep_line_breaks = true

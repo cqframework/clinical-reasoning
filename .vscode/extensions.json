@@ -11,10 +11,11 @@
     "shengchen.vscode-checkstyle",
     "sonarsource.sonarlint-vscode",
     "redhat.fabric8-analytics",
-    "rioj7.commandOnAllFiles"
+    "rioj7.commandOnAllFiles",
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": [
-    "alexr00.formatallfilesinworkspace"
+    "alexr00.formatallfilesinworkspace",
+    "esbenp.prettier-vscode"
   ]
 }

@@ -89,42 +89,42 @@ Within the healthcare space an example are the various Electronic Medical Record
 A common approach to scaling an SoS is to build a "platform". An SoS platform:
 
 * Promotes interoperability through
-  * Common communication mechanisms
-  * Common information models (semantics)
-  * Patterns or sequences of interaction
+    * Common communication mechanisms
+    * Common information models (semantics)
+    * Patterns or sequences of interaction
 * Provides services and functions to all constituent systems
 * Reduces time and effort to develop or modify systems by
-  * Providing reference or concrete implementations of services
-  * Replacing point-to-point integration with system-to-platform integration
-  * Reducing barrier to entry for new systems to join SoS
+    * Providing reference or concrete implementations of services
+    * Replacing point-to-point integration with system-to-platform integration
+    * Reducing barrier to entry for new systems to join SoS
 * Enables modular substitution systems in the SoS
-  * Which supports an “ecosystem”
+    * Which supports an “ecosystem”
 
 The Internet is an example of an SoS platform:
 
 * Common communication mechanisms
-  * TCP/HTTP
+    * TCP/HTTP
 * System-to-platform integration
-  * DNS servers allow you to access anything, anywhere
+    * DNS servers allow you to access anything, anywhere
 * Well-established patterns and sequences of interactions
-  * REST
+    * REST
 * Connecting to one server looks like connecting to any other
-  * Allows (nearly) transparent middleware
-    * Routers, proxies, caching, authentication
-  * Allows arbitrarily deep/complex networks
+    * Allows (nearly) transparent middleware
+        * Routers, proxies, caching, authentication
+    * Allows arbitrarily deep/complex networks
 
-An SoS Platform is frequently developed and described as a set of standards. For example, all the RFCs that are published by the IETF for the Internat that describe things like REST. These standards function as a formal description of a set of functionality within the overall platform. SDKs for developing Internet applications exist in almost every programming language, such as HTTP client libraries.
+An SoS Platform is frequently developed and described as a set of standards. For example, all the RFCs that are published by the IETF for the Internet that describe things like REST. These standards function as a formal description of a set of functionality within the overall platform. SDKs for developing Internet applications exist in almost every programming language, such as HTTP client libraries.
 
 #### FHIR Platform
 
 FHIR is an SoS Platform built on top of web standards and focused on clinical concepts. [Health Level Seven International](https://www.hl7.org/) (HL7) manages the development of FHIR. FHIR provides (among other things):
 
 * A Common data (meta)model and semantics
-  * FHIR "Resources" representing clinical concepts such as Patient, Encounter, Medication, etc.
+    * FHIR "Resources" representing clinical concepts such as Patient, Encounter, Medication, etc.
 * Common patterns for interaction
-  * FHIR REST API
-  * SMART-on-FHIR
-  * Bulk Data
+    * FHIR REST API
+    * SMART-on-FHIR
+    * Bulk Data
 * Extensibility and discovery mechanisms for adding new functionality to a systems
 
 Additionally, HL7 funds the development of reference implementations and provides some platform services, such as a common package registry for FHIR publications.
@@ -142,9 +142,9 @@ This project is designed to provide reusable Clinical Reasoning modules for any 
 * Android, as part of the [Google FHIR SDK](TODO)
 * [eCR Now](TODO), the CDC's reference implementation for contagious disease surveillance
 * Spark, for analytics use cases
-  * [Alphora](https://www.alphora.com/) provides a commercial solution
+    * [Alphora](https://www.alphora.com/) provides a commercial solution
 * VS Code, through the [LSP](https://github.com/cqframework/vscode-cql)
-  * Provides an IDE for authoring clinical logic in terms of FHIR/CQL
+    * Provides an IDE for authoring clinical logic in terms of FHIR/CQL
 * [HAPI FHIR Server](https://github.com/hapifhir/hapi-fhir), an open-source Clinical Data Repository (CDR)
 * [Smile CDR](https://www.smilecdr.com/smilecdr), a commercial derivative of HAPI.
 * Various other open-source and commercial implementations
@@ -197,50 +197,50 @@ Most of the components and operations in this repository are built around an int
 * Should be rooted with `org.opencds.cqf.fhir`
 * For the sake of brevity, `clinicalreasoning` is abbreviated `cr` in package names
 * Package names should reflect high-level areas of functionality:
-  * `org.opencds.cqf.fhir.utility`
-    * Non-FHIR version specific utilities
-  * `org.opencds.cqf.fhir.cql`
-    * Non-FHIR version specific CQL components
+    * `org.opencds.cqf.fhir.utility`
+        * Non-FHIR version specific utilities
+    * `org.opencds.cqf.fhir.cql`
+        * Non-FHIR version specific CQL components
 * If a FHIR version is specified, it should come after the high-level functionality described:
-  * `org.opencds.cqf.fhir.cql.r5`
-    * An example package name for CQL-related functionality tied to R5
+    * `org.opencds.cqf.fhir.cql.r5`
+        * An example package name for CQL-related functionality tied to R5
 * If a Resource name if specified, it should generally come after the FHIR version
-  * `org.opencds.cqf.fhir.cr.dstu3.measure`
-    * An example package name for Measure-related functionality tied to DSTU3
-    * Exception: There may be a few cases where functionality for a Resource is not FHIR-version specific, in which case the FHIR version should be omitted
-      * `org.opencds.cqf.fhir.cr.plandefinition`
+    * `org.opencds.cqf.fhir.cr.dstu3.measure`
+        * An example package name for Measure-related functionality tied to DSTU3
+        * Exception: There may be a few cases where functionality for a Resource is not FHIR-version specific, in which case the FHIR version should be omitted
+            * `org.opencds.cqf.fhir.cr.plandefinition`
 * Generally, the package name prefix should one of:
-  * `org.opencds.cqf.fhir.api`
-  * `org.opencds.cqf.fhir.utility`
-  * `org.opencds.cqf.fhir.cql`
-  * `org.opencds.cqf.fhir.elm`
-  * `org.opencds.cqf.fhir.cr`
-  * `org.opencds.cqf.fhir.cdshooks`
-  * If you find a use case that doesn't fall under one those prefixes, it may be out of scope for this repository.
+    * `org.opencds.cqf.fhir.api`
+    * `org.opencds.cqf.fhir.utility`
+    * `org.opencds.cqf.fhir.cql`
+    * `org.opencds.cqf.fhir.elm`
+    * `org.opencds.cqf.fhir.cr`
+    * `org.opencds.cqf.fhir.cdshooks`
+    * If you find a use case that doesn't fall under one those prefixes, it may be out of scope for this repository.
 * Java 9+ modules require that each artifact have only one root package name that's exported. If you find the need for multiple root namespaces, consider that you may need to create a new artifact.
 
 #### Artifact names
 
 * Should start with `cqf-fhir`
 * Should reflect the root package name for the artifact
-  * `org.opencds.cqf.fhir.cqf` -> `cqf-fhir-cql`
-  * `org.opencds.cqf.fhir.utility` -> `cqf-fhir-utility`
+    * `org.opencds.cqf.fhir.cqf` -> `cqf-fhir-cql`
+    * `org.opencds.cqf.fhir.utility` -> `cqf-fhir-utility`
 * Exception: If there is a FHIR-version in the package name, it should come _last_ in the artifact name. This is to match the conventions already established by the FHIR core and HAPI FHIR projects
-  * `org.opencds.cqf.fhir.cr.r5.measure` -> `cqf-fhir-cr-measure-r5`
+    * `org.opencds.cqf.fhir.cr.r5.measure` -> `cqf-fhir-cr-measure-r5`
 
 #### Class names
 
 * Should follow the conventions established by [Effective Java](#best-practices).
 * Utility classes should follow the conventions established in the [Utilities](#utilities) section.
 * There are several cases where this project implements a "runtime" for standards-based content. In other words, the clinical logic isn't implemented by java, but rather by some FHIR Resource or CQL, and the Java provides an execution environment for that logic:
-  * `Measure` evaluation
-  * `PlanDefinition` application
-  * `ActivityDefinition` application
+    * `Measure` evaluation
+    * `PlanDefinition` application
+    * `ActivityDefinition` application
   These cases require special approaches to design an extensible and debuggable runtime, discussed further in the [Architecture](#architecture) section, and the class names should follow conventions for naming runtimes:
-    * `CqlEngine`
-    * `FhirPathEngine`
-    * `MeasureEvaluationRuntime`
-    * `ActivityDefinitionEngine`
+        * `CqlEngine`
+        * `FhirPathEngine`
+        * `MeasureEvaluationRuntime`
+        * `ActivityDefinitionEngine`
 
 ### Design Conventions
 
@@ -295,8 +295,8 @@ In the above example any class that has access to a `Database` can inherit the `
 Examples
 
 * Cross-cutting concerns
-  * Data Access
-  * Logging
-  * Parameter Validation
+    * Data Access
+    * Logging
+    * Parameter Validation
 
 Functions associated with only one operation or a small set of related classes should not be modeled as a "Behavior". Default interfaces can be easily abused in this way. Ask yourself "would I use this in an operation for a totally unrelated FHIR Resource?". If not, it's not a cross-cutting behavior.

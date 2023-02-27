@@ -3,10 +3,12 @@
     "activitydefinition",
     "argfile",
     "cdshooks",
+    "clinicalreasoning",
     "Codeable",
     "Configurer",
     "CONTINUOUSVARIABLE",
     "CRMI",
+    "debuggable",
     "DENOMINATOREXCEPTION",
     "DENOMINATOREXCLUSION",
     "dstu",
@@ -14,6 +16,7 @@
     "fhirpath",
     "Gson",
     "INITIALPOPULATION",
+    "Javadoc",
     "JXSON",
     "MEASUREOBSERVATION",
     "MEASUREPOPULATION",
@@ -24,16 +27,19 @@
     "mrgc",
     "mrgsc",
     "msdc",
+    "mvnw",
     "numer",
     "NUMERATOREXCLUSION",
     "opencds",
     "PATIENTLIST",
     "plandefinition",
     "ppca",
+    "proxying",
     "qicore",
     "questionnaireresponse",
     "sdes",
     "sgpc",
+    "Sonarlint",
     "SUBJECTLIST",
     "testng",
     "Unvalidated",
@@ -43,7 +49,7 @@
     "java",
     "json",
     "xml",
-    "md"
+    "markdown"
   ],
   "cSpell.ignorePaths": [
     ".git/objects",
@@ -51,25 +57,6 @@
     "**/pom.xml",
     "checkstyle.xml"
   ],
-  "files.exclude": {
-    "**/.classpath": true,
-    "**/.project": true,
-    "**/.settings": true,
-    "**/.factorypath": true
-  },
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": true
-  },
-  "editor.detectIndentation": false,
-  "editor.foldingImportsByDefault": true,
-  "editor.tabSize": 2,
-  "java.configuration.updateBuildConfiguration": "automatic",
-  "java.dependency.packagePresentation": "hierarchical",
-  "java.jdt.ls.vmargs": "-noverify -Xmx16G -XX:+UseG1GC -XX:+UseStringDeduplication",
-  "java.compile.nullAnalysis.mode": "automatic",
-  "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
-  "java.format.settings.profile": "GoogleStyle",
   "commandOnAllFiles.commands": {
     "Format Java File": {
       "command": "editor.action.formatDocument",
@@ -110,6 +97,45 @@
         "target",
         "generated-sources"
       ]
+    }
+  },
+  "files.exclude": {
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "editor.detectIndentation": false,
+  "editor.foldingImportsByDefault": true,
+  "editor.tabSize": 2,
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.dependency.packagePresentation": "hierarchical",
+  "java.jdt.ls.vmargs": "-noverify -Xmx16G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
+  "java.format.settings.profile": "GoogleStyle",
+  "[markdown]": {
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    },
+    "cSpell.fixSpellingWithRenameProvider": true,
+    "cSpell.advanced.feature.useReferenceProviderWithRename": true,
+    "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/"
+  },
+  "markdownlint.config": {
+    "MD007": {
+      "indent": 4
     }
   }
 }

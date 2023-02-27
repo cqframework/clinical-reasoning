@@ -13,6 +13,12 @@ ij_formatter_tags_enabled = false
 ij_smart_tabs = false
 ij_wrap_on_typing = false
 
+[*.md]
+end_of_line = lf
+indent_size = 4
+insert_final_newline = true
+tab_width = 4
+
 [*.css]
 ij_css_align_closing_brace_with_properties = false
 ij_css_blank_lines_around_nested_selector = 1

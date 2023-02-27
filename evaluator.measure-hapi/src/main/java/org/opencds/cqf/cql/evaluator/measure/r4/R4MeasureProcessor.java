@@ -273,57 +273,48 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
                 this.validator.validate(measure, true);
             }
         }
+       var subjectIterator = subjectIds.iterator();
+        var ids = new ArrayList<String>();
        int threadBatchSize = this.measureEvaluationOptions.getThreadedBatchSize();
-        if (this.measureEvaluationOptions.isThreadedEnabled()
-                && sizeOfSubjects(subjectIds, threadBatchSize) > threadBatchSize) {
-            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
-        } else {
-            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint,
-                    terminologyEndpoint, dataEndpoint, additionalData);
-        }
+       List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
+       while (subjectIterator.hasNext()){
+           ids.add(subjectIterator.next());
+           if (ids.size() % threadBatchSize == 0) {
+               futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, ids, fhirDal,
+                       contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData));
+               ids.clear();
+           }
+       }
+       futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, ids, fhirDal,
+               contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData) );
+       List<MeasureReport> reports = new ArrayList<>();
+       futures.forEach(x -> reports.add(x.join()));
+       R4MeasureReportAggregator reportAggregator = new R4MeasureReportAggregator();
+       return reportAggregator.aggregate(reports);
     }
 
-    public static int sizeOfSubjects(Iterable<String> subjects, int batchSize) {
-        if (subjects instanceof Collection) {
-            return ((Collection<?>) subjects).size();
-        }
-        int counter = 0;
-        for (Object i : subjects) {
-            if (counter <= batchSize) {
-                counter++;
-            }
-            // Only checking if bigger than batch size
-            else return counter;
-        }
-        return counter;
-    }
-
-    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
+    protected CompletableFuture<MeasureReport> runEvaluate(Measure measure, String periodStart, String periodEnd,
             String reportType,
-            Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
-        Stream<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
-        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
-        List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
-        batches.forEach(x -> {
-            futures.add(
-                    CompletableFuture.supplyAsync(
-                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, x,
-                                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
-                            executor));
-        });
 
-        List<MeasureReport> reports = new ArrayList<>();
-        futures.forEach(x -> reports.add(x.join()));
-        R4MeasureReportAggregator reportAggregator = new R4MeasureReportAggregator();
-        return reportAggregator.aggregate(reports);
+        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+        if (measureEvaluationOptions.isThreadedEnabled()) {
+            return CompletableFuture.supplyAsync(
+                    () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                            fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
+                    executor);
+        }
+        else {
+            return CompletableFuture.completedFuture(this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData));
+        }
+
     }
 
     protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd,
             String reportType,
-            Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+            List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
             Endpoint dataEndpoint, Bundle additionalData) {
 
         if (!measure.hasLibrary()) {

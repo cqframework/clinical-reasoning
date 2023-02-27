@@ -210,25 +210,6 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
         return (Measure) measureIter.next();
     }
 
-    public Stream<List<String>> getBatches(Iterable<String> stream, int size) {
-        Iterator<String> iterator = stream.iterator();
-        Iterator<List<String>> listIterator = new Iterator<>() {
-
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            public List<String> next() {
-                List<String> result = new ArrayList<>(size);
-                for (int i = 0; i < size && iterator.hasNext(); i++) {
-                    result.add(iterator.next());
-                }
-                return result;
-            }
-        };
-        return StreamSupport.stream(((Iterable<List<String>>) () -> listIterator).spliterator(), false);
-    }
-
     public Iterable<String> getSubjects(String reportType, String subjectId, Endpoint dataEndpoint) {
         MeasureEvalType measureEvalType = MeasureEvalType.fromCode(reportType);
         return getSubjects(measureEvalType, subjectId, dataEndpoint, null);

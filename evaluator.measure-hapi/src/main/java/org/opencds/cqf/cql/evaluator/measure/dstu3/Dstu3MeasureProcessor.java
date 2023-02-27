@@ -57,6 +57,7 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureScoring;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,74 +200,47 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
         return subjectProvider.getSubjects(measureEvalType, subjectId);
     }
 
-    public static int sizeOfSubjects(Iterable<String> subjects, int batchSize) {
-        if (subjects instanceof Collection) {
-            return ((Collection<?>) subjects).size();
-        }
-        int counter = 0;
-        for (Object i : subjects) {
-            if (counter <= batchSize) {
-                counter++;
-            }
-            // Only checking if bigger than batch size
-            else return counter;
-        }
-        return counter;
-    }
-
     public MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd, String reportType,
-            Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint, Bundle additionalData) {
+                                                               Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+                                                               Endpoint dataEndpoint, Bundle additionalData) {
+
+        var subjectIterator = subjectIds.iterator();
+        var ids = new ArrayList<String>();
         int threadBatchSize = this.measureEvaluationOptions.getThreadedBatchSize();
-        if (this.measureEvaluationOptions.isThreadedEnabled()
-                && sizeOfSubjects(subjectIds, threadBatchSize) > threadBatchSize) {
-            return threadedMeasureEvaluate(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
-        } else {
-            return innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, fhirDal,
-                    contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
-        }
-
-    }
-
-    protected MeasureReport threadedMeasureEvaluate(Measure measure, String periodStart, String periodEnd,
-            String reportType, Iterable<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
-        // change
-        Stream<List<String>> batches = getBatches(subjectIds, this.measureEvaluationOptions.getThreadedBatchSize());
-        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
         List<CompletableFuture<MeasureReport>> futures = new ArrayList<>();
-        batches.forEach(x -> {
-            futures.add(
-                    CompletableFuture.supplyAsync(
-                            () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, x,
-                                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
-                            executor));
-        });
-
+        while (subjectIterator.hasNext()){
+            ids.add(subjectIterator.next());
+            if (ids.size() % threadBatchSize == 0) {
+                futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, ids, fhirDal,
+                        contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData));
+                ids.clear();
+            }
+        }
+        futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, ids, fhirDal,
+                contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData) );
         List<MeasureReport> reports = new ArrayList<>();
         futures.forEach(x -> reports.add(x.join()));
         Dstu3MeasureReportAggregator reportAggregator = new Dstu3MeasureReportAggregator();
         return reportAggregator.aggregate(reports);
     }
 
-    public Stream<List<String>> getBatches(Iterable<String> stream, int size) {
-        Iterator<String> iterator = stream.iterator();
-        Iterator<List<String>> listIterator = new Iterator<>() {
+    protected CompletableFuture<MeasureReport> runEvaluate(Measure measure, String periodStart, String periodEnd,
+                                                                                 String reportType,
+                                                                                 List<String> subjectIds, FhirDal fhirDal, Endpoint contentEndpoint, Endpoint terminologyEndpoint,
+                                                                                 Endpoint dataEndpoint, Bundle additionalData) {
 
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+        ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+        if (measureEvaluationOptions.isThreadedEnabled()) {
+            return CompletableFuture.supplyAsync(
+                    () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                            fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
+                    executor);
+        }
+        else {
+            return CompletableFuture.completedFuture(this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+                    fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData));
+        }
 
-            public List<String> next() {
-                List<String> result = new ArrayList<>(size);
-                for (int i = 0; i < size && iterator.hasNext(); i++) {
-                    result.add(iterator.next());
-                }
-                return result;
-            }
-        };
-        return StreamSupport.stream(((Iterable<List<String>>) () -> listIterator).spliterator(), false);
     }
 
     protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart, String periodEnd,

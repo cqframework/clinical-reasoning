@@ -113,7 +113,7 @@ The Internet is an example of an SoS platform:
         * Routers, proxies, caching, authentication
     * Allows arbitrarily deep/complex networks
 
-An SoS Platform is frequently developed and described as a set of standards. For example, all the RFCs that are published by the IETF for the Internet that describe things like REST. These standards function as a formal description of a set of functionality within the overall platform. SDKs for developing Internet applications exist in almost every programming language, such as HTTP client libraries.
+An SoS Platform is frequently described as a set of standards. For example, all the RFCs that are published by the IETF for the Internet that describe things like REST. These standards function as a formal description of a set of functionality within the overall platform. SDKs for developing Internet applications exist in almost every programming language, such as HTTP client libraries.
 
 #### FHIR Platform
 
@@ -131,7 +131,7 @@ Additionally, HL7 funds the development of reference implementations and provide
 
 ### HAPI FHIR
 
-[HAPI FHIR](https://hapifhir.io/hapi-fhir) is an open-source Java SDK for building FHIR applications. It defines a set of object models, a persistence layer, an implementation of the FHIR REST API, and forms the basis of this projects. In turn, some of the operations defined here are used to provide Clinical Reasoning functionality on the HAPI FHIR Server.
+[HAPI FHIR](https://hapifhir.io/hapi-fhir) is an open-source Java SDK for building FHIR applications. It defines a set of object models, a persistence layer, an implementation of the FHIR REST API, and forms the basis of this project. In turn, some of the operations defined here are used to provide Clinical Reasoning functionality on the HAPI FHIR Server.
 
 [Smile Digital Health](https://www.smilecdr.com/) is the maintainer and publisher of that HAPI FHIR project. The publisher of this project, [Alphora](https://www.alphora.com/), is a subsidiary of Smile Digital Health.
 
@@ -146,7 +146,7 @@ This project is designed to provide reusable Clinical Reasoning modules for any 
 * VS Code, through the [LSP](https://github.com/cqframework/vscode-cql)
     * Provides an IDE for authoring clinical logic in terms of FHIR/CQL
 * [HAPI FHIR Server](https://github.com/hapifhir/hapi-fhir), an open-source Clinical Data Repository (CDR)
-* [Smile CDR](https://www.smilecdr.com/smilecdr), a commercial derivative of HAPI.
+* [Smile CDR](https://www.smilecdr.com/smilecdr), a commercial CDR
 * Various other open-source and commercial implementations
 
 ### Hexagonal Architecture

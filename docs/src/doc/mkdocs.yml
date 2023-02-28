@@ -5,7 +5,6 @@ site_description: >-
   Documentation for CQF Clinical Reasoning on FHIR for Java
 
 copyright: Copyright &copy; 2019+ Smile Digital Health
-repo_name: CQF Clinical Reasoning
 repo_url: https://github.com/cqframework/clinical-reasoning/
 edit_uri: edit/master/docs/src/doc/docs
 

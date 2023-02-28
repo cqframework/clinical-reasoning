@@ -92,7 +92,7 @@ Inquires for commercial support can be directed to [info@alphora.com](info@alpho
 
 ## License
 
-Copyright 2019+ Dynamic Content Group, LLC (dba Alphora)
+Copyright 2019+ Smile Digital Health
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -105,4 +105,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-

@@ -1,8 +1,8 @@
-# CQF Clinical Reasoning for Java
+# CQF Clinical Reasoning on FHIR for Java
 
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
 
-This project provides a Java-based [CQL](https://cql.hl7.org/) clinical reasoning environment and related components.
+This project provides a Java-based, FHIR-enabled clinical reasoning components.
 
 See the [docs](https://www.cqframework.org/clinical-reasoning/) for more information.
 

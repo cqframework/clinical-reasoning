@@ -1,12 +1,14 @@
 {
   "resourceType": "Library",
   "id": "retrieve-example",
-  "extension": [ {
-    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-    "valueReference": {
-      "reference": "Device/cqf-tooling"
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+      "valueReference": {
+        "reference": "Device/cqf-tooling"
+      }
     }
-  } ],
+  ],
   "url": "http://somewhere.org/fhir/uv/mycontentig/Library/RetrieveExample",
   "version": "0.1.0",
   "name": "RetrieveExample",
@@ -14,83 +16,121 @@
   "status": "draft",
   "experimental": true,
   "type": {
-    "coding": [ {
-      "system": "http://terminology.hl7.org/CodeSystem/library-type",
-      "code": "logic-library"
-    } ]
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      }
+    ]
   },
   "subjectCodeableConcept": {
-    "coding": [ {
-      "system": "hl7.org/fhir/resource-types",
-      "code": "Patient"
-    } ]
+    "coding": [
+      {
+        "system": "hl7.org/fhir/resource-types",
+        "code": "Patient"
+      }
+    ]
   },
   "description": "Example library illustrating CQL retrieve with terminology",
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "display": "FHIR model information",
-    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-  }, {
-    "type": "depends-on",
-    "display": "Library FHIRHelpers",
-    "resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
-  }, {
-    "type": "depends-on",
-    "display": "Code system LOINC",
-    "resource": "http://loinc.org"
-  }, {
-    "type": "depends-on",
-    "display": "Value set Lung Cancer",
-    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1116.89"
-  }, {
-    "type": "depends-on",
-    "display": "Value set Condition Clinical Status",
-    "resource": "http://utah.edu/fhir/lcs-cds/ValueSet/conditionclinical"
-  } ],
-  "parameter": [ {
-    "name": "Patient",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "Patient"
-  }, {
-    "name": "Smoking status observation",
-    "use": "out",
-    "min": 0,
-    "max": "*",
-    "type": "Observation"
-  }, {
-    "name": "Lung cancer diagnosis",
-    "use": "out",
-    "min": 0,
-    "max": "*",
-    "type": "Condition"
-  } ],
-  "dataRequirement": [ {
-    "type": "Observation",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
-    "mustSupport": [ "code", "status" ],
-    "codeFilter": [ {
-      "path": "code",
-      "code": [ {
-        "system": "http://loinc.org",
-        "code": "72166-2"
-      } ]
-    } ]
-  }, {
-    "type": "Condition",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
-    "mustSupport": [ "code", "clinicalStatus" ],
-    "codeFilter": [ {
-      "path": "code",
-      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1116.89"
-    } ]
-  }, {
-    "type": "Patient",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ]
-  } ],
-  "content": [ {
-    "contentType": "text/cql",
-    "url": "res/cql/RetrieveExample.cql"
-  } ]
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "display": "FHIR model information",
+      "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+    },
+    {
+      "type": "depends-on",
+      "display": "Library FHIRHelpers",
+      "resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code system LOINC",
+      "resource": "http://loinc.org"
+    },
+    {
+      "type": "depends-on",
+      "display": "Value set Lung Cancer",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1116.89"
+    },
+    {
+      "type": "depends-on",
+      "display": "Value set Condition Clinical Status",
+      "resource": "http://utah.edu/fhir/lcs-cds/ValueSet/conditionclinical"
+    }
+  ],
+  "parameter": [
+    {
+      "name": "Patient",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Patient"
+    },
+    {
+      "name": "Smoking status observation",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Lung cancer diagnosis",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Condition"
+    }
+  ],
+  "dataRequirement": [
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "mustSupport": [
+        "code",
+        "status"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "72166-2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "code",
+        "clinicalStatus"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1116.89"
+        }
+      ]
+    },
+    {
+      "type": "Patient",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Patient"
+      ]
+    }
+  ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "res/cql/RetrieveExample.cql"
+    }
+  ]
 }

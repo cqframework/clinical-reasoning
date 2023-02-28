@@ -1,10 +1,10 @@
 {
-    "resourceType": "Library",
-    "id": "JsonContent",
-    "content": [
-        {
-            "contentType": "application/elm+json",
-            "data": "SlNPTg=="
-        }
-    ]
+  "resourceType": "Library",
+  "id": "JsonContent",
+  "content": [
+    {
+      "contentType": "application/elm+json",
+      "data": "SlNPTg=="
+    }
+  ]
 }

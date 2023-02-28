@@ -24,7 +24,6 @@ tab_width = 4
 [*.json]
 end_of_line = lf
 indent_size = 2
-insert_final_newline = true
 tab_width = 2
 max_line_length = 80
 ij_json_keep_blank_lines_in_code = 0

@@ -13,24 +13,32 @@
         "title": "CdsHooksMultipleActions",
         "status": "draft",
         "type": {
-          "coding": [ {
-            "system": "http://terminology.hl7.org/CodeSystem/library-type",
-            "code": "logic-library"
-          } ]
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/library-type",
+              "code": "logic-library"
+            }
+          ]
         },
-        "jurisdiction": [ {
-          "coding": [ {
-            "system": "urn:iso:std:iso:3166",
-            "code": "US",
-            "display": "United States of America"
-          } ],
-          "text": "United States of America"
-        } ],
-        "relatedArtifact": [ {
-          "type": "depends-on",
-          "display": "FHIR model information",
-          "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-        } ],
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US",
+                "display": "United States of America"
+              }
+            ],
+            "text": "United States of America"
+          }
+        ],
+        "relatedArtifact": [
+          {
+            "type": "depends-on",
+            "display": "FHIR model information",
+            "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+          }
+        ],
         "content": [
           {
             "contentType": "text/cql",
@@ -53,7 +61,9 @@
         "status": "active",
         "experimental": false,
         "description": "This is a plan to test multiple actions",
-        "library": [ "http://example.com/Library/CdsHooksMultipleActions" ],
+        "library": [
+          "http://example.com/Library/CdsHooksMultipleActions"
+        ],
         "action": [
           {
             "title": "Child Monthly Routine Visit",

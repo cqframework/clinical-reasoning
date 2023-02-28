@@ -55,7 +55,8 @@
     ".git/objects",
     ".vscode",
     "**/pom.xml",
-    "checkstyle.xml"
+    "checkstyle.xml",
+    "**/test/resources/**"
   ],
   "commandOnAllFiles.commands": {
     "Format Java File": {
@@ -119,7 +120,6 @@
   "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
   "java.format.settings.profile": "GoogleStyle",
   "json.schemaDownload.enable": true,
-  "json.format.keepLines": true,
   "[markdown]": {
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.unicodeHighlight.ambiguousCharacters": true,

@@ -10,20 +10,24 @@
       {
         "system": "http://localhost/unit-test",
         "version": "2018-03",
-        "filter": [{
-          "property": "parent",
-          "op": "=",
-          "value": "000"
-        }]
+        "filter": [
+          {
+            "property": "parent",
+            "op": "=",
+            "value": "000"
+          }
+        ]
       },
       {
         "system": "http://localhost/unit-test-2",
         "version": "2018-03",
-        "filter": [{
-          "property": "parent",
-          "op": "=",
-          "value": "333"
-        }]
+        "filter": [
+          {
+            "property": "parent",
+            "op": "=",
+            "value": "333"
+          }
+        ]
       }
     ]
   }

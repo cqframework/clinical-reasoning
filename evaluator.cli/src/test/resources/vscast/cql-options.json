@@ -1,19 +1,18 @@
 {
-   "options":[
-      "EnableLocators",
-      "DisableListDemotion",
-      "DisableListPromotion"
-
-],
-   "formats":[
-     "XML",
-     "JSON"
-   ],
-   "validateUnits":true,
-   "verifyOnly":false,
-   "errorLevel":"Info",
-   "signatureLevel":"None",
-   "compatibilityLevel":"1.4",
-   "analyzeDataRequirements":false,
-   "collapseDataRequirements":true
+  "options": [
+    "EnableLocators",
+    "DisableListDemotion",
+    "DisableListPromotion"
+  ],
+  "formats": [
+    "XML",
+    "JSON"
+  ],
+  "validateUnits": true,
+  "verifyOnly": false,
+  "errorLevel": "Info",
+  "signatureLevel": "None",
+  "compatibilityLevel": "1.4",
+  "analyzeDataRequirements": false,
+  "collapseDataRequirements": true
 }

@@ -1,31 +1,42 @@
 {
   "resourceType": "CarePlan",
-  "contained": [ {
-    "resourceType": "RequestGroup",
-    "id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
-    "instantiatesCanonical": [ "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0" ],
-    "status": "draft",
-    "intent": "proposal",
-    "subject": {
-      "reference": "patient-CdsHooksMultipleActions"
-    },
-    "action": [ {
-      "title": "Summary",
-      "description": "Detail"
-    }, {
-      "title": "Summary 1",
-      "description": "Detail 1"
-    } ]
-  } ],
-  "instantiatesCanonical": [ "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0" ],
+  "contained": [
+    {
+      "resourceType": "RequestGroup",
+      "id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
+      "instantiatesCanonical": [
+        "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "subject": {
+        "reference": "patient-CdsHooksMultipleActions"
+      },
+      "action": [
+        {
+          "title": "Summary",
+          "description": "Detail"
+        },
+        {
+          "title": "Summary 1",
+          "description": "Detail 1"
+        }
+      ]
+    }
+  ],
+  "instantiatesCanonical": [
+    "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+  ],
   "status": "draft",
   "intent": "proposal",
   "subject": {
     "reference": "patient-CdsHooksMultipleActions"
   },
-  "activity": [ {
-    "reference": {
-      "reference": "#CdsHooksMultipleActions-PlanDefinition-1.0.0"
+  "activity": [
+    {
+      "reference": {
+        "reference": "#CdsHooksMultipleActions-PlanDefinition-1.0.0"
+      }
     }
-  } ]
+  ]
 }

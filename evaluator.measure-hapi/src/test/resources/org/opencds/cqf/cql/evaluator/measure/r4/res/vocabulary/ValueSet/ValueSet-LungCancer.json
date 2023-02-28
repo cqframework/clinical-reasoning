@@ -5,7 +5,7 @@
   "title": "Lung Cancer",
   "status": "active",
   "publisher": "American Society of Clinical Oncology",
-  "description" : "This value set indicates the possible ICD9/ICD10 Lung Cancer codes.",
+  "description": "This value set indicates the possible ICD9/ICD10 Lung Cancer codes.",
   "compose": {
     "include": [
       {

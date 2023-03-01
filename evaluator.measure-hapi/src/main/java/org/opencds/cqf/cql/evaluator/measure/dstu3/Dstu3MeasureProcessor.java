@@ -261,7 +261,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
   }
 
   protected MeasureReport innerEvaluateMeasure(Measure measure, String periodStart,
-      String periodEnd, String reportType, Iterable<String> subjectIds, FhirDal fhirDal,
+      String periodEnd, String reportType, List<String> subjectIds, FhirDal fhirDal,
       Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
       Bundle additionalData) {
 

@@ -1,8 +1,7 @@
 {
   "resourceType": "GuidanceResponse",
   "id": "patient-mme-greater-than-fifty",
-  "contained": [
-  ],
+  "contained": [],
   "extension": [
     {
       "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/inputParameters",

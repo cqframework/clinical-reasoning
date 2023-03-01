@@ -5,7 +5,9 @@
       "resourceType": "RequestGroup",
       "id": "plandefinition-RuleFilters-1.0.0",
       "definition": [
-        { "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0" }
+        {
+          "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0"
+        }
       ],
       "status": "draft",
       "intent": "proposal",
@@ -572,7 +574,9 @@
     }
   ],
   "definition": [
-    { "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0" }
+    {
+      "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0"
+    }
   ],
   "status": "draft",
   "intent": "proposal",

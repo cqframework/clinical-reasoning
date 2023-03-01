@@ -122,13 +122,15 @@
     {
       "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",
       "valueReference": {
-        "extension": [ {
-          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
-          "valueString": "SDELastAppointmentDate"
-        }, {
-          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
-          "valueString": "SDELastAppointmentFilter"
-        },
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+            "valueString": "SDELastAppointmentDate"
+          },
+          {
+            "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+            "valueString": "SDELastAppointmentFilter"
+          },
           {
             "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
             "valueString": "SDEFirstAppointmentDate"

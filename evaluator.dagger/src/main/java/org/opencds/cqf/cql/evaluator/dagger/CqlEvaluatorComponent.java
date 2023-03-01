@@ -14,7 +14,7 @@ import ca.uhn.fhir.context.FhirContext;
 import dagger.BindsInstance;
 import dagger.Component;
 
-@Component(modules = { LibraryModule.class })
+@Component(modules = {LibraryModule.class})
 @Singleton
 public interface CqlEvaluatorComponent {
   // MeasureProcessor createMeasureProcessor();

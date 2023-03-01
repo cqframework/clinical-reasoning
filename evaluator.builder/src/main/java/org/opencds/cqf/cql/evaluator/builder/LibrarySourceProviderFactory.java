@@ -4,6 +4,7 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public interface LibrarySourceProviderFactory {
-    public LibrarySourceProvider create(EndpointInfo endpointInfo);
-    public LibrarySourceProvider create(IBaseBundle contentBundle);
+  public LibrarySourceProvider create(EndpointInfo endpointInfo);
+
+  public LibrarySourceProvider create(IBaseBundle contentBundle);
 }

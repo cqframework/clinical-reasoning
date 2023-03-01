@@ -5,25 +5,26 @@ import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 
 public class DataProviderComponents {
 
-    protected String modelUri;
-    protected ModelResolver modelResolver;
-    protected RetrieveProvider retrieveProvider;
+  protected String modelUri;
+  protected ModelResolver modelResolver;
+  protected RetrieveProvider retrieveProvider;
 
-    public DataProviderComponents(String modelUri, ModelResolver modelResolver, RetrieveProvider retrieveProvider) {
-        this.modelUri = modelUri;
-        this.modelResolver = modelResolver;
-        this.retrieveProvider = retrieveProvider;
-    }
-    
-    public String getModelUri() {
-        return this.modelUri;
-    }
+  public DataProviderComponents(String modelUri, ModelResolver modelResolver,
+      RetrieveProvider retrieveProvider) {
+    this.modelUri = modelUri;
+    this.modelResolver = modelResolver;
+    this.retrieveProvider = retrieveProvider;
+  }
 
-    public ModelResolver getModelResolver() {
-        return this.modelResolver;
-    }
+  public String getModelUri() {
+    return this.modelUri;
+  }
 
-    public RetrieveProvider getRetrieveProvider() {
-        return this.retrieveProvider;
-    }
+  public ModelResolver getModelResolver() {
+    return this.modelResolver;
+  }
+
+  public RetrieveProvider getRetrieveProvider() {
+    return this.retrieveProvider;
+  }
 }

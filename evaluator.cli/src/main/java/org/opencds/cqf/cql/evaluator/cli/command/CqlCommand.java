@@ -28,236 +28,251 @@ import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.dagger.CqlEvaluatorComponent;
 import org.opencds.cqf.cql.evaluator.dagger.DaggerCqlEvaluatorComponent;
+import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "cql", mixinStandardHelpOptions = true)
 public class CqlCommand implements Callable<Integer> {
-    @Option(names = { "-fv", "--fhir-version" }, required = true)
-    public String fhirVersion;
+  @Option(names = {"-fv", "--fhir-version"}, required = true)
+  public String fhirVersion;
 
-    @Option(names= { "-op", "--options-path" })
-    public String optionsPath;
+  @Option(names = {"-op", "--options-path"})
+  public String optionsPath;
+
+  @ArgGroup(multiplicity = "0..1", exclusive = false)
+  public NamespaceParameter namespace;
+
+  static class NamespaceParameter {
+    @Option(names = {"-nn", "--namespace-name"})
+    public String namespaceName;
+    @Option(names = {"-nu", "--namespace-uri"})
+    public String namespaceUri;
+  }
+
+  @Option(names = {"-rd", "--root-dir"})
+  public String rootDir;
+
+  @Option(names = {"-ig", "--ig-path"})
+  public String igPath;
+
+  @ArgGroup(multiplicity = "1..*", exclusive = false)
+  List<LibraryParameter> libraries;
+
+  static class LibraryParameter {
+    @Option(names = {"-lu", "--library-url"}, required = true)
+    public String libraryUrl;
+
+    @Option(names = {"-ln", "--library-name"}, required = true)
+    public String libraryName;
+
+    @Option(names = {"-lv", "--library-version"})
+    public String libraryVersion;
+
+    @Option(names = {"-t", "--terminology-url"})
+    public String terminologyUrl;
 
     @ArgGroup(multiplicity = "0..1", exclusive = false)
-    public NamespaceParameter namespace;
-    static class NamespaceParameter {
-        @Option(names = { "-nn", "--namespace-name" })
-        public String namespaceName;
-        @Option(names = { "-nu", "--namespace-uri" })
-        public String namespaceUri;
+    public ModelParameter model;
+
+    @ArgGroup(multiplicity = "0..*", exclusive = false)
+    public List<ParameterParameter> parameters;
+
+    @Option(names = {"-e", "--expression"})
+    public String[] expression;
+
+    @ArgGroup(multiplicity = "0..1", exclusive = false)
+    public ContextParameter context;
+
+    static class ContextParameter {
+      @Option(names = {"-c", "--context"})
+      public String contextName;
+
+      @Option(names = {"-cv", "--context-value"})
+      public String contextValue;
     }
 
-    @Option(names = { "-rd", "--root-dir" })
-    public String rootDir;
+    static class ModelParameter {
+      @Option(names = {"-m", "--model"})
+      public String modelName;
 
-    @Option(names = { "-ig", "--ig-path"})
-    public String igPath;
-
-    @ArgGroup(multiplicity = "1..*", exclusive = false)
-    List<LibraryParameter> libraries;
-
-    static class LibraryParameter {
-        @Option(names = { "-lu", "--library-url" }, required = true)
-        public String libraryUrl;
-
-        @Option(names = { "-ln", "--library-name" }, required = true)
-        public String libraryName;
-
-        @Option(names = { "-lv", "--library-version" })
-        public String libraryVersion;
-
-        @Option(names = { "-t", "--terminology-url" })
-        public String terminologyUrl;
-
-        @ArgGroup(multiplicity = "0..1", exclusive = false)
-        public ModelParameter model;
-
-        @ArgGroup(multiplicity = "0..*", exclusive = false)
-        public List<ParameterParameter> parameters;
-
-        @Option(names = { "-e", "--expression" })
-        public String[] expression;
-
-        @ArgGroup(multiplicity = "0..1", exclusive = false)
-        public ContextParameter context;
-
-        static class ContextParameter {
-            @Option(names = { "-c", "--context" })
-            public String contextName;
-
-            @Option(names = { "-cv", "--context-value" })
-            public String contextValue;
-        }
-
-        static class ModelParameter {
-            @Option(names = { "-m", "--model" })
-            public String modelName;
-
-            @Option(names = { "-mu", "--model-url" })
-            public String modelUrl;
-        }
-
-        static class ParameterParameter {
-            @Option(names = { "-p", "--parameter" })
-            public String parameterName;
-
-            @Option(names = { "-pv", "--parameter-value" })
-            public String parameterValue;
-        }
+      @Option(names = {"-mu", "--model-url"})
+      public String modelUrl;
     }
 
-    private Map<String, LibrarySourceProvider> librarySourceProviderIndex = new HashMap<>();
-    private Map<String, TerminologyProvider> terminologyProviderIndex = new HashMap<>();
+    static class ParameterParameter {
+      @Option(names = {"-p", "--parameter"})
+      public String parameterName;
 
-    private class Logger implements IWorkerContext.ILoggingService {
-
-        @Override
-        public void logMessage(String s) {
-            System.out.println(s);
-        }
-
-        @Override
-        public void logDebugMessage(LogCategory logCategory, String s) {
-            System.out.println(String.format("%s: %s", logCategory.toString(), s));
-        }
+      @Option(names = {"-pv", "--parameter-value"})
+      public String parameterValue;
     }
+  }
 
-    private String toVersionNumber(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case R4: return "4.0.1";
-            case R5: return "5.0.0-ballot";
-            case DSTU3: return "3.0.2";
-            default: throw new IllegalArgumentException(String.format("Unsupported FHIR version %s", fhirVersion));
-        }
+  private Map<String, LibrarySourceProvider> librarySourceProviderIndex = new HashMap<>();
+  private Map<String, TerminologyProvider> terminologyProviderIndex = new HashMap<>();
+
+  private class Logger implements IWorkerContext.ILoggingService {
+
+    @Override
+    public void logMessage(String s) {
+      System.out.println(s);
     }
 
     @Override
-    public Integer call() throws Exception {
+    public void logDebugMessage(LogCategory logCategory, String s) {
+      System.out.println(String.format("%s: %s", logCategory.toString(), s));
+    }
+  }
 
-        FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
+  private String toVersionNumber(FhirVersionEnum fhirVersion) {
+    switch (fhirVersion) {
+      case R4:
+        return "4.0.1";
+      case R5:
+        return "5.0.0-ballot";
+      case DSTU3:
+        return "3.0.2";
+      default:
+        throw new IllegalArgumentException(
+            String.format("Unsupported FHIR version %s", fhirVersion));
+    }
+  }
 
-        CqlEvaluatorComponent.Builder builder = DaggerCqlEvaluatorComponent.builder().fhirContext(fhirVersionEnum.newContext());
+  @Override
+  public Integer call() throws Exception {
 
-        IGContext igContext = null;
-        if (rootDir != null && igPath != null) {
-            igContext = new IGContext(new Logger());
-            igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
-        }
+    FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
 
-        CqlEvaluatorComponent cqlEvaluatorComponent = builder.build();
+    CqlEvaluatorComponent.Builder builder =
+        DaggerCqlEvaluatorComponent.builder().fhirContext(fhirVersionEnum.newContext());
 
-        CqlOptions cqlOptions = CqlOptions.defaultOptions();
-
-        if (optionsPath != null) {
-            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-            cqlOptions.setCqlTranslatorOptions(options);
-        }
-
-        for (LibraryParameter library : libraries) {
-            CqlEvaluatorBuilder cqlEvaluatorBuilder = cqlEvaluatorComponent.createBuilder().withCqlOptions(cqlOptions);
-
-            if (namespace != null) {
-                cqlEvaluatorBuilder.withNamespaceInfo(new NamespaceInfo(namespace.namespaceName, namespace.namespaceUri));
-            }
-
-            if (igContext != null) {
-                cqlEvaluatorBuilder.withNpmProcessor(new NpmProcessor(igContext));
-            }
-
-            LibrarySourceProvider librarySourceProvider = librarySourceProviderIndex.get(library.libraryUrl);
-
-            if (librarySourceProvider == null) {
-                librarySourceProvider = cqlEvaluatorComponent.createLibrarySourceProviderFactory()
-                        .create(new EndpointInfo().setAddress(library.libraryUrl));
-                this.librarySourceProviderIndex.put(library.libraryUrl, librarySourceProvider);
-            }
-
-            cqlEvaluatorBuilder.withLibrarySourceProvider(librarySourceProvider);
-
-            if (library.terminologyUrl != null) {
-                TerminologyProvider terminologyProvider = this.terminologyProviderIndex.get(library.terminologyUrl);
-                if (terminologyProvider == null) {
-                    terminologyProvider = cqlEvaluatorComponent.createTerminologyProviderFactory()
-                            .create(new EndpointInfo().setAddress(library.terminologyUrl));
-                    this.terminologyProviderIndex.put(library.terminologyUrl, terminologyProvider);
-                }
-
-                cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
-            }
-
-            DataProviderComponents dataProvider = null;
-            DataProviderFactory dataProviderFactory = cqlEvaluatorComponent.createDataProviderFactory();
-            if (library.model != null) {
-                dataProvider = dataProviderFactory.create(new EndpointInfo().setAddress(library.model.modelUrl));
-            }
-            // default to FHIR
-            else {
-                dataProvider = dataProviderFactory.create(new EndpointInfo().setType(Constants.HL7_FHIR_FILES_CODE));
-            }
-
-            cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider.getModelUri(), dataProvider.getModelResolver(),
-                    dataProvider.getRetrieveProvider());
-
-            CqlEvaluator evaluator = cqlEvaluatorBuilder.build();
-
-            VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
-
-            Pair<String, Object> contextParameter = null;
-
-            if (library.context != null) {
-                contextParameter = Pair.of(library.context.contextName, library.context.contextValue);
-            }
-
-            EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
-
-            for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
-                System.out.println(libraryEntry.getKey() + "=" + this.tempConvert(libraryEntry.getValue().value()));
-            }
-
-            System.out.println();
-        }
-
-        return 0;
+    IGContext igContext = null;
+    if (rootDir != null && igPath != null) {
+      igContext = new IGContext(new Logger());
+      igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
     }
 
-    private String tempConvert(Object value) {
-        if (value == null) {
-            return "null";
-        }
+    CqlEvaluatorComponent cqlEvaluatorComponent = builder.build();
 
-        String result = "";
-        if (value instanceof Iterable) {
-            result += "[";
-            Iterable<?> values = (Iterable<?>) value;
-            for (Object o : values) {
+    CqlOptions cqlOptions = CqlOptions.defaultOptions();
 
-                result += (tempConvert(o) + ", ");
-            }
-
-            if (result.length() > 1) {
-                result = result.substring(0, result.length() - 2);
-            }
-
-            result += "]";
-        } else if (value instanceof IBaseResource) {
-            IBaseResource resource = (IBaseResource) value;
-            result = resource.fhirType() + (resource.getIdElement() != null && resource.getIdElement().hasIdPart()
-                    ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                    : "");
-        } else if (value instanceof IBase) {
-            result = ((IBase) value).fhirType();
-        } else if (value instanceof IBaseDatatype) {
-            result = ((IBaseDatatype) value).fhirType();
-        } else {
-            result = value.toString();
-        }
-
-        return result;
+    if (optionsPath != null) {
+      CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
+      cqlOptions.setCqlTranslatorOptions(options);
     }
+
+    for (LibraryParameter library : libraries) {
+      CqlEvaluatorBuilder cqlEvaluatorBuilder =
+          cqlEvaluatorComponent.createBuilder().withCqlOptions(cqlOptions);
+
+      if (namespace != null) {
+        cqlEvaluatorBuilder
+            .withNamespaceInfo(new NamespaceInfo(namespace.namespaceName, namespace.namespaceUri));
+      }
+
+      if (igContext != null) {
+        cqlEvaluatorBuilder.withNpmProcessor(new NpmProcessor(igContext));
+      }
+
+      LibrarySourceProvider librarySourceProvider =
+          librarySourceProviderIndex.get(library.libraryUrl);
+
+      if (librarySourceProvider == null) {
+        librarySourceProvider = cqlEvaluatorComponent.createLibrarySourceProviderFactory()
+            .create(new EndpointInfo().setAddress(library.libraryUrl));
+        this.librarySourceProviderIndex.put(library.libraryUrl, librarySourceProvider);
+      }
+
+      cqlEvaluatorBuilder.withLibrarySourceProvider(librarySourceProvider);
+
+      if (library.terminologyUrl != null) {
+        TerminologyProvider terminologyProvider =
+            this.terminologyProviderIndex.get(library.terminologyUrl);
+        if (terminologyProvider == null) {
+          terminologyProvider = cqlEvaluatorComponent.createTerminologyProviderFactory()
+              .create(new EndpointInfo().setAddress(library.terminologyUrl));
+          this.terminologyProviderIndex.put(library.terminologyUrl, terminologyProvider);
+        }
+
+        cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
+      }
+
+      DataProviderComponents dataProvider = null;
+      DataProviderFactory dataProviderFactory = cqlEvaluatorComponent.createDataProviderFactory();
+      if (library.model != null) {
+        dataProvider =
+            dataProviderFactory.create(new EndpointInfo().setAddress(library.model.modelUrl));
+      }
+      // default to FHIR
+      else {
+        dataProvider =
+            dataProviderFactory.create(new EndpointInfo().setType(Constants.HL7_FHIR_FILES_CODE));
+      }
+
+      cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider.getModelUri(),
+          dataProvider.getModelResolver(), dataProvider.getRetrieveProvider());
+
+      CqlEvaluator evaluator = cqlEvaluatorBuilder.build();
+
+      VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
+
+      Pair<String, Object> contextParameter = null;
+
+      if (library.context != null) {
+        contextParameter = Pair.of(library.context.contextName, library.context.contextValue);
+      }
+
+      EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
+
+      for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+        System.out.println(
+            libraryEntry.getKey() + "=" + this.tempConvert(libraryEntry.getValue().value()));
+      }
+
+      System.out.println();
+    }
+
+    return 0;
+  }
+
+  private String tempConvert(Object value) {
+    if (value == null) {
+      return "null";
+    }
+
+    String result = "";
+    if (value instanceof Iterable) {
+      result += "[";
+      Iterable<?> values = (Iterable<?>) value;
+      for (Object o : values) {
+
+        result += (tempConvert(o) + ", ");
+      }
+
+      if (result.length() > 1) {
+        result = result.substring(0, result.length() - 2);
+      }
+
+      result += "]";
+    } else if (value instanceof IBaseResource) {
+      IBaseResource resource = (IBaseResource) value;
+      result = resource.fhirType()
+          + (resource.getIdElement() != null && resource.getIdElement().hasIdPart()
+              ? "(id=" + resource.getIdElement().getIdPart() + ")"
+              : "");
+    } else if (value instanceof IBase) {
+      result = ((IBase) value).fhirType();
+    } else if (value instanceof IBaseDatatype) {
+      result = ((IBaseDatatype) value).fhirType();
+    } else {
+      result = value.toString();
+    }
+
+    return result;
+  }
 
 }

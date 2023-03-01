@@ -13,45 +13,46 @@ import org.slf4j.LoggerFactory;
 
 public class PriorityTerminologyProvider implements TerminologyProvider {
 
-    Logger logger = LoggerFactory.getLogger(PriorityTerminologyProvider.class);
+  Logger logger = LoggerFactory.getLogger(PriorityTerminologyProvider.class);
 
-    List<TerminologyProvider> terminologyProviders;
+  List<TerminologyProvider> terminologyProviders;
 
-    public PriorityTerminologyProvider(List<TerminologyProvider> terminologyProviders) {
-        this.terminologyProviders = requireNonNull(terminologyProviders, "terminologyProviders can not be null");
-    }
+  public PriorityTerminologyProvider(List<TerminologyProvider> terminologyProviders) {
+    this.terminologyProviders =
+        requireNonNull(terminologyProviders, "terminologyProviders can not be null");
+  }
 
-    @Override
-    public boolean in(Code code, ValueSetInfo valueSet) {
-        for (TerminologyProvider terminologyProvider : terminologyProviders) {
-            try {
-                boolean in = terminologyProvider.in(code, valueSet);
-                if (in) {
-                    return true;
-                }
-            }
-            catch (Exception e) {
-                logger.warn("inner provider threw an Exception, continuing: %s", e.getMessage());
-            }
+  @Override
+  public boolean in(Code code, ValueSetInfo valueSet) {
+    for (TerminologyProvider terminologyProvider : terminologyProviders) {
+      try {
+        boolean in = terminologyProvider.in(code, valueSet);
+        if (in) {
+          return true;
         }
-
-        return false;
+      } catch (Exception e) {
+        logger.warn("inner provider threw an Exception, continuing: %s", e.getMessage());
+      }
     }
 
-    @Override
-    public Iterable<Code> expand(ValueSetInfo valueSet) {
-        for (TerminologyProvider provider : this.terminologyProviders) {
-            try {
-                return provider.expand(valueSet);
-            } catch (Exception e) {
-                continue;
-            }
-        }
-        return null;
-    }
+    return false;
+  }
 
-    @Override
-    public Code lookup(Code code, CodeSystemInfo codeSystem) {
-        return this.terminologyProviders.stream().map(x -> x.lookup(code, codeSystem)).findFirst().orElseGet(null);
+  @Override
+  public Iterable<Code> expand(ValueSetInfo valueSet) {
+    for (TerminologyProvider provider : this.terminologyProviders) {
+      try {
+        return provider.expand(valueSet);
+      } catch (Exception e) {
+        continue;
+      }
     }
+    return null;
+  }
+
+  @Override
+  public Code lookup(Code code, CodeSystemInfo codeSystem) {
+    return this.terminologyProviders.stream().map(x -> x.lookup(code, codeSystem)).findFirst()
+        .orElseGet(null);
+  }
 }

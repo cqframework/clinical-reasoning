@@ -28,87 +28,87 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvid
 @Named
 public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {
 
-    @Inject
-    CqlFileLibrarySourceProviderFactory(){}
+  @Inject
+  CqlFileLibrarySourceProviderFactory() {}
 
-    @Override
-    public String getType() {
-        return Constants.HL7_CQL_FILES;
+  @Override
+  public String getType() {
+    return Constants.HL7_CQL_FILES;
+  }
+
+  @Override
+  public LibrarySourceProvider create(String url, List<String> headers) {
+    List<String> libraries = this.getLibrariesFromPath(url);
+    return new InMemoryLibrarySourceProvider(libraries);
+  }
+
+  protected List<String> getLibrariesFromPath(String path) {
+    URI uri;
+    try {
+      if (!isUri(path)) {
+        File file = new File(path);
+        uri = file.toURI();
+      } else {
+        uri = new URI(path);
+      }
+    } catch (URISyntaxException e) {
+      throw new IllegalArgumentException(String.format("error attempting to bundle path: %s", path),
+          e);
     }
 
-    @Override
-    public LibrarySourceProvider create(String url, List<String> headers) {
-        List<String> libraries = this.getLibrariesFromPath(url);
-        return new InMemoryLibrarySourceProvider(libraries);
-    }
-
-    protected List<String> getLibrariesFromPath(String path) {
-        URI uri;
-        try{
-            if (!isUri(path)) {
-                File file = new File(path);
-                uri = file.toURI();
-            }
-            else {
-                uri = new URI(path);
-            }
-        }
-        catch(URISyntaxException e) {
-            throw new IllegalArgumentException(String.format("error attempting to bundle path: %s", path),e);
-        }
-
-        Collection<File> files;
-        if (uri.getScheme() != null && uri.getScheme().startsWith("jar")) {
-            files = this.listJar(uri, path);
-        }
-        else {
-            files = this.listDirectory(uri.getPath());
-        }
-
-
-        return this.readFiles(files);
+    Collection<File> files;
+    if (uri.getScheme() != null && uri.getScheme().startsWith("jar")) {
+      files = this.listJar(uri, path);
+    } else {
+      files = this.listDirectory(uri.getPath());
     }
 
 
-    private Collection<File> listJar(URI uri, String path) {
-        try (var fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())){
-            Path jarPath = fileSystem.getPath(path);
-            try(Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
-                return walk.map(x -> x.toFile()).filter(x -> x.isFile()).filter(
-                    x -> x.getName().endsWith("json") || x.getName().endsWith("xml")).collect(Collectors.toList());
-            }
-        }
-        catch (IOException e) {
-            throw new IllegalArgumentException(String.format("error attempting to list jar: %s", uri.toString()),e);
-        }
+    return this.readFiles(files);
+  }
+
+
+  private Collection<File> listJar(URI uri, String path) {
+    try (var fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())) {
+      Path jarPath = fileSystem.getPath(path);
+      try (Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
+        return walk.map(x -> x.toFile()).filter(x -> x.isFile())
+            .filter(x -> x.getName().endsWith("json") || x.getName().endsWith("xml"))
+            .collect(Collectors.toList());
+      }
+    } catch (IOException e) {
+      throw new IllegalArgumentException(
+          String.format("error attempting to list jar: %s", uri.toString()), e);
+    }
+  }
+
+  private Collection<File> listDirectory(String path) {
+    File resourceDirectory = new File(path);
+    if (!resourceDirectory.getAbsoluteFile().exists()) {
+      throw new IllegalArgumentException(
+          String.format("The specified path to resource files does not exist: %s", path));
     }
 
-    private Collection<File> listDirectory(String path) {
-        File resourceDirectory = new File(path);
-        if (!resourceDirectory.getAbsoluteFile().exists()) {
-            throw new IllegalArgumentException(String.format("The specified path to resource files does not exist: %s", path));
-        }
-
-        if (resourceDirectory.getAbsoluteFile().isDirectory()) {
-            return FileUtils.listFiles(resourceDirectory, new String[] { "cql" }, true);
-        }
-        else if (path.toLowerCase().endsWith("cql")) {
-            return Collections.singletonList(resourceDirectory);
-        }
-        else {
-            throw new IllegalArgumentException(String.format("path was not a directory or a recognized CQL file format (.cql) : %s", path));
-        }
+    if (resourceDirectory.getAbsoluteFile().isDirectory()) {
+      return FileUtils.listFiles(resourceDirectory, new String[] {"cql"}, true);
+    } else if (path.toLowerCase().endsWith("cql")) {
+      return Collections.singletonList(resourceDirectory);
+    } else {
+      throw new IllegalArgumentException(String
+          .format("path was not a directory or a recognized CQL file format (.cql) : %s", path));
     }
+  }
 
-    List<String> readFiles(Collection<File> files) {
-        return files.stream().map(x -> x.toPath()).filter(Files::isRegularFile).map(t -> {
-            try {
-                return Files.readAllBytes(t);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }).filter(x -> x != null).map(x -> new String(x, StandardCharsets.UTF_8)).collect(Collectors.toList());
-    }
+  List<String> readFiles(Collection<File> files) {
+    return files.stream().map(x -> x.toPath()).filter(Files::isRegularFile).map(t -> {
+      try {
+        return Files.readAllBytes(t);
+      } catch (IOException e) {
+        e.printStackTrace();
+        return null;
+      }
+    }).filter(x -> x != null).map(x -> new String(x, StandardCharsets.UTF_8))
+        .collect(Collectors.toList());
+  }
 
 }

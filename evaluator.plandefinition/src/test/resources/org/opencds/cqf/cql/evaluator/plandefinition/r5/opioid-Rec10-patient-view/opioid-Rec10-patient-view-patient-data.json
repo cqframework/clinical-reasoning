@@ -477,16 +477,20 @@
             ]
           }
         ]
-      },"request": {
-      "method": "PUT",
-      "url": "Observation/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch-4"
-    }
-    },{
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch-4"
+      }
+    },
+    {
       "resource": {
         "resourceType": "Encounter",
         "id": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch",
         "meta": {
-          "profile": [ "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter" ]
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ]
         },
         "status": "completed",
         "class": {
@@ -494,14 +498,18 @@
           "code": "AMB",
           "display": "ambulatory"
         },
-        "type": [ {
-          "coding": [ {
-            "system": "http://snomed.info/sct",
-            "version": "2020-09",
-            "code": "185463005",
-            "display": "Visit out of hours (procedure)"
-          } ]
-        } ],
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "version": "2020-09",
+                "code": "185463005",
+                "display": "Visit out of hours (procedure)"
+              }
+            ]
+          }
+        ],
         "subject": {
           "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
         },

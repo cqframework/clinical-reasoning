@@ -9,35 +9,35 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ParametersParameterComponentAdapter extends Adapter<IBaseBackboneElement> {
 
-    public IBaseBackboneElement get();
+  public IBaseBackboneElement get();
 
-    public String getName();
+  public String getName();
 
-    public void setName(String name);
+  public void setName(String name);
 
-    public List<IBaseBackboneElement> getPart();
+  public List<IBaseBackboneElement> getPart();
 
-    public void setPart(List<IBaseBackboneElement> parametersParameterComponents);
+  public void setPart(List<IBaseBackboneElement> parametersParameterComponents);
 
-    public IBaseBackboneElement addPart(); 
-    
-    public boolean hasPart();
+  public IBaseBackboneElement addPart();
 
-    public boolean hasResource();
+  public boolean hasPart();
 
-    public IBaseResource getResource();
+  public boolean hasResource();
 
-    public void setResource(IBaseResource resource);
+  public IBaseResource getResource();
 
-    public boolean hasValue();
+  public void setResource(IBaseResource resource);
 
-    public boolean hasPrimitiveValue();
+  public boolean hasValue();
 
-    public void setValue(IBaseDatatype value);
+  public boolean hasPrimitiveValue();
 
-    public IBaseDatatype getValue();
+  public void setValue(IBaseDatatype value);
 
-    public Boolean hasExtension();
+  public IBaseDatatype getValue();
 
-    public List<IBaseExtension<?,?>> getExtension();
+  public Boolean hasExtension();
+
+  public List<IBaseExtension<?, ?>> getExtension();
 }

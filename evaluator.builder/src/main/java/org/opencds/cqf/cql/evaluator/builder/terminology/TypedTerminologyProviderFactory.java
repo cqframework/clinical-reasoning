@@ -5,7 +5,7 @@ import java.util.List;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
 public interface TypedTerminologyProviderFactory {
-    public String getType();
+  public String getType();
 
-    public TerminologyProvider create(String url, List<String> headers);
+  public TerminologyProvider create(String url, List<String> headers);
 }

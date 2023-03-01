@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
@@ -39,150 +39,162 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public abstract class BaseMeasureProcessorTest {
 
-    public BaseMeasureProcessorTest(String bundleName) {
-        this.endpoint = new Endpoint().setAddress(bundleName)
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
-        this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
-        this.setup(false, 200);
-    }
+  public BaseMeasureProcessorTest(String bundleName) {
+    this.endpoint = new Endpoint().setAddress(bundleName)
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
+    this.setup(false, 200);
+  }
 
-    public BaseMeasureProcessorTest(String bundleName, boolean threadedEnabled, int threadedBatchSize) {
-        this.endpoint = new Endpoint().setAddress(bundleName)
-                .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
-        this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
-        this.setup(threadedEnabled, threadedBatchSize);
-    }
+  public BaseMeasureProcessorTest(String bundleName, boolean threadedEnabled,
+      int threadedBatchSize) {
+    this.endpoint = new Endpoint().setAddress(bundleName)
+        .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
+    this.setup(threadedEnabled, threadedBatchSize);
+  }
 
-    protected FhirContext fhirContext = null;
-    protected Dstu3MeasureProcessor measureProcessor = null;
-    protected Endpoint endpoint = null;
+  protected FhirContext fhirContext = null;
+  protected Dstu3MeasureProcessor measureProcessor = null;
+  protected Endpoint endpoint = null;
 
-    protected void validateGroupScore(MeasureReportGroupComponent group, BigDecimal score) {
-        MeasureValidationUtils.validateGroupScore(group, score);
-    }
+  protected void validateGroupScore(MeasureReportGroupComponent group, BigDecimal score) {
+    MeasureValidationUtils.validateGroupScore(group, score);
+  }
 
-    protected void validateGroup(MeasureReportGroupComponent group, String populationName, int count) {
-        MeasureValidationUtils.validateGroup(group, populationName, count);
-    }
+  protected void validateGroup(MeasureReportGroupComponent group, String populationName,
+      int count) {
+    MeasureValidationUtils.validateGroup(group, populationName, count);
+  }
 
-    protected void validateStratifier(MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue,
-            String populationName, int count) {
-        MeasureValidationUtils.validateStratifier(stratifierComponent, stratumValue, populationName, count);
-    }
+  protected void validateStratifier(MeasureReportGroupStratifierComponent stratifierComponent,
+      String stratumValue, String populationName, int count) {
+    MeasureValidationUtils.validateStratifier(stratifierComponent, stratumValue, populationName,
+        count);
+  }
 
-    protected void validateStratumScore(MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue,
-            BigDecimal score) {
-        MeasureValidationUtils.validateStratumScore(stratifierComponent, stratumValue, score);
-    }
+  protected void validateStratumScore(MeasureReportGroupStratifierComponent stratifierComponent,
+      String stratumValue, BigDecimal score) {
+    MeasureValidationUtils.validateStratumScore(stratifierComponent, stratumValue, score);
+  }
 
-    @SuppressWarnings("serial")
-    protected void setup(boolean threadedEnabled, int threadedBatchSize) {
-        // TODO: Mockito a good solid chunk of this setup...
+  @SuppressWarnings("serial")
+  protected void setup(boolean threadedEnabled, int threadedBatchSize) {
+    // TODO: Mockito a good solid chunk of this setup...
 
-        AdapterFactory adapterFactory = new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
+    AdapterFactory adapterFactory =
+        new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
 
-        LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
+    LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
 
-        Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories = new HashSet<TypedLibrarySourceProviderFactory>() {
-            {
-                add(new TypedLibrarySourceProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+    Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories =
+        new HashSet<TypedLibrarySourceProviderFactory>() {
+          {
+            add(new TypedLibrarySourceProviderFactory() {
+              @Override
+              public String getType() {
+                return Constants.HL7_FHIR_FILES;
+              }
 
-                    @Override
-                    public LibrarySourceProvider create(String url, List<String> headers) {
-                        return new BundleFhirLibrarySourceProvider(fhirContext,
-                                (IBaseBundle) fhirContext.newJsonParser()
-                                        .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)),
-                                adapterFactory, libraryVersionSelector);
-                    }
-                });
-            }
+              @Override
+              public LibrarySourceProvider create(String url, List<String> headers) {
+                return new BundleFhirLibrarySourceProvider(fhirContext,
+                    (IBaseBundle) fhirContext.newJsonParser()
+                        .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)),
+                    adapterFactory, libraryVersionSelector);
+              }
+            });
+          }
         };
 
-        Set<ModelResolverFactory> modelResolverFactories = new HashSet<ModelResolverFactory>() {
-            {
-                add(new FhirModelResolverFactory());
-            }
+    Set<ModelResolverFactory> modelResolverFactories = new HashSet<ModelResolverFactory>() {
+      {
+        add(new FhirModelResolverFactory());
+      }
+    };
+
+    LibrarySourceProviderFactory librarySourceProviderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(fhirContext,
+            adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
+    Set<TypedRetrieveProviderFactory> retrieveProviderFactories =
+        new HashSet<TypedRetrieveProviderFactory>() {
+          {
+            add(new TypedRetrieveProviderFactory() {
+              @Override
+              public String getType() {
+                return Constants.HL7_FHIR_FILES;
+              }
+
+              @Override
+              public RetrieveProvider create(String url, List<String> headers) {
+
+                return new BundleRetrieveProvider(fhirContext,
+                    (IBaseBundle) fhirContext.newJsonParser()
+                        .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
+              }
+            });
+          }
         };
 
-        LibrarySourceProviderFactory librarySourceProviderFactory = new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
-                fhirContext, adapterFactory, librarySourceProviderFactories, libraryVersionSelector);
-        Set<TypedRetrieveProviderFactory> retrieveProviderFactories = new HashSet<TypedRetrieveProviderFactory>() {
-            {
-                add(new TypedRetrieveProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+    DataProviderFactory dataProviderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+            modelResolverFactories, retrieveProviderFactories);
 
-                    @Override
-                    public RetrieveProvider create(String url, List<String> headers) {
+    Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories =
+        new HashSet<TypedTerminologyProviderFactory>() {
+          {
+            add(new TypedTerminologyProviderFactory() {
+              @Override
+              public String getType() {
+                return Constants.HL7_FHIR_FILES;
+              }
 
-                        return new BundleRetrieveProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
-                    }
-                });
-            }
+              @Override
+              public TerminologyProvider create(String url, List<String> headers) {
+                return new BundleTerminologyProvider(fhirContext,
+                    (IBaseBundle) fhirContext.newJsonParser()
+                        .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
+              }
+            });
+          }
         };
 
-        DataProviderFactory dataProviderFactory = new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(
-                fhirContext, modelResolverFactories, retrieveProviderFactories);
+    TerminologyProviderFactory terminologyProviderFactory =
+        new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+            fhirContext, typedTerminologyProviderFactories);
 
-        Set<TypedTerminologyProviderFactory> typedTerminologyProviderFactories = new HashSet<TypedTerminologyProviderFactory>() {
-            {
-                add(new TypedTerminologyProviderFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+    Set<TypedFhirDalFactory> fhirDalFactories = new HashSet<TypedFhirDalFactory>() {
+      {
+        add(new TypedFhirDalFactory() {
+          @Override
+          public String getType() {
+            return Constants.HL7_FHIR_FILES;
+          }
 
-                    @Override
-                    public TerminologyProvider create(String url, List<String> headers) {
-                        return new BundleTerminologyProvider(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
-                    }
-                });
-            }
-        };
+          @Override
+          public FhirDal create(String url, List<String> headers) {
+            return new BundleFhirDal(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
+                .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
+          }
+        });
+      }
+    };
 
-        TerminologyProviderFactory terminologyProviderFactory = new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
-                fhirContext, typedTerminologyProviderFactories);
+    FhirDalFactory fhirDalFactory =
+        new org.opencds.cqf.cql.evaluator.builder.dal.FhirDalFactory(fhirContext, fhirDalFactories);
 
-        Set<TypedFhirDalFactory> fhirDalFactories = new HashSet<TypedFhirDalFactory>() {
-            {
-                add(new TypedFhirDalFactory() {
-                    @Override
-                    public String getType() {
-                        return Constants.HL7_FHIR_FILES;
-                    }
+    EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
 
-                    @Override
-                    public FhirDal create(String url, List<String> headers) {
-                        return new BundleFhirDal(fhirContext, (IBaseBundle) fhirContext.newJsonParser()
-                                .parseResource(BaseMeasureProcessorTest.class.getResourceAsStream(url)));
-                    }
-                });
-            }
-        };
+    MeasureEvaluationOptions config = MeasureEvaluationOptions.defaultOptions();
 
-        FhirDalFactory fhirDalFactory = new org.opencds.cqf.cql.evaluator.builder.dal.FhirDalFactory(fhirContext,
-                fhirDalFactories);
-
-        EndpointConverter endpointConverter = new EndpointConverter(adapterFactory);
-
-        MeasureEvaluationOptions config = MeasureEvaluationOptions.defaultOptions();
-
-        if (threadedEnabled) {
-            config.setThreadedEnabled(true);
-            config.setThreadedBatchSize(threadedBatchSize);
-        }
-
-        this.measureProcessor = new Dstu3MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
-                librarySourceProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null, config, null,
-                null);
-
+    if (threadedEnabled) {
+      config.setThreadedEnabled(true);
+      config.setThreadedBatchSize(threadedBatchSize);
     }
+
+    this.measureProcessor = new Dstu3MeasureProcessor(terminologyProviderFactory,
+        dataProviderFactory, librarySourceProviderFactory, fhirDalFactory, endpointConverter, null,
+        null, null, null, config, null, null);
+
+  }
 }

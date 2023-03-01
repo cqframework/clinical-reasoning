@@ -34,24 +34,18 @@
           "linkId": "1.2",
           "definition": "http://hl7.org/fhir/Organization#Organization.identifier",
           "text": "NPI",
-          "answer": [
-
-          ]
+          "answer": []
         },
         {
           "linkId": "1.3",
           "definition": "http://hl7.org/fhir/Organization#Organization.identifier",
           "text": "PTAN",
-          "answer": [
-
-          ]
+          "answer": []
         },
         {
           "linkId": "1.4",
           "text": "Contract/Region",
-          "answer": [
-
-          ]
+          "answer": []
         }
       ]
     },

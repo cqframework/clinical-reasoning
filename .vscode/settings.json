@@ -1,89 +1,143 @@
 {
-    "cSpell.words": [
-        "activitydefinition",
-        "argfile",
-        "Codeable",
-        "Configurer",
-        "CONTINUOUSVARIABLE",
-        "CRMI",
-        "DENOMINATOREXCEPTION",
-        "DENOMINATOREXCLUSION",
-        "dstu",
-        "Fhir",
-        "fhirpath",
-        "Gson",
-        "INITIALPOPULATION",
-        "JXSON",
-        "MEASUREOBSERVATION",
-        "MEASUREPOPULATION",
-        "MEASUREPOPULATIONEXCLUSION",
-        "measurereport",
-        "mgpc",
-        "mgsc",
-        "mrgc",
-        "mrgsc",
-        "msdc",
-        "numer",
-        "NUMERATOREXCLUSION",
-        "opencds",
-        "PATIENTLIST",
-        "plandefinition",
-        "ppca",
-        "qicore",
-        "questionnaireresponse",
-        "sdes",
-        "sgpc",
-        "SUBJECTLIST",
-        "testng",
-        "Unvalidated",
-        "uscore"
-    ],
-    "cSpell.enabledLanguageIds": [
-        "java",
-        "json",
-        "xml",
-        "md"
-    ],
-    "cSpell.ignorePaths": [
-        ".git/objects",
-        ".vscode",
-        "**/pom.xml",
-        "checkstyle.xml"
-    ],
-    "files.exclude": {
-        "**/.classpath": true,
-        "**/.project": true,
-        "**/.settings": true,
-        "**/.factorypath": true
+  "cSpell.words": [
+    "activitydefinition",
+    "argfile",
+    "cdshooks",
+    "clinicalreasoning",
+    "Codeable",
+    "Configurer",
+    "CONTINUOUSVARIABLE",
+    "CRMI",
+    "debuggable",
+    "DENOMINATOREXCEPTION",
+    "DENOMINATOREXCLUSION",
+    "dstu",
+    "Fhir",
+    "fhirpath",
+    "Gson",
+    "INITIALPOPULATION",
+    "Javadoc",
+    "JXSON",
+    "MEASUREOBSERVATION",
+    "MEASUREPOPULATION",
+    "MEASUREPOPULATIONEXCLUSION",
+    "measurereport",
+    "mgpc",
+    "mgsc",
+    "mrgc",
+    "mrgsc",
+    "msdc",
+    "mvnw",
+    "numer",
+    "NUMERATOREXCLUSION",
+    "opencds",
+    "PATIENTLIST",
+    "plandefinition",
+    "ppca",
+    "proxying",
+    "qicore",
+    "questionnaireresponse",
+    "sdes",
+    "sgpc",
+    "Sonarlint",
+    "SUBJECTLIST",
+    "testng",
+    "Unvalidated",
+    "uscore"
+  ],
+  "cSpell.enabledLanguageIds": [
+    "java",
+    "json",
+    "xml",
+    "markdown"
+  ],
+  "cSpell.ignorePaths": [
+    ".git/objects",
+    ".vscode",
+    "**/pom.xml",
+    "checkstyle.xml",
+    "**/test/resources/**"
+  ],
+  "commandOnAllFiles.commands": {
+    "Format Java File": {
+      "command": "editor.action.formatDocument",
+      "includeFileExtensions": [
+        ".java"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
+      ]
     },
-    "editor.formatOnSave": true,
-    "editor.tabSize": 4,
-    "editor.detectIndentation": false,
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.dependency.packagePresentation": "hierarchical",
-    "java.jdt.ls.vmargs": "-noverify -Xmx8G -XX:+UseG1GC -XX:+UseStringDeduplication",
-    "java.compile.nullAnalysis.mode": "automatic",
-    "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
-    "java.format.settings.profile": "GoogleStyle",
-    "commandOnAllFiles.commands": {
-        "Format Java File": {
-            "command": "editor.action.formatDocument",
-            "includeFileExtensions": [
-                ".java"
-            ]
-        },
-        "Format JSON and XML Files": {
-            "command": "editor.action.formatDocument",
-            "includeFileExtensions": [
-                ".json",
-                ".xml"
-            ]
-        },
-        "Format Markdown Files": {
-            "command": "editor.action.formatDocument",
-            "includeFileExtensions": [
-                ".md"
-            ]
-        }
+    "Format XML Files": {
+      "command": "editor.action.formatDocument",
+      "includeFileExtensions": [
+        ".xml"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
+      ]
+    },
+    "Format JSON Files": {
+      "command": "editor.action.formatDocument",
+      "includeFileExtensions": [
+        ".json"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
+      ]
+    },
+    "Format Markdown Files": {
+      "command": "editor.action.formatDocument",
+      "includeFileExtensions": [
+        ".md"
+      ],
+      "excludeFolders": [
+        "target",
+        "generated-sources"
+      ]
     }
+  },
+  "files.exclude": {
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "editor.detectIndentation": false,
+  "editor.foldingImportsByDefault": true,
+  "editor.tabSize": 2,
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.dependency.packagePresentation": "hierarchical",
+  "java.jdt.ls.vmargs": "-Xmx16G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
+  "java.format.settings.profile": "GoogleStyle",
+  "json.schemaDownload.enable": true,
+  "[markdown]": {
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.unicodeHighlight.ambiguousCharacters": true,
+    "editor.unicodeHighlight.invisibleCharacters": true,
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    },
+    "cSpell.fixSpellingWithRenameProvider": true,
+    "cSpell.advanced.feature.useReferenceProviderWithRename": true,
+    "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/"
+  },
+  "markdownlint.config": {
+    "MD007": {
+      "indent": 4
+    }
+  }
 }

@@ -1,8 +1,7 @@
 package org.opencds.cqf.cql.evaluator.builder.terminology;
 
-import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
-
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
 
 import java.util.List;
 import java.util.Set;
@@ -20,60 +19,65 @@ import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvide
 import ca.uhn.fhir.context.FhirContext;
 
 @Named
-public class TerminologyProviderFactory implements org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory {
+public class TerminologyProviderFactory
+    implements org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory {
 
-    private Set<TypedTerminologyProviderFactory> terminologyProviderFactories;
-    private FhirContext fhirContext;
+  private Set<TypedTerminologyProviderFactory> terminologyProviderFactories;
+  private FhirContext fhirContext;
 
-    @Inject
-    public TerminologyProviderFactory(FhirContext fhirContext, Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
-        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.terminologyProviderFactories = requireNonNull(terminologyProviderFactories, "terminologyProviderFactories can not be null");
+  @Inject
+  public TerminologyProviderFactory(FhirContext fhirContext,
+      Set<TypedTerminologyProviderFactory> terminologyProviderFactories) {
+    this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+    this.terminologyProviderFactories = requireNonNull(terminologyProviderFactories,
+        "terminologyProviderFactories can not be null");
+  }
+
+  public TerminologyProvider create(EndpointInfo endpointInfo) {
+    if (endpointInfo == null) {
+      return null;
     }
 
-    public TerminologyProvider create(EndpointInfo endpointInfo) {
-        if (endpointInfo == null) {
-            return null;
-        }
-
-        if (endpointInfo.getAddress() == null) {
-            throw new IllegalArgumentException("endpointInfo must have a url defined");
-        }
-
-        if (endpointInfo.getType() == null) {
-            endpointInfo.setType(detectType(endpointInfo.getAddress()));
-        }
-
-        return create(endpointInfo.getType(), endpointInfo.getAddress(), endpointInfo.getHeaders());
+    if (endpointInfo.getAddress() == null) {
+      throw new IllegalArgumentException("endpointInfo must have a url defined");
     }
 
-    protected IBaseCoding detectType(String url) {
-        if (isFileUri(url)) {
-            return Constants.HL7_FHIR_FILES_CODE;
-        } else {
-            return Constants.HL7_FHIR_REST_CODE;
-        }
+    if (endpointInfo.getType() == null) {
+      endpointInfo.setType(detectType(endpointInfo.getAddress()));
     }
 
-    protected TerminologyProvider create(IBaseCoding connectionType, String url, List<String> headers) {
-        requireNonNull(url, "url can not be null");
-        requireNonNull(connectionType, "connectionType can not be null");
+    return create(endpointInfo.getType(), endpointInfo.getAddress(), endpointInfo.getHeaders());
+  }
 
-        for (TypedTerminologyProviderFactory factory : this.terminologyProviderFactories) {
-            if (factory.getType().equals(connectionType.getCode())) {
-                return factory.create(url, headers);
-            }
-        }
+  protected IBaseCoding detectType(String url) {
+    if (isFileUri(url)) {
+      return Constants.HL7_FHIR_FILES_CODE;
+    } else {
+      return Constants.HL7_FHIR_REST_CODE;
+    }
+  }
 
-        throw new IllegalArgumentException("unsupported or unknown connectionType for loading FHIR terminology");
+  protected TerminologyProvider create(IBaseCoding connectionType, String url,
+      List<String> headers) {
+    requireNonNull(url, "url can not be null");
+    requireNonNull(connectionType, "connectionType can not be null");
+
+    for (TypedTerminologyProviderFactory factory : this.terminologyProviderFactories) {
+      if (factory.getType().equals(connectionType.getCode())) {
+        return factory.create(url, headers);
+      }
     }
 
-    @Override
-    public TerminologyProvider create(IBaseBundle terminologyBundle) {
-        if (terminologyBundle == null) {
-            return null;
-        }
+    throw new IllegalArgumentException(
+        "unsupported or unknown connectionType for loading FHIR terminology");
+  }
 
-        return new BundleTerminologyProvider(this.fhirContext, terminologyBundle);
+  @Override
+  public TerminologyProvider create(IBaseBundle terminologyBundle) {
+    if (terminologyBundle == null) {
+      return null;
     }
+
+    return new BundleTerminologyProvider(this.fhirContext, terminologyBundle);
+  }
 }

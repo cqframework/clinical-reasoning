@@ -2,23 +2,23 @@ package org.opencds.cqf.cql.evaluator.fhir.builder;
 
 public class NarrativeSettings {
 
-	private String text;
-	private String status = "generated";
+  private String text;
+  private String status = "generated";
 
-	public NarrativeSettings(String theText) {
-		this.text = theText;
-	}
+  public NarrativeSettings(String theText) {
+    this.text = theText;
+  }
 
-	public NarrativeSettings(String theText, String theStatus) {
-		this.text = theText;
-		this.status = theStatus;
-	}
+  public NarrativeSettings(String theText, String theStatus) {
+    this.text = theText;
+    this.status = theStatus;
+  }
 
-	public String getText() {
-		return this.text;
-	}
+  public String getText() {
+    return this.text;
+  }
 
-	public String getStatus() {
-		return this.status;
-	}
+  public String getStatus() {
+    return this.status;
+  }
 }

@@ -15,28 +15,28 @@ import org.testng.annotations.Test;
 
 public class CacheAwareModelManagerTests {
 
-    @Test
-    public void Multiple_resolutions_should_use_cache(){
-        Map<ModelIdentifier, Model> cache = new HashMap<>();
-        Map<ModelIdentifier, Model> cacheSpy = spy(cache);
+  @Test
+  public void Multiple_resolutions_should_use_cache() {
+    Map<ModelIdentifier, Model> cache = new HashMap<>();
+    Map<ModelIdentifier, Model> cacheSpy = spy(cache);
 
-        ModelManager manager = new CacheAwareModelManager(cacheSpy);
-        ModelIdentifier versionedIdentifier = new ModelIdentifier().withId("FHIR").withVersion("4.0.0");
+    ModelManager manager = new CacheAwareModelManager(cacheSpy);
+    ModelIdentifier versionedIdentifier = new ModelIdentifier().withId("FHIR").withVersion("4.0.0");
 
-        // First resolution should load global cache
-        Model result = manager.resolveModel(versionedIdentifier);
-        assertNotNull(result);
+    // First resolution should load global cache
+    Model result = manager.resolveModel(versionedIdentifier);
+    assertNotNull(result);
 
-        verify(cacheSpy, times(1)).containsKey(versionedIdentifier);
-        verify(cacheSpy, times(1)).put(versionedIdentifier, result);
-        
+    verify(cacheSpy, times(1)).containsKey(versionedIdentifier);
+    verify(cacheSpy, times(1)).put(versionedIdentifier, result);
 
-        // Second resolution should not use global cache
-        result = manager.resolveModel(versionedIdentifier);
-        assertNotNull(result);
 
-        verify(cacheSpy, times(1)).containsKey(versionedIdentifier);
-        verify(cacheSpy, times(1)).put(versionedIdentifier, result);
-    }
-       
+    // Second resolution should not use global cache
+    result = manager.resolveModel(versionedIdentifier);
+    assertNotNull(result);
+
+    verify(cacheSpy, times(1)).containsKey(versionedIdentifier);
+    verify(cacheSpy, times(1)).put(versionedIdentifier, result);
+  }
+
 }

@@ -24,111 +24,118 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import ca.uhn.fhir.context.FhirContext;
 
 @Named
-public class DataProviderFactory implements org.opencds.cqf.cql.evaluator.builder.DataProviderFactory {
+public class DataProviderFactory
+    implements org.opencds.cqf.cql.evaluator.builder.DataProviderFactory {
 
-    private FhirContext fhirContext;
-    private Set<ModelResolverFactory> modelResolverFactories;
-    private Set<TypedRetrieveProviderFactory> retrieveProviderFactories;
+  private FhirContext fhirContext;
+  private Set<ModelResolverFactory> modelResolverFactories;
+  private Set<TypedRetrieveProviderFactory> retrieveProviderFactories;
 
-    @Inject
-    public DataProviderFactory(FhirContext fhirContext, Set<ModelResolverFactory> modelResolverFactories,
-            Set<TypedRetrieveProviderFactory> retrieveProviderFactories) {
-        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.modelResolverFactories = requireNonNull(modelResolverFactories, "modelResolverFactory can not be null");
-        this.retrieveProviderFactories = requireNonNull(retrieveProviderFactories,
-                "retrieveResolverFactory can not be null");
+  @Inject
+  public DataProviderFactory(FhirContext fhirContext,
+      Set<ModelResolverFactory> modelResolverFactories,
+      Set<TypedRetrieveProviderFactory> retrieveProviderFactories) {
+    this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+    this.modelResolverFactories =
+        requireNonNull(modelResolverFactories, "modelResolverFactory can not be null");
+    this.retrieveProviderFactories =
+        requireNonNull(retrieveProviderFactories, "retrieveResolverFactory can not be null");
 
+  }
+
+  @Override
+  public DataProviderComponents create(EndpointInfo endpointInfo) {
+    requireNonNull(endpointInfo, "endpointInfo can not be null");
+
+    if (endpointInfo.getType() == null) {
+      endpointInfo.setType(detectType(endpointInfo.getAddress()));
     }
 
-    @Override
-    public DataProviderComponents create(EndpointInfo endpointInfo) {
-        requireNonNull(endpointInfo, "endpointInfo can not be null");
+    String modelUri = detectModel(endpointInfo.getAddress(), endpointInfo.getType());
+    Pair<ModelResolver, RetrieveProvider> dp = create(modelUri, endpointInfo.getType(),
+        endpointInfo.getAddress(), endpointInfo.getHeaders());
 
-        if (endpointInfo.getType() == null) {
-            endpointInfo.setType(detectType(endpointInfo.getAddress()));
-        }
+    return new DataProviderComponents(modelUri, dp.getLeft(), dp.getRight());
+  }
 
-        String modelUri = detectModel(endpointInfo.getAddress(), endpointInfo.getType());
-        Pair<ModelResolver, RetrieveProvider> dp = create(modelUri, endpointInfo.getType(), endpointInfo.getAddress(),
-                endpointInfo.getHeaders());
-
-        return new DataProviderComponents(modelUri, dp.getLeft(), dp.getRight());
+  public IBaseCoding detectType(String url) {
+    if (url == null) {
+      return null;
     }
 
-    public IBaseCoding detectType(String url) {
-        if (url == null) {
-            return null;
-        }
+    if (isFileUri(url)) {
+      return Constants.HL7_FHIR_FILES_CODE;
+    } else {
+      return Constants.HL7_FHIR_REST_CODE;
+    }
+  }
 
-        if (isFileUri(url)) {
-            return Constants.HL7_FHIR_FILES_CODE;
-        } else {
-            return Constants.HL7_FHIR_REST_CODE;
-        }
+  public String detectModel(String url, IBaseCoding connectionType) {
+    if (connectionType == null) {
+      return null;
     }
 
-    public String detectModel(String url, IBaseCoding connectionType) {
-        if (connectionType == null) {
-            return null;
-        }
-        
-        switch (connectionType.getCode()) {
-            case Constants.HL7_FHIR_FILES:
-            case Constants.HL7_FHIR_REST:
-                return Constants.FHIR_MODEL_URI;
-            default:
-                return null;
-        }
+    switch (connectionType.getCode()) {
+      case Constants.HL7_FHIR_FILES:
+      case Constants.HL7_FHIR_REST:
+        return Constants.FHIR_MODEL_URI;
+      default:
+        return null;
+    }
+  }
+
+  protected ModelResolverFactory getFactory(String modelUri) {
+    for (ModelResolverFactory factory : this.modelResolverFactories) {
+      if (factory.getModelUri().equals(modelUri)) {
+        return factory;
+      }
     }
 
-    protected ModelResolverFactory getFactory(String modelUri) {
-        for (ModelResolverFactory factory : this.modelResolverFactories) {
-            if (factory.getModelUri().equals(modelUri)) {
-                return factory;
-            }
-        }
+    throw new IllegalArgumentException(
+        String.format("no registered ModelResolverFactory for modelUri: %s", modelUri));
+  }
 
+  protected Pair<ModelResolver, RetrieveProvider> create(String modelUri,
+      IBaseCoding connectionType, String url, List<String> headers) {
+    ModelResolver modelResolver = this.getFactory(modelUri)
+        .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
+
+    RetrieveProvider retrieveProvider = null;
+    if (url == null || connectionType == null) {
+      retrieveProvider = new NoOpRetrieveProvider();
+    } else {
+
+      for (TypedRetrieveProviderFactory factory : this.retrieveProviderFactories) {
+        if (connectionType.getCode().equals(factory.getType())) {
+          retrieveProvider = factory.create(url, headers);
+          break;
+        }
+      }
+
+      if (retrieveProvider == null) {
         throw new IllegalArgumentException(
-                String.format("no registered ModelResolverFactory for modelUri: %s", modelUri));
+            String.format("unsupported or unknown connectionType for loading FHIR Resources: %s",
+                connectionType));
+      }
     }
 
-    protected Pair<ModelResolver, RetrieveProvider> create(String modelUri, IBaseCoding connectionType, String url,
-            List<String> headers) {
-        ModelResolver modelResolver = this.getFactory(modelUri)
-                .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
+    return Pair.of(modelResolver, retrieveProvider);
+  }
 
-        RetrieveProvider retrieveProvider = null;
-        if (url == null || connectionType == null) {
-            retrieveProvider = new NoOpRetrieveProvider();
-        } else {
+  @Override
+  public DataProviderComponents create(IBaseBundle dataBundle) {
+    requireNonNull(dataBundle, "dataBundle can not be null");
 
-            for (TypedRetrieveProviderFactory factory : this.retrieveProviderFactories) {
-                if (connectionType.getCode().equals(factory.getType())) {
-                    retrieveProvider = factory.create(url, headers);
-                    break;
-                }
-            }
-
-            if (retrieveProvider == null) {
-                throw new IllegalArgumentException(
-                        String.format("unsupported or unknown connectionType for loading FHIR Resources: %s", connectionType));
-            }
-        }
-
-        return Pair.of(modelResolver, retrieveProvider);
+    if (!dataBundle.getStructureFhirVersionEnum()
+        .equals(this.fhirContext.getVersion().getVersion())) {
+      throw new IllegalArgumentException(
+          "The FHIR version of dataBundle and the FHIR context do not match");
     }
 
-    @Override
-    public DataProviderComponents create(IBaseBundle dataBundle) {
-        requireNonNull(dataBundle, "dataBundle can not be null");
+    ModelResolver modelResolver = this.getFactory(Constants.FHIR_MODEL_URI)
+        .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
 
-        if (!dataBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
-            throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");
-        }
-
-        ModelResolver modelResolver = this.getFactory(Constants.FHIR_MODEL_URI)
-                .create(this.fhirContext.getVersion().getVersion().getFhirVersionString());
-
-        return new DataProviderComponents(Constants.FHIR_MODEL_URI, modelResolver, new BundleRetrieveProvider(fhirContext, dataBundle));
-    }
+    return new DataProviderComponents(Constants.FHIR_MODEL_URI, modelResolver,
+        new BundleRetrieveProvider(fhirContext, dataBundle));
+  }
 }

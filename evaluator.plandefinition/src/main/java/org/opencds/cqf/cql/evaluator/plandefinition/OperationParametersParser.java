@@ -24,142 +24,142 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAd
 @Named
 public class OperationParametersParser {
 
-    protected AdapterFactory adapterFactory;
-    protected FhirTypeConverter fhirTypeConverter;
+  protected AdapterFactory adapterFactory;
+  protected FhirTypeConverter fhirTypeConverter;
 
-    @Inject
-    public OperationParametersParser(AdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
-        requireNonNull(adapterFactory, "adapterFactory must not be null");
-        requireNonNull(fhirTypeConverter, "fhirTypeConverter must not be null");
-        this.adapterFactory = adapterFactory;
-        this.fhirTypeConverter = fhirTypeConverter;
+  @Inject
+  public OperationParametersParser(AdapterFactory adapterFactory,
+      FhirTypeConverter fhirTypeConverter) {
+    requireNonNull(adapterFactory, "adapterFactory must not be null");
+    requireNonNull(fhirTypeConverter, "fhirTypeConverter must not be null");
+    this.adapterFactory = adapterFactory;
+    this.fhirTypeConverter = fhirTypeConverter;
+  }
+
+  public void addResourceChild(IBaseParameters parameters, String name, IBaseResource resource) {
+    requireNonNull(parameters, "parameters must not be null");
+    requireNonNull(name, "name must not be null");
+    ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+
+    ParametersParameterComponentAdapter part =
+        parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
+    if (part == null) {
+      part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
+
     }
 
-    public void addResourceChild(IBaseParameters parameters, String name, IBaseResource resource) {
-        requireNonNull(parameters, "parameters must not be null");
-        requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+    part.setName(name);
+    part.setResource(resource);
+    part.setValue(null);
+  }
 
-        ParametersParameterComponentAdapter part = parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
-        if (part == null) {
-            part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
-         
-        }
+  public void addValueChild(IBaseParameters parameters, String name, IBaseDatatype value) {
+    requireNonNull(parameters, "parameters must not be null");
+    requireNonNull(name, "name must not be null");
+    ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-        part.setName(name);
-        part.setResource(resource);
-        part.setValue(null);
+    ParametersParameterComponentAdapter part =
+        parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
+    if (part == null) {
+      part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
+
     }
 
-    public void addValueChild(IBaseParameters parameters, String name, IBaseDatatype value) {
-        requireNonNull(parameters, "parameters must not be null");
-        requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+    part.setName(name);
+    part.setResource(null);
+    part.setValue(value);
+  }
 
-        ParametersParameterComponentAdapter part = parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
-        if (part == null) {
-            part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
-         
-        }
-
-        part.setName(name);
-        part.setResource(null);
-        part.setValue(value);
+  public IBaseResource getResourceChild(IBaseParameters parameters, String name) {
+    if (parameters == null) {
+      return null;
     }
+    requireNonNull(name, "name must not be null");
+    ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-    public IBaseResource getResourceChild(IBaseParameters parameters, String name) {
-        if (parameters == null) {
-            return null;
-        }
-        requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+    IBaseResource value = parts.stream().filter(x -> x.getName().equals(name))
+        .map(x -> x.getResource()).findFirst().orElse(null);
 
-            IBaseResource value = parts.stream()
-            .filter(x -> x.getName().equals(name))
-            .map(x -> x.getResource())
-            .findFirst()
-            .orElse(null);
-            
-        return value;
+    return value;
+  }
+
+  public Map<String, IBaseResource> getResourceChildren(IBaseParameters parameters) {
+    if (parameters == null) {
+      return null;
     }
+    requireNonNull(parameters, "parameters must not be null");
+    ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-    public Map<String, IBaseResource> getResourceChildren(IBaseParameters parameters) {
-        if (parameters == null) {
-            return null;
-        }
-        requireNonNull(parameters, "parameters must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+    Map<String, IBaseResource> resources =
+        parts.stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getResource()));
 
-        Map<String, IBaseResource> resources = parts.stream()
-            .collect(Collectors.toMap(x -> x.getName(), x -> x.getResource()));
-            
-        return resources;
+    return resources;
+  }
+
+  public IBaseDatatype getValueChild(IBaseParameters parameters, String name) {
+    if (parameters == null) {
+      return null;
     }
+    requireNonNull(parameters, "parameters must not be null");
+    requireNonNull(name, "name must not be null");
+    ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-    public IBaseDatatype getValueChild(IBaseParameters parameters, String name) {
-        if (parameters == null) {
-            return null;
-        }
-        requireNonNull(parameters, "parameters must not be null");
-        requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+    IBaseDatatype value = parts.stream().filter(x -> x.getName().equals(name))
+        .map(x -> x.getValue()).findFirst().orElse(null);
 
-        IBaseDatatype value = parts.stream()
-            .filter(x -> x.getName().equals(name))
-            .map(x -> x.getValue())
-            .findFirst()
-            .orElse(null);
-            
-        return value;
+    return value;
+  }
+
+  public Map<String, IBaseDatatype> getValueChildren(IBaseParameters parameters) {
+    if (parameters == null) {
+      return null;
     }
+    requireNonNull(parameters, "parameters must not be null");
+    ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-    public Map<String, IBaseDatatype> getValueChildren(IBaseParameters parameters) {
-        if (parameters == null) {
-            return null;
-        }
-        requireNonNull(parameters, "parameters must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-            .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+    Map<String, IBaseDatatype> values =
+        parts.stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getValue()));
 
-        Map<String, IBaseDatatype> values = parts.stream()
-            .collect(Collectors.toMap(x -> x.getName(), x -> x.getValue()));
-            
-        return values;
-    }
+    return values;
+  }
 
-    // @SuppressWarnings("unused")
-    public Map<String, Object> getParameterParts(IBaseParameters parameters) {
-        throw new NotImplementedException("OperationParametersParser.getParameterParts is not implemented yet");
-        // requireNonNull(parameters, "parameters must not be null");
-        // ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        // List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-        //     .map(x -> this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
+  // @SuppressWarnings("unused")
+  public Map<String, Object> getParameterParts(IBaseParameters parameters) {
+    throw new NotImplementedException(
+        "OperationParametersParser.getParameterParts is not implemented yet");
+    // requireNonNull(parameters, "parameters must not be null");
+    // ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+    // List<ParametersParameterComponentAdapter> parts =
+    // parametersAdapter.getParameter().stream()
+    // .map(x ->
+    // this.adapterFactory.createParametersParameters(x)).collect(Collectors.toList());
 
-        // Map<String, Object> parameterParts = parts.stream()
-        //     .collect(Collectors.toMap(x -> x.getName(), x -> {
-        //         // This needs to work in order to support this
-        //         List<ParametersParameterComponentAdapter> part = x.getPart();
+    // Map<String, Object> parameterParts = parts.stream()
+    // .collect(Collectors.toMap(x -> x.getName(), x -> {
+    // // This needs to work in order to support this
+    // List<ParametersParameterComponentAdapter> part = x.getPart();
 
-        //         // Recursive parts
-        //         // Get all Resources mapped to Name
-        //         // Get all Datatypes mapped to Name
+    // // Recursive parts
+    // // Get all Resources mapped to Name
+    // // Get all Datatypes mapped to Name
 
-        //         return part;
-        //     }));
-            
-        // return parameterParts;
-        // return Collections.emptyMap();
-    }
+    // return part;
+    // }));
+
+    // return parameterParts;
+    // return Collections.emptyMap();
+  }
 }
 

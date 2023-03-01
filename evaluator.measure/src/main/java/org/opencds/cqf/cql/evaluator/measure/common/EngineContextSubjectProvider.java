@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -13,122 +12,117 @@ import org.slf4j.LoggerFactory;
 
 public class EngineContextSubjectProvider<SubjectT> implements SubjectProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(EngineContextSubjectProvider.class);
+  private static final Logger logger = LoggerFactory.getLogger(EngineContextSubjectProvider.class);
 
-    protected Context context;
-    protected String modelUri;
-    protected String subjectType;
+  protected Context context;
+  protected String modelUri;
+  protected String subjectType;
 
-    protected Function<SubjectT, String> getId;
-    Function<Object, String> idGet;
-    public EngineContextSubjectProvider(Context context, String modelUri, Function<SubjectT, String> getId) {
-        this.context = context;
-        this.modelUri = modelUri;
-        this.getId = getId;
-    }
+  protected Function<SubjectT, String> getId;
+  Function<Object, String> idGet;
 
-    public Iterable<String> getSubjects(MeasureEvalType type, String subjectId) {
-        switch (type) {
-            case PATIENT:
-            case SUBJECT:
-                return getIndividualSubjectId(subjectId);
-            case SUBJECTLIST:
-            case PATIENTLIST:
-                return this.getPractitionerSubjectIds(subjectId); //here
-            case POPULATION:
-                return this.getAllSubjectIds(); //here
-            default:
-                if (subjectId != null) {
-                    return getIndividualSubjectId(subjectId);
-                } else {
-                    return getAllSubjectIds();
-                }
-        }
-    }
+  public EngineContextSubjectProvider(Context context, String modelUri,
+      Function<SubjectT, String> getId) {
+    this.context = context;
+    this.modelUri = modelUri;
+    this.getId = getId;
+  }
 
-
-    protected DataProvider getDataProvider() {
-        return this.context.resolveDataProviderByModelUri(this.modelUri);
-    }
-
-    protected List<String> getIndividualSubjectId(String subjectId) {
-        String parsedSubjectId = null;
-        if (subjectId != null && subjectId.contains("/")) {
-            String[] subjectIdParts = subjectId.split("/");
-            parsedSubjectId = subjectIdParts[1];
+  public Iterable<String> getSubjects(MeasureEvalType type, String subjectId) {
+    switch (type) {
+      case PATIENT:
+      case SUBJECT:
+        return getIndividualSubjectId(subjectId);
+      case SUBJECTLIST:
+      case PATIENTLIST:
+        return this.getPractitionerSubjectIds(subjectId); // here
+      case POPULATION:
+        return this.getAllSubjectIds(); // here
+      default:
+        if (subjectId != null) {
+          return getIndividualSubjectId(subjectId);
         } else {
-            parsedSubjectId = subjectId;
-            logger.info("Could not determine subjectType. Defaulting to Patient");
+          return getAllSubjectIds();
         }
+    }
+  }
 
-        if (parsedSubjectId == null) {
-            throw new IllegalArgumentException("subjectId is required for individual reports.");
-        }
-
-        return Collections.singletonList(this.subjectType + "/" + parsedSubjectId);
+  protected List<String> getIndividualSubjectId(String subjectId) {
+    String parsedSubjectId = null;
+    if (subjectId != null && subjectId.contains("/")) {
+      String[] subjectIdParts = subjectId.split("/");
+      parsedSubjectId = subjectIdParts[1];
+    } else {
+      parsedSubjectId = subjectId;
+      logger.info("Could not determine subjectType. Defaulting to Patient");
     }
 
-    @SuppressWarnings("unchecked")
-    protected Iterable<String> getAllSubjectIds() {
-        this.subjectType = "Patient";
+    return Collections.singletonList(parsedSubjectId);
+  }
 
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null, subjectType, null, null,
-                null, null, null, null, null, null);
 
-        return new IdExtractingIterable(subjectRetrieve, idGet);
+  protected DataProvider getDataProvider() {
+    return this.context.resolveDataProviderByModelUri(this.modelUri);
+  }
+
+  protected Iterable<String> getAllSubjectIds() {
+    this.subjectType = "Patient";
+
+    Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve(null, null, null,
+        subjectType, null, null, null, null, null, null, null, null);
+
+    return new IdExtractingIterable(subjectRetrieve, idGet);
+  }
+
+  protected Iterable<String> getPractitionerSubjectIds(String practitionerRef) {
+    this.subjectType = "Patient";
+
+    if (!practitionerRef.contains("/")) {
+      practitionerRef = "Practitioner/" + practitionerRef;
     }
 
-    public class IdExtractingIterable implements Iterable<String> {
-        Iterable<Object> iterableToWrap;
-        Function<Object,String> idExtractor;
+    Iterable<Object> subjectRetrieve =
+        this.getDataProvider().retrieve("Practitioner", "generalPractitioner", practitionerRef,
+            subjectType, null, null, null, null, null, null, null, null);
 
-        public IdExtractingIterable(Iterable<Object> iterableToWrap, Function<Object,String> idExtractor){
-            this.iterableToWrap = iterableToWrap;
-            this.idExtractor = idExtractor;
-        }
+    return new IdExtractingIterable(subjectRetrieve, idGet);
+  }
 
+  public class IdExtractingIterable implements Iterable<String> {
+    Iterable<Object> iterableToWrap;
+    Function<Object, String> idExtractor;
 
-        @Override
-        public Iterator<String> iterator() {
-            return new SubjectIterator(this.iterableToWrap.iterator(), this.idExtractor);
-        }
-
-            class SubjectIterator implements Iterator<String> {
-                Iterator<Object> iteratorToWrap;
-                Function<Object,String> idExtractor;
-
-                public SubjectIterator(Iterator<Object> iteratorToWrap, Function<Object, String> idExtractor) {
-                    this.iteratorToWrap = iteratorToWrap;
-                    this.idExtractor = idExtractor;
-                }
-                @Override
-                public boolean hasNext() {
-                    return this.iteratorToWrap.hasNext();
-                }
-                @Override
-                public String next() {
-                    return this.idExtractor.apply(this.iteratorToWrap.next());
-                }
-            }
-
+    public IdExtractingIterable(Iterable<Object> iterableToWrap,
+        Function<Object, String> idExtractor) {
+      this.iterableToWrap = iterableToWrap;
+      this.idExtractor = idExtractor;
     }
 
 
-    @SuppressWarnings("unchecked")
-    protected Iterable<String> getPractitionerSubjectIds(String practitionerRef) {
-        this.subjectType = "Patient";
-
-        if (practitionerRef == null) {
-            return getAllSubjectIds();
-        }
-
-        if (!practitionerRef.contains("/")) {
-            practitionerRef = "Practitioner/" + practitionerRef;
-        }
-
-        Iterable<Object> subjectRetrieve = this.getDataProvider().retrieve("Practitioner", "generalPractitioner",
-                practitionerRef, subjectType, null, null, null, null, null, null, null, null);
-
-        return new IdExtractingIterable(subjectRetrieve, idGet);
+    @Override
+    public Iterator<String> iterator() {
+      return new SubjectIterator(this.iterableToWrap.iterator(), this.idExtractor);
     }
+
+    class SubjectIterator implements Iterator<String> {
+      Iterator<Object> iteratorToWrap;
+      Function<Object, String> idExtractor;
+
+      public SubjectIterator(Iterator<Object> iteratorToWrap,
+          Function<Object, String> idExtractor) {
+        this.iteratorToWrap = iteratorToWrap;
+        this.idExtractor = idExtractor;
+      }
+
+      @Override
+      public boolean hasNext() {
+        return this.iteratorToWrap.hasNext();
+      }
+
+      @Override
+      public String next() {
+        return this.idExtractor.apply(this.iteratorToWrap.next());
+      }
+    }
+  }
 }

@@ -17,24 +17,24 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 @Named
 public class FhirRestRetrieveProviderFactory implements TypedRetrieveProviderFactory {
 
-    FhirContext fhirContext;
-    ClientFactory clientFactory;
+  FhirContext fhirContext;
+  ClientFactory clientFactory;
 
-    @Inject
-    public FhirRestRetrieveProviderFactory(FhirContext fhirContext, ClientFactory clientFactory){
-        this.fhirContext = fhirContext;
-        this.clientFactory = clientFactory;
-    }
+  @Inject
+  public FhirRestRetrieveProviderFactory(FhirContext fhirContext, ClientFactory clientFactory) {
+    this.fhirContext = fhirContext;
+    this.clientFactory = clientFactory;
+  }
 
-    @Override
-    public String getType() {
-        return Constants.HL7_FHIR_REST;
-    }
+  @Override
+  public String getType() {
+    return Constants.HL7_FHIR_REST;
+  }
 
-    @Override
-    public RetrieveProvider create(String url, List<String> headers) {
-       IGenericClient fhirClient = this.clientFactory.create(url, headers);
-       return new RestFhirRetrieveProvider(new SearchParameterResolver(this.fhirContext), fhirClient);
-    }
-    
+  @Override
+  public RetrieveProvider create(String url, List<String> headers) {
+    IGenericClient fhirClient = this.clientFactory.create(url, headers);
+    return new RestFhirRetrieveProvider(new SearchParameterResolver(this.fhirContext), fhirClient);
+  }
+
 }

@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
+  <groupId>org.opencds.cqf.cql</groupId>
+  <artifactId>evaluator.spring</artifactId>
+  <version>3.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>evaluator.spring</name>
+  <description>CQL Evaluator - Spring Confguration</description>
+
+  <parent>
     <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.spring</artifactId>
-    <version>2.7.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <artifactId>evaluator.shared</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+  </parent>
 
-    <name>evaluator.spring</name>
-    <description>CQL Evaluator - Spring Confguration</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.builder</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+    </dependency>
 
-    <parent>
-        <groupId>org.opencds.cqf.cql</groupId>
-        <artifactId>evaluator.shared</artifactId>
-        <version>2.7.0-SNAPSHOT</version>
-    </parent>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.library</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.expression</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.measure</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.measure-hapi</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+    </dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator</artifactId>
-            <version>2.7.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.builder</artifactId>
-            <version>2.7.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.library</artifactId>
-            <version>2.7.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.expression</artifactId>
-            <version>2.7.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.measure</artifactId>
-            <version>2.7.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.measure-hapi</artifactId>
-            <version>2.7.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-    </dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+  </dependencies>
 </project>

@@ -12,14 +12,14 @@ import org.hl7.fhir.r4.model.Resource;
  * This class consists exclusively of static methods that assist with managing contained FHIR
  * Resources.
  *
- * The FHIR specification does not allow contained resources to contain additional resources:
- * &gt; Contained resources SHALL NOT contain additional contained resources.
+ * The FHIR specification does not allow contained resources to contain additional resources: &gt;
+ * Contained resources SHALL NOT contain additional contained resources.
  * https://www.hl7.org/fhir/references.html#contained
  *
  * When returning a resource from an annotated method that responds to an incoming request any
- * resources contained in another resource will be removed.  `liftContainedResourcesToParent` in
- * this class will move all contained resources to the parent so they are present in responses
- * to clients.
+ * resources contained in another resource will be removed. `liftContainedResourcesToParent` in this
+ * class will move all contained resources to the parent so they are present in responses to
+ * clients.
  */
 public class ContainedHelper {
 
@@ -30,10 +30,13 @@ public class ContainedHelper {
    * @return the modified parent resource
    */
   public static DomainResource liftContainedResourcesToParent(DomainResource resource) {
-    getContainedResourcesInContainedResources(resource)
-        .forEach(resource::addContained);   // add them to the parent
+    getContainedResourcesInContainedResources(resource).forEach(resource::addContained); // add
+                                                                                         // them
+                                                                                         // to
+                                                                                         // the
+                                                                                         // parent
 
-    return resource;  // Return the resource to allow for method chaining
+    return resource; // Return the resource to allow for method chaining
   }
 
   /**
@@ -52,6 +55,7 @@ public class ContainedHelper {
   /**
    * Returns all contained resources, including resources directly contained on the parent and
    * resources contained on any other contained resource
+   *
    * @param resource the parent resource
    * @return list of all contained resources
    */
@@ -69,10 +73,11 @@ public class ContainedHelper {
     if (!(resource instanceof DomainResource)) {
       return Stream.empty();
     }
-    return ((DomainResource) resource)
-        .getContained() // We don't need to re-add any resources that are already on the parent.
-        .stream()
-        .flatMap(ContainedHelper::streamAllContainedResources);  // Get the resources contained
+    return ((DomainResource) resource).getContained() // We don't need to re-add any resources
+                                                      // that are already on the parent.
+        .stream().flatMap(ContainedHelper::streamAllContainedResources); // Get the
+                                                                         // resources
+                                                                         // contained
   }
 
   /**
@@ -84,10 +89,7 @@ public class ContainedHelper {
     }
     List<Resource> contained = ((DomainResource) resource).getContained();
 
-    return Stream
-        .concat(contained.stream(),
-            contained
-                .stream()
-                .flatMap(ContainedHelper::streamAllContainedResources));
+    return Stream.concat(contained.stream(),
+        contained.stream().flatMap(ContainedHelper::streamAllContainedResources));
   }
 }

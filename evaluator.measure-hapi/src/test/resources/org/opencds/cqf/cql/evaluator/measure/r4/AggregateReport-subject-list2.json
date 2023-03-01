@@ -5,24 +5,28 @@
     {
       "resourceType": "List",
       "id": "subject-list-group-group-1-initial-population",
-      "entry": [  {
-        "item": {
-          "reference": "Patient/denom-EXM74-strat1-case2"
+      "entry": [
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case2"
+          }
+        },
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat1-case3"
+          }
         }
-      } ,{
-        "item": {
-          "reference": "Patient/denom-EXM74-strat1-case3"
-        }
-      } ]
+      ]
     },
     {
       "resourceType": "List",
       "id": "subject-list-group-group-1-denominator",
-      "entry": [ {
-        "item": {
-          "reference": "Patient/denom-EXM74-strat3-case6"
-        }
-      },
+      "entry": [
+        {
+          "item": {
+            "reference": "Patient/denom-EXM74-strat3-case6"
+          }
+        },
         {
           "item": {
             "reference": "Patient/numer-EXM74-strat2-case7"
@@ -52,7 +56,8 @@
           "item": {
             "reference": "Patient/numer-EXM74-strat3-case12"
           }
-        } ]
+        }
+      ]
     },
     {
       "resourceType": "Observation",
@@ -100,10 +105,12 @@
     "end": "2020-01-01T23:59:59-07:00"
   },
   "improvementNotation": {
-    "coding": [ {
-      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
-      "code": "increase"
-    } ]
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+        "code": "increase"
+      }
+    ]
   },
   "group": [
     {

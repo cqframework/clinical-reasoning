@@ -10,50 +10,50 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 
 public class PrivateCachingTerminologyProviderDecorator implements TerminologyProvider {
 
-    private Map<String, Iterable<Code>> valueSetIndexById = new HashMap<>();
+  private Map<String, Iterable<Code>> valueSetIndexById = new HashMap<>();
 
-    private TerminologyProvider innerProvider;
+  private TerminologyProvider innerProvider;
 
-    public PrivateCachingTerminologyProviderDecorator(TerminologyProvider terminologyProvider) {
-        this.innerProvider = terminologyProvider;
+  public PrivateCachingTerminologyProviderDecorator(TerminologyProvider terminologyProvider) {
+    this.innerProvider = terminologyProvider;
+  }
+
+  @Override
+  public boolean in(Code code, ValueSetInfo valueSet) {
+    if (!valueSetIndexById.containsKey(valueSet.getId())) {
+      // This will cache the ValueSet;
+      this.expand(valueSet);
     }
 
-    @Override
-    public boolean in(Code code, ValueSetInfo valueSet) {
-        if (!valueSetIndexById.containsKey(valueSet.getId())) {
-            // This will cache the ValueSet;
-            this.expand(valueSet);
-        }
+    Iterable<Code> codes = valueSetIndexById.get(valueSet.getId());
 
-        Iterable<Code> codes = valueSetIndexById.get(valueSet.getId());
-
-        if (codes == null) {
-            return false;
-        }
-
-        // TODO: Handle Versions
-        for (Code c : codes) {
-            if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
-                return true;
-            }
-        }
-
-        return false;
+    if (codes == null) {
+      return false;
     }
 
-    @Override
-    public Iterable<Code> expand(ValueSetInfo valueSet) {
-        if (!valueSetIndexById.containsKey(valueSet.getId())) {
-            valueSetIndexById.put(valueSet.getId(), this.innerProvider.expand(valueSet));
-        }
-
-        return valueSetIndexById.get(valueSet.getId());
+    // TODO: Handle Versions
+    for (Code c : codes) {
+      if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
+        return true;
+      }
     }
 
-    @Override
-    public Code lookup(Code code, CodeSystemInfo codeSystem) {
-        return this.innerProvider.lookup(code, codeSystem);
+    return false;
+  }
+
+  @Override
+  public Iterable<Code> expand(ValueSetInfo valueSet) {
+    if (!valueSetIndexById.containsKey(valueSet.getId())) {
+      valueSetIndexById.put(valueSet.getId(), this.innerProvider.expand(valueSet));
     }
+
+    return valueSetIndexById.get(valueSet.getId());
+  }
+
+  @Override
+  public Code lookup(Code code, CodeSystemInfo codeSystem) {
+    return this.innerProvider.lookup(code, codeSystem);
+  }
 
 }
 

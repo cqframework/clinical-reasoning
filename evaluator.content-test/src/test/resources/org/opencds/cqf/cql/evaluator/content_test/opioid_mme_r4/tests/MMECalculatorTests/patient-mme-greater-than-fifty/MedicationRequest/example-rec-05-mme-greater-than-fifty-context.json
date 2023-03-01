@@ -3,14 +3,16 @@
   "id": "example-rec-05-mme-greater-than-fifty-context",
   "status": "active",
   "intent": "order",
-  "category": [{
-    "coding": [
-      {
-        "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-        "code": "community"
-      }
-    ]
-  }],
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+          "code": "community"
+        }
+      ]
+    }
+  ],
   "medicationCodeableConcept": {
     "coding": [
       {
@@ -48,14 +50,16 @@
         }
       },
       "asNeededBoolean": false,
-      "doseAndRate": [{
-        "doseQuantity": {
-          "value": 1.0,
-          "unit": "patch",
-          "system": "http://unitsofmeasure.org",
-          "code": "{patch}"
+      "doseAndRate": [
+        {
+          "doseQuantity": {
+            "value": 1.0,
+            "unit": "patch",
+            "system": "http://unitsofmeasure.org",
+            "code": "{patch}"
+          }
         }
-      }]
+      ]
     }
   ],
   "dispenseRequest": {

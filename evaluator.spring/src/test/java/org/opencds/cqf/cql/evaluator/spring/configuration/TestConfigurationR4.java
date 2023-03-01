@@ -12,9 +12,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 @Import(EvaluatorConfiguration.class)
 public class TestConfigurationR4 {
 
-    @Bean
-    FhirContext fhirContext() {
-        return FhirContext.forCached(FhirVersionEnum.R4);
-    }
-    
+  @Bean
+  FhirContext fhirContext() {
+    return FhirContext.forCached(FhirVersionEnum.R4);
+  }
+
 }

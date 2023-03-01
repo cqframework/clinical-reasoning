@@ -8,16 +8,16 @@ import org.testng.annotations.Test;
 
 //
 
-public class CqlEvaluatorTest{
+public class CqlEvaluatorTest {
 
-    @Test
-    public void test_evaluator_returns_expressionValue() {
-        // Observation ob = new Observation();
-        // IntegerType value = new IntegerType(5);
-        // ob.setValue(value);
-        //Object result = ExpressionEvaluator.evaluateExpression(ob, "Observation.value");
-        // assertNotNull(result);
-        // assertEquals(value, result);
-    }
-       
+  @Test
+  public void test_evaluator_returns_expressionValue() {
+    // Observation ob = new Observation();
+    // IntegerType value = new IntegerType(5);
+    // ob.setValue(value);
+    // Object result = ExpressionEvaluator.evaluateExpression(ob, "Observation.value");
+    // assertNotNull(result);
+    // assertEquals(value, result);
+  }
+
 }

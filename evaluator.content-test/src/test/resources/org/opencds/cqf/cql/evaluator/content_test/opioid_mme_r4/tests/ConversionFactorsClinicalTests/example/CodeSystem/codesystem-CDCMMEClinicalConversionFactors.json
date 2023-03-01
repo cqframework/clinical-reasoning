@@ -7,67 +7,80 @@
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablecodesystem"
     ]
   },
-  "extension": [ {
-    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
-    "valueCode": "shareable"
-  }, {
-    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
-    "valueCode": "publishable"
-  }, {
-    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
-    "valueCode": "structured"
-  }, {
-    "url": "http://hl7.org/fhir/StructureDefinition/codesystem-sourceReference",
-    "valueUri": "https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf"
-  } ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+      "valueCode": "shareable"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+      "valueCode": "publishable"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+      "valueCode": "structured"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/codesystem-sourceReference",
+      "valueUri": "https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf"
+    }
+  ],
   "version": "3.0.0",
   "name": "CDCMMEClinicalConversionFactors",
   "title": "CDC MME Clinical Conversion Factors",
   "status": "active",
   "experimental": "false",
   "description": "This Code System Supplement defines clinical conversion factors for calculating Morphine Milligram Equivalence (MME), as described in the CDC Opioid Prescribing Guideline. The supplement defines conversions factors for ingredients in one of 3 ways: 1, as a direct conversion factor for the ingredient, 2, as a dose-form-specific conversion factor for the ingredient, and 3, as a dose-quantity-ranged conversion factor for the ingredient. See the descriptions for each property for information on how the values are represented for the different conversion factors. For a given ingredient, only one of 'dose-form' or 'dose-range' will be present, with or without an ingredient-specific conversion factor. The properties together will enable a unique conversion factor to be determined if the input is within the expected range. If the input is outside the expected range, and there is no ingredient-specific conversion-factor specified, implementations should indicate a conversion factor could not be determined from the supplied information. All conversion factors supplied in this supplement are in 'mg/d'.",
-  "useContext": [ {
-    "code": {
-      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
-      "code": "focus",
-      "display": "Clinical Focus"
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "182888003",
+            "display": "Medication requested (situation)"
+          }
+        ]
+      }
     },
-    "valueCodeableConcept": {
-      "coding": [ {
-        "system": "http://snomed.info/sct",
-        "code": "182888003",
-        "display": "Medication requested (situation)"
-      } ]
-    }
-  }, {
-    "code": {
-      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
-      "code": "focus",
-      "display": "Clinical Focus"
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "82423001",
+            "display": "Chronic pain (finding)"
+          }
+        ]
+      }
     },
-    "valueCodeableConcept": {
-      "coding": [ {
-        "system": "http://snomed.info/sct",
-        "code": "82423001",
-        "display": "Chronic pain (finding)"
-      } ]
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "task",
+        "display": "Task"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://fhir.org/guides/cdc/opioid-mme-r4/CodeSystem/CDCMMEUsageContextCodes",
+            "code": "mme-calculation",
+            "display": "MME Calculation"
+          }
+        ]
+      }
     }
-  }, {
-    "code": {
-      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
-      "code": "task",
-      "display": "Task"
-    },
-    "valueCodeableConcept": {
-      "coding": [
-        {
-          "system": "http://fhir.org/guides/cdc/opioid-mme-r4/CodeSystem/CDCMMEUsageContextCodes",
-          "code": "mme-calculation",
-          "display": "MME Calculation"
-        }
-      ]
-    }
-  } ],
+  ],
   "caseSensitive": false,
   "content": "supplement",
   "supplements": "http://www.nlm.nih.gov/research/umls/rxnorm",
@@ -92,34 +105,42 @@
     {
       "code": "2670",
       "display": "Codeine",
-      "property": [{
-        "code": "conversion-factor",
-        "valueDecimal": 0.15
-      }]
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 0.15
+        }
+      ]
     },
     {
       "code": "4337",
       "display": "Fentanyl",
-      "property": [{
-        "code": "dose-form-conversion-factor",
-        "valueString": "316987:7200"
-      }]
+      "property": [
+        {
+          "code": "dose-form-conversion-factor",
+          "valueString": "316987:7200"
+        }
+      ]
     },
     {
       "code": "5489",
       "display": "Hydrocodone",
-      "property": [{
-        "code": "conversion-factor",
-        "valueDecimal": 1
-      }]
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 1
+        }
+      ]
     },
     {
       "code": "3423",
       "display": "Hydromorphone",
-      "property": [{
-        "code": "conversion-factor",
-        "valueDecimal": 4
-      }]
+      "property": [
+        {
+          "code": "conversion-factor",
+          "valueDecimal": 4
+        }
+      ]
     },
     {
       "code": "6813",

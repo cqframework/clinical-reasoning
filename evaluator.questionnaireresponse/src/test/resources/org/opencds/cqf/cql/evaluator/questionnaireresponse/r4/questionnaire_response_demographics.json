@@ -25,17 +25,13 @@
       "linkId": "patient.id",
       "definition": "Patient.id",
       "text": "(internal use)",
-      "answer": [
-
-      ]
+      "answer": []
     },
     {
       "linkId": "patient.birthDate",
       "definition": "Patient.birthDate",
       "text": "Date of birth",
-      "answer": [
-
-      ]
+      "answer": []
     },
     {
       "linkId": "patient.name",
@@ -46,17 +42,13 @@
           "linkId": "patient.name.family",
           "definition": "Patient.name.family",
           "text": "Family name",
-          "answer": [
-
-          ]
+          "answer": []
         },
         {
           "linkId": "patient.name.given",
           "definition": "Patient.name.given",
           "text": "Given name(s)",
-          "answer": [
-
-          ]
+          "answer": []
         }
       ]
     },
@@ -87,17 +79,13 @@
           "linkId": "relative.id",
           "definition": "RelatedPerson.id",
           "text": "(internal use)",
-          "answer": [
-
-          ]
+          "answer": []
         },
         {
           "linkId": "relative.relationship",
           "definition": "RelatedPerson.relationship",
           "text": "Name(s)",
-          "answer": [
-
-          ]
+          "answer": []
         },
         {
           "extension": [
@@ -118,17 +106,13 @@
               "linkId": "relative.name.family",
               "definition": "RelatedPerson.name.family",
               "text": "Family name",
-              "answer": [
-
-              ]
+              "answer": []
             },
             {
               "linkId": "relative.name.given",
               "definition": "RelatedPerson.name.given",
               "text": "Given name(s)",
-              "answer": [
-
-              ]
+              "answer": []
             }
           ]
         }

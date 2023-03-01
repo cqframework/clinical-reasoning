@@ -1,0 +1,29 @@
+{
+  "resourceType": "ValueSet",
+  "id": "value-set-three",
+  "url": "http://localhost/fhir/ValueSet/value-set-three",
+  "name": "ValueSetThree",
+  "title": "ValueSetThree",
+  "expansion": {
+    "contains": [
+      {
+        "system": "http://localhost/unit-test",
+        "version": "2018-03",
+        "code": "777",
+        "display": "777 Code"
+      },
+      {
+        "system": "http://localhost/unit-test",
+        "version": "2018-03",
+        "code": "888",
+        "display": "888 Code"
+      },
+      {
+        "system": "http://localhost/unit-test-2",
+        "version": "2018-03",
+        "code": "999",
+        "display": "999 Code"
+      }
+    ]
+  }
+}

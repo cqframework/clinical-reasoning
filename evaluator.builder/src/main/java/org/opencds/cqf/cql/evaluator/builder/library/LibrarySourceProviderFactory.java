@@ -29,89 +29,95 @@ import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import ca.uhn.fhir.context.FhirContext;
 
 @Named
-public class LibrarySourceProviderFactory implements org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory {
+public class LibrarySourceProviderFactory
+    implements org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory {
 
-    protected Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories;
-    protected FhirContext fhirContext;
-    protected AdapterFactory adapterFactory;
-    protected LibraryVersionSelector libraryVersionSelector;
+  protected Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories;
+  protected FhirContext fhirContext;
+  protected AdapterFactory adapterFactory;
+  protected LibraryVersionSelector libraryVersionSelector;
 
-    protected Map<VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
+  protected Map<VersionedIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
-    @Inject
-    public LibrarySourceProviderFactory(FhirContext fhirContext, AdapterFactory adapterFactory,
-            Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories, LibraryVersionSelector libraryVersionSelector) {
-        this.librarySourceProviderFactories = requireNonNull(librarySourceProviderFactories,
-                "librarySourceProviderFactories can not be null");
-        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
-        this.libraryVersionSelector = requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
+  @Inject
+  public LibrarySourceProviderFactory(FhirContext fhirContext, AdapterFactory adapterFactory,
+      Set<TypedLibrarySourceProviderFactory> librarySourceProviderFactories,
+      LibraryVersionSelector libraryVersionSelector) {
+    this.librarySourceProviderFactories = requireNonNull(librarySourceProviderFactories,
+        "librarySourceProviderFactories can not be null");
+    this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+    this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
+    this.libraryVersionSelector =
+        requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
+  }
+
+  @Override
+  public LibrarySourceProvider create(EndpointInfo endpointInfo) {
+    requireNonNull(endpointInfo, "endpointInfo can not be null");
+    if (endpointInfo.getAddress() == null) {
+      throw new IllegalArgumentException("endpointInfo must have a url defined");
     }
 
-    @Override
-    public LibrarySourceProvider create(EndpointInfo endpointInfo) {
-        requireNonNull(endpointInfo, "endpointInfo can not be null");
-        if (endpointInfo.getAddress() == null) {
-            throw new IllegalArgumentException("endpointInfo must have a url defined");
-        }
-
-        if (endpointInfo.getType() == null) {
-            endpointInfo.setType(detectType(endpointInfo.getAddress()));
-        }
-
-        LibrarySourceProvider contentProvider = this.getProvider(endpointInfo.getType(), endpointInfo.getAddress(),
-                endpointInfo.getHeaders());
-
-        return contentProvider;
+    if (endpointInfo.getType() == null) {
+      endpointInfo.setType(detectType(endpointInfo.getAddress()));
     }
 
-    protected IBaseCoding detectType(String url) {
-        if (isFileUri(url)) {
-            // Attempt to auto-detect the type of files.
-            try {
-                Path directoryPath = null;
-                try {
-                    directoryPath = Paths.get(new URL(url).toURI());
-                }
-                catch (Exception e) {
-                    directoryPath = Paths.get(url);
-                }
+    LibrarySourceProvider contentProvider = this.getProvider(endpointInfo.getType(),
+        endpointInfo.getAddress(), endpointInfo.getHeaders());
 
-                File directory = new File(directoryPath.toAbsolutePath().toString());
+    return contentProvider;
+  }
 
-                File[] files = directory.listFiles((d, name) -> name.endsWith(".cql"));
+  protected IBaseCoding detectType(String url) {
+    if (isFileUri(url)) {
+      // Attempt to auto-detect the type of files.
+      try {
+        Path directoryPath = null;
+        try {
+          directoryPath = Paths.get(new URL(url).toURI());
+        } catch (Exception e) {
+          directoryPath = Paths.get(url);
+        }
 
-                if (files != null && files.length > 0) {
-                    return Constants.HL7_CQL_FILES_CODE;
-                } else {
-                    return Constants.HL7_FHIR_FILES_CODE;
-                }
-            } catch (Exception e) {
-                return Constants.HL7_FHIR_FILES_CODE;
-            }
+        File directory = new File(directoryPath.toAbsolutePath().toString());
+
+        File[] files = directory.listFiles((d, name) -> name.endsWith(".cql"));
+
+        if (files != null && files.length > 0) {
+          return Constants.HL7_CQL_FILES_CODE;
         } else {
-            return Constants.HL7_FHIR_REST_CODE;
+          return Constants.HL7_FHIR_FILES_CODE;
         }
+      } catch (Exception e) {
+        return Constants.HL7_FHIR_FILES_CODE;
+      }
+    } else {
+      return Constants.HL7_FHIR_REST_CODE;
+    }
+  }
+
+  protected LibrarySourceProvider getProvider(IBaseCoding connectionType, String url,
+      List<String> headers) {
+    for (TypedLibrarySourceProviderFactory factory : this.librarySourceProviderFactories) {
+      if (factory.getType().equals(connectionType.getCode())) {
+        return factory.create(url, headers);
+      }
     }
 
-    protected LibrarySourceProvider getProvider(IBaseCoding connectionType, String url, List<String> headers) {
-        for (TypedLibrarySourceProviderFactory factory : this.librarySourceProviderFactories) {
-            if (factory.getType().equals(connectionType.getCode())) {
-                return factory.create(url, headers);
-            }
-        }
+    throw new IllegalArgumentException("invalid connectionType for loading Libraries");
+  }
 
-        throw new IllegalArgumentException("invalid connectionType for loading Libraries");
+  @Override
+  public LibrarySourceProvider create(IBaseBundle contentBundle) {
+    requireNonNull(contentBundle, "contentBundle can not be null");
+
+    if (!contentBundle.getStructureFhirVersionEnum()
+        .equals(this.fhirContext.getVersion().getVersion())) {
+      throw new IllegalArgumentException(
+          "The FHIR version of dataBundle and the FHIR context do not match");
     }
 
-    @Override
-    public LibrarySourceProvider create(IBaseBundle contentBundle) {
-        requireNonNull(contentBundle, "contentBundle can not be null");
-
-        if (!contentBundle.getStructureFhirVersionEnum().equals(this.fhirContext.getVersion().getVersion())) {
-            throw new IllegalArgumentException("The FHIR version of dataBundle and the FHIR context do not match");
-        }
-
-        return new BundleFhirLibrarySourceProvider(this.fhirContext, contentBundle, this.adapterFactory, this.libraryVersionSelector);
-    }
+    return new BundleFhirLibrarySourceProvider(this.fhirContext, contentBundle, this.adapterFactory,
+        this.libraryVersionSelector);
+  }
 }

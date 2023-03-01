@@ -1,23 +1,30 @@
 {
   "resourceType": "Bundle",
   "type": "collection",
-  "entry": [ {
-    "resource": {
-      "resourceType": "RequestGroup",
-      "id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
-      "instantiatesCanonical": [ "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0" ],
-      "status": "draft",
-      "intent": "proposal",
-      "subject": {
-        "reference": "patient-CdsHooksMultipleActions"
-      },
-      "action": [ {
-        "title": "Summary",
-        "description": "Detail"
-      }, {
-        "title": "Summary 1",
-        "description": "Detail 1"
-      } ]
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "RequestGroup",
+        "id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
+        "instantiatesCanonical": [
+          "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+        ],
+        "status": "draft",
+        "intent": "proposal",
+        "subject": {
+          "reference": "patient-CdsHooksMultipleActions"
+        },
+        "action": [
+          {
+            "title": "Summary",
+            "description": "Detail"
+          },
+          {
+            "title": "Summary 1",
+            "description": "Detail 1"
+          }
+        ]
+      }
     }
-  } ]
+  ]
 }

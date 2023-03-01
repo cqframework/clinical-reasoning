@@ -12,9 +12,9 @@ import ca.uhn.fhir.context.FhirContext;
 @ComponentScan("org.opencds.cqf.cql.evaluator.library")
 public class LibraryConfiguration {
 
-    @Bean
-    FhirTypeConverter fhirTypeConverter(FhirContext fhirContext) {
-        return new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-    }
-    
+  @Bean
+  FhirTypeConverter fhirTypeConverter(FhirContext fhirContext) {
+    return new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+  }
+
 }

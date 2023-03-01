@@ -261,7 +261,9 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
        while (subjectIterator.hasNext()){
            ids.add(subjectIterator.next());
            if (ids.size() % threadBatchSize == 0) {
-               futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, ids, fhirDal,
+               var idsTr = new ArrayList<String>();
+               idsTr.addAll(ids);
+               futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, idsTr, fhirDal,
                        contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData));
                ids.clear();
            }

@@ -43,7 +43,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         int i =0;
         if (measureEvalType == null) {
             while (subjectIds.iterator().hasNext()){
-                i = i++;
+                i = i+1;
                 if (i>1){
                     measureEvalType = MeasureEvalType.POPULATION;
                     break; // exit once we know >1

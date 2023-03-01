@@ -1,12 +1,14 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+
 
 import javax.inject.Inject;
 import javax.inject.Named;

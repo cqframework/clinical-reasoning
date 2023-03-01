@@ -9,6 +9,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,9 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
       IBaseResource dataEndpoint) {
     return apply(theId, subjectId, encounterId, practitionerId, organizationId, userType,
-        userLanguage, userTaskContext, setting, settingContext, parameters, libraryEngine);
+        userLanguage, userTaskContext, setting, settingContext, parameters,
+        new LibraryEngine(fhirContext, Repositories.federated(fhirContext, dataEndpoint,
+            contentEndpoint, terminologyEndpoint)));
   }
 
   @SuppressWarnings("unchecked")

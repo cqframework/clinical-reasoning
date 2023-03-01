@@ -14,6 +14,7 @@ import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +76,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
         .create(fhirContext.getVersion().getVersion().getFhirVersionString());
   }
 
-  public abstract LibraryEngine buildLibraryEngine(IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
-
   public abstract T resolvePlanDefinition(IIdType theId);
 
   public abstract IBaseResource applyPlanDefinition(T planDefinition);
@@ -86,16 +84,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public abstract IBaseResource transformToBundle(IBaseResource requestGroup);
 
-  // public abstract Object resolveParameterValue(IBase value);
-
   public abstract void resolveCdsHooksDynamicValue(IBaseResource requestGroup, Object value,
       String path);
 
-  // public abstract IBaseResource getSubject();
-
   public abstract void extractQuestionnaireResponse();
-
-  public abstract void createDynamicQuestionnaire(String theId);
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
@@ -105,8 +97,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
       IBaseResource terminologyEndpoint) {
     return apply(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
-        useServerData, bundle, prefetchData,
-        buildLibraryEngine(dataEndpoint, contentEndpoint, terminologyEndpoint));
+        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, Repositories
+            .federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
   }
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
@@ -136,7 +128,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.libraryEngine = libraryEngine;
     this.containResources = true;
     extractQuestionnaireResponse();
-    createDynamicQuestionnaire(theId.getIdPart());
     return transformToCarePlan(applyPlanDefinition(resolvePlanDefinition(theId)));
   }
 
@@ -148,8 +139,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
       IBaseResource terminologyEndpoint) {
     return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
-        useServerData, bundle, prefetchData,
-        buildLibraryEngine(dataEndpoint, contentEndpoint, terminologyEndpoint));
+        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, Repositories
+            .federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
   }
 
   public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
@@ -174,7 +165,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.libraryEngine = libraryEngine;
     this.containResources = false;
     extractQuestionnaireResponse();
-    createDynamicQuestionnaire(theId.getIdPart());
     return transformToBundle(applyPlanDefinition(resolvePlanDefinition(theId)));
   }
 

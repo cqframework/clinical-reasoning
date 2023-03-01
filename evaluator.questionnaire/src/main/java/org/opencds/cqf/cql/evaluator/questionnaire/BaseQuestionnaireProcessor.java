@@ -6,6 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
   protected String patientId;
   protected IBaseParameters parameters;
   protected IBaseBundle bundle;
+  protected static final String subjectType = "Patient";
 
   protected BaseQuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal) {
     this.fhirContext = fhirContext;
@@ -32,27 +34,25 @@ public abstract class BaseQuestionnaireProcessor<T> {
     this.fhirDal = fhirDal;
   }
 
-  public abstract LibraryEngine buildLibraryEngine(IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
-
-  public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
+  public T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
       IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
-      IBaseResource terminologyEndpoint);
+      IBaseResource terminologyEndpoint) {
+    return prePopulate(questionnaire, patientId, parameters, bundle, new LibraryEngine(fhirContext,
+        Repositories.federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+  }
 
   public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
       IBaseBundle bundle, LibraryEngine libraryEngine);
 
-  public abstract IBaseResource populate(T questionnaire, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
+  public IBaseResource populate(T questionnaire, String patientId, IBaseParameters parameters,
+      IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    return populate(questionnaire, patientId, parameters, bundle, new LibraryEngine(fhirContext,
+        Repositories.federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+  }
 
   public abstract IBaseResource populate(T questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine);
 
-  public abstract T generateQuestionnaire(String theId, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint);
-
-  public abstract T generateQuestionnaire(String theId, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine);
+  public abstract T generateQuestionnaire(String theId);
 }

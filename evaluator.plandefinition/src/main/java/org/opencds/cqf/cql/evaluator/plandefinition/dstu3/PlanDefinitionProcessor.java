@@ -17,8 +17,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DomainResource;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Goal;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -50,13 +50,11 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
-import org.opencds.cqf.fhir.utility.Repositories;
-import org.opencds.cqf.fhir.utility.RestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +67,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   protected ActivityDefinitionProcessor activityDefinitionProcessor;
   private final QuestionnaireProcessor questionnaireProcessor;
   private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
+  private QuestionnaireItemGenerator questionnaireItemGenerator;
 
   public PlanDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal,
       ActivityDefinitionProcessor activityDefinitionProcessor,
@@ -91,19 +90,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
-  public LibraryEngine buildLibraryEngine(IBaseResource dataEndpoint, IBaseResource contentEndpoint,
-      IBaseResource terminologyEndpoint) {
-    var data = new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) dataEndpoint));
-    var content = new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) contentEndpoint));
-    var terminology =
-        new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) terminologyEndpoint));
-
-    var repository = Repositories.proxy(data, content, terminology);
-
-    return new LibraryEngine(fhirContext, repository);
-  }
-
-  @Override
   public void extractQuestionnaireResponse() {
     var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
         .filter(entry -> entry.getResource().fhirType()
@@ -122,12 +108,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
-  public void createDynamicQuestionnaire(String theId) {
-    this.questionnaire = questionnaireProcessor.generateQuestionnaire(theId, patientId, parameters,
-        bundle, libraryEngine);
-  }
-
-  @Override
   public PlanDefinition resolvePlanDefinition(IIdType theId) {
     var basePlanDefinition = this.fhirDal.read(theId);
 
@@ -138,6 +118,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             .orElse(null);
 
     logger.info("Performing $apply operation on {}", theId);
+
+    var questionnaire = new Questionnaire();
+    questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), theId.getIdPart()));
+    this.questionnaire = questionnaire;
+    this.questionnaireItemGenerator = new QuestionnaireItemGenerator(fhirDal, theId.getIdPart(),
+        parameters, bundle, libraryEngine);
 
     return planDefinition;
   }
@@ -270,7 +256,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     if (action.hasInput()) {
       for (var actionInput : action.getInput()) {
         if (actionInput.hasProfile()) {
-          ((Questionnaire) this.questionnaire).addItem(this.questionnaireProcessor
+          ((Questionnaire) this.questionnaire).addItem(this.questionnaireItemGenerator
               .generateItem(actionInput, ((Questionnaire) this.questionnaire).getItem().size()));
         }
       }
@@ -299,14 +285,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       logger.debug("Resolving definition {}", action.getDefinition().getReference());
       var definition = action.getDefinition();
       var resourceName = getResourceName(definition);
-      switch (requireNonNull(resourceName)) {
-        case "PlanDefinition":
+      switch (FHIRAllTypes.fromCode(requireNonNull(resourceName))) {
+        case PLANDEFINITION:
           applyNestedPlanDefinition(requestGroup, definition, action);
           break;
-        case "ActivityDefinition":
+        case ACTIVITYDEFINITION:
           applyActivityDefinition(planDefinition, requestGroup, definition, action);
           break;
-        case "Questionnaire":
+        case QUESTIONNAIRE:
           applyQuestionnaireDefinition(planDefinition, requestGroup, definition, action);
           break;
         default:
@@ -325,7 +311,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       if (referenceToContained) {
         result = resolveContained(planDefinition, definition.getReference());
       } else {
-        var iterator = fhirDal.searchByUrl("Questionnaire", definition.getReference()).iterator();
+        var iterator = fhirDal
+            .searchByUrl(FHIRAllTypes.QUESTIONNAIRE.toCode(), definition.getReference()).iterator();
         if (!iterator.hasNext()) {
           throw new FHIRException("No questionnaire found for definition: " + definition);
         }

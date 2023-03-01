@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -23,38 +20,14 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
-import org.opencds.cqf.fhir.utility.Repositories;
-import org.opencds.cqf.fhir.utility.RestRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
   public QuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal) {
     super(fhirContext, fhirDal);
-  }
-
-  public LibraryEngine buildLibraryEngine(IBaseResource dataEndpoint, IBaseResource contentEndpoint,
-      IBaseResource terminologyEndpoint) {
-    var data = new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) dataEndpoint));
-    var content = new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) contentEndpoint));
-    var terminology =
-        new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) terminologyEndpoint));
-
-    var repository = Repositories.proxy(data, content, terminology);
-
-    return new LibraryEngine(fhirContext, repository);
-  }
-
-  @Override
-  public Questionnaire prePopulate(Questionnaire questionnaire, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-    var libraryEngine = buildLibraryEngine(dataEndpoint, contentEndpoint, terminologyEndpoint);
-
-    return prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
   }
 
   @Override
@@ -122,13 +95,6 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
 
   @Override
   public IBaseResource populate(Questionnaire questionnaire, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-    return populate(questionnaire, patientId, parameters, bundle, libraryEngine);
-  }
-
-  @Override
-  public IBaseResource populate(Questionnaire questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
     var populatedQuestionnaire =
         prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
@@ -177,28 +143,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   }
 
   @Override
-  public Questionnaire generateQuestionnaire(String theId, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-    return generateQuestionnaire(theId, patientId, parameters, bundle,
-        buildLibraryEngine(dataEndpoint, contentEndpoint, terminologyEndpoint));
-  }
-
-  @Override
-  public Questionnaire generateQuestionnaire(String theId, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-    this.patientId = patientId;
-    this.parameters = parameters;
-    this.bundle = bundle;
-
+  public Questionnaire generateQuestionnaire(String theId) {
     var questionnaire = new Questionnaire();
     questionnaire.setId(new IdType("Questionnaire", theId));
 
     return questionnaire;
-  }
-
-  public Questionnaire.QuestionnaireItemComponent generateItem(DataRequirement actionInput,
-      Integer itemCount) {
-    throw new NotImplementedException();
   }
 }

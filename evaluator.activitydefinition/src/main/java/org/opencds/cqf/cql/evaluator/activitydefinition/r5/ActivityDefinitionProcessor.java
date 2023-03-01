@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableReference;
@@ -18,7 +15,6 @@ import org.hl7.fhir.r5.model.Enumerations.RequestIntent;
 import org.hl7.fhir.r5.model.Enumerations.RequestStatus;
 import org.hl7.fhir.r5.model.MedicationRequest;
 import org.hl7.fhir.r5.model.MedicationRequest.MedicationRequestDoseComponent;
-import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Procedure;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
@@ -28,7 +24,6 @@ import org.hl7.fhir.r5.model.SupplyRequest;
 import org.hl7.fhir.r5.model.Task;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +33,8 @@ public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
-  public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal,
-      LibraryProcessor libraryProcessor) {
-    super(fhirContext, fhirDal, libraryProcessor);
+  public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal) {
+    super(fhirContext, fhirDal);
   }
 
   // For library use
@@ -113,17 +107,17 @@ public class ActivityDefinitionProcessor
     return result;
   }
 
-  @Override
-  public Object resolveParameterValue(IBase value) {
-    if (value == null)
-      return null;
-    return ((Parameters.ParametersParameterComponent) value).getValue();
-  }
+  // @Override
+  // public Object resolveParameterValue(IBase value) {
+  // if (value == null)
+  // return null;
+  // return ((Parameters.ParametersParameterComponent) value).getValue();
+  // }
 
-  @Override
-  public IBaseResource getSubject(String subjectType) {
-    return this.fhirDal.read(new IdType(subjectType, this.subjectId));
-  }
+  // @Override
+  // public IBaseResource getSubject(String subjectType) {
+  // return this.fhirDal.read(new IdType(subjectType, this.subjectId));
+  // }
 
   private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {
     var task = new Task();

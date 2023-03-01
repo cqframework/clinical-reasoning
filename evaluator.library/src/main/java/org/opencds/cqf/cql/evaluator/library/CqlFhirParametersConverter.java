@@ -282,11 +282,8 @@ public class CqlFhirParametersConverter {
         .evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
     if (max.isPresent()) {
       String maxString = max.get().getValueAsString();
-      if (maxString.equals("1")) {
-        return false;
-      }
 
-      return true;
+      return !maxString.equals("1");
     }
 
     Optional<IBaseIntegerDatatype> min = this.fhirPath
@@ -295,7 +292,7 @@ public class CqlFhirParametersConverter {
       return min.get().getValue() > 1;
     }
 
-    return null;
+    return false;
   }
 
   private Object convertToCql(ParametersParameterComponentAdapter ppca) {

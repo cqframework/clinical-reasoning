@@ -8,10 +8,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.FhirClientFhirLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.ClientFactory;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;

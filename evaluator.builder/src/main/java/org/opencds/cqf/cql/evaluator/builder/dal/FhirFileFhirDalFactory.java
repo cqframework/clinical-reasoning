@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.opencds.cqf.cql.evaluator.builder.Constants;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
 import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;

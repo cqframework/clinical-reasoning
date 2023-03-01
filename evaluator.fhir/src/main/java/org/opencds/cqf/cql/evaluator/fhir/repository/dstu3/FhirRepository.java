@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.fhir.repository.r4;
+package org.opencds.cqf.cql.evaluator.fhir.repository.dstu3;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -8,14 +8,14 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirResourceLoader;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class FhirRepository implements Repository {
 
-  FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
+  FhirContext context = FhirContext.forCached(FhirVersionEnum.DSTU3);
   protected IFhirPath fhirPath;
 
   private Map<IdType, IBaseResource> resourceMap;
@@ -181,7 +181,7 @@ public class FhirRepository implements Repository {
 
         case R4:
           var r4String =
-              this.fhirPath.evaluateFirst(resource, "url", org.hl7.fhir.r4.model.UriType.class);
+              this.fhirPath.evaluateFirst(resource, "url", org.hl7.fhir.dstu3.model.UriType.class);
           if (r4String.isPresent() && r4String.get().getValue().equals(url)) {
             returnList.add(resource);
           }
@@ -267,10 +267,5 @@ public class FhirRepository implements Repository {
   public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
       P parameters, Class<B> returnType, Map<String, String> headers) {
     throw new NotImplementedException();
-  }
-
-  @Override
-  public FhirContext fhirContext() {
-    return this.context;
   }
 }

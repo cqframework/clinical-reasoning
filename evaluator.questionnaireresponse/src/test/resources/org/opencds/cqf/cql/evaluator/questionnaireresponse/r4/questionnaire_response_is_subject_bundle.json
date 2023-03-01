@@ -44,6 +44,11 @@
         },
         "effectiveDateTime": "2021-12-01T07:00:00Z",
         "issued": "2021-12-01T07:00:00.000+00:00",
+        "valueQuantity": {
+          "value": 141,
+          "system": "http://unitsofmeasure.org",
+          "code": "cm"
+        },
         "derivedFrom": [
           {
             "reference": "QuestionnaireResponse/questionnaireresponse-sdc-profile-example-multi-subject"
@@ -94,6 +99,11 @@
         },
         "effectiveDateTime": "2021-12-01T07:00:00Z",
         "issued": "2021-12-01T07:00:00.000+00:00",
+        "valueQuantity": {
+          "value": 42.3,
+          "system": "http://unitsofmeasure.org",
+          "code": "kg"
+        },
         "derivedFrom": [
           {
             "reference": "QuestionnaireResponse/questionnaireresponse-sdc-profile-example-multi-subject"
@@ -144,6 +154,11 @@
         },
         "effectiveDateTime": "2021-12-01T07:00:00Z",
         "issued": "2021-12-01T07:00:00.000+00:00",
+        "valueQuantity": {
+          "value": 47,
+          "system": "http://unitsofmeasure.org",
+          "code": "cm"
+        },
         "derivedFrom": [
           {
             "reference": "QuestionnaireResponse/questionnaireresponse-sdc-profile-example-multi-subject"
@@ -194,6 +209,11 @@
         },
         "effectiveDateTime": "2021-12-01T07:00:00Z",
         "issued": "2021-12-01T07:00:00.000+00:00",
+        "valueQuantity": {
+          "value": 8.7,
+          "system": "http://unitsofmeasure.org",
+          "code": "kg"
+        },
         "derivedFrom": [
           {
             "reference": "QuestionnaireResponse/questionnaireresponse-sdc-profile-example-multi-subject"
@@ -244,6 +264,11 @@
         },
         "effectiveDateTime": "2021-12-01T07:00:00Z",
         "issued": "2021-12-01T07:00:00.000+00:00",
+        "valueQuantity": {
+          "value": 109,
+          "system": "http://unitsofmeasure.org",
+          "code": "cm"
+        },
         "derivedFrom": [
           {
             "reference": "QuestionnaireResponse/questionnaireresponse-sdc-profile-example-multi-subject"
@@ -294,6 +319,11 @@
         },
         "effectiveDateTime": "2021-12-01T07:00:00Z",
         "issued": "2021-12-01T07:00:00.000+00:00",
+        "valueQuantity": {
+          "value": 27.3,
+          "system": "http://unitsofmeasure.org",
+          "code": "kg"
+        },
         "derivedFrom": [
           {
             "reference": "QuestionnaireResponse/questionnaireresponse-sdc-profile-example-multi-subject"

@@ -8,8 +8,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
@@ -54,8 +52,6 @@ public class TestQuestionnaireResponse {
 
   static class Extract {
     private MockFhirDal fhirDal = new MockFhirDal();
-    private Endpoint dataEndpoint;
-    private Endpoint libraryEndpoint;
     private QuestionnaireResponse baseResource;
 
     public Extract(String questionnaireResponseName) {
@@ -63,17 +59,11 @@ public class TestQuestionnaireResponse {
     }
 
     public Extract withData(String dataAssetName) {
-      dataEndpoint = new Endpoint().setAddress(dataAssetName).setConnectionType(
-          new Coding().setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
-
       fhirDal.addAll(parse(dataAssetName));
       return this;
     }
 
     public Extract withLibrary(String dataAssetName) {
-      libraryEndpoint = new Endpoint().setAddress(dataAssetName).setConnectionType(
-          new Coding().setCode(org.opencds.cqf.cql.evaluator.builder.Constants.HL7_FHIR_FILES));
-
       fhirDal.addAll(parse(dataAssetName));
       return this;
     }

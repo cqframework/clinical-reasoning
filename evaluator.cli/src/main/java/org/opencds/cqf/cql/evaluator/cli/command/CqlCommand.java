@@ -22,7 +22,6 @@ import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
-import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
@@ -33,6 +32,7 @@ import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProvide
 import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.terminology.FhirFileTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;

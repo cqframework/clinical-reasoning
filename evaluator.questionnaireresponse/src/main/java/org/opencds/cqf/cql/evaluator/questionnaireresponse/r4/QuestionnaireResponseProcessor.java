@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.r4;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -183,7 +181,8 @@ public class QuestionnaireResponseProcessor
     var nestedProperty = base.getNamedProperty(nestedPropertyName);
     if (nestedProperty.getMaxCardinality() > 1 && nestedProperty.hasValues()
         && nestedProperty.getValues().size() > 1) {
-      var newValues = nestedProperty.getValues();
+      // TODO: Resolve multiple nested values
+      // var newValues = nestedProperty.getValues();
     } else {
       var hasExisting = nestedProperty.hasValues();
       var newValue = hasExisting ? nestedProperty.getValues().get(0) : newValue(nestedProperty);
@@ -205,19 +204,9 @@ public class QuestionnaireResponseProcessor
 
   private Base newValue(Property property) {
     try {
-      var newValue = (Base) Class.forName("org.hl7.fhir.r4.model." + property.getTypeCode())
+      return (Base) Class.forName("org.hl7.fhir.r4.model." + property.getTypeCode())
           .getConstructor().newInstance();
-
-      return newValue;
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException(e);
-    } catch (InstantiationException e) {
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (NoSuchMethodException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -287,15 +276,11 @@ public class QuestionnaireResponseProcessor
     obs.setPerformer(Collections.singletonList(questionnaireResponse.getAuthor()));
 
     switch (answer.getValue().fhirType()) {
-      case "string":
-        obs.setValue(new StringType(answer.getValueStringType().getValue()));
-        break;
       case "Coding":
         obs.setValue(new CodeableConcept().addCoding(answer.getValueCoding()));
         break;
-      case "boolean":
-        obs.setValue(new BooleanType(answer.getValueBooleanType().booleanValue()));
-        break;
+      default:
+        obs.setValue(answer.getValue());
     }
     var questionnaireResponseReference = new Reference();
     questionnaireResponseReference
@@ -355,7 +340,7 @@ public class QuestionnaireResponseProcessor
           e.getMessage()));
       // throw new IllegalArgumentException(String.format("Unable to find resource by URL %s",
       // questionnaireUrl));
-      return null;
+      return Collections.emptyMap();
     }
 
     return createCodeMap(questionnaire);

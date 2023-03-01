@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -16,11 +15,11 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -30,45 +29,56 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
+import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
+import org.opencds.cqf.fhir.utility.Repositories;
+import org.opencds.cqf.fhir.utility.RestRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-  public QuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal,
-      LibraryProcessor libraryProcessor, ExpressionEvaluator expressionEvaluator) {
-    super(fhirContext, fhirDal, libraryProcessor, expressionEvaluator);
+  public QuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal) {
+    super(fhirContext, fhirDal);
   }
 
   @Override
-  public Object resolveParameterValue(IBase value) {
-    if (value == null)
-      return null;
-    return ((Parameters.ParametersParameterComponent) value).getValue();
-  }
+  public LibraryEngine buildLibraryEngine(IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    var data = new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) dataEndpoint));
+    var content = new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) contentEndpoint));
+    var terminology =
+        new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) terminologyEndpoint));
 
-  @Override
-  public IBaseResource getSubject() {
-    return this.fhirDal.read(new IdType("Patient", this.patientId));
+    var repository = Repositories.proxy(data, content, terminology);
+
+    return new LibraryEngine(fhirContext, repository);
   }
 
   @Override
   public Questionnaire prePopulate(Questionnaire questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+    var libraryEngine = buildLibraryEngine(dataEndpoint, contentEndpoint, terminologyEndpoint);
+
+    return prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
+  }
+
+  @Override
+  public Questionnaire prePopulate(Questionnaire questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
     if (questionnaire == null) {
       throw new IllegalArgumentException("No questionnaire passed in");
+    }
+    if (libraryEngine == null) {
+      throw new IllegalArgumentException("No engine passed in");
     }
     this.patientId = patientId;
     this.parameters = parameters;
     this.bundle = bundle;
-    this.dataEndpoint = dataEndpoint;
-    this.contentEndpoint = contentEndpoint;
-    this.terminologyEndpoint = terminologyEndpoint;
+    this.libraryEngine = libraryEngine;
 
     var libraryUrl =
         ((CanonicalType) questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY).getValue())
@@ -97,8 +107,9 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
           var expression = (Expression) item.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
           var libraryUrl = expression.hasReference() ? expression.getReference() : defaultLibrary;
           try {
-            var result = getExpressionResult(expression.getExpression(), expression.getLanguage(),
-                libraryUrl, this.parameters);
+            var result = this.libraryEngine.getExpressionResult(this.patientId, "Patient",
+                expression.getExpression(), expression.getLanguage(), libraryUrl, this.parameters,
+                this.bundle);
             // TODO: what to do with choice answerOptions of type valueCoding with an
             // expression that returns a valueString
             item.addInitial(
@@ -120,8 +131,15 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   public IBaseResource populate(Questionnaire questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpopint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-    var populatedQuestionnaire = prePopulate(questionnaire, patientId, parameters, bundle,
-        dataEndpopint, contentEndpoint, terminologyEndpoint);
+    return populate(questionnaire, patientId, parameters, bundle,
+        buildLibraryEngine(dataEndpopint, contentEndpoint, terminologyEndpoint));
+  }
+
+  @Override
+  public IBaseResource populate(Questionnaire questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+    var populatedQuestionnaire =
+        prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
     var response = new QuestionnaireResponse();
     response.setId(populatedQuestionnaire.getIdPart() + "-response");
     if (questionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES)) {
@@ -172,12 +190,17 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   public Questionnaire generateQuestionnaire(String theId, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+    return generateQuestionnaire(theId, patientId, parameters, bundle,
+        buildLibraryEngine(dataEndpoint, contentEndpoint, terminologyEndpoint));
+  }
+
+  @Override
+  public Questionnaire generateQuestionnaire(String theId, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
     this.patientId = patientId;
     this.parameters = parameters;
     this.bundle = bundle;
-    this.dataEndpoint = dataEndpoint;
-    this.contentEndpoint = contentEndpoint;
-    this.terminologyEndpoint = terminologyEndpoint;
+    this.libraryEngine = libraryEngine;
 
     var questionnaire = new Questionnaire();
     questionnaire.setId(new IdType("Questionnaire", theId));
@@ -327,8 +350,9 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
           var expression =
               (Expression) element.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
-          var result = getExpressionResult(expression.getExpression(), expression.getLanguage(),
-              expression.getReference(), parameters);
+          var result = this.libraryEngine.getExpressionResult(this.patientId, "Patient",
+              expression.getExpression(), expression.getLanguage(), expression.getReference(),
+              parameters, this.bundle);
           childItem.addInitial().setValue((Type) result);
         }
         childItem.setRequired(element.hasMin() && element.getMin() == 1);

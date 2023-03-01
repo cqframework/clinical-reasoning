@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
@@ -25,6 +24,7 @@ import org.opencds.cqf.cql.evaluator.builder.EndpointConverter;
 import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,9 +95,8 @@ public class LibraryProcessor {
       IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
       IBaseBundle additionalData, Set<String> expressions) {
 
-    return this.evaluate(this.getVersionedIdentifer(url, libraryEndpoint, additionalData),
-        patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint, additionalData,
-        expressions);
+    return this.evaluate(this.getVersionedIdentifier(url), patientId, parameters, libraryEndpoint,
+        terminologyEndpoint, dataEndpoint, additionalData, expressions);
   }
 
   /**
@@ -119,8 +118,8 @@ public class LibraryProcessor {
       IBaseResource libraryEndpoint, IBaseResource terminologyEndpoint, IBaseResource dataEndpoint,
       IBaseBundle additionalData, Set<String> expressions) {
 
-    return this.evaluate(this.getVersionedIdentifer(id, libraryEndpoint, additionalData), patientId,
-        parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint, additionalData,
+    return this.evaluate(this.getVersionedIdentifier(id, libraryEndpoint, additionalData),
+        patientId, parameters, libraryEndpoint, terminologyEndpoint, dataEndpoint, additionalData,
         expressions);
   }
 
@@ -210,13 +209,12 @@ public class LibraryProcessor {
     }
   }
 
-  protected VersionedIdentifier getVersionedIdentifer(IIdType id, IBaseResource libraryEndpoint,
+  protected VersionedIdentifier getVersionedIdentifier(IIdType id, IBaseResource libraryEndpoint,
       IBaseBundle additionalData) {
     throw new NotImplementedException();
   }
 
-  protected VersionedIdentifier getVersionedIdentifer(String url, IBaseResource libraryEndpoint,
-      IBaseBundle additionalData) {
+  protected VersionedIdentifier getVersionedIdentifier(String url) {
     if (!url.contains("/Library/")) {
       throw new IllegalArgumentException(
           "Invalid resource type for determining library version identifier: Library");
@@ -240,6 +238,7 @@ public class LibraryProcessor {
     } else {
       versionedIdentifier.setId(cqlName);
     }
+
     return versionedIdentifier;
   }
 }

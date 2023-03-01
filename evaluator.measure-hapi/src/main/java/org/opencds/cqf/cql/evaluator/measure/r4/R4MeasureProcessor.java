@@ -288,8 +288,11 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
       }
     }
 
-    futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, ids, fhirDal,
-        contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData));
+    // Make sure to run partial batches.
+    if (!ids.isEmpty()) {
+      futures.add(runEvaluate(measure, periodStart, periodEnd, reportType, ids, fhirDal,
+          contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData));
+    }
 
     var reports = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
 

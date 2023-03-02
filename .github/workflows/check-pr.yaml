@@ -18,7 +18,5 @@ jobs:
         run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 compile
       - name: Compile tests
         run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 test-compile
-      - name: Unit tests
-        run: mvn --batch-mode --no-transfer-progress -T 4 test
-      - name: Integration tests and additional checks
+      - name: Tests and additional checks
         run: mvn --batch-mode --no-transfer-progress -T 4 verify

@@ -4,23 +4,40 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 import static org.testng.Assert.assertThrows;
 
+import java.util.List;
+
+import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.testng.annotations.Test;
 
 public class QuestionnaireProcessorTests {
   @Test
   void testPrePopulate() {
-    TestQuestionnaire.Assert.that("questionnaire-for-order.json", "OPA-Patient1")
-        .withData("o2_peter_bundle.json").withLibrary("outpatientPA.json")
-        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
+    // TestQuestionnaire.Assert.that("questionnaire-for-order.json", "OPA-Patient1")
+    // .withData("o2_peter_bundle.json").withLibrary("outpatientPA.json")
+    // .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
+    // .isEqualsTo("questionnaire-for-order-populated.json");
+
+    TestQuestionnaire.Assert
+        .that("res/content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulateWithEngine()
         .isEqualsTo("questionnaire-for-order-populated.json");
   }
 
   @Test
   void testPrePopulate_NoLibrary() {
-    TestQuestionnaire.Assert.that("questionnaire-for-order.json", "OPA-Patient1")
-        .withData("o2_peter_bundle.json")
-        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
-        .isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
+    // TestQuestionnaire.Assert.that("questionnaire-for-order.json", "OPA-Patient1")
+    // .withData("o2_peter_bundle.json")
+    // .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
+    // .isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
+
+    FhirRepository data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
+
+    var repository = Repositories.proxy(data, null, null);
+    TestQuestionnaire.Assert
+        .that("res/content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+        .prePopulateWithEngine().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
   }
 
   @Test

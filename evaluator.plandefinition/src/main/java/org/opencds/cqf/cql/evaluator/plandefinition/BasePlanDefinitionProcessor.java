@@ -98,7 +98,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
     return apply(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
         useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, Repositories
-            .federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+            .proxy(fhirContext, fhirDal, dataEndpoint, contentEndpoint, terminologyEndpoint)));
   }
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
@@ -140,7 +140,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
     return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
         useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, Repositories
-            .federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+            .proxy(fhirContext, fhirDal, dataEndpoint, contentEndpoint, terminologyEndpoint)));
   }
 
   public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,

@@ -37,8 +37,9 @@ public abstract class BaseQuestionnaireProcessor<T> {
   public T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
       IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    return prePopulate(questionnaire, patientId, parameters, bundle, new LibraryEngine(fhirContext,
-        Repositories.federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+    return prePopulate(questionnaire, patientId, parameters, bundle,
+        new LibraryEngine(fhirContext, Repositories.proxy(fhirContext, fhirDal, dataEndpoint,
+            contentEndpoint, terminologyEndpoint)));
   }
 
   public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
@@ -47,8 +48,9 @@ public abstract class BaseQuestionnaireProcessor<T> {
   public IBaseResource populate(T questionnaire, String patientId, IBaseParameters parameters,
       IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    return populate(questionnaire, patientId, parameters, bundle, new LibraryEngine(fhirContext,
-        Repositories.federated(fhirContext, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+    return populate(questionnaire, patientId, parameters, bundle,
+        new LibraryEngine(fhirContext, Repositories.proxy(fhirContext, fhirDal, dataEndpoint,
+            contentEndpoint, terminologyEndpoint)));
   }
 
   public abstract IBaseResource populate(T questionnaire, String patientId,

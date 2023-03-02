@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.evaluator.fhir.util;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.opencds.cqf.fhir.utility.ProxyRepository;
 import org.opencds.cqf.fhir.utility.RestRepository;
 
@@ -31,8 +31,24 @@ public class Repositories {
     }
   }
 
-  public static Repository federated(FhirContext fhirContext, IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+  private static Repository getDalRepository(FhirContext fhirContext, FhirDal fhirDal) {
+    switch (fhirContext.getVersion().getVersion()) {
+      case DSTU3:
+        return new org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.DalRepository(fhirDal);
+      case R4:
+        return new org.opencds.cqf.cql.evaluator.fhir.repository.r4.DalRepository(fhirDal);
+      case R5:
+        return new org.opencds.cqf.cql.evaluator.fhir.repository.r5.DalRepository(fhirDal);
+      default:
+        throw new IllegalArgumentException(
+            String.format("unsupported FHIR version: %s", fhirContext));
+    }
+  }
+
+  public static Repository proxy(FhirContext fhirContext, FhirDal fhirDal,
+      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    var fhirDalRepository = getDalRepository(fhirContext, fhirDal);
     Repository data =
         dataEndpoint == null ? null : new RestRepository(getClient(fhirContext, dataEndpoint));
     Repository content = contentEndpoint == null ? null
@@ -40,6 +56,6 @@ public class Repositories {
     Repository terminology = terminologyEndpoint == null ? null
         : new RestRepository(getClient(fhirContext, terminologyEndpoint));
 
-    return new FederatedRepository(data, content, terminology);
+    return new ProxyRepository(fhirDalRepository, data, content, terminology);
   }
 }

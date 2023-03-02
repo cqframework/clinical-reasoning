@@ -5,6 +5,7 @@ import static org.testng.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,10 +17,10 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import org.opencds.cqf.fhir.utility.Repositories;
-import org.opencds.cqf.fhir.utility.RestRepository;
+import org.opencds.cqf.fhir.api.Repository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -67,10 +68,17 @@ public class TestQuestionnaire {
     private Parameters parameters;
     private Questionnaire baseResource;
     private String patientId;
+    private Repository repository;
 
     public QuestionnaireResult(String questionnaireName, String patientId) {
       baseResource = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
       this.patientId = patientId;
+      FhirRepository data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
+      FhirRepository content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
+      FhirRepository terminology = new FhirRepository(this.getClass(),
+          List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
+
+      this.repository = Repositories.proxy(data, content, terminology);
     }
 
     public QuestionnaireResult withData(String dataAssetName) {
@@ -107,21 +115,18 @@ public class TestQuestionnaire {
       return this;
     }
 
+    public QuestionnaireResult withRepository(Repository repository) {
+      this.repository = repository;
+      return this;
+    }
+
     public GeneratedQuestionnaire prePopulate() {
       return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId,
           parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
     }
 
     public GeneratedQuestionnaire prePopulateWithEngine() {
-      var data = new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) dataEndpoint));
-      var content =
-          new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) contentEndpoint));
-      var terminology =
-          new RestRepository(Clients.forEndpoint(fhirContext, (Endpoint) terminologyEndpoint));
-
-      var repository = Repositories.proxy(data, content, terminology);
-
-      var libraryEngine = new LibraryEngine(fhirContext, repository);
+      var libraryEngine = new LibraryEngine(fhirContext, this.repository);
 
       return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId,
           parameters, bundle, libraryEngine));

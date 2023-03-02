@@ -1,188 +1,174 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.cql.evaluator.fhir.repository.dstu3;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 
-public class ProxyRepository implements Repository {
+public class DalRepository implements Repository {
 
-  private Repository local;
-  private Repository data;
-  private Repository content;
-  private Repository terminology;
+  FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
+  private FhirDal fhirDal;
 
-  public ProxyRepository(Repository local, Repository data, Repository content,
-      Repository terminology) {
-    // One data server, one terminology server (content defaults to data)
-    // One data server, one content server (terminology defaults to data)
-    // One data server, one content server, one terminology server
-    checkNotNull(local);
-
-    this.local = local;
-    this.data = data == null ? local : data;
-    this.content = content == null ? data : content;
-    this.terminology = terminology == null ? data : terminology;
+  public DalRepository(FhirDal fhirDal) {
+    this.fhirDal = fhirDal;
   }
 
-  public ProxyRepository(Repository data, Repository content, Repository terminology) {
-    checkNotNull(data);
-
-    this.data = data;
-    this.content = content == null ? data : content;
-    this.terminology = terminology == null ? data : terminology;
-  }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
       Map<String, String> headers) {
-
-    if (isTerminologyResource(resourceType.getSimpleName())) {
-      return terminology.read(resourceType, id, headers);
-    } else if (isContentResource(resourceType.getSimpleName())) {
-      return content.read(resourceType, id, headers);
-    } else {
-      return data.read(resourceType, id, headers);
-    }
+    return (T) this.fhirDal.read(new IdType(resourceType.getSimpleName(), id.getIdPart()));
   }
 
   @Override
   public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'create'");
   }
 
   @Override
   public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters,
       Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'patch'");
   }
 
   @Override
   public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'update'");
   }
 
   @Override
   public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
       I id, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'delete'");
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
       Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
       Map<String, String> headers) {
-    if (isTerminologyResource(resourceType.getSimpleName())) {
-      return terminology.search(bundleType, resourceType, searchParameters, headers);
-    } else if (isContentResource(resourceType.getSimpleName())) {
-      return content.search(bundleType, resourceType, searchParameters, headers);
+    Bundle bundle = Resources.newResource(Bundle.class, UUID.randomUUID().toString());
+    bundle.setType(Bundle.BundleType.SEARCHSET);
+
+    if (searchParameters != null && searchParameters.containsKey("url")) {
+      Iterable<IBaseResource> bundleResources =
+          this.fhirDal.searchByUrl(resourceType.getSimpleName(),
+              searchParameters.get("url").get(0).getValueAsQueryToken(context));
+      bundleResources.forEach(resource -> bundle
+          .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
     } else {
-      return data.search(bundleType, resourceType, searchParameters, headers);
+      Iterable<IBaseResource> bundleResources = this.fhirDal.search(resourceType.getSimpleName());
+      bundleResources.forEach(resource -> bundle
+          .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
     }
+
+    return (B) bundle;
   }
 
   @Override
   public <B extends IBaseBundle> B link(Class<B> bundleType, String url,
       Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'link'");
   }
 
   @Override
   public <C extends IBaseConformance> C capabilities(Class<C> resourceType,
       Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'capabilities'");
   }
 
   @Override
   public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'transaction'");
   }
 
   @Override
   public <R extends IBaseResource, P extends IBaseParameters> R invoke(String name, P parameters,
       Class<R> returnType, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'invoke'");
   }
 
   @Override
   public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters,
       Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'invoke'");
   }
 
   @Override
   public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
       Class<T> resourceType, String name, P parameters, Class<R> returnType,
       Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'invoke'");
   }
 
   @Override
   public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
       Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'invoke'");
   }
 
   @Override
   public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I id,
       String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'invoke'");
   }
 
   @Override
   public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name,
       P parameters, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'invoke'");
   }
 
   @Override
   public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters,
       Class<B> returnType, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'history'");
   }
 
   @Override
   public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
       Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'history'");
   }
 
   @Override
   public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
       P parameters, Class<B> returnType, Map<String, String> headers) {
-    return null;
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'history'");
   }
 
-  @Override
-  public FhirContext fhirContext() {
-    return data.fhirContext();
-  }
-
-  private static Set<String> terminologyResourceSet =
-      new HashSet<>(Arrays.asList("ValueSet", "CodeSystem", "ConceptMap"));
-
-  private boolean isTerminologyResource(String type) {
-    return (terminologyResourceSet.contains(type));
-  }
-
-  private static Set<String> contentResourceSet = new HashSet<>(Arrays.asList("Library", "Measure",
-      "PlanDefinition", "StructureDefinition", "ActivityDefinition", "Questionnaire"));
-
-  private boolean isContentResource(String type) {
-    return (contentResourceSet.contains(type));
-  }
 }

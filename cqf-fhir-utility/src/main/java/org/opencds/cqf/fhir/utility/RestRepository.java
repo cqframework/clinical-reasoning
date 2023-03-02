@@ -69,8 +69,17 @@ public class RestRepository implements Repository {
   public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
       Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
       Map<String, String> headers) {
-    var op = this.client.search().forResource(resourceType).where(searchParameters)
-        .returnBundle(bundleType);
+    var op = this.client.search().forResource(resourceType).returnBundle(bundleType);
+    if (searchParameters != null) {
+      op = op.where(searchParameters);
+    }
+
+    if (headers != null) {
+      for (var entry : headers.entrySet()) {
+        op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+      }
+    }
+
     return this.addHeaders(op, headers).execute();
   }
 

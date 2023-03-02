@@ -55,7 +55,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       IBaseResource dataEndpoint) {
     return apply(theId, subjectId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, parameters,
-        new LibraryEngine(fhirContext, Repositories.federated(fhirContext, dataEndpoint,
+        new LibraryEngine(fhirContext, Repositories.proxy(fhirContext, fhirDal, dataEndpoint,
             contentEndpoint, terminologyEndpoint)));
   }
 

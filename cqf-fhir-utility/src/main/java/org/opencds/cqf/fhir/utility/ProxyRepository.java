@@ -34,17 +34,17 @@ public class ProxyRepository implements Repository {
     checkNotNull(local);
 
     this.local = local;
-    this.data = data == null ? local : data;
-    this.content = content == null ? data : content;
-    this.terminology = terminology == null ? data : terminology;
+    this.data = data == null ? this.local : data;
+    this.content = content == null ? this.data : content;
+    this.terminology = terminology == null ? this.data : terminology;
   }
 
   public ProxyRepository(Repository data, Repository content, Repository terminology) {
     checkNotNull(data);
 
     this.data = data;
-    this.content = content == null ? data : content;
-    this.terminology = terminology == null ? data : terminology;
+    this.content = content == null ? this.data : content;
+    this.terminology = terminology == null ? this.data : terminology;
   }
 
   @Override

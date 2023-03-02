@@ -80,8 +80,10 @@ public class DalRepository implements Repository {
           .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
     } else {
       Iterable<IBaseResource> bundleResources = this.fhirDal.search(resourceType.getSimpleName());
-      bundleResources.forEach(resource -> bundle
-          .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+      if (bundleResources != null) {
+        bundleResources.forEach(resource -> bundle
+            .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+      }
     }
 
     return (B) bundle;

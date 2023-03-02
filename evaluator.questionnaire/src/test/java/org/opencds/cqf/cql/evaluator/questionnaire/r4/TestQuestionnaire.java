@@ -137,6 +137,13 @@ public class TestQuestionnaire {
           (QuestionnaireResponse) buildProcessor(fhirDal).populate(baseResource, patientId,
               parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
     }
+
+    public GeneratedQuestionnaireResponse populateWithEngine() {
+      var libraryEngine = new LibraryEngine(fhirContext, this.repository);
+
+      return new GeneratedQuestionnaireResponse((QuestionnaireResponse) buildProcessor(fhirDal)
+          .populate(baseResource, patientId, parameters, bundle, libraryEngine));
+    }
   }
 
   static class GeneratedQuestionnaire {

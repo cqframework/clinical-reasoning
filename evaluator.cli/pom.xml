@@ -131,6 +131,14 @@
             </execution>
           </executions>
         </plugin>
+        <!--This is not a library module, it's a CLI app, so we don't need to be compliant with Android here -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>animal-sniffer-maven-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>

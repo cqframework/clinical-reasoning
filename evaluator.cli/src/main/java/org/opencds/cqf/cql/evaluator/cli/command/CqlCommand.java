@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.cli.command;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,10 +27,18 @@ import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.dagger.CqlEvaluatorComponent;
-import org.opencds.cqf.cql.evaluator.dagger.DaggerCqlEvaluatorComponent;
+import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.builder.terminology.FhirFileTerminologyProviderFactory;
+import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
+import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -117,14 +126,16 @@ public class CqlCommand implements Callable<Integer> {
 
   private class Logger implements IWorkerContext.ILoggingService {
 
+    private final org.slf4j.Logger log = LoggerFactory.getLogger(Logger.class);
+
     @Override
     public void logMessage(String s) {
-      System.out.println(s);
+      log.warn(s);
     }
 
     @Override
     public void logDebugMessage(LogCategory logCategory, String s) {
-      System.out.println(String.format("%s: %s", logCategory.toString(), s));
+      log.debug("{}: {}", logCategory, s);
     }
   }
 
@@ -147,16 +158,13 @@ public class CqlCommand implements Callable<Integer> {
 
     FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
 
-    CqlEvaluatorComponent.Builder builder =
-        DaggerCqlEvaluatorComponent.builder().fhirContext(fhirVersionEnum.newContext());
+    FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
 
     IGContext igContext = null;
     if (rootDir != null && igPath != null) {
       igContext = new IGContext(new Logger());
       igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
     }
-
-    CqlEvaluatorComponent cqlEvaluatorComponent = builder.build();
 
     CqlOptions cqlOptions = CqlOptions.defaultOptions();
 
@@ -166,8 +174,8 @@ public class CqlCommand implements Callable<Integer> {
     }
 
     for (LibraryParameter library : libraries) {
-      CqlEvaluatorBuilder cqlEvaluatorBuilder =
-          cqlEvaluatorComponent.createBuilder().withCqlOptions(cqlOptions);
+      CqlEvaluatorBuilder cqlEvaluatorBuilder = new CqlEvaluatorBuilder();
+      cqlEvaluatorBuilder.withCqlOptions(cqlOptions);
 
       if (namespace != null) {
         cqlEvaluatorBuilder
@@ -182,7 +190,7 @@ public class CqlCommand implements Callable<Integer> {
           librarySourceProviderIndex.get(library.libraryUrl);
 
       if (librarySourceProvider == null) {
-        librarySourceProvider = cqlEvaluatorComponent.createLibrarySourceProviderFactory()
+        librarySourceProvider = createLibrarySourceProviderFactory(fhirContext)
             .create(new EndpointInfo().setAddress(library.libraryUrl));
         this.librarySourceProviderIndex.put(library.libraryUrl, librarySourceProvider);
       }
@@ -193,7 +201,7 @@ public class CqlCommand implements Callable<Integer> {
         TerminologyProvider terminologyProvider =
             this.terminologyProviderIndex.get(library.terminologyUrl);
         if (terminologyProvider == null) {
-          terminologyProvider = cqlEvaluatorComponent.createTerminologyProviderFactory()
+          terminologyProvider = createTerminologyProviderFactory(fhirContext)
               .create(new EndpointInfo().setAddress(library.terminologyUrl));
           this.terminologyProviderIndex.put(library.terminologyUrl, terminologyProvider);
         }
@@ -202,7 +210,7 @@ public class CqlCommand implements Callable<Integer> {
       }
 
       DataProviderComponents dataProvider = null;
-      DataProviderFactory dataProviderFactory = cqlEvaluatorComponent.createDataProviderFactory();
+      DataProviderFactory dataProviderFactory = createDataProviderFactory(fhirContext);
       if (library.model != null) {
         dataProvider =
             dataProviderFactory.create(new EndpointInfo().setAddress(library.model.modelUrl));
@@ -228,16 +236,73 @@ public class CqlCommand implements Callable<Integer> {
 
       EvaluationResult result = evaluator.evaluate(identifier, contextParameter);
 
-      for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
-        System.out.println(
-            libraryEntry.getKey() + "=" + this.tempConvert(libraryEntry.getValue().value()));
-      }
+      writeResult(result);
 
-      System.out.println();
     }
 
     return 0;
   }
+
+  private org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory createLibrarySourceProviderFactory(
+      FhirContext fhirContext) {
+    var af = adapterFactory(fhirContext);
+    var lvs = new LibraryVersionSelector(af);
+    var db = directoryBundler(fhirContext);
+
+    return new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
+        fhirContext, adapterFactory(fhirContext),
+        Set.of(new FhirFileLibrarySourceProviderFactory(fhirContext, db, af, lvs),
+            new CqlFileLibrarySourceProviderFactory()),
+        lvs);
+  }
+
+  private org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory createTerminologyProviderFactory(
+      FhirContext fhirContext) {
+    return new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
+        fhirContext,
+        Set.of(new FhirFileTerminologyProviderFactory(fhirContext, directoryBundler(fhirContext))));
+  }
+
+  private org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory createDataProviderFactory(
+      FhirContext fhirContext) {
+    var db = directoryBundler(fhirContext);
+    return new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+        Set.of(new FhirModelResolverFactory()),
+        Set.of(new FhirFileRetrieveProviderFactory(fhirContext, db)));
+  }
+
+  private DirectoryBundler directoryBundler(FhirContext fhirContext) {
+    return new DirectoryBundler(fhirContext);
+  }
+
+  private AdapterFactory adapterFactory(FhirContext fhirContext) {
+    switch (fhirContext.getVersion().getVersion()) {
+
+      case DSTU3:
+        return new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
+      case R4:
+        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+      case R5:
+        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
+      case DSTU2:
+      case DSTU2_1:
+      case DSTU2_HL7ORG:
+      default:
+        throw new UnsupportedOperationException(String.format("FHIR version %s is not supported.",
+            fhirContext.getVersion().getVersion().toString()));
+    }
+  }
+
+  @SuppressWarnings("java:S106") // We are intending to output to the console here as a CLI tool
+  private void writeResult(EvaluationResult result) {
+    for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+      System.out
+          .println(libraryEntry.getKey() + "=" + this.tempConvert(libraryEntry.getValue().value()));
+    }
+
+    System.out.println();
+  }
+
 
   private String tempConvert(Object value) {
     if (value == null) {

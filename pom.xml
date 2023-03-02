@@ -17,7 +17,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <cql.version>2.7.0-SNAPSHOT</cql.version>
     <spring.version>5.3.19</spring.version>
-    <dagger.version>2.34.1</dagger.version>
     <fhir-core.version>5.6.68</fhir-core.version>
     <hapi.version>6.2.1</hapi.version>
     <picocli.version>4.6.1</picocli.version>
@@ -51,7 +50,6 @@
     <module>evaluator.fhir-npm</module>
     <module>evaluator.library</module>
     <module>evaluator.builder</module>
-    <module>evaluator.dagger</module>
     <module>evaluator.spring</module>
     <module>evaluator.cli</module>
     <module>evaluator.content-test</module>
@@ -291,13 +289,6 @@
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>1.6</version>
-      </dependency>
-
-      <!-- Dagger -->
-      <dependency>
-        <groupId>com.google.dagger</groupId>
-        <artifactId>dagger</artifactId>
-        <version>${dagger.version}</version>
       </dependency>
 
       <!-- Guava-->

@@ -29,7 +29,7 @@ import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvid
 public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {
 
   @Inject
-  CqlFileLibrarySourceProviderFactory() {}
+  public CqlFileLibrarySourceProviderFactory() {}
 
   @Override
   public String getType() {

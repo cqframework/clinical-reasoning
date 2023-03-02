@@ -1,10 +1,12 @@
 package org.opencds.cqf.fhir.utility;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.StringParam;
 
 public class Searches {
 
@@ -37,10 +39,19 @@ public class Searches {
     }
 
     SearchBuilder withToken(String name, String value) {
+      // var paramValue = new StringParam(value);
+      // var paramList = new ArrayList<IQueryParameterType>();
+      // paramList.add(paramValue);
+      if (values == null) {
+        values = new HashMap<String, List<IQueryParameterType>>();
+      }
+      values.put(name, Collections.singletonList(new StringParam(value)));
+
       return this;
     }
 
     SearchBuilder withToken(String name, String value, String... values) {
+
       return this;
     }
   }

@@ -115,7 +115,7 @@ public class TestQuestionnaire {
     // librarySourceProviderFactory, dataProviderFactory, terminologyProviderFactory,
     // endpointConverter, fhirModelResolverFactory, CqlEvaluatorBuilder::new);
 
-    return new QuestionnaireProcessor(fhirContext, fhirDal);
+    return new QuestionnaireProcessor(fhirContext);
   }
 
   /** Fluent interface starts here **/

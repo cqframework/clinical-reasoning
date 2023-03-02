@@ -12,10 +12,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected ExpressionEvaluator expressionEvaluator;
   protected OperationParametersParser operationParametersParser;
   protected FhirContext fhirContext;
-  protected FhirDal fhirDal;
+  protected Repository repository;
   protected IFhirPath fhirPath;
 
   protected String patientId;
@@ -60,15 +60,14 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected final Collection<IBaseResource> extractedResources;
   protected final ModelResolver modelResolver;
 
-  protected BasePlanDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal,
+  protected BasePlanDefinitionProcessor(FhirContext fhirContext, Repository repository,
       OperationParametersParser operationParametersParser) {
     requireNonNull(fhirContext, "fhirContext can not be null");
-    requireNonNull(fhirDal, "fhirDal can not be null");
-    requireNonNull(libraryEngine, "LibraryEngine can not be null");
+    requireNonNull(repository, "localRepository can not be null");
     requireNonNull(operationParametersParser, "OperationParametersParser can not be null");
     this.fhirContext = fhirContext;
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    this.fhirDal = fhirDal;
+    this.repository = repository;
     this.operationParametersParser = operationParametersParser;
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
@@ -95,10 +94,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
       IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
       IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
+    repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
+        terminologyEndpoint);
     return apply(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
-        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, Repositories
-            .proxy(fhirContext, fhirDal, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, repository));
   }
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
@@ -137,10 +137,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
       IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
       IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
+    repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
+        terminologyEndpoint);
     return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
-        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, Repositories
-            .proxy(fhirContext, fhirDal, dataEndpoint, contentEndpoint, terminologyEndpoint)));
+        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, repository));
   }
 
   public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,

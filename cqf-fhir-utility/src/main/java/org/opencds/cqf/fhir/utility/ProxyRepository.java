@@ -21,6 +21,10 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 
 public class ProxyRepository implements Repository {
 
+  // One data server, one terminology server (content defaults to data)
+  // One data server, one content server (terminology defaults to data)
+  // One data server, one content server, one terminology server
+
   private Repository local;
   private Repository data;
   private Repository content;
@@ -28,9 +32,6 @@ public class ProxyRepository implements Repository {
 
   public ProxyRepository(Repository local, Repository data, Repository content,
       Repository terminology) {
-    // One data server, one terminology server (content defaults to data)
-    // One data server, one content server (terminology defaults to data)
-    // One data server, one content server, one terminology server
     checkNotNull(local);
 
     this.local = local;

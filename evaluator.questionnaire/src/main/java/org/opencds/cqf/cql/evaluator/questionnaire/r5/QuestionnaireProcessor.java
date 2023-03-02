@@ -18,15 +18,15 @@ import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.Reference;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
+import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-  public QuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    super(fhirContext, fhirDal);
+  public QuestionnaireProcessor(FhirContext fhirContext, Repository repository) {
+    super(fhirContext, repository);
   }
 
   @Override

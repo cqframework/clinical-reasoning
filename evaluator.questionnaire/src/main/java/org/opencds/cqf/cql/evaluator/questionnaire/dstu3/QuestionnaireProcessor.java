@@ -19,15 +19,15 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
+import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-  public QuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    super(fhirContext, fhirDal);
+  public QuestionnaireProcessor(FhirContext fhirContext, Repository repository) {
+    super(fhirContext, repository);
   }
 
   @Override

@@ -11,13 +11,17 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     var planDefinitionID = "ChildRoutineVisit-PlanDefinition-1.0.0";
     var patientID = "Patient/ChildRoutine-Reportable";
     var data = "child-routine-visit/child_routine_visit_patient.json";
-    var content = "child-routine-visit/child_routine_visit_plan_definition.json";
+    // var content = "child-routine-visit/child_routine_visit_plan_definition.json";
+    // PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
+    // .withContent(content).apply()
+    // .isEqualsTo("child-routine-visit/child_routine_visit_careplan.json");
+    // PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
+    // .withContent(content).applyR5()
+    // .isEqualsTo("child-routine-visit/child_routine_visit_bundle.json");
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).apply()
-        .isEqualsTo("child-routine-visit/child_routine_visit_careplan.json");
+        .applyWithEngine().isEqualsTo("child-routine-visit/child_routine_visit_careplan.json");
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).applyR5()
-        .isEqualsTo("child-routine-visit/child_routine_visit_bundle.json");
+        .applyR5WithEngine().isEqualsTo("child-routine-visit/child_routine_visit_bundle.json");
   }
 
   @Test

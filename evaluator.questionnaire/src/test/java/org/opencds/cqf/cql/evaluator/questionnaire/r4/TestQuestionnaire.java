@@ -16,7 +16,6 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -47,8 +46,8 @@ public class TestQuestionnaire {
     return jsonParser.parseResource(open(asset));
   }
 
-  public static QuestionnaireProcessor buildProcessor(FhirDal fhirDal) {
-    return new QuestionnaireProcessor(fhirContext, fhirDal);
+  public static QuestionnaireProcessor buildProcessor(Repository repository) {
+    return new QuestionnaireProcessor(fhirContext, repository);
   }
 
   /** Fluent interface starts here **/
@@ -60,7 +59,6 @@ public class TestQuestionnaire {
   }
 
   static class QuestionnaireResult {
-    private MockFhirDal fhirDal = new MockFhirDal();
     private Bundle bundle;
     private Endpoint dataEndpoint;
     private Endpoint contentEndpoint;
@@ -73,6 +71,7 @@ public class TestQuestionnaire {
     public QuestionnaireResult(String questionnaireName, String patientId) {
       baseResource = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
       this.patientId = patientId;
+
       FhirRepository data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
       FhirRepository content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
       FhirRepository terminology = new FhirRepository(this.getClass(),
@@ -85,7 +84,6 @@ public class TestQuestionnaire {
       dataEndpoint = new Endpoint().setAddress(dataAssetName)
           .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-      // fhirDal.addAll(parse(dataAssetName));
       return this;
     }
 
@@ -93,7 +91,6 @@ public class TestQuestionnaire {
       dataEndpoint = new Endpoint().setAddress(dataAssetName)
           .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-      // fhirDal.addAll(parse(dataAssetName));
       return this;
     }
 
@@ -101,7 +98,6 @@ public class TestQuestionnaire {
       terminologyEndpoint = new Endpoint().setAddress(dataAssetName)
           .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
 
-      // fhirDal.addAll(parse(dataAssetName));
       return this;
     }
 
@@ -121,28 +117,29 @@ public class TestQuestionnaire {
     }
 
     public GeneratedQuestionnaire prePopulate() {
-      return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId,
-          parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
+      return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(baseResource,
+          patientId, parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
     }
 
     public GeneratedQuestionnaire prePopulateWithEngine() {
       var libraryEngine = new LibraryEngine(fhirContext, this.repository);
 
-      return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId,
-          parameters, bundle, libraryEngine));
+      return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(baseResource,
+          patientId, parameters, bundle, libraryEngine));
     }
 
     public GeneratedQuestionnaireResponse populate() {
       return new GeneratedQuestionnaireResponse(
-          (QuestionnaireResponse) buildProcessor(fhirDal).populate(baseResource, patientId,
+          (QuestionnaireResponse) buildProcessor(this.repository).populate(baseResource, patientId,
               parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
     }
 
     public GeneratedQuestionnaireResponse populateWithEngine() {
       var libraryEngine = new LibraryEngine(fhirContext, this.repository);
 
-      return new GeneratedQuestionnaireResponse((QuestionnaireResponse) buildProcessor(fhirDal)
-          .populate(baseResource, patientId, parameters, bundle, libraryEngine));
+      return new GeneratedQuestionnaireResponse(
+          (QuestionnaireResponse) buildProcessor(this.repository).populate(baseResource, patientId,
+              parameters, bundle, libraryEngine));
     }
   }
 

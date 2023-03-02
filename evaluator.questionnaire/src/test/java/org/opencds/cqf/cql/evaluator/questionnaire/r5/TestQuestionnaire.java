@@ -17,7 +17,6 @@ import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -44,8 +43,8 @@ public class TestQuestionnaire {
     return jsonParser.parseResource(open(asset));
   }
 
-  public static QuestionnaireProcessor buildProcessor(FhirDal fhirDal) {
-    return new QuestionnaireProcessor(fhirContext, fhirDal);
+  public static QuestionnaireProcessor buildProcessor() {
+    return new QuestionnaireProcessor(fhirContext);
   }
 
   /** Fluent interface starts here **/
@@ -57,7 +56,6 @@ public class TestQuestionnaire {
   }
 
   static class QuestionnaireResult {
-    private MockFhirDal fhirDal = new MockFhirDal();
     private Bundle bundle;
     private Endpoint dataEndpoint;
     private Endpoint contentEndpoint;
@@ -109,14 +107,14 @@ public class TestQuestionnaire {
     }
 
     public GeneratedQuestionnaire prePopulate() {
-      return new GeneratedQuestionnaire(buildProcessor(fhirDal).prePopulate(baseResource, patientId,
+      return new GeneratedQuestionnaire(buildProcessor().prePopulate(baseResource, patientId,
           parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
     }
 
     public GeneratedQuestionnaireResponse populate() {
       return new GeneratedQuestionnaireResponse(
-          (QuestionnaireResponse) buildProcessor(fhirDal).populate(baseResource, patientId,
-              parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
+          (QuestionnaireResponse) buildProcessor().populate(baseResource, patientId, parameters,
+              bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
     }
   }
 

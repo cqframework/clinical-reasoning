@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +35,11 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
       LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
   protected IParser parser;
   protected FhirContext fhirContext;
-  protected FhirDal fhirDal;
+  protected Repository repository;
 
-  protected BaseQuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
+  protected BaseQuestionnaireResponseProcessor(FhirContext fhirContext, Repository repository) {
     this.fhirContext = fhirContext;
-    this.fhirDal = fhirDal;
+    this.repository = repository;
     this.parser = this.fhirContext.newJsonParser();
   }
 

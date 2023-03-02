@@ -32,16 +32,17 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireResponseProcessor
     extends BaseQuestionnaireResponseProcessor<QuestionnaireResponse> {
 
-  public QuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    super(fhirContext, fhirDal);
+  public QuestionnaireResponseProcessor(FhirContext fhirContext, Repository repository) {
+    super(fhirContext, repository);
   }
 
   protected IBaseBundle createResourceBundle(QuestionnaireResponse questionnaireResponse,
@@ -329,8 +330,10 @@ public class QuestionnaireResponseProcessor
     // client.read().resource(Questionnaire.class).withUrl(questionnaireUrl).execute();
     Questionnaire questionnaire = null;
     try {
-      var results = this.fhirDal.searchByUrl("Questionnaire", questionnaireUrl);
-      questionnaire = results == null ? null : (Questionnaire) results.iterator().next();
+      var results = this.repository.search(Bundle.class, Questionnaire.class,
+          Searches.byUrl(questionnaireUrl));
+      questionnaire =
+          results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
       if (questionnaire == null) {
         throw new RuntimeException();
       }

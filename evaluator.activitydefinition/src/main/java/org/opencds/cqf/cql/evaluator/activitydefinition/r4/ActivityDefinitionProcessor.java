@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +31,8 @@ public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
-  public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    super(fhirContext, fhirDal);
+  public ActivityDefinitionProcessor(FhirContext fhirContext, Repository repository) {
+    super(fhirContext, repository);
   }
 
   // For library use

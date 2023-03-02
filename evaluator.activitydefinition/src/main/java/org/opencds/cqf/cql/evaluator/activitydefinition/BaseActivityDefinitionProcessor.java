@@ -5,12 +5,13 @@ import static java.util.Objects.requireNonNull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,16 +31,16 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
   public static final String MISSING_CODE_PROPERTY = "Missing required code property";
   private final FhirContext fhirContext;
-  protected final FhirDal fhirDal;
   private final IFhirPath fhirPath;
   private final ModelResolver modelResolver;
+  protected Repository repository;
 
-  protected BaseActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal) {
+  protected BaseActivityDefinitionProcessor(FhirContext fhirContext, Repository repository) {
     requireNonNull(fhirContext, "fhirContext can not be null");
-    requireNonNull(fhirDal, "fhirDal can not be null");
+    requireNonNull(repository, "repository can not be null");
     this.fhirContext = fhirContext;
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    this.fhirDal = fhirDal;
+    this.repository = repository;
     modelResolver = new FhirModelResolverFactory()
         .create(fhirContext.getVersion().getVersion().getFhirVersionString());
   }
@@ -53,10 +54,12 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
       IBaseResource dataEndpoint) {
+    this.repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
+        terminologyEndpoint);
+
     return apply(theId, subjectId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, parameters,
-        new LibraryEngine(fhirContext, Repositories.proxy(fhirContext, fhirDal, dataEndpoint,
-            contentEndpoint, terminologyEndpoint)));
+        new LibraryEngine(fhirContext, this.repository));
   }
 
   @SuppressWarnings("unchecked")
@@ -67,7 +70,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     this.subjectId = subjectId;
     this.parameters = parameters;
     this.libraryEngine = libraryEngine;
-    T activityDefinition = (T) this.fhirDal.read(theId);
+    T activityDefinition = (T) this.repository.read(ActivityDefinition.class, theId);
     if (activityDefinition == null) {
       throw new IllegalArgumentException("Couldn't find ActivityDefinition " + theId);
     }

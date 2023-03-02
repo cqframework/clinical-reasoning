@@ -5,10 +5,10 @@ import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -19,12 +19,18 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 public class ActivityDefinitionProcessorTests {
   private static FhirContext fhirContext;
   private ActivityDefinitionProcessor activityDefinitionProcessor;
+  private Repository repository;
 
   @BeforeClass
   public void setup() {
     fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-    FhirDal fhirDal = new MockFhirDal();
-    activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, fhirDal);
+    var data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
+    var content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
+    var terminology = new FhirRepository(this.getClass(),
+        List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
+
+    repository = Repositories.proxy(data, content, terminology);
+    activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, repository);
   }
 
   @Test
@@ -45,12 +51,6 @@ public class ActivityDefinitionProcessorTests {
     // "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint,
     // terminologyEndpoint, dataEndpoint);
 
-    FhirRepository data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
-    FhirRepository content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
-    FhirRepository terminology = new FhirRepository(this.getClass(),
-        List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
-
-    var repository = Repositories.proxy(data, content, terminology);
     var libraryEngine = new LibraryEngine(fhirContext, repository);
 
     Object result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),

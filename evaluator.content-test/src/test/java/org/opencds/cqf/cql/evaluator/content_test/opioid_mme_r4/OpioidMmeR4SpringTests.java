@@ -64,7 +64,7 @@ public class OpioidMmeR4SpringTests extends AbstractTestNGSpringContextTests {
 
   private String getJarPath(String resourcePath) {
     try {
-      return OpioidMmeR4Tests.class.getResource(resourcePath).toURI().toString();
+      return OpioidMmeR4SpringTests.class.getResource(resourcePath).toURI().toString();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

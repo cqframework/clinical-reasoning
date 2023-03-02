@@ -32,11 +32,6 @@
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.dagger</artifactId>
-      <version>3.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.jackson-deps</artifactId>
       <version>3.0.0-SNAPSHOT</version>
       <type>pom</type>
@@ -135,6 +130,14 @@
               </goals>
             </execution>
           </executions>
+        </plugin>
+        <!--This is not a library module, it's a CLI app, so we don't need to be compliant with Android here -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>animal-sniffer-maven-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

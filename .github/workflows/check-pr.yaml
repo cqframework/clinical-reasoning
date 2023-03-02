@@ -1,14 +1,22 @@
 name: Check PR
 on: pull_request
 
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   maven:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 11
-    - name: Run Checks
-      run: mvn --batch-mode --no-transfer-progress --update-snapshots verify
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+      - name: Compile
+        run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 compile
+      - name: Compile tests
+        run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 test-compile
+      - name: Tests and additional checks
+        run: mvn --batch-mode --no-transfer-progress -T 4 verify

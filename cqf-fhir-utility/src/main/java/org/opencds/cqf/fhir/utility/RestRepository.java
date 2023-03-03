@@ -15,6 +15,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IHistoryTyped;
 import ca.uhn.fhir.util.ParametersUtil;
 
@@ -34,104 +35,62 @@ public class RestRepository implements Repository {
   public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
       Map<String, String> headers) {
     var op = this.client.read().resource(resourceType).withId(id);
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
     var op = this.client.create().resource(resource);
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I id, P patchParameters,
       Map<String, String> headers) {
     var op = this.client.patch().withFhirPatch(patchParameters).withId(id);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
     var op = this.client.update().resource(resource).withId(resource.getIdElement());
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
       I id, Map<String, String> headers) {
     var op = this.client.delete().resourceById(id);
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
       Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
       Map<String, String> headers) {
-
     var op = this.client.search().forResource(resourceType).where(searchParameters)
         .returnBundle(bundleType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <C extends IBaseConformance> C capabilities(Class<C> resourceType,
       Map<String, String> headers) {
     var op = this.client.capabilities().ofType(resourceType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
     var op = this.client.transaction().withBundle(transaction);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <B extends IBaseBundle> B link(Class<B> bundleType, String url,
       Map<String, String> headers) {
     var op = this.client.loadPage().byUrl(url).andReturnBundle(bundleType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
@@ -139,12 +98,7 @@ public class RestRepository implements Repository {
       Class<R> returnType, Map<String, String> headers) {
     var op = this.client.operation().onServer().named(name).withParameters(parameters)
         .returnResourceType(returnType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
@@ -152,12 +106,7 @@ public class RestRepository implements Repository {
       Map<String, String> headers) {
     var op = this.client.operation().onServer().named(name).withParameters(parameters)
         .returnMethodOutcome();
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
@@ -166,12 +115,7 @@ public class RestRepository implements Repository {
       Map<String, String> headers) {
     var op = this.client.operation().onType(resourceType).named(name).withParameters(parameters)
         .returnResourceType(returnType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
@@ -179,12 +123,7 @@ public class RestRepository implements Repository {
       Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
     var op = this.client.operation().onType(resourceType).named(name).withParameters(parameters)
         .returnMethodOutcome();
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
@@ -192,12 +131,7 @@ public class RestRepository implements Repository {
       String name, P parameters, Class<R> returnType, Map<String, String> headers) {
     var op = this.client.operation().onInstance(id).named(name).withParameters(parameters)
         .returnResourceType(returnType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
@@ -205,58 +139,35 @@ public class RestRepository implements Repository {
       P parameters, Map<String, String> headers) {
     var op = this.client.operation().onInstance(id).named(name).withParameters(parameters)
         .returnMethodOutcome();
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    return op.execute();
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <B extends IBaseBundle, P extends IBaseParameters> B history(P parameters,
       Class<B> returnType, Map<String, String> headers) {
     var op = this.client.history().onServer().returnBundle(returnType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    this.applyHistoryParams(op, parameters);
-
-    return op.execute();
+    this.addHistoryParams(null, parameters);
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
       Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
     var op = this.client.history().onType(resourceType).returnBundle(returnType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    this.applyHistoryParams(op, parameters);
-
-    return op.execute();
+    this.addHistoryParams(null, parameters);
+    return this.addHeaders(op, headers).execute();
   }
 
   @Override
   public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
       P parameters, Class<B> returnType, Map<String, String> headers) {
     var op = this.client.history().onInstance(id).returnBundle(returnType);
-
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
-    }
-
-    this.applyHistoryParams(op, parameters);
-
-    return op.execute();
+    this.addHistoryParams(null, parameters);
+    return this.addHeaders(op, headers).execute();
   }
 
   @SuppressWarnings("unchecked")
-  protected <B extends IBaseBundle, P extends IBaseParameters> void applyHistoryParams(
+  protected <B extends IBaseBundle, P extends IBaseParameters> void addHistoryParams(
       IHistoryTyped<B> operation, P parameters) {
 
     var ctx = this.client.getFhirContext();
@@ -271,5 +182,13 @@ public class RestRepository implements Repository {
     if (since.isPresent()) {
       operation.since((IPrimitiveType<Date>) since.get());
     }
+  }
+
+  protected <T extends IClientExecutable<T, ?>> T addHeaders(T op, Map<String, String> headers) {
+    for (var entry : headers.entrySet()) {
+      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+    }
+
+    return op;
   }
 }

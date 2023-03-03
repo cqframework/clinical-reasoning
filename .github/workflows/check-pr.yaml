@@ -19,4 +19,4 @@ jobs:
       - name: Compile tests
         run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 test-compile
       - name: Tests and additional checks
-        run: mvn --batch-mode --no-transfer-progress -T 4 verify
+        run: mvn --batch-mode --no-transfer-progress -T 4 verify -Ppackage

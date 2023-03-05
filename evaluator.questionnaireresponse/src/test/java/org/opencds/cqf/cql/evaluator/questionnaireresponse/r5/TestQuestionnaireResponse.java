@@ -5,12 +5,15 @@ import static org.testng.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.cql.evaluator.fhir.repository.r5.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.fhir.api.Repository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -37,9 +40,8 @@ public class TestQuestionnaireResponse {
     return jsonParser.parseResource(open(asset));
   }
 
-
-  public static QuestionnaireResponseProcessor buildProcessor(FhirDal fhirDal) {
-    return new QuestionnaireResponseProcessor(fhirContext, fhirDal);
+  public static QuestionnaireResponseProcessor buildProcessor(Repository repository) {
+    return new QuestionnaireResponseProcessor(fhirContext, repository);
   }
 
   /** Fluent interface starts here **/
@@ -51,25 +53,21 @@ public class TestQuestionnaireResponse {
   }
 
   static class Extract {
-    private MockFhirDal fhirDal = new MockFhirDal();
+    private Repository repository;
     private QuestionnaireResponse baseResource;
 
     public Extract(String questionnaireResponseName) {
       baseResource = (QuestionnaireResponse) parse(questionnaireResponseName);
-    }
+      FhirRepository data = new FhirRepository(this.getClass(), List.of("tests"), false);
+      FhirRepository content = new FhirRepository(this.getClass(), List.of("content/"), false);
+      FhirRepository terminology = new FhirRepository(this.getClass(),
+          List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
-    public Extract withData(String dataAssetName) {
-      fhirDal.addAll(parse(dataAssetName));
-      return this;
-    }
-
-    public Extract withLibrary(String dataAssetName) {
-      fhirDal.addAll(parse(dataAssetName));
-      return this;
+      this.repository = Repositories.proxy(data, content, terminology);
     }
 
     public GeneratedBundle extract() {
-      return new GeneratedBundle((Bundle) buildProcessor(fhirDal).extract(baseResource));
+      return new GeneratedBundle((Bundle) buildProcessor(repository).extract(baseResource));
     }
   }
 

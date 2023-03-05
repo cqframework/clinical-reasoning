@@ -1,19 +1,25 @@
 package org.opencds.cqf.cql.evaluator.library;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
@@ -37,15 +43,7 @@ public class LibraryEngine {
 
   private void initContext() {}
 
-  public IBaseParameters evaluate(String url, String patientId, IBaseParameters parameters,
-      IBaseBundle additionalData, Set<String> expressions) {
-    return this.evaluate(this.getVersionedIdentifier(url), patientId, parameters, additionalData,
-        expressions);
-  }
-
-  public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
-      IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
-
+  private Pair<String, Object> buildContextParameter(String patientId) {
     Pair<String, Object> contextParameter = null;
     if (patientId != null) {
       if (patientId.startsWith("Patient/")) {
@@ -54,9 +52,40 @@ public class LibraryEngine {
       contextParameter = Pair.of("Patient", patientId);
     }
 
+    return contextParameter;
+  }
+
+  public IBaseParameters evaluate(String url, String patientId, IBaseParameters parameters,
+      IBaseBundle additionalData, Set<String> expressions) {
+    return this.evaluate(this.getVersionedIdentifier(url), patientId, parameters, additionalData,
+        expressions);
+  }
+
+  public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
+      IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
     var libraryEvaluator = Contexts.forRepository(fhirContext, null, repository, additionalData);
 
-    return libraryEvaluator.evaluate(id, contextParameter, parameters, expressions);
+    return libraryEvaluator.evaluate(id, buildContextParameter(patientId), parameters, expressions);
+  }
+
+  public IBaseParameters evaluateExpression(String expression, IBaseParameters parameters,
+      String patientId, List<Pair<String, String>> libraries, IBaseBundle bundle) {
+    var libraryConstructor = new LibraryConstructor(fhirContext);
+    var cqlFhirParametersConverter = Contexts.getCqlFhirParametersConverter(fhirContext);
+    var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
+    var cql = libraryConstructor.constructCqlLibrary(expression, libraries, cqlParameters);
+
+    Set<String> expressions = new HashSet<>();
+    expressions.add("return");
+
+    List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
+    librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
+    var libraryEvaluator = Contexts.forRepository(fhirContext, null, repository, bundle,
+        librarySourceProviders, cqlFhirParametersConverter);
+
+    return libraryEvaluator.evaluate(
+        new VersionedIdentifier().withId("expression").withVersion("1.0.0"),
+        buildContextParameter(patientId), parameters, expressions);
   }
 
   public IBase getExpressionResult(String patientId, String subjectType, String expression,
@@ -69,13 +98,13 @@ public class LibraryEngine {
       case "text/cql":
       case "text/cql.expression":
       case "text/cql-expression":
-        // parametersResult = expressionEvaluator.evaluate(expression, params);
-        // // The expression is assumed to be the parameter component name
-        // // The expression evaluator creates a library with a single expression defined as
-        // // "return"
-        // expression = "return";
-        // result = (IBase) resolveParameterValue(ParametersUtil
-        // .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
+        parametersResult = this.evaluateExpression(expression, parameters, patientId, null, bundle);
+        // The expression is assumed to be the parameter component name
+        // The expression evaluator creates a library with a single expression defined as
+        // "return"
+        expression = "return";
+        result = (IBase) resolveParameterValue(ParametersUtil
+            .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
         break;
       case "text/cql-identifier":
       case "text/cql.identifier":
@@ -139,7 +168,7 @@ public class LibraryEngine {
   }
 
   protected IBaseResource getSubject(String subjectId, String subjectType) {
-    if (subjectType == null || subjectType.isBlank()) {
+    if (subjectType == null || subjectType.isEmpty()) {
       subjectType = "Patient";
     }
     switch (fhirContext.getVersion().getVersion()) {

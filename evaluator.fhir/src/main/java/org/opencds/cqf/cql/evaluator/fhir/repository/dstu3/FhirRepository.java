@@ -27,6 +27,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleUtil;
 
 
 public class FhirRepository implements Repository {
@@ -51,6 +52,15 @@ public class FhirRepository implements Repository {
       resourceMap.put(new IdType(resource.getIdElement().getResourceType(),
           resource.getIdElement().getIdPart()), resource);
     });
+  }
+
+  public FhirRepository(Bundle bundle) {
+    resourceMap = new LinkedHashMap<>();
+    random = new Random();
+
+    BundleUtil.toListOfResources(this.context, bundle).forEach(resource -> resourceMap.put(
+        new IdType(resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()),
+        resource));
   }
 
   @Override
@@ -181,7 +191,7 @@ public class FhirRepository implements Repository {
 
         case R4:
           var r4String =
-              this.fhirPath.evaluateFirst(resource, "url", org.hl7.fhir.dstu3.model.UriType.class);
+              this.fhirPath.evaluateFirst(resource, "url", org.hl7.fhir.r4.model.UriType.class);
           if (r4String.isPresent() && r4String.get().getValue().equals(url)) {
             returnList.add(resource);
           }

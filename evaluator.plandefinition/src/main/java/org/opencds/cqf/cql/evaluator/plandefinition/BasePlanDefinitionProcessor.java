@@ -9,11 +9,13 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -33,12 +35,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   protected static final String subjectType = "Patient";
 
+  protected final OperationParametersParser operationParametersParser;
+  protected final ModelResolver modelResolver;
+  protected final FhirContext fhirContext;
+  protected final IFhirPath fhirPath;
+  protected Repository repository;
   protected LibraryEngine libraryEngine;
   protected ExpressionEvaluator expressionEvaluator;
-  protected OperationParametersParser operationParametersParser;
-  protected FhirContext fhirContext;
-  protected Repository repository;
-  protected IFhirPath fhirPath;
 
   protected String patientId;
   protected String encounterId;
@@ -56,23 +59,22 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected IBaseParameters prefetchData;
   protected Boolean containResources;
   protected IBaseResource questionnaire;
-  protected final Collection<IBaseResource> requestResources;
-  protected final Collection<IBaseResource> extractedResources;
-  protected final ModelResolver modelResolver;
+  protected Collection<IBaseResource> requestResources;
+  protected Collection<IBaseResource> extractedResources;
 
-  protected BasePlanDefinitionProcessor(FhirContext fhirContext, Repository repository,
-      OperationParametersParser operationParametersParser) {
+  protected BasePlanDefinitionProcessor(FhirContext fhirContext, Repository repository) {
     requireNonNull(fhirContext, "fhirContext can not be null");
     requireNonNull(repository, "localRepository can not be null");
-    requireNonNull(operationParametersParser, "OperationParametersParser can not be null");
+    this.repository = repository;
     this.fhirContext = fhirContext;
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    this.repository = repository;
-    this.operationParametersParser = operationParametersParser;
+    this.operationParametersParser =
+        new OperationParametersParser(Contexts.getAdapterFactory(fhirContext),
+            new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion()));
+    this.modelResolver = new FhirModelResolverFactory()
+        .create(fhirContext.getVersion().getVersion().getFhirVersionString());
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
-    modelResolver = new FhirModelResolverFactory()
-        .create(fhirContext.getVersion().getVersion().getFhirVersionString());
   }
 
   public abstract T resolvePlanDefinition(IIdType theId);

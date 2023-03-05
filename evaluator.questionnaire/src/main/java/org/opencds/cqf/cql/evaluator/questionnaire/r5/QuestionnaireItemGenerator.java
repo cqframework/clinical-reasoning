@@ -6,6 +6,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
@@ -19,24 +20,25 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QuestionnaireItemGenerator {
   protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
 
-  protected FhirDal fhirDal;
+  protected Repository repository;
   protected String patientId;
   protected IBaseParameters parameters;
   protected IBaseBundle bundle;
   protected LibraryEngine libraryEngine;
   protected static final String subjectType = "Patient";
 
-  public QuestionnaireItemGenerator(FhirDal fhirDal, String patientId, IBaseParameters parameters,
-      IBaseBundle bundle, LibraryEngine libraryEngine) {
-    this.fhirDal = fhirDal;
+  public QuestionnaireItemGenerator(Repository repository, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+    this.repository = repository;
     this.patientId = patientId;
     this.parameters = parameters;
     this.bundle = bundle;
@@ -93,14 +95,10 @@ public class QuestionnaireItemGenerator {
   protected StructureDefinition getProfileDefinition(String url) {
     StructureDefinition profile = null;
     try {
-      // Check fhirDal first
-      var searchResult = this.fhirDal.searchByUrl("StructureDefinition", url);
-      if (searchResult.iterator().hasNext()) {
-        profile = (StructureDefinition) searchResult.iterator().next();
-      }
-      if (profile == null) {
-        // Check contentEndpoint
-        // profile = this.contentEndpoint.
+      var searchResult =
+          repository.search(Bundle.class, StructureDefinition.class, Searches.byUrl(url));
+      if (searchResult.hasEntry()) {
+        profile = (StructureDefinition) searchResult.getEntry().get(0).getResource();
       }
     } catch (Exception ex) {
       logger.error("Error retrieving definition (%s): %s", url, ex.getMessage());
@@ -112,12 +110,9 @@ public class QuestionnaireItemGenerator {
   protected ValueSet getValueSet(String url) {
     ValueSet valueSet = null;
     try {
-      var searchResult = this.fhirDal.searchByUrl("ValueSet", url);
-      if (searchResult.iterator().hasNext()) {
-        valueSet = (ValueSet) searchResult.iterator().next();
-      }
-      if (valueSet == null) {
-        // Check terminologyEndpoint
+      var searchResult = repository.search(Bundle.class, ValueSet.class, Searches.byUrl(url));
+      if (searchResult.hasEntry()) {
+        valueSet = (ValueSet) searchResult.getEntry().get(0).getResource();
       }
     } catch (Exception ex) {
       logger.error("Error retrieving ValueSet (%s): %s", url, ex.getMessage());
@@ -184,7 +179,7 @@ public class QuestionnaireItemGenerator {
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
           var expression =
               (Expression) element.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
-          var result = this.libraryEngine.getExpressionResult(this.patientId, "Patient",
+          var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
               expression.getExpression(), expression.getLanguage(), expression.getReference(),
               parameters, this.bundle);
           childItem.addInitial().setValue((DataType) result);

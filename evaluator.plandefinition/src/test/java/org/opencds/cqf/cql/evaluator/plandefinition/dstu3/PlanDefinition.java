@@ -5,22 +5,23 @@ import static org.testng.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
-import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
+import org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.fhir.api.Repository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -47,18 +48,11 @@ public class PlanDefinition {
     return jsonParser.parseResource(open(asset));
   }
 
-
-  public static PlanDefinitionProcessor buildProcessor(FhirDal fhirDal) {
-    AdapterFactory adapterFactory = new AdapterFactory();
-    FhirTypeConverter fhirTypeConverter =
-        new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+  public static PlanDefinitionProcessor buildProcessor(Repository repository) {
     ActivityDefinitionProcessor activityDefinitionProcessor =
-        new ActivityDefinitionProcessor(fhirContext, fhirDal);
-    OperationParametersParser operationParametersParser =
-        new OperationParametersParser(adapterFactory, fhirTypeConverter);
+        new ActivityDefinitionProcessor(fhirContext, repository);
 
-    return new PlanDefinitionProcessor(fhirContext, fhirDal, activityDefinitionProcessor,
-        operationParametersParser);
+    return new PlanDefinitionProcessor(fhirContext, repository, activityDefinitionProcessor);
   }
 
   /** Fluent interface starts here **/
@@ -75,10 +69,10 @@ public class PlanDefinition {
     private String patientID;
     private String encounterID;
 
-    private MockFhirDal fhirDal = new MockFhirDal();
-    private Endpoint dataEndpoint;
-    private Endpoint contentEndpoint;
-    private Endpoint terminologyEndpoint;
+    private Repository repository;
+    private Repository dataRepository;
+    private Repository contentRepository;
+    private Repository terminologyRepository;
     private Bundle additionalData;
     private Parameters parameters;
 
@@ -89,42 +83,69 @@ public class PlanDefinition {
     }
 
     public Apply withData(String dataAssetName) {
-      dataEndpoint = new Endpoint().setAddress(dataAssetName)
-          .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+      dataRepository = new FhirRepository((Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public Apply withContent(String dataAssetName) {
-      contentEndpoint = new Endpoint().setAddress(dataAssetName)
-          .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+      contentRepository = new FhirRepository((Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public Apply withTerminology(String dataAssetName) {
-      terminologyEndpoint = new Endpoint().setAddress(dataAssetName)
-          .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+      terminologyRepository = new FhirRepository((Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public Apply withAdditionalData(String dataAssetName) {
-      additionalData = (Bundle) parse(dataAssetName);
+      var data = parse(dataAssetName);
+      additionalData =
+          data.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode()) ? (Bundle) data
+              : new Bundle().setType(BundleType.COLLECTION)
+                  .addEntry(new BundleEntryComponent().setResource((Resource) data));
 
       return this;
     }
 
     public Apply withParameters(Parameters params) {
       parameters = params;
+
       return this;
     }
 
+    public Apply withRepository(Repository repository) {
+      this.repository = repository;
+
+      return this;
+    }
+
+    private void buildRepository() {
+      if (repository != null) {
+        return;
+      }
+      if (dataRepository == null) {
+        dataRepository = new FhirRepository(this.getClass(), List.of("tests"), false);
+      }
+      if (contentRepository == null) {
+        contentRepository = new FhirRepository(this.getClass(), List.of("content"), false);
+      }
+      if (terminologyRepository == null) {
+        terminologyRepository = new FhirRepository(this.getClass(),
+            List.of("vocabulary/CodeSystem", "vocabulary/ValueSet"), false);
+      }
+
+      repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
+    }
+
     public GeneratedCarePlan apply() {
-      return new GeneratedCarePlan(
-          (CarePlan) buildProcessor(fhirDal).apply(new IdType("PlanDefinition", planDefinitionID),
-              patientID, encounterID, null, null, null, null, null, null, null, null, parameters,
-              null, additionalData, null, dataEndpoint, contentEndpoint, terminologyEndpoint));
+      buildRepository();
+      var libraryEngine = new LibraryEngine(fhirContext, this.repository);
+      return new GeneratedCarePlan((CarePlan) buildProcessor(repository).apply(
+          new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, null, null, null,
+          null, null, null, null, null, parameters, null, additionalData, null, libraryEngine));
     }
   }
 

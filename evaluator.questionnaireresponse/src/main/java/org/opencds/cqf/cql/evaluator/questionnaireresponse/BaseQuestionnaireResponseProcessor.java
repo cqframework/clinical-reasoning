@@ -55,6 +55,10 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
     return createResourceBundle(questionnaireResponse, resources);
   }
 
+  protected String getExtractId(T questionnaireResponse) {
+    return "extract-" + ((IBaseResource) questionnaireResponse).getIdElement().getIdPart();
+  }
+
   protected abstract IBaseBundle createResourceBundle(T questionnaireResponse,
       List<IBaseResource> resources);
 

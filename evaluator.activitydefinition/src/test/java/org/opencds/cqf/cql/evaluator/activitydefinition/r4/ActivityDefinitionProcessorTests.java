@@ -18,16 +18,16 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ActivityDefinitionProcessorTests {
   private static FhirContext fhirContext;
-  private ActivityDefinitionProcessor activityDefinitionProcessor;
   private Repository repository;
+  private ActivityDefinitionProcessor activityDefinitionProcessor;
 
   @BeforeClass
   public void setup() {
     fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-    var data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
-    var content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
+    var data = new FhirRepository(this.getClass(), List.of("tests"), false);
+    var content = new FhirRepository(this.getClass(), List.of("content"), false);
     var terminology = new FhirRepository(this.getClass(),
-        List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
+        List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
     repository = Repositories.proxy(data, content, terminology);
     activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, repository);
@@ -35,25 +35,9 @@ public class ActivityDefinitionProcessorTests {
 
   @Test
   public void testActivityDefinitionApply() throws FHIRException {
-    // Endpoint contentEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
-    // .setAddress("bundle-activityDefinitionTest.json")
-    // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
-
-    // Endpoint terminologyEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
-    // .setAddress("bundle-activityDefinitionTest.json")
-    // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
-
-    // Endpoint dataEndpoint = new Endpoint().setStatus(EndpointStatus.ACTIVE)
-    // .setAddress("bundle-activityDefinitionTest.json")
-    // .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
-
-    // Object result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),
-    // "patient-1", null, null, null, null, null, null, null, null, null, contentEndpoint,
-    // terminologyEndpoint, dataEndpoint);
-
     var libraryEngine = new LibraryEngine(fhirContext, repository);
 
-    Object result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),
+    var result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),
         "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
     Assert.assertTrue(result instanceof MedicationRequest);
     MedicationRequest request = (MedicationRequest) result;

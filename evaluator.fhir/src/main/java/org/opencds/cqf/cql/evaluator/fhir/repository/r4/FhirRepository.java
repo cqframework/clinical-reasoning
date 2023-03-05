@@ -27,12 +27,13 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleUtil;
 
 
 public class FhirRepository implements Repository {
 
   FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
-  protected IFhirPath fhirPath;
+  IFhirPath fhirPath = FhirPathCache.cachedForContext(context);
 
   private Map<IdType, IBaseResource> resourceMap;
 
@@ -41,7 +42,6 @@ public class FhirRepository implements Repository {
   public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
     FhirResourceLoader resourceLoader =
         new FhirResourceLoader(context, clazz, directoryList, recursive);
-    this.fhirPath = FhirPathCache.cachedForContext(context);
     List<IBaseResource> list = resourceLoader.getResources();
 
     resourceMap = new LinkedHashMap<>();
@@ -51,6 +51,15 @@ public class FhirRepository implements Repository {
       resourceMap.put(new IdType(resource.getIdElement().getResourceType(),
           resource.getIdElement().getIdPart()), resource);
     });
+  }
+
+  public FhirRepository(Bundle bundle) {
+    resourceMap = new LinkedHashMap<>();
+    random = new Random();
+
+    BundleUtil.toListOfResources(this.context, bundle).forEach(resource -> resourceMap.put(
+        new IdType(resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()),
+        resource));
   }
 
   @Override

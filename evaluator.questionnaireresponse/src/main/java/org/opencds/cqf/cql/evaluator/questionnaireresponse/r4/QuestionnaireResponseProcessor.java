@@ -16,10 +16,11 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Property;
@@ -48,10 +49,8 @@ public class QuestionnaireResponseProcessor
   protected IBaseBundle createResourceBundle(QuestionnaireResponse questionnaireResponse,
       List<IBaseResource> resources) {
     var newBundle = new Bundle();
-    var bundleId = new Identifier();
-    bundleId.setValue("QuestionnaireResponse/" + questionnaireResponse.getIdElement().getIdPart());
+    newBundle.setId(new IdType(FHIRAllTypes.BUNDLE.toCode(), getExtractId(questionnaireResponse)));
     newBundle.setType(Bundle.BundleType.TRANSACTION);
-    newBundle.setIdentifier(bundleId);
     resources.forEach(resource -> {
       var request = new Bundle.BundleEntryRequestComponent();
       request.setMethod(Bundle.HTTPVerb.PUT);
@@ -143,8 +142,7 @@ public class QuestionnaireResponseProcessor
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
     var resourceType = getFhirType(itemExtractionContext).toCode();
     var resource = (Resource) this.fhirContext.getResourceDefinition(resourceType).newInstance();
-    resource.setId(new IdType(resourceType,
-        "extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId));
+    resource.setId(new IdType(resourceType, getExtractId(questionnaireResponse) + "." + linkId));
     var subjectProperty = getSubjectProperty(resource);
     if (subjectProperty != null) {
       resource.setProperty(subjectProperty.getName(), subject);
@@ -238,8 +236,8 @@ public class QuestionnaireResponseProcessor
                 subject);
           });
         } else {
-          if (questionnaireCodeMap != null
-              && questionnaireCodeMap.get(item.getLinkId()).size() > 0) {
+          if (questionnaireCodeMap != null && !questionnaireCodeMap.isEmpty()
+              && !questionnaireCodeMap.get(item.getLinkId()).isEmpty()) {
             resources.add(createObservationFromItemAnswer(answer, item.getLinkId(),
                 questionnaireResponse, subject, questionnaireCodeMap));
           }
@@ -255,7 +253,7 @@ public class QuestionnaireResponseProcessor
     // Observation-based extraction -
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#observation-based-extraction
     var obs = new Observation();
-    obs.setId("extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
+    obs.setId(getExtractId(questionnaireResponse) + "." + linkId);
     obs.setBasedOn(questionnaireResponse.getBasedOn());
     obs.setPartOf(questionnaireResponse.getPartOf());
     obs.setStatus(Observation.ObservationStatus.FINAL);
@@ -280,13 +278,13 @@ public class QuestionnaireResponseProcessor
       case "Coding":
         obs.setValue(new CodeableConcept().addCoding(answer.getValueCoding()));
         break;
+      case "date":
+        obs.setValue(new DateTimeType(((DateType) answer.getValue()).getValue()));
+        break;
       default:
         obs.setValue(answer.getValue());
     }
-    var questionnaireResponseReference = new Reference();
-    questionnaireResponseReference
-        .setReference("QuestionnaireResponse/" + questionnaireResponse.getIdElement().getIdPart());
-    obs.setDerivedFrom(Collections.singletonList(questionnaireResponseReference));
+    obs.setDerivedFrom(Collections.singletonList(new Reference(questionnaireResponse)));
 
     var linkIdExtension = new Extension();
     linkIdExtension.setUrl("http://hl7.org/fhir/uv/sdc/StructureDefinition/derivedFromLinkId");
@@ -315,19 +313,6 @@ public class QuestionnaireResponseProcessor
   // }
 
   private Map<String, List<Coding>> getQuestionnaireCodeMap(String questionnaireUrl) {
-    // String url = mySdcProperties.getExtract().getEndpoint();
-    // if (null == url || url.length() < 1) {
-    // throw new IllegalArgumentException("Unable to GET Questionnaire. No observation.endpoint
-    // defined in sdc properties.");
-    // }
-    // String user = mySdcProperties.getExtract().getUsername();
-    // String password = mySdcProperties.getExtract().getPassword();
-    //
-    // IGenericClient client = Clients.forUrl(fhirContext, url);
-    // Clients.registerBasicAuth(client, user, password);
-    //
-    // Questionnaire questionnaire =
-    // client.read().resource(Questionnaire.class).withUrl(questionnaireUrl).execute();
     Questionnaire questionnaire = null;
     try {
       var results = this.repository.search(Bundle.class, Questionnaire.class,
@@ -335,14 +320,13 @@ public class QuestionnaireResponseProcessor
       questionnaire =
           results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
       if (questionnaire == null) {
-        throw new RuntimeException();
+        throw new RuntimeException(
+            String.format("Unable to find resource by URL %s", questionnaireUrl));
       }
     } catch (Exception e) {
       logger.error(String.format(
           "Error encountered searching for Questionnaire during extract operation: %s",
           e.getMessage()));
-      // throw new IllegalArgumentException(String.format("Unable to find resource by URL %s",
-      // questionnaireUrl));
       return Collections.emptyMap();
     }
 

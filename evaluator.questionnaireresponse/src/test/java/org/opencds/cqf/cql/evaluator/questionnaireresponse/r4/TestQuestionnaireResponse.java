@@ -40,7 +40,6 @@ public class TestQuestionnaireResponse {
     return jsonParser.parseResource(open(asset));
   }
 
-
   public static QuestionnaireResponseProcessor buildProcessor(Repository repository) {
     return new QuestionnaireResponseProcessor(fhirContext, repository);
   }
@@ -59,10 +58,10 @@ public class TestQuestionnaireResponse {
 
     public Extract(String questionnaireResponseName) {
       baseResource = (QuestionnaireResponse) parse(questionnaireResponseName);
-      FhirRepository data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
-      FhirRepository content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
+      FhirRepository data = new FhirRepository(this.getClass(), List.of("tests"), false);
+      FhirRepository content = new FhirRepository(this.getClass(), List.of("content/"), false);
       FhirRepository terminology = new FhirRepository(this.getClass(),
-          List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
+          List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
       this.repository = Repositories.proxy(data, content, terminology);
     }

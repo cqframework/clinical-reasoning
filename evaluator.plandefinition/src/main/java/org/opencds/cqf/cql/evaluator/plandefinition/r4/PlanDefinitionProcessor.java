@@ -52,7 +52,6 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
@@ -75,9 +74,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
   public PlanDefinitionProcessor(FhirContext fhirContext, Repository repository,
-      ActivityDefinitionProcessor activityDefinitionProcessor,
-      OperationParametersParser operationParametersParser) {
-    super(fhirContext, repository, operationParametersParser);
+      ActivityDefinitionProcessor activityDefinitionProcessor) {
+    super(fhirContext, repository);
     this.activityDefinitionProcessor = activityDefinitionProcessor;
     this.questionnaireProcessor = new QuestionnaireProcessor(this.fhirContext, this.repository);
     this.questionnaireResponseProcessor =
@@ -96,6 +94,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   @Override
   public void extractQuestionnaireResponse() {
+    if (bundle == null) {
+      return;
+    }
+
     var questionnaireResponses = ((Bundle) this.bundle).getEntry().stream()
         .filter(entry -> entry.getResource().fhirType()
             .equals(Enumerations.FHIRAllTypes.QUESTIONNAIRERESPONSE.toCode()))
@@ -124,11 +126,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     logger.info("Performing $apply operation on {}", theId);
 
-    var questionnaire = new Questionnaire();
-    questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), theId.getIdPart()));
-    this.questionnaire = questionnaire;
-    this.questionnaireItemGenerator = new QuestionnaireItemGenerator(repository, theId.getIdPart(),
-        parameters, bundle, libraryEngine);
+    this.questionnaire = new Questionnaire();
+    this.questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), theId.getIdPart()));
+    this.questionnaireItemGenerator =
+        new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
 
     return planDefinition;
   }
@@ -183,6 +184,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var carePlan = new CarePlan().setInstantiatesCanonical(requestGroup.getInstantiatesCanonical())
         .setSubject(requestGroup.getSubject()).setStatus(CarePlan.CarePlanStatus.DRAFT)
         .setIntent(CarePlan.CarePlanIntent.PROPOSAL);
+    carePlan.setId(new IdType(carePlan.fhirType(), requestGroup.getIdElement().getIdPart()));
 
     if (requestGroup.hasEncounter()) {
       carePlan.setEncounter(requestGroup.getEncounter());
@@ -198,8 +200,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         carePlan.addGoal(new Reference((Resource) goal));
       }
     }
-    carePlan.addActivity()
-        .setReference(new Reference("#" + requestGroup.getIdElement().getIdPart()));
+    carePlan.addActivity().setReference(new Reference(requestGroup));
     carePlan.addContained(requestGroup);
 
     for (var resource : extractedResources) {
@@ -217,6 +218,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   @Override
   public IBaseResource transformToBundle(IBaseResource requestGroup) {
     var resultBundle = new Bundle().setType(BundleType.COLLECTION);
+    resultBundle.setId(requestGroup.getIdElement().getIdPart());
     resultBundle.addEntry().setResource((Resource) requestGroup);
     for (var resource : requestResources) {
       resultBundle.addEntry().setResource((Resource) resource);
@@ -383,7 +385,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var searchResult = repository.search(Bundle.class, ActivityDefinition.class,
             Searches.byUrl(definition.asStringValue()));
         if (!searchResult.hasEntry()) {
-          throw new FHIRException("No activity definition found for definition: " + definition);
+          throw new FHIRException(
+              "No activity definition found for definition: " + definition.asStringValue());
         }
         var activityDefinition = (ActivityDefinition) searchResult.getEntryFirstRep().getResource();
         result = this.activityDefinitionProcessor.apply(activityDefinition.getIdElement(),
@@ -410,7 +413,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var searchResult = repository.search(Bundle.class, PlanDefinition.class,
         Searches.byUrl(definition.asStringValue()));
     if (!searchResult.hasEntry()) {
-      throw new FHIRException("No plan definition found for definition: " + definition);
+      throw new FHIRException(
+          "No plan definition found for definition: " + definition.asStringValue());
     }
     var planDefinition = (PlanDefinition) searchResult.getEntryFirstRep().getResource();
     var result = (RequestGroup) applyPlanDefinition(planDefinition);
@@ -499,7 +503,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private void resolvePrepopulateAction(PlanDefinition.PlanDefinitionActionComponent action,
       RequestGroup requestGroup, Task task) {
-    var questionnaireBundles = getQuestionnaireForOrder(action);
+    var questionnaireBundles = getQuestionnairePackage(action);
     for (var questionnaireBundle : questionnaireBundles) {
       var questionnaire = (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
       // Each bundle should contain a Questionnaire and supporting Library and ValueSet
@@ -512,7 +516,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           .filter(e -> e.hasResource()
               && (e.getResource().fhirType().equals(Enumerations.FHIRAllTypes.VALUESET.toCode())))
           .map(e -> (ValueSet) e.getResource()).collect(Collectors.toList());
-      var additionalData = ((Bundle) bundle).copy();
+      var additionalData =
+          bundle == null ? new Bundle().setType(BundleType.COLLECTION) : ((Bundle) bundle).copy();
       libraries.forEach(library -> {
         additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(library));
       });
@@ -551,7 +556,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
   }
 
-  private List<Bundle> getQuestionnaireForOrder(
+  private List<Bundle> getQuestionnairePackage(
       PlanDefinition.PlanDefinitionActionComponent action) {
     Bundle bundle = null;
     // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as
@@ -575,11 +580,17 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       IGenericClient client = Clients.forUrl(fhirContext, urlSplit[0]);
       // Clients.registerBasicAuth(client, user, password);
       try {
-        bundle = client.operation().onInstance(new IdType("Patient")).named("$" + urlSplit[1])
-            .withParameters(new Parameters().addParameter("order", orderId))
+        // TODO: This is not currently in use, but if it ever is we will need to determine how the
+        // order and coverage resources are passed in
+        Type order = null;
+        Type coverage = null;
+        bundle = client.operation().onType(FHIRAllTypes.QUESTIONNAIRE.toCode())
+            .named("$questionnaire-package")
+            .withParameters(
+                new Parameters().addParameter("order", order).addParameter("coverage", coverage))
             .returnResourceType(Bundle.class).execute();
       } catch (Exception e) {
-        logger.error("Error encountered calling $Questionnaire-for-Order operation: %s", e);
+        logger.error("Error encountered calling $questionnaire-package operation: %s", e);
       }
     } else {
       var searchResult =
@@ -589,8 +600,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       }
       var questionnaire = searchResult.getEntryFirstRep().getResource();
       if (questionnaire != null) {
-        bundle = new Bundle()
-            .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) questionnaire));
+        bundle =
+            new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(questionnaire));
       }
     }
 
@@ -666,16 +677,18 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             planDefinition.getLibrary().get(0).getValueAsString(),
             resolveInputParameters(action.getInput()));
         if (result == null) {
-          logger.warn("Condition expression {} returned null", condition.getExpression());
+          logger.warn("Condition expression {} returned null",
+              condition.getExpression().getExpression());
           return false;
         }
         if (!(result instanceof BooleanType)) {
           logger.warn("The condition expression {} returned a non-boolean value: {}",
-              condition.getExpression(), result.getClass().getSimpleName());
+              condition.getExpression().getExpression(), result.getClass().getSimpleName());
           continue;
         }
         if (!((BooleanType) result).booleanValue()) {
-          logger.info("The result of condition expression {} is false", condition.getExpression());
+          logger.info("The result of condition expression {} is false",
+              condition.getExpression().getExpression());
           return false;
         }
       }
@@ -704,6 +717,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     var params = new Parameters();
     for (var req : dataRequirements) {
+      if (!req.hasId()) {
+        continue;
+      }
+
       var resources = repository.search(Bundle.class, IBaseResource.class, Searches.ALL);
 
       if (resources.hasEntry()) {

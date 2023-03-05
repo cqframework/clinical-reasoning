@@ -47,14 +47,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.plandefinition.OperationParametersParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,14 +69,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
-  public PlanDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal,
-      ActivityDefinitionProcessor activityDefinitionProcessor,
-      OperationParametersParser operationParametersParser) {
-    super(fhirContext, fhirDal, operationParametersParser);
+  public PlanDefinitionProcessor(FhirContext fhirContext, Repository repository,
+      ActivityDefinitionProcessor activityDefinitionProcessor) {
+    super(fhirContext, repository);
     this.activityDefinitionProcessor = activityDefinitionProcessor;
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.fhirContext, this.fhirDal);
+    this.questionnaireProcessor = new QuestionnaireProcessor(this.fhirContext, this.repository);
     this.questionnaireResponseProcessor =
-        new QuestionnaireResponseProcessor(this.fhirContext, this.fhirDal);
+        new QuestionnaireResponseProcessor(this.fhirContext, this.repository);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -109,7 +108,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   @Override
   public PlanDefinition resolvePlanDefinition(IIdType theId) {
-    var basePlanDefinition = this.fhirDal.read(theId);
+    var basePlanDefinition = this.repository.read(PlanDefinition.class, theId);
 
     requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
 
@@ -119,11 +118,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     logger.info("Performing $apply operation on {}", theId);
 
-    var questionnaire = new Questionnaire();
-    questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), theId.getIdPart()));
-    this.questionnaire = questionnaire;
-    this.questionnaireItemGenerator = new QuestionnaireItemGenerator(fhirDal, theId.getIdPart(),
-        parameters, bundle, libraryEngine);
+    this.questionnaire = new Questionnaire();
+    this.questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), theId.getIdPart()));
+    this.questionnaireItemGenerator =
+        new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
 
     return planDefinition;
   }
@@ -311,12 +309,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       if (referenceToContained) {
         result = resolveContained(planDefinition, definition.getReference());
       } else {
-        var iterator = fhirDal
-            .searchByUrl(FHIRAllTypes.QUESTIONNAIRE.toCode(), definition.getReference()).iterator();
-        if (!iterator.hasNext()) {
-          throw new FHIRException("No questionnaire found for definition: " + definition);
+        var searchResult = repository.search(Bundle.class, Questionnaire.class,
+            Searches.byUrl(definition.getReference()));
+        if (!searchResult.hasEntry()) {
+          throw new FHIRException(
+              "No questionnaire found for definition: " + definition.getReference());
         }
-        result = iterator.next();
+        result = searchResult.getEntryFirstRep().getResource();
       }
 
       applyAction(requestGroup, result, action);
@@ -342,12 +341,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             patientId, practitionerId, organizationId);
         result.setId(activityDefinition.getIdElement().withResourceType(result.fhirType()));
       } else {
-        var iterator =
-            fhirDal.searchByUrl("ActivityDefinition", definition.getReference()).iterator();
-        if (!iterator.hasNext()) {
-          throw new FHIRException("No activity definition found for definition: " + definition);
+        var searchResult = repository.search(Bundle.class, ActivityDefinition.class,
+            Searches.byUrl(definition.getReference()));
+        if (!searchResult.hasEntry()) {
+          throw new FHIRException(
+              "No activity definition found for definition: " + definition.getReference());
         }
-        var activityDefinition = (ActivityDefinition) iterator.next();
+        var activityDefinition = (ActivityDefinition) searchResult.getEntryFirstRep().getResource();
         result = this.activityDefinitionProcessor.apply(activityDefinition.getIdElement(),
             patientId, encounterId, practitionerId, organizationId, userType, userLanguage,
             userTaskContext, setting, settingContext, parameters, libraryEngine);
@@ -365,11 +365,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private void applyNestedPlanDefinition(RequestGroup requestGroup, Reference definition,
       PlanDefinition.PlanDefinitionActionComponent action) {
-    var iterator = fhirDal.searchByUrl("PlanDefinition", definition.getReference()).iterator();
-    if (!iterator.hasNext()) {
-      throw new FHIRException("No plan definition found for definition: " + definition);
+    var searchResult = repository.search(Bundle.class, PlanDefinition.class,
+        Searches.byUrl(definition.getReference()));
+    if (!searchResult.hasEntry()) {
+      throw new FHIRException(
+          "No plan definition found for definition: " + definition.getReference());
     }
-    var planDefinition = (PlanDefinition) iterator.next();
+    var planDefinition = (PlanDefinition) searchResult.getEntryFirstRep().getResource();
     var result = (RequestGroup) applyPlanDefinition(planDefinition);
 
     applyAction(requestGroup, result, action);
@@ -455,7 +457,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private void resolvePrepopulateAction(PlanDefinition.PlanDefinitionActionComponent action,
       RequestGroup requestGroup, Task task) {
-    var questionnaireBundles = getQuestionnaireForOrder(action);
+    var questionnaireBundles = getQuestionnairePackage(action);
     for (var questionnaireBundle : questionnaireBundles) {
       // Each bundle should contain a Questionnaire and supporting Library and ValueSet
       // resources
@@ -509,7 +511,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
   }
 
-  private List<Bundle> getQuestionnaireForOrder(
+  private List<Bundle> getQuestionnairePackage(
       PlanDefinition.PlanDefinitionActionComponent action) {
     Bundle bundle = null;
     // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as
@@ -537,26 +539,33 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       IGenericClient client = Clients.forUrl(fhirContext, urlSplit[0]);
       // Clients.registerBasicAuth(client, user, password);
       try {
-        bundle = client.operation().onInstance(new IdType("Patient")).named("$" + urlSplit[1])
+        // TODO: This is not currently in use, but if it ever is we will need to determine how the
+        // order and coverage resources are passed in
+        Type order = null;
+        Type coverage = null;
+        bundle = client.operation().onType(FHIRAllTypes.QUESTIONNAIRE.toCode())
+            .named("$questionnaire-package")
             .withParameters(new Parameters()
-                .addParameter(new ParametersParameterComponent(new StringType("order"))
-                    .setValue(new StringType(orderId))))
+                .addParameter(new ParametersParameterComponent().setName("order").setValue(order))
+                .addParameter(
+                    new ParametersParameterComponent().setName("coverage").setValue(coverage)))
             .returnResourceType(Bundle.class).execute();
       } catch (Exception e) {
-        logger.error("Error encountered calling $Questionnaire-for-Order operation: %s", e);
+        logger.error("Error encountered calling $questionnaire-package operation: %s", e);
       }
     } else {
-      var questionnaires = this.fhirDal.searchByUrl("Questionnaire", questionnaireUrl);
-      var iterator = questionnaires.iterator();
-      if (!iterator.hasNext()) {
+      var searchResult =
+          repository.search(Bundle.class, Questionnaire.class, Searches.byUrl(questionnaireUrl));
+      if (!searchResult.hasEntry()) {
         throw new FHIRException("No questionnaire found for definition: " + questionnaireUrl);
       }
-      var questionnaire = iterator.next();
+      var questionnaire = searchResult.getEntryFirstRep().getResource();
       if (questionnaire != null) {
-        bundle = new Bundle()
-            .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) questionnaire));
+        bundle =
+            new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(questionnaire));
       }
     }
+
 
     if (bundle == null) {
       bundle = new Bundle();
@@ -639,13 +648,16 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     var params = new Parameters();
     for (var req : dataRequirements) {
-      var resources = fhirDal.search(req.getType()).iterator();
+      if (!req.hasId()) {
+        continue;
+      }
 
-      if (resources.hasNext()) {
-        var index = 0;
+      var resources = repository.search(Bundle.class, IBaseResource.class, Searches.ALL);
+
+      if (resources.hasEntry()) {
         var found = true;
-        while (resources.hasNext()) {
-          var resource = (Resource) resources.next();
+        for (var resource : resources.getEntry().stream().map(e -> e.getResource())
+            .collect(Collectors.toList())) {
           var parameter =
               new ParametersParameterComponent().setName("%" + String.format("%s", req.getId()));
           if (req.hasCodeFilter()) {
@@ -653,13 +665,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
               var codeFilterParam = new Parameters();
               codeFilterParam.addParameter().setName("%resource").setResource(resource);
               if (filter != null && filter.hasPath() && filter.hasValueSet()) {
-                var valueset = fhirDal.searchByUrl("ValueSet", filter.getValueSet().getId());
-                if (valueset != null && valueset.iterator().hasNext()) {
+                var valueSets = repository.search(Bundle.class, ValueSet.class,
+                    Searches.byUrl(filter.getValueSetStringType().getValue()));
+                if (valueSets.hasEntry()) {
                   codeFilterParam.addParameter().setName("%valueset")
-                      .setResource((Resource) valueset.iterator().next());
+                      .setResource(valueSets.getEntryFirstRep().getResource());
                   var codeFilterExpression =
                       "%" + String.format("resource.%s.where(code.memberOf('%s'))",
-                          filter.getPath(), "%" + "valueset");
+                          filter.getPath(), "%valueset");
                   var codeFilterResult =
                       expressionEvaluator.evaluate(codeFilterExpression, codeFilterParam);
                   var tempResult =
@@ -673,7 +686,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
               }
             }
           }
-          if (!resources.hasNext() && index == 0) {
+          if (resources.getEntry().size() == 1) {
             parameter.addExtension(
                 "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
                 new ParameterDefinition().setMax("*").setName("%" + req.getId()));
@@ -682,13 +695,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
           } else {
             if (!found) {
-              index++;
               continue;
             }
             parameter.setResource(resource);
           }
           params.addParameter(parameter);
-          index++;
         }
       } else {
         var parameter =

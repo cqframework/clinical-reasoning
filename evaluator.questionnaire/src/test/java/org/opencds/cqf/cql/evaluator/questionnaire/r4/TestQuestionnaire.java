@@ -9,13 +9,14 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Resource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -59,86 +60,90 @@ public class TestQuestionnaire {
   }
 
   static class QuestionnaireResult {
-    private Bundle bundle;
-    private Endpoint dataEndpoint;
-    private Endpoint contentEndpoint;
-    private Endpoint terminologyEndpoint;
-    private Parameters parameters;
-    private Questionnaire baseResource;
+    private Questionnaire questionnaire;
     private String patientId;
     private Repository repository;
+    private Repository dataRepository;
+    private Repository contentRepository;
+    private Repository terminologyRepository;
+    private Bundle bundle;
+    private Parameters parameters;
 
     public QuestionnaireResult(String questionnaireName, String patientId) {
-      baseResource = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
+      questionnaire = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
       this.patientId = patientId;
-
-      FhirRepository data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
-      FhirRepository content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
-      FhirRepository terminology = new FhirRepository(this.getClass(),
-          List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
-
-      this.repository = Repositories.proxy(data, content, terminology);
     }
 
     public QuestionnaireResult withData(String dataAssetName) {
-      dataEndpoint = new Endpoint().setAddress(dataAssetName)
-          .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+      dataRepository = new FhirRepository((Bundle) parse(dataAssetName));
 
       return this;
     }
 
-    public QuestionnaireResult withLibrary(String dataAssetName) {
-      dataEndpoint = new Endpoint().setAddress(dataAssetName)
-          .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+    public QuestionnaireResult withContent(String dataAssetName) {
+      contentRepository = new FhirRepository((Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public QuestionnaireResult withTerminology(String dataAssetName) {
-      terminologyEndpoint = new Endpoint().setAddress(dataAssetName)
-          .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
+      terminologyRepository = new FhirRepository((Bundle) parse(dataAssetName));
 
       return this;
     }
 
-    public QuestionnaireResult withBundle(String dataAssetName) {
-      bundle = (Bundle) parse(dataAssetName);
+    public QuestionnaireResult withAdditionalData(String dataAssetName) {
+      var data = parse(dataAssetName);
+      bundle =
+          data.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode()) ? (Bundle) data
+              : new Bundle().setType(BundleType.COLLECTION)
+                  .addEntry(new BundleEntryComponent().setResource((Resource) data));
+
       return this;
     }
 
     public QuestionnaireResult withParameters(Parameters params) {
       parameters = params;
+
       return this;
     }
 
     public QuestionnaireResult withRepository(Repository repository) {
       this.repository = repository;
+
       return this;
     }
 
-    public GeneratedQuestionnaire prePopulate() {
-      return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(baseResource,
-          patientId, parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
+    private void buildRepository() {
+      if (repository != null) {
+        return;
+      }
+      if (dataRepository == null) {
+        dataRepository = new FhirRepository(this.getClass(), List.of("tests"), false);
+      }
+      if (contentRepository == null) {
+        contentRepository = new FhirRepository(this.getClass(), List.of("content/"), false);
+      }
+      if (terminologyRepository == null) {
+        terminologyRepository = new FhirRepository(this.getClass(),
+            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+      }
+
+      repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
     }
 
-    public GeneratedQuestionnaire prePopulateWithEngine() {
-      var libraryEngine = new LibraryEngine(fhirContext, this.repository);
-
-      return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(baseResource,
+    public GeneratedQuestionnaire prePopulate() {
+      buildRepository();
+      var libraryEngine = new LibraryEngine(fhirContext, repository);
+      return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(questionnaire,
           patientId, parameters, bundle, libraryEngine));
     }
 
     public GeneratedQuestionnaireResponse populate() {
+      buildRepository();
+      var libraryEngine = new LibraryEngine(fhirContext, repository);
       return new GeneratedQuestionnaireResponse(
-          (QuestionnaireResponse) buildProcessor(this.repository).populate(baseResource, patientId,
-              parameters, bundle, dataEndpoint, contentEndpoint, terminologyEndpoint));
-    }
-
-    public GeneratedQuestionnaireResponse populateWithEngine() {
-      var libraryEngine = new LibraryEngine(fhirContext, this.repository);
-
-      return new GeneratedQuestionnaireResponse(
-          (QuestionnaireResponse) buildProcessor(this.repository).populate(baseResource, patientId,
+          (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire, patientId,
               parameters, bundle, libraryEngine));
     }
   }

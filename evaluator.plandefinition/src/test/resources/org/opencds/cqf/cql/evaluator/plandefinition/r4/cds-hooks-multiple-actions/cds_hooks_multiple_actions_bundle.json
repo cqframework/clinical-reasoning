@@ -1,5 +1,6 @@
 {
   "resourceType": "Bundle",
+  "id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
   "type": "collection",
   "entry": [
     {

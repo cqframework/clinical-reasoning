@@ -20,7 +20,6 @@ import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.InstantType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Property;
@@ -32,25 +31,24 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StringType;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireResponseProcessor
     extends BaseQuestionnaireResponseProcessor<QuestionnaireResponse> {
 
-  public QuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    super(fhirContext, fhirDal);
+  public QuestionnaireResponseProcessor(FhirContext fhirContext, Repository repository) {
+    super(fhirContext, repository);
   }
 
   protected IBaseBundle createResourceBundle(QuestionnaireResponse questionnaireResponse,
       List<IBaseResource> resources) {
     var newBundle = new Bundle();
-    var bundleId = new Identifier();
-    bundleId.setValue("QuestionnaireResponse/" + questionnaireResponse.getIdElement().getIdPart());
+    newBundle.setId(getExtractId(questionnaireResponse));
     newBundle.setType(Bundle.BundleType.TRANSACTION);
-    newBundle.setIdentifier(bundleId);
     resources.forEach(resource -> {
       var request = new Bundle.BundleEntryRequestComponent();
       request.setMethod(Bundle.HTTPVerb.PUT);
@@ -143,8 +141,7 @@ public class QuestionnaireResponseProcessor
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
     var resourceType = getFhirType(itemExtractionContext).toCode();
     var resource = (Resource) this.fhirContext.getResourceDefinition(resourceType).newInstance();
-    resource.setId(new IdType(resourceType,
-        "extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId));
+    resource.setId(new IdType(resourceType, getExtractId(questionnaireResponse) + "." + linkId));
     var subjectProperty = getSubjectProperty(resource);
     if (subjectProperty != null) {
       resource.setProperty(subjectProperty.getName(), subject);
@@ -238,7 +235,8 @@ public class QuestionnaireResponseProcessor
                 subject);
           });
         } else {
-          if (questionnaireCodeMap.get(item.getLinkId()).size() > 0) {
+          if (questionnaireCodeMap != null && !questionnaireCodeMap.isEmpty()
+              && !questionnaireCodeMap.get(item.getLinkId()).isEmpty()) {
             resources.add(createObservationFromItemAnswer(answer, item.getLinkId(),
                 questionnaireResponse, subject, questionnaireCodeMap));
           }
@@ -254,7 +252,7 @@ public class QuestionnaireResponseProcessor
     // Observation-based extraction -
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#observation-based-extraction
     var obs = new Observation();
-    obs.setId("extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
+    obs.setId(getExtractId(questionnaireResponse) + "." + linkId);
     obs.setBasedOn(questionnaireResponse.getBasedOn());
     obs.setPartOf(questionnaireResponse.getPartOf());
     obs.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -314,24 +312,21 @@ public class QuestionnaireResponseProcessor
   // }
 
   private Map<String, List<Coding>> getQuestionnaireCodeMap(String questionnaireUrl) {
-    // String url = mySdcProperties.getExtract().getEndpoint();
-    // if (null == url || url.length() < 1) {
-    // throw new IllegalArgumentException("Unable to GET Questionnaire. No observation.endpoint
-    // defined in sdc properties.");
-    // }
-    // String user = mySdcProperties.getExtract().getUsername();
-    // String password = mySdcProperties.getExtract().getPassword();
-    //
-    // IGenericClient client = Clients.forUrl(fhirContext, url);
-    // Clients.registerBasicAuth(client, user, password);
-    //
-    // Questionnaire questionnaire =
-    // client.read().resource(Questionnaire.class).withUrl(questionnaireUrl).execute();
-    var questionnaire = (Questionnaire) this.fhirDal.searchByUrl("Questionnaire", questionnaireUrl)
-        .iterator().next();
-
-    if (questionnaire == null) {
-      throw new IllegalArgumentException("Unable to find resource by URL " + questionnaireUrl);
+    Questionnaire questionnaire = null;
+    try {
+      var results = this.repository.search(Bundle.class, Questionnaire.class,
+          Searches.byUrl(questionnaireUrl));
+      questionnaire =
+          results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
+      if (questionnaire == null) {
+        throw new RuntimeException(
+            String.format("Unable to find resource by URL %s", questionnaireUrl));
+      }
+    } catch (Exception e) {
+      logger.error(String.format(
+          "Error encountered searching for Questionnaire during extract operation: %s",
+          e.getMessage()));
+      return Collections.emptyMap();
     }
 
     return createCodeMap(questionnaire);

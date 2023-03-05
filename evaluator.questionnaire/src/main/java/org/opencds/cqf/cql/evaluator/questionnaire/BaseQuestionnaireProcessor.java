@@ -3,7 +3,6 @@ package org.opencds.cqf.cql.evaluator.questionnaire;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -18,7 +17,6 @@ public abstract class BaseQuestionnaireProcessor<T> {
   protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
 
   protected LibraryEngine libraryEngine;
-  protected ExpressionEvaluator expressionEvaluator;
   protected FhirContext fhirContext;
   protected Repository repository;
   protected IFhirPath fhirPath;

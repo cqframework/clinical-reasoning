@@ -1,5 +1,6 @@
 {
   "resourceType": "CarePlan",
+  "id": "opioidcds-10-patient-view",
   "contained": [
     {
       "resourceType": "RequestGroup",
@@ -59,7 +60,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#opioidcds-10-patient-view"
+        "reference": "#RequestGroup/opioidcds-10-patient-view"
       }
     }
   ]

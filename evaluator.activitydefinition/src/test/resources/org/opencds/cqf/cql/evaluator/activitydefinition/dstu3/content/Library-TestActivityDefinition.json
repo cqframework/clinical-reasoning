@@ -1,0 +1,22 @@
+{
+  "resourceType": "Library",
+  "id": "TestActivityDefinition",
+  "url": "http://test/fhir/Library/TestActivityDefinition|1.0.0",
+  "version": "1.0.0",
+  "name": "TestActivityDefinition",
+  "parameter": [
+    {
+      "name": "ActiveProcedureStatus",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "boolean"
+    }
+  ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "cql/TestActivityDefinition.cql"
+    }
+  ]
+}

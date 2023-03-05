@@ -23,7 +23,7 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.SupplyRequest;
 import org.hl7.fhir.r5.model.Task;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +33,8 @@ public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
-  public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    super(fhirContext, fhirDal);
+  public ActivityDefinitionProcessor(FhirContext fhirContext, Repository repository) {
+    super(fhirContext, repository);
   }
 
   // For library use
@@ -92,7 +92,13 @@ public class ActivityDefinitionProcessor
         throw new FHIRException(msg);
     }
 
-    var subjectCode = activityDefinition.getSubjectCodeableConcept().getCoding().get(0).getCode();
+    String subjectCode = null;
+    if (activityDefinition.hasSubjectCodeableConcept()) {
+      var concept = activityDefinition.getSubjectCodeableConcept();
+      if (concept.hasCoding()) {
+        subjectCode = concept.getCoding().get(0).getCode();
+      }
+    }
     var subjectType = subjectCode != null ? subjectCode : "Patient";
     for (ActivityDefinition.ActivityDefinitionDynamicValueComponent dynamicValue : activityDefinition
         .getDynamicValue()) {

@@ -27,30 +27,35 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleUtil;
 
 
 public class FhirRepository implements Repository {
 
   FhirContext context = FhirContext.forCached(FhirVersionEnum.R5);
-  protected IFhirPath fhirPath;
+  IFhirPath fhirPath = FhirPathCache.cachedForContext(context);
 
   private Map<IdType, IBaseResource> resourceMap;
-
   private Random random;
 
   public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
-    FhirResourceLoader resourceLoader =
-        new FhirResourceLoader(context, clazz, directoryList, recursive);
-    this.fhirPath = FhirPathCache.cachedForContext(context);
-    List<IBaseResource> list = resourceLoader.getResources();
-
     resourceMap = new LinkedHashMap<>();
     random = new Random();
 
-    list.forEach(resource -> {
+    var resourceLoader = new FhirResourceLoader(context, clazz, directoryList, recursive);
+    resourceLoader.getResources().forEach(resource -> {
       resourceMap.put(new IdType(resource.getIdElement().getResourceType(),
           resource.getIdElement().getIdPart()), resource);
     });
+  }
+
+  public FhirRepository(Bundle bundle) {
+    resourceMap = new LinkedHashMap<>();
+    random = new Random();
+
+    BundleUtil.toListOfResources(this.context, bundle).forEach(resource -> resourceMap.put(
+        new IdType(resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()),
+        resource));
   }
 
   @Override
@@ -181,8 +186,16 @@ public class FhirRepository implements Repository {
 
         case R4:
           var r4String =
-              this.fhirPath.evaluateFirst(resource, "url", org.hl7.fhir.r5.model.UriType.class);
+              this.fhirPath.evaluateFirst(resource, "url", org.hl7.fhir.r4.model.UriType.class);
           if (r4String.isPresent() && r4String.get().getValue().equals(url)) {
+            returnList.add(resource);
+          }
+          break;
+
+        case R5:
+          var r5String =
+              this.fhirPath.evaluateFirst(resource, "url", org.hl7.fhir.r5.model.UriType.class);
+          if (r5String.isPresent() && r5String.get().getValue().equals(url)) {
             returnList.add(resource);
           }
           break;

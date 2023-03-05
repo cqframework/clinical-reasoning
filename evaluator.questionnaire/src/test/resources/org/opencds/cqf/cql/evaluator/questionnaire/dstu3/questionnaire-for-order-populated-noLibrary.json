@@ -1,6 +1,6 @@
 {
   "resourceType": "Questionnaire",
-  "id": "1903",
+  "id": "OutpatientPriorAuthorizationRequest",
   "meta": {
     "versionId": "2",
     "lastUpdated": "2022-11-21T17:34:01.764+00:00",
@@ -11,7 +11,7 @@
   "contained": [
     {
       "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-1903",
+      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest",
       "issue": [
         {
           "severity": "error",
@@ -144,7 +144,7 @@
     {
       "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
       "valueReference": {
-        "reference": "#prepopulate-outcome-1903"
+        "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest"
       }
     }
   ],

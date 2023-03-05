@@ -1,5 +1,6 @@
 {
   "resourceType": "Bundle",
+  "id": "hello-world-patient-view",
   "type": "collection",
   "entry": [
     {

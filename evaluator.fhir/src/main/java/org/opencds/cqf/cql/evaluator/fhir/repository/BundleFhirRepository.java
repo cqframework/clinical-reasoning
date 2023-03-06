@@ -157,4 +157,9 @@ public class BundleFhirRepository implements Repository {
       P parameters, Class<B> returnType, Map<String, String> headers) {
     throw new NotImplementedException();
   }
+
+  @Override
+  public FhirContext fhirContext() {
+    return this.context;
+  }
 }

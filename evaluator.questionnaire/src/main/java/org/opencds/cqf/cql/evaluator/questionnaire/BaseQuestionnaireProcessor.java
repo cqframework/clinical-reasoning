@@ -35,7 +35,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
   protected IBaseResource contentEndpoint;
   protected IBaseResource terminologyEndpoint;
 
-  public BaseQuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal,
+  protected BaseQuestionnaireProcessor(FhirContext fhirContext, FhirDal fhirDal,
       LibraryProcessor libraryProcessor, ExpressionEvaluator expressionEvaluator) {
     this.fhirContext = fhirContext;
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);

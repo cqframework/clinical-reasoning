@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 
@@ -147,6 +148,11 @@ public class FederatedRepository implements Repository {
     return null;
   }
 
+  @Override
+  public FhirContext fhirContext() {
+    return data.fhirContext();
+  }
+
   private static Set<String> terminologyResourceSet =
       new HashSet<>(Arrays.asList("ValueSet", "CodeSystem", "ConceptMap"));
 
@@ -164,6 +170,4 @@ public class FederatedRepository implements Repository {
       return true;
     return false;
   }
-
-
 }

@@ -27,14 +27,12 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
-  public ActivityDefinitionProcessor(FhirContext fhirContext, Repository repository) {
-    super(fhirContext, repository);
+  public ActivityDefinitionProcessor(Repository repository) {
+    super(repository);
   }
 
   // For library use

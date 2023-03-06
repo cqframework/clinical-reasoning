@@ -60,7 +60,6 @@ import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 @SuppressWarnings({"unused", "squid:S107"})
@@ -73,13 +72,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
-  public PlanDefinitionProcessor(FhirContext fhirContext, Repository repository,
-      ActivityDefinitionProcessor activityDefinitionProcessor) {
-    super(fhirContext, repository);
-    this.activityDefinitionProcessor = activityDefinitionProcessor;
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.fhirContext, this.repository);
-    this.questionnaireResponseProcessor =
-        new QuestionnaireResponseProcessor(this.fhirContext, this.repository);
+  public PlanDefinitionProcessor(Repository repository) {
+    super(repository);
+    this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository);
+    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository);
+    this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -577,7 +574,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     if (questionnaireUrl.contains("$")) {
       var urlSplit = questionnaireUrl.split("$");
-      IGenericClient client = Clients.forUrl(fhirContext, urlSplit[0]);
+      IGenericClient client = Clients.forUrl(repository.fhirContext(), urlSplit[0]);
       // Clients.registerBasicAuth(client, user, password);
       try {
         // TODO: This is not currently in use, but if it ever is we will need to determine how the

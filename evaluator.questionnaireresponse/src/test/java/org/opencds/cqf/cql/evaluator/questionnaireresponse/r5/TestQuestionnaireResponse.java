@@ -41,7 +41,7 @@ public class TestQuestionnaireResponse {
   }
 
   public static QuestionnaireResponseProcessor buildProcessor(Repository repository) {
-    return new QuestionnaireResponseProcessor(fhirContext, repository);
+    return new QuestionnaireResponseProcessor(repository);
   }
 
   /** Fluent interface starts here **/

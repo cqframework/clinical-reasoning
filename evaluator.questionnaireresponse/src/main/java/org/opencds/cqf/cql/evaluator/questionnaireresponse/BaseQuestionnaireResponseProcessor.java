@@ -8,7 +8,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 /*
@@ -34,13 +33,11 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected static final Logger logger =
       LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
   protected IParser parser;
-  protected FhirContext fhirContext;
   protected Repository repository;
 
-  protected BaseQuestionnaireResponseProcessor(FhirContext fhirContext, Repository repository) {
-    this.fhirContext = fhirContext;
+  protected BaseQuestionnaireResponseProcessor(Repository repository) {
     this.repository = repository;
-    this.parser = this.fhirContext.newJsonParser();
+    this.parser = this.repository.fhirContext().newJsonParser();
   }
 
   public IBaseBundle extract(T questionnaireResponse) {

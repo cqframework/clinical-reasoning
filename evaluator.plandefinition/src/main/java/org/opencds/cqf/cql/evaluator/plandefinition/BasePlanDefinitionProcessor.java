@@ -21,7 +21,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
@@ -37,7 +36,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   protected final OperationParametersParser operationParametersParser;
   protected final ModelResolver modelResolver;
-  protected final FhirContext fhirContext;
   protected final IFhirPath fhirPath;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
@@ -61,19 +59,15 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected Collection<IBaseResource> requestResources;
   protected Collection<IBaseResource> extractedResources;
 
-  protected BasePlanDefinitionProcessor(FhirContext fhirContext, Repository repository) {
-    requireNonNull(fhirContext, "fhirContext can not be null");
+  protected BasePlanDefinitionProcessor(Repository repository) {
     requireNonNull(repository, "localRepository can not be null");
     this.repository = repository;
-    this.fhirContext = fhirContext;
-    this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    this.operationParametersParser =
-        new OperationParametersParser(Contexts.getAdapterFactory(fhirContext),
-            new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion()));
+    this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
+    this.operationParametersParser = new OperationParametersParser(
+        Contexts.getAdapterFactory(repository.fhirContext()),
+        new FhirTypeConverterFactory().create(repository.fhirContext().getVersion().getVersion()));
     this.modelResolver = new FhirModelResolverFactory()
-        .create(fhirContext.getVersion().getVersion().getFhirVersionString());
-    this.requestResources = new ArrayList<>();
-    this.extractedResources = new ArrayList<>();
+        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
 
   public abstract T resolvePlanDefinition(IIdType theId);
@@ -95,11 +89,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
       Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
       IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
-        terminologyEndpoint);
+    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return apply(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
-        prefetchData, new LibraryEngine(fhirContext, repository));
+        prefetchData, new LibraryEngine(repository));
   }
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
@@ -107,7 +100,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
       LibraryEngine libraryEngine) {
-    if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
+    if (repository.fhirContext().getVersion().getVersion() == FhirVersionEnum.R5) {
       return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
           userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
           prefetchData, libraryEngine);
@@ -127,6 +120,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.prefetchData = prefetchData;
     this.libraryEngine = libraryEngine;
     this.containResources = true;
+    this.requestResources = new ArrayList<>();
+    this.extractedResources = new ArrayList<>();
     extractQuestionnaireResponse();
     return transformToCarePlan(applyPlanDefinition(resolvePlanDefinition(theId)));
   }
@@ -137,11 +132,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
       Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
       IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
-        terminologyEndpoint);
+    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
-        prefetchData, new LibraryEngine(fhirContext, repository));
+        prefetchData, new LibraryEngine(repository));
   }
 
   public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
@@ -164,6 +158,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.prefetchData = prefetchData;
     this.libraryEngine = libraryEngine;
     this.containResources = false;
+    this.requestResources = new ArrayList<>();
+    this.extractedResources = new ArrayList<>();
     extractQuestionnaireResponse();
     return transformToBundle(applyPlanDefinition(resolvePlanDefinition(theId)));
   }
@@ -195,7 +191,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
     // backwards compatibility where CDS Hooks indicator was set with activity.extension or
     // action.extension path
     else if (path.startsWith("activity.extension") || path.startsWith("action.extension")) {
-      if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
+      if (repository.fhirContext().getVersion().getVersion() == FhirVersionEnum.R5) {
         throw new IllegalArgumentException(
             "Please use the priority path when setting indicator values when using FHIR R5 for CDS Hooks evaluation");
       }

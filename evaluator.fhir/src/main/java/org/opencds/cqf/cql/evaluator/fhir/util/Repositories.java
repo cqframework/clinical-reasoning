@@ -30,30 +30,15 @@ public class Repositories {
     }
   }
 
-  // private static Repository getDalRepository(FhirContext fhirContext, FhirDal fhirDal) {
-  // switch (fhirContext.getVersion().getVersion()) {
-  // case DSTU3:
-  // return new org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.DalRepository(fhirDal);
-  // case R4:
-  // return new org.opencds.cqf.cql.evaluator.fhir.repository.r4.DalRepository(fhirDal);
-  // case R5:
-  // return new org.opencds.cqf.cql.evaluator.fhir.repository.r5.DalRepository(fhirDal);
-  // default:
-  // throw new IllegalArgumentException(
-  // String.format("unsupported FHIR version: %s", fhirContext));
-  // }
-  // }
-
-  public static Repository proxy(FhirContext fhirContext, Repository localRepository,
-      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
-      IBaseResource terminologyEndpoint) {
+  public static Repository proxy(Repository localRepository, IBaseResource dataEndpoint,
+      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     // var fhirDalRepository = getDalRepository(fhirContext, fhirDal);
-    Repository data =
-        dataEndpoint == null ? null : new RestRepository(getClient(fhirContext, dataEndpoint));
+    Repository data = dataEndpoint == null ? null
+        : new RestRepository(getClient(localRepository.fhirContext(), dataEndpoint));
     Repository content = contentEndpoint == null ? null
-        : new RestRepository(getClient(fhirContext, contentEndpoint));
+        : new RestRepository(getClient(localRepository.fhirContext(), contentEndpoint));
     Repository terminology = terminologyEndpoint == null ? null
-        : new RestRepository(getClient(fhirContext, terminologyEndpoint));
+        : new RestRepository(getClient(localRepository.fhirContext(), terminologyEndpoint));
 
     return new ProxyRepository(localRepository, data, content, terminology);
   }

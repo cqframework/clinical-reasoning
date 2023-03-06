@@ -16,7 +16,6 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.activitydefinition.r5.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r5.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -48,10 +47,7 @@ public class PlanDefinition {
   }
 
   public static PlanDefinitionProcessor buildProcessor(Repository repository) {
-    ActivityDefinitionProcessor activityDefinitionProcessor =
-        new ActivityDefinitionProcessor(fhirContext, repository);
-
-    return new PlanDefinitionProcessor(fhirContext, repository, activityDefinitionProcessor);
+    return new PlanDefinitionProcessor(repository);
   }
 
   /** Fluent interface starts here **/
@@ -141,7 +137,7 @@ public class PlanDefinition {
 
     public GeneratedBundle apply() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(fhirContext, this.repository);
+      var libraryEngine = new LibraryEngine(this.repository);
       return new GeneratedBundle((Bundle) buildProcessor(repository).apply(
           new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, null, null, null,
           null, null, null, null, parameters, null, additionalData, null, libraryEngine));

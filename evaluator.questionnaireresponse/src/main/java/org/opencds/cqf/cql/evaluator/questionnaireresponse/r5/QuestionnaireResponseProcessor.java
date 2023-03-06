@@ -35,13 +35,11 @@ import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResp
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Searches;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class QuestionnaireResponseProcessor
     extends BaseQuestionnaireResponseProcessor<QuestionnaireResponse> {
 
-  public QuestionnaireResponseProcessor(FhirContext fhirContext, Repository repository) {
-    super(fhirContext, repository);
+  public QuestionnaireResponseProcessor(Repository repository) {
+    super(repository);
   }
 
   protected IBaseBundle createResourceBundle(QuestionnaireResponse questionnaireResponse,
@@ -140,7 +138,8 @@ public class QuestionnaireResponseProcessor
     // Definition-based extraction -
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
     var resourceType = getFhirType(itemExtractionContext).toCode();
-    var resource = (Resource) this.fhirContext.getResourceDefinition(resourceType).newInstance();
+    var resource =
+        (Resource) this.repository.fhirContext().getResourceDefinition(resourceType).newInstance();
     resource.setId(new IdType(resourceType, getExtractId(questionnaireResponse) + "." + linkId));
     var subjectProperty = getSubjectProperty(resource);
     if (subjectProperty != null) {

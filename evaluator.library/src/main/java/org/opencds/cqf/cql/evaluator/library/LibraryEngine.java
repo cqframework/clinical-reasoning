@@ -34,9 +34,9 @@ public class LibraryEngine {
   protected FhirContext fhirContext;
   protected IFhirPath fhirPath;
 
-  public LibraryEngine(FhirContext fhirContext, Repository repository) {
-    this.fhirContext = fhirContext;
+  public LibraryEngine(Repository repository) {
     this.repository = repository;
+    this.fhirContext = repository.fhirContext();
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     initContext();
   }

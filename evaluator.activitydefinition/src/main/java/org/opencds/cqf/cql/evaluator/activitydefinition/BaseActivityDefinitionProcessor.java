@@ -15,7 +15,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
@@ -30,19 +29,16 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public static final String CODE_ERROR_PREAMBLE = "Code does not map to ";
   public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
   public static final String MISSING_CODE_PROPERTY = "Missing required code property";
-  private final FhirContext fhirContext;
   private final IFhirPath fhirPath;
   private final ModelResolver modelResolver;
   protected Repository repository;
 
-  protected BaseActivityDefinitionProcessor(FhirContext fhirContext, Repository repository) {
-    requireNonNull(fhirContext, "fhirContext can not be null");
+  protected BaseActivityDefinitionProcessor(Repository repository) {
     requireNonNull(repository, "repository can not be null");
-    this.fhirContext = fhirContext;
-    this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     this.repository = repository;
+    this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
     modelResolver = new FhirModelResolverFactory()
-        .create(fhirContext.getVersion().getVersion().getFhirVersionString());
+        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
 
   protected String subjectId;
@@ -54,12 +50,12 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
       IBaseResource dataEndpoint) {
-    this.repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
-        terminologyEndpoint);
+    this.repository =
+        Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
     return apply(theId, subjectId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, parameters,
-        new LibraryEngine(fhirContext, this.repository));
+        new LibraryEngine(this.repository));
   }
 
   @SuppressWarnings("unchecked")

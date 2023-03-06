@@ -23,11 +23,9 @@ import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-  public QuestionnaireProcessor(FhirContext fhirContext, Repository repository) {
-    super(fhirContext, repository);
+  public QuestionnaireProcessor(Repository repository) {
+    super(repository);
   }
 
   @Override

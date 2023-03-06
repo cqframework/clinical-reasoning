@@ -48,7 +48,7 @@ public class TestQuestionnaire {
   }
 
   public static QuestionnaireProcessor buildProcessor(Repository repository) {
-    return new QuestionnaireProcessor(fhirContext, repository);
+    return new QuestionnaireProcessor(repository);
   }
 
   /** Fluent interface starts here **/
@@ -134,14 +134,14 @@ public class TestQuestionnaire {
 
     public GeneratedQuestionnaire prePopulate() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(fhirContext, repository);
+      var libraryEngine = new LibraryEngine(repository);
       return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(questionnaire,
           patientId, parameters, bundle, libraryEngine));
     }
 
     public GeneratedQuestionnaireResponse populate() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(fhirContext, repository);
+      var libraryEngine = new LibraryEngine(repository);
       return new GeneratedQuestionnaireResponse(
           (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire, patientId,
               parameters, bundle, libraryEngine));

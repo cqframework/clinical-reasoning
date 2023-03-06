@@ -10,14 +10,12 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
 public abstract class BaseQuestionnaireProcessor<T> {
   protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
 
   protected LibraryEngine libraryEngine;
-  protected FhirContext fhirContext;
   protected Repository repository;
   protected IFhirPath fhirPath;
 
@@ -26,19 +24,16 @@ public abstract class BaseQuestionnaireProcessor<T> {
   protected IBaseBundle bundle;
   protected static final String subjectType = "Patient";
 
-  protected BaseQuestionnaireProcessor(FhirContext fhirContext, Repository repository) {
-    this.fhirContext = fhirContext;
-    this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
+  protected BaseQuestionnaireProcessor(Repository repository) {
     this.repository = repository;
+    this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
   }
 
   public T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
       IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
-        terminologyEndpoint);
-    return prePopulate(questionnaire, patientId, parameters, bundle,
-        new LibraryEngine(fhirContext, repository));
+    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    return prePopulate(questionnaire, patientId, parameters, bundle, new LibraryEngine(repository));
   }
 
   public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
@@ -47,10 +42,8 @@ public abstract class BaseQuestionnaireProcessor<T> {
   public IBaseResource populate(T questionnaire, String patientId, IBaseParameters parameters,
       IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
-        terminologyEndpoint);
-    return populate(questionnaire, patientId, parameters, bundle,
-        new LibraryEngine(fhirContext, repository));
+    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    return populate(questionnaire, patientId, parameters, bundle, new LibraryEngine(repository));
   }
 
   public abstract IBaseResource populate(T questionnaire, String patientId,

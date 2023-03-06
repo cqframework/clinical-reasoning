@@ -13,30 +13,24 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 public class ActivityDefinitionProcessorTests {
-  private static FhirContext fhirContext;
   private Repository repository;
   private ActivityDefinitionProcessor activityDefinitionProcessor;
 
   @BeforeClass
   public void setup() {
-    fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
-
     var data = new FhirRepository(this.getClass(), List.of("tests"), false);
     var content = new FhirRepository(this.getClass(), List.of("content/"), false);
     var terminology = new FhirRepository(this.getClass(),
         List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
     repository = Repositories.proxy(data, content, terminology);
-    activityDefinitionProcessor = new ActivityDefinitionProcessor(fhirContext, repository);
+    activityDefinitionProcessor = new ActivityDefinitionProcessor(repository);
   }
 
   @Test
   public void testActivityDefinitionApply() throws FHIRException {
-    var libraryEngine = new LibraryEngine(fhirContext, repository);
+    var libraryEngine = new LibraryEngine(repository);
 
     var result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),
         "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);

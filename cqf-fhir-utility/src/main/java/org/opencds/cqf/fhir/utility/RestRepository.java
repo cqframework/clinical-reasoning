@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -164,6 +165,11 @@ public class RestRepository implements Repository {
     var op = this.client.history().onInstance(id).returnBundle(returnType);
     this.addHistoryParams(null, parameters);
     return this.addHeaders(op, headers).execute();
+  }
+
+  @Override
+  public FhirContext fhirContext() {
+    return this.getClient().getFhirContext();
   }
 
   @SuppressWarnings("unchecked")

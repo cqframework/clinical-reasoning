@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import com.google.common.annotations.Beta;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -641,4 +642,17 @@ public interface Repository {
    */
   <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I id,
       P parameters, Class<B> returnType, Map<String, String> headers);
+
+  /**
+   * Returns the {@link FhirContext} used by the repository
+   *
+   * Practically, implementing FHIR functionality with the HAPI toolset requires a FhirContext. In
+   * particular for things like version independent code. Ideally, a user could which FHIR version a
+   * repository was configured for using things like the CapabilityStatement. In practice, that's
+   * not widely implemented (yet) and it's expensive to create a new context with every call. We
+   * will probably revisit this in the future.
+   *
+   * @return a FhirContext
+   */
+  public FhirContext fhirContext();
 }

@@ -145,7 +145,7 @@ public class PlanDefinition {
       var libraryEngine = new LibraryEngine(fhirContext, this.repository);
       return new GeneratedCarePlan((CarePlan) buildProcessor(repository).apply(
           new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, null, null, null,
-          null, null, null, null, null, parameters, null, additionalData, null, libraryEngine));
+          null, null, null, null, parameters, null, additionalData, null, libraryEngine));
     }
   }
 

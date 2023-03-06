@@ -33,7 +33,7 @@ import ca.uhn.fhir.util.BundleUtil;
 public class FhirRepository implements Repository {
 
   FhirContext context = FhirContext.forCached(FhirVersionEnum.DSTU3);
-  protected IFhirPath fhirPath;
+  IFhirPath fhirPath = FhirPathCache.cachedForContext(context);
 
   private Map<IdType, IBaseResource> resourceMap;
 
@@ -42,7 +42,6 @@ public class FhirRepository implements Repository {
   public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
     FhirResourceLoader resourceLoader =
         new FhirResourceLoader(context, clazz, directoryList, recursive);
-    this.fhirPath = FhirPathCache.cachedForContext(context);
     List<IBaseResource> list = resourceLoader.getResources();
 
     resourceMap = new LinkedHashMap<>();

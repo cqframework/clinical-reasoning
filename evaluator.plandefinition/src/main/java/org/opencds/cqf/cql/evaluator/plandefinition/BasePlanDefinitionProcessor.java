@@ -52,7 +52,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected String userTaskContext;
   protected String setting;
   protected String settingContext;
-  protected Boolean mergeNestedCarePlans;
   protected IBaseParameters parameters;
   protected Boolean useServerData;
   protected IBaseBundle bundle;
@@ -92,26 +91,26 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, Boolean mergeNestedCarePlans,
-      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
-      IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
         terminologyEndpoint);
     return apply(theId, patientId, encounterId, practitionerId, organizationId, userType,
-        userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
-        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, repository));
+        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
+        prefetchData, new LibraryEngine(fhirContext, repository));
   }
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, Boolean mergeNestedCarePlans,
-      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
-      IBaseParameters prefetchData, LibraryEngine libraryEngine) {
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      LibraryEngine libraryEngine) {
     if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
       return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
-          userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
-          useServerData, bundle, prefetchData, libraryEngine);
+          userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
+          prefetchData, libraryEngine);
     }
     this.patientId = patientId;
     this.encounterId = encounterId;
@@ -122,7 +121,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.userTaskContext = userTaskContext;
     this.setting = setting;
     this.settingContext = settingContext;
-    this.mergeNestedCarePlans = mergeNestedCarePlans;
     this.parameters = parameters;
     this.useServerData = useServerData;
     this.bundle = bundle;
@@ -135,22 +133,22 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, Boolean mergeNestedCarePlans,
-      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
-      IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(fhirContext, repository, dataEndpoint, contentEndpoint,
         terminologyEndpoint);
     return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
-        userLanguage, userTaskContext, setting, settingContext, mergeNestedCarePlans, parameters,
-        useServerData, bundle, prefetchData, new LibraryEngine(fhirContext, repository));
+        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
+        prefetchData, new LibraryEngine(fhirContext, repository));
   }
 
   public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, Boolean mergeNestedCarePlans,
-      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
-      IBaseParameters prefetchData, LibraryEngine libraryEngine) {
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      LibraryEngine libraryEngine) {
     this.patientId = patientId;
     this.encounterId = encounterId;
     this.practitionerId = practitionerId;
@@ -160,7 +158,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.userTaskContext = userTaskContext;
     this.setting = setting;
     this.settingContext = settingContext;
-    this.mergeNestedCarePlans = mergeNestedCarePlans;
     this.parameters = parameters;
     this.useServerData = useServerData;
     this.bundle = bundle;

@@ -73,7 +73,7 @@ public class Contexts {
     var dataProviders =
         buildDataProviders(fhirContext, repository, additionalData, terminologyProvider);
     var cqlEvaluator = new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
-        CqlOptions.defaultOptions().getCqlEngineOptions().getOptions());
+        cqlOptions.getCqlEngineOptions().getOptions());
 
     return new LibraryEvaluator(cqlFhirParametersConverter, cqlEvaluator);
   }
@@ -117,7 +117,6 @@ public class Contexts {
     var modelResolver = new FhirModelResolverFactory()
         .create(fhirContext.getVersion().getVersion().getFhirVersionString());
     var retrieveProvider = new RepositoryRetrieveProvider(fhirContext, repository);
-    // retrieveProvider.setTerminologyProvider(terminologyProvider);
     providers.add(retrieveProvider);
     if (additionalData != null) {
       providers.add(new BundleRetrieveProvider(fhirContext, additionalData));

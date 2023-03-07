@@ -187,7 +187,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         carePlan.addGoal(new Reference((Resource) goal));
       }
     }
-    carePlan.addActivity().setReference(new Reference((Resource) requestGroup));
+    carePlan.addActivity().setReference(new Reference(requestGroup));
     carePlan.addContained(requestGroup);
 
     for (var resource : extractedResources) {
@@ -492,7 +492,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
             .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
       }
-      if (oc.getIssue().size() > 0) {
+      if (!oc.getIssue().isEmpty()) {
         if (Boolean.TRUE.equals(containResources)) {
           requestGroup.addContained(oc);
           requestGroup.addExtension(new Extension().setUrl(Constants.EXT_CRMI_MESSAGES)

@@ -100,8 +100,7 @@ public class LibraryEngine {
       case "text/cql-expression":
         parametersResult = this.evaluateExpression(expression, parameters, patientId, null, bundle);
         // The expression is assumed to be the parameter component name
-        // The expression evaluator creates a library with a single expression defined as
-        // "return"
+        // The expression evaluator creates a library with a single expression defined as "return"
         expression = "return";
         result = (IBase) resolveParameterValue(ParametersUtil
             .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
@@ -197,8 +196,6 @@ public class LibraryEngine {
       throw new IllegalArgumentException(
           "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
     }
-
-    // String cqlNamespaceUrl = urlSplit[0];
 
     String cqlName = urlSplit[1];
     VersionedIdentifier versionedIdentifier = new VersionedIdentifier();

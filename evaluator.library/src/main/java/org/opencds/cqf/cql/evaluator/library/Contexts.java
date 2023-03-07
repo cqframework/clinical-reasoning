@@ -11,8 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.cqframework.cql.elm.execution.Library;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
@@ -22,7 +20,6 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
-import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
@@ -46,80 +43,72 @@ public class Contexts {
 
   private Contexts() {}
 
-  public static LibraryEvaluator forRepository(FhirContext fhirContext, Library library,
-      Repository repository, IBaseBundle additionalData) {
+  public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
+      IBaseBundle additionalData) {
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-    return forRepository(fhirContext, library, repository, additionalData, librarySourceProviders,
-        null);
+    return forRepository(settings, repository, additionalData, librarySourceProviders, null);
   }
 
-  public static LibraryEvaluator forRepository(FhirContext fhirContext, Library library,
-      Repository repository, IBaseBundle additionalData,
-      List<LibrarySourceProvider> librarySourceProviders,
+  public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
+      IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
       CqlFhirParametersConverter cqlFhirParametersConverter) {
-    checkNotNull(fhirContext);
+    checkNotNull(settings);
     checkNotNull(repository);
     checkNotNull(librarySourceProviders);
 
     if (cqlFhirParametersConverter == null) {
-      cqlFhirParametersConverter = getCqlFhirParametersConverter(fhirContext);
+      cqlFhirParametersConverter = getCqlFhirParametersConverter(repository.fhirContext());
     }
 
-    // Context context = new Context(library);
-    var terminologyProvider = new RepositoryTerminologyProvider(fhirContext, repository);
-    librarySourceProviders.add(buildLibrarySource(fhirContext, repository));
-    var libraryLoader = buildLibraryLoader(librarySourceProviders);
+    var terminologyProvider = new RepositoryTerminologyProvider(repository);
+    librarySourceProviders.add(buildLibrarySource(repository));
+    var libraryLoader = buildLibraryLoader(settings, librarySourceProviders);
 
-    var dataProviders =
-        buildDataProviders(fhirContext, repository, additionalData, terminologyProvider);
+    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider);
     var cqlEvaluator = new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
-        cqlOptions.getCqlEngineOptions().getOptions());
+        settings.getEngineOptions().getOptions());
 
     return new LibraryEvaluator(cqlFhirParametersConverter, cqlEvaluator);
   }
 
   private static Map<ModelIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
 
-  private static Map<VersionedIdentifier, Library> libraryCache;
-
-  private static CqlOptions cqlOptions = CqlOptions.defaultOptions();
-
-  private static LibrarySourceProvider buildLibrarySource(FhirContext fhirContext,
-      Repository repository) {
-    AdapterFactory adapterFactory = getAdapterFactory(fhirContext);
-    return new RepositoryFhirLibrarySourceProvider(fhirContext, repository, adapterFactory,
+  private static LibrarySourceProvider buildLibrarySource(Repository repository) {
+    AdapterFactory adapterFactory = getAdapterFactory(repository.fhirContext());
+    return new RepositoryFhirLibrarySourceProvider(repository, adapterFactory,
         new LibraryVersionSelector(adapterFactory));
   }
 
   // TODO: Add NPM library source loader support
-  private static LibraryLoader buildLibraryLoader(
+  private static LibraryLoader buildLibraryLoader(EvaluationSettings settings,
       List<LibrarySourceProvider> librarySourceProviders) {
-    if (cqlOptions.useEmbeddedLibraries()) {
+    if (settings.getCqlOptions().useEmbeddedLibraries()) {
       librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
 
     TranslatorOptionAwareLibraryLoader libraryLoader =
         new TranslatingLibraryLoader(new CacheAwareModelManager(globalModelCache),
-            librarySourceProviders, cqlOptions.getCqlTranslatorOptions(), null);
+            librarySourceProviders, settings.getCqlOptions().getCqlTranslatorOptions(), null);
 
-    if (libraryCache != null) {
-      libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, libraryCache);
+    if (settings.getLibraryCache() != null) {
+      libraryLoader =
+          new CacheAwareLibraryLoaderDecorator(libraryLoader, settings.getLibraryCache());
     }
 
     return libraryLoader;
   }
 
-  private static Map<String, DataProvider> buildDataProviders(FhirContext fhirContext,
-      Repository repository, IBaseBundle additionalData, TerminologyProvider terminologyProvider) {
+  private static Map<String, DataProvider> buildDataProviders(Repository repository,
+      IBaseBundle additionalData, TerminologyProvider terminologyProvider) {
     Map<String, DataProvider> dataProviders = new HashMap<>();
 
     var providers = new ArrayList<RetrieveProvider>();
     var modelResolver = new FhirModelResolverFactory()
-        .create(fhirContext.getVersion().getVersion().getFhirVersionString());
-    var retrieveProvider = new RepositoryRetrieveProvider(fhirContext, repository);
+        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
+    var retrieveProvider = new RepositoryRetrieveProvider(repository);
     providers.add(retrieveProvider);
     if (additionalData != null) {
-      providers.add(new BundleRetrieveProvider(fhirContext, additionalData));
+      providers.add(new BundleRetrieveProvider(repository.fhirContext(), additionalData));
     }
 
     var retrieveProviderConfigurer =

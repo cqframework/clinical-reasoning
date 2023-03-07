@@ -33,15 +33,24 @@ public class LibraryEngine {
   protected Repository repository;
   protected FhirContext fhirContext;
   protected IFhirPath fhirPath;
+  protected EvaluationSettings settings;
 
   public LibraryEngine(Repository repository) {
     this.repository = repository;
     this.fhirContext = repository.fhirContext();
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    initContext();
+    this.settings = EvaluationSettings.getDefault().withFhirContext(fhirContext);
   }
 
-  private void initContext() {}
+  public void setSettings(EvaluationSettings settings) {
+    this.settings = settings;
+  }
+
+  public LibraryEngine withSettings(EvaluationSettings settings) {
+    setSettings(settings);
+
+    return this;
+  }
 
   private Pair<String, Object> buildContextParameter(String patientId) {
     Pair<String, Object> contextParameter = null;
@@ -63,7 +72,7 @@ public class LibraryEngine {
 
   public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
       IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
-    var libraryEvaluator = Contexts.forRepository(fhirContext, null, repository, additionalData);
+    var libraryEvaluator = Contexts.forRepository(settings, repository, additionalData);
 
     return libraryEvaluator.evaluate(id, buildContextParameter(patientId), parameters, expressions);
   }
@@ -80,7 +89,7 @@ public class LibraryEngine {
 
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
-    var libraryEvaluator = Contexts.forRepository(fhirContext, null, repository, bundle,
+    var libraryEvaluator = Contexts.forRepository(settings, repository, bundle,
         librarySourceProviders, cqlFhirParametersConverter);
 
     return libraryEvaluator.evaluate(

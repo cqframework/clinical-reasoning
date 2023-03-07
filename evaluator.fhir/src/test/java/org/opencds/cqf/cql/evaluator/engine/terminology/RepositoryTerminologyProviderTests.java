@@ -17,9 +17,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 public class RepositoryTerminologyProviderTests {
 
   FhirRepository repository;
@@ -31,8 +28,7 @@ public class RepositoryTerminologyProviderTests {
   }
 
   private TerminologyProvider getTerminologyProvider() {
-    FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
-    return new RepositoryTerminologyProvider(context,
+    return new RepositoryTerminologyProvider(
         new FhirRepository(this.getClass(), List.of("test1/", "test2/"), false));
   }
 

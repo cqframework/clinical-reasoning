@@ -57,7 +57,7 @@ public class LibraryConstructor {
 
   private void constructIncludes(StringBuilder sb, List<Pair<String, String>> libraries) {
     sb.append(String.format("include FHIRHelpers version '%s' called FHIRHelpers%n",
-        fhirContext.getVersion().getVersion()));
+        fhirContext.getVersion().getVersion().getFhirVersionString()));
 
     if (libraries != null) {
       for (Pair<String, String> library : libraries) {
@@ -97,7 +97,8 @@ public class LibraryConstructor {
   }
 
   private void constructUsings(StringBuilder sb) {
-    sb.append(String.format("using FHIR version '%s'%n", fhirContext.getVersion().getVersion()));
+    sb.append(String.format("using FHIR version '%s'%n",
+        fhirContext.getVersion().getVersion().getFhirVersionString()));
   }
 
   private void constructHeader(StringBuilder sb) {

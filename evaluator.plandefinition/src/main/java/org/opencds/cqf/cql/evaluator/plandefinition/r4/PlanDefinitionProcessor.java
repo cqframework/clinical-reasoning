@@ -688,6 +688,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
               condition.getExpression().getExpression());
           return false;
         }
+        logger.info("The result of condition expression {} is true",
+            condition.getExpression().getExpression());
       }
     }
     return true;

@@ -90,11 +90,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   @Override
   public void extractQuestionnaireResponse() {
+    if (bundle == null) {
+      return;
+    }
+
     var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
         .filter(entry -> entry.getResource().fhirType()
             .equals(Enumerations.FHIRTypes.QUESTIONNAIRERESPONSE.toCode()))
         .map(entry -> (QuestionnaireResponse) entry.getResource()).collect(Collectors.toList());
-    if (questionnaireResponses != null && questionnaireResponses.size() > 0) {
+    if (questionnaireResponses != null && !questionnaireResponses.isEmpty()) {
       for (var questionnaireResponse : questionnaireResponses) {
         var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
         extractedResources.add(questionnaireResponse);

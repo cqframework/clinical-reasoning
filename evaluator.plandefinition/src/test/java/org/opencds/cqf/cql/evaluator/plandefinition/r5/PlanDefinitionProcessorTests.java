@@ -3,7 +3,11 @@ package org.opencds.cqf.cql.evaluator.plandefinition.r5;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.stringPart;
 
+import java.util.List;
+
 import org.hl7.fhir.r5.model.Parameters;
+import org.opencds.cqf.cql.evaluator.fhir.repository.r5.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests extends PlanDefinition {
@@ -31,17 +35,20 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
   // Disabling this test because the current resources are using R4
   @Test(enabled = false)
   public void testOpioidRec10PatientView() {
-    /*
-     * NOTE: All dynamicValues with the path equaling action.extension have been removed from the
-     * plandefinition until the issue in the link https://github.com/DBCG/cqf-ruler/issues/539 has
-     * been resolved.
-     */
+    var data =
+        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
+    var content =
+        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/content"), false);
+    var terminology = new FhirRepository(this.getClass(),
+        List.of("opioid-Rec10-patient-view/vocabulary/CodeSystem",
+            "opioid-Rec10-patient-view/vocabulary/ValueSet"),
+        false);
+    var repository = Repositories.proxy(data, content, terminology);
     PlanDefinition.Assert
         .that("opioidcds-10-patient-view", "example-rec-10-patient-view-POS-Cocaine-drugs",
             "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch")
-        .withAdditionalData("opioid-Rec10-patient-view/opioid-Rec10-patient-view-patient-data.json")
-        .withContent("opioid-Rec10-patient-view/opioid-Rec10-patient-view-bundle.json").apply()
-        .isEqualsTo("opioid-Rec10-patient-view/opioid-Rec10-patient-view-result.json");
+        .withRepository(repository).apply()
+        .isEqualsTo("opioid-Rec10-patient-view/tests/Bundle-opioid-Rec10-patient-view.json");
   }
 
   // In R5 ActivityDefinitions can no longer create Tasks which breaks this test

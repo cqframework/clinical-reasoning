@@ -839,7 +839,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#prepopulate"
+        "reference": "#RequestGroup/prepopulate"
       }
     }
   ]

@@ -41,7 +41,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#hello-world-patient-view"
+        "reference": "#RequestGroup/hello-world-patient-view"
       }
     }
   ]

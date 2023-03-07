@@ -51,19 +51,9 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
 
   @Test
   public void testOpioidRec10PatientView() {
-    /*
-     * NOTE: All dynamicValues with the path equaling action.extension have been removed from the
-     * plandefinition until the issue in the link https://github.com/DBCG/cqf-ruler/issues/539 has
-     * been resolved.
-     */
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
-    // var data = new FhirRepository(
-    // (Bundle) parse("opioid-Rec10-patient-view/opioid-Rec10-patient-view-patient-data.json"));
-    // var content = new FhirRepository(
-    // (Bundle) parse("opioid-Rec10-patient-view/opioid-Rec10-patient-view-content.json"));
-    // var repository = Repositories.proxy(data, content, content);
     var data =
         new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
     var content =
@@ -73,9 +63,9 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
             "opioid-Rec10-patient-view/vocabulary/ValueSet"),
         false);
     var repository = Repositories.proxy(data, content, terminology);
-    // PlanDefinition.Assert.that(planDefinitionID, patientID,
-    // encounterID).withRepository(repository)
-    // .apply().isEqualsTo("opioid-Rec10-patient-view/opioid-Rec10-patient-view-careplan.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+        .apply()
+        .isEqualsTo("opioid-Rec10-patient-view/tests/CarePlan-opioid-Rec10-patient-view.json");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
         .applyR5()
         .isEqualsTo("opioid-Rec10-patient-view/tests/Bundle-opioid-Rec10-patient-view.json");

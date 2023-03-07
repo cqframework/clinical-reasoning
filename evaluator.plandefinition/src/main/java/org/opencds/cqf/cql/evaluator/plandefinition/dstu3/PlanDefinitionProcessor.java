@@ -87,6 +87,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   @Override
   public void extractQuestionnaireResponse() {
+    if (bundle == null) {
+      return;
+    }
+
     var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
         .filter(entry -> entry.getResource().fhirType()
             .equals(Enumerations.FHIRAllTypes.QUESTIONNAIRERESPONSE.toCode()))
@@ -181,8 +185,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         carePlan.addGoal(new Reference((Resource) goal));
       }
     }
-    carePlan.addActivity()
-        .setReference(new Reference("#" + requestGroup.getIdElement().getIdPart()));
+    carePlan.addActivity().setReference(new Reference((Resource) requestGroup));
     carePlan.addContained(requestGroup);
 
     for (var resource : extractedResources) {
@@ -322,7 +325,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     } catch (Exception e) {
       e.printStackTrace();
       logger.error("ERROR: Questionnaire {} could not be applied and threw exception {}",
-          definition, e.toString());
+          definition.getReference(), e.toString());
     }
   }
 
@@ -356,7 +359,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       requestGroup.addContained((Resource) result);
     } catch (Exception e) {
       logger.error("ERROR: ActivityDefinition {} could not be applied and threw exception {}",
-          definition, e.toString());
+          definition.getReference(), e.toString());
     }
   }
 
@@ -621,6 +624,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           logger.info("The result of condition expression {} is false", condition.getExpression());
           return false;
         }
+        logger.info("The result of condition expression {} is true", condition.getExpression());
       }
     }
     return true;

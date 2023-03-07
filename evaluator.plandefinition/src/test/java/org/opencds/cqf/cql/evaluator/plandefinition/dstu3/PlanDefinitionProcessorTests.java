@@ -3,6 +3,10 @@ package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.stringPart;
 
+import java.util.List;
+
+import org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests extends PlanDefinition {
@@ -25,19 +29,22 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
         .isEqualsTo("hello-world/hello-world-careplan.json");
   }
 
-  @Test(enabled = false) // Still resolving
+  @Test(enabled = false) // Unable to get the cql to run against dstu3
   public void testOpioidRec10PatientView() {
-    /*
-     * NOTE: All dynamicValues with the path equaling action.extension have been removed from the
-     * plandefinition until the issue in the link https://github.com/DBCG/cqf-ruler/issues/539 has
-     * been resolved.
-     */
+    var data =
+        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
+    var content =
+        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/content"), false);
+    var terminology = new FhirRepository(this.getClass(),
+        List.of("opioid-Rec10-patient-view/vocabulary/CodeSystem",
+            "opioid-Rec10-patient-view/vocabulary/ValueSet"),
+        false);
+    var repository = Repositories.proxy(data, content, terminology);
     PlanDefinition.Assert
-        .that("opioidcds-10", "example-rec-10-patient-view-POS-Cocaine-drugs",
+        .that("opioidcds-10-patient-view", "example-rec-10-patient-view-POS-Cocaine-drugs",
             "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch")
-        .withAdditionalData("opioid-Rec10-patient-view/opioid-Rec10-patient-view-patient-data.json")
-        .withContent("opioid-Rec10-patient-view/opioid-Rec10-patient-view-bundle.json").apply()
-        .isEqualsTo("opioid-Rec10-patient-view/opioid-Rec10-patient-view-careplan.json");
+        .withRepository(repository).apply()
+        .isEqualsTo("opioid-Rec10-patient-view/tests/CarePlan-opioid-Rec10-patient-view.json");
   }
 
   @Test

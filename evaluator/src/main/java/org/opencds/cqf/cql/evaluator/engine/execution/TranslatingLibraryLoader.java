@@ -6,18 +6,25 @@ import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConvert
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.elm.execution.FunctionDef;
 import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.engine.exception.CqlException;
@@ -42,6 +49,9 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   protected List<LibrarySourceProvider> librarySourceProviders;
 
   protected LibraryManager libraryManager;
+
+  private static Set<LibraryBuilder.SignatureLevel> overloadSafeSignatureLevels =
+      new HashSet<>((Arrays.asList(SignatureLevel.All, SignatureLevel.Overloads)));
 
   public TranslatingLibraryLoader(ModelManager modelManager,
       List<LibrarySourceProvider> librarySourceProviders, CqlTranslatorOptions translatorOptions,
@@ -71,9 +81,18 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   public Library load(VersionedIdentifier libraryIdentifier) {
     Library library = this.getLibraryFromElm(libraryIdentifier);
 
-    if (library != null && this.translatorOptionsMatch(library)) {
+    boolean requireFunctionSignature = false;
+
+    if (hasOverloadedFunctions(library) &&
+        !overloadSafeSignatureLevels.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
+      this.cqlTranslatorOptions.setSignatureLevel(SignatureLevel.Overloads);
+      requireFunctionSignature = true;
+    }
+
+    if (library != null && !requireFunctionSignature && this.translatorOptionsMatch(library)) {
       return library;
     }
+
     this.cqlTranslatorOptions.setEnableCqlOnly(true);
     return this.translate(libraryIdentifier);
   }
@@ -149,6 +168,23 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
       throw new CqlException(
           String.format("Mapping of library %s failed", libraryIdentifier.getId()), e);
     }
+  }
+
+  private boolean hasOverloadedFunctions(Library library) {
+    Set<String> functionNames = new HashSet<>();
+    if (library.getStatements() != null) {
+      for (ExpressionDef ed : library.getStatements().getDef()) {
+        if (ed instanceof FunctionDef) {
+          FunctionDef fd = (FunctionDef) ed;
+          if (functionNames.contains(fd.getName())) {
+            return true;
+          } else {
+            functionNames.add(fd.getName());
+          }
+        }
+      }
+    }
+    return false;
   }
 
 }

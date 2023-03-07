@@ -36,6 +36,22 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
         .withContent(content).applyR5().isEqualsTo("anc-visit/anc_visit_bundle.json");
   }
 
+  @Test(enabled = false) // Currently failing due to missing ValueSet/anc-b8-de19
+  public void testANCDT17() {
+    var planDefinitionID = "ANCDT17";
+    var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
+    var encounterID = "helloworld-patient-1-encounter-1";
+    var data = new FhirRepository(this.getClass(), List.of("anc-dak/tests"), false);
+    var content = new FhirRepository(this.getClass(), List.of("anc-dak/content"), false);
+    var terminology =
+        new FhirRepository(this.getClass(), List.of("anc-dak/vocabulary/ValueSet"), false);
+    var repository = Repositories.proxy(data, content, terminology);
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+        .apply().isEqualsTo("tests/CarePlan-ANCDT17.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+        .applyR5().isEqualsTo("tests/Bundle-ANCDT17.json");
+  }
+
   @Test
   public void testHelloWorld() {
     var planDefinitionID = "hello-world-patient-view";

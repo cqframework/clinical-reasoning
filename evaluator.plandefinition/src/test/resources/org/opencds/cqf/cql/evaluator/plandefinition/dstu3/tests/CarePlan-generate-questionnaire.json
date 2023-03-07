@@ -196,7 +196,7 @@
               "linkId": "3.4",
               "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient#Patient.gender",
               "text": "Gender",
-              "type": "question",
+              "type": "choice",
               "required": true,
               "answerOption": [
                 {
@@ -459,9 +459,13 @@
       }
     }
   ],
-  "instantiatesCanonical": [
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+  "definition": [
+    {
+      "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire"
+    },
+    {
+      "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+    }
   ],
   "status": "draft",
   "intent": "proposal",

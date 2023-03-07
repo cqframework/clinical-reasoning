@@ -7,7 +7,7 @@
   "status": "draft",
   "description": "Create a task to complete a Questionnaire.",
   "library": [],
-  "kind": "RequestOrchestration",
+  "kind": "Task",
   "productCodeableConcept": {
     "coding": [
       {

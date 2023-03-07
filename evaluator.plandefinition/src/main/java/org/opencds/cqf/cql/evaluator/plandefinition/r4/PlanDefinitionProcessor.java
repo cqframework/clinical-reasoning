@@ -534,7 +534,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
             .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
       }
-      if (oc.getIssue().size() > 0) {
+      if (!oc.getIssue().isEmpty()) {
         if (Boolean.TRUE.equals(containResources)) {
           requestGroup.addContained(oc);
           requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES, new Reference("#" + oc.getId()));

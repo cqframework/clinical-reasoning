@@ -176,6 +176,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var carePlan = new CarePlan().setInstantiatesCanonical(requestGroup.getInstantiatesCanonical())
         .setSubject(requestGroup.getSubject()).setStatus(RequestStatus.DRAFT)
         .setIntent(CarePlan.CarePlanIntent.PROPOSAL);
+    carePlan.setId(new IdType(carePlan.fhirType(), requestGroup.getIdElement().getIdPart()));
 
     if (requestGroup.hasEncounter()) {
       carePlan.setEncounter(requestGroup.getEncounter());
@@ -210,6 +211,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   @Override
   public IBaseResource transformToBundle(IBaseResource requestGroup) {
     var resultBundle = new Bundle().setType(BundleType.COLLECTION);
+    resultBundle.setId(requestGroup.getIdElement().getIdPart());
     resultBundle.addEntry().setResource((Resource) requestGroup);
     for (var resource : requestResources) {
       resultBundle.addEntry().setResource((Resource) resource);
@@ -508,7 +510,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
             .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
       }
-      if (oc.getIssue().size() > 0) {
+      if (!oc.getIssue().isEmpty()) {
         if (Boolean.TRUE.equals(containResources)) {
           requestGroup.addContained(oc);
           requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES, new Reference("#" + oc.getId()));

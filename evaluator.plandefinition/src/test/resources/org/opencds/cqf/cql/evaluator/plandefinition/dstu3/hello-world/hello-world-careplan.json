@@ -1,5 +1,6 @@
 {
   "resourceType": "CarePlan",
+  "id": "hello-world-patient-view",
   "contained": [
     {
       "resourceType": "RequestGroup",

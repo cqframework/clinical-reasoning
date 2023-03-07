@@ -172,6 +172,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var carePlan = new CarePlan().setStatus(CarePlan.CarePlanStatus.DRAFT)
         .setIntent(CarePlan.CarePlanIntent.PROPOSAL).setDefinition(requestGroup.getDefinition())
         .setSubject(requestGroup.getSubject());
+    carePlan.setId(new IdType(carePlan.fhirType(), requestGroup.getIdElement().getIdPart()));
+
     if (encounterId != null)
       carePlan.setContext(new Reference(encounterId));
     if (requestGroup.hasAuthor()) {

@@ -1,5 +1,6 @@
 {
   "resourceType": "CarePlan",
+  "id": "plandefinition-RuleFilters-1.0.0",
   "contained": [
     {
       "resourceType": "RequestGroup",

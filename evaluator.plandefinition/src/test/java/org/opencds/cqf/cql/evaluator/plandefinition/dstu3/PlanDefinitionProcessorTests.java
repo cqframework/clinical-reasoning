@@ -90,12 +90,10 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
         .isEqualsTo("extract-questionnaireresponse/careplan.json");
   }
 
-  @Test(enabled = false) // Not implemented
+  @Test(enabled = false) // Need valid dstu3 content for this test
   public void testGenerateQuestionnaire() {
-    PlanDefinition.Assert.that("generate-Questionnaire", "OPA-Patient1", null)
-        .withAdditionalData("generate-questionnaire/patient-data.json")
-        .withContent("generate-questionnaire/content-bundle.json")
+    PlanDefinition.Assert.that("generate-questionnaire", "OPA-Patient1", null)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply()
-        .isEqualsTo("generate-questionnaire/careplan.json");
+        .isEqualsTo("tests/CarePlan-generate-questionnaire.json");
   }
 }

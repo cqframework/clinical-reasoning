@@ -96,12 +96,10 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
         .isEqualsTo("extract-questionnaireresponse/bundle.json");
   }
 
-  @Test(enabled = false) // Not implemented
+  @Test(enabled = false) // Need valid r5 content for this test
   public void testGenerateQuestionnaire() {
     PlanDefinition.Assert.that("generate-questionnaire", "OPA-Patient1", null)
-        .withAdditionalData("generate-questionnaire/patient-data.json")
-        .withContent("generate-questionnaire/content-bundle.json")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply()
-        .isEqualsTo("generate-questionnaire/bundle.json");
+        .isEqualsTo("tests/Bundle-generate-questionnaire.json");
   }
 }

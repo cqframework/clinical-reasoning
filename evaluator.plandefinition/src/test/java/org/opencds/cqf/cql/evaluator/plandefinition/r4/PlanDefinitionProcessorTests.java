@@ -3,7 +3,8 @@ package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 
-import org.hl7.fhir.r4.model.Bundle;
+import java.util.List;
+
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.testng.annotations.Test;
@@ -48,7 +49,7 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
         .withContent(content).applyR5().isEqualsTo("hello-world/hello-world-bundle.json");
   }
 
-  @Test(enabled = false) // Still resolving
+  @Test
   public void testOpioidRec10PatientView() {
     /*
      * NOTE: All dynamicValues with the path equaling action.extension have been removed from the
@@ -58,16 +59,26 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
-    var data = new FhirRepository(
-        (Bundle) parse("opioid-Rec10-patient-view/opioid-Rec10-patient-view-patient-data.json"));
-    var content = new FhirRepository(
-        (Bundle) parse("opioid-Rec10-patient-view/opioid-Rec10-patient-view-content.json"));
-    var repository = Repositories.proxy(data, content, content);
+    // var data = new FhirRepository(
+    // (Bundle) parse("opioid-Rec10-patient-view/opioid-Rec10-patient-view-patient-data.json"));
+    // var content = new FhirRepository(
+    // (Bundle) parse("opioid-Rec10-patient-view/opioid-Rec10-patient-view-content.json"));
+    // var repository = Repositories.proxy(data, content, content);
+    var data =
+        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
+    var content =
+        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/content"), false);
+    var terminology = new FhirRepository(this.getClass(),
+        List.of("opioid-Rec10-patient-view/vocabulary/CodeSystem",
+            "opioid-Rec10-patient-view/vocabulary/ValueSet"),
+        false);
+    var repository = Repositories.proxy(data, content, terminology);
     // PlanDefinition.Assert.that(planDefinitionID, patientID,
     // encounterID).withRepository(repository)
     // .apply().isEqualsTo("opioid-Rec10-patient-view/opioid-Rec10-patient-view-careplan.json");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
-        .applyR5().isEqualsTo("opioid-Rec10-patient-view/opioid-Rec10-patient-view-bundle.json");
+        .applyR5()
+        .isEqualsTo("opioid-Rec10-patient-view/tests/Bundle-opioid-Rec10-patient-view.json");
   }
 
   @Test

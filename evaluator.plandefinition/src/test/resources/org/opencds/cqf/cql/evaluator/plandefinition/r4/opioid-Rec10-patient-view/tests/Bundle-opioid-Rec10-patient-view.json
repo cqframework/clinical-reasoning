@@ -21,8 +21,8 @@
         },
         "action": [
           {
-            "title": "Positive Cocaine or PCP in Urine Screening",
-            "description": "<br/>*Positive for Cocaine: <br/>2022-06-02<br/>Note: result may be false positive result or indicate patient is occasional user or addicted to the illicit drug.",
+            "title": "Positive Cocaine or PCP or Opiates in Urine Screening",
+            "description": "<br/>*Positive for Cocaine: <br/>2022-06-02<br/>Note: result may be false positive result or indicate patient is occasional user or addicted to the illicit drug. For guidance on counseling patients regarding the purpose of urine toxicology test, review the draft CDC 2022 Opioid Prescribing Guideline Recommendation 10 page 140 lines 3441 – 3446.",
             "resource": {
               "reference": "ServiceRequest/opioidcds-urine-screening-request"
             }

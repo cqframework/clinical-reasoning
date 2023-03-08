@@ -1,6 +1,6 @@
 {
   "resourceType": "Questionnaire",
-  "id": "1903",
+  "id": "OutpatientPriorAuthorizationRequest-Errors",
   "meta": {
     "versionId": "2",
     "lastUpdated": "2022-11-21T17:34:01.764+00:00",
@@ -11,107 +11,102 @@
   "contained": [
     {
       "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-1903",
+      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors",
       "issue": [
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (FacilityName) for item (1.1): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (FacilityName) for item (1.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (FacilityNPI) for item (1.2): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (FacilityNPI) for item (1.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (BeneficiaryMedicareID) for item (2.4): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianFirstName) for item (3.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianFirstName) for item (3.1): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianLastName) for item (3.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianLastName) for item (3.2): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianNPI) for item (3.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianNPI) for item (3.3): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress1) for item (3.5.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress1) for item (3.5.1): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress2) for item (3.5.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress2) for item (3.5.2): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressCity) for item (3.5.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressCity) for item (3.5.3): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressState) for item (3.5.4): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressState) for item (3.5.4): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressZip) for item (3.5.5): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressZip) for item (3.5.5): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianSame) for item (4.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianSame) for item (4.1): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianFirstName) for item (4.2.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianFirstName) for item (4.2.1): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianLastName) for item (4.2.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianLastName) for item (4.2.2): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianNPI) for item (4.2.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianNPI) for item (4.2.3): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress1) for item (4.2.5.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress1) for item (4.2.5.1): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress2) for item (4.2.5.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress2) for item (4.2.5.2): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressCity) for item (4.2.5.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressCity) for item (4.2.5.3): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressState) for item (4.2.5.4): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         },
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressState) for item (4.2.5.4): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressZip) for item (4.2.5.5): Could not resolve type BiologicallyDerivedProductStatus. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
+          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressZip) for item (4.2.5.5): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
         }
       ]
     }
@@ -124,11 +119,11 @@
     {
       "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
       "valueReference": {
-        "reference": "#prepopulate-outcome-1903"
+        "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors"
       }
     }
   ],
-  "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+  "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
   "name": "OutpatientPriorAuthorizationRequest",
   "title": "Outpatient Prior Authorization Request",
   "status": "active",
@@ -276,7 +271,8 @@
           "linkId": "2.4",
           "text": "Medicare ID",
           "type": "string",
-          "required": true
+          "required": true,
+          "initialString": "525697298M"
         },
         {
           "extension": [

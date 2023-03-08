@@ -1,10 +1,9 @@
   {
     "resourceType": "QuestionnaireResponse",
-    "id": "1903",
-    "meta": {
-      "versionId": "2-response"
+    "id": "OutpatientPriorAuthorizationRequest-response",
+    "questionnaire": {
+      "reference": "Questionnaire/OutpatientPriorAuthorizationRequest"
     },
-    "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
     "status": "in-progress",
     "subject": {
       "reference": "Patient/OPA-Patient1"

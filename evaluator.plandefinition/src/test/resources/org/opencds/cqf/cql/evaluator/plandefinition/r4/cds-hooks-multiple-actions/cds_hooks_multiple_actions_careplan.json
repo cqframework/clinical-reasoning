@@ -1,5 +1,6 @@
 {
   "resourceType": "CarePlan",
+  "id": "CdsHooksMultipleActions-PlanDefinition-1.0.0",
   "contained": [
     {
       "resourceType": "RequestGroup",
@@ -35,7 +36,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#CdsHooksMultipleActions-PlanDefinition-1.0.0"
+        "reference": "#RequestGroup/CdsHooksMultipleActions-PlanDefinition-1.0.0"
       }
     }
   ]

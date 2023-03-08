@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.r5;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Base;
-import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -22,7 +20,6 @@ import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.InstantType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Property;
@@ -34,25 +31,22 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StringType;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
-
-import ca.uhn.fhir.context.FhirContext;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 
 public class QuestionnaireResponseProcessor
     extends BaseQuestionnaireResponseProcessor<QuestionnaireResponse> {
 
-  public QuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    super(fhirContext, fhirDal);
+  public QuestionnaireResponseProcessor(Repository repository) {
+    super(repository);
   }
 
   protected IBaseBundle createResourceBundle(QuestionnaireResponse questionnaireResponse,
       List<IBaseResource> resources) {
     var newBundle = new Bundle();
-    var bundleId = new Identifier();
-    bundleId.setValue("QuestionnaireResponse/" + questionnaireResponse.getIdElement().getIdPart());
+    newBundle.setId(getExtractId(questionnaireResponse));
     newBundle.setType(Bundle.BundleType.TRANSACTION);
-    newBundle.setIdentifier(bundleId);
     resources.forEach(resource -> {
       var request = new Bundle.BundleEntryRequestComponent();
       request.setMethod(Bundle.HTTPVerb.PUT);
@@ -144,9 +138,9 @@ public class QuestionnaireResponseProcessor
     // Definition-based extraction -
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
     var resourceType = getFhirType(itemExtractionContext).toCode();
-    var resource = (Resource) this.fhirContext.getResourceDefinition(resourceType).newInstance();
-    resource.setId(new IdType(resourceType,
-        "extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId));
+    var resource =
+        (Resource) this.repository.fhirContext().getResourceDefinition(resourceType).newInstance();
+    resource.setId(new IdType(resourceType, getExtractId(questionnaireResponse) + "." + linkId));
     var subjectProperty = getSubjectProperty(resource);
     if (subjectProperty != null) {
       resource.setProperty(subjectProperty.getName(), subject);
@@ -184,7 +178,8 @@ public class QuestionnaireResponseProcessor
     var nestedProperty = base.getNamedProperty(nestedPropertyName);
     if (nestedProperty.getMaxCardinality() > 1 && nestedProperty.hasValues()
         && nestedProperty.getValues().size() > 1) {
-      var newValues = nestedProperty.getValues();
+      // TODO: Resolve multiple nested values
+      // var newValues = nestedProperty.getValues();
     } else {
       var hasExisting = nestedProperty.hasValues();
       var newValue = hasExisting ? nestedProperty.getValues().get(0) : newValue(nestedProperty);
@@ -206,19 +201,9 @@ public class QuestionnaireResponseProcessor
 
   private Base newValue(Property property) {
     try {
-      var newValue = (Base) Class.forName("org.hl7.fhir.r5.model." + property.getTypeCode())
+      return (Base) Class.forName("org.hl7.fhir.r5.model." + property.getTypeCode())
           .getConstructor().newInstance();
-
-      return newValue;
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException(e);
-    } catch (InstantiationException e) {
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (NoSuchMethodException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -249,7 +234,8 @@ public class QuestionnaireResponseProcessor
                 subject);
           });
         } else {
-          if (questionnaireCodeMap.get(item.getLinkId()).size() > 0) {
+          if (questionnaireCodeMap != null && !questionnaireCodeMap.isEmpty()
+              && !questionnaireCodeMap.get(item.getLinkId()).isEmpty()) {
             resources.add(createObservationFromItemAnswer(answer, item.getLinkId(),
                 questionnaireResponse, subject, questionnaireCodeMap));
           }
@@ -265,7 +251,7 @@ public class QuestionnaireResponseProcessor
     // Observation-based extraction -
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#observation-based-extraction
     var obs = new Observation();
-    obs.setId("extract-" + questionnaireResponse.getIdElement().getIdPart() + "." + linkId);
+    obs.setId(getExtractId(questionnaireResponse) + "." + linkId);
     obs.setBasedOn(questionnaireResponse.getBasedOn());
     obs.setPartOf(questionnaireResponse.getPartOf());
     obs.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -287,15 +273,11 @@ public class QuestionnaireResponseProcessor
     obs.setPerformer(Collections.singletonList(questionnaireResponse.getAuthor()));
 
     switch (answer.getValue().fhirType()) {
-      case "string":
-        obs.setValue(new StringType(answer.getValueStringType().getValue()));
-        break;
       case "Coding":
         obs.setValue(new CodeableConcept().addCoding(answer.getValueCoding()));
         break;
-      case "boolean":
-        obs.setValue(new BooleanType(answer.getValueBooleanType().booleanValue()));
-        break;
+      default:
+        obs.setValue(answer.getValue());
     }
     var questionnaireResponseReference = new Reference();
     questionnaireResponseReference
@@ -329,24 +311,21 @@ public class QuestionnaireResponseProcessor
   // }
 
   private Map<String, List<Coding>> getQuestionnaireCodeMap(String questionnaireUrl) {
-    // String url = mySdcProperties.getExtract().getEndpoint();
-    // if (null == url || url.length() < 1) {
-    // throw new IllegalArgumentException("Unable to GET Questionnaire. No observation.endpoint
-    // defined in sdc properties.");
-    // }
-    // String user = mySdcProperties.getExtract().getUsername();
-    // String password = mySdcProperties.getExtract().getPassword();
-    //
-    // IGenericClient client = Clients.forUrl(fhirContext, url);
-    // Clients.registerBasicAuth(client, user, password);
-    //
-    // Questionnaire questionnaire =
-    // client.read().resource(Questionnaire.class).withUrl(questionnaireUrl).execute();
-    var questionnaire = (Questionnaire) this.fhirDal.searchByUrl("Questionnaire", questionnaireUrl)
-        .iterator().next();
-
-    if (questionnaire == null) {
-      throw new IllegalArgumentException("Unable to find resource by URL " + questionnaireUrl);
+    Questionnaire questionnaire = null;
+    try {
+      var results = this.repository.search(Bundle.class, Questionnaire.class,
+          Searches.byUrl(questionnaireUrl));
+      questionnaire =
+          results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
+      if (questionnaire == null) {
+        throw new RuntimeException(
+            String.format("Unable to find resource by URL %s", questionnaireUrl));
+      }
+    } catch (Exception e) {
+      logger.error(String.format(
+          "Error encountered searching for Questionnaire during extract operation: %s",
+          e.getMessage()));
+      return Collections.emptyMap();
     }
 
     return createCodeMap(questionnaire);

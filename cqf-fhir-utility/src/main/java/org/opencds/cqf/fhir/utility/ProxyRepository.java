@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -19,14 +21,31 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 
 public class ProxyRepository implements Repository {
 
+  // One data server, one terminology server (content defaults to data)
+  // One data server, one content server (terminology defaults to data)
+  // One data server, one content server, one terminology server
+
+  private Repository local;
   private Repository data;
   private Repository content;
   private Repository terminology;
 
+  public ProxyRepository(Repository local, Repository data, Repository content,
+      Repository terminology) {
+    checkNotNull(local);
+
+    this.local = local;
+    this.data = data == null ? this.local : data;
+    this.content = content == null ? this.data : content;
+    this.terminology = terminology == null ? this.data : terminology;
+  }
+
   public ProxyRepository(Repository data, Repository content, Repository terminology) {
+    checkNotNull(data);
+
     this.data = data;
-    this.content = content;
-    this.terminology = terminology;
+    this.content = content == null ? this.data : content;
+    this.terminology = terminology == null ? this.data : terminology;
   }
 
   @Override
@@ -158,17 +177,13 @@ public class ProxyRepository implements Repository {
       new HashSet<>(Arrays.asList("ValueSet", "CodeSystem", "ConceptMap"));
 
   private boolean isTerminologyResource(String type) {
-    if (terminologyResourceSet.contains(type))
-      return true;
-    return false;
+    return (terminologyResourceSet.contains(type));
   }
 
-  private static Set<String> contentResourceSet =
-      new HashSet<>(Arrays.asList("Library", "Measure", "PlanDefinition", "StructureDefinition"));
+  private static Set<String> contentResourceSet = new HashSet<>(Arrays.asList("Library", "Measure",
+      "PlanDefinition", "StructureDefinition", "ActivityDefinition", "Questionnaire"));
 
   private boolean isContentResource(String type) {
-    if (contentResourceSet.contains(type))
-      return true;
-    return false;
+    return (contentResourceSet.contains(type));
   }
 }

@@ -22,11 +22,11 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
   private FhirContext fhirContext;
   private LibraryVersionSelector libraryVersionSelector;
 
-  public RepositoryFhirLibrarySourceProvider(FhirContext fhirContext, Repository repository,
-      AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+  public RepositoryFhirLibrarySourceProvider(Repository repository, AdapterFactory adapterFactory,
+      LibraryVersionSelector libraryVersionSelector) {
     super(adapterFactory);
-    this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
     this.repository = requireNonNull(repository, "repository can not be null");
+    this.fhirContext = repository.fhirContext();
     this.libraryVersionSelector =
         requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
 

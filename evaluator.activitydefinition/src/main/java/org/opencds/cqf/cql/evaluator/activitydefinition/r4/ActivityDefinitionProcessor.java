@@ -5,16 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -25,20 +21,16 @@ import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
-  public ActivityDefinitionProcessor(FhirContext fhirContext, FhirDal fhirDal,
-      LibraryProcessor libraryProcessor) {
-    super(fhirContext, fhirDal, libraryProcessor);
+  public ActivityDefinitionProcessor(Repository repository) {
+    super(repository);
   }
 
   // For library use
@@ -115,18 +107,6 @@ public class ActivityDefinitionProcessor
     }
 
     return result;
-  }
-
-  @Override
-  public Object resolveParameterValue(IBase value) {
-    if (value == null)
-      return null;
-    return ((Parameters.ParametersParameterComponent) value).getValue();
-  }
-
-  @Override
-  public IBaseResource getSubject(String subjectType) {
-    return this.fhirDal.read(new IdType(subjectType, this.subjectId));
   }
 
   private Task resolveTask(ActivityDefinition activityDefinition) {

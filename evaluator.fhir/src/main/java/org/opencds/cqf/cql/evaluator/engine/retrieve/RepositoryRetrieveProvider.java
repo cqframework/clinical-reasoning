@@ -35,10 +35,10 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
   private final CodeUtil codeUtil;
   private final IFhirPath fhirPath;
 
-  public RepositoryRetrieveProvider(final FhirContext fhirContext, final Repository repository) {
+  public RepositoryRetrieveProvider(final Repository repository) {
 
-    this.fhirContext = requireNonNull(fhirContext, "bundle can not be null.");
     this.repository = requireNonNull(repository, "repository can not be null.");
+    this.fhirContext = repository.fhirContext();
     this.codeUtil = new CodeUtil(fhirContext);
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
   }

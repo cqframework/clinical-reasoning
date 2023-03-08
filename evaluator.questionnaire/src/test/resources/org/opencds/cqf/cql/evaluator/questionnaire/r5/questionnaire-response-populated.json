@@ -1,9 +1,6 @@
 {
   "resourceType": "QuestionnaireResponse",
-  "id": "1903",
-  "meta": {
-    "versionId": "2-response"
-  },
+  "id": "OutpatientPriorAuthorizationRequest-response",
   "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
   "status": "in-progress",
   "subject": {

@@ -172,7 +172,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
   private boolean hasOverloadedFunctions(Library library) {
     Set<String> functionNames = new HashSet<>();
-    if (library.getStatements() != null) {
+    if (library != null && library.getStatements() != null) {
       for (ExpressionDef ed : library.getStatements().getDef()) {
         if (ed instanceof FunctionDef) {
           FunctionDef fd = (FunctionDef) ed;

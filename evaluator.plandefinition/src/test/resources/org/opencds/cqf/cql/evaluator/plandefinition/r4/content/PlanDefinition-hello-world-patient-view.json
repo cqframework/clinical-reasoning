@@ -1,27 +1,21 @@
 {
   "resourceType": "PlanDefinition",
-  "id": "generate-questionnaire",
+  "id": "hello-world-patient-view",
   "meta": {
     "profile": [
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
     ]
   },
-  "extension": [
-    {
-      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate",
-      "valueBoolean": true
-    }
-  ],
-  "url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
+  "url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view",
   "identifier": [
     {
       "use": "official",
-      "value": "generate-questionnaire-sample"
+      "value": "helloworld-patient-view-sample"
     }
   ],
   "version": "1.0.0",
-  "name": "Generate Questionnaire",
-  "title": "Generate Questionnaire from StructureDefinition profile of action input",
+  "name": "HelloWorldPatientView",
+  "title": "Hello World (patient-view)",
   "type": {
     "coding": [
       {
@@ -35,7 +29,7 @@
   "experimental": true,
   "date": "2021-05-26T00:00:00-08:00",
   "publisher": "Alphora",
-  "description": "This PlanDefinition defines a simple recommendation with inputs to generate a Questionnaire.",
+  "description": "This PlanDefinition defines a simple Hello World recommendation that triggers on patient-view.",
   "useContext": [
     {
       "code": {
@@ -62,31 +56,47 @@
   "usage": "This is to be used in conjunction with a patient-facing FHIR application.",
   "copyright": "© CDC 2016+.",
   "library": [
-    "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+    "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld"
   ],
   "action": [
     {
-      "extension": [],
-      "title": "Prior Auth Route One",
-      "description": "",
+      "title": "Hello World!",
+      "description": "A simple Hello World (patient-view) recommendation",
+      "trigger": [
+        {
+          "type": "named-event",
+          "name": "patient-view"
+        }
+      ],
       "condition": [
         {
-          "kind": "applicability",
+          "kind": "start",
           "expression": {
+            "description": "Whether or not a Hello World! card should be returned",
             "language": "text/cql.identifier",
-            "expression": "Claim Is Applicable"
+            "expression": "Main Action Condition Expression Is True"
           }
         }
       ],
-      "input": [
+      "dynamicValue": [
         {
-          "type": "Claim",
-          "profile": [
-            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim"
-          ]
+          "fhir_comments": [
+            " dynamic card elements "
+          ],
+          "path": "action.title",
+          "expression": {
+            "language": "text/cql.identifier",
+            "expression": "Get Title"
+          }
+        },
+        {
+          "path": "action.description",
+          "expression": {
+            "language": "text/cql.identifier",
+            "expression": "Get Description"
+          }
         }
-      ],
-      "definitionCanonical": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+      ]
     }
   ]
 }

@@ -7,9 +7,19 @@ import java.util.List;
 
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.fhir.api.Repository;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests extends PlanDefinition {
+  private Repository createRepositoryForPath(String path) {
+    var data = new FhirRepository(this.getClass(), List.of(path + "/tests"), false);
+    var content = new FhirRepository(this.getClass(), List.of(path + "/content"), false);
+    var terminology =
+        new FhirRepository(this.getClass(), List.of(path + "/vocabulary/ValueSet"), false);
+
+    return Repositories.proxy(data, content, terminology);
+  }
+
   @Test
   public void testChildRoutineVisit() {
     var planDefinitionID = "ChildRoutineVisit-PlanDefinition-1.0.0";
@@ -39,17 +49,24 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
   @Test(enabled = false) // Currently failing due to missing ValueSet/anc-b8-de19
   public void testANCDT17() {
     var planDefinitionID = "ANCDT17";
-    var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
+    var patientID = "OPA-Patient1";
     var encounterID = "helloworld-patient-1-encounter-1";
-    var data = new FhirRepository(this.getClass(), List.of("anc-dak/tests"), false);
-    var content = new FhirRepository(this.getClass(), List.of("anc-dak/content"), false);
-    var terminology =
-        new FhirRepository(this.getClass(), List.of("anc-dak/vocabulary/ValueSet"), false);
-    var repository = Repositories.proxy(data, content, terminology);
+    var repository = createRepositoryForPath("anc-dak");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
-        .apply().isEqualsTo("tests/CarePlan-ANCDT17.json");
+        .apply().isEqualsTo("anc-dak/tests/CarePlan-ANCDT17.json");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
-        .applyR5().isEqualsTo("tests/Bundle-ANCDT17.json");
+        .applyR5().isEqualsTo("anc-dak/tests/Bundle-ANCDT17.json");
+  }
+
+  @Test(enabled = false) // Need patient data to test this
+  public void testECRWithFhirPath() {
+    var planDefinitionID = "us-ecr-specification";
+    var patientID = "helloworld-patient-1";
+    var encounterID = "helloworld-patient-1-encounter-1";
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).apply()
+        .isEqualsTo("tests/CarePlan-us-ecr-specification.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).applyR5()
+        .isEqualsTo("tests/Bundle-us-ecr-specification.json");
   }
 
   @Test
@@ -57,12 +74,10 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     var planDefinitionID = "hello-world-patient-view";
     var patientID = "helloworld-patient-1";
     var encounterID = "helloworld-patient-1-encounter-1";
-    var data = "hello-world/hello-world-patient-data.json";
-    var content = "hello-world/hello-world-patient-view-bundle.json";
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withAdditionalData(data)
-        .withContent(content).apply().isEqualsTo("hello-world/hello-world-careplan.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withAdditionalData(data)
-        .withContent(content).applyR5().isEqualsTo("hello-world/hello-world-bundle.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).apply()
+        .isEqualsTo("tests/CarePlan-hello-world-patient-view.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).applyR5()
+        .isEqualsTo("tests/Bundle-hello-world-patient-view.json");
   }
 
   @Test
@@ -70,15 +85,7 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
-    var data =
-        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
-    var content =
-        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/content"), false);
-    var terminology = new FhirRepository(this.getClass(),
-        List.of("opioid-Rec10-patient-view/vocabulary/CodeSystem",
-            "opioid-Rec10-patient-view/vocabulary/ValueSet"),
-        false);
-    var repository = Repositories.proxy(data, content, terminology);
+    var repository = createRepositoryForPath("opioid-Rec10-patient-view");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
         .apply()
         .isEqualsTo("opioid-Rec10-patient-view/tests/CarePlan-opioid-Rec10-patient-view.json");

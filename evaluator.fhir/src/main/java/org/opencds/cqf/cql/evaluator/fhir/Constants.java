@@ -24,6 +24,9 @@ public class Constants {
   public static final Map<String, String> ALIAS_MAP =
       ImmutableMap.of("FHIR", FHIR_MODEL_URI, "QUICK", FHIR_MODEL_URI, "QDM", QDM_MODEL_URI);
 
+
+  public static final String CPG_QUESTIONNAIRE_GENERATE =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate";
   // public static final String CQF_QUESTIONNAIRE =
   // "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire";
   public static final String CQF_EXPRESSION =

@@ -275,7 +275,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup,
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
-    if (action.hasInput()) {
+    if (planDefinition.hasExtension(Constants.CPG_QUESTIONNAIRE_GENERATE) && action.hasInput()) {
       for (var actionInput : action.getInput()) {
         if (actionInput.hasProfile()) {
           ((Questionnaire) this.questionnaire).addItem(this.questionnaireItemGenerator

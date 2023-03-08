@@ -22,6 +22,12 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 
 /**
  * <p>
+ * NOTE: This API is still incubating. In particular, we're looking at ways to provide a fluent
+ * pattern for it. The intent is to eventually promote it up to the HAPI FHIR core once all
+ * stakeholders have reviewed and approved.
+ * </p>
+ *
+ * <p>
  * This interface is a Java rendition of the FHIR REST API. All FHIR operations are defined at the
  * HTTP level, which is convenient from the specification point-of-view since FHIR is built on top
  * of web standards. This does mean that a few HTTP specific considerations, such as transmitting

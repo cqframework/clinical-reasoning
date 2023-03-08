@@ -46,11 +46,11 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
         .withContent(content).applyR5().isEqualsTo("anc-visit/anc_visit_bundle.json");
   }
 
-  @Test(enabled = false) // Currently failing due to missing ValueSet/anc-b8-de19
+  @Test
   public void testANCDT17() {
     var planDefinitionID = "ANCDT17";
-    var patientID = "OPA-Patient1";
-    var encounterID = "helloworld-patient-1-encounter-1";
+    var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
+    var encounterID = "Encounter/helloworld-patient-1-encounter-1";
     var repository = createRepositoryForPath("anc-dak");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
         .apply().isEqualsTo("anc-dak/tests/CarePlan-ANCDT17.json");

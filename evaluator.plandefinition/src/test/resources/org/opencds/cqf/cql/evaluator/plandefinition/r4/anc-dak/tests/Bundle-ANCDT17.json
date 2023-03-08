@@ -1,6 +1,7 @@
 {
   "resourceType": "Bundle",
   "id": "ANCDT17",
+  "type": "collection",
   "entry": [
     {
       "resource": {

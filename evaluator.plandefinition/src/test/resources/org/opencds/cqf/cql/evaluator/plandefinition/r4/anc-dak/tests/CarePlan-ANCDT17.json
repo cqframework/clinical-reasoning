@@ -32,7 +32,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#ANCDT17"
+        "reference": "#RequestGroup/ANCDT17"
       }
     }
   ]

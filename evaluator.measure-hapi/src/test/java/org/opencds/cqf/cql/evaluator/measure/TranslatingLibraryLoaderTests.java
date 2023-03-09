@@ -1,20 +1,25 @@
 package org.opencds.cqf.cql.evaluator.measure;
 
 
+import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionRef;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -30,7 +35,6 @@ import ca.uhn.fhir.parser.IParser;
 
 public class TranslatingLibraryLoaderTests {
 
-  private static FhirContext fhirContext;
   private static IParser parser;
   private static ModelManager modelManger;
   private BaseFhirLibrarySourceProvider testFhirLibrarySourceProvider;
@@ -38,7 +42,7 @@ public class TranslatingLibraryLoaderTests {
 
   @BeforeClass
   public void setup() {
-    fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+    FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     modelManger = new ModelManager();
     parser = fhirContext.newJsonParser();
   }
@@ -64,13 +68,28 @@ public class TranslatingLibraryLoaderTests {
   }
 
   @Test
-  public void loadLibrary() {
+  public void loadLibraryTranslateWithSignature() {
     VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("MethodOverload");
-    Library library = this.libraryLoader.load(libraryIdentifier);
 
+    Library storedElmLibrary = getElmLibrary(libraryIdentifier);
+    assertFalse(hasSignature(storedElmLibrary));
+
+    Library library = this.libraryLoader.load(libraryIdentifier);
     assertNotNull(library);
-    //stored elm had no signature but translated library has one
+
     assertTrue(hasSignature(library));
+  }
+
+  private Library getElmLibrary(VersionedIdentifier vi) {
+    org.hl7.elm.r1.VersionedIdentifier versionedIdentifier = toElmIdentifier(vi);
+    InputStream is = testFhirLibrarySourceProvider.getLibraryContent(versionedIdentifier,
+        LibraryContentType.JSON);
+    try {
+      return CqlLibraryReaderFactory.getReader(LibraryContentType.JSON.mimeType()).read(is);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   boolean hasSignature(Library library) {
@@ -78,7 +97,7 @@ public class TranslatingLibraryLoaderTests {
       for (ExpressionDef ed : library.getStatements().getDef()) {
         if (ed.getExpression() instanceof FunctionRef) {
           FunctionRef fr = (FunctionRef) ed.getExpression();
-          if (fr.getSignature() != null) {
+          if (fr.getSignature() != null && !fr.getSignature().isEmpty()) {
             return true;
           }
         }

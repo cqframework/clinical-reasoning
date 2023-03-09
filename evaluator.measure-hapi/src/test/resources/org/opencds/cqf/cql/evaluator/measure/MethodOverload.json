@@ -1,30 +1,9 @@
 {
   "resourceType": "Library",
   "id": "MethodOverload",
-  "extension": [
-    {
-      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-      "valueReference": {
-        "reference": "Device/cqf-tooling"
-      }
-    },
-    {
-      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-      "valueReference": {
-        "reference": "cqf-tooling"
-      }
-    }
-  ],
   "url": "http://fhir.org/guides/cqf/common/Library/MethodOverload",
   "version": "1.0.000",
   "name": "MethodOverload",
-  "relatedArtifact": [
-    {
-      "type": "depends-on",
-      "display": "FHIR model information",
-      "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-    }
-  ],
   "content": [
     {
       "contentType": "text/cql",

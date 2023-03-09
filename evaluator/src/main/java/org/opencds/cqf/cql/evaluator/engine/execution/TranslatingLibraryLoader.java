@@ -142,7 +142,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   }
 
   protected Library translate(VersionedIdentifier libraryIdentifier) {
-    CompiledLibrary library = null;
+    CompiledLibrary library;
     List<CqlCompilerException> errors = new ArrayList<>();
     try {
       library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier),
@@ -171,20 +171,54 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   }
 
   private boolean hasOverloadedFunctions(Library library) {
-    Set<String> functionNames = new HashSet<>();
+    Set<FunctionSig> functionNames = new HashSet<>();
     if (library != null && library.getStatements() != null) {
       for (ExpressionDef ed : library.getStatements().getDef()) {
         if (ed instanceof FunctionDef) {
           FunctionDef fd = (FunctionDef) ed;
-          if (functionNames.contains(fd.getName())) {
+          var sig = new FunctionSig(fd.getName(),
+              fd.getOperand() == null ? 0 : fd.getOperand().size());
+          if (functionNames.contains(sig)) {
             return true;
           } else {
-            functionNames.add(fd.getName());
+            functionNames.add(sig);
           }
         }
       }
     }
     return false;
+  }
+
+  class FunctionSig {
+
+    private final String name;
+    private final int numArguments;
+
+    public FunctionSig(String name, int numArguments) {
+      this.name = name;
+      this.numArguments = numArguments;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      if (other == null) {
+        return false;
+      }
+
+      FunctionSig func = (FunctionSig) other;
+
+      if (func == null) {
+        return false;
+      }
+
+      return this.name.equals(func.name) && this.numArguments == func.numArguments;
+    }
+
+    @Override
+    public int hashCode() {
+      int start = 17;
+      return start + name.hashCode() * 31 + numArguments * 31;
+    }
   }
 
 }

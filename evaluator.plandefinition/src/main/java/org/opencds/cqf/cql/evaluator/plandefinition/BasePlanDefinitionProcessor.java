@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -177,7 +178,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
       String altLanguage, String altExpression, String altPath, String libraryUrl,
       IBaseResource resource, IBaseParameters params) {
     validateExpressionWithPath(language, expression, path, libraryUrl);
-    Object result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, expression,
+    var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, expression,
         language, libraryUrl, params, this.bundle);
     if (result == null && altExpression != null) {
       validateExpressionWithPath(altLanguage, altExpression, altPath, libraryUrl);
@@ -201,10 +202,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
     }
   }
 
-  public Object resolveCondition(String language, String expression, String altLanguage,
+  public IBase resolveCondition(String language, String expression, String altLanguage,
       String altExpression, String libraryUrl, IBaseParameters params) {
     this.libraryEngine.validateExpression(language, expression, libraryUrl);
-    Object result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, expression,
+    var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, expression,
         language, libraryUrl, params, this.bundle);
     if (result == null && altExpression != null) {
       this.libraryEngine.validateExpression(altLanguage, altExpression, libraryUrl);

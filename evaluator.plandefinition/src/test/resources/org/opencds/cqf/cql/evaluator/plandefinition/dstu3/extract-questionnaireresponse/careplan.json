@@ -17,8 +17,10 @@
       },
       "action": [
         {
+          "title": "Prepopulate!",
+          "description": "A simple recommendation to complete a prepopulated Questionnaire",
           "resource": {
-            "reference": "Task"
+            "reference": "Task/complete-questionnaire"
           }
         }
       ]
@@ -693,7 +695,7 @@
     },
     {
       "resourceType": "Task",
-      "id": "Task",
+      "id": "complete-questionnaire",
       "basedOn": [
         {
           "reference": "#RequestGroup/prepopulate"

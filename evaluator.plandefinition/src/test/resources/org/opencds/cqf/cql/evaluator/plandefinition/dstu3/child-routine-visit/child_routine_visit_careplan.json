@@ -14,7 +14,26 @@
       "intent": "proposal",
       "subject": {
         "reference": "Patient/ChildRoutine-Reportable"
-      }
+      },
+      "action": [
+        {
+          "title": "Child Monthly Routine Visit",
+          "description": "This action will performed every month for a patient < 5 years old. The start date with be next month after registration while the end date will be the 60th week after birth.",
+          "timingTiming": {
+            "repeat": {
+              "countMax": 59,
+              "duration": 2,
+              "durationMax": 4,
+              "durationUnit": "h",
+              "frequency": 1,
+              "frequencyMax": 1,
+              "period": 1,
+              "periodMax": 1,
+              "periodUnit": "mo"
+            }
+          }
+        }
+      ]
     },
     {
       "resourceType": "Goal",

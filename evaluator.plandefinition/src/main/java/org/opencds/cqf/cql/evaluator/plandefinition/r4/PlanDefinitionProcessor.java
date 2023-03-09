@@ -35,17 +35,17 @@ import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PlanDefinition;
-import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
+import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RequestGroup;
+import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestStatus;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
@@ -95,7 +95,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       return;
     }
 
-    var questionnaireResponses = ((Bundle) this.bundle).getEntry().stream()
+    var questionnaireResponses = ((Bundle) bundle).getEntry().stream()
         .filter(entry -> entry.getResource().fhirType()
             .equals(Enumerations.FHIRAllTypes.QUESTIONNAIRERESPONSE.toCode()))
         .map(entry -> (QuestionnaireResponse) entry.getResource()).collect(Collectors.toList());
@@ -104,7 +104,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
         extractedResources.add(questionnaireResponse);
         for (var entry : extractBundle.getEntry()) {
-          ((Bundle) this.bundle).addEntry(entry);
+          ((Bundle) bundle).addEntry(entry);
           extractedResources.add(entry.getResource());
         }
       }
@@ -285,59 +285,69 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, action))) {
-      if (action.hasRelatedAction()) {
-        for (var relatedActionComponent : action.getRelatedAction()) {
-          if (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
-              && metConditions.containsKey(relatedActionComponent.getActionId())) {
-            metConditions.put(action.getId(), action);
-            resolveDefinition(planDefinition, requestGroup, action);
-            resolveDynamicValues(planDefinition, requestGroup, action);
+      // TODO: Figure out why this was here and what it was trying to do
+      // if (action.hasRelatedAction()) {
+      // for (var relatedActionComponent : action.getRelatedAction()) {
+      // if (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
+      // && metConditions.containsKey(relatedActionComponent.getActionId())) {
+      // metConditions.put(action.getId(), action);
+      // resolveDefinition(planDefinition, requestGroup, action);
+      // resolveDynamicValues(planDefinition, requestGroup, action);
+      // }
+      // }
+      // }
+      metConditions.put(action.getId(), action);
+      var requestAction = createRequestAction(action);
+      if (action.hasDefinitionCanonicalType()) {
+        var resource = resolveDefinition(planDefinition, requestGroup, action);
+        if (resource != null) {
+          applyAction(requestGroup, resource, action);
+          requestAction.setResource(new Reference(resource.getIdElement()));
+          if (Boolean.TRUE.equals(containResources)) {
+            requestGroup.addContained((Resource) resource);
+          } else {
+            requestResources.add(resource);
           }
         }
+      } else if (action.hasDefinitionUriType()) {
+        var definition = action.getDefinitionUriType();
+        requestAction.setResource(new Reference(definition.asStringValue()));
       }
-      metConditions.put(action.getId(), action);
-      resolveDefinition(planDefinition, requestGroup, action);
+      requestGroup.addAction(requestAction);
       resolveDynamicValues(planDefinition, requestGroup, action);
     }
   }
 
-  private void resolveDefinition(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private RequestGroupActionComponent createRequestAction(PlanDefinitionActionComponent action) {
+    var requestAction = new RequestGroupActionComponent().setTitle(action.getTitle())
+        .setDescription(action.getDescription()).setTextEquivalent(action.getTextEquivalent())
+        .setCode(action.getCode()).setDocumentation(action.getDocumentation())
+        .setTiming(action.getTiming());
+    requestAction.setId(action.getId());
+
+    return requestAction;
+  }
+
+  private IBaseResource resolveDefinition(PlanDefinition planDefinition, RequestGroup requestGroup,
       PlanDefinition.PlanDefinitionActionComponent action) {
-    if (action.hasDefinitionCanonicalType()) {
-      logger.debug("Resolving definition {}", action.getDefinitionCanonicalType().getValue());
-      var definition = action.getDefinitionCanonicalType();
-      var resourceName = resolveResourceName(definition, planDefinition);
-      switch (FHIRAllTypes.fromCode(requireNonNull(resourceName))) {
-        case PLANDEFINITION:
-          applyNestedPlanDefinition(requestGroup, definition, action);
-          break;
-        case ACTIVITYDEFINITION:
-          applyActivityDefinition(planDefinition, requestGroup, definition, action);
-          break;
-        case QUESTIONNAIRE:
-          applyQuestionnaireDefinition(planDefinition, requestGroup, definition, action);
-          break;
-        default:
-          throw new FHIRException(String.format("Unknown action definition: %s", definition));
-      }
-    } else if (action.hasDefinitionUriType()) {
-      var definition = action.getDefinitionUriType();
-      applyUriDefinition(requestGroup, definition, action);
+    logger.debug("Resolving definition {}", action.getDefinitionCanonicalType().getValue());
+    var definition = action.getDefinitionCanonicalType();
+    var resourceName = resolveResourceName(definition, planDefinition);
+    switch (FHIRAllTypes.fromCode(requireNonNull(resourceName))) {
+      case PLANDEFINITION:
+        return applyNestedPlanDefinition(requestGroup, definition);
+      case ACTIVITYDEFINITION:
+        return applyActivityDefinition(planDefinition, definition);
+      case QUESTIONNAIRE:
+        return applyQuestionnaireDefinition(planDefinition, definition);
+      default:
+        throw new FHIRException(String.format("Unknown action definition: %s", definition));
     }
   }
 
-  private void applyUriDefinition(RequestGroup requestGroup, UriType definition,
-      PlanDefinition.PlanDefinitionActionComponent action) {
-    requestGroup.addAction().setResource(new Reference(definition.asStringValue()))
-        .setTitle(action.getTitle()).setDescription(action.getDescription())
-        .setTextEquivalent(action.getTextEquivalent()).setCode(action.getCode())
-        .setTiming(action.getTiming());
-  }
-
-  private void applyQuestionnaireDefinition(PlanDefinition planDefinition,
-      RequestGroup requestGroup, CanonicalType definition,
-      PlanDefinition.PlanDefinitionActionComponent action) {
-    IBaseResource result;
+  private IBaseResource applyQuestionnaireDefinition(PlanDefinition planDefinition,
+      CanonicalType definition) {
+    IBaseResource result = null;
     try {
       var referenceToContained = definition.getValue().startsWith("#");
       if (referenceToContained) {
@@ -350,25 +360,18 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
         result = searchResult.getEntryFirstRep().getResource();
       }
-
-      applyAction(requestGroup, result, action);
-      requestGroup.addAction().setResource(new Reference(result.getIdElement()));
-      if (Boolean.TRUE.equals(containResources)) {
-        requestGroup.addContained((Resource) result);
-      } else {
-        requestResources.add(result);
-      }
-
     } catch (Exception e) {
       e.printStackTrace();
       logger.error("ERROR: Questionnaire {} could not be applied and threw exception {}",
           definition, e.toString());
     }
+
+    return result;
   }
 
-  private void applyActivityDefinition(PlanDefinition planDefinition, RequestGroup requestGroup,
-      CanonicalType definition, PlanDefinition.PlanDefinitionActionComponent action) {
-    IBaseResource result;
+  private IBaseResource applyActivityDefinition(PlanDefinition planDefinition,
+      CanonicalType definition) {
+    IBaseResource result = null;
     try {
       var referenceToContained = definition.getValue().startsWith("#");
       if (referenceToContained) {
@@ -391,22 +394,16 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             userTaskContext, setting, settingContext, parameters, libraryEngine);
         result.setId(activityDefinition.getIdElement().withResourceType(result.fhirType()));
       }
-
-      applyAction(requestGroup, result, action);
-      requestGroup.addAction().setResource(new Reference(result.getIdElement()));
-      if (Boolean.TRUE.equals(containResources)) {
-        requestGroup.addContained((Resource) result);
-      } else {
-        requestResources.add(result);
-      }
     } catch (Exception e) {
       logger.error("ERROR: ActivityDefinition {} could not be applied and threw exception {}",
           definition, e.toString());
     }
+
+    return result;
   }
 
-  private void applyNestedPlanDefinition(RequestGroup requestGroup, CanonicalType definition,
-      PlanDefinition.PlanDefinitionActionComponent action) {
+  private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup,
+      CanonicalType definition) {
     var searchResult = repository.search(Bundle.class, PlanDefinition.class,
         Searches.byUrl(definition.asStringValue()));
     if (!searchResult.hasEntry()) {
@@ -416,19 +413,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var planDefinition = (PlanDefinition) searchResult.getEntryFirstRep().getResource();
     var result = (RequestGroup) applyPlanDefinition(planDefinition);
 
-    applyAction(requestGroup, result, action);
-
-    // Add an action to the request group which points to this request group
-    requestGroup.addAction().setResource(new Reference(result.getIdElement()));
-    if (Boolean.TRUE.equals(containResources)) {
-      requestGroup.addContained(result);
-    } else {
-      requestResources.add(result);
-    }
-
     for (var c : result.getInstantiatesCanonical()) {
       requestGroup.addInstantiatesCanonical(c.getValueAsString());
     }
+
+    return result;
   }
 
   private void applyAction(RequestGroup requestGroup, IBaseResource result,
@@ -515,12 +504,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           .map(e -> (ValueSet) e.getResource()).collect(Collectors.toList());
       var additionalData =
           bundle == null ? new Bundle().setType(BundleType.COLLECTION) : ((Bundle) bundle).copy();
-      libraries.forEach(library -> {
-        additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(library));
-      });
-      valueSets.forEach(valueSet -> {
-        additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet));
-      });
+      libraries.forEach(library -> additionalData
+          .addEntry(new Bundle.BundleEntryComponent().setResource(library)));
+      valueSets.forEach(valueSet -> additionalData
+          .addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
       var oc = new OperationOutcome();
       oc.setId("prepopulate-outcome-" + questionnaire.getId());

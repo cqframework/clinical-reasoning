@@ -14,7 +14,13 @@
         "intent": "proposal",
         "subject": {
           "reference": "OPA-Patient1"
-        }
+        },
+        "action": [
+          {
+            "title": "Prepopulate!",
+            "description": "A simple recommendation to complete a prepopulated Questionnaire"
+          }
+        ]
       }
     },
     {

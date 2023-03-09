@@ -17,59 +17,147 @@
         },
         "action": [
           {
+            "id": "start",
+            "description": "This action represents the start of the reporting workflow in response to the encounter-start event",
+            "textEquivalent": "Start the reporting workflow in response to an encounter-start event",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "start"
+                  }
+                ]
+              }
+            ],
             "resource": {
               "reference": "Task/start"
             }
           },
           {
+            "id": "ckr-is-encounter-reportable",
             "resource": {
               "reference": "Task/ckr-is-encounter-reportable"
             }
           },
           {
+            "id": "ckr-is-encounter-in-progress",
             "resource": {
               "reference": "Task/ckr-is-encounter-in-progress"
             }
           },
           {
+            "id": "check-reportable",
+            "description": "This action represents the check for suspected reportability of the eICR.",
+            "textEquivalent": "Check Reportable",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "check-reportable"
+                  }
+                ]
+              }
+            ],
             "resource": {
               "reference": "Task/check-reportable"
             }
           },
           {
+            "id": "car-report-eicr",
             "resource": {
               "reference": "Task/car-report-eicr"
             }
           },
           {
+            "id": "car-is-encounter-complete",
             "resource": {
               "reference": "Task/car-is-encounter-complete"
             }
           },
           {
+            "id": "car-is-encounter-in-progress",
             "resource": {
               "reference": "Task/car-is-encounter-in-progress"
             }
           },
           {
+            "id": "create-and-report-eicr",
+            "description": "This action represents the creation and reporting of the eICR.",
+            "textEquivalent": "Create and Report eICR",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "create-and-report-eicr"
+                  }
+                ]
+              }
+            ],
             "resource": {
               "reference": "Task/create-and-report-eicr"
             }
           },
           {
+            "id": "create-eicr",
+            "description": "This action represents the creation of the eICR.",
+            "textEquivalent": "Create eICR.",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "create-eicr"
+                  }
+                ]
+              }
+            ],
             "resource": {
               "reference": "Task/create-eicr"
             }
           },
           {
+            "id": "validate-eicr",
+            "description": "This action represents the validation of the eICR.",
+            "textEquivalent": "Validate eICR.",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "validate-eicr"
+                  }
+                ]
+              }
+            ],
             "resource": {
               "reference": "Task/validate-eicr"
             }
           },
           {
+            "id": "route-and-send-eicr",
+            "description": "This action represents the routing and sending of the eICR.",
+            "textEquivalent": "Route and send eICR",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                    "code": "route-and-send-eicr"
+                  }
+                ]
+              }
+            ],
             "resource": {
               "reference": "Task/route-and-send-eicr"
             }
+          },
+          {
+            "id": "report-eicr",
+            "description": "This action represents the reporting of the eICR.",
+            "textEquivalent": "Report eICR"
           }
         ]
       }

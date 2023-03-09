@@ -16,6 +16,7 @@
       },
       "action": [
         {
+          "title": "Prior Auth Route One",
           "resource": {
             "reference": "RequestGroup/route-one"
           }
@@ -456,7 +457,21 @@
       "intent": "proposal",
       "subject": {
         "reference": "OPA-Patient1"
-      }
+      },
+      "action": [
+        {
+          "title": "Facility Information"
+        },
+        {
+          "title": "Beneficiary Information"
+        },
+        {
+          "title": "Operating Physician Information"
+        },
+        {
+          "title": "Attending Physician Information"
+        }
+      ]
     }
   ],
   "instantiatesCanonical": [

@@ -5,38 +5,36 @@ import static org.testng.Assert.assertThrows;
 import org.testng.annotations.Test;
 
 public class QuestionnaireResponseProcessorTests {
+  private void testExtract(String questionnaireResponse) {
+    TestQuestionnaireResponse.Assert
+        .that("tests/QuestionnaireResponse-" + questionnaireResponse + ".json").extract()
+        .isEqualsTo("tests/Bundle-" + questionnaireResponse + ".json");
+  }
+
   @Test
-  void testExtract() {
-    TestQuestionnaireResponse.Assert.that("questionnaire_response_1558.json")
-        .withData("questionnaire_1559.json").extract()
-        .isEqualsTo("questionnaire_response_1558_bundle.json");
+  void test() {
+    testExtract("QRSharonDecision");
   }
 
   @Test
   void testExtract_noQuestionnaireReference_throwsException() {
     assertThrows(IllegalArgumentException.class, () -> {
-      TestQuestionnaireResponse.Assert.that("mypain-questionnaire-response-no-url.json").extract();
+      testExtract("mypain-no-url");
     });
   }
 
   @Test
   void testIsSubjectExtension() {
-    TestQuestionnaireResponse.Assert.that("questionnaire_response_is_subject.json")
-        .withData("questionnaire_is_subject.json").extract()
-        .isEqualsTo("questionnaire_response_is_subject_bundle.json");
+    testExtract("sdc-profile-example-multi-subject");
   }
 
   @Test
   void testDefinitionBasedExtraction() {
-    TestQuestionnaireResponse.Assert.that("questionnaire_response_definition.json")
-        .withData("questionnaire_definition.json").extract()
-        .isEqualsTo("questionnaire_response_definition_bundle.json");
+    testExtract("OutpatientPriorAuthorizationRequest");
   }
 
   @Test(enabled = false)
   void testDemographicsExtraction() {
-    TestQuestionnaireResponse.Assert.that("questionnaire_response_demographics.json")
-        .withData("questionnaire_demographics.json").extract()
-        .isEqualsTo("questionnaire_response_demographics_bundle.json");
+    testExtract("demographics-qr");
   }
 }

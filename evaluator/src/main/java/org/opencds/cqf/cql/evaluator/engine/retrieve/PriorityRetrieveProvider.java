@@ -11,7 +11,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class PriorityRetrieveProvider implements RetrieveProvider {
 
-  private List<RetrieveProvider> retrieveProviders;;
+  private List<RetrieveProvider> retrieveProviders;
 
   public PriorityRetrieveProvider(List<RetrieveProvider> retrieveProviders) {
     requireNonNull(retrieveProviders, "retrieveProviders can not be null.");

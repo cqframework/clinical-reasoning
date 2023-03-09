@@ -1,5 +1,6 @@
 {
   "resourceType": "CarePlan",
+  "id": "ChildRoutineVisit-PlanDefinition-1.0.0",
   "contained": [
     {
       "resourceType": "RequestGroup",
@@ -67,7 +68,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#ChildRoutineVisit-PlanDefinition-1.0.0"
+        "reference": "#RequestGroup/ChildRoutineVisit-PlanDefinition-1.0.0"
       }
     }
   ]

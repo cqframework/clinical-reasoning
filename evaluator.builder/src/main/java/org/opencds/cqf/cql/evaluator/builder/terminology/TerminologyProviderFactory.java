@@ -12,9 +12,9 @@ import javax.inject.Named;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 
 import ca.uhn.fhir.context.FhirContext;
 

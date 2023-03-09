@@ -4,11 +4,10 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 /*
@@ -34,13 +33,11 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected static final Logger logger =
       LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
   protected IParser parser;
-  protected FhirContext fhirContext;
-  protected FhirDal fhirDal;
+  protected Repository repository;
 
-  protected BaseQuestionnaireResponseProcessor(FhirContext fhirContext, FhirDal fhirDal) {
-    this.fhirContext = fhirContext;
-    this.fhirDal = fhirDal;
-    this.parser = this.fhirContext.newJsonParser();
+  protected BaseQuestionnaireResponseProcessor(Repository repository) {
+    this.repository = repository;
+    this.parser = this.repository.fhirContext().newJsonParser();
   }
 
   public IBaseBundle extract(T questionnaireResponse) {
@@ -53,6 +50,10 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
     var resources = processItems(questionnaireResponse);
 
     return createResourceBundle(questionnaireResponse, resources);
+  }
+
+  protected String getExtractId(T questionnaireResponse) {
+    return "extract-" + ((IBaseResource) questionnaireResponse).getIdElement().getIdPart();
   }
 
   protected abstract IBaseBundle createResourceBundle(T questionnaireResponse,

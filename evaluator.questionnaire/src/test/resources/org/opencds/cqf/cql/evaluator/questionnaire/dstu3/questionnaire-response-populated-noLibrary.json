@@ -1,10 +1,10 @@
 {
   "resourceType": "QuestionnaireResponse",
-  "id": "1903-response",
+  "id": "OutpatientPriorAuthorizationRequest-response",
   "contained": [
     {
       "resourceType": "OperationOutcome",
-      "id": "populate-outcome-1903",
+      "id": "populate-outcome-OutpatientPriorAuthorizationRequest",
       "issue": [
         {
           "severity": "error",
@@ -133,12 +133,12 @@
     {
       "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
       "valueReference": {
-        "reference": "#populate-outcome-1903"
+        "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest"
       }
     }
   ],
   "questionnaire": {
-    "reference": "Questionnaire/1903"
+    "reference": "Questionnaire/OutpatientPriorAuthorizationRequest"
   },
   "status": "in-progress",
   "subject": {

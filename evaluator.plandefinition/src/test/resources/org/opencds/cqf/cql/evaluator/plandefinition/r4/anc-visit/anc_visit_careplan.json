@@ -1,5 +1,6 @@
 {
   "resourceType": "CarePlan",
+  "id": "AncVisit-PlanDefinition",
   "contained": [
     {
       "resourceType": "RequestGroup",
@@ -102,7 +103,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#AncVisit-PlanDefinition"
+        "reference": "#RequestGroup/AncVisit-PlanDefinition"
       }
     }
   ]

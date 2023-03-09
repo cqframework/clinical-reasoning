@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure;
 
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,6 +10,8 @@ import java.util.Collections;
 
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.elm.execution.ExpressionDef;
+import org.cqframework.cql.elm.execution.FunctionRef;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -64,7 +67,23 @@ public class TranslatingLibraryLoaderTests {
   public void loadLibrary() {
     VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("MethodOverload");
     Library library = this.libraryLoader.load(libraryIdentifier);
+
     assertNotNull(library);
+    //stored elm had no signature but translated library has one
+    assertTrue(hasSignature(library));
   }
 
+  boolean hasSignature(Library library) {
+    if (library != null && library.getStatements() != null) {
+      for (ExpressionDef ed : library.getStatements().getDef()) {
+        if (ed.getExpression() instanceof FunctionRef) {
+          FunctionRef fr = (FunctionRef) ed.getExpression();
+          if (fr.getSignature() != null) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 }

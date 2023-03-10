@@ -178,4 +178,18 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withParameters(parameters)
         .applyR5().isEqualsTo("tests/Bundle-generate-questionnaire.json");
   }
+  
+  @Test
+  public void testANCDT17PlanDefinition() {
+      PlanDefinition.Assert.that(
+              "ANCDT17",
+              "Patient/5946f880-b197-400b-9caa-a3c661d23041",
+              "Encounter/ANCDT17-encounter"
+          )
+          .withData("anc-dak/data-bundle.json")
+          .withContent("anc-dak/content-bundle.json")
+          .withTerminology("anc-dak/terminology-bundle.json")
+          .apply()
+          .isEqualsTo("anc-dak/output-careplan.json");
+  }
 }

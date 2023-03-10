@@ -54,7 +54,7 @@
     "markdown"
   ],
   "cSpell.ignorePaths": [
-    ".git/objects",
+    ".git",
     ".vscode",
     "**/pom.xml",
     "checkstyle.xml",

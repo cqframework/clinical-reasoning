@@ -18,9 +18,8 @@ theme:
     primary: white
   icon:
     repo: fontawesome/brands/github
-  theme:
-    features:
-      - content.action.edit
+  features:
+    - content.action.edit
 
 extra:
   social:

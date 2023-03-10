@@ -39,6 +39,8 @@ markdown_extensions:
   - pymdownx.snippets:
       base_path: [".", "../main/java/docs", "../main/resources"]
   - pymdownx.superfences
+  - toc:
+      permalink: true
 
 nav:
   - Home: index.md

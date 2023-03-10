@@ -25,7 +25,7 @@ See the [Java Guidance](#java-guidance) section for more detailed information.
 
 ### Getting Started
 
-Java 11+ is required to build and run this project. You can build the project with `./mvnw package`.
+Java 11+ is required to build and run this project. You can build the project with `mvn package`.
 
 ### Licensing
 
@@ -33,7 +33,7 @@ All contributions to this project will be licensed under Apache 2.0
 
 ### Extensions
 
-If you're using VS Code, the cqf-fhir-clinical-reasoning repo suggests a list of Java extensions for static and style analysis. Please enable these recommended extensions, as they help detect issues with contributions prior to committing them or opening a PR.
+If you're using VS Code, the `clinical-reasoning` repo suggests a list of Java extensions for static and style analysis. Please enable these recommended extensions, as they help detect issues with contributions prior to committing them or opening a PR.
 
 ### Style Guide
 
@@ -223,7 +223,7 @@ Most of the components and operations in this repository are built around an int
 
 * Should start with `cqf-fhir`
 * Should reflect the root package name for the artifact
-    * `org.opencds.cqf.fhir.cqf` -> `cqf-fhir-cql`
+    * `org.opencds.cqf.fhir.cql` -> `cqf-fhir-cql`
     * `org.opencds.cqf.fhir.utility` -> `cqf-fhir-utility`
 * Exception: If there is a FHIR-version in the package name, it should come _last_ in the artifact name. This is to match the conventions already established by the FHIR core and HAPI FHIR projects
     * `org.opencds.cqf.fhir.cr.r5.measure` -> `cqf-fhir-cr-measure-r5`

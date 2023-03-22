@@ -26,7 +26,7 @@
       "valueCode": "pa"
     }
   ],
-  "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization",
+  "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-noLibrary",
   "version": "4.3.0",
   "name": "RouteOneOrganization",
   "title": "Facility Information",

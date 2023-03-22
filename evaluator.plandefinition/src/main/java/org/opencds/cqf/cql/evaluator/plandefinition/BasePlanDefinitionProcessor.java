@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -69,6 +70,16 @@ public abstract class BasePlanDefinitionProcessor<T> {
         new FhirTypeConverterFactory().create(repository.fhirContext().getVersion().getVersion()));
     this.modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
+  }
+
+  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
+      String errorMessage) {
+    if (obj == null)
+      return Optional.empty();
+    if (type.isInstance(obj)) {
+      return Optional.of(type.cast(obj));
+    }
+    throw new IllegalArgumentException(errorMessage);
   }
 
   public abstract T resolvePlanDefinition(IIdType theId);

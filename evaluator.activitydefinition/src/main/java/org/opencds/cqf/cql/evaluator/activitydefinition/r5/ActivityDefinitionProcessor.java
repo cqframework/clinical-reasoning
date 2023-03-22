@@ -1,9 +1,13 @@
 package org.opencds.cqf.cql.evaluator.activitydefinition.r5;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableReference;
@@ -35,10 +39,23 @@ public class ActivityDefinitionProcessor
     super(repository);
   }
 
-  // For library use
   @Override
-  public Resource resolveActivityDefinition(ActivityDefinition activityDefinition, String patientId,
-      String practitionerId, String organizationId) throws FHIRException {
+  public ActivityDefinition resolveActivityDefinition(IIdType theId) throws FHIRException {
+    var baseActivityDefinition = this.repository.read(ActivityDefinition.class, theId);
+
+    requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + theId);
+
+    var activityDefinition = castOrThrow(baseActivityDefinition, ActivityDefinition.class,
+        "The activityDefinition passed to Repository was not a valid instance of ActivityDefinition.class")
+            .orElse(null);
+
+    logger.info("Performing $apply operation on {}", theId);
+
+    return activityDefinition;
+  }
+
+  @Override
+  public IBaseResource applyActivityDefinition(ActivityDefinition activityDefinition) {
     Resource result;
     try {
       result =
@@ -52,32 +69,31 @@ public class ActivityDefinitionProcessor
 
     switch (result.fhirType()) {
       case "ServiceRequest":
-        result =
-            resolveServiceRequest(activityDefinition, patientId, practitionerId, organizationId);
+        result = resolveServiceRequest(activityDefinition);
         break;
 
       case "MedicationRequest":
-        result = resolveMedicationRequest(activityDefinition, patientId);
+        result = resolveMedicationRequest(activityDefinition);
         break;
 
       case "SupplyRequest":
-        result = resolveSupplyRequest(activityDefinition, practitionerId, organizationId);
+        result = resolveSupplyRequest(activityDefinition);
         break;
 
       case "Procedure":
-        result = resolveProcedure(activityDefinition, patientId);
+        result = resolveProcedure(activityDefinition);
         break;
 
       case "DiagnosticReport":
-        result = resolveDiagnosticReport(activityDefinition, patientId);
+        result = resolveDiagnosticReport(activityDefinition);
         break;
 
       case "Communication":
-        result = resolveCommunication(activityDefinition, patientId);
+        result = resolveCommunication(activityDefinition);
         break;
 
       case "CommunicationRequest":
-        result = resolveCommunicationRequest(activityDefinition, patientId);
+        result = resolveCommunicationRequest(activityDefinition);
         break;
 
       case "Task":
@@ -153,13 +169,13 @@ public class ActivityDefinitionProcessor
     return task;
   }
 
-  private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition,
-      String patientId, String practitionerId, String organizationId) throws FHIRException {
+  private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition)
+      throws FHIRException {
     // status, intent, code, and subject are required
     var serviceRequest = new ServiceRequest();
     serviceRequest.setStatus(RequestStatus.DRAFT);
     serviceRequest.setIntent(RequestIntent.ORDER);
-    serviceRequest.setSubject(new Reference(patientId));
+    serviceRequest.setSubject(new Reference(subjectId));
 
     if (practitionerId != null) {
       serviceRequest.setRequester(new Reference(practitionerId));
@@ -198,12 +214,12 @@ public class ActivityDefinitionProcessor
     return serviceRequest;
   }
 
-  private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition,
-      String patientId) throws FHIRException {
+  private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition)
+      throws FHIRException {
     // intent, medication, and subject are required
     var medicationRequest = new MedicationRequest();
     medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
-    medicationRequest.setSubject(new Reference(patientId));
+    medicationRequest.setSubject(new Reference(subjectId));
 
     if (activityDefinition.hasProduct()) {
       var medicationValue = new CodeableReference();
@@ -239,8 +255,8 @@ public class ActivityDefinitionProcessor
     return medicationRequest;
   }
 
-  private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition,
-      String practitionerId, String organizationId) throws FHIRException {
+  private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition)
+      throws FHIRException {
     var supplyRequest = new SupplyRequest();
 
     if (practitionerId != null) {
@@ -278,11 +294,11 @@ public class ActivityDefinitionProcessor
     return supplyRequest;
   }
 
-  private Procedure resolveProcedure(ActivityDefinition activityDefinition, String patientId) {
+  private Procedure resolveProcedure(ActivityDefinition activityDefinition) {
     var procedure = new Procedure();
 
     procedure.setStatus(EventStatus.UNKNOWN);
-    procedure.setSubject(new Reference(patientId));
+    procedure.setSubject(new Reference(subjectId));
 
     if (activityDefinition.hasCode()) {
       procedure.setCode(activityDefinition.getCode());
@@ -295,12 +311,11 @@ public class ActivityDefinitionProcessor
     return procedure;
   }
 
-  private DiagnosticReport resolveDiagnosticReport(ActivityDefinition activityDefinition,
-      String patientId) {
+  private DiagnosticReport resolveDiagnosticReport(ActivityDefinition activityDefinition) {
     var diagnosticReport = new DiagnosticReport();
 
     diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
-    diagnosticReport.setSubject(new Reference(patientId));
+    diagnosticReport.setSubject(new Reference(subjectId));
 
     if (activityDefinition.hasCode()) {
       diagnosticReport.setCode(activityDefinition.getCode());
@@ -331,12 +346,11 @@ public class ActivityDefinitionProcessor
     return diagnosticReport;
   }
 
-  private Communication resolveCommunication(ActivityDefinition activityDefinition,
-      String patientId) {
+  private Communication resolveCommunication(ActivityDefinition activityDefinition) {
     var communication = new Communication();
 
     communication.setStatus(EventStatus.UNKNOWN);
-    communication.setSubject(new Reference(patientId));
+    communication.setSubject(new Reference(subjectId));
 
     if (activityDefinition.hasCode()) {
       communication.setReason(Collections
@@ -363,12 +377,11 @@ public class ActivityDefinitionProcessor
     return communication;
   }
 
-  private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition,
-      String patientId) {
+  private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition) {
     var communicationRequest = new CommunicationRequest();
 
     communicationRequest.setStatus(RequestStatus.UNKNOWN);
-    communicationRequest.setSubject(new Reference(patientId));
+    communicationRequest.setSubject(new Reference(subjectId));
 
     if (activityDefinition.hasCode() && activityDefinition.getCode().hasText()) {
       communicationRequest.addPayload()

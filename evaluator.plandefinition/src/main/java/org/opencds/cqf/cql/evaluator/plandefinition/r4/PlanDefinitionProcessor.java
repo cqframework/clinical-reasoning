@@ -6,12 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -77,16 +75,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository);
     this.questionnaireProcessor = new QuestionnaireProcessor(this.repository);
     this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
-  }
-
-  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
-      String errorMessage) {
-    if (obj == null)
-      return Optional.empty();
-    if (type.isInstance(obj)) {
-      return Optional.of(type.cast(obj));
-    }
-    throw new IllegalArgumentException(errorMessage);
   }
 
   @Override
@@ -377,8 +365,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       if (referenceToContained) {
         var activityDefinition =
             (ActivityDefinition) resolveContained(planDefinition, definition.getValue());
-        result = this.activityDefinitionProcessor.resolveActivityDefinition(activityDefinition,
-            patientId, practitionerId, organizationId);
+        result = this.activityDefinitionProcessor.apply(activityDefinition, patientId, encounterId,
+            practitionerId, organizationId, userType, userLanguage, userTaskContext, setting,
+            settingContext, parameters, libraryEngine);
         result.setId(
             new IdType(result.fhirType(), activityDefinition.getIdPart().replaceFirst("#", "")));
       } else {

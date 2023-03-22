@@ -2,10 +2,12 @@ package org.opencds.cqf.cql.evaluator.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
@@ -33,6 +35,13 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   private final ModelResolver modelResolver;
   protected Repository repository;
 
+  protected String subjectId;
+  protected String encounterId;
+  protected String practitionerId;
+  protected String organizationId;
+  protected IBaseParameters parameters;
+  protected LibraryEngine libraryEngine;
+
   protected BaseActivityDefinitionProcessor(Repository repository) {
     requireNonNull(repository, "repository can not be null");
     this.repository = repository;
@@ -41,9 +50,15 @@ public abstract class BaseActivityDefinitionProcessor<T> {
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
 
-  protected String subjectId;
-  protected IBaseParameters parameters;
-  protected LibraryEngine libraryEngine;
+  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
+      String errorMessage) {
+    if (obj == null)
+      return Optional.empty();
+    if (type.isInstance(obj)) {
+      return Optional.of(type.cast(obj));
+    }
+    throw new IllegalArgumentException(errorMessage);
+  }
 
   public IBaseResource apply(IIdType theId, String subjectId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
@@ -58,23 +73,32 @@ public abstract class BaseActivityDefinitionProcessor<T> {
         new LibraryEngine(this.repository));
   }
 
-  @SuppressWarnings("unchecked")
   public IBaseResource apply(IIdType theId, String subjectId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       LibraryEngine libraryEngine) {
-    this.subjectId = subjectId;
-    this.parameters = parameters;
-    this.libraryEngine = libraryEngine;
-    T activityDefinition = (T) this.repository.read(ActivityDefinition.class, theId);
-    if (activityDefinition == null) {
-      throw new IllegalArgumentException("Couldn't find ActivityDefinition " + theId);
-    }
-    return resolveActivityDefinition(activityDefinition, subjectId, practitionerId, organizationId);
+    return apply(resolveActivityDefinition(theId), subjectId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, libraryEngine);
   }
 
-  public abstract IBaseResource resolveActivityDefinition(T activityDefinition, String patientId,
-      String practitionerId, String organizationId);
+  public IBaseResource apply(T theActivityDefinition, String subjectId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      LibraryEngine libraryEngine) {
+    this.subjectId = subjectId;
+    this.encounterId = encounterId;
+    this.practitionerId = practitionerId;
+    this.organizationId = organizationId;
+    this.parameters = parameters;
+    this.libraryEngine = libraryEngine;
+
+    return applyActivityDefinition(theActivityDefinition);
+  }
+
+  public abstract T resolveActivityDefinition(IIdType theId);
+
+  public abstract IBaseResource applyActivityDefinition(T theActivityDefinition);
 
   public void resolveDynamicValue(String language, String expression, String libraryUrl,
       String path, IBaseResource resource, String subjectType) {

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 
 public class Searches {
 
@@ -19,7 +21,7 @@ public class Searches {
   }
 
   public static Map<String, List<IQueryParameterType>> byUrl(String url) {
-    return builder().withToken("url", url).build();
+    return builder().withUri("url", url).build();
   }
 
   public static Map<String, List<IQueryParameterType>> byName(String name) {
@@ -38,6 +40,15 @@ public class Searches {
       return this.values;
     }
 
+    SearchBuilder withString(String name, String value) {
+      if (values == null) {
+        values = new HashMap<String, List<IQueryParameterType>>();
+      }
+      values.put(name, Collections.singletonList(new StringParam(value)));
+
+      return this;
+    }
+
     SearchBuilder withToken(String name, String value) {
       // var paramValue = new StringParam(value);
       // var paramList = new ArrayList<IQueryParameterType>();
@@ -45,7 +56,16 @@ public class Searches {
       if (values == null) {
         values = new HashMap<String, List<IQueryParameterType>>();
       }
-      values.put(name, Collections.singletonList(new StringParam(value)));
+      values.put(name, Collections.singletonList(new TokenParam(value)));
+
+      return this;
+    }
+
+    SearchBuilder withUri(String name, String value) {
+      if (values == null) {
+        values = new HashMap<String, List<IQueryParameterType>>();
+      }
+      values.put(name, Collections.singletonList(new UriParam(value)));
 
       return this;
     }

@@ -123,13 +123,39 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     logger.info("Performing $apply operation on {}", theId);
 
-    this.questionnaire = new Questionnaire();
-    this.questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), theId.getIdPart()));
-    this.questionnaireItemGenerator =
-        new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+    createQuestionnaire(planDefinition.getIdElement().getIdPart());
 
     return planDefinition;
   }
+
+  @Override
+  public PlanDefinition resolvePlanDefinition(String url) {
+    var searchResult = repository.search(Bundle.class, PlanDefinition.class,
+        Searches.byUrl(url));
+
+    if (!searchResult.hasEntry()) {
+      throw new FHIRException("No plan definition found for url: " + url);
+    }
+    var basePlanDefinition = searchResult.getEntryFirstRep().getResource();
+
+    var planDefinition = castOrThrow(basePlanDefinition, PlanDefinition.class,
+        "The planDefinition passed to FhirDal was not a valid instance of PlanDefinition.class")
+        .orElse(null);
+
+    logger.info("Performing $apply operation on {}", url);
+
+    createQuestionnaire(planDefinition.getIdElement().getIdPart());
+
+    return planDefinition;
+  }
+
+  private void createQuestionnaire(String idPart){
+    this.questionnaire = new Questionnaire();
+    this.questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), idPart));
+    this.questionnaireItemGenerator =
+        new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+  }
+
 
   @Override
   public IBaseResource applyPlanDefinition(PlanDefinition planDefinition) {
@@ -362,17 +388,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         result.setId(
             new IdType(result.fhirType(), activityDefinition.getIdPart().replaceFirst("#", "")));
       } else {
-        var searchResult = repository.search(Bundle.class, ActivityDefinition.class,
-            Searches.byUrl(definition.getReference()));
-        if (!searchResult.hasEntry()) {
-          throw new FHIRException(
-              "No activity definition found for definition: " + definition.getReference());
-        }
-        var activityDefinition = (ActivityDefinition) searchResult.getEntryFirstRep().getResource();
-        result = this.activityDefinitionProcessor.apply(activityDefinition.getIdElement(),
+       result = this.activityDefinitionProcessor.apply(definition.getReference(),
             patientId, encounterId, practitionerId, organizationId, userType, userLanguage,
             userTaskContext, setting, settingContext, parameters, libraryEngine);
-        result.setId(activityDefinition.getIdElement().withResourceType(result.fhirType()));
+        var activityDefinitionId = new IdType(definition.getReference());
+        result.setId(activityDefinitionId.getIdPart().withResourceType(result.fhirType()));
       }
     } catch (Exception e) {
       logger.error("ERROR: ActivityDefinition {} could not be applied and threw exception {}",

@@ -27,6 +27,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public abstract class BasePlanDefinitionProcessor<T> {
+
   private static final Logger logger = LoggerFactory.getLogger(BasePlanDefinitionProcessor.class);
   protected static final String ALT_EXPRESSION_EXT =
       "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression";
@@ -73,6 +74,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public abstract T resolvePlanDefinition(IIdType theId);
 
+  public abstract T resolvePlanDefinition(String url);
+
   public abstract IBaseResource applyPlanDefinition(T planDefinition);
 
   public abstract IBaseResource transformToCarePlan(IBaseResource requestGroup);
@@ -90,10 +93,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
       Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
       IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
-    return apply(theId, patientId, encounterId, practitionerId, organizationId, userType,
+    return apply(resolvePlanDefinition(theId), patientId, encounterId, practitionerId,
+        organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
-        prefetchData, new LibraryEngine(repository));
+        prefetchData, dataEndpoint, contentEndpoint, terminologyEndpoint);
   }
 
   public IBaseResource apply(IIdType theId, String patientId, String encounterId,
@@ -101,8 +104,99 @@ public abstract class BasePlanDefinitionProcessor<T> {
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
       LibraryEngine libraryEngine) {
+    return apply(resolvePlanDefinition(theId), patientId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, useServerData, bundle, prefetchData, libraryEngine);
+
+  }
+
+  public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    return applyR5(resolvePlanDefinition(theId), patientId, encounterId, practitionerId,
+        organizationId, userType,
+        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
+        prefetchData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+  }
+
+  public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      LibraryEngine libraryEngine) {
+    return applyR5(resolvePlanDefinition(theId), patientId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, useServerData, bundle, prefetchData, libraryEngine);
+  }
+
+  public IBaseResource apply(String url, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    return apply(resolvePlanDefinition(url), patientId, encounterId, practitionerId,
+        organizationId, userType,
+        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
+        prefetchData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+  }
+
+  public IBaseResource apply(String url, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      LibraryEngine libraryEngine) {
+    return apply(resolvePlanDefinition(url), patientId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, useServerData, bundle, prefetchData, libraryEngine);
+
+  }
+
+  public IBaseResource applyR5(String url, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    return applyR5(resolvePlanDefinition(url), patientId, encounterId, practitionerId,
+        organizationId, userType,
+        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
+        prefetchData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+  }
+
+  public IBaseResource applyR5(String url, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      LibraryEngine libraryEngine) {
+    return applyR5(resolvePlanDefinition(url), patientId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, useServerData, bundle, prefetchData, libraryEngine);
+  }
+
+  public IBaseResource apply(T planDefinition, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    return apply(planDefinition, patientId, encounterId, practitionerId, organizationId, userType,
+        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
+        prefetchData, new LibraryEngine(repository));
+  }
+
+  public IBaseResource apply(T planDefinition, String patientId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
+      LibraryEngine libraryEngine) {
     if (repository.fhirContext().getVersion().getVersion() == FhirVersionEnum.R5) {
-      return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
+      return applyR5(planDefinition, patientId, encounterId, practitionerId, organizationId,
+          userType,
           userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
           prefetchData, libraryEngine);
     }
@@ -124,22 +218,23 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
     extractQuestionnaireResponse();
-    return transformToCarePlan(applyPlanDefinition(resolvePlanDefinition(theId)));
+    return transformToCarePlan(applyPlanDefinition(planDefinition));
   }
 
-  public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
+
+  public IBaseResource applyR5(T planDefinition, String patientId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
       IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
-    return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
+    return applyR5(planDefinition, patientId, encounterId, practitionerId, organizationId, userType,
         userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
         prefetchData, new LibraryEngine(repository));
   }
 
-  public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
+  public IBaseResource applyR5(T planDefinition, String patientId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
@@ -162,7 +257,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
     extractQuestionnaireResponse();
-    return transformToBundle(applyPlanDefinition(resolvePlanDefinition(theId)));
+    return transformToBundle(applyPlanDefinition(planDefinition));
   }
 
   public void validateExpressionWithPath(String language, String expression, String path,

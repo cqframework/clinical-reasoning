@@ -5,7 +5,9 @@ import static java.util.Objects.requireNonNull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
@@ -14,11 +16,13 @@ import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opencds.cqf.fhir.utility.Searches;
 
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public abstract class BaseActivityDefinitionProcessor<T> {
+
   private static final Logger logger =
       LoggerFactory.getLogger(BaseActivityDefinitionProcessor.class);
   public static final String TARGET_STATUS_URL =
@@ -63,15 +67,66 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       LibraryEngine libraryEngine) {
-    this.subjectId = subjectId;
-    this.parameters = parameters;
-    this.libraryEngine = libraryEngine;
     T activityDefinition = (T) this.repository.read(ActivityDefinition.class, theId);
     if (activityDefinition == null) {
       throw new IllegalArgumentException("Couldn't find ActivityDefinition " + theId);
     }
+    return apply(activityDefinition, subjectId, encounterId, practitionerId, organizationId,
+        userType, userLanguage, userTaskContext, setting, settingContext, parameters, libraryEngine);
+  }
+
+  public IBaseResource apply(String url, String subjectId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
+      IBaseResource dataEndpoint) {
+    this.repository =
+        Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+
+    return apply(url, subjectId, encounterId, practitionerId, organizationId, userType,
+        userLanguage, userTaskContext, setting, settingContext, parameters,
+        new LibraryEngine(this.repository));
+  }
+
+  @SuppressWarnings("unchecked")
+  public IBaseResource apply(String url, String subjectId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      LibraryEngine libraryEngine) {
+    var searchResult = repository.search(Bundle.class, ActivityDefinition.class,
+        Searches.byUrl(url));
+    if (!searchResult.hasEntry()) {
+      throw new IllegalArgumentException(
+          "No activity definition found for definition: " + url);
+    }
+    var activityDefinition = (T) searchResult.getEntryFirstRep().getResource();
+    return apply(activityDefinition, subjectId, encounterId, practitionerId, organizationId,
+        userType, userLanguage, userTaskContext, setting, settingContext, parameters, libraryEngine);
+  }
+
+  public IBaseResource apply(T activityDefinition, String subjectId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
+      IBaseResource dataEndpoint) {
+    this.repository =
+        Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+
+    return apply(activityDefinition, subjectId, encounterId, practitionerId, organizationId, userType,
+        userLanguage, userTaskContext, setting, settingContext, parameters,
+        new LibraryEngine(this.repository));
+  }
+
+  public IBaseResource apply(T activityDefinition, String subjectId, String encounterId,
+      String practitionerId, String organizationId, String userType, String userLanguage,
+      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      LibraryEngine libraryEngine) {
+    this.subjectId = subjectId;
+    this.parameters = parameters;
+    this.libraryEngine = libraryEngine;
     return resolveActivityDefinition(activityDefinition, subjectId, practitionerId, organizationId);
   }
+
 
   public abstract IBaseResource resolveActivityDefinition(T activityDefinition, String patientId,
       String practitionerId, String organizationId);

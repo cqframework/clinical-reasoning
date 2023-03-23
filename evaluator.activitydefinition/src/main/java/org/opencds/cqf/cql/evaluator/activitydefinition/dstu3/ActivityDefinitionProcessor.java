@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Communication;
 import org.hl7.fhir.dstu3.model.CommunicationRequest;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
@@ -30,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +44,27 @@ public class ActivityDefinitionProcessor
   }
 
   @Override
-  public ActivityDefinition resolveActivityDefinition(IIdType theId) throws FHIRException {
-    var baseActivityDefinition = this.repository.read(ActivityDefinition.class, theId);
+  @SuppressWarnings("unchecked")
+  public <R extends IBaseResource> R searchRepositoryByUrl(Class<R> theResourceType,
+      String theUrl) {
+    var searchResult = repository.search(Bundle.class, theResourceType, Searches.byUrl(theUrl));
+    if (!searchResult.hasEntry()) {
+      throw new FHIRException(String.format("No resource of type %s found for url: %s",
+          theResourceType.getSimpleName(), theUrl));
+    }
+
+    return (R) searchResult.getEntryFirstRep().getResource();
+  }
+
+  @Override
+  public ActivityDefinition resolveActivityDefinition(IIdType theId, String theCanonical,
+      IBaseResource theActivityDefinition) throws FHIRException {
+    var baseActivityDefinition = theActivityDefinition != null ? theActivityDefinition : null;
+    if (baseActivityDefinition == null) {
+      baseActivityDefinition = theCanonical != null && !theCanonical.isEmpty()
+          ? searchRepositoryByUrl(ActivityDefinition.class, theCanonical)
+          : this.repository.read(ActivityDefinition.class, theId);
+    }
 
     requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + theId);
 

@@ -77,6 +77,19 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
+  @SuppressWarnings("unchecked")
+  public <R extends IBaseResource> R searchRepositoryByUrl(Class<R> theResourceType,
+      String theUrl) {
+    var searchResult = repository.search(Bundle.class, theResourceType, Searches.byUrl(theUrl));
+    if (!searchResult.hasEntry()) {
+      throw new FHIRException(String.format("No resource of type %s found for url: %s",
+          theResourceType.getSimpleName(), theUrl));
+    }
+
+    return (R) searchResult.getEntryFirstRep().getResource();
+  }
+
+  @Override
   public void extractQuestionnaireResponse() {
     if (bundle == null) {
       return;
@@ -98,9 +111,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
   }
 
-  @Override
-  public PlanDefinition resolvePlanDefinition(IIdType theId) {
-    var basePlanDefinition = this.repository.read(PlanDefinition.class, theId);
+  public PlanDefinition resolvePlanDefinition(IIdType theId, String theCanonical,
+      IBaseResource thePlanDefinition) {
+    var basePlanDefinition = thePlanDefinition != null ? thePlanDefinition : null;
+    if (basePlanDefinition == null) {
+      basePlanDefinition = theCanonical != null && !theCanonical.isEmpty()
+          ? searchRepositoryByUrl(PlanDefinition.class, theCanonical)
+          : this.repository.read(PlanDefinition.class, theId);
+    }
 
     requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
 
@@ -299,12 +317,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       if (referenceToContained) {
         result = resolveContained(planDefinition, definition.getValue());
       } else {
-        var searchResult = repository.search(Bundle.class, Questionnaire.class,
-            Searches.byUrl(definition.asStringValue()));
-        if (!searchResult.hasEntry()) {
-          throw new FHIRException("No questionnaire found for definition: " + definition);
-        }
-        result = searchResult.getEntryFirstRep().getResource();
+        result = searchRepositoryByUrl(Questionnaire.class, definition.asStringValue());
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -329,16 +342,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         result.setId(
             new IdType(result.fhirType(), activityDefinition.getIdPart().replaceFirst("#", "")));
       } else {
-        var searchResult = repository.search(Bundle.class, ActivityDefinition.class,
-            Searches.byUrl(definition.asStringValue()));
-        if (!searchResult.hasEntry()) {
-          throw new FHIRException(
-              "No activity definition found for definition: " + definition.asStringValue());
-        }
-        var activityDefinition = (ActivityDefinition) searchResult.getEntryFirstRep().getResource();
-        result = this.activityDefinitionProcessor.apply(activityDefinition.getIdElement(),
-            patientId, encounterId, practitionerId, organizationId, userType, userLanguage,
-            userTaskContext, setting, settingContext, parameters, libraryEngine);
+        var activityDefinition =
+            searchRepositoryByUrl(ActivityDefinition.class, definition.asStringValue());
+        result = this.activityDefinitionProcessor.apply(activityDefinition, patientId, encounterId,
+            practitionerId, organizationId, userType, userLanguage, userTaskContext, setting,
+            settingContext, parameters, libraryEngine);
         result.setId(activityDefinition.getIdElement().withResourceType(result.fhirType()));
       }
     } catch (Exception e) {
@@ -351,13 +359,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup,
       CanonicalType definition) {
-    var searchResult = repository.search(Bundle.class, PlanDefinition.class,
-        Searches.byUrl(definition.asStringValue()));
-    if (!searchResult.hasEntry()) {
-      throw new FHIRException(
-          "No plan definition found for definition: " + definition.asStringValue());
-    }
-    var planDefinition = (PlanDefinition) searchResult.getEntryFirstRep().getResource();
+    var planDefinition = searchRepositoryByUrl(PlanDefinition.class, definition.asStringValue());
     var result = (RequestGroup) applyPlanDefinition(planDefinition);
 
     for (var c : result.getInstantiatesCanonical()) {
@@ -526,12 +528,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         logger.error("Error encountered calling $questionnaire-package operation: %s", e);
       }
     } else {
-      var searchResult =
-          repository.search(Bundle.class, Questionnaire.class, Searches.byUrl(questionnaireUrl));
-      if (!searchResult.hasEntry()) {
-        throw new FHIRException("No questionnaire found for definition: " + questionnaireUrl);
-      }
-      var questionnaire = searchResult.getEntryFirstRep().getResource();
+      var questionnaire = searchRepositoryByUrl(Questionnaire.class, questionnaireUrl);
       if (questionnaire != null) {
         bundle =
             new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(questionnaire));

@@ -140,16 +140,18 @@ public class PlanDefinition {
       buildRepository();
       var libraryEngine = new LibraryEngine(this.repository);
       return new GeneratedBundle((Bundle) buildProcessor(repository).applyR5(
-          new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, null, null, null,
-          null, null, null, null, parameters, null, additionalData, null, libraryEngine));
+          new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
+          null, null, null, null, null, null, parameters, null, additionalData, null,
+          libraryEngine));
     }
 
     public GeneratedCarePlan apply() {
       buildRepository();
       var libraryEngine = new LibraryEngine(this.repository);
       return new GeneratedCarePlan((CarePlan) buildProcessor(repository).apply(
-          new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, null, null, null,
-          null, null, null, null, parameters, null, additionalData, null, libraryEngine));
+          new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
+          null, null, null, null, null, null, parameters, null, additionalData, null,
+          libraryEngine));
     }
   }
 

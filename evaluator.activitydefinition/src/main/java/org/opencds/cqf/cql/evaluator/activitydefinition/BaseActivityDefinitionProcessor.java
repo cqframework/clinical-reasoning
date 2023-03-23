@@ -60,7 +60,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     throw new IllegalArgumentException(errorMessage);
   }
 
-  public IBaseResource apply(IIdType theId, String subjectId, String encounterId,
+  public IBaseResource apply(IIdType theId, String theCanonical,
+      IBaseResource theActivityDefinition, String subjectId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
@@ -68,18 +69,19 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     this.repository =
         Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-    return apply(theId, subjectId, encounterId, practitionerId, organizationId, userType,
-        userLanguage, userTaskContext, setting, settingContext, parameters,
-        new LibraryEngine(this.repository));
+    return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, new LibraryEngine(this.repository));
   }
 
-  public IBaseResource apply(IIdType theId, String subjectId, String encounterId,
+  public IBaseResource apply(IIdType theId, String theCanonical,
+      IBaseResource theActivityDefinition, String subjectId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       LibraryEngine libraryEngine) {
-    return apply(resolveActivityDefinition(theId), subjectId, encounterId, practitionerId,
-        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
-        parameters, libraryEngine);
+    return apply(resolveActivityDefinition(theId, theCanonical, theActivityDefinition), subjectId,
+        encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext,
+        setting, settingContext, parameters, libraryEngine);
   }
 
   public IBaseResource apply(T theActivityDefinition, String subjectId, String encounterId,
@@ -96,7 +98,11 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     return applyActivityDefinition(theActivityDefinition);
   }
 
-  public abstract T resolveActivityDefinition(IIdType theId);
+  public abstract T resolveActivityDefinition(IIdType theId, String theCanonical,
+      IBaseResource theActivityDefinition);
+
+  public abstract <R extends IBaseResource> R searchRepositoryByUrl(Class<R> theResourceType,
+      String theUrl);
 
   public abstract IBaseResource applyActivityDefinition(T theActivityDefinition);
 

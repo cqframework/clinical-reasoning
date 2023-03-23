@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -15,17 +16,48 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemC
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
   public QuestionnaireProcessor(Repository repository) {
     super(repository);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <R extends IBaseResource> R searchRepositoryByUrl(Class<R> theResourceType,
+      String theUrl) {
+    var searchResult = repository.search(Bundle.class, theResourceType, Searches.byUrl(theUrl));
+    if (!searchResult.hasEntry()) {
+      throw new FHIRException(String.format("No resource of type %s found for url: %s",
+          theResourceType.getSimpleName(), theUrl));
+    }
+
+    return (R) searchResult.getEntryFirstRep().getResource();
+  }
+
+  @Override
+  public Questionnaire resolveQuestionnaire(IIdType theId, String theCanonical,
+      IBaseResource theQuestionnaire) {
+    var baseQuestionnaire = theQuestionnaire != null ? theQuestionnaire : null;
+    if (baseQuestionnaire == null) {
+      baseQuestionnaire = theCanonical != null && !theCanonical.isEmpty()
+          ? searchRepositoryByUrl(Questionnaire.class, theCanonical)
+          : this.repository.read(Questionnaire.class, theId);
+    }
+
+    return castOrThrow(baseQuestionnaire, Questionnaire.class,
+        "The Questionnaire passed to repository was not a valid instance of Questionnaire.class")
+            .orElse(null);
   }
 
   @Override

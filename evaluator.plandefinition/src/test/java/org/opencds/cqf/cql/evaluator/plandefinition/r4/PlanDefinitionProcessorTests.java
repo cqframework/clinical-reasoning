@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 
 import java.util.List;
@@ -52,9 +53,10 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
     var encounterID = "Encounter/helloworld-patient-1-encounter-1";
     var repository = createRepositoryForPath("anc-dak");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+    var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository).withParameters(parameters)
         .apply().isEqualsTo("anc-dak/tests/CarePlan-ANCDT17.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository).withParameters(parameters)
         .applyR5().isEqualsTo("anc-dak/tests/Bundle-ANCDT17.json");
   }
 

@@ -616,9 +616,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
     for (var condition : action.getCondition()) {
       if (condition.hasExpression()) {
+        Parameters inputParams = resolveInputParameters(action.getInput());
+        if (parameters != null) {
+          inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
+        }
         var result = resolveCondition(condition.getLanguage(), condition.getExpression(), null,
-            null, planDefinition.getLibrary().get(0).getReference(),
-            resolveInputParameters(action.getInput()));
+            null, planDefinition.getLibrary().get(0).getReference(), inputParams);
         if (result == null) {
           logger.warn("Condition expression {} returned null", condition.getExpression());
           return false;

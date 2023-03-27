@@ -48,7 +48,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   @Override
   public Questionnaire resolveQuestionnaire(IIdType theId, String theCanonical,
       IBaseResource theQuestionnaire) {
-    var baseQuestionnaire = theQuestionnaire != null ? theQuestionnaire : null;
+    var baseQuestionnaire = theQuestionnaire;
     if (baseQuestionnaire == null) {
       baseQuestionnaire = theCanonical != null && !theCanonical.isEmpty()
           ? searchRepositoryByUrl(Questionnaire.class, theCanonical)

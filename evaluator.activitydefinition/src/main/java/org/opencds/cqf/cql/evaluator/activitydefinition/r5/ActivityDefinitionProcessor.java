@@ -57,7 +57,7 @@ public class ActivityDefinitionProcessor
   @Override
   public ActivityDefinition resolveActivityDefinition(IIdType theId, String theCanonical,
       IBaseResource theActivityDefinition) throws FHIRException {
-    var baseActivityDefinition = theActivityDefinition != null ? theActivityDefinition : null;
+    var baseActivityDefinition = theActivityDefinition;
     if (baseActivityDefinition == null) {
       baseActivityDefinition = theCanonical != null && !theCanonical.isEmpty()
           ? searchRepositoryByUrl(ActivityDefinition.class, theCanonical)

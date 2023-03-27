@@ -115,7 +115,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   @Override
   public PlanDefinition resolvePlanDefinition(IIdType theId, String theCanonical,
       IBaseResource thePlanDefinition) {
-    var basePlanDefinition = thePlanDefinition != null ? thePlanDefinition : null;
+    var basePlanDefinition = thePlanDefinition;
     if (basePlanDefinition == null) {
       basePlanDefinition = theCanonical != null && !theCanonical.isEmpty()
           ? searchRepositoryByUrl(PlanDefinition.class, theCanonical)

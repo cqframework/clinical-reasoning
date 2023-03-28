@@ -24,6 +24,10 @@ public class Searches {
     return builder().withUriParam("url", url).build();
   }
 
+  public static Map<String, List<IQueryParameterType>> byUrlAndVersion(String url, String version) {
+    return builder().withUriParam("url", url).withTokenParam("version", version).build();
+  }
+
   public static Map<String, List<IQueryParameterType>> byName(String name) {
     return builder().withTokenParam("name", name).build();
   }

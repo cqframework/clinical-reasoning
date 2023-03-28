@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
@@ -60,11 +61,11 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     throw new IllegalArgumentException(errorMessage);
   }
 
-  public IBaseResource apply(IIdType theId, String theCanonical,
-      IBaseResource theActivityDefinition, String subjectId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
+      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
       IBaseResource dataEndpoint) {
     this.repository =
         Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
@@ -74,11 +75,11 @@ public abstract class BaseActivityDefinitionProcessor<T> {
         parameters, new LibraryEngine(this.repository));
   }
 
-  public IBaseResource apply(IIdType theId, String theCanonical,
-      IBaseResource theActivityDefinition, String subjectId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      LibraryEngine libraryEngine) {
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
+      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, LibraryEngine libraryEngine) {
     return apply(resolveActivityDefinition(theId, theCanonical, theActivityDefinition), subjectId,
         encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext,
         setting, settingContext, parameters, libraryEngine);
@@ -98,11 +99,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     return applyActivityDefinition(theActivityDefinition);
   }
 
-  public abstract T resolveActivityDefinition(IIdType theId, String theCanonical,
-      IBaseResource theActivityDefinition);
-
-  public abstract <R extends IBaseResource> R searchRepositoryByUrl(Class<R> theResourceType,
-      String theUrl);
+  public abstract <CanonicalType extends IPrimitiveType<String>> T resolveActivityDefinition(
+      IIdType theId, CanonicalType theCanonical, IBaseResource theActivityDefinition);
 
   public abstract IBaseResource applyActivityDefinition(T theActivityDefinition);
 

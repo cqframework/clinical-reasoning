@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -43,14 +44,12 @@ public abstract class BaseQuestionnaireProcessor<T> {
     throw new IllegalArgumentException(errorMessage);
   }
 
-  public abstract <R extends IBaseResource> R searchRepositoryByUrl(Class<R> theResourceType,
-      String theUrl);
+  public abstract <CanonicalType extends IPrimitiveType<String>> T resolveQuestionnaire(
+      IIdType theId, CanonicalType theCanonical, IBaseResource theQuestionnaire);
 
-  public abstract T resolveQuestionnaire(IIdType theId, String theCanonical,
-      IBaseResource theQuestionnaire);
-
-  public T prePopulate(IIdType theId, String theCanonical, IBaseResource questionnaire,
-      String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
+  public <CanonicalType extends IPrimitiveType<String>> T prePopulate(IIdType theId,
+      CanonicalType theCanonical, IBaseResource questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return prePopulate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId,
@@ -60,8 +59,9 @@ public abstract class BaseQuestionnaireProcessor<T> {
   public abstract T prePopulate(T questionnaire, String patientId, IBaseParameters parameters,
       IBaseBundle bundle, LibraryEngine libraryEngine);
 
-  public IBaseResource populate(IIdType theId, String theCanonical, IBaseResource questionnaire,
-      String patientId, IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(IIdType theId,
+      CanonicalType theCanonical, IBaseResource questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return populate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId, parameters,
@@ -72,4 +72,11 @@ public abstract class BaseQuestionnaireProcessor<T> {
       IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine);
 
   public abstract T generateQuestionnaire(String theId);
+
+  public abstract IBaseBundle packageQuestionnaire(T theQuestionnaire);
+
+  public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
+      IIdType theId, CanonicalType theCanonical, IBaseResource questionnaire) {
+    return packageQuestionnaire(resolveQuestionnaire(theId, theCanonical, questionnaire));
+  }
 }

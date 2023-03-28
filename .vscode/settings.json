@@ -12,11 +12,13 @@
     "debuggable",
     "DENOMINATOREXCEPTION",
     "DENOMINATOREXCLUSION",
+    "DEPENDSON",
     "dstu",
     "Fhir",
     "fhirpath",
     "Gson",
     "INITIALPOPULATION",
+    "INPROGRESS",
     "Javadoc",
     "JXSON",
     "MEASUREOBSERVATION",
@@ -141,5 +143,6 @@
     "MD007": {
       "indent": 4
     }
-  }
+  },
+  "java.debug.settings.onBuildFailureProceed": true
 }

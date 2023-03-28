@@ -69,11 +69,16 @@
             "extension": [
               {
                 "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",
-                "valueString": "ClaimId"
-              },
-              {
-                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
-                "valueUri": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter",
+                    "valueString": "ClaimId"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
+                    "valueUri": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+                  }
+                ]
               }
             ],
             "title": "Prepopulate!",

@@ -614,10 +614,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
           }
         }
+        Parameters inputParams = resolveInputParameters(action.getInput());
+        if (parameters != null) {
+          inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
+        }
         var result = resolveCondition(condition.getExpression().getLanguage(),
             condition.getExpression().getExpression(), altLanguage, altExpression,
-            planDefinition.getLibrary().get(0).getValueAsString(),
-            resolveInputParameters(action.getInput()));
+            planDefinition.getLibrary().get(0).getValueAsString(), inputParams);
         if (result == null) {
           logger.warn("Condition expression {} returned null",
               condition.getExpression().getExpression());

@@ -1,22 +1,34 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r5;
 
+import static org.opencds.cqf.cql.evaluator.fhir.util.r5.SearchHelper.searchRepositoryByCanonical;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.DataType;
+import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
@@ -25,6 +37,20 @@ import org.opencds.cqf.fhir.api.Repository;
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
   public QuestionnaireProcessor(Repository repository) {
     super(repository);
+  }
+
+  @Override
+  public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(IIdType theId,
+      C theCanonical, IBaseResource theQuestionnaire) {
+    var baseQuestionnaire = theQuestionnaire;
+    if (baseQuestionnaire == null) {
+      baseQuestionnaire = theId != null ? this.repository.read(Questionnaire.class, theId)
+          : (Questionnaire) searchRepositoryByCanonical(repository, theCanonical);
+    }
+
+    return castOrThrow(baseQuestionnaire, Questionnaire.class,
+        "The Questionnaire passed to repository was not a valid instance of Questionnaire.class")
+            .orElse(null);
   }
 
   @Override
@@ -49,7 +75,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
 
     processItems(questionnaire.getItem(), libraryUrl.getValue(), oc);
 
-    if (oc.getIssue().size() > 0) {
+    if (!oc.getIssue().isEmpty()) {
       questionnaire.addContained(oc);
       questionnaire.addExtension(Constants.EXT_CRMI_MESSAGES, new Reference("#" + oc.getIdPart()));
     }
@@ -98,7 +124,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
       var ocId = ((Reference) ocExt.getValue()).getReference().replaceFirst("#", "");
       var ocList = questionnaire.getContained().stream()
           .filter(resource -> resource.getIdPart().equals(ocId)).collect(Collectors.toList());
-      var oc = ocList == null || ocList.size() == 0 ? null : ocList.get(0);
+      var oc = ocList == null || ocList.isEmpty() ? null : ocList.get(0);
       if (oc != null) {
         oc.setId("populate-outcome-" + populatedQuestionnaire.getIdPart());
         response.addContained(oc);
@@ -128,11 +154,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         processResponseItems(item.getItem(), nestedResponseItems);
         responseItem.setItem(nestedResponseItems);
       } else if (item.hasInitial()) {
-        item.getInitial().forEach(answer -> {
-          responseItem
-              .addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-                  .setValue(answer.getValue()));
-        });
+        item.getInitial()
+            .forEach(answer -> responseItem
+                .addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                    .setValue(answer.getValue())));
       }
       responseItems.add(responseItem);
     });
@@ -144,5 +169,46 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     questionnaire.setId(new IdType("Questionnaire", theId));
 
     return questionnaire;
+  }
+
+  private static List<String> packableResources = Arrays.asList(FHIRTypes.LIBRARY.toCode(),
+      FHIRTypes.CODESYSTEM.toCode(), FHIRTypes.VALUESET.toCode());
+
+  private void addRelatedArtifacts(Bundle theBundle, List<RelatedArtifact> theArtifacts) {
+    for (var artifact : theArtifacts) {
+      if (artifact.getType().equals(RelatedArtifactType.DEPENDSON)
+          && artifact.hasResourceElement()) {
+        var resource = searchRepositoryByCanonical(repository, artifact.getResourceElement());
+        if (resource != null && packableResources.contains(resource.fhirType())
+            && theBundle.getEntry().stream()
+                .noneMatch(e -> e.getResource().getIdElement().equals(resource.getIdElement()))) {
+          theBundle.addEntry(new BundleEntryComponent().setResource(resource));
+          if (resource.fhirType().equals(FHIRTypes.LIBRARY.toCode())
+              && ((Library) resource).hasRelatedArtifact()) {
+            addRelatedArtifacts(theBundle, ((Library) resource).getRelatedArtifact());
+          }
+        }
+      }
+    }
+  }
+
+  @Override
+  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire) {
+    var bundle = new Bundle();
+    bundle.setType(BundleType.COLLECTION);
+    bundle.addEntry(new BundleEntryComponent().setResource(theQuestionnaire));
+    var libraryExtension = theQuestionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
+    if (libraryExtension != null) {
+      var libraryCanonical = (CanonicalType) libraryExtension.getValue();
+      var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
+      if (library != null) {
+        bundle.addEntry(new BundleEntryComponent().setResource(library));
+        if (library.hasRelatedArtifact()) {
+          addRelatedArtifacts(bundle, library.getRelatedArtifact());
+        }
+      }
+    }
+
+    return bundle;
   }
 }

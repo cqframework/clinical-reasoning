@@ -138,9 +138,10 @@ public class PlanDefinition {
     public GeneratedBundle apply() {
       buildRepository();
       var libraryEngine = new LibraryEngine(this.repository);
-      return new GeneratedBundle((Bundle) buildProcessor(repository).apply(
-          new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, null, null, null,
-          null, null, null, null, parameters, null, additionalData, null, libraryEngine));
+      return new GeneratedBundle(
+          (Bundle) buildProcessor(repository).apply(new IdType("PlanDefinition", planDefinitionID),
+              null, null, patientID, encounterID, null, null, null, null, null, null, null,
+              parameters, null, additionalData, null, libraryEngine));
     }
   }
 

@@ -32,8 +32,8 @@ public class ActivityDefinitionProcessorTests {
   public void testActivityDefinitionApply() throws FHIRException {
     var libraryEngine = new LibraryEngine(repository);
 
-    var result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"),
-        "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
+    var result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"), null,
+        null, "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
     Assert.assertTrue(result instanceof MedicationRequest);
     MedicationRequest request = (MedicationRequest) result;
     Assert.assertTrue(request.getDoNotPerform());

@@ -21,7 +21,9 @@
   "relatedArtifact": [
     {
       "type": "depends-on",
-      "resource": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|3.2.0"
+      "resource": {
+        "reference": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|3.2.0"
+      }
     }
   ],
   "dataRequirement": [

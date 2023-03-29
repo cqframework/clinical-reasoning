@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-cdshooks</artifactId>
-  <version>3.0.0.PRE-1</version>
+  <version>3.0.0-SNAPSHOT</version>
 
   <name>FHIR Clinical Reasoning (CDS Hooks)</name>
   <description>CDS Hooks components for FHIR Clinical Reasoning</description>
@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0.PRE-1</version>
+    <version>3.0.0-SNAPSHOT</version>
     <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
@@ -21,27 +21,27 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-api</artifactId>
-      <version>3.0.0.PRE-1</version>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cql</artifactId>
-      <version>3.0.0.PRE-1</version>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cr</artifactId>
-      <version>3.0.0.PRE-1</version>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-utility</artifactId>
-      <version>3.0.0.PRE-1</version>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
-      <version>3.0.0.PRE-1</version>
+      <version>3.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

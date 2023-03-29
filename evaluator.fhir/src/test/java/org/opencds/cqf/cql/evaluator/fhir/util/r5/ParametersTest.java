@@ -49,91 +49,92 @@ class ParametersTest {
         urlPart("r5UrlPart", "https://example.com"),
         uuidPart("r5UuidPart", "urn:uuid:c757873d-ec9a-4326-a141-556f43239520"));
 
-    org.hl7.fhir.r5.model.DataType r5Type = parameters.getParameter("r5Base64BinaryPart");
+    org.hl7.fhir.r5.model.DataType r5Type =
+        parameters.getParameter("r5Base64BinaryPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.Base64BinaryType);
     assertEquals("SGVsbG8gV29ybGQh",
         ((org.hl7.fhir.r5.model.Base64BinaryType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5BooleanPart");
+    r5Type = parameters.getParameter("r5BooleanPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.BooleanType);
     assertTrue(((org.hl7.fhir.r5.model.BooleanType) r5Type).getValue());
 
-    r5Type = parameters.getParameter("r5CanonicalPart");
+    r5Type = parameters.getParameter("r5CanonicalPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.CanonicalType);
     assertEquals("https://example.com/Library/example-library",
         ((org.hl7.fhir.r5.model.CanonicalType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5CodePart");
+    r5Type = parameters.getParameter("r5CodePart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.CodeType);
     assertEquals("active", ((org.hl7.fhir.r5.model.CodeType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5DatePart");
+    r5Type = parameters.getParameter("r5DatePart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.DateType);
     assertEquals("2012-12-31", ((org.hl7.fhir.r5.model.DateType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5DateTimePart");
+    r5Type = parameters.getParameter("r5DateTimePart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.DateTimeType);
     assertEquals("2015-02-07T13:28:17-05:00",
         ((org.hl7.fhir.r5.model.DateTimeType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5DecimalPart");
+    r5Type = parameters.getParameter("r5DecimalPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.DecimalType);
     assertEquals("72.42", ((org.hl7.fhir.r5.model.DecimalType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5IdPart");
+    r5Type = parameters.getParameter("r5IdPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.IdType);
     assertEquals("example-id", ((org.hl7.fhir.r5.model.IdType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5InstantPart");
+    r5Type = parameters.getParameter("r5InstantPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.InstantType);
     assertEquals("2015-02-07T13:28:17.239+02:00",
         ((org.hl7.fhir.r5.model.InstantType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5IntegerPart");
+    r5Type = parameters.getParameter("r5IntegerPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.IntegerType);
     assertEquals((Integer) 72, ((org.hl7.fhir.r5.model.IntegerType) r5Type).getValue());
 
-    r5Type = parameters.getParameter("r5Integer64Part");
+    r5Type = parameters.getParameter("r5Integer64Part").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.Integer64Type);
     assertEquals((Long) 9223372036854775807L,
         ((org.hl7.fhir.r5.model.Integer64Type) r5Type).getValue());
 
-    r5Type = parameters.getParameter("r5MarkdownPart");
+    r5Type = parameters.getParameter("r5MarkdownPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.MarkdownType);
     assertEquals("## Markdown Title",
         ((org.hl7.fhir.r5.model.MarkdownType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5OidPart");
+    r5Type = parameters.getParameter("r5OidPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.OidType);
     assertEquals("urn:oid:1.2.3.4.5", ((org.hl7.fhir.r5.model.OidType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5PositiveIntPart");
+    r5Type = parameters.getParameter("r5PositiveIntPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.PositiveIntType);
     assertEquals((Integer) 1, ((org.hl7.fhir.r5.model.PositiveIntType) r5Type).getValue());
 
-    r5Type = parameters.getParameter("r5StringPart");
+    r5Type = parameters.getParameter("r5StringPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.StringType);
     assertEquals("example string", ((org.hl7.fhir.r5.model.StringType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5TimePart");
+    r5Type = parameters.getParameter("r5TimePart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.TimeType);
     assertEquals("12:30:30.500", ((org.hl7.fhir.r5.model.TimeType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5UnsignedIntPart");
+    r5Type = parameters.getParameter("r5UnsignedIntPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.UnsignedIntType);
     assertEquals((Integer) 0, ((org.hl7.fhir.r5.model.UnsignedIntType) r5Type).getValue());
 
-    r5Type = parameters.getParameter("r5UriPart");
+    r5Type = parameters.getParameter("r5UriPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.UriType);
     assertEquals("s:comp.infosystems.www.servers.unix",
         ((org.hl7.fhir.r5.model.UriType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5UrlPart");
+    r5Type = parameters.getParameter("r5UrlPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.UrlType);
     assertEquals("https://example.com",
         ((org.hl7.fhir.r5.model.UrlType) r5Type).getValueAsString());
 
-    r5Type = parameters.getParameter("r5UuidPart");
+    r5Type = parameters.getParameter("r5UuidPart").getValue();
     assertTrue(r5Type instanceof org.hl7.fhir.r5.model.UuidType);
     assertEquals("urn:uuid:c757873d-ec9a-4326-a141-556f43239520",
         ((org.hl7.fhir.r5.model.UuidType) r5Type).getValueAsString());

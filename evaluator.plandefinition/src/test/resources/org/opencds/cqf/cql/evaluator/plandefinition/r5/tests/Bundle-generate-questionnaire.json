@@ -5,7 +5,7 @@
   "entry": [
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "RequestOrchestration",
         "id": "generate-questionnaire",
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
@@ -19,7 +19,7 @@
         "action": [
           {
             "resource": {
-              "reference": "RequestGroup/route-one"
+              "reference": "RequestOrchestration/route-one"
             }
           }
         ]
@@ -27,7 +27,7 @@
     },
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "RequestOrchestration",
         "id": "route-one",
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"

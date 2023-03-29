@@ -11,7 +11,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.annotations.Test;
 
-public class PlanDefinitionProcessorTests extends PlanDefinition {
+public class PlanDefinitionProcessorTests {
   private Repository createRepositoryForPath(String path) {
     var data = new FhirRepository(this.getClass(), List.of(path + "/tests"), false);
     var content = new FhirRepository(this.getClass(), List.of(path + "/content"), false);
@@ -54,9 +54,11 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     var encounterID = "Encounter/helloworld-patient-1-encounter-1";
     var repository = createRepositoryForPath("anc-dak");
     var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository).withParameters(parameters)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+        .withParameters(parameters)
         .apply().isEqualsTo("anc-dak/tests/CarePlan-ANCDT17.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository).withParameters(parameters)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+        .withParameters(parameters)
         .applyR5().isEqualsTo("anc-dak/tests/Bundle-ANCDT17.json");
   }
 

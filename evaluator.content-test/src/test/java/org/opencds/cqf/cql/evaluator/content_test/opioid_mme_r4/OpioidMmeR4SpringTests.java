@@ -57,7 +57,7 @@ public class OpioidMmeR4SpringTests extends AbstractTestNGSpringContextTests {
   }
 
   private String getSubject(Parameters parameters) {
-    StringType subject = (StringType) parameters.getParameter("subject");
+    StringType subject = (StringType) parameters.getParameter("subject").getValue();
 
     return subject.getValue().replace("Patient/", "");
   }

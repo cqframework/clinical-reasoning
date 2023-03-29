@@ -35,6 +35,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected static final String REQUEST_GROUP_EXT =
       "http://fl7.org/fhir/StructureDefinition/RequestGroup-Goal";
 
+  protected static final String REQUEST_ORCHESTRATION_EXT =
+      "http://fl7.org/fhir/StructureDefinition/RequestOrchestration-Goal";
+
   protected static final String subjectType = "Patient";
 
   protected final OperationParametersParser operationParametersParser;

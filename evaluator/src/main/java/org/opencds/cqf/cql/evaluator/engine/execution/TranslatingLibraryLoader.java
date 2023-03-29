@@ -94,7 +94,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     }
 
     // Need to ensure namespaces are preserved when recompiling
-    if (libraryIdentifier.getSystem() != null && !libraryIdentifier.getSystem().isBlank()
+    if (libraryIdentifier.getSystem() != null && !libraryIdentifier.getSystem().isEmpty()
         && libraryManager.getNamespaceManager().getNamespaceInfoFromUri(libraryIdentifier.getSystem()) == null) {
       libraryManager.getNamespaceManager().addNamespace(new NamespaceInfo(libraryIdentifier.getId(), libraryIdentifier.getSystem()));
     }

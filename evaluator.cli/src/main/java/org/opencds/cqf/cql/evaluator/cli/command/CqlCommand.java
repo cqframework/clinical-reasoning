@@ -137,6 +137,11 @@ public class CqlCommand implements Callable<Integer> {
     public void logDebugMessage(LogCategory logCategory, String s) {
       log.debug("{}: {}", logCategory, s);
     }
+
+    @Override
+    public boolean isDebugLogging() {
+      return log.isDebugEnabled();
+    }
   }
 
   private String toVersionNumber(FhirVersionEnum fhirVersion) {

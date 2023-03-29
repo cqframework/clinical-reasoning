@@ -9,7 +9,7 @@ import org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.testng.annotations.Test;
 
-public class PlanDefinitionProcessorTests extends PlanDefinition {
+public class PlanDefinitionProcessorTests {
   @Test
   public void testChildRoutineVisit() {
     PlanDefinition.Assert

@@ -42,8 +42,8 @@ import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionInputComponent;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.RequestGroup;
-import org.hl7.fhir.r5.model.RequestGroup.RequestGroupActionComponent;
+import org.hl7.fhir.r5.model.RequestOrchestration;
+import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.Task;
 import org.hl7.fhir.r5.model.UrlType;
@@ -129,9 +129,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   @Override
   public IBaseResource applyPlanDefinition(PlanDefinition planDefinition) {
-    // Each Group of actions shares a RequestGroup
-    var requestGroup = new RequestGroup().setStatus(RequestStatus.DRAFT.toCode())
-        .setIntent(RequestIntent.PROPOSAL.toCode())
+    // Each Group of actions shares a RequestOrchestration
+    var requestGroup = new RequestOrchestration().setStatus(RequestStatus.DRAFT)
+        .setIntent(RequestIntent.PROPOSAL)
         .addInstantiatesCanonical(planDefinition.getUrl()).setSubject(new Reference(patientId));
 
     requestGroup
@@ -148,12 +148,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     for (int i = 0; i < planDefinition.getGoal().size(); i++) {
       var goal = convertGoal(planDefinition.getGoal().get(i));
       goal.setIdElement(new IdType("Goal", String.valueOf(i + 1)));
-      requestGroup.addExtension().setUrl(REQUEST_GROUP_EXT)
+      requestGroup.addExtension().setUrl(REQUEST_ORCHESTRATION_EXT)
           .setValue(new Reference(goal.getIdElement()));
       requestResources.add(goal);
     }
 
-    // Create Questionnaire for the RequestGroup if using Modular Questionnaires.
+    // Create Questionnaire for the RequestOrchestration if using Modular Questionnaires.
     // Assuming Dynamic until a use case for modular arises
 
     var metConditions = new HashMap<String, PlanDefinition.PlanDefinitionActionComponent>();
@@ -191,7 +191,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   @Override
   public void resolveCdsHooksDynamicValue(IBaseResource rg, Object value, String path) {
-    RequestGroup requestGroup = (RequestGroup) rg;
+    RequestOrchestration requestGroup = (RequestOrchestration) rg;
     int matchCount = StringUtils.countMatches(path, "action.");
     if (!requestGroup.hasAction()) {
       for (int i = 0; i < matchCount; ++i) {
@@ -231,7 +231,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return myGoal;
   }
 
-  private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private void resolveAction(PlanDefinition planDefinition, RequestOrchestration requestGroup,
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
     if (planDefinition.hasExtension(Constants.CPG_QUESTIONNAIRE_GENERATE) && action.hasInput()) {
@@ -273,8 +273,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
   }
 
-  private RequestGroupActionComponent createRequestAction(PlanDefinitionActionComponent action) {
-    var requestAction = new RequestGroupActionComponent().setTitle(action.getTitle())
+  private RequestOrchestrationActionComponent createRequestAction(
+      PlanDefinitionActionComponent action) {
+    var requestAction = new RequestOrchestrationActionComponent().setTitle(action.getTitle())
         .setDescription(action.getDescription()).setTextEquivalent(action.getTextEquivalent())
         .setCode(Collections.singletonList(action.getCode()))
         .setDocumentation(action.getDocumentation()).setTiming(action.getTiming());
@@ -283,7 +284,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return requestAction;
   }
 
-  private IBaseResource resolveDefinition(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private IBaseResource resolveDefinition(PlanDefinition planDefinition,
+      RequestOrchestration requestGroup,
       PlanDefinition.PlanDefinitionActionComponent action) {
     logger.debug("Resolving definition {}", action.getDefinitionCanonicalType().getValue());
     var definition = action.getDefinitionCanonicalType();
@@ -341,10 +343,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return result;
   }
 
-  private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup,
+  private IBaseResource applyNestedPlanDefinition(RequestOrchestration requestGroup,
       CanonicalType definition) {
     var planDefinition = (PlanDefinition) searchRepositoryByCanonical(repository, definition);
-    var result = (RequestGroup) applyPlanDefinition(planDefinition);
+    var result = (RequestOrchestration) applyPlanDefinition(planDefinition);
 
     for (var c : result.getInstantiatesCanonical()) {
       requestGroup.addInstantiatesCanonical(c.getValueAsString());
@@ -353,7 +355,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return result;
   }
 
-  private void applyAction(RequestGroup requestGroup, IBaseResource result,
+  private void applyAction(RequestOrchestration requestGroup, IBaseResource result,
       PlanDefinition.PlanDefinitionActionComponent action) {
     if ("Task".equals(result.fhirType())) {
       resolveTask(requestGroup, (Task) result, action);
@@ -364,7 +366,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
    * offset -> Duration timing -> Timing ( just our use case for connectathon period periodUnit
    * frequency count ) use task code
    */
-  private void resolveTask(RequestGroup requestGroup, Task task,
+  private void resolveTask(RequestOrchestration requestGroup, Task task,
       PlanDefinition.PlanDefinitionActionComponent action) {
     if (action.hasId()) {
       task.setId(new IdType(task.fhirType(), action.getId()));
@@ -421,7 +423,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   private void resolvePrepopulateAction(PlanDefinition.PlanDefinitionActionComponent action,
-      RequestGroup requestGroup, Task task) {
+      RequestOrchestration requestGroup, Task task) {
     if (action.hasExtension(Constants.SDC_QUESTIONNAIRE_PREPOPULATE)) {
       var questionnaireBundles = getQuestionnairePackage(
           action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE));
@@ -554,7 +556,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return bundle;
   }
 
-  private void resolveDynamicValues(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private void resolveDynamicValues(PlanDefinition planDefinition,
+      RequestOrchestration requestGroup,
       PlanDefinition.PlanDefinitionActionComponent action) {
     action.getDynamicValue().forEach(dynamicValue -> {
       if (dynamicValue.hasExpression()) {
@@ -580,7 +583,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     });
   }
 
-  private Boolean meetsConditions(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private Boolean meetsConditions(PlanDefinition planDefinition, RequestOrchestration requestGroup,
       PlanDefinition.PlanDefinitionActionComponent action) {
     // Should we be resolving child actions regardless of whether the conditions are met?
     if (action.hasAction()) {

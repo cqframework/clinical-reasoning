@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.shared</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0.PRE-1</version>
   <packaging>pom</packaging>
 
   <name>evaluator.shared</name>
@@ -15,12 +15,12 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cql.version>2.7.0-SNAPSHOT</cql.version>
-    <spring.version>5.3.19</spring.version>
-    <fhir-core.version>5.6.68</fhir-core.version>
-    <hapi.version>6.2.1</hapi.version>
+    <cql.version>2.7.0</cql.version>
+    <spring.version>5.3.23</spring.version>
+    <fhir-core.version>5.6.971</fhir-core.version>
+    <hapi.version>6.4.4</hapi.version>
     <picocli.version>4.6.1</picocli.version>
-    <slf4j.version>1.7.29</slf4j.version>
+    <slf4j.version>2.0.3</slf4j.version>
     <caffeine.version>2.9.0</caffeine.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <guava.version>31.0.1-jre</guava.version>

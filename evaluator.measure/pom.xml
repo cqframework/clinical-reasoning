@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.measure</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0.PRE-1</version>
   <packaging>jar</packaging>
 
   <description>CQL Evaluator - Measure Evaluation</description>
@@ -13,14 +13,14 @@
   <parent>
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0.PRE-1</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator</artifactId>
-      <version>3.0.0-SNAPSHOT</version>
+      <version>3.0.0.PRE-1</version>
     </dependency>
   </dependencies>
 </project>

@@ -93,6 +93,12 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
       return library;
     }
 
+    // Need to ensure namespaces are preserved when recompiling
+    if (libraryIdentifier.getSystem() != null && !libraryIdentifier.getSystem().isBlank()
+        && libraryManager.getNamespaceManager().getNamespaceInfoFromUri(libraryIdentifier.getSystem()) == null) {
+      libraryManager.getNamespaceManager().addNamespace(new NamespaceInfo(libraryIdentifier.getId(), libraryIdentifier.getSystem()));
+    }
+
     this.cqlTranslatorOptions.setEnableCqlOnly(true);
     return this.translate(libraryIdentifier);
   }

@@ -6,27 +6,33 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
 
-@Test(singleThreaded = true)
-public class DaVinciExtensionMeasureProcessorTest extends BaseMeasureProcessorTest {
+@Test
+public class DaVinciExtensionMeasureProcessorTest extends BaseMeasureProcessorTestB {
 
   public DaVinciExtensionMeasureProcessorTest() {
-    super("BreastCancerScreeningFHIR-bundle.json");
+    super("BreastCancerScreeningFHIR");
   }
 
   @Test
   public void exm125_numerator() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/BreastCancerScreeningFHIR", "2019-01-01",
-        "2019-12-31", "subject", "numer-EXM125", null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroupFirstRep(), "numerator", 1);
-    validateGroup(report.getGroupFirstRep(), "denominator", 1);
+    // Given
 
-    validateGroupScore(report.getGroupFirstRep(), new BigDecimal("1.0"));
+    // When
 
-    validateEvaluatedResourceExtension(report.getEvaluatedResource(), "Patient/numer-EXM125",
-        "initial-population", "denominator-exclusion");
-    validateEvaluatedResourceExtension(report.getEvaluatedResource(),
-        "DiagnosticReport/numer-EXM125-3", "numerator");
+    // Then
+    Measure.Assert.that("BreastCancerScreeningFHIR", "2019-01-01", "2019-12-31")
+        .repository(this.repository).subject("Patient/numer-EXM125").reportType("subject")
+        .evaluate()
+        .firstGroup().hasScore(new BigDecimal("1.0"))
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1).up().up()
+        .passes(this::exm125_numerator_validation);
   }
 
+  protected void exm125_numerator_validation(MeasureReport report) {
+    MeasureValidationUtils.validateEvaluatedResourceExtension(report.getEvaluatedResource(),
+        "Patient/numer-EXM125", "initial-population", "denominator-exclusion");
+    MeasureValidationUtils.validateEvaluatedResourceExtension(report.getEvaluatedResource(),
+        "DiagnosticReport/numer-EXM125-3", "numerator");
+  }
 }

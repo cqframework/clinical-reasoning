@@ -40,16 +40,16 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public abstract class BaseMeasureProcessorTest {
 
-  public BaseMeasureProcessorTest(String bundleName) {
-    this.endpoint = new Endpoint().setAddress(bundleName)
+  public BaseMeasureProcessorTest(String testDirectory) {
+    this.endpoint = new Endpoint().setAddress(testDirectory)
         .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
     this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     this.setup(false, 200);
   }
 
-  public BaseMeasureProcessorTest(String bundleName, boolean threadedEnabled,
+  public BaseMeasureProcessorTest(String testDirectory, boolean threadedEnabled,
       int threadedBatchSize) {
-    this.endpoint = new Endpoint().setAddress(bundleName)
+    this.endpoint = new Endpoint().setAddress(testDirectory)
         .setConnectionType(new Coding().setCode(Constants.HL7_FHIR_FILES));
     this.fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     this.setup(threadedEnabled, threadedBatchSize);

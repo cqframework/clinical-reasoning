@@ -57,6 +57,23 @@
       <version>3.0.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.library</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.skyscreamer</groupId>
+      <artifactId>jsonassert</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.oath.cyclops</groupId>
+      <artifactId>cyclops</artifactId>
+      <version>10.4.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

@@ -4,10 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opencds.cqf.cql.evaluator.fhir.util.ValidationProfile;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 
 public class MeasureEvaluationOptions {
   public static MeasureEvaluationOptions defaultOptions() {
-    return new MeasureEvaluationOptions();
+    var options = new MeasureEvaluationOptions();
+    options.setEvaluationSettings(EvaluationSettings.getDefault());
+    return options;
+
   }
 
   private boolean isThreadedEnabled = false;
@@ -15,6 +19,8 @@ public class MeasureEvaluationOptions {
   private Integer numThreads = null;
   private boolean isValidationEnabled = false;
   private Map<String, ValidationProfile> validationProfiles = new HashMap<>();
+
+  private EvaluationSettings evaluationSettings = null;
 
   public boolean isThreadedEnabled() {
     return this.isThreadedEnabled;
@@ -58,5 +64,13 @@ public class MeasureEvaluationOptions {
 
   public void setValidationProfiles(Map<String, ValidationProfile> validationProfiles) {
     this.validationProfiles = validationProfiles;
+  }
+
+  public void setEvaluationSettings(EvaluationSettings evaluationSettings) {
+    this.evaluationSettings = evaluationSettings;
+  }
+
+  public EvaluationSettings getEvaluationSettings() {
+    return this.evaluationSettings;
   }
 }

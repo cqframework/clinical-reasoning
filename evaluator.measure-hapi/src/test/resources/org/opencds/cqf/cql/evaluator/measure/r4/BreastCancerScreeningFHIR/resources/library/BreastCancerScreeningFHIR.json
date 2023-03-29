@@ -1,0 +1,513 @@
+{
+  "resourceType": "Library",
+  "id": "BreastCancerScreeningFHIR",
+  "meta": {
+    "versionId": "2",
+    "lastUpdated": "2021-01-15T09:56:34.000-07:00",
+    "source": "#r5t67Nu6Bnm1gVb2",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
+  },
+  "language": "en",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "cqf-tooling"
+    }
+  } ],
+  "url": "http://ecqi.healthit.gov/ecqms/Library/BreastCancerScreeningFHIR",
+  "version": "2.0.003",
+  "name": "BreastCancerScreeningFHIR",
+  "status": "active",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "date": "2021-01-15T16:56:33+00:00",
+  "publisher": "National Committee for Quality Assurance",
+  "description": "Breast Cancer Screening FHIR",
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers|4.0.001"
+  }, {
+    "type": "depends-on",
+    "display": "Library SDE",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/SupplementalDataElementsFHIR4|2.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library Global",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/MATGlobalCommonFunctionsFHIR4|6.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library AdultOutpatientEncounters",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/AdultOutpatientEncountersFHIR4|2.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library Hospice",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/HospiceFHIR4|2.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library Frailty",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/AdvancedIllnessandFrailtyExclusionECQMFHIR4|5.12.000"
+  }, {
+    "type": "depends-on",
+    "display": "Code system LOINC",
+    "resource": "http://loinc.org"
+  }, {
+    "type": "depends-on",
+    "display": "Code system SNOMEDCT",
+    "resource": "http://snomed.info/sct"
+  }, {
+    "type": "depends-on",
+    "display": "Code system SNOMEDCT:2017-09",
+    "resource": "http://snomed.info/sct|http://snomed.info/sct/version/201709"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Bilateral Mastectomy",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Ethnicity",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Female",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.560.100.2"
+  }, {
+    "type": "depends-on",
+    "display": "Value set History of bilateral mastectomy",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Left",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.122.12.1036"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Mammography",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+  }, {
+    "type": "depends-on",
+    "display": "Value set ONC Administrative Sex",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Payer",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Race",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.836"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Right",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.122.12.1035"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Status Post Left Mastectomy",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Status Post Right Mastectomy",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Unilateral Mastectomy Left",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Unilateral Mastectomy Right",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Unilateral Mastectomy, Unspecified Laterality",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Office Visit",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Annual Wellness Visit",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Preventive Care Services - Established Office Visit, 18 and Up",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Preventive Care Services-Initial Office Visit, 18 and Up",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Home Healthcare Services",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Encounter Inpatient",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Hospice care ambulatory",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Frailty Device",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Frailty Diagnosis",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Frailty Encounter",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Frailty Symptom",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Outpatient",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1087"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Observation",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1086"
+  }, {
+    "type": "depends-on",
+    "display": "Value set ED",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1085"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Nonacute Inpatient",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1084"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Advanced Illness",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Acute Inpatient",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1083"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Dementia Medications",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Care Services in Long-Term Residential Facility",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1014"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Nursing Facility Visit",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1012"
+  } ],
+  "parameter": [ {
+    "name": "Measurement Period",
+    "use": "in",
+    "min": 0,
+    "max": "1",
+    "type": "Period"
+  }, {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Patient"
+  }, {
+    "name": "SDE Ethnicity",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Payer",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  }, {
+    "name": "SDE Race",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Sex",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Coding"
+  }, {
+    "name": "Initial Population",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Denominator",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Right Mastectomy Diagnosis",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Condition"
+  }, {
+    "name": "Right Mastectomy Procedure",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Procedure"
+  }, {
+    "name": "Left Mastectomy Procedure",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Procedure"
+  }, {
+    "name": "Left Mastectomy",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Condition"
+  }, {
+    "name": "Bilateral Mastectomy Diagnosis",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Condition"
+  }, {
+    "name": "Bilateral Mastectomy Procedure",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Procedure"
+  }, {
+    "name": "Numerator",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Denominator Exclusion",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  } ],
+  "dataRequirement": [ {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
+    "mustSupport": [ "extension", "value", "url" ],
+    "codeFilter": [ {
+      "path": "url",
+      "code": [ {
+        "code": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+      } ]
+    } ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
+    "mustSupport": [ "extension", "value", "url" ],
+    "codeFilter": [ {
+      "path": "url",
+      "code": [ {
+        "code": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+      } ]
+    } ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+    "mustSupport": [ "bodySite", "code" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+    } ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+    "mustSupport": [ "code", "onset" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+    } ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+    "mustSupport": [ "code" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+    } ]
+  }, {
+    "type": "Procedure",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+    "mustSupport": [ "code", "performed", "status" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+    }, {
+      "path": "status",
+      "code": [ {
+        "code": "completed"
+      } ]
+    } ]
+  }, {
+    "type": "Procedure",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+    "mustSupport": [ "code", "performed", "status" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+    }, {
+      "path": "status",
+      "code": [ {
+        "code": "completed"
+      } ]
+    } ]
+  }, {
+    "type": "Procedure",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+    "mustSupport": [ "code", "performed", "status" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+    }, {
+      "path": "status",
+      "code": [ {
+        "code": "completed"
+      } ]
+    } ]
+  }, {
+    "type": "Procedure",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+    "mustSupport": [ "code", "performed", "status" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15"
+    }, {
+      "path": "status",
+      "code": [ {
+        "code": "completed"
+      } ]
+    } ]
+  }, {
+    "type": "DiagnosticReport",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/DiagnosticReport" ],
+    "mustSupport": [ "effective", "code", "status" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+    } ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+    "mustSupport": [ "period", "hospitalization", "hospitalization.dischargeDisposition", "type", "status" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+    } ],
+    "dateFilter": [ {
+      "path": "period",
+      "_valueDateTime": {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Measurement Period"
+          }
+        } ]
+      }
+    } ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+    "mustSupport": [ "period", "type" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+    } ]
+  }, {
+    "type": "ServiceRequest",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/ServiceRequest" ],
+    "mustSupport": [ "code", "authoredOn", "intent" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15"
+    }, {
+      "path": "intent",
+      "code": [ {
+        "code": "order"
+      } ]
+    } ],
+    "dateFilter": [ {
+      "path": "authoredOn",
+      "_valueDateTime": {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Measurement Period"
+          }
+        } ]
+      }
+    } ]
+  }, {
+    "type": "DeviceRequest",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/DeviceRequest" ],
+    "mustSupport": [ "code", "authoredOn" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+    } ],
+    "dateFilter": [ {
+      "path": "authoredOn",
+      "_valueDateTime": {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Measurement Period"
+          }
+        } ]
+      }
+    }, {
+      "path": "authoredOn",
+      "_valueDateTime": {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Measurement Period"
+          }
+        } ]
+      }
+    } ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+    "mustSupport": [ "effective", "code" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+    } ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/BreastCancerScreeningFHIR.cql"
+  } ]
+}

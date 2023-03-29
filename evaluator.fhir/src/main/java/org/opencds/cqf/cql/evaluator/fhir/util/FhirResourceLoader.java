@@ -1,6 +1,8 @@
 package org.opencds.cqf.cql.evaluator.fhir.util;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +31,6 @@ public class FhirResourceLoader implements ResourceLoader {
       locations.addAll(getFilePaths(getDirectoryOrFileLocation(dir), recursive));
     });
 
-    System.out.println(locations);
     locations.forEach(item -> {
       IBaseResource resource = loadTestResources(item);
       resources.add(resource);
@@ -53,12 +54,12 @@ public class FhirResourceLoader implements ResourceLoader {
     return directoryLocationUrl;
   }
 
-  private List<String> getFilePaths(String directoryPath, Boolean recursive) {
-    List<String> filePaths = new ArrayList<String>();
+  private List<String> getFilePaths(String directoryPath, boolean recursive) {
+    var filePaths = new ArrayList<String>();
     File inputDir = new File(directoryPath);
-    ArrayList<File> files = inputDir.isDirectory()
-        ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles())
-            .<NoSuchElementException>orElseThrow(() -> new NoSuchElementException())))
+    var files = inputDir.isDirectory()
+        ? new ArrayList<File>(Arrays.asList(
+            Optional.ofNullable(inputDir.listFiles()).orElseThrow(NoSuchElementException::new)))
         : new ArrayList<File>();
 
     for (File file : files) {
@@ -74,8 +75,13 @@ public class FhirResourceLoader implements ResourceLoader {
     return filePaths;
   }
 
-  private String getCqlContent(String relativePath) {
-    return stringFromResource(getDirectoryOrFileLocation(relativePath));
+  private String getCqlContent(String rootPath, String relativePath) {
+    var p = Paths.get(rootPath).getParent().resolve(relativePath).normalize();
+    try {
+      return Files.readString(p);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private IBaseResource loadTestResources(String location) {
@@ -89,7 +95,7 @@ public class FhirResourceLoader implements ResourceLoader {
               org.opencds.cqf.cql.evaluator.fhir.util.dstu3.AttachmentUtil.getCqlLocation(resource);
           if (cqlLocation != null) {
             resource = org.opencds.cqf.cql.evaluator.fhir.util.dstu3.AttachmentUtil
-                .addData(resource, getCqlContent(cqlLocation));
+                .addData(resource, getCqlContent(location, cqlLocation));
           }
           break;
         case R4:
@@ -97,7 +103,7 @@ public class FhirResourceLoader implements ResourceLoader {
               org.opencds.cqf.cql.evaluator.fhir.util.r4.AttachmentUtil.getCqlLocation(resource);
           if (cqlLocation != null) {
             resource = org.opencds.cqf.cql.evaluator.fhir.util.r4.AttachmentUtil.addData(resource,
-                getCqlContent(cqlLocation));
+                getCqlContent(location, cqlLocation));
           }
           break;
         case R5:
@@ -105,7 +111,7 @@ public class FhirResourceLoader implements ResourceLoader {
               org.opencds.cqf.cql.evaluator.fhir.util.r5.AttachmentUtil.getCqlLocation(resource);
           if (cqlLocation != null) {
             resource = org.opencds.cqf.cql.evaluator.fhir.util.r5.AttachmentUtil.addData(resource,
-                getCqlContent(cqlLocation));
+                getCqlContent(location, cqlLocation));
           }
           break;
         default:

@@ -35,8 +35,14 @@ public class MeasureValidationUtils {
 
     assertTrue(population.isPresent(),
         String.format("Unable to locate a population with id \"%s\"", populationName));
-    assertEquals(population.get().getCount(), count,
-        String.format("expected count for population \"%s\" did not match", populationName));
+
+    validatePopulation(population.get(), count);
+  }
+
+  protected static void validatePopulation(
+      MeasureReport.MeasureReportGroupPopulationComponent population, int count) {
+    assertEquals(population.getCount(), count,
+        String.format("expected count for population \"%s\" did not match", population.getId()));
   }
 
   protected static void validateStratifier(

@@ -11,10 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
+import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
@@ -42,6 +44,29 @@ import ca.uhn.fhir.context.FhirContext;
 public class Contexts {
 
   private Contexts() {}
+
+  // TODO: Need to refactor this a bit more once I understand how this will be used - JP
+  public static Context forRepositoryAndSettings(EvaluationSettings settings, Repository repository,
+      VersionedIdentifier id) {
+    checkNotNull(settings);
+    checkNotNull(repository);
+    checkNotNull(id);
+
+    var terminologyProvider = new RepositoryTerminologyProvider(repository);
+    var sourceProviders = new ArrayList<LibrarySourceProvider>();
+    sourceProviders.add(buildLibrarySource(repository));
+    var libraryLoader = buildLibraryLoader(settings, sourceProviders);
+    var dataProviders = buildDataProviders(repository, null, terminologyProvider);
+
+    var context = new Context(libraryLoader.load(id));
+    context.registerLibraryLoader(libraryLoader);
+    context.registerTerminologyProvider(terminologyProvider);
+    for (var entry : dataProviders.entrySet()) {
+      context.registerDataProvider(entry.getKey(), entry.getValue());
+    }
+
+    return context;
+  }
 
   public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
       IBaseBundle additionalData) {

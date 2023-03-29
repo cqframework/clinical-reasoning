@@ -1,9 +1,12 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,23 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected BaseQuestionnaireResponseProcessor(Repository repository) {
     this.repository = repository;
     this.parser = this.repository.fhirContext().newJsonParser();
+  }
+
+  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
+      String errorMessage) {
+    if (obj == null)
+      return Optional.empty();
+    if (type.isInstance(obj)) {
+      return Optional.of(type.cast(obj));
+    }
+    throw new IllegalArgumentException(errorMessage);
+  }
+
+  public abstract T resolveQuestionnaireResponse(IIdType theId,
+      IBaseResource theQuestionnaireResponse);
+
+  public IBaseBundle extract(IIdType theId, IBaseResource theQuestionnaireResponse) {
+    return extract(resolveQuestionnaireResponse(theId, theQuestionnaireResponse));
   }
 
   public IBaseBundle extract(T questionnaireResponse) {

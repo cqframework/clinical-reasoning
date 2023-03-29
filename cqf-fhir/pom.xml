@@ -33,6 +33,12 @@
     <url>https://github.com/DBCG/cql-evaluator/tree/master</url>
   </scm>
 
+  <developers>
+    <developer>
+      <name>Jonathan Percival</name>
+    </developer>
+  </developers>
+
   <repositories>
     <repository>
       <id>oss-sonatype</id>

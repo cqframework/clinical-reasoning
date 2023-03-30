@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.annotations.Test;
 
-public class PlanDefinitionProcessorTests extends PlanDefinition {
+public class PlanDefinitionProcessorTests {
   private Repository createRepositoryForPath(String path) {
     var data = new FhirRepository(this.getClass(), List.of(path + "/tests"), false);
     var content = new FhirRepository(this.getClass(), List.of(path + "/content"), false);
@@ -52,10 +53,27 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
     var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
     var encounterID = "Encounter/helloworld-patient-1-encounter-1";
     var repository = createRepositoryForPath("anc-dak");
+    var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+        .withParameters(parameters)
         .apply().isEqualsTo("anc-dak/tests/CarePlan-ANCDT17.json");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+        .withParameters(parameters)
         .applyR5().isEqualsTo("anc-dak/tests/Bundle-ANCDT17.json");
+  }
+
+  @Test
+  public void testANCDT17WithElm() {
+    PlanDefinition.Assert.that(
+            "ANCDT17",
+            "Patient/5946f880-b197-400b-9caa-a3c661d23041",
+            "Encounter/ANCDT17-encounter"
+        )
+        .withData("anc-dak/data-bundle.json")
+        .withContent("anc-dak/content-bundle.json")
+        .withTerminology("anc-dak/terminology-bundle.json")
+        .apply()
+        .isEqualsTo("anc-dak/output-careplan.json");
   }
 
   @Test(enabled = false) // Need patient data to test this

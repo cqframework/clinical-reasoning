@@ -67,80 +67,80 @@ class ParametersTest {
             urlPart("r4UrlPart", "https://example.com"),
             uuidPart("r4UuidPart", "urn:uuid:c757873d-ec9a-4326-a141-556f43239520"));
 
-    Type r4Type = parameters.getParameter("r4Base64BinaryPart");
+    Type r4Type = parameters.getParameter("r4Base64BinaryPart").getValue();
     assertTrue(r4Type instanceof Base64BinaryType);
     assertEquals("SGVsbG8gV29ybGQh", ((Base64BinaryType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4BooleanPart");
+    r4Type = parameters.getParameter("r4BooleanPart").getValue();
     assertTrue(r4Type instanceof BooleanType);
     assertTrue(((BooleanType) r4Type).getValue());
 
-    r4Type = parameters.getParameter("r4CanonicalPart");
+    r4Type = parameters.getParameter("r4CanonicalPart").getValue();
     assertTrue(r4Type instanceof CanonicalType);
     assertEquals("https://example.com/Library/example-library",
         ((CanonicalType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4CodePart");
+    r4Type = parameters.getParameter("r4CodePart").getValue();
     assertTrue(r4Type instanceof CodeType);
     assertEquals("active", ((CodeType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4DatePart");
+    r4Type = parameters.getParameter("r4DatePart").getValue();
     assertTrue(r4Type instanceof DateType);
     assertEquals("2012-12-31", ((DateType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4DateTimePart");
+    r4Type = parameters.getParameter("r4DateTimePart").getValue();
     assertTrue(r4Type instanceof DateTimeType);
     assertEquals("2015-02-07T13:28:17-05:00", ((DateTimeType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4DecimalPart");
+    r4Type = parameters.getParameter("r4DecimalPart").getValue();
     assertTrue(r4Type instanceof DecimalType);
     assertEquals("72.42", ((DecimalType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4IdPart");
+    r4Type = parameters.getParameter("r4IdPart").getValue();
     assertTrue(r4Type instanceof IdType);
     assertEquals("example-id", ((IdType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4InstantPart");
+    r4Type = parameters.getParameter("r4InstantPart").getValue();
     assertTrue(r4Type instanceof InstantType);
     assertEquals("2015-02-07T13:28:17.239+02:00", ((InstantType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4IntegerPart");
+    r4Type = parameters.getParameter("r4IntegerPart").getValue();
     assertTrue(r4Type instanceof IntegerType);
     assertEquals((Integer) 72, ((IntegerType) r4Type).getValue());
 
-    r4Type = parameters.getParameter("r4MarkdownPart");
+    r4Type = parameters.getParameter("r4MarkdownPart").getValue();
     assertTrue(r4Type instanceof MarkdownType);
     assertEquals("## Markdown Title", ((MarkdownType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4OidPart");
+    r4Type = parameters.getParameter("r4OidPart").getValue();
     assertTrue(r4Type instanceof OidType);
     assertEquals("urn:oid:1.2.3.4.5", ((OidType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4PositiveIntPart");
+    r4Type = parameters.getParameter("r4PositiveIntPart").getValue();
     assertTrue(r4Type instanceof PositiveIntType);
     assertEquals((Integer) 1, ((PositiveIntType) r4Type).getValue());
 
-    r4Type = parameters.getParameter("r4StringPart");
+    r4Type = parameters.getParameter("r4StringPart").getValue();
     assertTrue(r4Type instanceof StringType);
     assertEquals("example string", ((StringType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4TimePart");
+    r4Type = parameters.getParameter("r4TimePart").getValue();
     assertTrue(r4Type instanceof TimeType);
     assertEquals("12:30:30.500", ((TimeType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4UnsignedIntPart");
+    r4Type = parameters.getParameter("r4UnsignedIntPart").getValue();
     assertTrue(r4Type instanceof UnsignedIntType);
     assertEquals((Integer) 0, ((UnsignedIntType) r4Type).getValue());
 
-    r4Type = parameters.getParameter("r4UriPart");
+    r4Type = parameters.getParameter("r4UriPart").getValue();
     assertTrue(r4Type instanceof UriType);
     assertEquals("s:comp.infosystems.www.servers.unix", ((UriType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4UrlPart");
+    r4Type = parameters.getParameter("r4UrlPart").getValue();
     assertTrue(r4Type instanceof UrlType);
     assertEquals("https://example.com", ((UrlType) r4Type).getValueAsString());
 
-    r4Type = parameters.getParameter("r4UuidPart");
+    r4Type = parameters.getParameter("r4UuidPart").getValue();
     assertTrue(r4Type instanceof UuidType);
     assertEquals("urn:uuid:c757873d-ec9a-4326-a141-556f43239520",
         ((UuidType) r4Type).getValueAsString());

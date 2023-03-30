@@ -2,10 +2,12 @@ package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 
 import java.util.List;
 
+import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.testng.annotations.Test;
@@ -93,5 +95,16 @@ public class QuestionnaireProcessorTests {
       TestQuestionnaire.Assert.that("content/Questionnaire-invalid-questionnaire.json", null)
           .populate();
     });
+  }
+
+  @Test
+  void testQuestionnairePackage() {
+    var generatedPackage = TestQuestionnaire.Assert
+        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", null)
+        .questionnairePackage();
+
+    assertEquals(generatedPackage.getEntry().size(), 3);
+    assertEquals(generatedPackage.getEntry().get(0).getResource().fhirType(),
+        FHIRAllTypes.QUESTIONNAIRE.toCode());
   }
 }

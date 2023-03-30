@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
@@ -44,6 +45,20 @@ public class QuestionnaireResponseProcessor
     super(repository);
   }
 
+  @Override
+  public QuestionnaireResponse resolveQuestionnaireResponse(IIdType theId,
+      IBaseResource theQuestionnaireResponse) {
+    var baseQuestionnaireResponse = theQuestionnaireResponse;
+    if (baseQuestionnaireResponse == null && theId != null) {
+      baseQuestionnaireResponse = this.repository.read(Questionnaire.class, theId);
+    }
+
+    return castOrThrow(baseQuestionnaireResponse, QuestionnaireResponse.class,
+        "The QuestionnaireResponse passed to repository was not a valid instance of QuestionnaireResponse.class")
+            .orElse(null);
+  }
+
+  @Override
   protected IBaseBundle createResourceBundle(QuestionnaireResponse questionnaireResponse,
       List<IBaseResource> resources) {
     var newBundle = new Bundle();
@@ -63,6 +78,7 @@ public class QuestionnaireResponseProcessor
     return newBundle;
   }
 
+  @Override
   public List<IBaseResource> processItems(QuestionnaireResponse questionnaireResponse) {
     var questionnaireCanonical = questionnaireResponse.getQuestionnaire();
     if (questionnaireCanonical == null || questionnaireCanonical.isEmpty()) {
@@ -98,7 +114,7 @@ public class QuestionnaireResponseProcessor
         .filter(child -> child.hasExtension(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))
         .collect(Collectors.toList());
     var groupSubject =
-        subjectItems.size() != 0 ? subjectItems.get(0).getAnswer().get(0).getValueReference()
+        !subjectItems.isEmpty() ? subjectItems.get(0).getAnswer().get(0).getValueReference()
             : subject.copy();
     var itemExtractionContext =
         item.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT);
@@ -187,7 +203,7 @@ public class QuestionnaireResponseProcessor
       if (nestedElements.size() == 1) {
         setProperty(newValue, pathElements[2], answerValue);
       } else {
-        processNestedItem((String[]) nestedElements.toArray(), newValue, answerValue);
+        processNestedItem(nestedElements.toArray(new String[0]), newValue, answerValue);
       }
       if (!hasExisting) {
         setProperty(base, nestedPropertyName, newValue);
@@ -230,10 +246,8 @@ public class QuestionnaireResponseProcessor
     if (item.hasAnswer()) {
       item.getAnswer().forEach(answer -> {
         if (answer.hasItem()) {
-          answer.getItem().forEach(answerItem -> {
-            processItem(answerItem, questionnaireResponse, questionnaireCodeMap, resources,
-                subject);
-          });
+          answer.getItem().forEach(answerItem -> processItem(answerItem, questionnaireResponse,
+              questionnaireCodeMap, resources, subject));
         } else {
           if (questionnaireCodeMap != null && !questionnaireCodeMap.isEmpty()
               && !questionnaireCodeMap.get(item.getLinkId()).isEmpty()) {
@@ -336,9 +350,7 @@ public class QuestionnaireResponseProcessor
   // header and will not have a specific code to be used with an answer"
   private Map<String, List<Coding>> createCodeMap(Questionnaire questionnaire) {
     var questionnaireCodeMap = new HashMap<String, List<Coding>>();
-    questionnaire.getItem().forEach(item -> {
-      processQuestionnaireItems(item, questionnaireCodeMap);
-    });
+    questionnaire.getItem().forEach(item -> processQuestionnaireItems(item, questionnaireCodeMap));
 
     return questionnaireCodeMap;
   }
@@ -346,9 +358,7 @@ public class QuestionnaireResponseProcessor
   private void processQuestionnaireItems(Questionnaire.QuestionnaireItemComponent item,
       Map<String, List<Coding>> questionnaireCodeMap) {
     if (item.hasItem()) {
-      item.getItem().forEach(qItem -> {
-        processQuestionnaireItems(qItem, questionnaireCodeMap);
-      });
+      item.getItem().forEach(qItem -> processQuestionnaireItems(qItem, questionnaireCodeMap));
     } else {
       questionnaireCodeMap.put(item.getLinkId(), item.getCode());
     }

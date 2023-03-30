@@ -146,6 +146,11 @@ public class TestQuestionnaire {
           (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire, patientId,
               parameters, bundle, libraryEngine));
     }
+
+    public Bundle questionnairePackage() {
+      buildRepository();
+      return buildProcessor(repository).packageQuestionnaire(questionnaire);
+    }
   }
 
   static class GeneratedQuestionnaire {

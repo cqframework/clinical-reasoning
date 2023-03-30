@@ -4,7 +4,7 @@
   "entry": [
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "RequestOrchestration",
         "id": "prepopulate",
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
@@ -682,8 +682,8 @@
         "id": "complete-questionnaire",
         "basedOn": [
           {
-            "reference": "RequestGroup/prepopulate",
-            "type": "RequestGroup"
+            "reference": "RequestOrchestration/prepopulate",
+            "type": "RequestOrchestration"
           }
         ],
         "status": "draft",

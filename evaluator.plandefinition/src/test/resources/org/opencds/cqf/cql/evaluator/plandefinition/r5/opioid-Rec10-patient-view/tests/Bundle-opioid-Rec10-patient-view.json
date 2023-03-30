@@ -5,7 +5,7 @@
   "entry": [
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "RequestOrchestration",
         "id": "opioidcds-10-patient-view",
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view"

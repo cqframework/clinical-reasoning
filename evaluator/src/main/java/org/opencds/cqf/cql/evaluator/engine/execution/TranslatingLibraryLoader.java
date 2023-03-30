@@ -22,9 +22,9 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
 import org.cqframework.cql.elm.execution.Library;
-import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.engine.exception.CqlException;
@@ -89,8 +89,17 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
       requireFunctionSignature = true;
     }
 
-    if (library != null && !requireFunctionSignature && this.translatorOptionsMatch(library)) {
+    if (library != null && !requireFunctionSignature
+        && Boolean.TRUE.equals(this.translatorOptionsMatch(library))) {
       return library;
+    }
+
+    // Need to ensure namespaces are preserved when recompiling
+    if (libraryIdentifier.getSystem() != null && !libraryIdentifier.getSystem().isEmpty()
+        && libraryManager.getNamespaceManager()
+            .getNamespaceInfoFromUri(libraryIdentifier.getSystem()) == null) {
+      libraryManager.getNamespaceManager().addNamespace(
+          new NamespaceInfo(libraryIdentifier.getId(), libraryIdentifier.getSystem()));
     }
 
     this.cqlTranslatorOptions.setEnableCqlOnly(true);
@@ -205,11 +214,11 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
         return false;
       }
 
-      FunctionSig func = (FunctionSig) other;
-
-      if (func == null) {
+      if (this.getClass() != other.getClass()) {
         return false;
       }
+
+      FunctionSig func = (FunctionSig) other;
 
       return this.name.equals(func.name) && this.numArguments == func.numArguments;
     }

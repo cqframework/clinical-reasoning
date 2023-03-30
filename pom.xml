@@ -15,12 +15,12 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cql.version>2.7.0-SNAPSHOT</cql.version>
-    <spring.version>5.3.19</spring.version>
-    <fhir-core.version>5.6.68</fhir-core.version>
-    <hapi.version>6.2.1</hapi.version>
+    <cql.version>2.7.0</cql.version>
+    <spring.version>5.3.23</spring.version>
+    <fhir-core.version>5.6.971</fhir-core.version>
+    <hapi.version>6.4.4</hapi.version>
     <picocli.version>4.6.1</picocli.version>
-    <slf4j.version>1.7.29</slf4j.version>
+    <slf4j.version>2.0.3</slf4j.version>
     <caffeine.version>2.9.0</caffeine.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <guava.version>31.0.1-jre</guava.version>
@@ -315,7 +315,7 @@
       <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
-        <version>7.4.0</version>
+        <version>7.7.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -520,7 +520,7 @@
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.6.7</version>
+          <version>1.6.13</version>
           <extensions>true</extensions>
           <configuration>
             <serverId>ossrh</serverId>

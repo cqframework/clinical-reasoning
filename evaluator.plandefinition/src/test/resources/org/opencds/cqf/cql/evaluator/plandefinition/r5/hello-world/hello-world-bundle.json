@@ -4,7 +4,7 @@
   "entry": [
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "RequestOrchestration",
         "id": "hello-world-patient-view",
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"

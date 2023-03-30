@@ -1,7 +1,9 @@
 {
   "cSpell.words": [
     "activitydefinition",
+    "aggregatable",
     "argfile",
+    "careplan",
     "cdshooks",
     "clinicalreasoning",
     "Codeable",
@@ -12,11 +14,15 @@
     "debuggable",
     "DENOMINATOREXCEPTION",
     "DENOMINATOREXCLUSION",
+    "DEPENDSON",
+    "DERIVEDFROM",
     "dstu",
     "Fhir",
     "fhirpath",
     "Gson",
+    "helloworld",
     "INITIALPOPULATION",
+    "INPROGRESS",
     "Javadoc",
     "JXSON",
     "MEASUREOBSERVATION",
@@ -32,6 +38,7 @@
     "numer",
     "NUMERATOREXCLUSION",
     "opencds",
+    "opioidcds",
     "PATIENTLIST",
     "plandefinition",
     "ppca",
@@ -141,5 +148,6 @@
     "MD007": {
       "indent": 4
     }
-  }
+  },
+  "java.debug.settings.onBuildFailureProceed": true
 }

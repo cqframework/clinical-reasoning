@@ -17,6 +17,11 @@ public class LoggerAdapter implements IWorkerContext.ILoggingService {
 
   @Override
   public void logDebugMessage(LogCategory logCategory, String s) {
-    innerLogger.debug(String.format("%s: %s", logCategory.toString(), s));
+    innerLogger.debug("{}: {}", logCategory, s);
+  }
+
+  @Override
+  public boolean isDebugLogging() {
+    return this.innerLogger.isDebugEnabled();
   }
 }

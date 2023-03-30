@@ -1,7 +1,9 @@
 {
   "cSpell.words": [
     "activitydefinition",
+    "aggregatable",
     "argfile",
+    "careplan",
     "cdshooks",
     "clinicalreasoning",
     "Codeable",
@@ -18,6 +20,7 @@
     "Fhir",
     "fhirpath",
     "Gson",
+    "helloworld",
     "INITIALPOPULATION",
     "INPROGRESS",
     "Javadoc",
@@ -35,6 +38,7 @@
     "numer",
     "NUMERATOREXCLUSION",
     "opencds",
+    "opioidcds",
     "PATIENTLIST",
     "plandefinition",
     "ppca",

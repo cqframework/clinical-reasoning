@@ -75,7 +75,7 @@ public class LibraryVersionSelector {
       return -1;
     }
 
-    if (version1 == null && version2 != null) {
+    if (version1 == null) {
       return 1;
     }
 

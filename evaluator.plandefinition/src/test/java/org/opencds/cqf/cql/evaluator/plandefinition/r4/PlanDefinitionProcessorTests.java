@@ -62,6 +62,20 @@ public class PlanDefinitionProcessorTests {
         .applyR5().isEqualsTo("anc-dak/tests/Bundle-ANCDT17.json");
   }
 
+  @Test
+  public void testANCDT17WithElm() {
+    PlanDefinition.Assert.that(
+            "ANCDT17",
+            "Patient/5946f880-b197-400b-9caa-a3c661d23041",
+            "Encounter/ANCDT17-encounter"
+        )
+        .withData("anc-dak/data-bundle.json")
+        .withContent("anc-dak/content-bundle.json")
+        .withTerminology("anc-dak/terminology-bundle.json")
+        .apply()
+        .isEqualsTo("anc-dak/output-careplan.json");
+  }
+
   @Test(enabled = false) // Need patient data to test this
   public void testECRWithFhirPath() {
     var planDefinitionID = "us-ecr-specification";

@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -44,7 +45,6 @@ import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
  */
 public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoader {
 
-  protected NamespaceInfo namespaceInfo;
   protected CqlTranslatorOptions cqlTranslatorOptions;
   protected List<LibrarySourceProvider> librarySourceProviders;
 
@@ -81,29 +81,45 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   public Library load(VersionedIdentifier libraryIdentifier) {
     Library library = this.getLibraryFromElm(libraryIdentifier);
 
-    boolean requireFunctionSignature = false;
-
-    if (hasOverloadedFunctions(library) &&
-        !overloadSafeSignatureLevels.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
-      this.cqlTranslatorOptions.setSignatureLevel(SignatureLevel.Overloads);
-      requireFunctionSignature = true;
-    }
-
-    if (library != null && !requireFunctionSignature
-        && Boolean.TRUE.equals(this.translatorOptionsMatch(library))) {
+    if (cqlTranslatorOptions.getEnableCqlOnly()) {
+      ensureNamespaceUpdate(libraryIdentifier);
+      return this.translate(libraryIdentifier);
+    } else if (checkBinaryCompatibility(library)) {
       return library;
+    } else {
+      ensureNamespaceUpdate(libraryIdentifier);
+      this.cqlTranslatorOptions.setEnableCqlOnly(true);
+      return this.translate(libraryIdentifier);
     }
+  }
 
+  private void ensureNamespaceUpdate(VersionedIdentifier libraryIdentifier) {
     // Need to ensure namespaces are preserved when recompiling
     if (libraryIdentifier.getSystem() != null && !libraryIdentifier.getSystem().isEmpty()
         && libraryManager.getNamespaceManager()
-            .getNamespaceInfoFromUri(libraryIdentifier.getSystem()) == null) {
+        .getNamespaceInfoFromUri(libraryIdentifier.getSystem()) == null) {
       libraryManager.getNamespaceManager().addNamespace(
           new NamespaceInfo(libraryIdentifier.getId(), libraryIdentifier.getSystem()));
     }
+  }
 
-    this.cqlTranslatorOptions.setEnableCqlOnly(true);
-    return this.translate(libraryIdentifier);
+  private boolean checkBinaryCompatibility(Library library) {
+    boolean compatible = true;
+
+    compatible = compatible && isVersionCompatible(library);
+    compatible = compatible && Boolean.TRUE.equals(this.translatorOptionsMatch(library));
+    compatible =compatible && isCompatibleBasedOnSignature(library);
+
+    return compatible;
+  }
+
+  private boolean isCompatibleBasedOnSignature(Library library) {
+    if (hasOverloadedFunctions(library) &&
+        !overloadSafeSignatureLevels.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
+      this.cqlTranslatorOptions.setSignatureLevel(SignatureLevel.Overloads);
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -177,6 +193,19 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
       throw new CqlException(
           String.format("Mapping of library %s failed", libraryIdentifier.getId()), e);
     }
+  }
+
+  private boolean isVersionCompatible(Library library) {
+    if (!StringUtils.isEmpty(cqlTranslatorOptions.getCompatibilityLevel())) {
+      if (library.getAnnotation() != null) {
+        String version = TranslatorOptionsUtil.getTranslationVersion(library);
+        if (version != null) {
+          return version.equals(cqlTranslatorOptions.getCompatibilityLevel());
+        }
+      }
+    }
+
+    return false;
   }
 
   private boolean hasOverloadedFunctions(Library library) {

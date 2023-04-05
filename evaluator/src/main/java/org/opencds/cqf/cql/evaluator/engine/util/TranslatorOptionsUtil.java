@@ -83,4 +83,33 @@ public class TranslatorOptionsUtil {
 
     return optionSet;
   }
+
+  /**
+   * Gets the translator version used to generate an elm Library.
+   *
+   * Returns null if the translator version could not be determined. (for example, the Library was
+   * translated without annotations)
+   *
+   * @param library The library to extracts the translator version from.
+   * @return The version of translator used to translate the library.
+   */
+  public static String getTranslationVersion(Library library) {
+    requireNonNull(library, "library can not be null");
+    if (library.getAnnotation() == null || library.getAnnotation().isEmpty()) {
+      return null;
+    }
+
+    return getTranslatorVersion(library.getAnnotation());
+  }
+
+  private static String getTranslatorVersion(List<CqlToElmBase> annotations) {
+    for (CqlToElmBase o : annotations) {
+      if (o instanceof CqlToElmInfo) {
+        CqlToElmInfo c = (CqlToElmInfo) o;
+        return c.getTranslatorVersion();
+      }
+    }
+
+    return null;
+  }
 }

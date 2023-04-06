@@ -83,15 +83,26 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return questionnaire;
   }
 
+  private Expression getExpression(QuestionnaireItemComponent item) {
+    if (item.hasExtension(Constants.CQF_EXPRESSION)) {
+      return (Expression) item.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
+    } else if (item.hasExtension(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION)) {
+      return (Expression) item.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION)
+          .getValue();
+    }
+
+    return null;
+  }
+
   protected void processItems(List<QuestionnaireItemComponent> items, String defaultLibrary,
       OperationOutcome oc) {
     items.forEach(item -> {
       if (item.hasItem()) {
         processItems(item.getItem(), defaultLibrary, oc);
       } else {
-        if (item.hasExtension(Constants.CQF_EXPRESSION)) {
+        var expression = getExpression(item);
+        if (expression != null) {
           // evaluate expression and set the result as the initialAnswer on the item
-          var expression = (Expression) item.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
           var libraryUrl = expression.hasReference() ? expression.getReference() : defaultLibrary;
           try {
             var result = this.libraryEngine.getExpressionResult(this.patientId, "Patient",

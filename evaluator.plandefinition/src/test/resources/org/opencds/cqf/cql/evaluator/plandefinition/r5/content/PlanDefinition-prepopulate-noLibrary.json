@@ -67,7 +67,7 @@
             },
             {
               "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
-              "valueCanonical": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary"
+              "valueCanonical": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary"
             }
           ]
         }

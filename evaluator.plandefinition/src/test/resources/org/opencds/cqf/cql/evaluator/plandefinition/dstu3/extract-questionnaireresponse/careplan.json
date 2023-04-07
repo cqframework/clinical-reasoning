@@ -29,7 +29,7 @@
       "resourceType": "QuestionnaireResponse",
       "id": "1903",
       "questionnaire": {
-        "reference": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+        "reference": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
       },
       "status": "completed",
       "subject": {
@@ -195,7 +195,7 @@
           }
         }
       ],
-      "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+      "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
       "name": "OutpatientPriorAuthorizationRequest",
       "title": "Outpatient Prior Authorization Request",
       "status": "active",

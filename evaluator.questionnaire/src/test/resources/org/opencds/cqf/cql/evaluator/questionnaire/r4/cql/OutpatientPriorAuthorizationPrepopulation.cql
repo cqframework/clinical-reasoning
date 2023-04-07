@@ -82,6 +82,9 @@ define BeneficiaryName:
 define "BeneficiaryFirstName":
   BeneficiaryName.given[0].value
 
+define "BeneficiaryFirstNames":
+  BeneficiaryName.given
+
 define "BeneficiaryLastName":
   BeneficiaryName.family.value
 

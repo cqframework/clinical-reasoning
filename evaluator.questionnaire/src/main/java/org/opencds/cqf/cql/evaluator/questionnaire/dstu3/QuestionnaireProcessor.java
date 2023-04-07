@@ -87,31 +87,54 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return questionnaire;
   }
 
+  private boolean verifyLibraryUrlForItemExpression(String url, String expression,
+      String itemLinkId, OperationOutcome oc) {
+    if (url == null || url.isEmpty()) {
+      var message =
+          String.format("No library specified for expression (%s) for item (%s)",
+              expression, itemLinkId);
+      logger.error(message);
+      oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+          .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+      return false;
+    }
+    return true;
+  }
+
+  private void getInitial(QuestionnaireItemComponent item, String defaultLibrary,
+      OperationOutcome oc) {
+    if (item.hasExtension(Constants.CQF_EXPRESSION)) {
+      // evaluate expression and set the result as the initialAnswer on the item
+      var expressionExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION);
+      var expression = expressionExtension.getValue().toString();
+      var languageExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION_LANGUAGE);
+      var language = languageExtension.getValue().toString();
+      if (verifyLibraryUrlForItemExpression(defaultLibrary, expression, item.getLinkId(), oc)) {
+        try {
+          var results = this.libraryEngine.getExpressionResult(this.patientId, "Patient",
+              expression, language, defaultLibrary, this.parameters, this.bundle);
+          for (var result : results) {
+            item.setInitial((Type) result);
+          }
+        } catch (Exception ex) {
+          var message =
+              String.format("Error encountered evaluating expression (%s) for item (%s): %s",
+                  expression, item.getLinkId(), ex.getMessage());
+          logger.error(message);
+          oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+              .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+        }
+      }
+    }
+  }
+
   protected void processItems(List<QuestionnaireItemComponent> items, String defaultLibrary,
       OperationOutcome oc) {
     items.forEach(item -> {
       if (item.hasItem()) {
         processItems(item.getItem(), defaultLibrary, oc);
       } else {
-        if (item.hasExtension(Constants.CQF_EXPRESSION)) {
-          // evaluate expression and set the result as the initialAnswer on the item
-          var expressionExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION);
-          var expression = expressionExtension.getValue().toString();
-          var languageExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION_LANGUAGE);
-          var language = languageExtension.getValue().toString();
-          try {
-            var result = this.libraryEngine.getExpressionResult(this.patientId, "Patient",
-                expression, language, defaultLibrary, this.parameters, this.bundle);
-            item.setInitial((Type) result);
-          } catch (Exception ex) {
-            var message =
-                String.format("Error encountered evaluating expression (%s) for item (%s): %s",
-                    expression, item.getLinkId(), ex.getMessage());
-            logger.error(message);
-            oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-          }
-        }
+        getInitial(item, defaultLibrary, oc);
       }
     });
   }
@@ -136,6 +159,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             .setValue(new Reference("#" + oc.getIdPart()));
       }
     }
+    // response.addContained(populatedQuestionnaire);
     response.setQuestionnaire(new Reference(populatedQuestionnaire));
     response.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
     response.setSubject(new Reference(new IdType("Patient", patientId)));

@@ -179,15 +179,18 @@ public class QuestionnaireItemGenerator {
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
           var expression =
               (Expression) element.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
-          var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
+          var results = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
               expression.getExpression(), expression.getLanguage(), expression.getReference(),
               parameters, this.bundle);
-          childItem.addInitial().setValue((DataType) result);
+          for (var result : results) {
+            childItem.addInitial().setValue((DataType) result);
+          }
         }
         childItem.setRequired(element.hasMin() && element.getMin() == 1);
         // set readonly based on?
-        // set repeat based on?
-        // set enableWhen based on?
+        // set repeat based on? if expression result type is a list?
+        // set enableWhen based on? use
+        // http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression
         item.addItem(childItem);
         paths.add(element.getPath());
       } catch (Exception ex) {

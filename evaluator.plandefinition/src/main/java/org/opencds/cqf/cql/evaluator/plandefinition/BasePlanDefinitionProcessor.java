@@ -208,6 +208,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
       result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, altExpression,
           altLanguage, libraryUrl, params, this.bundle);
     }
+    if (result != null && result.size() > 1) {
+      throw new IllegalArgumentException(String.format(
+          "Dynamic value resolution received multiple values for expression: %s", expression));
+    }
     if (path.startsWith("action.")) {
       resolveCdsHooksDynamicValue(resource, result, path);
     }
@@ -234,7 +238,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
       result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, altExpression,
           altLanguage, libraryUrl, params, this.bundle);
     }
+    if (result != null && result.size() > 1) {
+      throw new IllegalArgumentException(String.format(
+          "Dynamic value resolution received multiple values for expression: %s", expression));
+    }
 
-    return result;
+    return result == null || result.isEmpty() ? null : result.get(0);
   }
 }

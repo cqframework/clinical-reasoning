@@ -35,6 +35,8 @@ public class Constants {
   public static final String CQF_EXPRESSION_LANGUAGE =
       "http://hl7.org/fhir/StructureDefinition/cqf-expression-language";
   public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
+  public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
+      "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-response";
   public static final String EXT_CRMI_MESSAGES =
       "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages";
   public static final String SDC_QUESTIONNAIRE_HIDDEN =
@@ -47,6 +49,8 @@ public class Constants {
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse-isSubject";
   public static final String SDC_QUESTIONNAIRE_INITIAL_EXPRESSION =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression";
+  public static final String SDC_QUESTIONNAIRE_CANDIDATE_EXPRESSION =
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-candidateExpression";
   public static final String SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire";
   public static final String SDC_QUESTIONNAIRE_PREPOPULATE =

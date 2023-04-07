@@ -1,6 +1,6 @@
 {
   "resourceType": "Questionnaire",
-  "id": "OutpatientPriorAuthorizationRequest",
+  "id": "OutpatientPriorAuthorizationRequest-OPA-Patient1",
   "meta": {
     "versionId": "2",
     "lastUpdated": "2022-11-21T17:34:01.764+00:00",
@@ -15,7 +15,7 @@
       "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
     }
   ],
-  "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+  "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
   "name": "OutpatientPriorAuthorizationRequest",
   "title": "Outpatient Prior Authorization Request",
   "status": "active",

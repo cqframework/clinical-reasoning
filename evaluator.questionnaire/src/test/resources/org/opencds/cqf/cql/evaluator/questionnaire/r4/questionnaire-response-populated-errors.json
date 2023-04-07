@@ -1,10 +1,10 @@
 {
   "resourceType": "QuestionnaireResponse",
-  "id": "OutpatientPriorAuthorizationRequest-Errors-response",
+  "id": "OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1-response",
   "contained": [
     {
       "resourceType": "OperationOutcome",
-      "id": "populate-outcome-OutpatientPriorAuthorizationRequest-Errors",
+      "id": "populate-outcome-OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1",
       "issue": [
         {
           "severity": "error",
@@ -28,11 +28,11 @@
     {
       "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
       "valueReference": {
-        "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-Errors"
+        "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1"
       }
     }
   ],
-  "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
+  "questionnaire": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
   "status": "in-progress",
   "subject": {
     "reference": "Patient/OPA-Patient1"

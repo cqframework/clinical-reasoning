@@ -19,7 +19,7 @@
       "valueCanonical": "http://hl7.org/fhir/us/davinci-dtr/Library/BasicPatientInfo-prepopulation"
     }
   ],
-  "url": "http://mcg.com/fhir/Questionnaire/definition",
+  "url": "http://hl7.org/fhir/Questionnaire/definition",
   "name": "OutpatientPriorAuthorizationRequest",
   "title": "Outpatient Prior Authorization Request",
   "status": "active",

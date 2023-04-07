@@ -10,9 +10,19 @@ import java.util.List;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.fhir.api.Repository;
 import org.testng.annotations.Test;
 
 public class QuestionnaireProcessorTests {
+  private Repository createRepositoryForPath(String path) {
+    var data = new FhirRepository(this.getClass(), List.of(path + "/tests"), false);
+    var content = new FhirRepository(this.getClass(), List.of(path + "/content"), false);
+    var terminology =
+        new FhirRepository(this.getClass(), List.of(path + "/vocabulary/ValueSet"), false);
+
+    return Repositories.proxy(data, content, terminology);
+  }
+
   @Test
   void testPrePopulate() {
     TestQuestionnaire.Assert
@@ -106,5 +116,22 @@ public class QuestionnaireProcessorTests {
     assertEquals(generatedPackage.getEntry().size(), 3);
     assertEquals(generatedPackage.getEntry().get(0).getResource().fhirType(),
         FHIRAllTypes.QUESTIONNAIRE.toCode());
+  }
+
+
+  @Test
+  void testPA_ASPL_PrePopulate() {
+    var repository = createRepositoryForPath("pa-aslp");
+    TestQuestionnaire.Assert.that("pa-aslp/content/Questionnaire-ASLPA1.json", "positive")
+        .withRepository(repository)
+        .prePopulate().isEqualsTo("pa-aslp/tests/Questionnaire-ASLPA1-positive.json");
+  }
+
+  @Test
+  void testPA_ASPL_Populate() {
+    var repository = createRepositoryForPath("pa-aslp");
+    TestQuestionnaire.Assert.that("pa-aslp/content/Questionnaire-ASLPA1.json", "positive")
+        .withRepository(repository)
+        .populate().isEqualsTo("pa-aslp/tests/QuestionnaireResponse-ASLPA1.json");
   }
 }

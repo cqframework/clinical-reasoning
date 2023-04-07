@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.IdType;
@@ -67,6 +68,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     this.bundle = bundle;
     this.libraryEngine = libraryEngine;
 
+    questionnaire.setId(questionnaire.getIdPart() + "-" + patientId);
+
     var libraryUrl =
         ((CanonicalType) questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY).getValue())
             .getValue();
@@ -83,7 +86,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return questionnaire;
   }
 
-  private Expression getExpression(QuestionnaireItemComponent item) {
+  private Expression getInitialExpression(QuestionnaireItemComponent item) {
     if (item.hasExtension(Constants.CQF_EXPRESSION)) {
       return (Expression) item.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
     } else if (item.hasExtension(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION)) {
@@ -94,33 +97,70 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return null;
   }
 
+  private boolean verifyLibraryUrlForItemExpression(String url, String expression,
+      String itemLinkId, OperationOutcome oc) {
+    if (url == null || url.isEmpty()) {
+      var message =
+          String.format("No library specified for expression (%s) for item (%s)",
+              expression, itemLinkId);
+      logger.error(message);
+      oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+          .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+      return false;
+    }
+    return true;
+  }
+
+  private void getInitial(QuestionnaireItemComponent item, String defaultLibrary,
+      OperationOutcome oc) {
+    var initialExpression = getInitialExpression(item);
+    if (initialExpression != null) {
+      // evaluate expression and set the result as the initialAnswer on the item
+      var libraryUrl =
+          initialExpression.hasReference() ? initialExpression.getReference() : defaultLibrary;
+      if (verifyLibraryUrlForItemExpression(libraryUrl, initialExpression.getExpression(),
+          item.getLinkId(), oc)) {
+        try {
+          var results = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
+              initialExpression.getExpression(), initialExpression.getLanguage(), libraryUrl,
+              this.parameters,
+              this.bundle);
+
+          // TODO: what to do with choice answerOptions of type valueCoding with an
+          // expression that returns a valueString
+
+          if (results != null && !results.isEmpty()) {
+            // TODO: Add attestation extension for CQL Device
+            // item.addExtension
+            for (var result : results) {
+              var value = ((Type) result).hasType("CodeableConcept")
+                  ? ((CodeableConcept) result).getCodingFirstRep()
+                  : (Type) result;
+              item.addInitial(
+                  new Questionnaire.QuestionnaireItemInitialComponent()
+                      .setValue(value));
+
+            }
+          }
+        } catch (Exception ex) {
+          var message =
+              String.format("Error encountered evaluating expression (%s) for item (%s): %s",
+                  initialExpression.getExpression(), item.getLinkId(), ex.getMessage());
+          logger.error(message);
+          oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+              .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+        }
+      }
+    }
+  }
+
   protected void processItems(List<QuestionnaireItemComponent> items, String defaultLibrary,
       OperationOutcome oc) {
     items.forEach(item -> {
       if (item.hasItem()) {
         processItems(item.getItem(), defaultLibrary, oc);
       } else {
-        var expression = getExpression(item);
-        if (expression != null) {
-          // evaluate expression and set the result as the initialAnswer on the item
-          var libraryUrl = expression.hasReference() ? expression.getReference() : defaultLibrary;
-          try {
-            var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
-                expression.getExpression(), expression.getLanguage(), libraryUrl, this.parameters,
-                this.bundle);
-            // TODO: what to do with choice answerOptions of type valueCoding with an
-            // expression that returns a valueString
-            item.addInitial(
-                new Questionnaire.QuestionnaireItemInitialComponent().setValue((Type) result));
-          } catch (Exception ex) {
-            var message =
-                String.format("Error encountered evaluating expression (%s) for item (%s): %s",
-                    expression.getExpression(), item.getLinkId(), ex.getMessage());
-            logger.error(message);
-            oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-          }
-        }
+        getInitial(item, defaultLibrary, oc);
       }
     });
   }
@@ -144,7 +184,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         response.addExtension(Constants.EXT_CRMI_MESSAGES, new Reference("#" + oc.getIdPart()));
       }
     }
-    response.setQuestionnaire(populatedQuestionnaire.getUrl());
+    // response.addContained(populatedQuestionnaire);
+    // response.addExtension(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE,
+    // new Reference("#" + populatedQuestionnaire.getIdPart()));
+    response.setQuestionnaire(questionnaire.getUrl());
     response.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
     response.setSubject(new Reference(new IdType("Patient", patientId)));
     var responseItems = new ArrayList<QuestionnaireResponseItemComponent>();
@@ -157,21 +200,29 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   protected void processResponseItems(List<QuestionnaireItemComponent> items,
       List<QuestionnaireResponseItemComponent> responseItems) {
     items.forEach(item -> {
-      var responseItem =
-          new QuestionnaireResponse.QuestionnaireResponseItemComponent(item.getLinkIdElement());
-      responseItem.setDefinition(item.getDefinition());
-      responseItem.setTextElement(item.getTextElement());
-      if (item.hasItem()) {
-        var nestedResponseItems = new ArrayList<QuestionnaireResponseItemComponent>();
-        processResponseItems(item.getItem(), nestedResponseItems);
-        responseItem.setItem(nestedResponseItems);
-      } else if (item.hasInitial()) {
-        item.getInitial()
-            .forEach(answer -> responseItem
-                .addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-                    .setValue(answer.getValue())));
+      if (item.getRepeats()) {
+
+      } else {
+        var responseItem =
+            new QuestionnaireResponse.QuestionnaireResponseItemComponent(item.getLinkIdElement());
+        responseItem.setDefinition(item.getDefinition());
+        responseItem.setTextElement(item.getTextElement());
+        if (item.hasItem()) {
+          var nestedResponseItems = new ArrayList<QuestionnaireResponseItemComponent>();
+          processResponseItems(item.getItem(), nestedResponseItems);
+          responseItem.setItem(nestedResponseItems);
+        } else if (item.hasInitial()) {
+          if (item.hasRepeats() && item.getRepeats()) {
+
+          } else {
+            item.getInitial()
+                .forEach(answer -> responseItem
+                    .addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                        .setValue(answer.getValue())));
+          }
+        }
+        responseItems.add(responseItem);
       }
-      responseItems.add(responseItem);
     });
   }
 

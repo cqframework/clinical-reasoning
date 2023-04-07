@@ -97,11 +97,11 @@ public class LibraryEngine {
         buildContextParameter(patientId), parameters, expressions);
   }
 
-  public IBase getExpressionResult(String patientId, String subjectType, String expression,
+  public List<IBase> getExpressionResult(String patientId, String subjectType, String expression,
       String language, String libraryToBeEvaluated, IBaseParameters parameters,
       IBaseBundle bundle) {
     validateExpression(language, expression, libraryToBeEvaluated);
-    IBase result = null;
+    List<IBase> results = null;
     IBaseParameters parametersResult;
     switch (language) {
       case "text/cql":
@@ -111,8 +111,8 @@ public class LibraryEngine {
         // The expression is assumed to be the parameter component name
         // The expression evaluator creates a library with a single expression defined as "return"
         expression = "return";
-        result = (IBase) resolveParameterValue(ParametersUtil
-            .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
+        results = resolveParameterValues(ParametersUtil
+            .getNamedParameters(fhirContext, parametersResult, expression));
         break;
       case "text/cql-identifier":
       case "text/cql.identifier":
@@ -120,8 +120,8 @@ public class LibraryEngine {
       case "text/cql-name":
         parametersResult = this.evaluate(libraryToBeEvaluated, patientId, parameters, bundle,
             Collections.singleton(expression));
-        result = (IBase) resolveParameterValue(ParametersUtil
-            .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
+        results = resolveParameterValues(ParametersUtil
+            .getNamedParameters(fhirContext, parametersResult, expression));
         break;
       case "text/fhirpath":
         List<IBase> outputs;
@@ -131,7 +131,7 @@ public class LibraryEngine {
           throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
         }
         if (outputs != null && outputs.size() == 1) {
-          result = outputs.get(0);
+          results = Collections.singletonList(outputs.get(0));
         } else {
           throw new IllegalArgumentException(
               "Expected only one value when evaluating FHIRPath expression: " + expression);
@@ -141,7 +141,7 @@ public class LibraryEngine {
         logger.warn("An action language other than CQL was found: {}", language);
     }
 
-    return result;
+    return results;
   }
 
   public void validateExpression(String language, String expression, String libraryUrl) {
@@ -157,22 +157,31 @@ public class LibraryEngine {
     }
   }
 
-  public Object resolveParameterValue(IBase value) {
-    if (value == null) {
+  public List<IBase> resolveParameterValues(List<IBase> values) {
+    if (values == null || values.isEmpty()) {
       return null;
     }
+
+    List<IBase> returnValues = new ArrayList<>();
     switch (fhirContext.getVersion().getVersion()) {
       case DSTU3:
-        return ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) value)
-            .getValue();
+        values.forEach(v -> returnValues.add(
+            ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) v).getValue()));
+        break;
       case R4:
-        return ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) value).getValue();
+        values.forEach(v -> returnValues.add(
+            ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) v).getValue()));
+        break;
       case R5:
-        return ((org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent) value).getValue();
+        values.forEach(v -> returnValues.add(
+            ((org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent) v).getValue()));
+        break;
       default:
         throw new IllegalArgumentException(
             String.format("unsupported FHIR version: %s", fhirContext));
     }
+
+    return returnValues;
   }
 
   protected IBaseResource getSubject(String subjectId, String subjectType) {

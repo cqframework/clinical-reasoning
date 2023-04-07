@@ -127,7 +127,7 @@
       }
     }
   ],
-  "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
+  "questionnaire": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
   "status": "in-progress",
   "subject": {
     "reference": "Patient/OPA-Patient1"

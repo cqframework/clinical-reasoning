@@ -193,7 +193,7 @@
             }
           }
         ],
-        "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary",
+        "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary",
         "name": "OutpatientPriorAuthorizationRequest",
         "title": "Outpatient Prior Authorization Request",
         "status": "active",

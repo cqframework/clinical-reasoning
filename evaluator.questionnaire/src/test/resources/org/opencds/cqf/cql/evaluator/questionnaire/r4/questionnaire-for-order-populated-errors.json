@@ -1,6 +1,6 @@
 {
   "resourceType": "Questionnaire",
-  "id": "OutpatientPriorAuthorizationRequest-Errors",
+  "id": "OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1",
   "meta": {
     "versionId": "2",
     "lastUpdated": "2022-11-21T17:34:01.764+00:00",
@@ -12,7 +12,7 @@
   "contained": [
     {
       "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors",
+      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1",
       "issue": [
         {
           "severity": "error",
@@ -40,11 +40,11 @@
     {
       "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
       "valueReference": {
-        "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors"
+        "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1"
       }
     }
   ],
-  "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
+  "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
   "name": "OutpatientPriorAuthorizationRequest",
   "title": "Outpatient Prior Authorization Request",
   "status": "active",

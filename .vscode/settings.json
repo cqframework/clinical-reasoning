@@ -17,6 +17,7 @@
     "DEPENDSON",
     "DERIVEDFROM",
     "dstu",
+    "Eithers",
     "Fhir",
     "fhirpath",
     "Gson",

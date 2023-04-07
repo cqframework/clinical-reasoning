@@ -4,7 +4,6 @@ import static org.testng.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
@@ -213,7 +212,7 @@ public class Measure {
       return this.generatedReport;
     }
 
-    public SelectedGroup hasScore(BigDecimal score) {
+    public SelectedGroup hasScore(String score) {
       MeasureValidationUtils.validateGroupScore(this.group, score);
       return this;
     }

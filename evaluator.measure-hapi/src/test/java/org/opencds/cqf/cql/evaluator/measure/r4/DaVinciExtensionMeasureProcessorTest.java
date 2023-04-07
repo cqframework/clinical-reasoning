@@ -1,7 +1,5 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import java.math.BigDecimal;
-
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.testng.annotations.Test;
 
@@ -21,9 +19,9 @@ public class DaVinciExtensionMeasureProcessorTest extends BaseMeasureProcessorTe
 
     // Then
     Measure.Assert.that("BreastCancerScreeningFHIR", "2019-01-01", "2019-12-31")
-        .repository(this.repository).subject("Patient/numer-EXM125").reportType("subject")
-        .evaluate()
-        .firstGroup().hasScore(new BigDecimal("1.0"))
+        .repository(this.repository).subject("Patient/numer-EXM125")
+        .reportType("subject").evaluate()
+        .firstGroup().hasScore("1.0")
         .population("numerator").hasCount(1).up()
         .population("denominator").hasCount(1).up().up()
         .passes(this::exm125_numerator_validation);

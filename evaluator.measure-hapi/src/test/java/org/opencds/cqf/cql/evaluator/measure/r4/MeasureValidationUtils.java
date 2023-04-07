@@ -21,6 +21,11 @@ import org.hl7.fhir.r4.model.ResourceType;
 public class MeasureValidationUtils {
 
   protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group,
+      String score) {
+    validateGroupScore(group, new BigDecimal(score));
+  }
+
+  protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group,
       BigDecimal score) {
     assertTrue(group.hasMeasureScore(),
         String.format("group \"%s\" does not have a score", group.getId()));

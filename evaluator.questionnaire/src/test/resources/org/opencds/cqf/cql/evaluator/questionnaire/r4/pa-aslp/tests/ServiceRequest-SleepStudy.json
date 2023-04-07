@@ -1,12 +1,12 @@
 {
     "resourceType": "ServiceRequest",
+    "id": "SleepStudy",
     "meta": {
         "profile": [
             "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
             "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-servicerequest"
         ]
     },
-    "id": "SleepStudy",
     "status": "draft",
     "intent": "order",
     "code": {

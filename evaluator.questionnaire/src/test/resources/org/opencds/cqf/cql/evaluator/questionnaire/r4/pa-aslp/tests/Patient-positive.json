@@ -3,7 +3,8 @@
   "id": "positive",
   "meta": {
     "profile": [
-      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+      "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-patient",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
     ]
   },
   "extension": [

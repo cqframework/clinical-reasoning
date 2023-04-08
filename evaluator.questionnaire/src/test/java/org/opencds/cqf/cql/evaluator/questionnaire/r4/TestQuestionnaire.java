@@ -149,7 +149,8 @@ public class TestQuestionnaire {
 
     public Bundle questionnairePackage() {
       buildRepository();
-      return buildProcessor(repository).packageQuestionnaire(questionnaire);
+      var generatedPackage = buildProcessor(repository).packageQuestionnaire(questionnaire);
+      return generatedPackage;
     }
   }
 

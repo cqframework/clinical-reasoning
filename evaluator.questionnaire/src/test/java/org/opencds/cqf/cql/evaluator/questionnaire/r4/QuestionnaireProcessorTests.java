@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertThrows;
 
 import java.util.List;
@@ -138,5 +139,16 @@ public class QuestionnaireProcessorTests {
             stringPart("Service Request Id", "SleepStudy2"),
             stringPart("Coverage Id", "Coverage-positive")))
         .populate().isEqualsTo("pa-aslp/tests/QuestionnaireResponse-ASLPA1-positive-response.json");
+  }
+
+  @Test
+  void testPA_ASLP_Package() {
+    var repository = createRepositoryForPath("pa-aslp");
+    var generatedPackage = TestQuestionnaire.Assert
+        .that("pa-aslp/content/Questionnaire-ASLPA1.json", null).withRepository(repository)
+        .questionnairePackage();
+
+    assertFalse(generatedPackage.getEntry().isEmpty(), null);
+    assertEquals(generatedPackage.getEntry().size(), 11);
   }
 }

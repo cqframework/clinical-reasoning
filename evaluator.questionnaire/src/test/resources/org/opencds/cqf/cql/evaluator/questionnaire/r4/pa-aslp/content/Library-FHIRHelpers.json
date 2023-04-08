@@ -9,7 +9,7 @@
       }
     }
   ],
-  "url": "http://hl7.org/fhir/Library/FHIRHelpers",
+  "url": "http://example.org/sdh/dtr/aslp/Library/FHIRHelpers",
   "version": "4.1.000",
   "name": "FHIRHelpers",
   "relatedArtifact": [

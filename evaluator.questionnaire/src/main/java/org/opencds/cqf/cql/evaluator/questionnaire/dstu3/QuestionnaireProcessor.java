@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
@@ -204,16 +205,23 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     for (var artifact : theArtifacts) {
       if (artifact.getType().toCode().equals(RelatedArtifactType.DEPENDSON.toCode())
           && artifact.hasResource()) {
-        var resource =
-            searchRepositoryByCanonical(repository, artifact.getResource().getReferenceElement_());
-        if (resource != null && packableResources.contains(resource.fhirType())
-            && theBundle.getEntry().stream()
-                .noneMatch(e -> e.getResource().getIdElement().equals(resource.getIdElement()))) {
-          theBundle.addEntry(new BundleEntryComponent().setResource(resource));
-          if (resource.fhirType().equals(FHIRAllTypes.LIBRARY.toCode())
-              && ((Library) resource).hasRelatedArtifact()) {
-            addRelatedArtifacts(theBundle, ((Library) resource).getRelatedArtifact());
+        try {
+          var canonical = artifact.getResource().getReferenceElement_();
+          if (packableResources.contains(Canonicals.getResourceType(canonical))) {
+            var resource = searchRepositoryByCanonical(repository, canonical);
+            if (resource != null
+                && theBundle.getEntry().stream()
+                    .noneMatch(
+                        e -> e.getResource().getIdElement().equals(resource.getIdElement()))) {
+              theBundle.addEntry(new BundleEntryComponent().setResource(resource));
+              if (resource.fhirType().equals(FHIRAllTypes.LIBRARY.toCode())
+                  && ((Library) resource).hasRelatedArtifact()) {
+                addRelatedArtifacts(theBundle, ((Library) resource).getRelatedArtifact());
+              }
+            }
           }
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
         }
       }
     }

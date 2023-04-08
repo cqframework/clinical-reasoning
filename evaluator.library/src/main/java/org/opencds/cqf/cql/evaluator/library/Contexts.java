@@ -43,78 +43,81 @@ public class Contexts {
 
   private Contexts() {}
 
-  public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
-      IBaseBundle additionalData) {
+  public static LibraryEvaluator forRepository(EvaluationSettings theSettings,
+      Repository theRepository,
+      IBaseBundle theAdditionalData) {
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-    return forRepository(settings, repository, additionalData, librarySourceProviders, null);
+    return forRepository(theSettings, theRepository, theAdditionalData, librarySourceProviders,
+        null);
   }
 
-  public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
-      IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
-      CqlFhirParametersConverter cqlFhirParametersConverter) {
-    checkNotNull(settings);
-    checkNotNull(repository);
-    checkNotNull(librarySourceProviders);
+  public static LibraryEvaluator forRepository(EvaluationSettings theSettings,
+      Repository theRepository,
+      IBaseBundle theAdditionalData, List<LibrarySourceProvider> theLibrarySourceProviders,
+      CqlFhirParametersConverter theCqlFhirParametersConverter) {
+    checkNotNull(theSettings);
+    checkNotNull(theRepository);
+    checkNotNull(theLibrarySourceProviders);
 
-    if (cqlFhirParametersConverter == null) {
-      cqlFhirParametersConverter = getCqlFhirParametersConverter(repository.fhirContext());
+    if (theCqlFhirParametersConverter == null) {
+      theCqlFhirParametersConverter = getCqlFhirParametersConverter(theRepository.fhirContext());
     }
 
-    var terminologyProvider = new RepositoryTerminologyProvider(repository);
-    librarySourceProviders.add(buildLibrarySource(repository));
-    var libraryLoader = buildLibraryLoader(settings, librarySourceProviders);
+    var terminologyProvider = new RepositoryTerminologyProvider(theRepository);
+    theLibrarySourceProviders.add(buildLibrarySource(theRepository));
+    var libraryLoader = buildLibraryLoader(theSettings, theLibrarySourceProviders);
 
-    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider);
+    var dataProviders = buildDataProviders(theRepository, theAdditionalData, terminologyProvider);
     var cqlEvaluator = new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
-        settings.getEngineOptions().getOptions());
+        theSettings.getEngineOptions().getOptions());
 
-    return new LibraryEvaluator(cqlFhirParametersConverter, cqlEvaluator);
+    return new LibraryEvaluator(theCqlFhirParametersConverter, cqlEvaluator);
   }
 
-  private static Map<ModelIdentifier, Model> globalModelCache = new ConcurrentHashMap<>();
+  private static Map<ModelIdentifier, Model> ourGlobalModelCache = new ConcurrentHashMap<>();
 
-  private static LibrarySourceProvider buildLibrarySource(Repository repository) {
-    AdapterFactory adapterFactory = getAdapterFactory(repository.fhirContext());
-    return new RepositoryFhirLibrarySourceProvider(repository, adapterFactory,
+  private static LibrarySourceProvider buildLibrarySource(Repository theRepository) {
+    AdapterFactory adapterFactory = getAdapterFactory(theRepository.fhirContext());
+    return new RepositoryFhirLibrarySourceProvider(theRepository, adapterFactory,
         new LibraryVersionSelector(adapterFactory));
   }
 
   // TODO: Add NPM library source loader support
-  private static LibraryLoader buildLibraryLoader(EvaluationSettings settings,
-      List<LibrarySourceProvider> librarySourceProviders) {
-    if (settings.getCqlOptions().useEmbeddedLibraries()) {
-      librarySourceProviders.add(new FhirLibrarySourceProvider());
+  private static LibraryLoader buildLibraryLoader(EvaluationSettings theSettings,
+      List<LibrarySourceProvider> theLibrarySourceProviders) {
+    if (theSettings.getCqlOptions().useEmbeddedLibraries()) {
+      theLibrarySourceProviders.add(new FhirLibrarySourceProvider());
     }
 
     TranslatorOptionAwareLibraryLoader libraryLoader =
-        new TranslatingLibraryLoader(new CacheAwareModelManager(globalModelCache),
-            librarySourceProviders, settings.getCqlOptions().getCqlTranslatorOptions(), null);
+        new TranslatingLibraryLoader(new CacheAwareModelManager(ourGlobalModelCache),
+            theLibrarySourceProviders, theSettings.getCqlOptions().getCqlTranslatorOptions(), null);
 
-    if (settings.getLibraryCache() != null) {
+    if (theSettings.getLibraryCache() != null) {
       libraryLoader =
-          new CacheAwareLibraryLoaderDecorator(libraryLoader, settings.getLibraryCache());
+          new CacheAwareLibraryLoaderDecorator(libraryLoader, theSettings.getLibraryCache());
     }
 
     return libraryLoader;
   }
 
-  private static Map<String, DataProvider> buildDataProviders(Repository repository,
-      IBaseBundle additionalData, TerminologyProvider terminologyProvider) {
+  private static Map<String, DataProvider> buildDataProviders(Repository theRepository,
+      IBaseBundle theAdditionalData, TerminologyProvider theTerminologyProvider) {
     Map<String, DataProvider> dataProviders = new HashMap<>();
 
     var providers = new ArrayList<RetrieveProvider>();
     var modelResolver = new FhirModelResolverFactory()
-        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
-    var retrieveProvider = new RepositoryRetrieveProvider(repository);
+        .create(theRepository.fhirContext().getVersion().getVersion().getFhirVersionString());
+    var retrieveProvider = new RepositoryRetrieveProvider(theRepository);
     providers.add(retrieveProvider);
-    if (additionalData != null) {
-      providers.add(new BundleRetrieveProvider(repository.fhirContext(), additionalData));
+    if (theAdditionalData != null) {
+      providers.add(new BundleRetrieveProvider(theRepository.fhirContext(), theAdditionalData));
     }
 
     var retrieveProviderConfigurer =
         new RetrieveProviderConfigurer(RetrieveProviderConfig.defaultConfig());
     for (RetrieveProvider provider : providers) {
-      retrieveProviderConfigurer.configure(provider, terminologyProvider);
+      retrieveProviderConfigurer.configure(provider, theTerminologyProvider);
     }
 
     dataProviders.put(Constants.FHIR_MODEL_URI,
@@ -123,8 +126,8 @@ public class Contexts {
     return dataProviders;
   }
 
-  public static AdapterFactory getAdapterFactory(FhirContext fhirContext) {
-    switch (fhirContext.getVersion().getVersion()) {
+  public static AdapterFactory getAdapterFactory(FhirContext theFhirContext) {
+    switch (theFhirContext.getVersion().getVersion()) {
       case DSTU3:
         return new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
       case R4:
@@ -133,14 +136,15 @@ public class Contexts {
         return new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
       default:
         throw new IllegalArgumentException(
-            String.format("unsupported FHIR version: %s", fhirContext));
+            String.format("unsupported FHIR version: %s", theFhirContext));
     }
   }
 
-  public static CqlFhirParametersConverter getCqlFhirParametersConverter(FhirContext fhirContext) {
+  public static CqlFhirParametersConverter getCqlFhirParametersConverter(
+      FhirContext theFhirContext) {
     var fhirTypeConverter =
-        new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-    return new CqlFhirParametersConverter(fhirContext, getAdapterFactory(fhirContext),
+        new FhirTypeConverterFactory().create(theFhirContext.getVersion().getVersion());
+    return new CqlFhirParametersConverter(theFhirContext, getAdapterFactory(theFhirContext),
         fhirTypeConverter);
   }
 }

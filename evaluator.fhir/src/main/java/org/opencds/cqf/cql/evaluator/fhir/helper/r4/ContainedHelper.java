@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.fhir.helper.r4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,11 +31,11 @@ public class ContainedHelper {
    * @return the modified parent resource
    */
   public static DomainResource liftContainedResourcesToParent(DomainResource resource) {
-    getContainedResourcesInContainedResources(resource).forEach(resource::addContained); // add
-                                                                                         // them
-                                                                                         // to
-                                                                                         // the
-                                                                                         // parent
+    // add them to the parent
+    getContainedResourcesInContainedResources(resource).forEach(resource::addContained);
+    // remove them from the children
+    getContainedResourcesInContainedResources(resource)
+        .forEach(r -> ((DomainResource) r).setContained(Collections.emptyList()));
 
     return resource; // Return the resource to allow for method chaining
   }

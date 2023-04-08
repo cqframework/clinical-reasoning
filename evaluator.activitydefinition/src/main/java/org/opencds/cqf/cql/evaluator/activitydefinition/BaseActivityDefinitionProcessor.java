@@ -107,14 +107,14 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public void resolveDynamicValue(String language, String expression, String libraryUrl,
       String path, IBaseResource resource, String subjectType) {
 
-    var value = this.libraryEngine.getExpressionResult(this.subjectId, subjectType, expression,
+    var result = this.libraryEngine.getExpressionResult(this.subjectId, subjectType, expression,
         language, libraryUrl, this.parameters, null);
-    if (value.size() == 1) {
-      modelResolver.setValue(resource, path, value.get(0));
-    } else {
+    if (result != null && result.size() > 1) {
       throw new IllegalArgumentException(String.format(
           "Dynamic value resolution received multiple values for expression: %s", expression));
     }
+    var value = result == null || result.isEmpty() ? null : result.get(0);
+    modelResolver.setValue(resource, path, value);
   }
 
 }

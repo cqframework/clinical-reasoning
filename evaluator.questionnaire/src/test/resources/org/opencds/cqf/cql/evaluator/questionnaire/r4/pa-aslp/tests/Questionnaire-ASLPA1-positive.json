@@ -1,19 +1,6 @@
 {
   "resourceType": "Questionnaire",
   "id": "ASLPA1-positive",
-  "contained": [
-    {
-      "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-ASLPA1-positive",
-      "issue": [
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (Sleep Study) for item (2): null"
-        }
-      ]
-    }
-  ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
@@ -36,9 +23,9 @@
       "valueCanonical": "http://example.org/sdh/dtr/aslp/Library/ASLPDataElements"
     },
     {
-      "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject",
       "valueReference": {
-        "reference": "#prepopulate-outcome-ASLPA1-positive"
+        "reference": "Patient/positive"
       }
     }
   ],
@@ -68,21 +55,21 @@
   ],
   "item": [
     {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Sleep Study"
+          }
+        }
+      ],
       "linkId": "0",
       "text": "A sleep study procedure being ordered",
       "type": "group",
       "repeats": true,
       "item": [
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Sleep Study Code"
-              }
-            }
-          ],
           "linkId": "1",
           "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.code",
           "text": "A sleep study procedure being ordered",
@@ -90,13 +77,74 @@
           "answerValueSet": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de1-codes-grouper",
           "initial": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueCoding": {
                 "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
                 "code": "ASLP.A1.DE14",
                 "display": "Artificial intelligence (AI)"
               }
-            },
+            }
+          ]
+        },
+        {
+          "linkId": "2",
+          "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.occurrenceDateTime",
+          "text": "Date of the procedure",
+          "type": "dateTime",
+          "initial": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
+              "valueDateTime": "2023-04-15"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Sleep Study"
+          }
+        }
+      ],
+      "linkId": "0",
+      "text": "A sleep study procedure being ordered",
+      "type": "group",
+      "repeats": true,
+      "item": [
+        {
+          "linkId": "1",
+          "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.code",
+          "text": "A sleep study procedure being ordered",
+          "type": "choice",
+          "answerValueSet": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de1-codes-grouper",
+          "initial": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueCoding": {
                 "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
                 "code": "ASLP.A1.DE2",
@@ -106,19 +154,23 @@
           ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Sleep Study"
-              }
-            }
-          ],
           "linkId": "2",
-          "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.occurrence[x]",
+          "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.occurrenceDateTime",
           "text": "Date of the procedure",
-          "type": "dateTime"
+          "type": "dateTime",
+          "initial": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
+              "valueDateTime": "2023-04-10"
+            }
+          ]
         }
       ]
     },
@@ -139,6 +191,14 @@
       "answerValueSet": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de17",
       "initial": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "valueCoding": {
             "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
             "code": "ASLP.A1.DE17",
@@ -163,6 +223,14 @@
       "type": "boolean",
       "initial": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "valueBoolean": true
         }
       ]
@@ -183,6 +251,14 @@
       "type": "boolean",
       "initial": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "valueBoolean": true
         }
       ]
@@ -203,6 +279,14 @@
       "type": "quantity",
       "initial": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "valueQuantity": {
             "value": 16,
             "unit": "[in_i]",
@@ -228,6 +312,14 @@
       "type": "quantity",
       "initial": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "valueQuantity": {
             "value": 69,
             "unit": "[in_i]",
@@ -253,6 +345,14 @@
       "type": "quantity",
       "initial": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "valueQuantity": {
             "value": 185,
             "unit": "[lb_av]",
@@ -278,6 +378,14 @@
       "type": "quantity",
       "initial": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "valueQuantity": {
             "value": 16.2,
             "unit": "kg/m2",

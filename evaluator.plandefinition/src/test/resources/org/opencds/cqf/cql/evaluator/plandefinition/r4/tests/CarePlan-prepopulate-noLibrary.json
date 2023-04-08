@@ -25,7 +25,7 @@
     },
     {
       "resourceType": "Questionnaire",
-      "id": "OutpatientPriorAuthorizationRequest-noLibrary",
+      "id": "OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1",
       "meta": {
         "source": "#Szj0RYKKLb3zYK89",
         "profile": [
@@ -38,9 +38,15 @@
           "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation-noLibrary"
         },
         {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject",
+          "valueReference": {
+            "reference": "Patient/OPA-Patient1"
+          }
+        },
+        {
           "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
           "valueReference": {
-            "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest-noLibrary"
+            "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
           }
         }
       ],
@@ -608,7 +614,7 @@
       "intent": "proposal",
       "description": "Create a task to complete a Questionnaire.",
       "focus": {
-        "reference": "Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary"
+        "reference": "Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
       },
       "for": {
         "reference": "OPA-Patient1"
@@ -616,7 +622,7 @@
     },
     {
       "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest-noLibrary",
+      "id": "populate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1",
       "issue": [
         {
           "severity": "error",
@@ -754,6 +760,14 @@
           "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressZip) for item (4.2.5.5): Unable to resolve library (OutpatientPriorAuthorizationPrepopulation-noLibrary): Could not load source for library OutpatientPriorAuthorizationPrepopulation-noLibrary, version null."
         }
       ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+      "valueReference": {
+        "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
+      }
     }
   ],
   "instantiatesCanonical": [

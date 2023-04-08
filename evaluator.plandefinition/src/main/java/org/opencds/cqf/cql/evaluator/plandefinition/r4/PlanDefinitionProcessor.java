@@ -30,7 +30,6 @@ import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -169,7 +168,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       resolveAction(planDefinition, requestGroup, metConditions, action);
     }
 
-    return requestGroup;
+    return Boolean.TRUE.equals(containResources)
+        ? ContainedHelper.liftContainedResourcesToParent(requestGroup)
+        : requestGroup;
   }
 
   @Override
@@ -194,6 +195,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         carePlan.addGoal(new Reference((Resource) goal));
       }
     }
+
+    var operationOutcomes =
+        resolveContainedByType(requestGroup, FHIRAllTypes.OPERATIONOUTCOME.toCode());
+    for (var operationOutcome : operationOutcomes) {
+      carePlan.addExtension(Constants.EXT_CRMI_MESSAGES,
+          new Reference("#" + operationOutcome.getId()));
+    }
+
     carePlan.addActivity().setReference(new Reference(requestGroup));
     carePlan.addContained(requestGroup);
 
@@ -466,9 +475,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       var questionnaireBundles = getQuestionnairePackage(
           action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE));
       for (var questionnaireBundle : questionnaireBundles) {
-        var questionnaire = (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
-        // Each bundle should contain a Questionnaire and supporting Library and ValueSet
-        // resources
+        var toPopulate = (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
+        // Bundle should contain a Questionnaire and supporting Library and ValueSet resources
         var libraries = questionnaireBundle.getEntry().stream()
             .filter(e -> e.hasResource()
                 && (e.getResource().fhirType().equals(Enumerations.FHIRAllTypes.LIBRARY.toCode())))
@@ -484,34 +492,16 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         valueSets.forEach(valueSet -> additionalData
             .addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
-        var oc = new OperationOutcome();
-        oc.setId("prepopulate-outcome-" + questionnaire.getId());
-        try {
-          questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters,
-              additionalData, libraryEngine);
-        } catch (Exception ex) {
-          var message = ex.getMessage();
-          logger.error("Error encountered while attempting to prepopulate questionnaire: %s",
-              message);
-          oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-              .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-        }
-        if (!oc.getIssue().isEmpty()) {
-          if (Boolean.TRUE.equals(containResources)) {
-            requestGroup.addContained(oc);
-            requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES, new Reference("#" + oc.getId()));
-          } else {
-            requestResources.add(oc);
-            requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES,
-                new Reference(oc.getIdElement()));
-          }
-        }
+        var populatedQuestionnaire =
+            questionnaireProcessor.prePopulate(toPopulate, patientId, this.parameters,
+                additionalData, libraryEngine);
         if (Boolean.TRUE.equals(containResources)) {
-          requestGroup.addContained(questionnaire);
+          requestGroup.addContained(populatedQuestionnaire);
         } else {
-          requestResources.add(questionnaire);
+          requestResources.add(populatedQuestionnaire);
         }
-        task.setFocus(new Reference(questionnaire.getIdElement()));
+        task.setFocus(new Reference(
+            new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), populatedQuestionnaire.getIdPart())));
         task.setFor(requestGroup.getSubject());
       }
     }
@@ -773,5 +763,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var first = resource.getContained().stream().filter(Resource::hasIdElement)
         .filter(x -> x.getIdElement().getIdPart().equals(id)).findFirst();
     return first.orElse(null);
+  }
+
+  protected List<Resource> resolveContainedByType(DomainResource resource, String resourceType) {
+    return resource.getContained().stream().filter(r -> r.fhirType().equals(resourceType))
+        .collect(Collectors.toList());
   }
 }

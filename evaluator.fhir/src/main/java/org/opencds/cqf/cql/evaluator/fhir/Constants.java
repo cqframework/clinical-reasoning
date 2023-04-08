@@ -10,6 +10,9 @@ public class Constants {
 
   private Constants() {}
 
+  public static final String CQL_ENGINE_DEVICE =
+      "http://cqframework.org/fhir/Device/clinical-quality-language";
+
   public static final String HL7_FHIR_REST = "hl7-fhir-rest";
   public static final String HL7_FHIR_FILES = "hl7-fhir-files";
   public static final String HL7_CQL_FILES = "hl7-cql-files";
@@ -25,6 +28,8 @@ public class Constants {
       ImmutableMap.of("FHIR", FHIR_MODEL_URI, "QUICK", FHIR_MODEL_URI, "QDM", QDM_MODEL_URI);
 
 
+  public static final String QUESTIONNAIRE_RESPONSE_AUTHOR =
+      "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
   public static final String CPG_QUESTIONNAIRE_GENERATE =
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate";
   // public static final String CQF_QUESTIONNAIRE =
@@ -43,8 +48,12 @@ public class Constants {
       "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden";
   public static final String SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext";
+  public static final String SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT =
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext";
   public static final String SDC_QUESTIONNAIRE_IS_SUBJECT =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject";
+  public static final String SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT =
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject";
   public static final String SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaireresponse-isSubject";
   public static final String SDC_QUESTIONNAIRE_INITIAL_EXPRESSION =

@@ -212,8 +212,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
       throw new IllegalArgumentException(String.format(
           "Dynamic value resolution received multiple values for expression: %s", expression));
     }
+    var value = result == null || result.isEmpty() ? null : result.get(0);
     if (path.startsWith("action.")) {
-      resolveCdsHooksDynamicValue(resource, result, path);
+      resolveCdsHooksDynamicValue(resource, value, path);
     }
     // backwards compatibility where CDS Hooks indicator was set with activity.extension or
     // action.extension path
@@ -222,9 +223,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
         throw new IllegalArgumentException(
             "Please use the priority path when setting indicator values when using FHIR R5 for CDS Hooks evaluation");
       }
-      resolveCdsHooksDynamicValue(resource, result, path);
+      resolveCdsHooksDynamicValue(resource, value, path);
     } else {
-      modelResolver.setValue(resource, path, result);
+      modelResolver.setValue(resource, path, value);
     }
   }
 

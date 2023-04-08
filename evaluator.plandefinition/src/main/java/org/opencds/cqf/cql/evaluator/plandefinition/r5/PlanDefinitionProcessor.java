@@ -32,7 +32,6 @@ import org.hl7.fhir.r5.model.Goal;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.MetadataResource;
-import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.ParameterDefinition;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
@@ -428,7 +427,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       var questionnaireBundles = getQuestionnairePackage(
           action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE));
       for (var questionnaireBundle : questionnaireBundles) {
-        var questionnaire = (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
+        var toPopulate = (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
         // Each bundle should contain a Questionnaire and supporting Library and ValueSet
         // resources
         var libraries = questionnaireBundle.getEntry().stream()
@@ -446,34 +445,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         valueSets.forEach(valueSet -> additionalData
             .addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
-        var oc = new OperationOutcome();
-        oc.setId("prepopulate-outcome-" + questionnaire.getId());
-        try {
-          questionnaireProcessor.prePopulate(questionnaire, patientId, this.parameters,
-              additionalData, libraryEngine);
-        } catch (Exception ex) {
-          var message = ex.getMessage();
-          logger.error("Error encountered while attempting to prepopulate questionnaire: %s",
-              message);
-          oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-              .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-        }
-        if (!oc.getIssue().isEmpty()) {
-          if (Boolean.TRUE.equals(containResources)) {
-            requestGroup.addContained(oc);
-            requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES, new Reference("#" + oc.getId()));
-          } else {
-            requestResources.add(oc);
-            requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES,
-                new Reference(oc.getIdElement()));
-          }
-        }
-        if (Boolean.TRUE.equals(containResources)) {
-          requestGroup.addContained(questionnaire);
-        } else {
-          requestResources.add(questionnaire);
-        }
-        task.setFocus(new Reference(questionnaire.getIdElement()));
+        var populatedQuestionnaire =
+            questionnaireProcessor.prePopulate(toPopulate, patientId, this.parameters,
+                additionalData, libraryEngine);
+        requestResources.add(populatedQuestionnaire);
+        task.setFocus(new Reference(
+            new IdType(FHIRTypes.QUESTIONNAIRE.toCode(), populatedQuestionnaire.getIdPart())));
         task.setFor(requestGroup.getSubject());
       }
     }

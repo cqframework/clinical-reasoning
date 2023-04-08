@@ -49,21 +49,21 @@
   ],
   "item": [
     {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Sleep Study"
+          }
+        }
+      ],
       "linkId": "0",
       "text": "A sleep study procedure being ordered",
       "type": "group",
       "repeats": true,
       "item": [
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Sleep Study Code"
-              }
-            }
-          ],
           "linkId": "1",
           "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.code",
           "text": "A sleep study procedure being ordered",
@@ -71,17 +71,8 @@
           "answerValueSet": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de1-codes-grouper"
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Sleep Study"
-              }
-            }
-          ],
           "linkId": "2",
-          "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.occurrence[x]",
+          "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order#ServiceRequest.occurrenceDateTime",
           "text": "Date of the procedure",
           "type": "dateTime"
         }

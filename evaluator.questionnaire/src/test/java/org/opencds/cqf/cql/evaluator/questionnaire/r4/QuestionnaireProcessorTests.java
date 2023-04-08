@@ -118,20 +118,25 @@ public class QuestionnaireProcessorTests {
         FHIRAllTypes.QUESTIONNAIRE.toCode());
   }
 
-
   @Test
-  void testPA_ASPL_PrePopulate() {
+  void testPA_ASLP_PrePopulate() {
     var repository = createRepositoryForPath("pa-aslp");
     TestQuestionnaire.Assert.that("pa-aslp/content/Questionnaire-ASLPA1.json", "positive")
         .withRepository(repository)
+        .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
+            stringPart("Service Request Id", "SleepStudy2"),
+            stringPart("Coverage Id", "Coverage-positive")))
         .prePopulate().isEqualsTo("pa-aslp/tests/Questionnaire-ASLPA1-positive.json");
   }
 
   @Test
-  void testPA_ASPL_Populate() {
+  void testPA_ASLP_Populate() {
     var repository = createRepositoryForPath("pa-aslp");
     TestQuestionnaire.Assert.that("pa-aslp/content/Questionnaire-ASLPA1.json", "positive")
         .withRepository(repository)
-        .populate().isEqualsTo("pa-aslp/tests/QuestionnaireResponse-ASLPA1.json");
+        .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
+            stringPart("Service Request Id", "SleepStudy2"),
+            stringPart("Coverage Id", "Coverage-positive")))
+        .populate().isEqualsTo("pa-aslp/tests/QuestionnaireResponse-ASLPA1-positive-response.json");
   }
 }

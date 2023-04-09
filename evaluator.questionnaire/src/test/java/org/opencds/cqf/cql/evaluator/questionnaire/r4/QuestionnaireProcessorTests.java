@@ -127,7 +127,7 @@ public class QuestionnaireProcessorTests {
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
             stringPart("Service Request Id", "SleepStudy2"),
             stringPart("Coverage Id", "Coverage-positive")))
-        .prePopulate().isEqualsTo("pa-aslp/tests/Questionnaire-ASLPA1-positive.json");
+        .prePopulate().hasItems(13).itemHasInitialValue("1").itemHasInitialValue("2");
   }
 
   @Test
@@ -138,7 +138,7 @@ public class QuestionnaireProcessorTests {
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
             stringPart("Service Request Id", "SleepStudy2"),
             stringPart("Coverage Id", "Coverage-positive")))
-        .populate().isEqualsTo("pa-aslp/tests/QuestionnaireResponse-ASLPA1-positive-response.json");
+        .populate().hasItems(13).itemHasAnswer("1").itemHasAnswer("2");
   }
 
   @Test

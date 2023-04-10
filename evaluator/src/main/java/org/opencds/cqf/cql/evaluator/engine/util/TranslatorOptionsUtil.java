@@ -2,10 +2,14 @@ package org.opencds.cqf.cql.evaluator.engine.util;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions.Options;
 import org.cqframework.cql.elm.execution.CqlToElmBase;
 import org.cqframework.cql.elm.execution.CqlToElmInfo;
 import org.cqframework.cql.elm.execution.Library;
@@ -39,6 +43,18 @@ public class TranslatorOptionsUtil {
     String translatorOptions = getTranslatorOptions(library.getAnnotation());
     return parseTranslatorOptions(translatorOptions);
   }
+
+  public static EnumSet<CqlTranslatorOptions.Options> getTranslatorOptions(Library library,
+      boolean excludeOptional) {
+    EnumSet<CqlTranslatorOptions.Options> filteredSet = getTranslatorOptions(library);
+    if (excludeOptional) {
+      filteredSet.remove(optionalEnumSet);
+    }
+    return filteredSet;
+  }
+
+  public static Set<CqlTranslatorOptions.Options> optionalEnumSet =
+      new HashSet<>((Arrays.asList(Options.EnableAnnotations, Options.EnableLocators)));
 
   private static String getTranslatorOptions(List<CqlToElmBase> annotations) {
     for (CqlToElmBase o : annotations) {
@@ -83,6 +99,16 @@ public class TranslatorOptionsUtil {
 
     return optionSet;
   }
+
+  public static EnumSet<CqlTranslatorOptions.Options> parseTranslatorOptions(
+      String translatorOptions, boolean excludeOptional) {
+    EnumSet<CqlTranslatorOptions.Options> excludedSet = parseTranslatorOptions(translatorOptions);
+    if (excludeOptional) {
+      excludedSet.remove(optionalEnumSet);
+    }
+    return excludedSet;
+  }
+
 
   /**
    * Gets the translator version used to generate an elm Library.

@@ -104,16 +104,19 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   }
 
   private boolean checkBinaryCompatibility(Library library) {
+    if(library == null) {
+      return false;
+    }
     boolean compatible = true;
 
+    compatible = compatible && isSignatureCompatible(library);
     compatible = compatible && isVersionCompatible(library);
     compatible = compatible && Boolean.TRUE.equals(this.translatorOptionsMatch(library));
-    compatible =compatible && isCompatibleBasedOnSignature(library);
 
     return compatible;
   }
 
-  private boolean isCompatibleBasedOnSignature(Library library) {
+  private boolean isSignatureCompatible(Library library) {
     if (hasOverloadedFunctions(library) &&
         !overloadSafeSignatureLevels.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
       this.cqlTranslatorOptions.setSignatureLevel(SignatureLevel.Overloads);
@@ -145,12 +148,15 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
   protected Boolean translatorOptionsMatch(Library library) {
     EnumSet<CqlTranslatorOptions.Options> options =
-        TranslatorOptionsUtil.getTranslatorOptions(library);
+        TranslatorOptionsUtil.getTranslatorOptions(library, true);
     if (options == null) {
       return false;
     }
 
-    return options.equals(this.cqlTranslatorOptions.getOptions());
+    EnumSet<CqlTranslatorOptions.Options> filteredOptions = this.cqlTranslatorOptions.getOptions();
+    filteredOptions.remove(TranslatorOptionsUtil.optionalEnumSet);
+
+    return options.equals(filteredOptions);
   }
 
   protected InputStream getLibraryContent(org.hl7.elm.r1.VersionedIdentifier libraryIdentifier,

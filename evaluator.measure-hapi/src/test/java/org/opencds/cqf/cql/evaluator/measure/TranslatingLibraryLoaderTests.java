@@ -95,6 +95,19 @@ public class TranslatingLibraryLoaderTests {
     assertEquals(TranslatorOptionsUtil.getTranslationVersion(library), "2.7.0");
   }
 
+  @Test
+  public void loadLibraryTranslateWithOptionsMismatch() {
+    VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("OptionsMismatch");
+
+    Library storedElmLibrary = getElmLibrary(libraryIdentifier);
+    assertEquals(TranslatorOptionsUtil.getTranslatorOptions(storedElmLibrary).size(), 2);
+
+    Library library = this.libraryLoader.load(libraryIdentifier);
+    assertNotNull(library);
+
+    assertEquals(TranslatorOptionsUtil.getTranslatorOptions(library).size(), 4);
+  }
+
   private Library getElmLibrary(VersionedIdentifier vi) {
     org.hl7.elm.r1.VersionedIdentifier versionedIdentifier = toElmIdentifier(vi);
     InputStream is = testFhirLibrarySourceProvider.getLibraryContent(versionedIdentifier,

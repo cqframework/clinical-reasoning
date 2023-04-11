@@ -1,36 +1,28 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
 
-@Test
-public class DaVinciExtensionMeasureProcessorTest extends BaseMeasureProcessorTestB {
+public class DaVinciExtensionMeasureProcessorTest {
 
-  public DaVinciExtensionMeasureProcessorTest() {
-    super("BreastCancerScreeningFHIR");
-  }
+  protected static Given given = Measure.given().repositoryFor("r4/BreastCancerScreeningFHIR");
+
 
   @Test
   public void exm125_numerator() {
-    // Given
-
-    // When
-
-    // Then
-    Measure.Assert.that("BreastCancerScreeningFHIR", "2019-01-01", "2019-12-31")
-        .repository(this.repository).subject("Patient/numer-EXM125")
-        .reportType("subject").evaluate()
+    given.when()
+        .measureId("BreastCancerScreeningFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2019-12-31")
+        .subject("Patient/numer-EXM125")
+        .reportType("subject")
+        .evaluate().then()
         .firstGroup().hasScore("1.0")
         .population("numerator").hasCount(1).up()
         .population("denominator").hasCount(1).up().up()
-        .passes(this::exm125_numerator_validation);
-  }
-
-  protected void exm125_numerator_validation(MeasureReport report) {
-    MeasureValidationUtils.validateEvaluatedResourceExtension(report.getEvaluatedResource(),
-        "Patient/numer-EXM125", "initial-population", "denominator-exclusion");
-    MeasureValidationUtils.validateEvaluatedResourceExtension(report.getEvaluatedResource(),
-        "DiagnosticReport/numer-EXM125-3", "numerator");
+        .evaluatedResource("Patient/numer-EXM125")
+        .hasPopulations("initial-population", "denominator-exclusion").up()
+        .evaluatedResource("DiagnosticReport/numer-EXM125-3").hasPopulations("numerator");
   }
 }

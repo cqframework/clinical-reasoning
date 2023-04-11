@@ -26,8 +26,8 @@ public class R4MeasureProcessorB {
   public R4MeasureProcessorB(Repository repository,
       MeasureEvaluationOptions measureEvaluationOptions) {
     this.repository = Objects.requireNonNull(repository);
-    this.measureEvaluationOptions = Objects.requireNonNullElse(measureEvaluationOptions,
-        MeasureEvaluationOptions.defaultOptions());
+    this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions
+        : MeasureEvaluationOptions.defaultOptions();
 
   }
 

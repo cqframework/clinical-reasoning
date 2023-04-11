@@ -1,64 +1,50 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.function.Supplier;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
-import org.json.JSONException;
+import org.hl7.fhir.r4.model.Reference;
+import org.opencds.cqf.cql.evaluator.measure.TestRepositories;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.GeneratedReport.PopulationSelector;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.GeneratedReport.PopulationValidator;
 import org.opencds.cqf.fhir.api.Repository;
-import org.skyscreamer.jsonassert.JSONAssert;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
 
 public class Measure {
-  private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-  private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
-
-  private static InputStream open(String asset) {
-    return Measure.class.getResourceAsStream(asset);
+  public static Given given() {
+    return new Given();
   }
 
-  public static String load(InputStream asset) throws IOException {
-    return new String(asset.readAllBytes(), StandardCharsets.UTF_8);
-  }
+  static class Given {
+    private Repository repository;
 
-  public static String load(String asset) throws IOException {
-    return load(open(asset));
-  }
+    Given repository(Repository repository) {
+      this.repository = repository;
+      return this;
+    }
 
-  public static IBaseResource parse(String asset) {
-    return jsonParser.parseResource(open(asset));
-  }
+    Given repositoryFor(String repositoryPath) {
+      this.repository = TestRepositories.createRepositoryForPath(repositoryPath);
+      return this;
+    }
 
-  public static R4MeasureProcessorB buildProcessor(Repository repository) {
-    return new R4MeasureProcessorB(repository, null);
-  }
+    private static R4MeasureProcessorB buildProcessor(Repository repository) {
+      return new R4MeasureProcessorB(repository, null);
+    }
 
-  /** Fluent interface starts here **/
-
-  static class Assert {
-    public static Evaluate that(String measureId, String periodStart, String periodEnd) {
-      return new Evaluate(measureId, periodStart, periodEnd);
+    When when() {
+      return new When(buildProcessor(this.repository));
     }
   }
 
-  static class Evaluate {
+  static class When {
+    private final R4MeasureProcessorB processor;
+
+    When(R4MeasureProcessorB processor) {
+      this.processor = processor;
+    }
+
     private String measureId;
 
     private String periodStart;
@@ -67,61 +53,45 @@ public class Measure {
     private String subjectId;
     private String reportType;
 
-    private Repository repository;
-    private Repository dataRepository;
-    private Repository contentRepository;
-    private Repository terminologyRepository;
-    private Bundle additionalData;
-    private Parameters parameters;
+    private Supplier<GeneratedReport> operation;
 
-    public Evaluate(String measureId, String periodStart, String periodEnd) {
+    public When measureId(String measureId) {
       this.measureId = measureId;
-      this.periodStart = periodStart;
-      this.periodEnd = periodEnd;
+      return this;
     }
 
-    public Evaluate subject(String subjectId) {
+    public When periodEnd(String periodEnd) {
+      this.periodEnd = periodEnd;
+      return this;
+    }
+
+    public When periodStart(String periodStart) {
+      this.periodStart = periodStart;
+      return this;
+    }
+
+
+    public When subject(String subjectId) {
       this.subjectId = subjectId;
       return this;
     }
 
-    public Evaluate reportType(String reportType) {
+    public When reportType(String reportType) {
       this.reportType = reportType;
       return this;
-
     }
 
-    public Evaluate additionalData(String dataAssetName) {
-      var data = parse(dataAssetName);
-      additionalData =
-          data.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode()) ? (Bundle) data
-              : new Bundle().setType(BundleType.COLLECTION)
-                  .addEntry(new BundleEntryComponent().setResource((Resource) data));
-
+    public When evaluate() {
+      this.operation = () -> new GeneratedReport(
+          processor.evaluateMeasure(new IdType("Measure", measureId), periodStart,
+              periodEnd, reportType, Collections.singletonList(this.subjectId)));
       return this;
     }
 
-    public Evaluate parameters(Parameters params) {
-      parameters = params;
-
-      return this;
-    }
-
-    public Evaluate repository(Repository repository) {
-      this.repository = repository;
-
-      return this;
-    }
-
-
-    public GeneratedReport evaluate() {
-      var processor = buildProcessor(repository);
-      var result = processor.evaluateMeasure(new IdType("Measure", measureId), periodStart,
-          periodEnd, reportType, Collections.singletonList(this.subjectId));
-      return new GeneratedReport(result);
+    public GeneratedReport then() {
+      return this.operation.get();
     }
   }
-
   static class GeneratedReport {
 
     @FunctionalInterface
@@ -161,22 +131,16 @@ public class Measure {
           MeasureReport.MeasureReportGroupComponent group);
     }
 
+    @FunctionalInterface
+    interface ReferenceSelector {
+      Reference selectReference(
+          MeasureReport measureReport);
+    }
+
     private final MeasureReport report;
 
     public GeneratedReport(MeasureReport report) {
       this.report = report;
-    }
-
-    public GeneratedReport isEqualsTo(String expectedReportResourceName) {
-      try {
-        JSONAssert.assertEquals(load(expectedReportResourceName),
-            jsonParser.encodeResourceToString(report), true);
-      } catch (JSONException | IOException e) {
-        e.printStackTrace();
-        fail("Unable to compare Jsons: " + e.getMessage());
-      }
-
-      return this;
     }
 
     public GeneratedReport passes(MeasureReportValidator measureReportValidator) {
@@ -192,9 +156,24 @@ public class Measure {
       return this.group(MeasureReport::getGroupFirstRep);
     }
 
+    public SelectedGroup group(String id) {
+      return this
+          .group(x -> x.getGroup().stream().filter(g -> g.getId().equals(id)).findFirst().get());
+    }
+
     public SelectedGroup group(GroupSelector groupSelector) {
       var g = groupSelector.selectGroup(report);
       return new SelectedGroup(this, g);
+    }
+
+    public SelectedReference reference(ReferenceSelector referenceSelector) {
+      var r = referenceSelector.selectReference(report);
+      return new SelectedReference(this, r);
+    }
+
+    public SelectedReference evaluatedResource(String name) {
+      return this.reference(x -> x.getEvaluatedResource().stream()
+          .filter(y -> y.getReference().equals(name)).findFirst().get());
     }
   }
 
@@ -231,6 +210,26 @@ public class Measure {
     public SelectedPopulation population(PopulationSelector populationSelector) {
       var p = populationSelector.selectPopulation(group);
       return new SelectedPopulation(this, p);
+    }
+  }
+
+  static class SelectedReference {
+    private final GeneratedReport generatedReport;
+    private final Reference reference;
+
+    public SelectedReference(GeneratedReport generatedReport, Reference reference) {
+      this.generatedReport = generatedReport;
+      this.reference = reference;
+    }
+
+    public GeneratedReport up() {
+      return generatedReport;
+    }
+
+
+    public SelectedReference hasPopulations(String... population) {
+      // TODO: Validate evaluatedResource extension
+      return this;
     }
   }
 

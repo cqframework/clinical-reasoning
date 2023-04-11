@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.fhir.util;
 
 import java.io.File;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +10,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import com.google.common.io.Files;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -78,7 +80,8 @@ public class FhirResourceLoader implements ResourceLoader {
   private String getCqlContent(String rootPath, String relativePath) {
     var p = Paths.get(rootPath).getParent().resolve(relativePath).normalize();
     try {
-      return Files.readString(p);
+      return Files.asCharSource(p.toFile(), StandardCharsets.UTF_8).read();
+
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -11,6 +11,9 @@ import org.testng.annotations.Test;
 @Test(singleThreaded = true)
 public class BloodPressureMeasureProcessorTest extends BaseMeasureProcessorTest {
 
+  // protected static Given given =
+  // Measure.given().repositoryFor("r4/ControllingBloodPressureFHIR");
+
 
   // TODO: This Bundle is currently bad. It's missing Patients
   public BloodPressureMeasureProcessorTest() {

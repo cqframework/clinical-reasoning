@@ -26,6 +26,5 @@ public class ItemGeneratorTests {
             stringPart("Service Request Id", "SleepStudy2"),
             stringPart("Coverage Id", "Coverage-positive")))
         .generateItem().isEqualsTo("Questionnaire-aslp-sleep-study-order.json");
-
   }
 }

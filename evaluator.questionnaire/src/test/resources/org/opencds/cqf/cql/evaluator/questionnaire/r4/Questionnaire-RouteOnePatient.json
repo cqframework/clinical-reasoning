@@ -3,13 +3,8 @@
   "id": "RouteOnePatient",
   "item": [
     {
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-          "valueCode": "Patient"
-        }
-      ],
       "linkId": "1",
+      "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient",
       "text": "Beneficiary Information",
       "type": "group",
       "item": [

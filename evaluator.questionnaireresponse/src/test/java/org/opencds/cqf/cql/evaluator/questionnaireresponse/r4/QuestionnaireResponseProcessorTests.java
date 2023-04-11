@@ -36,7 +36,14 @@ public class QuestionnaireResponseProcessorTests {
 
   @Test
   void testDefinitionBasedExtraction() {
-    testExtract("OutpatientPriorAuthorizationRequest-OPA-Patient1");
+    var repository = new TestRepository().createRepository();
+    TestQuestionnaireResponse.Assert
+        .that(
+            new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1"))
+        .withRepository(repository)
+        .withExpectedBundleId(
+            new IdType("Bundle", "extract-OutpatientPriorAuthorizationRequest-OPA-Patient1"))
+        .extract().hasEntry(2);
   }
 
   @Test(enabled = false)

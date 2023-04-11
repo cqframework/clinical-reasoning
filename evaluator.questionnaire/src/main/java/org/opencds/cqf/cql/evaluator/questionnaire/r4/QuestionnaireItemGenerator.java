@@ -7,12 +7,10 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -65,9 +63,7 @@ public class QuestionnaireItemGenerator {
       var text = profile.hasTitle() ? profile.getTitle()
           : profileUrl.substring(profileUrl.lastIndexOf("/") + 1);
       var item = new QuestionnaireItemComponent().setType(Questionnaire.QuestionnaireItemType.GROUP)
-          .setLinkId(linkId).setText(text);
-      item.addExtension(new Extension().setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
-          .setValue(new CodeType().setValue(profile.getType())));
+          .setLinkId(linkId).setDefinition(profileUrl).setText(text);
 
       var paths = new ArrayList<String>();
       processElements(profile.getDifferential().getElement(), profile, item, paths);

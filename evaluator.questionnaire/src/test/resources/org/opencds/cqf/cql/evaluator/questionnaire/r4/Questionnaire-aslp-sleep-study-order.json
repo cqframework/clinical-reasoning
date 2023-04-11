@@ -3,26 +3,10 @@
   "id": "aslp-sleep-study-order",
   "item": [
     {
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext",
-          "valueExpression": {
-            "language": "text/cql-identifier",
-            "expression": "Sleep Study"
-          }
-        },
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-          "valueExpression": {
-            "language": "text/cql-identifier",
-            "expression": "Sleep Study"
-          }
-        }
-      ],
       "linkId": "1",
+      "definition": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
       "text": "ASLP Sleep Study Order",
       "type": "group",
-      "repeats": true,
       "item": [
         {
           "linkId": "1.1",

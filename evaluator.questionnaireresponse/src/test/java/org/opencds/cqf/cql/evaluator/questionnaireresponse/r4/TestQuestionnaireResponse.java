@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.r4;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -146,6 +147,10 @@ public class TestQuestionnaireResponse {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
+    }
+
+    public void hasEntry(int theCount) {
+      assertEquals(myGeneratedBundle.getEntry().size(), theCount);
     }
   }
 }

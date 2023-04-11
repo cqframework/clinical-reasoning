@@ -243,6 +243,6 @@ public class PlanDefinitionProcessorTests {
     var repository = new TestRepository().createRepositoryForPath("pa-aslp");
     PlanDefinition.Assert.that(planDefinitionID, patientID, null)
         .withParameters(parameters).withRepository(repository).applyR5()
-        .hasEntry(1);
+        .hasEntry(2);
   }
 }

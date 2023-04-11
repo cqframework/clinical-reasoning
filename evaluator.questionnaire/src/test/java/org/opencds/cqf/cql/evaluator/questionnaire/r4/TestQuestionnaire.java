@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
@@ -63,9 +64,14 @@ public class TestQuestionnaire {
     public static QuestionnaireResult that(String questionnaireName, String patientId) {
       return new QuestionnaireResult(questionnaireName, patientId);
     }
+
+    public static QuestionnaireResult that(IdType theId, String thePatientId) {
+      return new QuestionnaireResult(theId, thePatientId);
+    }
   }
 
   static class QuestionnaireResult {
+    private IdType questionnaireId;
     private Questionnaire questionnaire;
     private String patientId;
     private Repository repository;
@@ -77,7 +83,14 @@ public class TestQuestionnaire {
 
     public QuestionnaireResult(String questionnaireName, String patientId) {
       questionnaire = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
+      questionnaireId = null;
       this.patientId = patientId;
+    }
+
+    public QuestionnaireResult(IdType theId, String thePatientId) {
+      questionnaire = null;
+      questionnaireId = theId;
+      patientId = thePatientId;
     }
 
     public QuestionnaireResult withData(String dataAssetName) {
@@ -121,21 +134,27 @@ public class TestQuestionnaire {
     }
 
     private void buildRepository() {
-      if (repository != null) {
-        return;
-      }
-      if (dataRepository == null) {
-        dataRepository = new FhirRepository(this.getClass(), List.of("tests"), false);
-      }
-      if (contentRepository == null) {
-        contentRepository = new FhirRepository(this.getClass(), List.of("content/"), false);
-      }
-      if (terminologyRepository == null) {
-        terminologyRepository = new FhirRepository(this.getClass(),
-            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+      if (repository == null) {
+        if (dataRepository == null) {
+          dataRepository = new FhirRepository(this.getClass(), List.of("tests"), false);
+        }
+        if (contentRepository == null) {
+          contentRepository = new FhirRepository(this.getClass(), List.of("content/"), false);
+        }
+        if (terminologyRepository == null) {
+          terminologyRepository = new FhirRepository(this.getClass(),
+              List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+        }
+
+        repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
       }
 
-      repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
+      if (questionnaire == null) {
+        try {
+          questionnaire = repository.read(Questionnaire.class, questionnaireId);
+        } catch (Exception e) {
+        }
+      }
     }
 
     public GeneratedQuestionnaire prePopulate() {
@@ -195,7 +214,7 @@ public class TestQuestionnaire {
       return this;
     }
 
-    public GeneratedQuestionnaire itemHasInitialValue(String theLinkId) {
+    public GeneratedQuestionnaire itemHasInitial(String theLinkId) {
       var matchingItems = myItems.stream().filter(i -> i.getLinkId().equals(theLinkId))
           .collect(Collectors.toList());
       for (var item : matchingItems) {

@@ -2,13 +2,19 @@ package org.opencds.cqf.cql.evaluator.questionnaireresponse.r4;
 
 import static org.testng.Assert.assertThrows;
 
+import org.hl7.fhir.r4.model.IdType;
+import org.opencds.cqf.fhir.test.r4.TestRepository;
 import org.testng.annotations.Test;
 
 public class QuestionnaireResponseProcessorTests {
   private void testExtract(String questionnaireResponse) {
+    var repository = new TestRepository().createRepository();
     TestQuestionnaireResponse.Assert
-        .that("tests/QuestionnaireResponse-" + questionnaireResponse + ".json").extract()
-        .isEqualsTo("tests/Bundle-" + questionnaireResponse + ".json");
+        .that(new IdType("QuestionnaireResponse", questionnaireResponse))
+        .withRepository(repository)
+        .withExpectedBundleId(new IdType("Bundle", "extract-" + questionnaireResponse))
+        .extract()
+        .isEqualsToExpected();
   }
 
   @Test
@@ -30,7 +36,7 @@ public class QuestionnaireResponseProcessorTests {
 
   @Test
   void testDefinitionBasedExtraction() {
-    testExtract("OutpatientPriorAuthorizationRequest");
+    testExtract("OutpatientPriorAuthorizationRequest-OPA-Patient1");
   }
 
   @Test(enabled = false)

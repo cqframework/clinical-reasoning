@@ -688,7 +688,7 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-response",
+      "url": "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire",
       "valueReference": {
         "reference": "#OutpatientPriorAuthorizationRequest-OPA-Patient1"
       }

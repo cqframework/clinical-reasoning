@@ -75,9 +75,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     this.parameters = parameters;
     this.bundle = bundle;
     this.libraryEngine = libraryEngine;
-    libraryUrl =
-        ((CanonicalType) questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY).getValue())
-            .getValue();
+    libraryUrl = questionnaire.hasExtension(Constants.CQF_LIBRARY)
+        ? ((CanonicalType) questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY).getValue())
+            .getValue()
+        : null;
     populatedQuestionnaire = questionnaire.copy();
 
     populatedQuestionnaire.setId(questionnaire.getIdPart() + "-" + patientId);

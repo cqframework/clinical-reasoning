@@ -61,7 +61,7 @@ public class QuestionnaireItemGenerator {
         logger.error(message);
         throw new IllegalArgumentException(message);
       }
-      // TODO: define an extension for the text?
+      // TODO: define an extension for the text? SDC_QUESTIONNAIRE_SHORT_TEXT
       var text = profile.hasTitle() ? profile.getTitle()
           : profileUrl.substring(profileUrl.lastIndexOf("/") + 1);
       var item = new QuestionnaireItemComponent().setType(Questionnaire.QuestionnaireItemType.GROUP)

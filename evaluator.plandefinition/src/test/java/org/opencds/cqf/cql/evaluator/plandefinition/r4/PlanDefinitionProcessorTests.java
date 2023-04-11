@@ -6,9 +6,11 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 
 import java.util.List;
 
+import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.test.r4.TestRepository;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests {
@@ -27,11 +29,11 @@ public class PlanDefinitionProcessorTests {
     var patientID = "Patient/ChildRoutine-Reportable";
     var data = "child-routine-visit/child_routine_visit_patient.json";
     var content = "child-routine-visit/child_routine_visit_plan_definition.json";
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).apply()
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).apply()
         .isEqualsTo("child-routine-visit/child_routine_visit_careplan.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).applyR5()
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).applyR5()
         .isEqualsTo("child-routine-visit/child_routine_visit_bundle.json");
   }
 
@@ -42,9 +44,11 @@ public class PlanDefinitionProcessorTests {
     var data = "anc-visit/anc_visit_patient.json";
     var content = "anc-visit/anc_visit_plan_definition.json";
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
-        .withContent(content).apply().isEqualsTo("anc-visit/anc_visit_careplan.json");
+        .withContent(content).withTerminology(content).apply()
+        .isEqualsTo("anc-visit/anc_visit_careplan.json");
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
-        .withContent(content).applyR5().isEqualsTo("anc-visit/anc_visit_bundle.json");
+        .withContent(content).withTerminology(content).applyR5()
+        .isEqualsTo("anc-visit/anc_visit_bundle.json");
   }
 
   @Test
@@ -52,23 +56,24 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "ANCDT17";
     var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
     var encounterID = "Encounter/helloworld-patient-1-encounter-1";
-    var repository = createRepositoryForPath("anc-dak");
+    var repository = new TestRepository().createRepositoryForPath("anc-dak");
     var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
         .withParameters(parameters)
-        .apply().isEqualsTo("anc-dak/tests/CarePlan-ANCDT17.json");
+        .withExpectedCarePlanId(new IdType("CarePlan", "ANCDT17"))
+        .apply().isEqualsToExpected();
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
         .withParameters(parameters)
-        .applyR5().isEqualsTo("anc-dak/tests/Bundle-ANCDT17.json");
+        .withExpectedBundleId(new IdType("Bundle", "ANCDT17"))
+        .applyR5().isEqualsToExpected();
   }
 
   @Test
   public void testANCDT17WithElm() {
     PlanDefinition.Assert.that(
-            "ANCDT17",
-            "Patient/5946f880-b197-400b-9caa-a3c661d23041",
-            "Encounter/ANCDT17-encounter"
-        )
+        "ANCDT17",
+        "Patient/5946f880-b197-400b-9caa-a3c661d23041",
+        "Encounter/ANCDT17-encounter")
         .withData("anc-dak/data-bundle.json")
         .withContent("anc-dak/content-bundle.json")
         .withTerminology("anc-dak/terminology-bundle.json")
@@ -81,10 +86,15 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "us-ecr-specification";
     var patientID = "helloworld-patient-1";
     var encounterID = "helloworld-patient-1-encounter-1";
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).apply()
-        .isEqualsTo("tests/CarePlan-us-ecr-specification.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).applyR5()
-        .isEqualsTo("tests/Bundle-us-ecr-specification.json");
+    var repository = new TestRepository().createRepository();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
+        .withExpectedCarePlanId(new IdType("CarePlan", "us-ecr-specification")).apply()
+        .isEqualsToExpected();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
+        .withExpectedBundleId(new IdType("Bundle", "us-ecr-specification")).applyR5()
+        .isEqualsToExpected();
   }
 
   @Test
@@ -92,10 +102,15 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "hello-world-patient-view";
     var patientID = "helloworld-patient-1";
     var encounterID = "helloworld-patient-1-encounter-1";
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).apply()
-        .isEqualsTo("tests/CarePlan-hello-world-patient-view.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).applyR5()
-        .isEqualsTo("tests/Bundle-hello-world-patient-view.json");
+    var repository = new TestRepository().createRepository();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
+        .withExpectedCarePlanId(new IdType("CarePlan", "hello-world-patient-view")).apply()
+        .isEqualsToExpected();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
+        .withExpectedBundleId(new IdType("Bundle", "hello-world-patient-view")).applyR5()
+        .isEqualsToExpected();
   }
 
   @Test
@@ -103,13 +118,15 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
-    var repository = createRepositoryForPath("opioid-Rec10-patient-view");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
-        .apply()
-        .isEqualsTo("opioid-Rec10-patient-view/tests/CarePlan-opioid-Rec10-patient-view.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
-        .applyR5()
-        .isEqualsTo("opioid-Rec10-patient-view/tests/Bundle-opioid-Rec10-patient-view.json");
+    var repository = new TestRepository().createRepositoryForPath("opioid-Rec10-patient-view");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
+        .withExpectedCarePlanId(new IdType("CarePlan", "opioidcds-10-patient-view")).apply()
+        .isEqualsToExpected();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
+        .withExpectedBundleId(new IdType("Bundle", "opioidcds-10-patient-view")).applyR5()
+        .isEqualsToExpected();
   }
 
   @Test
@@ -118,10 +135,12 @@ public class PlanDefinitionProcessorTests {
     var patientID = "NotReportable";
     var data = "rule-filters/tests-NotReportable-bundle.json";
     var content = "rule-filters/RuleFilters-1.0.0-bundle.json";
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).apply().isEqualsTo("rule-filters/NotReportableCarePlan.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).applyR5().isEqualsTo("rule-filters/NotReportableBundle.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).apply()
+        .isEqualsTo("rule-filters/NotReportableCarePlan.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).applyR5()
+        .isEqualsTo("rule-filters/NotReportableBundle.json");
   }
 
   @Test
@@ -130,10 +149,12 @@ public class PlanDefinitionProcessorTests {
     var patientID = "Reportable";
     var data = "rule-filters/tests-Reportable-bundle.json";
     var content = "rule-filters/RuleFilters-1.0.0-bundle.json";
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).apply().isEqualsTo("rule-filters/ReportableCarePlan.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).applyR5().isEqualsTo("rule-filters/ReportableBundle.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).apply()
+        .isEqualsTo("rule-filters/ReportableCarePlan.json");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).applyR5()
+        .isEqualsTo("rule-filters/ReportableBundle.json");
   }
 
   @Test
@@ -142,11 +163,11 @@ public class PlanDefinitionProcessorTests {
     var patientID = "patient-CdsHooksMultipleActions";
     var data = "cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json";
     var content = "cds-hooks-multiple-actions/cds_hooks_multiple_actions_plan_definition.json";
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).apply()
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).apply()
         .isEqualsTo("cds-hooks-multiple-actions/cds_hooks_multiple_actions_careplan.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withContent(content).applyR5()
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withData(data)
+        .withContent(content).withTerminology(content).applyR5()
         .isEqualsTo("cds-hooks-multiple-actions/cds_hooks_multiple_actions_bundle.json");
   }
 
@@ -155,10 +176,15 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "prepopulate";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withParameters(parameters).apply()
-        .isEqualsTo("tests/CarePlan-prepopulate.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withParameters(parameters)
-        .applyR5().isEqualsTo("tests/Bundle-prepopulate.json");
+    var repository = new TestRepository().createRepository();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null)
+        .withRepository(repository).withParameters(parameters)
+        .withExpectedCarePlanId(new IdType("CarePlan", "prepopulate"))
+        .apply().isEqualsToExpected();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null)
+        .withRepository(repository).withParameters(parameters)
+        .withExpectedBundleId(new IdType("Bundle", "prepopulate"))
+        .applyR5().isEqualsToExpected();
   }
 
   @Test
@@ -166,24 +192,29 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "prepopulate-noLibrary";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withParameters(parameters).apply()
-        .isEqualsTo("tests/CarePlan-prepopulate-noLibrary.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withParameters(parameters)
-        .applyR5().isEqualsTo("tests/Bundle-prepopulate-noLibrary.json");
+    var repository = new TestRepository().createRepository();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
+        .withParameters(parameters)
+        .apply().hasOperationOutcome();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
+        .withParameters(parameters)
+        .applyR5().hasQuestionnaireOperationOutcome();
   }
 
   @Test
   public void testQuestionnaireResponse() {
     var planDefinitionID = "prepopulate";
     var patientID = "OPA-Patient1";
-    var data = "tests/QuestionnaireResponse-OutpatientPriorAuthorizationRequest-OPA-Patient1.json";
+    var dataId =
+        new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1");
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withParameters(parameters).apply()
-        .isEqualsTo("tests/CarePlan-extract-questionnaireresponse.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withAdditionalData(data)
-        .withParameters(parameters).applyR5()
-        .isEqualsTo("tests/Bundle-extract-questionnaireresponse.json");
+    var repository = new TestRepository().createRepository();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
+        .withAdditionalDataId(dataId).withParameters(parameters)
+        .apply().hasContained(6);
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
+        .withAdditionalDataId(dataId).withParameters(parameters)
+        .applyR5().hasEntry(6);
   }
 
   @Test
@@ -191,9 +222,27 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "generate-questionnaire";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withParameters(parameters).apply()
-        .isEqualsTo("tests/CarePlan-generate-questionnaire.json");
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withParameters(parameters)
-        .applyR5().isEqualsTo("tests/Bundle-generate-questionnaire.json");
+    var repository = new TestRepository().createRepository();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
+        .withParameters(parameters)
+        .withExpectedCarePlanId(new IdType("CarePlan", "generate-questionnaire"))
+        .apply().isEqualsToExpected();
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
+        .withParameters(parameters)
+        .withExpectedBundleId(new IdType("Bundle", "generate-questionnaire"))
+        .applyR5().isEqualsToExpected();
+  }
+
+  @Test
+  public void testASLPA1() {
+    var planDefinitionID = "ASLPA1";
+    var patientID = "positive";
+    var parameters = parameters(stringPart("Service Request Id", "SleepStudy"),
+        stringPart("Service Request Id", "SleepStudy2"),
+        stringPart("Coverage Id", "Coverage-positive"));
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null)
+        .withParameters(parameters).withRepository(repository).applyR5()
+        .hasEntry(1);
   }
 }

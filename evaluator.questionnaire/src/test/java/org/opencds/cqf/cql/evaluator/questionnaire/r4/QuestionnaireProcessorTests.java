@@ -6,112 +6,117 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertThrows;
 
-import java.util.List;
-
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
-import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
-import org.opencds.cqf.fhir.api.Repository;
+import org.hl7.fhir.r4.model.IdType;
+import org.opencds.cqf.fhir.test.r4.TestRepository;
 import org.testng.annotations.Test;
 
 public class QuestionnaireProcessorTests {
-  private Repository createRepositoryForPath(String path) {
-    var data = new FhirRepository(this.getClass(), List.of(path + "/tests"), false);
-    var content = new FhirRepository(this.getClass(), List.of(path + "/content"), false);
-    var terminology =
-        new FhirRepository(this.getClass(), List.of(path + "/vocabulary/ValueSet"), false);
-
-    return Repositories.proxy(data, content, terminology);
-  }
-
   @Test
   void testPrePopulate() {
+    var repository = new TestRepository().createRepository();
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
+        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
         .isEqualsTo("questionnaire-for-order-populated.json");
   }
 
   @Test
   void testPrePopulate_NoLibrary() {
-    var data = new FhirRepository(this.getClass(), List.of("tests"), false);
-    var repository = Repositories.proxy(data, null, null);
+    var repository = new TestRepository().createRepository();
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .prePopulate().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
   }
 
   @Test
   void testPrePopulate_HasErrors() {
+    var repository = new TestRepository().createRepository();
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
+        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"),
             "OPA-Patient1")
+        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
         .isEqualsTo("questionnaire-for-order-populated-errors.json");
   }
 
   @Test
   void testPrePopulate_noQuestionnaire_throwsException() {
+    var repository = new TestRepository().createRepository();
     assertThrows(IllegalArgumentException.class, () -> {
-      TestQuestionnaire.Assert.that("", null).prePopulate();
+      TestQuestionnaire.Assert.that("", null).withRepository(repository).prePopulate();
     });
   }
 
   @Test
   void testPrePopulate_notQuestionnaire_throwsException() {
+    var repository = new TestRepository().createRepository();
     assertThrows(ClassCastException.class, () -> {
-      TestQuestionnaire.Assert.that("content/Questionnaire-invalid-questionnaire.json", null)
+      TestQuestionnaire.Assert
+          .that("questionnaire-invalid-questionnaire.json", null)
+          .withRepository(repository)
           .prePopulate();
     });
   }
 
   @Test
   void testPopulate() {
+    var repository = new TestRepository().createRepository();
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
+        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
         .isEqualsTo("questionnaire-response-populated.json");
   }
 
   @Test
   void testPopulate_NoLibrary() {
-    var data = new FhirRepository(this.getClass(), List.of("tests"), false);
-    var repository = Repositories.proxy(data, null, null);
+    var repository = new TestRepository().createRepository();
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .populate().isEqualsTo("questionnaire-response-populated-noLibrary.json");
   }
 
   @Test
   void testPopulate_HasErrors() {
+    var repository = new TestRepository().createRepository();
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
+        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"),
             "OPA-Patient1")
+        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
         .isEqualsTo("questionnaire-response-populated-errors.json");
   }
 
   @Test
   void testPopulate_noQuestionnaire_throwsException() {
+    var repository = new TestRepository().createRepository();
     assertThrows(IllegalArgumentException.class, () -> {
-      TestQuestionnaire.Assert.that("", null).populate();
+      TestQuestionnaire.Assert.that("", null).withRepository(repository).populate();
     });
   }
 
   @Test
   void testPopulate_notQuestionnaire_throwsException() {
+    var repository = new TestRepository().createRepository();
     assertThrows(ClassCastException.class, () -> {
-      TestQuestionnaire.Assert.that("content/Questionnaire-invalid-questionnaire.json", null)
+      TestQuestionnaire.Assert.that("questionnaire-invalid-questionnaire.json", null)
+          .withRepository(repository)
           .populate();
     });
   }
 
   @Test
   void testQuestionnairePackage() {
+    var repository = new TestRepository().createRepository();
     var generatedPackage = TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", null)
+        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), null)
+        .withRepository(repository)
         .questionnairePackage();
 
     assertEquals(generatedPackage.getEntry().size(), 3);
@@ -121,19 +126,19 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPA_ASLP_PrePopulate() {
-    var repository = createRepositoryForPath("pa-aslp");
-    TestQuestionnaire.Assert.that("pa-aslp/content/Questionnaire-ASLPA1.json", "positive")
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
         .withRepository(repository)
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
             stringPart("Service Request Id", "SleepStudy2"),
             stringPart("Coverage Id", "Coverage-positive")))
-        .prePopulate().hasItems(13).itemHasInitialValue("1").itemHasInitialValue("2");
+        .prePopulate().hasItems(13).itemHasInitial("1").itemHasInitial("2");
   }
 
   @Test
   void testPA_ASLP_Populate() {
-    var repository = createRepositoryForPath("pa-aslp");
-    TestQuestionnaire.Assert.that("pa-aslp/content/Questionnaire-ASLPA1.json", "positive")
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
         .withRepository(repository)
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
             stringPart("Service Request Id", "SleepStudy2"),
@@ -143,9 +148,9 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPA_ASLP_Package() {
-    var repository = createRepositoryForPath("pa-aslp");
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
     var generatedPackage = TestQuestionnaire.Assert
-        .that("pa-aslp/content/Questionnaire-ASLPA1.json", null).withRepository(repository)
+        .that(new IdType("Questionnaire", "ASLPA1"), null).withRepository(repository)
         .questionnairePackage();
 
     assertFalse(generatedPackage.getEntry().isEmpty(), null);

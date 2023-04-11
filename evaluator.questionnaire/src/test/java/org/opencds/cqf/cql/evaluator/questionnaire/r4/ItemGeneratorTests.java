@@ -3,7 +3,6 @@ package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 
-import org.opencds.cqf.fhir.test.r4.TestRepository;
 import org.testng.annotations.Test;
 
 public class ItemGeneratorTests {

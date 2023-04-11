@@ -9,8 +9,8 @@ import java.util.List;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.TestRepository;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.test.r4.TestRepository;
 import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTests {

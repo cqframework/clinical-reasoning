@@ -43,10 +43,9 @@ public class FhirRepository implements Repository {
     random = new Random();
 
     var resourceLoader = new FhirResourceLoader(context, clazz, directoryList, recursive);
-    resourceLoader.getResources().forEach(resource -> {
-      resourceMap.put(new IdType(resource.getIdElement().getResourceType(),
-          resource.getIdElement().getIdPart()), resource);
-    });
+    resourceLoader.getResources()
+        .forEach(resource -> resourceMap.put(new IdType(resource.getIdElement().getResourceType(),
+            resource.getIdElement().getIdPart()), resource));
   }
 
   public FhirRepository(Bundle bundle) {
@@ -75,9 +74,9 @@ public class FhirRepository implements Repository {
 
     if (IBaseResource.class.isAssignableFrom(resource.getClass())) {
 
-      IBaseResource iBaseResource = (IBaseResource) resource;
+      var iBaseResource = (IBaseResource) resource;
 
-      IdType theId = new IdType(iBaseResource.getIdElement().getResourceType(),
+      var theId = new IdType(iBaseResource.getIdElement().getResourceType(),
           iBaseResource.getIdElement().getIdPart());
       if (!resourceMap.containsKey(theId)) {
         resourceMap.put(theId, iBaseResource);
@@ -109,9 +108,9 @@ public class FhirRepository implements Repository {
 
     if (IBaseResource.class.isAssignableFrom(resource.getClass())) {
 
-      IBaseResource iBaseResource = (IBaseResource) resource;
+      var iBaseResource = (IBaseResource) resource;
 
-      IdType theId = new IdType(iBaseResource.getIdElement().getResourceType(),
+      var theId = new IdType(iBaseResource.getIdElement().getResourceType(),
           iBaseResource.getIdElement().getIdPart());
       if (resourceMap.containsKey(theId)) {
         resourceMap.put(theId, iBaseResource);
@@ -152,8 +151,8 @@ public class FhirRepository implements Repository {
 
     List<IBaseResource> resourceList = new ArrayList<>();
     for (IBaseResource resource : resourceMap.values()) {
-      if (resource.getIdElement().equals(resourceType.getSimpleName())
-          || resource.getIdElement().getResourceType().equals(resourceType.getSimpleName())) {
+      if (resource.getIdElement() != null
+          && resource.getIdElement().getResourceType().equals(resourceType.getSimpleName())) {
         resourceList.add(resource);
       }
     }

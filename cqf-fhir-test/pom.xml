@@ -22,10 +22,5 @@
       <artifactId>cqf-fhir-api</artifactId>
       <version>3.0.0-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-SNAPSHOT</version>
-    </dependency>
   </dependencies>
 </project>

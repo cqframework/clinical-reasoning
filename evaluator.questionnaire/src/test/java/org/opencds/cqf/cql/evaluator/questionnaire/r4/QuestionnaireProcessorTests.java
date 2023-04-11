@@ -8,7 +8,6 @@ import static org.testng.Assert.assertThrows;
 
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.fhir.test.r4.TestRepository;
 import org.testng.annotations.Test;
 
 public class QuestionnaireProcessorTests {

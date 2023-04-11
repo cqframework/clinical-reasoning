@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure;
 
 
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -21,6 +22,7 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
+import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -78,6 +80,19 @@ public class TranslatingLibraryLoaderTests {
     assertNotNull(library);
 
     assertTrue(hasSignature(library));
+  }
+
+  @Test
+  public void loadLibraryTranslateWithVersionMismatch() {
+    VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("VersionMismatch");
+
+    Library storedElmLibrary = getElmLibrary(libraryIdentifier);
+    assertEquals(TranslatorOptionsUtil.getTranslationVersion(storedElmLibrary), "1.4");
+
+    Library library = this.libraryLoader.load(libraryIdentifier);
+    assertNotNull(library);
+
+    assertEquals(TranslatorOptionsUtil.getTranslationVersion(library), "2.7.0");
   }
 
   private Library getElmLibrary(VersionedIdentifier vi) {

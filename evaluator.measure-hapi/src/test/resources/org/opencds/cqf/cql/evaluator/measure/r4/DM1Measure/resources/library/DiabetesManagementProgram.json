@@ -1,0 +1,46 @@
+{
+  "resourceType": "Library",
+  "id": "DiabetesManagementProgram",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/quality-program-cqfm" ]
+  },
+  "url": "http://cds.optum.com/dqm-diabetes/Library/DiabetesManagementProgram",
+  "identifier": [ {
+    "system": "http://cds.optum.com/dqm-diabetes",
+    "value": "DIABETES-MANAGEMENT"
+  } ],
+  "version": "1.0.1",
+  "name": "DiabetesManagementProgram",
+  "title": "Program to improve diabetes management",
+  "status": "draft",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "asset-collection",
+      "display": "Asset Collection"
+    } ]
+  },
+  "date": "2022-06-01",
+  "publisher": "Optum CDS",
+  "description": "Program to improve diabetes management",
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "program"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes",
+        "code": "DIABETES-MANAGEMENT"
+      } ]
+    }
+  } ],
+  "relatedArtifact": [ {
+    "type": "composed-of",
+    "resource": "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure"
+  }, {
+    "type": "composed-of",
+    "resource": "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM2Measure"
+  } ]
+}

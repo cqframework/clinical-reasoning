@@ -1,0 +1,113 @@
+{
+  "resourceType": "ValueSet",
+  "id": "TZD-nocombo",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "shareable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "narrative"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "publishable"
+  }, {
+    "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion",
+    "valueString": "All generics (with different strengths) and brands (with different strengths) mentioned in Rick's prototype"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning",
+    "valueString": "This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."
+  } ],
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/TZD-nocombo",
+  "version": "1.0.1",
+  "name": "TZDnocombo",
+  "title": "TZD-nocombo",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-08-05T12:37:01-06:00",
+  "publisher": "Optum Technology CDS",
+  "description": "This value set contains SGLT2i medication codes",
+  "purpose": "Medications documented in a clinical record.",
+  "expansion": {
+    "timestamp": "2022-08-05T12:35:49-06:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "261241",
+      "display": "rosiglitazone 2 MG Oral Tablet [Avandia]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "261242",
+      "display": "rosiglitazone 4 MG Oral Tablet [Avandia]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "261243",
+      "display": "rosiglitazone 8 MG Oral Tablet [Avandia]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "261266",
+      "display": "pioglitazone 15 MG Oral Tablet [Actos]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "261267",
+      "display": "pioglitazone 30 MG Oral Tablet [Actos]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "261268",
+      "display": "pioglitazone 45 MG Oral Tablet [Actos]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "312440",
+      "display": "pioglitazone 30 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "312441",
+      "display": "pioglitazone 45 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "312859",
+      "display": "rosiglitazone 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "312860",
+      "display": "rosiglitazone 4 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "312861",
+      "display": "rosiglitazone 8 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "317573",
+      "display": "pioglitazone 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "33738",
+      "display": "pioglitazone"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "84108",
+      "display": "rosiglitazone"
+    } ]
+  }
+}

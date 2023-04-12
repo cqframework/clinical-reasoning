@@ -1,0 +1,210 @@
+{
+  "resourceType": "Library",
+  "id": "HTNSupplementalDataElements",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/library-cqfm" ]
+  },
+  "url": "http://cds.optum.com/dqm-hypertension/fhir/Library/HTNSupplementalDataElements",
+  "version": "1.0.1",
+  "name": "HTNSupplementalDataElements",
+  "title": "HTNSupplementalDataElements",
+  "status": "draft",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "date": "2022-06-01",
+  "publisher": "Optum CDS",
+  "description": "HTNSupplementalDataElements",
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/Library/DQMHypertensionFHIRHelpers|1.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/Library/DQMHypertensionFHIRCommon|1.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/Library/DQMHypertensionCommonLogic|1.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/Library/HTNAmbulatoryVisits|1.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.114222.4.11.837|1.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113762.1.4.1|1.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.114222.4.11.3591|1.0.1"
+  }, {
+    "type": "depends-on",
+    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.114222.4.11.836|1.0.1"
+  } ],
+  "parameter": [ {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Patient"
+  }, {
+    "name": "SDE Ethnicity",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Payer",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  }, {
+    "name": "SDE Race",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Sex",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Coding"
+  }, {
+    "name": "Last Appointment",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Encounter"
+  }, {
+    "name": "Most Recent Practitioner ID",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Reference"
+  }, {
+    "name": "Most Recent Practitioner Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Most Recent Practitioner",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Practitioner"
+  }, {
+    "name": "Days Since Last Appointment",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Observation"
+  }, {
+    "name": "Patient General Practitioners",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Reference"
+  }, {
+    "name": "Qualifying Encounter Practitioners",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Reference"
+  }, {
+    "name": "Patient Practitioner List",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Reference"
+  }, {
+    "name": "Practitioners List",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Practitioner"
+  }, {
+    "name": "Resource Test",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Patient"
+  }, {
+    "name": "Provider Test",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Practitioner"
+  }, {
+    "name": "Tuple Test - Provider",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Practitioner"
+  }, {
+    "name": "Tuple Test - Provider Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Tuple Test",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Any"
+  }, {
+    "name": "List Test",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Practitioner"
+  }, {
+    "name": "Resource Construction Test",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Observation"
+  } ],
+  "dataRequirement": [ {
+    "type": "Coverage",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Coverage" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.114222.4.11.3591|1.0.1"
+    } ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Practitioner" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Practitioner" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Practitioner" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Practitioner" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Practitioner" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Practitioner" ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/HTNSupplementalDataElements.cql"
+  } ]
+}

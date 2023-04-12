@@ -1,0 +1,18 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "UIBehavior",
+  "url": "http://cds.optum.com/dqm-hypertension/fhir/CodeSystem/UIBehavior",
+  "version": "1.0.1",
+  "name": "UIBehavior",
+  "title": "Allowed codes used by worklists UI Behavior.",
+  "status": "active",
+  "date": "2022-08-30T14:45:13-06:00",
+  "description": "Codes used in the worklist UI",
+  "content": "complete",
+  "count": 1,
+  "concept": [ {
+    "code": "hidden",
+    "display": "Hidden",
+    "definition": "Hidden UI State"
+  } ]
+}

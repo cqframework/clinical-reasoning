@@ -1,0 +1,279 @@
+{
+  "resourceType": "Library",
+  "id": "InitialInpatientPopulation",
+  "meta": {
+    "versionId": "3",
+    "lastUpdated": "2022-02-27T21:57:45.514+00:00",
+    "source": "#8e643ba116f0a7ff"
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  } ],
+  "url": "http://fhir.org/guides/cqf/Library/InitialInpatientPopulation",
+  "version": "0.0.001",
+  "name": "InitialInpatientPopulation",
+  "title": "InitialInpatientPopulation",
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://fhir.org/guides/cqf/Library/FHIRHelpers|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library SDE",
+    "resource": "http://fhir.org/guides/cqf/Library/SupplementalDataElementsFHIR4|2.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library Global",
+    "resource": "http://fhir.org/guides/cqf/Library/MATGlobalCommonFunctionsFHIR4|6.1.000"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ActCode",
+    "resource": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+  }, {
+    "type": "depends-on",
+    "display": "Code system Diagnosis Role",
+    "resource": "http://terminology.hl7.org/CodeSystem/diagnosis-role"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Blood Glucose Laboratory and Point of Care Tests",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38"
+  }, {
+    "type": "depends-on",
+    "display": "Value set CDC Location Codes",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1046.265"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Discharge Disposition",
+    "resource": "http://terminology.hl7.org/ValueSet/encounter-discharge-disposition"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Gender Identity",
+    "resource": "http://hl7.org/fhir/ValueSet/gender-identity"
+  }, {
+    "type": "depends-on",
+    "display": "Value set NHSN Hypoglycemia Drugs",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Payer",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+  } ],
+  "parameter": [ {
+    "name": "Performance Period",
+    "use": "in",
+    "min": 0,
+    "max": "1",
+    "type": "Period"
+  }, {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Patient"
+  }, {
+    "name": "Inpatient Encounter",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Encounter"
+  }, {
+    "name": "Antidiabetic Drugs Administered or Ordered",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  }, {
+    "name": "Initial Population",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  }, {
+    "name": "SDE Chief Complaint",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Encounter"
+  }, {
+    "name": "SDE Condition",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Condition"
+  }, {
+    "name": "SDE Encounter Discharge Dispositions",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Encounter"
+  }, {
+    "name": "SDE Encounter Locations",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Encounter"
+  }, {
+    "name": "SDE Ethnicity",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Gender Identity",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Patient"
+  }, {
+    "name": "SDE Locations",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Location"
+  }, {
+    "name": "SDE Medication Administration",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "MedicationAdministration"
+  }, {
+    "name": "SDE Medication Request",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "MedicationRequest"
+  }, {
+    "name": "SDE Observation",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Observation"
+  }, {
+    "name": "SDE Patient Death Date",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Any"
+  }, {
+    "name": "SDE Payer",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  }, {
+    "name": "SDE Patient ID",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  }, {
+    "name": "SDE Procedures",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Procedure"
+  }, {
+    "name": "SDE Race",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Service Request",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "ServiceRequest"
+  }, {
+    "name": "SDE Sex",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Coding"
+  }, {
+    "name": "SDE Zip Code",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  } ],
+  "dataRequirement": [ {
+    "type": "MedicationAdministration",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationAdministration" ],
+    "mustSupport": [ "medication", "status" ],
+    "codeFilter": [ {
+      "path": "medication",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58"
+    } ]
+  }, {
+    "type": "MedicationAdministration",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationAdministration" ]
+  }, {
+    "type": "MedicationRequest",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationRequest" ],
+    "mustSupport": [ "medication" ],
+    "codeFilter": [ {
+      "path": "medication",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58"
+    } ]
+  }, {
+    "type": "MedicationRequest",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationRequest" ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+    "mustSupport": [ "type" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://terminology.hl7.org/ValueSet/encounter-discharge-disposition"
+    } ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+    "mustSupport": [ "period", "diagnosis", "location", "class" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
+    "mustSupport": [ "identifier", "extension", "address", "deceased", "gender", "value", "url" ]
+  }, {
+    "type": "Coverage",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Coverage" ],
+    "mustSupport": [ "period", "type" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+    } ]
+  }, {
+    "type": "ServiceRequest",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/ServiceRequest" ],
+    "mustSupport": [ "code", "intent", "status" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38"
+    } ]
+  }, {
+    "type": "Location",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Location" ],
+    "mustSupport": [ "id" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ]
+  }, {
+    "type": "Procedure",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/InitialInpatientPopulation.cql"
+  } ]
+}

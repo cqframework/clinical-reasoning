@@ -8,8 +8,8 @@ public class DaVinciExtensionMeasureProcessorTest {
 
   protected static Given given = Measure.given().repositoryFor("r4/BreastCancerScreeningFHIR");
 
-
   @Test
+  // TODO: Huh. Why is patient not showing up in the 'initial-population' list?
   public void exm125_numerator() {
     given.when()
         .measureId("BreastCancerScreeningFHIR")
@@ -17,7 +17,8 @@ public class DaVinciExtensionMeasureProcessorTest {
         .periodEnd("2019-12-31")
         .subject("Patient/numer-EXM125")
         .reportType("subject")
-        .evaluate().then()
+        .evaluate()
+        .then()
         .firstGroup().hasScore("1.0")
         .population("numerator").hasCount(1).up()
         .population("denominator").hasCount(1).up().up()

@@ -1,59 +1,44 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertNotNull;
-
 import java.io.IOException;
 
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
+public class BloodPressureMeasureProcessorTest {
 
-@Test(singleThreaded = true)
-public class BloodPressureMeasureProcessorTest extends BaseMeasureProcessorTest {
-
-  // protected static Given given =
-  // Measure.given().repositoryFor("r4/ControllingBloodPressureFHIR");
+  protected static Given given =
+      Measure.given().repositoryFor("r4/ControllingBloodPressureFHIR");
 
 
-  // TODO: This Bundle is currently bad. It's missing Patients
-  public BloodPressureMeasureProcessorTest() {
-    super("ControllingBloodPressureFHIR-bundle.json");
-  }
-
-  @Test(enabled = false)
+  @Test(enabled = false, description = "source bundle is missing needed data")
   public void exm165_singlePatient_numerator() throws IOException {
 
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/chronic-ds/Measure/ControllingBloodPressureFHIR", "2019-01-01",
-        "2020-01-01", "patient", "numer-EXM165", null, null, endpoint, endpoint, endpoint, null);
-    assertNotNull(report);
-
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 1);
-
-    // java.io.File yourFile = new java.io.File("target/sample.json");
-    // yourFile.createNewFile(); // if file already exists will do nothing
-
-    // ca.uhn.fhir.parser.IParser parser = fhirContext.newJsonParser();
-    // parser.setPrettyPrint(true);
-
-    // java.io.FileWriter fileWriter = new java.io.FileWriter(yourFile);
-    // fileWriter.write(parser.encodeResourceToString(report));
-    // fileWriter.flush();
-    // fileWriter.close();
-
-
+    given.when()
+        .measureId("ControllingBloodPressureFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/numer-EXM165")
+        .reportType("patient")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1);
   }
 
-  @Test(enabled = false)
+  @Test(enabled = false, description = "source bundle is missing needed data")
   public void exm165_population() throws IOException {
 
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/chronic-ds/Measure/ControllingBloodPressureFHIR", "2019-01-01",
-        "2020-01-01", "population", null, null, null, endpoint, endpoint, endpoint, null);
-    assertNotNull(report);
-
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 2);
+    given.when()
+        .measureId("ControllingBloodPressureFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .reportType("population")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(2);
   }
 }

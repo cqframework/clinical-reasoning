@@ -1,15 +1,23 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.Collections;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.cql.evaluator.measure.TestRepositories;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.GeneratedReport.PopulationSelector;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.GeneratedReport.PopulationValidator;
 import org.opencds.cqf.fhir.api.Repository;
+import org.testng.TestException;
 
 public class Measure {
   public static Given given() {
@@ -53,7 +61,11 @@ public class Measure {
     private String subjectId;
     private String reportType;
 
+    private Bundle additionalData;
+
     private Supplier<GeneratedReport> operation;
+
+
 
     public When measureId(String measureId) {
       this.measureId = measureId;
@@ -81,6 +93,12 @@ public class Measure {
       return this;
     }
 
+    public When additionalData(Bundle additionalData) {
+      this.additionalData = additionalData;
+      throw new TestException("additional data is not yet supported in tests");
+      // return this;
+    }
+
     public When evaluate() {
       this.operation = () -> new GeneratedReport(
           processor.evaluateMeasure(new IdType("Measure", measureId), periodStart,
@@ -89,7 +107,16 @@ public class Measure {
     }
 
     public GeneratedReport then() {
-      return this.operation.get();
+      if (this.operation == null) {
+        throw new IllegalStateException(
+            "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
+      }
+
+      try {
+        return this.operation.get();
+      } catch (Exception e) {
+        throw new TestException("error when running 'then' and invoking the chosen operation", e);
+      }
     }
   }
   static class GeneratedReport {
@@ -175,6 +202,16 @@ public class Measure {
       return this.reference(x -> x.getEvaluatedResource().stream()
           .filter(y -> y.getReference().equals(name)).findFirst().get());
     }
+
+    public GeneratedReport hasEvaluatedResourceCount(int count) {
+      assertEquals(count, report().getEvaluatedResource().size());
+      return this;
+    }
+
+    public GeneratedReport hasContainedResourceCount(int count) {
+      assertEquals(count, report().getContained().size());
+      return this;
+    }
   }
 
   static class SelectedGroup {
@@ -227,8 +264,25 @@ public class Measure {
     }
 
 
+    // Hmm.. may need to rethink this one a bit.
     public SelectedReference hasPopulations(String... population) {
-      // TODO: Validate evaluatedResource extension
+      var ex = this.reference.getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
+      if (ex.isEmpty()) {
+        throw new TestException(String.format(
+            "no evaluated resource extensions were found, and expected %s", population.length));
+      }
+
+      @SuppressWarnings("unchecked")
+      var set = ex.stream().map(x -> ((IPrimitiveType<String>) x.getValue()).getValue())
+          .collect(Collectors.toSet());
+
+      for (var p : population) {
+        assertTrue(set.contains(p),
+            String.format(
+                "population: %s was not found in the evaluated resources criteria reference extension list",
+                p));
+      }
+
       return this;
     }
   }

@@ -1,0 +1,175 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1190.38",
+  "meta": {
+    "versionId": "3",
+    "lastUpdated": "2022-03-01T19:51:26.032+00:00",
+    "source": "#057dfbe43012e681"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n         <h3>Value Set Contents</h3>\n         <p>This value set contains 28 concepts</p>\n         <p>All codes from system \n            <code>http://loinc.org</code>\n         </p>\n         <table class=\"codes\">\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <b>Code</b>\n               </td>\n               <td>\n                  <b>Display</b>\n               </td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-10449-7\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/10449-7.html\">10449-7</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --1 hour post meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-10450-5\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/10450-5.html\">10450-5</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --10 hours fasting</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-1521-4\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/1521-4.html\">1521-4</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --2 hours post meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-1547-9\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/1547-9.html\">1547-9</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --baseline</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-1550-3\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/1550-3.html\">1550-3</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --pre 12 hour fast</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-1554-5\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/1554-5.html\">1554-5</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --12 hours fasting</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-1556-0\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/1556-0.html\">1556-0</a>\n               </td>\n               <td>Fasting glucose [Mass/volume] in Capillary blood</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-1557-8\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/1557-8.html\">1557-8</a>\n               </td>\n               <td>Fasting glucose [Mass/volume] in Venous blood</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-1558-6\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/1558-6.html\">1558-6</a>\n               </td>\n               <td>Fasting glucose [Mass/volume] in Serum or Plasma</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-16915-1\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/16915-1.html\">16915-1</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --post meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-17865-7\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/17865-7.html\">17865-7</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --8 hours fasting</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-2339-0\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/2339-0.html\">2339-0</a>\n               </td>\n               <td>Glucose [Mass/volume] in Blood</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-2340-8\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/2340-8.html\">2340-8</a>\n               </td>\n               <td>Glucose [Mass/volume] in Blood by Automated test strip</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-2341-6\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/2341-6.html\">2341-6</a>\n               </td>\n               <td>Glucose [Mass/volume] in Blood by Test strip manual</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-2345-7\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/2345-7.html\">2345-7</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-32016-8\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/32016-8.html\">32016-8</a>\n               </td>\n               <td>Glucose [Mass/volume] in Capillary blood</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-40858-3\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/40858-3.html\">40858-3</a>\n               </td>\n               <td>Glucose [Mass/volume] in Capillary blood --baseline</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-41604-0\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/41604-0.html\">41604-0</a>\n               </td>\n               <td>Fasting glucose [Mass/volume] in Capillary blood by Glucometer</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-41651-1\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/41651-1.html\">41651-1</a>\n               </td>\n               <td>Glucose [Mass/volume] in Arterial blood</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-41652-9\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/41652-9.html\">41652-9</a>\n               </td>\n               <td>Glucose [Mass/volume] in Venous blood</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-41653-7\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/41653-7.html\">41653-7</a>\n               </td>\n               <td>Glucose [Mass/volume] in Capillary blood by Glucometer</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-53049-3\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/53049-3.html\">53049-3</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --pre-meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-6689-4\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/6689-4.html\">6689-4</a>\n               </td>\n               <td>Glucose [Mass/volume] in Blood --2 hours post meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-74774-1\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/74774-1.html\">74774-1</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum, Plasma or Blood</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-80959-0\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/80959-0.html\">80959-0</a>\n               </td>\n               <td>Glucose [Mass/volume] in Serum or Plasma --1.5 hours post meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-87422-2\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/87422-2.html\">87422-2</a>\n               </td>\n               <td>Glucose [Mass/volume] in Blood --post meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-88365-2\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/88365-2.html\">88365-2</a>\n               </td>\n               <td>Glucose [Mass/volume] in Blood --pre-meal</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---loinc.org-93791-2\"> </a>\n                  <a href=\"http://details.loinc.org/LOINC/93791-2.html\">93791-2</a>\n               </td>\n               <td>Glucose [Mass/volume] mean in Serum or Plasma</td>\n            </tr>\n         </table>\n      </div>"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38",
+  "version": "20220210",
+  "name": "Blood Glucose Laboratory and Point of Care Tests",
+  "title": "Blood Glucose Laboratory and Point of Care Tests",
+  "status": "active",
+  "date": "2022-02-10T01:02:28-05:00",
+  "publisher": "HL7 Terminology",
+  "description": "Blood Glucose LOINC Terms for the NHSN ADE – Hypoglycemia Module. Excludes any terms with the unit moles/volume.",
+  "expansion": {
+    "identifier": "urn:uuid:abcf2c55-b560-4a63-9927-d6cf9c907e9d",
+    "timestamp": "2022-02-15T11:20:01-05:00",
+    "total": 28,
+    "offset": 0,
+    "parameter": [ {
+      "name": "count",
+      "valueInteger": 1000
+    }, {
+      "name": "offset",
+      "valueInteger": 0
+    } ],
+    "contains": [ {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "10449-7",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --1 hour post meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "10450-5",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --10 hours fasting"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "1521-4",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --2 hours post meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "1547-9",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --baseline"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "1550-3",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --pre 12 hour fast"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "1554-5",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --12 hours fasting"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "1556-0",
+      "display": "Fasting glucose [Mass/volume] in Capillary blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "1557-8",
+      "display": "Fasting glucose [Mass/volume] in Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "1558-6",
+      "display": "Fasting glucose [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "16915-1",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --post meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "17865-7",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --8 hours fasting"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "2339-0",
+      "display": "Glucose [Mass/volume] in Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "2340-8",
+      "display": "Glucose [Mass/volume] in Blood by Automated test strip"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "2341-6",
+      "display": "Glucose [Mass/volume] in Blood by Test strip manual"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "2345-7",
+      "display": "Glucose [Mass/volume] in Serum or Plasma"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "32016-8",
+      "display": "Glucose [Mass/volume] in Capillary blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "40858-3",
+      "display": "Glucose [Mass/volume] in Capillary blood --baseline"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "41604-0",
+      "display": "Fasting glucose [Mass/volume] in Capillary blood by Glucometer"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "41651-1",
+      "display": "Glucose [Mass/volume] in Arterial blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "41652-9",
+      "display": "Glucose [Mass/volume] in Venous blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "41653-7",
+      "display": "Glucose [Mass/volume] in Capillary blood by Glucometer"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "53049-3",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --pre-meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "6689-4",
+      "display": "Glucose [Mass/volume] in Blood --2 hours post meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "74774-1",
+      "display": "Glucose [Mass/volume] in Serum, Plasma or Blood"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "80959-0",
+      "display": "Glucose [Mass/volume] in Serum or Plasma --1.5 hours post meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "87422-2",
+      "display": "Glucose [Mass/volume] in Blood --post meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "88365-2",
+      "display": "Glucose [Mass/volume] in Blood --pre-meal"
+    }, {
+      "system": "http://loinc.org",
+      "version": "2.71",
+      "code": "93791-2",
+      "display": "Glucose [Mass/volume] mean in Serum or Plasma"
+    } ]
+  }
+}

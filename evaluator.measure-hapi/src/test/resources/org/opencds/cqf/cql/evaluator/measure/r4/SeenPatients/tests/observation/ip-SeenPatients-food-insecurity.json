@@ -1,0 +1,43 @@
+{
+  "resourceType": "Observation",
+  "id": "ip-SeenPatients-food-insecurity",
+  "status": "final",
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "social-history",
+      "display": "Social History"
+    } ]
+  }, {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "survey",
+      "display": "Survey"
+    } ]
+  }, {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes",
+      "code": "food-insecurity",
+      "display": "Food Insecurity"
+    } ]
+  } ],
+  "code": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "88124-3",
+      "display": "Food insecurity risk [HVS]"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/ip-SeenPatients"
+  },
+  "effectiveDateTime": "2019-09-10T21:56:54.671Z",
+  "issued": "2019-09-10T21:56:54.671Z",
+  "valueCodeableConcept": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "LA19952-3",
+      "display": "At risk"
+    } ]
+  }
+}

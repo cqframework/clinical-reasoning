@@ -1,46 +1,40 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.HashSet;
 
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
-public class MeasureProcessorEvaluatedResourceTest extends BaseMeasureProcessorTest {
+public class MeasureProcessorEvaluatedResourceTest {
 
-  public MeasureProcessorEvaluatedResourceTest() {
-    super("ContentBundleUpdated.json");
-  }
+  protected static Given given =
+      Measure.given().repositoryFor("r4/ContentBundleUpdated");
 
   @Test
   public void measure_eval_contained_is_unique() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://cds.optum.com/dqm-hypertension/fhir/Measure/HTN1Measure", "2020-08-16",
-        "2022-08-16", "subject", "Patient/HTN1-patient-1", null, null, endpoint, endpoint, endpoint,
-        null);
-
-    assertNotNull(report);
+    var report = given.when()
+        .measureId("HTN1Measure")
+        .periodStart("2020-08-16")
+        .periodEnd("2022-08-16")
+        .subject("Patient/HTN1-patient-1")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .hasEvaluatedResourceCount(9)
+        .hasContainedResourceCount(4)
+        .evaluatedResource("Encounter/HTN1-patient-1-encounter-2")
+        .hasPopulations("initial-population").up()
+        .evaluatedResource("Observation/HTN1-patient-1-observation-3")
+        .hasPopulations("numerator").up()
+        .firstGroup()
+        .population("initial-population").hasCount(1).up().up()
+        .report();
 
     // check contained duplicates
     HashSet<String> containedIdSet = new HashSet<>();
     report.getContained().forEach(x -> containedIdSet.add(x.getId()));
     assertEquals(report.getContained().size(), containedIdSet.size());
-
-    // check evaluated resource
-    assertEquals(report.getEvaluatedResource().size(), 9);
-
-    assertTrue(report.getEvaluatedResource().stream().anyMatch(
-        item -> item.getReference().equalsIgnoreCase("Encounter/HTN1-patient-1-encounter-2")
-            && ((StringType) item.getExtension().get(0).getValue()).getValue()
-                .equalsIgnoreCase("initial-population")));
-
-    assertTrue(report.getEvaluatedResource().stream().anyMatch(
-        item -> item.getReference().equalsIgnoreCase("Observation/HTN1-patient-1-observation-3")
-            && ((StringType) item.getExtension().get(0).getValue()).getValue()
-                .equalsIgnoreCase("numerator")));
   }
 }

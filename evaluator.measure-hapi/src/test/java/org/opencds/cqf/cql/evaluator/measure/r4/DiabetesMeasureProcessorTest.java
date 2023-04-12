@@ -1,77 +1,67 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertNotNull;
-
 import java.io.IOException;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 
-@Test(singleThreaded = true)
-public class DiabetesMeasureProcessorTest extends BaseMeasureProcessorTest {
+public class DiabetesMeasureProcessorTest {
 
-
-  public DiabetesMeasureProcessorTest() {
-    super("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR-bundle.json");
-  }
+  protected static Given given =
+      Measure.given().repositoryFor("r4/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
 
   @Test
   public void a1c_singlePatient_numerator() {
-
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR",
-        "2019-01-01", "2020-01-01", "patient", "numer-CMS122-Patient", null, null, endpoint,
-        endpoint, endpoint, null);
-    assertNotNull(report);
-
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 1);
-
-    // java.io.File yourFile = new java.io.File("target/sample.json");
-    // yourFile.createNewFile(); // if file already exists will do nothing
-
-    // ca.uhn.fhir.parser.IParser parser = fhirContext.newJsonParser();
-    // parser.setPrettyPrint(true);
-
-    // java.io.FileWriter fileWriter = new java.io.FileWriter(yourFile);
-    // fileWriter.write(parser.encodeResourceToString(report));
-    // fileWriter.flush();
-    // fileWriter.close();
-
-
+    given.when()
+        .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/numer-CMS122-Patient")
+        .reportType("patient")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1);
   }
 
   @Test
+  // TODO: Need a subject provider / processor that can load multiple subjects
   public void a1c_population() throws IOException {
-
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR",
-        "2019-01-01", "2020-01-01", "population", null, null, null, endpoint, endpoint, endpoint,
-        null);
-    assertNotNull(report);
-
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 2);
-
-    // Potentially an error in the data... TBD
-    // validateGroup(report.getGroup().get(0), "initial-population", 3);
+    given.when()
+        .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .reportType("population")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(2);
   }
 
   // TODO: Work on the additional data Bundle integration with the Subject provider
-  @Test(enabled = false)
+  @Test(enabled = false, description = "Additional data is not yet supported for Subjects")
   public void a1c_additionalData() {
-    Bundle additionalData = (Bundle) fhirContext.newJsonParser().parseResource(
-        BaseMeasureProcessorTest.class.getResourceAsStream("CMS122-AdditionalData-bundle.json"));
 
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/chronic-ds/Measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR",
-        "2019-01-01", "2020-01-01", "patient", "numer-CMS122-2-Patient", null, null, endpoint,
-        endpoint, null, additionalData);
-    assertNotNull(report);
-
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 1);
+    Bundle additionalData = (Bundle) FhirContext.forR4Cached().newJsonParser()
+        .parseResource(DiabetesMeasureProcessorTest.class
+            .getResourceAsStream(
+                "DiabetesHemoglobinA1cHbA1cPoorControl9FHIR/CMS122-AdditionalData-bundle.json"));
+    given.when()
+        .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/numer-CMS122-Patient")
+        .reportType("patient")
+        .additionalData(additionalData)
+        .evaluate()
+        .then()
+        .firstGroup()
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1);
   }
 }

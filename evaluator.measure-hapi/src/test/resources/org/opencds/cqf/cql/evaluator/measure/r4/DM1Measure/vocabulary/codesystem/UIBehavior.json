@@ -1,0 +1,18 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "UIBehavior",
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIBehavior",
+  "version": "1.0.1",
+  "name": "UIBehavior",
+  "title": "Allowed codes used by worklists UI Behavior.",
+  "status": "active",
+  "date": "2022-08-05T12:37:01-06:00",
+  "description": "Codes used in the worklist UI",
+  "content": "complete",
+  "count": 1,
+  "concept": [ {
+    "code": "hidden",
+    "display": "Hidden",
+    "definition": "Hidden UI State"
+  } ]
+}

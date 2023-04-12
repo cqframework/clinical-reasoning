@@ -100,7 +100,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public abstract void extractQuestionnaireResponse();
 
-  public abstract IBaseBundle packagePlanDefinition(T thePlanDefinition);
+  public abstract IBaseBundle packagePlanDefinition(T thePlanDefinition, boolean theIsPut);
+
+  public IBaseBundle packagePlanDefinition(T thePlanDefinition) {
+    return packagePlanDefinition(thePlanDefinition, false);
+  }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packagePlanDefinition(
       IIdType theId, CanonicalType theCanonical, IBaseResource thePlanDefinition) {

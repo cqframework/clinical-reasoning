@@ -74,10 +74,15 @@ public abstract class BaseQuestionnaireProcessor<T> {
 
   public abstract T generateQuestionnaire(String theId);
 
-  public abstract IBaseBundle packageQuestionnaire(T theQuestionnaire);
+  public abstract IBaseBundle packageQuestionnaire(T theQuestionnaire, boolean theIsPut);
+
+  public IBaseBundle packageQuestionnaire(T theQuestionnaire) {
+    return packageQuestionnaire(theQuestionnaire, false);
+  }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
-      IIdType theId, CanonicalType theCanonical, IBaseResource theQuestionnaire) {
-    return packageQuestionnaire(resolveQuestionnaire(theId, theCanonical, theQuestionnaire));
+      IIdType theId, CanonicalType theCanonical, IBaseResource theQuestionnaire, boolean theIsPut) {
+    return packageQuestionnaire(resolveQuestionnaire(theId, theCanonical, theQuestionnaire),
+        theIsPut);
   }
 }

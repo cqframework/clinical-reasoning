@@ -281,18 +281,19 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   }
 
   @Override
-  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire) {
+  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean theIsPut) {
     var bundle = new Bundle();
     bundle.setType(BundleType.TRANSACTION);
-    bundle.addEntry(PackageHelper.createEntry(theQuestionnaire));
+    bundle.addEntry(PackageHelper.createEntry(theQuestionnaire, theIsPut));
     var libraryExtension = theQuestionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
     if (libraryExtension != null) {
       var libraryCanonical = (CanonicalType) libraryExtension.getValue();
       var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
       if (library != null) {
-        bundle.addEntry(PackageHelper.createEntry(library));
+        bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
         if (library.hasRelatedArtifact()) {
-          PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository);
+          PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository,
+              theIsPut);
         }
       }
     }

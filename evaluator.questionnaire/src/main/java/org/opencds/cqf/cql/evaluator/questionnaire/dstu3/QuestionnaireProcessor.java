@@ -228,7 +228,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   }
 
   @Override
-  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire) {
+  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean theIsPut) {
     var bundle = new Bundle();
     bundle.setType(BundleType.COLLECTION);
     bundle.addEntry(new BundleEntryComponent().setResource(theQuestionnaire));

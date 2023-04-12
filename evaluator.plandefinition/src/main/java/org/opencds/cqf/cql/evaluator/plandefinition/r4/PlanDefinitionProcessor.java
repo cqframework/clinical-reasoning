@@ -104,24 +104,26 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
-  public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition) {
+  public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition, boolean theIsPut) {
     var bundle = new Bundle();
     bundle.setType(BundleType.TRANSACTION);
-    bundle.addEntry(PackageHelper.createEntry(thePlanDefinition));
+    bundle.addEntry(PackageHelper.createEntry(thePlanDefinition, theIsPut));
     // The CPG IG specifies a main cql library for a PlanDefinition
     var libraryCanonical =
         thePlanDefinition.hasLibrary() ? thePlanDefinition.getLibrary().get(0) : null;
     if (libraryCanonical != null) {
       var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
       if (library != null) {
-        bundle.addEntry(PackageHelper.createEntry(library));
+        bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
         if (library.hasRelatedArtifact()) {
-          PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository);
+          PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository,
+              theIsPut);
         }
       }
     }
     if (thePlanDefinition.hasRelatedArtifact()) {
-      PackageHelper.addRelatedArtifacts(bundle, thePlanDefinition.getRelatedArtifact(), repository);
+      PackageHelper.addRelatedArtifacts(bundle, thePlanDefinition.getRelatedArtifact(), repository,
+          theIsPut);
     }
 
     return bundle;

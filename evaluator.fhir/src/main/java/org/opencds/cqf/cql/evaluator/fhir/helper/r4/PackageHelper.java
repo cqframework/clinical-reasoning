@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.evaluator.fhir.helper.r4;
 
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,12 +10,15 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -37,41 +39,130 @@ public class PackageHelper {
           FHIRAllTypes.CODESYSTEM.toCode(), FHIRAllTypes.VALUESET.toCode());
 
   protected static boolean hasRelatedArtifact(Resource theResource) {
-    return (theResource.fhirType().equals(FHIRAllTypes.LIBRARY.toCode())
-        && ((Library) theResource).hasRelatedArtifact())
-        || (theResource.fhirType().equals(FHIRAllTypes.PLANDEFINITION.toCode())
-            && ((PlanDefinition) theResource).hasRelatedArtifact())
-        || (theResource.fhirType().equals(FHIRAllTypes.ACTIVITYDEFINITION.toCode())
-            && ((ActivityDefinition) theResource).hasRelatedArtifact());
+    switch (theResource.getResourceType()) {
+      case Library:
+        return ((Library) theResource).hasRelatedArtifact();
+      case PlanDefinition:
+        return ((PlanDefinition) theResource).hasRelatedArtifact();
+      case ActivityDefinition:
+        return ((ActivityDefinition) theResource).hasRelatedArtifact();
+      default:
+        return false;
+    }
   }
 
   protected static List<RelatedArtifact> getRelatedArtifact(Resource theResource) {
-    List<RelatedArtifact> relatedArtifact = new ArrayList<>();
     switch (theResource.getResourceType()) {
       case Library:
         return ((Library) theResource).getRelatedArtifact();
-
       case PlanDefinition:
         return ((PlanDefinition) theResource).getRelatedArtifact();
-
       case ActivityDefinition:
         return ((ActivityDefinition) theResource).getRelatedArtifact();
-
       default:
-        break;
+        return null;
     }
-
-    return relatedArtifact;
   }
 
-  public static BundleEntryComponent createEntry(Resource theResource) {
-    var url = theResource.getResourceType().toString() + "/" + theResource.getIdPart();
-    return new BundleEntryComponent().setResource(theResource)
-        .setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.PUT).setUrl(url));
+  protected static boolean hasUrl(Resource theResource) {
+    switch (theResource.getResourceType()) {
+      case Library:
+        return ((Library) theResource).hasUrl();
+      case PlanDefinition:
+        return ((PlanDefinition) theResource).hasUrl();
+      case ActivityDefinition:
+        return ((ActivityDefinition) theResource).hasUrl();
+      case StructureDefinition:
+        return ((StructureDefinition) theResource).hasUrl();
+      case ValueSet:
+        return ((ValueSet) theResource).hasUrl();
+      case CodeSystem:
+        return ((CodeSystem) theResource).hasUrl();
+      default:
+        return false;
+    }
+  }
+
+  protected static String getUrl(Resource theResource) {
+    switch (theResource.getResourceType()) {
+      case Library:
+        return ((Library) theResource).getUrl();
+      case PlanDefinition:
+        return ((PlanDefinition) theResource).getUrl();
+      case ActivityDefinition:
+        return ((ActivityDefinition) theResource).getUrl();
+      case StructureDefinition:
+        return ((StructureDefinition) theResource).getUrl();
+      case ValueSet:
+        return ((ValueSet) theResource).getUrl();
+      case CodeSystem:
+        return ((CodeSystem) theResource).getUrl();
+      default:
+        return null;
+    }
+  }
+
+  protected static boolean hasVersion(Resource theResource) {
+    switch (theResource.getResourceType()) {
+      case Library:
+        return ((Library) theResource).hasVersion();
+      case PlanDefinition:
+        return ((PlanDefinition) theResource).hasVersion();
+      case ActivityDefinition:
+        return ((ActivityDefinition) theResource).hasVersion();
+      case StructureDefinition:
+        return ((StructureDefinition) theResource).hasVersion();
+      case ValueSet:
+        return ((ValueSet) theResource).hasVersion();
+      case CodeSystem:
+        return ((CodeSystem) theResource).hasVersion();
+      default:
+        return false;
+    }
+  }
+
+  protected static String getVersion(Resource theResource) {
+    switch (theResource.getResourceType()) {
+      case Library:
+        return ((Library) theResource).getVersion();
+      case PlanDefinition:
+        return ((PlanDefinition) theResource).getVersion();
+      case ActivityDefinition:
+        return ((ActivityDefinition) theResource).getVersion();
+      case StructureDefinition:
+        return ((StructureDefinition) theResource).getVersion();
+      case ValueSet:
+        return ((ValueSet) theResource).getVersion();
+      case CodeSystem:
+        return ((CodeSystem) theResource).getVersion();
+      default:
+        return null;
+    }
+  }
+
+  public static BundleEntryComponent createEntry(Resource theResource, boolean theIsPut) {
+    var resourceType = theResource.getResourceType().toString();
+    var entry = new BundleEntryComponent().setResource(theResource);
+    var request = new BundleEntryRequestComponent();
+    if (theIsPut) {
+      request.setMethod(HTTPVerb.PUT).setUrl(resourceType + "/" + theResource.getIdPart());
+    } else {
+      request.setMethod(HTTPVerb.POST).setUrl(resourceType);
+      if (hasUrl(theResource)) {
+        var url = getUrl(theResource);
+        if (hasVersion(theResource)) {
+          request.setIfNoneExist(String.format("url=%s&version=%s", url, getVersion(theResource)));
+        } else {
+          request.setIfNoneExist(String.format("url=%s", url));
+        }
+      }
+    }
+
+    return entry;
   }
 
   public static void addRelatedArtifacts(Bundle theBundle, List<RelatedArtifact> theArtifacts,
-      Repository theRepository) {
+      Repository theRepository, boolean theIsPut) {
     for (var artifact : theArtifacts) {
       if (artifact.getType().equals(RelatedArtifactType.DEPENDSON)
           && artifact.hasResourceElement()) {
@@ -84,9 +175,10 @@ public class PackageHelper {
                 && theBundle.getEntry().stream()
                     .noneMatch(
                         e -> e.getResource().getIdElement().equals(resource.getIdElement()))) {
-              theBundle.addEntry(createEntry(resource));
+              theBundle.addEntry(createEntry(resource, theIsPut));
               if (hasRelatedArtifact(resource)) {
-                addRelatedArtifacts(theBundle, getRelatedArtifact(resource), theRepository);
+                addRelatedArtifacts(theBundle, getRelatedArtifact(resource), theRepository,
+                    theIsPut);
               }
             }
           }

@@ -67,6 +67,44 @@
   ],
   "purpose": "The purpose of this is to test the system to make sure we have complete end-to-end functionality",
   "usage": "This is to be used in conjunction with a patient-facing FHIR application.",
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-bmi"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-diagnosis-of-obstructive-sleep-apnea"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-height"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-diabetes"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-hypertension"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-neck-circumference"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-servicerequest"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-weight"
+    }
+  ],
   "library": [
     "http://example.org/sdh/dtr/aslp/Library/ASLPDataElements"
   ],

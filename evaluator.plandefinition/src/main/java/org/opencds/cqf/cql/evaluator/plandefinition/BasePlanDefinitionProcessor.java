@@ -100,6 +100,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public abstract void extractQuestionnaireResponse();
 
+  public abstract IBaseBundle packagePlanDefinition(T thePlanDefinition);
+
+  public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packagePlanDefinition(
+      IIdType theId, CanonicalType theCanonical, IBaseResource thePlanDefinition) {
+    return packagePlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition));
+  }
+
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
       CanonicalType theCanonical, IBaseResource thePlanDefinition, String patientId,
       String encounterId, String practitionerId, String organizationId, String userType,

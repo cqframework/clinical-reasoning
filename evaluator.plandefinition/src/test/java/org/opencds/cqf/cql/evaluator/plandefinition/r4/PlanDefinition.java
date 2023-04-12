@@ -209,6 +209,14 @@ public class PlanDefinition {
           null, null, null, null, null, null, parameters, null, additionalData, null,
           libraryEngine), expectedCarePlan);
     }
+
+    public GeneratedPackage packagePlanDefinition() {
+      buildRepository();
+      return new GeneratedPackage(
+          (Bundle) buildProcessor(repository)
+              .packagePlanDefinition(new IdType("PlanDefinition", planDefinitionID), null, null),
+          null);
+    }
   }
 
   static class GeneratedBundle {
@@ -288,6 +296,20 @@ public class PlanDefinition {
     public void hasOperationOutcome() {
       assertTrue(myGeneratedCarePlan.getContained().stream()
           .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+    }
+  }
+
+  static class GeneratedPackage {
+    Bundle myGeneratedBundle;
+    Bundle myExpectedBundle;
+
+    public GeneratedPackage(Bundle theGeneratedBundle, Bundle theExpectedBundle) {
+      myGeneratedBundle = theGeneratedBundle;
+      myExpectedBundle = theExpectedBundle;
+    }
+
+    public void hasEntry(int theCount) {
+      assertEquals(myGeneratedBundle.getEntry().size(), theCount);
     }
   }
 }

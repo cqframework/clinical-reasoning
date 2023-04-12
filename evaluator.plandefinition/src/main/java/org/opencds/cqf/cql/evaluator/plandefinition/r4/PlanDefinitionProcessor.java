@@ -50,6 +50,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
+import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireItemGenerator;
@@ -100,6 +101,30 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
       }
     }
+  }
+
+  @Override
+  public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition) {
+    var bundle = new Bundle();
+    bundle.setType(BundleType.TRANSACTION);
+    bundle.addEntry(PackageHelper.createEntry(thePlanDefinition));
+    // The CPG IG specifies a main cql library for a PlanDefinition
+    var libraryCanonical =
+        thePlanDefinition.hasLibrary() ? thePlanDefinition.getLibrary().get(0) : null;
+    if (libraryCanonical != null) {
+      var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
+      if (library != null) {
+        bundle.addEntry(PackageHelper.createEntry(library));
+        if (library.hasRelatedArtifact()) {
+          PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository);
+        }
+      }
+    }
+    if (thePlanDefinition.hasRelatedArtifact()) {
+      PackageHelper.addRelatedArtifacts(bundle, thePlanDefinition.getRelatedArtifact(), repository);
+    }
+
+    return bundle;
   }
 
   @Override

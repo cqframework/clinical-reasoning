@@ -245,4 +245,12 @@ public class PlanDefinitionProcessorTests {
         .withParameters(parameters).withRepository(repository).applyR5()
         .hasEntry(2);
   }
+
+  @Test
+  public void testPackageASLPA1() {
+    var planDefinitionID = "ASLPA1";
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    PlanDefinition.Assert.that(planDefinitionID, null, null)
+        .withRepository(repository).packagePlanDefinition().hasEntry(20);
+  }
 }

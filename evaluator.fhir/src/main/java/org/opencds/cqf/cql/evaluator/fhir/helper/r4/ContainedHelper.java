@@ -23,6 +23,8 @@ import org.hl7.fhir.r4.model.Resource;
  */
 public class ContainedHelper {
 
+  private ContainedHelper() {}
+
   /**
    * Adds all contained resources in resources contained on the parent to the parent.
    *

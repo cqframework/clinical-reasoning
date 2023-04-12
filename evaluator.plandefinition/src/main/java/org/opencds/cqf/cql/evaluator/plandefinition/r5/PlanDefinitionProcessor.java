@@ -102,6 +102,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
+  public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition) {
+    var bundle = new Bundle();
+    bundle.setType(BundleType.TRANSACTION);
+
+    return bundle;
+  }
+
+  @Override
   public <C extends IPrimitiveType<String>> PlanDefinition resolvePlanDefinition(IIdType theId,
       C theCanonical, IBaseResource thePlanDefinition) {
     var basePlanDefinition = thePlanDefinition;

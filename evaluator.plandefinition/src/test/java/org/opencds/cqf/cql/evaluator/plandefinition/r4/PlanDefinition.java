@@ -214,7 +214,8 @@ public class PlanDefinition {
       buildRepository();
       return new GeneratedPackage(
           (Bundle) buildProcessor(repository)
-              .packagePlanDefinition(new IdType("PlanDefinition", planDefinitionID), null, null),
+              .packagePlanDefinition(new IdType("PlanDefinition", planDefinitionID), null, null,
+                  true),
           null);
     }
   }

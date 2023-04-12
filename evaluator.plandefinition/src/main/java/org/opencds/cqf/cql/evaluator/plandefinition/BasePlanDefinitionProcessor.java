@@ -107,8 +107,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packagePlanDefinition(
-      IIdType theId, CanonicalType theCanonical, IBaseResource thePlanDefinition) {
-    return packagePlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition));
+      IIdType theId, CanonicalType theCanonical, IBaseResource thePlanDefinition,
+      boolean theIsPut) {
+    return packagePlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition),
+        theIsPut);
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,

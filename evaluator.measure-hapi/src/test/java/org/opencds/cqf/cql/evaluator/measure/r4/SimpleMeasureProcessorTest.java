@@ -13,7 +13,7 @@ public class SimpleMeasureProcessorTest {
       Measure.given().repositoryFor("r4/EXM108");
 
 
-  @Test(enabled = false)
+  @Test(enabled = false, description = "Need to test at the service level to enable this")
   public void exm108_partialSubjectId() {
     given.when()
         .measureId("measure-EXM108-8.3.000")

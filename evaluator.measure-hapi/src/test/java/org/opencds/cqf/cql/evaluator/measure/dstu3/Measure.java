@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.measure.r4;
+package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -8,18 +8,18 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupPopulationComponent;
+import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.measure.TestRepositories;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
-import org.opencds.cqf.cql.evaluator.measure.r4.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.TestException;
 
@@ -62,8 +62,8 @@ public class Measure {
       return this;
     }
 
-    private static R4MeasureProcessor buildProcessor(Repository repository) {
-      return new R4MeasureProcessor(repository, null);
+    private static Dstu3MeasureProcessor buildProcessor(Repository repository) {
+      return new Dstu3MeasureProcessor(repository, null);
     }
 
     When when() {
@@ -72,9 +72,9 @@ public class Measure {
   }
 
   static class When {
-    private final R4MeasureProcessor processor;
+    private final Dstu3MeasureProcessor processor;
 
-    When(R4MeasureProcessor processor) {
+    When(Dstu3MeasureProcessor processor) {
       this.processor = processor;
     }
 
@@ -184,15 +184,15 @@ public class Measure {
       return new SelectedReference<>(this, r);
     }
 
-    public SelectedReference<SelectedReport> evaluatedResource(String name) {
-      return this.reference(x -> x.getEvaluatedResource().stream()
-          .filter(y -> y.getReference().equals(name)).findFirst().get());
-    }
+    // public SelectedReference<SelectedReport> evaluatedResource(String name) {
+    // return this.reference(x -> x.getEvaluatedResource().stream()
+    // .filter(y -> y.getReference().equals(name)).findFirst().get());
+    // }
 
-    public SelectedReport hasEvaluatedResourceCount(int count) {
-      assertEquals(count, report().getEvaluatedResource().size());
-      return this;
-    }
+    // public SelectedReport hasEvaluatedResourceCount(int count) {
+    // assertEquals(count, report().getEvaluatedResource().size());
+    // return this;
+    // }
 
     public SelectedReport hasContainedResourceCount(int count) {
       assertEquals(count, report().getContained().size());

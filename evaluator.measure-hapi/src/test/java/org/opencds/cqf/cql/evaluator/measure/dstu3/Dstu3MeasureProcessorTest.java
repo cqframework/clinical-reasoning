@@ -1,22 +1,24 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
-import static org.testng.Assert.assertNotNull;
-
+import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.Given;
 import org.testng.annotations.Test;
 
-@Test(singleThreaded = true)
-public class Dstu3MeasureProcessorTest extends BaseMeasureProcessorTest {
-  public Dstu3MeasureProcessorTest() {
-    super("EXM105FHIR3Measure.json");
-  }
+public class Dstu3MeasureProcessorTest {
+
+  protected static Given given =
+      Measure.given().repositoryFor("dstu3/EXM105FHIR3Measure");
 
   @Test
-  public void testMeasureEvaluate() {
-    var report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM105-FHIR3-8.0.000", "2019-01-01",
-        "2020-01-01", "subject", "Patient/denom-EXM105-FHIR3", null, null, endpoint, endpoint,
-        endpoint, null);
-
-    assertNotNull(report);
+  public void exm105_fullSubjectId() {
+    given.when()
+        .measureId("EXM105-FHIR3-8.0.000")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/denom-EXM105-FHIR3")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup().population("numerator").hasCount(0).up()
+        .population("denominator").hasCount(1);
   }
 }

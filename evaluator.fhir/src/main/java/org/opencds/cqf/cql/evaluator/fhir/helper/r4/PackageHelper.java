@@ -157,6 +157,7 @@ public class PackageHelper {
         }
       }
     }
+    entry.setRequest(request);
 
     return entry;
   }

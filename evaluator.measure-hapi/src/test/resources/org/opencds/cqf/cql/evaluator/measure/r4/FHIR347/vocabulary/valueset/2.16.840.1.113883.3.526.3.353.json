@@ -1,0 +1,95 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.353",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.353",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.353"
+  } ],
+  "version": "20200307",
+  "name": "EndStageRenalDisease",
+  "title": "End Stage Renal Disease",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.6",
+      "display": "End stage renal disease"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236434000",
+      "display": "End stage renal failure untreated by renal replacement therapy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236435004",
+      "display": "End stage renal failure on dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236436003",
+      "display": "End stage renal failure with renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46177005",
+      "display": "End-stage renal disease (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.6",
+      "display": "End stage renal disease"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236434000",
+      "display": "End stage renal failure untreated by renal replacement therapy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236435004",
+      "display": "End stage renal failure on dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236436003",
+      "display": "End stage renal failure with renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46177005",
+      "display": "End-stage renal disease (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "N18.6",
+      "display": "End stage renal disease"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236434000",
+      "display": "End stage renal failure untreated by renal replacement therapy (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236435004",
+      "display": "End stage renal failure on dialysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "236436003",
+      "display": "End stage renal failure with renal transplant (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "46177005",
+      "display": "End-stage renal disease (disorder)"
+    } ]
+  }
+}

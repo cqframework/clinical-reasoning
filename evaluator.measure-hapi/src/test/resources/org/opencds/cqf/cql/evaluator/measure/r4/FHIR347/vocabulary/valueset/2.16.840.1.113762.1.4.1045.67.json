@@ -1,0 +1,910 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.67",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.67",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1045.67"
+  } ],
+  "version": "20170504",
+  "name": "PCI",
+  "title": "PCI",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270346",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027034Z",
+      "display": "Dilation of Coronary Artery, One Artery with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270356",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027035Z",
+      "display": "Dilation of Coronary Artery, One Artery with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270366",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027036Z",
+      "display": "Dilation of Coronary Artery, One Artery with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270376",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027037Z",
+      "display": "Dilation of Coronary Artery, One Artery with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703D6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703DZ",
+      "display": "Dilation of Coronary Artery, One Artery with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703E6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703EZ",
+      "display": "Dilation of Coronary Artery, One Artery with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703F6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703FZ",
+      "display": "Dilation of Coronary Artery, One Artery with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703G6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703GZ",
+      "display": "Dilation of Coronary Artery, One Artery with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703T6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703TZ",
+      "display": "Dilation of Coronary Artery, One Artery with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703Z6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02703ZZ",
+      "display": "Dilation of Coronary Artery, One Artery, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270446",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027044Z",
+      "display": "Dilation of Coronary Artery, One Artery with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270456",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027045Z",
+      "display": "Dilation of Coronary Artery, One Artery with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270466",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027046Z",
+      "display": "Dilation of Coronary Artery, One Artery with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0270476",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027047Z",
+      "display": "Dilation of Coronary Artery, One Artery with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704D6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704DZ",
+      "display": "Dilation of Coronary Artery, One Artery with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704E6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704EZ",
+      "display": "Dilation of Coronary Artery, One Artery with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704F6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704FZ",
+      "display": "Dilation of Coronary Artery, One Artery with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704G6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704GZ",
+      "display": "Dilation of Coronary Artery, One Artery with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704T6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704TZ",
+      "display": "Dilation of Coronary Artery, One Artery with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704Z6",
+      "display": "Dilation of Coronary Artery, One Artery, Bifurcation, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02704ZZ",
+      "display": "Dilation of Coronary Artery, One Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271346",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027134Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271356",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027135Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271366",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027136Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271376",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027137Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713D6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713DZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713E6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713EZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713F6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713FZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713G6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713GZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713T6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713TZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713Z6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02713ZZ",
+      "display": "Dilation of Coronary Artery, Two Arteries, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271446",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027144Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271456",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027145Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271466",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027146Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0271476",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027147Z",
+      "display": "Dilation of Coronary Artery, Two Arteries with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714D6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714DZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714E6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714EZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714F6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714FZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714G6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714GZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714T6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714TZ",
+      "display": "Dilation of Coronary Artery, Two Arteries with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714Z6",
+      "display": "Dilation of Coronary Artery, Two Arteries, Bifurcation, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02714ZZ",
+      "display": "Dilation of Coronary Artery, Two Arteries, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272346",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027234Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272356",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027235Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272366",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027236Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272376",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027237Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723D6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723DZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723E6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723EZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723F6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723FZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723G6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723GZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723T6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723TZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723Z6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02723ZZ",
+      "display": "Dilation of Coronary Artery, Three Arteries, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272446",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027244Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272456",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027245Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272466",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027246Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0272476",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027247Z",
+      "display": "Dilation of Coronary Artery, Three Arteries with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724D6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724DZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724E6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724EZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724F6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724FZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724G6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724GZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724T6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724TZ",
+      "display": "Dilation of Coronary Artery, Three Arteries with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724Z6",
+      "display": "Dilation of Coronary Artery, Three Arteries, Bifurcation, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02724ZZ",
+      "display": "Dilation of Coronary Artery, Three Arteries, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273346",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027334Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Drug-eluting Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273356",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027335Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Two Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273366",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027336Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Three Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273376",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027337Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Four or More Drug-eluting Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733D6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733DZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733E6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733EZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Two Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733F6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733FZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Three Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733G6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733GZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Four or More Intraluminal Devices, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733T6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733TZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Radioactive Intraluminal Device, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733Z6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02733ZZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Percutaneous Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273446",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027344Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Drug-eluting Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273456",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027345Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Two Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273466",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027346Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Three Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0273476",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "027347Z",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Four or More Drug-eluting Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734D6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734DZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734E6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734EZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Two Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734F6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734FZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Three Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734G6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734GZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Four or More Intraluminal Devices, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734T6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734TZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries with Radioactive Intraluminal Device, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734Z6",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Bifurcation, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02734ZZ",
+      "display": "Dilation of Coronary Artery, Four or More Arteries, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "11101003",
+      "display": "Percutaneous transluminal coronary angioplasty (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175066001",
+      "display": "Percutaneous transluminal balloon angioplasty of bypass graft of coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "36969009",
+      "display": "Placement of stent in coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "397193006",
+      "display": "Percutaneous transluminal coronary angioplasty by rotoablation (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "397431004",
+      "display": "Percutaneous transluminal coronary angioplasty with rotoablation, single vessel (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414089002",
+      "display": "Emergency percutaneous coronary intervention (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "415070008",
+      "display": "Percutaneous coronary intervention (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428488008",
+      "display": "Placement of stent in anterior descending branch of left coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429499003",
+      "display": "Placement of stent in circumflex branch of left coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429639007",
+      "display": "Percutaneous transluminal balloon angioplasty with insertion of stent into coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "429809004",
+      "display": "Fluoroscopic percutaneous transluminal angioplasty of coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609153008",
+      "display": "Percutaneous insertion of drug eluting stent into coronary artery using fluoroscopic guidance (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609154002",
+      "display": "Percutaneous transluminal insertion of metal stent into coronary artery using fluoroscopic guidance (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "68466008",
+      "display": "Removal of coronary artery obstruction by percutaneous transluminal balloon, single vessel (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "698740005",
+      "display": "Percutaneous transluminal atherectomy of coronary artery by rotary cutter using fluoroscopic guidance (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "707828002",
+      "display": "Percutaneous transluminal cutting balloon angioplasty of coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "737085003",
+      "display": "Percutaneous insertion of bioresorbable stent into coronary artery using fluoroscopic guidance (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "85053006",
+      "display": "Percutaneous transluminal coronary angioplasty, multiple vessels (procedure)"
+    } ]
+  }
+}

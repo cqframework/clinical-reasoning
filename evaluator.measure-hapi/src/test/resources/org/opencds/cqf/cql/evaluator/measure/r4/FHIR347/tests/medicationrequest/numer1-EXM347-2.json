@@ -1,0 +1,27 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "numer1-EXM347-2",
+  "status": "active",
+  "intent": "order",
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+      "code": "discharge",
+      "display": "Discharge"
+    } ]
+  } ],
+  "medicationCodeableConcept": {
+    "coding": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "code": "1790679",
+      "display": "Simvastatin 4 MG/ML Oral Suspension"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/numer1-EXM347"
+  },
+  "encounter": {
+    "reference": "Encounter/numer1-EXM347-1"
+  },
+  "authoredOn": "2019-02-01T08:30:00"
+}

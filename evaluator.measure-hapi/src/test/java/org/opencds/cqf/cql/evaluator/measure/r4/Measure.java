@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -11,15 +12,39 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.measure.TestRepositories;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
-import org.opencds.cqf.cql.evaluator.measure.r4.Measure.GeneratedReport.PopulationSelector;
-import org.opencds.cqf.cql.evaluator.measure.r4.Measure.GeneratedReport.PopulationValidator;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.TestException;
 
 public class Measure {
+
+  @FunctionalInterface
+  interface Validator<T> {
+    void validate(T value);
+  }
+
+  @FunctionalInterface
+  interface Selector<T, S> {
+    T select(S from);
+  }
+
+  interface ChildOf<T> {
+    T up();
+  }
+
+  interface SelectedOf<T> {
+    T selected();
+  }
+
+
+
   public static Given given() {
     return new Given();
   }
@@ -63,7 +88,7 @@ public class Measure {
 
     private Bundle additionalData;
 
-    private Supplier<GeneratedReport> operation;
+    private Supplier<MeasureReport> operation;
 
 
 
@@ -100,77 +125,37 @@ public class Measure {
     }
 
     public When evaluate() {
-      this.operation = () -> new GeneratedReport(
-          processor.evaluateMeasure(new IdType("Measure", measureId), periodStart,
-              periodEnd, reportType, Collections.singletonList(this.subjectId)));
+      this.operation =
+          () -> processor.evaluateMeasure(new IdType("Measure", measureId), periodStart,
+              periodEnd, reportType, Collections.singletonList(this.subjectId));
       return this;
     }
 
-    public GeneratedReport then() {
+    public SelectedReport then() {
       if (this.operation == null) {
         throw new IllegalStateException(
             "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
       }
 
+      MeasureReport report = null;
       try {
-        return this.operation.get();
+        report = this.operation.get();
       } catch (Exception e) {
         throw new TestException("error when running 'then' and invoking the chosen operation", e);
       }
+
+      return new SelectedReport(report);
     }
   }
-  static class GeneratedReport {
-
-    @FunctionalInterface
-    interface MeasureReportValidator {
-      void validate(MeasureReport report);
-    }
-
-    @FunctionalInterface
-    interface PopulationValidator {
-      void validate(MeasureReport.MeasureReportGroupPopulationComponent population);
-    }
-
-    @FunctionalInterface
-    interface GroupValidator {
-      void validate(MeasureReport.MeasureReportGroupComponent group);
-    }
-
-    @FunctionalInterface
-    interface StratifierValidator {
-      void validate(MeasureReport.MeasureReportGroupStratifierComponent stratifier);
-    }
-
-    @FunctionalInterface
-    interface GroupSelector {
-      MeasureReport.MeasureReportGroupComponent selectGroup(MeasureReport report);
-    }
-
-    @FunctionalInterface
-    interface PopulationSelector {
-      MeasureReport.MeasureReportGroupPopulationComponent selectPopulation(
-          MeasureReport.MeasureReportGroupComponent group);
-    }
-
-    @FunctionalInterface
-    interface StratificationSelector {
-      MeasureReport.MeasureReportGroupStratifierComponent selectStratification(
-          MeasureReport.MeasureReportGroupComponent group);
-    }
-
-    @FunctionalInterface
-    interface ReferenceSelector {
-      Reference selectReference(
-          MeasureReport measureReport);
-    }
+  static class SelectedReport implements SelectedOf<MeasureReport>, ChildOf<Void> {
 
     private final MeasureReport report;
 
-    public GeneratedReport(MeasureReport report) {
+    public SelectedReport(MeasureReport report) {
       this.report = report;
     }
 
-    public GeneratedReport passes(MeasureReportValidator measureReportValidator) {
+    public SelectedReport passes(Validator<MeasureReport> measureReportValidator) {
       measureReportValidator.validate(report);
       return this;
     }
@@ -188,53 +173,77 @@ public class Measure {
           .group(x -> x.getGroup().stream().filter(g -> g.getId().equals(id)).findFirst().get());
     }
 
-    public SelectedGroup group(GroupSelector groupSelector) {
-      var g = groupSelector.selectGroup(report);
+    public SelectedGroup group(Selector<MeasureReportGroupComponent, MeasureReport> groupSelector) {
+      var g = groupSelector.select(report);
       return new SelectedGroup(this, g);
     }
 
-    public SelectedReference reference(ReferenceSelector referenceSelector) {
-      var r = referenceSelector.selectReference(report);
-      return new SelectedReference(this, r);
+    public SelectedReference<SelectedReport> reference(
+        Selector<Reference, MeasureReport> referenceSelector) {
+      var r = referenceSelector.select(report);
+      return new SelectedReference<>(this, r);
     }
 
-    public SelectedReference evaluatedResource(String name) {
+    public SelectedReference<SelectedReport> evaluatedResource(String name) {
       return this.reference(x -> x.getEvaluatedResource().stream()
           .filter(y -> y.getReference().equals(name)).findFirst().get());
     }
 
-    public GeneratedReport hasEvaluatedResourceCount(int count) {
+    public SelectedReport hasEvaluatedResourceCount(int count) {
       assertEquals(count, report().getEvaluatedResource().size());
       return this;
     }
 
-    public GeneratedReport hasContainedResourceCount(int count) {
+    public SelectedReport hasContainedResourceCount(int count) {
       assertEquals(count, report().getContained().size());
       return this;
     }
+
+    // TODO: SelectedContained resource class?
+    public SelectedReport hasContainedResource(Predicate<Resource> criteria) {
+      var contained = this.report().getContained().stream();
+      assertTrue(contained.anyMatch(criteria), "Did not find a resource matching this criteria ");
+      return this;
+    }
+
+    // TODO: SelectedExtension class?
+    public SelectedReport hasExtension(String url, int count) {
+      var ex = this.report.getExtensionsByUrl(url);
+      assertEquals(ex.size(), count);
+
+      return this;
+    }
+
+    @Override
+    public MeasureReport selected() {
+      return this.report;
+    }
+
+    @Override
+    public Void up() {
+      return null;
+    }
   }
 
-  static class SelectedGroup {
-    private final GeneratedReport generatedReport;
+
+  static class SelectedGroup
+      implements ChildOf<SelectedReport>, SelectedOf<MeasureReport.MeasureReportGroupComponent> {
+    private final SelectedReport selectedReport;
     private final MeasureReport.MeasureReportGroupComponent group;
 
-    public SelectedGroup(GeneratedReport generatedReport,
+    public SelectedGroup(SelectedReport generatedReport,
         MeasureReport.MeasureReportGroupComponent group) {
-      this.generatedReport = generatedReport;
+      this.selectedReport = generatedReport;
       this.group = group;
     }
 
-    public GeneratedReport up() {
-      return this.generatedReport;
+    public SelectedReport up() {
+      return this.selectedReport;
     }
 
     public SelectedGroup hasScore(String score) {
       MeasureValidationUtils.validateGroupScore(this.group, score);
       return this;
-    }
-
-    public SelectedPopulation firstPopulation() {
-      return this.population(MeasureReport.MeasureReportGroupComponent::getPopulationFirstRep);
     }
 
 
@@ -244,71 +253,133 @@ public class Measure {
               && x.getCode().getCoding().get(0).getCode().equals(name)).findFirst().get());
     }
 
-    public SelectedPopulation population(PopulationSelector populationSelector) {
-      var p = populationSelector.selectPopulation(group);
+    public SelectedPopulation population(
+        Selector<MeasureReportGroupPopulationComponent, MeasureReportGroupComponent> populationSelector) {
+      var p = populationSelector.select(group);
       return new SelectedPopulation(this, p);
     }
-  }
 
-  static class SelectedReference {
-    private final GeneratedReport generatedReport;
-    private final Reference reference;
-
-    public SelectedReference(GeneratedReport generatedReport, Reference reference) {
-      this.generatedReport = generatedReport;
-      this.reference = reference;
+    public SelectedPopulation firstPopulation() {
+      return this.population(MeasureReport.MeasureReportGroupComponent::getPopulationFirstRep);
     }
 
-    public GeneratedReport up() {
-      return generatedReport;
-    }
-
-
-    // Hmm.. may need to rethink this one a bit.
-    public SelectedReference hasPopulations(String... population) {
-      var ex = this.reference.getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
-      if (ex.isEmpty()) {
-        throw new TestException(String.format(
-            "no evaluated resource extensions were found, and expected %s", population.length));
-      }
-
-      @SuppressWarnings("unchecked")
-      var set = ex.stream().map(x -> ((IPrimitiveType<String>) x.getValue()).getValue())
-          .collect(Collectors.toSet());
-
-      for (var p : population) {
-        assertTrue(set.contains(p),
-            String.format(
-                "population: %s was not found in the evaluated resources criteria reference extension list",
-                p));
-      }
-
+    public SelectedGroup hasStratifierCount(int count) {
+      assertEquals(this.group.getStratifier().size(), count);
       return this;
     }
+
+    public SelectedStratifier firstStratifier() {
+      return this.stratifier(MeasureReport.MeasureReportGroupComponent::getStratifierFirstRep);
+    }
+
+    public SelectedStratifier stratifier(
+        Selector<MeasureReportGroupStratifierComponent, MeasureReportGroupComponent> stratifierSelector) {
+      var s = stratifierSelector.select(group);
+      return new SelectedStratifier(this, s);
+    }
+
+    @Override
+    public MeasureReportGroupComponent selected() {
+      return this.group;
+    }
+
+    static class SelectedReference<T> implements ChildOf<T>, SelectedOf<Reference> {
+      private final T parent;
+      private final Reference reference;
+
+      public SelectedReference(T parent, Reference reference) {
+        this.parent = parent;
+        this.reference = reference;
+      }
+
+      public T up() {
+        return parent;
+      }
+
+
+      // Hmm.. may need to rethink this one a bit.
+      public SelectedReference<T> hasPopulations(String... population) {
+        var ex = this.reference.getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
+        if (ex.isEmpty()) {
+          throw new TestException(String.format(
+              "no evaluated resource extensions were found, and expected %s", population.length));
+        }
+
+        @SuppressWarnings("unchecked")
+        var set = ex.stream().map(x -> ((IPrimitiveType<String>) x.getValue()).getValue())
+            .collect(Collectors.toSet());
+
+        for (var p : population) {
+          assertTrue(set.contains(p),
+              String.format(
+                  "population: %s was not found in the evaluated resources criteria reference extension list",
+                  p));
+        }
+
+        return this;
+      }
+
+      @Override
+      public Reference selected() {
+        return this.reference;
+      }
+    }
+
+    static class SelectedPopulation implements ChildOf<SelectedGroup>,
+        SelectedOf<MeasureReport.MeasureReportGroupPopulationComponent> {
+      private final SelectedGroup selectedGroup;
+      private final MeasureReport.MeasureReportGroupPopulationComponent population;
+
+      public SelectedPopulation(SelectedGroup selectedGroup,
+          MeasureReport.MeasureReportGroupPopulationComponent population) {
+        this.selectedGroup = selectedGroup;
+        this.population = population;
+      }
+
+      public SelectedGroup up() {
+        return this.selectedGroup;
+      }
+
+      public SelectedPopulation hasCount(int count) {
+        MeasureValidationUtils.validatePopulation(population, count);
+        return this;
+      }
+
+      public SelectedPopulation passes(
+          Validator<MeasureReport.MeasureReportGroupPopulationComponent> populationValidator) {
+        populationValidator.validate(this.population);
+        return this;
+      }
+
+      @Override
+      public MeasureReportGroupPopulationComponent selected() {
+        return this.population;
+      }
+    }
   }
 
-  static class SelectedPopulation {
+
+  static class SelectedStratifier implements ChildOf<SelectedGroup>,
+      SelectedOf<MeasureReport.MeasureReportGroupStratifierComponent> {
+
     private final SelectedGroup selectedGroup;
-    private final MeasureReport.MeasureReportGroupPopulationComponent population;
+    private final MeasureReport.MeasureReportGroupStratifierComponent stratifier;
 
-    public SelectedPopulation(SelectedGroup selectedGroup,
-        MeasureReport.MeasureReportGroupPopulationComponent population) {
+    public SelectedStratifier(SelectedGroup selectedGroup,
+        MeasureReport.MeasureReportGroupStratifierComponent stratifier) {
       this.selectedGroup = selectedGroup;
-      this.population = population;
+      this.stratifier = stratifier;
     }
 
+    @Override
+    public MeasureReportGroupStratifierComponent selected() {
+      return stratifier;
+    }
+
+    @Override
     public SelectedGroup up() {
-      return this.selectedGroup;
-    }
-
-    public SelectedPopulation hasCount(int count) {
-      MeasureValidationUtils.validatePopulation(population, count);
-      return this;
-    }
-
-    public SelectedPopulation passes(PopulationValidator populationValidator) {
-      populationValidator.validate(this.population);
-      return this;
+      return selectedGroup;
     }
   }
+
 }

@@ -1,0 +1,22 @@
+{
+  "resourceType": "Coverage",
+  "id": "denom-EXM74-strat3-case6-Coverage",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/sop",
+      "code": "313",
+      "display": "Dental --Stand Alone"
+    } ]
+  },
+  "beneficiary": {
+    "reference": "Patient/denom-EXM74-strat3-case6"
+  },
+  "period": {
+    "start": "2018-05-30T00:00:00-00:00",
+    "end": "2020-05-31T00:00:00-00:00"
+  },
+  "payor": [ {
+    "reference": "Patient/denom-EXM74-strat3-case6"
+  } ]
+}

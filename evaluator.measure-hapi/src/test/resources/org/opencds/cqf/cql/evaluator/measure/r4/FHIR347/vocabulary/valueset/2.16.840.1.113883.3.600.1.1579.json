@@ -1,0 +1,220 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.600.1.1579",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.600.1.1579",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.600.1.1579"
+  } ],
+  "version": "20170504",
+  "name": "PalliativeorHospiceCare",
+  "title": "Palliative or Hospice Care",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103735009",
+      "display": "Palliative care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "133918004",
+      "display": "Comfort measures (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182964004",
+      "display": "Terminal care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305284002",
+      "display": "Admission by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305381007",
+      "display": "Admission to palliative care department (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305981001",
+      "display": "Referral by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306237005",
+      "display": "Referral to palliative care service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306288008",
+      "display": "Referral to palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385736008",
+      "display": "Dying care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385763009",
+      "display": "Hospice care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103735009",
+      "display": "Palliative care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "133918004",
+      "display": "Comfort measures (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182964004",
+      "display": "Terminal care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305284002",
+      "display": "Admission by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305381007",
+      "display": "Admission to palliative care department (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305981001",
+      "display": "Referral by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306237005",
+      "display": "Referral to palliative care service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306288008",
+      "display": "Referral to palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385736008",
+      "display": "Dying care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385763009",
+      "display": "Hospice care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103735009",
+      "display": "Palliative care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "133918004",
+      "display": "Comfort measures (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182964004",
+      "display": "Terminal care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305284002",
+      "display": "Admission by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305381007",
+      "display": "Admission to palliative care department (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305981001",
+      "display": "Referral by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306237005",
+      "display": "Referral to palliative care service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306288008",
+      "display": "Referral to palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385736008",
+      "display": "Dying care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385763009",
+      "display": "Hospice care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "103735009",
+      "display": "Palliative care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "133918004",
+      "display": "Comfort measures (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182964004",
+      "display": "Terminal care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305284002",
+      "display": "Admission by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305381007",
+      "display": "Admission to palliative care department (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "305981001",
+      "display": "Referral by palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306237005",
+      "display": "Referral to palliative care service (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "306288008",
+      "display": "Referral to palliative care physician (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385736008",
+      "display": "Dying care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "385763009",
+      "display": "Hospice care (regime/therapy)"
+    } ]
+  }
+}

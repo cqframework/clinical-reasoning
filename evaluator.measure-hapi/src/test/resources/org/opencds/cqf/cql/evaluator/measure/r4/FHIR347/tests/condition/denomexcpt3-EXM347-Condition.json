@@ -1,0 +1,26 @@
+{
+  "resourceType": "Condition",
+  "id": "denomexcpt3-EXM347-Condition",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  },
+  "verificationStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+      "code": "confirmed",
+      "display": "Confirmed"
+    } ]
+  },
+  "code": {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "102781000119107",
+      "display": "Sensory neuropathy due to type 1 diabetes mellitus (disorder)"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcpt3-EXM347"
+  },
+  "onsetDateTime": "2018-01-01T08:30:00",
+  "abatementDateTime": "2019-12-01T08:30:00"
+}

@@ -9,33 +9,36 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.hl7.fhir.r4.model.Patient;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
+import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public class R4FhirDalSubjectProvider implements SubjectProvider {
+public class R4RepositorySubjectProvider implements SubjectProvider {
 
-  private FhirDal fhirDal;
+  private Repository repo;
 
-  public R4FhirDalSubjectProvider(FhirDal fhirDal) {
-    this.fhirDal = fhirDal;
+  public R4RepositorySubjectProvider(Repository repo) {
+    this.repo = repo;
   }
 
   @Override
   public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
     if (subjectId == null) {
-      Iterable<IBaseResource> resources = fhirDal.search("Patient");
-      List<String> ids = new ArrayList<>();
-      for (IBaseResource r : resources) {
-        ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-      }
+      // TODO: Use the Bundle iterable
+      // Iterable<IBaseResource> resources = repo.search("Patient");
+      // List<String> ids = new ArrayList<>();
+      // for (IBaseResource r : resources) {
+      // ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+      // }
 
-      return ids;
+      // return ids;
+      return null;
     } else if (subjectId.indexOf("/") == -1) {
       IdType id = new IdType("Patient/" + subjectId);
-      IBaseResource r = fhirDal.read(id);
+      IBaseResource r = repo.read(Patient.class, id);
 
       if (r == null) {
         throw new ResourceNotFoundException(id);
@@ -44,7 +47,7 @@ public class R4FhirDalSubjectProvider implements SubjectProvider {
           .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
     } else if (subjectId.startsWith("Group")) {
       IdType id = new IdType(subjectId);
-      Group r = (Group) fhirDal.read(id);
+      Group r = repo.read(Group.class, id);
 
       if (r == null) {
         throw new ResourceNotFoundException(id);
@@ -58,13 +61,7 @@ public class R4FhirDalSubjectProvider implements SubjectProvider {
 
       return subjectIds;
     } else {
-      IdType id = new IdType(subjectId);
-      IBaseResource r = fhirDal.read(id);
-      if (r == null) {
-        throw new ResourceNotFoundException(id);
-      }
-      return Collections
-          .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+      throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectId));
     }
   }
 }

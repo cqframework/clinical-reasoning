@@ -7,36 +7,38 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Group.GroupMemberComponent;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
+import org.opencds.cqf.fhir.api.Repository;
 
-public class Dstu3FhirDalSubjectProvider implements SubjectProvider {
+public class Dstu3RepositorySubjectProvider implements SubjectProvider {
 
-  private FhirDal fhirDal;
+  private Repository repo;
 
-  public Dstu3FhirDalSubjectProvider(FhirDal fhirDal) {
-    this.fhirDal = fhirDal;
+  public Dstu3RepositorySubjectProvider(Repository repo) {
+    this.repo = repo;
   }
 
   @Override
   public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
     if (subjectId == null) {
-      Iterable<IBaseResource> resources = fhirDal.search("Patient");
-      List<String> ids = new ArrayList<>();
-      for (IBaseResource r : resources) {
-        ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-      }
+      // TODO: Grab the Bundle iterator
+      // Iterable<IBaseResource> resources = repo.search("Patient");
+      // List<String> ids = new ArrayList<>();
+      // for (IBaseResource r : resources) {
+      // ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+      // }
 
-      return ids;
+      // return ids;
+      return null;
     } else if (subjectId.indexOf("/") == -1) {
-      IBaseResource r = fhirDal.read(new IdType("Patient/" + subjectId));
+      var r = repo.read(Patient.class, new IdType("Patient/" + subjectId));
       return Collections
           .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
     } else if (subjectId.startsWith("Group")) {
-      Group r = (Group) fhirDal.read(new IdType(subjectId));
+      var r = repo.read(Group.class, new IdType(subjectId));
       List<String> subjectIds = new ArrayList<>();
 
       for (GroupMemberComponent gmc : r.getMember()) {
@@ -46,9 +48,7 @@ public class Dstu3FhirDalSubjectProvider implements SubjectProvider {
 
       return subjectIds;
     } else {
-      IBaseResource r = fhirDal.read(new IdType(subjectId));
-      return Collections
-          .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+      throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectId));
     }
   }
 }

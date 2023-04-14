@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
@@ -184,6 +185,9 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT).getValue();
     var populationContext =
         getExpressionResult(contextExpression, groupItem.getLinkId(), null);
+    if (populationContext == null || populationContext.isEmpty()) {
+      return Collections.emptyList();
+    }
     for (var context : populationContext) {
       var contextItem = groupItem.copy();
       for (var item : contextItem.getItem()) {

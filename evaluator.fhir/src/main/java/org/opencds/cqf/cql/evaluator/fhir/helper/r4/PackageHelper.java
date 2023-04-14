@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.Resource;
@@ -78,6 +79,8 @@ public class PackageHelper {
         return ((ValueSet) theResource).hasUrl();
       case CodeSystem:
         return ((CodeSystem) theResource).hasUrl();
+      case Questionnaire:
+        return ((Questionnaire) theResource).hasUrl();
       default:
         return false;
     }
@@ -97,6 +100,8 @@ public class PackageHelper {
         return ((ValueSet) theResource).getUrl();
       case CodeSystem:
         return ((CodeSystem) theResource).getUrl();
+      case Questionnaire:
+        return ((Questionnaire) theResource).getUrl();
       default:
         return null;
     }
@@ -116,6 +121,8 @@ public class PackageHelper {
         return ((ValueSet) theResource).hasVersion();
       case CodeSystem:
         return ((CodeSystem) theResource).hasVersion();
+      case Questionnaire:
+        return ((Questionnaire) theResource).hasVersion();
       default:
         return false;
     }
@@ -135,6 +142,8 @@ public class PackageHelper {
         return ((ValueSet) theResource).getVersion();
       case CodeSystem:
         return ((CodeSystem) theResource).getVersion();
+      case Questionnaire:
+        return ((Questionnaire) theResource).getVersion();
       default:
         return null;
     }

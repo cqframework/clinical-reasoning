@@ -10,21 +10,29 @@ public class TestRepository {
   public TestRepository() {}
 
   public Repository createRepository() {
-    var data = new FhirRepository(TestRepository.class, Lists.newArrayList("tests"), true);
-    var content = new FhirRepository(TestRepository.class, Lists.newArrayList("content"), true);
+    return createRepository(TestRepository.class);
+  }
+
+  public Repository createRepository(Class<?> clazz) {
+    var data = new FhirRepository(clazz, Lists.newArrayList("tests"), true);
+    var content = new FhirRepository(clazz, Lists.newArrayList("content"), true);
     var terminology =
-        new FhirRepository(TestRepository.class, Lists.newArrayList("vocabulary"), true);
+        new FhirRepository(clazz, Lists.newArrayList("vocabulary"), true);
 
     return Repositories.proxy(data, content, terminology);
   }
 
   public Repository createRepositoryForPath(String path) {
+    return createRepositoryForPath(path, TestRepository.class);
+  }
+
+  public Repository createRepositoryForPath(String path, Class<?> clazz) {
     var data =
-        new FhirRepository(TestRepository.class, Lists.newArrayList(path + "/tests"), true);
+        new FhirRepository(clazz, Lists.newArrayList(path + "/tests"), true);
     var content =
-        new FhirRepository(TestRepository.class, Lists.newArrayList(path + "/content"), true);
+        new FhirRepository(clazz, Lists.newArrayList(path + "/content"), true);
     var terminology =
-        new FhirRepository(TestRepository.class, Lists.newArrayList(path + "/vocabulary"),
+        new FhirRepository(clazz, Lists.newArrayList(path + "/vocabulary"),
             true);
 
     return Repositories.proxy(data, content, terminology);

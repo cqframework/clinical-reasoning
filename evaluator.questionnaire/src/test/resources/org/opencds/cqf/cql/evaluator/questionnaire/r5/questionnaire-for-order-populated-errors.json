@@ -1,6 +1,6 @@
 {
   "resourceType": "Questionnaire",
-  "id": "OutpatientPriorAuthorizationRequest-Errors",
+  "id": "OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1",
   "meta": {
     "versionId": "2",
     "lastUpdated": "2022-11-21T17:34:01.764+00:00",
@@ -12,7 +12,7 @@
   "contained": [
     {
       "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors",
+      "id": "populate-outcome-OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1",
       "issue": [
         {
           "severity": "error",
@@ -133,13 +133,19 @@
       "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
     },
     {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject",
+      "valueReference": {
+        "reference": "Patient/OPA-Patient1"
+      }
+    },
+    {
       "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
       "valueReference": {
-        "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors"
+        "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-Errors-OPA-Patient1"
       }
     }
   ],
-  "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
+  "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
   "name": "OutpatientPriorAuthorizationRequest",
   "title": "Outpatient Prior Authorization Request",
   "status": "active",
@@ -267,6 +273,14 @@
           "required": true,
           "initial": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "Peter"
             }
           ]
@@ -287,6 +301,14 @@
           "required": true,
           "initial": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "Chalmers"
             }
           ]
@@ -307,6 +329,14 @@
           "required": true,
           "initial": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueDate": "1974-12-25"
             }
           ]
@@ -373,6 +403,14 @@
           ],
           "initial": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "male"
             }
           ]

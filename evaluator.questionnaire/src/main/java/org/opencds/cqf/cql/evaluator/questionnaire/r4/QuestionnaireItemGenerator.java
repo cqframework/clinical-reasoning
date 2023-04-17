@@ -7,12 +7,10 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -61,13 +59,11 @@ public class QuestionnaireItemGenerator {
         logger.error(message);
         throw new IllegalArgumentException(message);
       }
-      // TODO: define an extension for the text?
+      // TODO: define an extension for the text? SDC_QUESTIONNAIRE_SHORT_TEXT
       var text = profile.hasTitle() ? profile.getTitle()
           : profileUrl.substring(profileUrl.lastIndexOf("/") + 1);
       var item = new QuestionnaireItemComponent().setType(Questionnaire.QuestionnaireItemType.GROUP)
-          .setLinkId(linkId).setText(text);
-      item.addExtension(new Extension().setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
-          .setValue(new CodeType().setValue(profile.getType())));
+          .setLinkId(linkId).setDefinition(profileUrl).setText(text);
 
       var paths = new ArrayList<String>();
       processElements(profile.getDifferential().getElement(), profile, item, paths);
@@ -179,15 +175,18 @@ public class QuestionnaireItemGenerator {
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
           var expression =
               (Expression) element.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
-          var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
+          var results = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
               expression.getExpression(), expression.getLanguage(), expression.getReference(),
               parameters, this.bundle);
-          childItem.addInitial().setValue((Type) result);
+          for (var result : results) {
+            childItem.addInitial().setValue((Type) result);
+          }
         }
         childItem.setRequired(element.hasMin() && element.getMin() == 1);
         // set readonly based on?
-        // set repeat based on?
-        // set enableWhen based on?
+        // set repeat based on? if expression result type is a list?
+        // set enableWhen based on? use
+        // http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression
         item.addItem(childItem);
         paths.add(element.getPath());
       } catch (Exception ex) {

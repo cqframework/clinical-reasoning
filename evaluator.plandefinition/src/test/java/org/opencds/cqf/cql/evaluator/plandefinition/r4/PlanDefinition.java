@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -15,7 +17,9 @@ import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
@@ -70,7 +74,10 @@ public class PlanDefinition {
     private Repository contentRepository;
     private Repository terminologyRepository;
     private Bundle additionalData;
+    private IdType additionalDataId;
     private Parameters parameters;
+    private IdType expectedBundleId;
+    private IdType expectedCarePlanId;
 
     public Apply(String planDefinitionID, String patientID, String encounterID) {
       this.planDefinitionID = planDefinitionID;
@@ -96,12 +103,23 @@ public class PlanDefinition {
       return this;
     }
 
+    private void loadAdditionalData(IBaseResource resource) {
+      additionalData =
+          resource.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode())
+              ? (Bundle) resource
+              : new Bundle().setType(BundleType.COLLECTION)
+                  .addEntry(new BundleEntryComponent().setResource((Resource) resource));
+    }
+
     public Apply withAdditionalData(String dataAssetName) {
       var data = parse(dataAssetName);
-      additionalData =
-          data.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode()) ? (Bundle) data
-              : new Bundle().setType(BundleType.COLLECTION)
-                  .addEntry(new BundleEntryComponent().setResource((Resource) data));
+      loadAdditionalData(data);
+
+      return this;
+    }
+
+    public Apply withAdditionalDataId(IdType theId) {
+      additionalDataId = theId;
 
       return this;
     }
@@ -114,6 +132,18 @@ public class PlanDefinition {
 
     public Apply withRepository(Repository repository) {
       this.repository = repository;
+
+      return this;
+    }
+
+    public Apply withExpectedBundleId(IdType theId) {
+      expectedBundleId = theId;
+
+      return this;
+    }
+
+    public Apply withExpectedCarePlanId(IdType theId) {
+      expectedCarePlanId = theId;
 
       return this;
     }
@@ -139,55 +169,148 @@ public class PlanDefinition {
     public GeneratedBundle applyR5() {
       buildRepository();
       var libraryEngine = new LibraryEngine(this.repository);
+      Bundle expectedBundle = null;
+      if (expectedBundleId != null) {
+        try {
+          expectedBundle = repository.read(Bundle.class, expectedBundleId);
+        } catch (Exception e) {
+        }
+      }
+      if (additionalDataId != null) {
+        var resource =
+            repository.read(fhirContext.getResourceDefinition(additionalDataId.getResourceType())
+                .newInstance().getClass(), additionalDataId);
+        loadAdditionalData(resource);
+      }
       return new GeneratedBundle((Bundle) buildProcessor(repository).applyR5(
           new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
           null, null, null, null, null, null, parameters, null, additionalData, null,
-          libraryEngine));
+          libraryEngine), expectedBundle);
     }
 
     public GeneratedCarePlan apply() {
       buildRepository();
       var libraryEngine = new LibraryEngine(this.repository);
+      CarePlan expectedCarePlan = null;
+      if (expectedCarePlanId != null) {
+        try {
+          expectedCarePlan = repository.read(CarePlan.class, expectedCarePlanId);
+        } catch (Exception e) {
+        }
+      }
+      if (additionalDataId != null) {
+        var resource =
+            repository.read(fhirContext.getResourceDefinition(additionalDataId.getResourceType())
+                .newInstance().getClass(), additionalDataId);
+        loadAdditionalData(resource);
+      }
       return new GeneratedCarePlan((CarePlan) buildProcessor(repository).apply(
           new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
           null, null, null, null, null, null, parameters, null, additionalData, null,
-          libraryEngine));
+          libraryEngine), expectedCarePlan);
+    }
+
+    public GeneratedPackage packagePlanDefinition() {
+      buildRepository();
+      return new GeneratedPackage(
+          (Bundle) buildProcessor(repository)
+              .packagePlanDefinition(new IdType("PlanDefinition", planDefinitionID), null, null,
+                  true),
+          null);
     }
   }
 
   static class GeneratedBundle {
-    Bundle bundle;
+    Bundle myGeneratedBundle;
+    Bundle myExpectedBundle;
 
-    public GeneratedBundle(Bundle bundle) {
-      this.bundle = bundle;
+    public GeneratedBundle(Bundle theGeneratedBundle, Bundle theExpectedBundle) {
+      myGeneratedBundle = theGeneratedBundle;
+      myExpectedBundle = theExpectedBundle;
     }
 
     public void isEqualsTo(String expectedBundleAssetName) {
       try {
         JSONAssert.assertEquals(load(expectedBundleAssetName),
-            jsonParser.encodeResourceToString(bundle), true);
+            jsonParser.encodeResourceToString(myGeneratedBundle), true);
       } catch (JSONException | IOException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
     }
+
+    public void isEqualsToExpected() {
+      try {
+        JSONAssert.assertEquals(jsonParser.encodeResourceToString(myExpectedBundle),
+            jsonParser.encodeResourceToString(myGeneratedBundle), true);
+      } catch (JSONException e) {
+        e.printStackTrace();
+        fail("Unable to compare Jsons: " + e.getMessage());
+      }
+    }
+
+    public void hasEntry(int theCount) {
+      assertEquals(myGeneratedBundle.getEntry().size(), theCount);
+    }
+
+    public void hasQuestionnaireOperationOutcome() {
+      assertTrue(myGeneratedBundle.getEntry().stream().map(e -> e.getResource())
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.Questionnaire)
+              && ((Questionnaire) r).getContained().stream()
+                  .anyMatch(c -> c.getResourceType().equals(ResourceType.OperationOutcome))));
+    }
   }
 
   static class GeneratedCarePlan {
-    CarePlan carePlan;
+    CarePlan myGeneratedCarePlan;
+    CarePlan myExpectedCarePlan;
 
-    public GeneratedCarePlan(CarePlan carePlan) {
-      this.carePlan = carePlan;
+    public GeneratedCarePlan(CarePlan theGeneratedCarePlan, CarePlan theExpectedCarePlan) {
+      myGeneratedCarePlan = theGeneratedCarePlan;
+      myExpectedCarePlan = theExpectedCarePlan;
     }
 
     public void isEqualsTo(String expectedCarePlanAssetName) {
       try {
         JSONAssert.assertEquals(load(expectedCarePlanAssetName),
-            jsonParser.encodeResourceToString(carePlan), true);
+            jsonParser.encodeResourceToString(myGeneratedCarePlan), true);
       } catch (JSONException | IOException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
+    }
+
+    public void isEqualsToExpected() {
+      try {
+        JSONAssert.assertEquals(jsonParser.encodeResourceToString(myExpectedCarePlan),
+            jsonParser.encodeResourceToString(myGeneratedCarePlan), true);
+      } catch (JSONException e) {
+        e.printStackTrace();
+        fail("Unable to compare Jsons: " + e.getMessage());
+      }
+    }
+
+    public void hasContained(int theCount) {
+      assertEquals(myGeneratedCarePlan.getContained().size(), theCount);
+    }
+
+    public void hasOperationOutcome() {
+      assertTrue(myGeneratedCarePlan.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+    }
+  }
+
+  static class GeneratedPackage {
+    Bundle myGeneratedBundle;
+    Bundle myExpectedBundle;
+
+    public GeneratedPackage(Bundle theGeneratedBundle, Bundle theExpectedBundle) {
+      myGeneratedBundle = theGeneratedBundle;
+      myExpectedBundle = theExpectedBundle;
+    }
+
+    public void hasEntry(int theCount) {
+      assertEquals(myGeneratedBundle.getEntry().size(), theCount);
     }
   }
 }

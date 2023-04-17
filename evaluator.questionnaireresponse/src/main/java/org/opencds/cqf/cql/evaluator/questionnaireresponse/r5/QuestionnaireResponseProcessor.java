@@ -77,6 +77,9 @@ public class QuestionnaireResponseProcessor
   }
 
   @Override
+  protected void setup(QuestionnaireResponse theQuestionnaireResponse) {}
+
+  @Override
   public List<IBaseResource> processItems(QuestionnaireResponse questionnaireResponse) {
     var questionnaireCanonical = questionnaireResponse.getQuestionnaire();
     if (questionnaireCanonical == null || questionnaireCanonical.isEmpty()) {

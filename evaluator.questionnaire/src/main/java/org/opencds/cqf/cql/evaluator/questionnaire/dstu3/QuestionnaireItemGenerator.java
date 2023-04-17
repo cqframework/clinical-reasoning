@@ -184,6 +184,7 @@ public class QuestionnaireItemGenerator {
           var language = languageExtension.getValue().toString();
           var libraryExtension = getExtensionByUrl(item, Constants.CQF_LIBRARY);
           var library = libraryExtension.getValue().toString();
+          // TODO: is a list result valid here?
           var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
               expression, language, library, parameters, this.bundle);
           childItem.setInitial((Type) result);

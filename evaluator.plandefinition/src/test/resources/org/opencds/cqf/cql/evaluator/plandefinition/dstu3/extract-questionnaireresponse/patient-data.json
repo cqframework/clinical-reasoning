@@ -8,7 +8,7 @@
         "resourceType": "QuestionnaireResponse",
         "id": "1903",
         "questionnaire": {
-          "reference": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+          "reference": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
         },
         "status": "completed",
         "subject": {

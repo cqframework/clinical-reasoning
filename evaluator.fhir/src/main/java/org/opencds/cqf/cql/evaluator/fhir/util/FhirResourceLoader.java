@@ -36,6 +36,10 @@ public class FhirResourceLoader implements ResourceLoader {
     });
   }
 
+  public Class<?> getRelativeClass() {
+    return relativeToClazz;
+  }
+
   public List<IBaseResource> getResources() {
     if (resources == null) {
       resources = new ArrayList<>();

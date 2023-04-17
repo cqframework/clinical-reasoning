@@ -1,7 +1,7 @@
 {
   "resourceType": "QuestionnaireResponse",
   "id": "OutpatientPriorAuthorizationRequest-OPA-Patient1",
-  "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+  "questionnaire": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
   "status": "completed",
   "subject": {
     "reference": "Patient/OPA-Patient1"

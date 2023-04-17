@@ -23,6 +23,8 @@ import org.hl7.fhir.r4.model.Resource;
  */
 public class ContainedHelper {
 
+  private ContainedHelper() {}
+
   /**
    * Adds all contained resources in resources contained on the parent to the parent.
    *
@@ -30,11 +32,8 @@ public class ContainedHelper {
    * @return the modified parent resource
    */
   public static DomainResource liftContainedResourcesToParent(DomainResource resource) {
-    getContainedResourcesInContainedResources(resource).forEach(resource::addContained); // add
-                                                                                         // them
-                                                                                         // to
-                                                                                         // the
-                                                                                         // parent
+    // add them to the parent
+    getContainedResourcesInContainedResources(resource).forEach(resource::addContained);
 
     return resource; // Return the resource to allow for method chaining
   }

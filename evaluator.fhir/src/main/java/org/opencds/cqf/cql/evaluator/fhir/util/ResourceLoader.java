@@ -14,6 +14,8 @@ import ca.uhn.fhir.parser.IParser;
 
 public interface ResourceLoader {
 
+  Class<?> getRelativeClass();
+
   default Object loadBundle(FhirContext context, String theLocation) {
     IBaseBundle resource = (IBaseBundle) readResource(context, theLocation);
     return resource;
@@ -67,7 +69,7 @@ public interface ResourceLoader {
       if (theLocation.startsWith(File.separator)) {
         is = new FileInputStream(theLocation);
       } else {
-        is = ResourceLoader.class.getResourceAsStream(theLocation);
+        is = getRelativeClass().getResourceAsStream(theLocation);
       }
       return IOUtils.toString(is, StandardCharsets.UTF_8);
     } catch (Exception e) {

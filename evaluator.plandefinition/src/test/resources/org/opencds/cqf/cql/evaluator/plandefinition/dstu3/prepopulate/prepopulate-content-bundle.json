@@ -76,7 +76,7 @@
                   },
                   {
                     "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
-                    "valueUri": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+                    "valueUri": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
                   }
                 ]
               }
@@ -129,7 +129,7 @@
             "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
           }
         ],
-        "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+        "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
         "name": "OutpatientPriorAuthorizationRequest",
         "title": "Outpatient Prior Authorization Request",
         "status": "active",

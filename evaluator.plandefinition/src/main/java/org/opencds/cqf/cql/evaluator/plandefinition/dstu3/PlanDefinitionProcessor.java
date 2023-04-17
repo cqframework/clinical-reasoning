@@ -91,7 +91,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         .map(entry -> (QuestionnaireResponse) entry.getResource()).collect(Collectors.toList());
     if (questionnaireResponses != null && !questionnaireResponses.isEmpty()) {
       for (var questionnaireResponse : questionnaireResponses) {
-        var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse);
+        var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse,
+            parameters, bundle, libraryEngine);
         extractedResources.add(questionnaireResponse);
         for (var entry : extractBundle.getEntry()) {
           ((Bundle) bundle).addEntry(entry);
@@ -99,6 +100,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
       }
     }
+  }
+
+  @Override
+  public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition, boolean theIsPut) {
+    var bundle = new Bundle();
+    bundle.setType(BundleType.TRANSACTION);
+
+    return bundle;
   }
 
   @Override

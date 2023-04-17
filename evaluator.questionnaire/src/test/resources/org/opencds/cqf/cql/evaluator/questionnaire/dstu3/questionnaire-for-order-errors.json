@@ -15,7 +15,7 @@
       "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation|1.0.0"
     }
   ],
-  "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+  "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
   "name": "OutpatientPriorAuthorizationRequest",
   "title": "Outpatient Prior Authorization Request",
   "status": "active",

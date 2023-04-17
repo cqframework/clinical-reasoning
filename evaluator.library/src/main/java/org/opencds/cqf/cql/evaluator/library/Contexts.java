@@ -71,10 +71,12 @@ public class Contexts {
   public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
       IBaseBundle additionalData) {
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-    return forRepository(settings, repository, additionalData, librarySourceProviders, null);
+    return forRepository(settings, repository, additionalData, librarySourceProviders,
+        null);
   }
 
-  public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
+  public static LibraryEvaluator forRepository(EvaluationSettings settings,
+      Repository repository,
       IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
       CqlFhirParametersConverter cqlFhirParametersConverter) {
     checkNotNull(settings);
@@ -124,7 +126,7 @@ public class Contexts {
   }
 
   private static Map<String, DataProvider> buildDataProviders(Repository repository,
-      IBaseBundle additionalData, TerminologyProvider terminologyProvider) {
+      IBaseBundle additionalData, TerminologyProvider theTerminologyProvider) {
     Map<String, DataProvider> dataProviders = new HashMap<>();
 
     var providers = new ArrayList<RetrieveProvider>();
@@ -139,7 +141,7 @@ public class Contexts {
     var retrieveProviderConfigurer =
         new RetrieveProviderConfigurer(RetrieveProviderConfig.defaultConfig());
     for (RetrieveProvider provider : providers) {
-      retrieveProviderConfigurer.configure(provider, terminologyProvider);
+      retrieveProviderConfigurer.configure(provider, theTerminologyProvider);
     }
 
     dataProviders.put(Constants.FHIR_MODEL_URI,
@@ -162,7 +164,8 @@ public class Contexts {
     }
   }
 
-  public static CqlFhirParametersConverter getCqlFhirParametersConverter(FhirContext fhirContext) {
+  public static CqlFhirParametersConverter getCqlFhirParametersConverter(
+      FhirContext fhirContext) {
     var fhirTypeConverter =
         new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
     return new CqlFhirParametersConverter(fhirContext, getAdapterFactory(fhirContext),

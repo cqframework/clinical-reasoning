@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
@@ -87,31 +88,54 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return questionnaire;
   }
 
+  private boolean verifyLibraryUrlForItemExpression(String url, String expression,
+      String itemLinkId, OperationOutcome oc) {
+    if (url == null || url.isEmpty()) {
+      var message =
+          String.format("No library specified for expression (%s) for item (%s)",
+              expression, itemLinkId);
+      logger.error(message);
+      oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+          .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+      return false;
+    }
+    return true;
+  }
+
+  private void getInitial(QuestionnaireItemComponent item, String defaultLibrary,
+      OperationOutcome oc) {
+    if (item.hasExtension(Constants.CQF_EXPRESSION)) {
+      // evaluate expression and set the result as the initialAnswer on the item
+      var expressionExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION);
+      var expression = expressionExtension.getValue().toString();
+      var languageExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION_LANGUAGE);
+      var language = languageExtension.getValue().toString();
+      if (verifyLibraryUrlForItemExpression(defaultLibrary, expression, item.getLinkId(), oc)) {
+        try {
+          var results = this.libraryEngine.getExpressionResult(this.patientId, "Patient",
+              expression, language, defaultLibrary, this.parameters, this.bundle);
+          for (var result : results) {
+            item.setInitial((Type) result);
+          }
+        } catch (Exception ex) {
+          var message =
+              String.format("Error encountered evaluating expression (%s) for item (%s): %s",
+                  expression, item.getLinkId(), ex.getMessage());
+          logger.error(message);
+          oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+              .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+        }
+      }
+    }
+  }
+
   protected void processItems(List<QuestionnaireItemComponent> items, String defaultLibrary,
       OperationOutcome oc) {
     items.forEach(item -> {
       if (item.hasItem()) {
         processItems(item.getItem(), defaultLibrary, oc);
       } else {
-        if (item.hasExtension(Constants.CQF_EXPRESSION)) {
-          // evaluate expression and set the result as the initialAnswer on the item
-          var expressionExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION);
-          var expression = expressionExtension.getValue().toString();
-          var languageExtension = getExtensionByUrl(item, Constants.CQF_EXPRESSION_LANGUAGE);
-          var language = languageExtension.getValue().toString();
-          try {
-            var result = this.libraryEngine.getExpressionResult(this.patientId, "Patient",
-                expression, language, defaultLibrary, this.parameters, this.bundle);
-            item.setInitial((Type) result);
-          } catch (Exception ex) {
-            var message =
-                String.format("Error encountered evaluating expression (%s) for item (%s): %s",
-                    expression, item.getLinkId(), ex.getMessage());
-            logger.error(message);
-            oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-          }
-        }
+        getInitial(item, defaultLibrary, oc);
       }
     });
   }
@@ -136,6 +160,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             .setValue(new Reference("#" + oc.getIdPart()));
       }
     }
+    // response.addContained(populatedQuestionnaire);
     response.setQuestionnaire(new Reference(populatedQuestionnaire));
     response.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
     response.setSubject(new Reference(new IdType("Patient", patientId)));
@@ -180,23 +205,30 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     for (var artifact : theArtifacts) {
       if (artifact.getType().toCode().equals(RelatedArtifactType.DEPENDSON.toCode())
           && artifact.hasResource()) {
-        var resource =
-            searchRepositoryByCanonical(repository, artifact.getResource().getReferenceElement_());
-        if (resource != null && packableResources.contains(resource.fhirType())
-            && theBundle.getEntry().stream()
-                .noneMatch(e -> e.getResource().getIdElement().equals(resource.getIdElement()))) {
-          theBundle.addEntry(new BundleEntryComponent().setResource(resource));
-          if (resource.fhirType().equals(FHIRAllTypes.LIBRARY.toCode())
-              && ((Library) resource).hasRelatedArtifact()) {
-            addRelatedArtifacts(theBundle, ((Library) resource).getRelatedArtifact());
+        try {
+          var canonical = artifact.getResource().getReferenceElement_();
+          if (packableResources.contains(Canonicals.getResourceType(canonical))) {
+            var resource = searchRepositoryByCanonical(repository, canonical);
+            if (resource != null
+                && theBundle.getEntry().stream()
+                    .noneMatch(
+                        e -> e.getResource().getIdElement().equals(resource.getIdElement()))) {
+              theBundle.addEntry(new BundleEntryComponent().setResource(resource));
+              if (resource.fhirType().equals(FHIRAllTypes.LIBRARY.toCode())
+                  && ((Library) resource).hasRelatedArtifact()) {
+                addRelatedArtifacts(theBundle, ((Library) resource).getRelatedArtifact());
+              }
+            }
           }
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
         }
       }
     }
   }
 
   @Override
-  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire) {
+  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean theIsPut) {
     var bundle = new Bundle();
     bundle.setType(BundleType.COLLECTION);
     bundle.addEntry(new BundleEntryComponent().setResource(theQuestionnaire));

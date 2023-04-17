@@ -5,8 +5,10 @@ import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,13 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
       LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
   protected IParser parser;
   protected Repository repository;
+  protected LibraryEngine libraryEngine;
+
+  protected String patientId;
+  protected IBaseParameters parameters;
+  protected IBaseBundle bundle;
+  protected String libraryUrl;
+  protected static final String subjectType = "Patient";
 
   protected BaseQuestionnaireResponseProcessor(Repository repository) {
     this.repository = repository;
@@ -53,31 +62,40 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
     throw new IllegalArgumentException(errorMessage);
   }
 
+  protected abstract IBaseBundle createResourceBundle(T questionnaireResponse,
+      List<IBaseResource> resources);
+
+  public abstract List<IBaseResource> processItems(T questionnaireResponse);
+
   public abstract T resolveQuestionnaireResponse(IIdType theId,
       IBaseResource theQuestionnaireResponse);
 
-  public IBaseBundle extract(IIdType theId, IBaseResource theQuestionnaireResponse) {
-    return extract(resolveQuestionnaireResponse(theId, theQuestionnaireResponse));
+  protected abstract void setup(T theQuestionnaireResponse);
+
+  public IBaseBundle extract(IIdType theId, IBaseResource theQuestionnaireResponse,
+      IBaseParameters theParameters, IBaseBundle theBundle, LibraryEngine theLibraryEngine) {
+    return extract(resolveQuestionnaireResponse(theId, theQuestionnaireResponse), theParameters,
+        theBundle, theLibraryEngine);
   }
 
-  public IBaseBundle extract(T questionnaireResponse) {
-    if (questionnaireResponse == null) {
+  public IBaseBundle extract(T theQuestionnaireResponse, IBaseParameters theParameters,
+      IBaseBundle theBundle, LibraryEngine theLibraryEngine) {
+    if (theQuestionnaireResponse == null) {
       var message = "Unable to perform operation $extract.  The QuestionnaireResponse was null";
       logger.error(message);
       throw new IllegalArgumentException(message);
     }
+    parameters = theParameters;
+    bundle = theBundle;
+    libraryEngine = theLibraryEngine;
+    setup(theQuestionnaireResponse);
 
-    var resources = processItems(questionnaireResponse);
+    var resources = processItems(theQuestionnaireResponse);
 
-    return createResourceBundle(questionnaireResponse, resources);
+    return createResourceBundle(theQuestionnaireResponse, resources);
   }
 
   protected String getExtractId(T questionnaireResponse) {
     return "extract-" + ((IBaseResource) questionnaireResponse).getIdElement().getIdPart();
   }
-
-  protected abstract IBaseBundle createResourceBundle(T questionnaireResponse,
-      List<IBaseResource> resources);
-
-  public abstract List<IBaseResource> processItems(T questionnaireResponse);
 }

@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -67,7 +68,9 @@ public class TestQuestionnaireResponse {
     }
 
     public GeneratedBundle extract() {
-      return new GeneratedBundle((Bundle) buildProcessor(repository).extract(baseResource));
+      var libraryEngine = new LibraryEngine(repository);
+      return new GeneratedBundle(
+          (Bundle) buildProcessor(repository).extract(baseResource, null, null, libraryEngine));
     }
   }
 

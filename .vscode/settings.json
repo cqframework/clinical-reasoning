@@ -49,6 +49,7 @@
     "qicore",
     "questionnaireresponse",
     "sdes",
+    "SEARCHSET",
     "sgpc",
     "Sonarlint",
     "SUBJECTLIST",
@@ -150,6 +151,5 @@
     "MD007": {
       "indent": 4
     }
-  },
-  "java.debug.settings.onBuildFailureProceed": true
+  }
 }

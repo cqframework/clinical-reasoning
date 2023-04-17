@@ -155,7 +155,8 @@ public class FhirRepository implements Repository {
 
     List<IBaseResource> resourceList = new ArrayList<>();
     for (IBaseResource resource : resourceMap.values()) {
-      if (resource.getIdElement().getResourceType().equals(resourceType.getSimpleName())) {
+      if (resource.getIdElement() != null
+          && resource.getIdElement().getResourceType().equals(resourceType.getSimpleName())) {
         resourceList.add(resource);
       }
     }

@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
@@ -30,35 +32,38 @@ public class LibraryEngine {
 
   private static Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
 
-  protected Repository repository;
-  protected FhirContext fhirContext;
-  protected IFhirPath fhirPath;
+  protected final Repository repository;
+  protected final FhirContext fhirContext;
+  protected final IFhirPath fhirPath;
+  protected final ModelResolver modelResolver;
   protected EvaluationSettings settings;
 
-  public LibraryEngine(Repository repository) {
-    this.repository = repository;
-    this.fhirContext = repository.fhirContext();
-    this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    this.settings = EvaluationSettings.getDefault().withFhirContext(fhirContext);
+  public LibraryEngine(Repository theRepository) {
+    repository = theRepository;
+    fhirContext = repository.fhirContext();
+    fhirPath = FhirPathCache.cachedForContext(fhirContext);
+    settings = EvaluationSettings.getDefault().withFhirContext(fhirContext);
+    modelResolver = new FhirModelResolverFactory()
+        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
 
-  public void setSettings(EvaluationSettings settings) {
-    this.settings = settings;
+  public void setSettings(EvaluationSettings theSettings) {
+    settings = theSettings;
   }
 
-  public LibraryEngine withSettings(EvaluationSettings settings) {
-    setSettings(settings);
+  public LibraryEngine withSettings(EvaluationSettings theSettings) {
+    setSettings(theSettings);
 
     return this;
   }
 
-  private Pair<String, Object> buildContextParameter(String patientId) {
+  private Pair<String, Object> buildContextParameter(String thePatientId) {
     Pair<String, Object> contextParameter = null;
-    if (patientId != null) {
-      if (patientId.startsWith("Patient/")) {
-        patientId = patientId.replace("Patient/", "");
+    if (thePatientId != null) {
+      if (thePatientId.startsWith("Patient/")) {
+        thePatientId = thePatientId.replace("Patient/", "");
       }
-      contextParameter = Pair.of("Patient", patientId);
+      contextParameter = Pair.of("Patient", thePatientId);
     }
 
     return contextParameter;
@@ -70,109 +75,142 @@ public class LibraryEngine {
         expressions);
   }
 
-  public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
-      IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
-    var libraryEvaluator = Contexts.forRepository(settings, repository, additionalData);
+  public IBaseParameters evaluate(VersionedIdentifier theId, String thePatientId,
+      IBaseParameters theParameters, IBaseBundle theAdditionalData, Set<String> theExpressions) {
+    var libraryEvaluator = Contexts.forRepository(settings, repository, theAdditionalData);
 
-    return libraryEvaluator.evaluate(id, buildContextParameter(patientId), parameters, expressions);
+    return libraryEvaluator.evaluate(theId, buildContextParameter(thePatientId), theParameters,
+        theExpressions);
   }
 
-  public IBaseParameters evaluateExpression(String expression, IBaseParameters parameters,
-      String patientId, List<Pair<String, String>> libraries, IBaseBundle bundle) {
+  public IBaseParameters evaluateExpression(String theExpression, IBaseParameters theParameters,
+      String thePatientId, List<Pair<String, String>> theLibraries, IBaseBundle theBundle) {
     var libraryConstructor = new LibraryConstructor(fhirContext);
     var cqlFhirParametersConverter = Contexts.getCqlFhirParametersConverter(fhirContext);
-    var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
-    var cql = libraryConstructor.constructCqlLibrary(expression, libraries, cqlParameters);
+    var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(theParameters);
+    var cql = libraryConstructor.constructCqlLibrary(theExpression, theLibraries, cqlParameters);
 
     Set<String> expressions = new HashSet<>();
     expressions.add("return");
 
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
-    var libraryEvaluator = Contexts.forRepository(settings, repository, bundle,
+    var libraryEvaluator = Contexts.forRepository(settings, repository, theBundle,
         librarySourceProviders, cqlFhirParametersConverter);
 
     return libraryEvaluator.evaluate(
         new VersionedIdentifier().withId("expression").withVersion("1.0.0"),
-        buildContextParameter(patientId), parameters, expressions);
+        buildContextParameter(thePatientId), theParameters, expressions);
   }
 
-  public IBase getExpressionResult(String patientId, String subjectType, String expression,
-      String language, String libraryToBeEvaluated, IBaseParameters parameters,
-      IBaseBundle bundle) {
-    validateExpression(language, expression, libraryToBeEvaluated);
-    IBase result = null;
+  public List<IBase> getExpressionResult(String theSubjectId, String theSubjectType,
+      String theExpression,
+      String theLanguage, String theLibraryToBeEvaluated, IBaseParameters theParameters,
+      IBaseBundle theBundle) {
+    validateExpression(theLanguage, theExpression, theLibraryToBeEvaluated);
+    List<IBase> results = null;
     IBaseParameters parametersResult;
-    switch (language) {
+    switch (theLanguage) {
       case "text/cql":
       case "text/cql.expression":
       case "text/cql-expression":
-        parametersResult = this.evaluateExpression(expression, parameters, patientId, null, bundle);
+        parametersResult =
+            this.evaluateExpression(theExpression, theParameters, theSubjectId, null, theBundle);
         // The expression is assumed to be the parameter component name
         // The expression evaluator creates a library with a single expression defined as "return"
-        expression = "return";
-        result = (IBase) resolveParameterValue(ParametersUtil
-            .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
+        theExpression = "return";
+        results = resolveParameterValues(ParametersUtil
+            .getNamedParameters(fhirContext, parametersResult, theExpression));
         break;
       case "text/cql-identifier":
       case "text/cql.identifier":
       case "text/cql.name":
       case "text/cql-name":
-        parametersResult = this.evaluate(libraryToBeEvaluated, patientId, parameters, bundle,
-            Collections.singleton(expression));
-        result = (IBase) resolveParameterValue(ParametersUtil
-            .getNamedParameter(fhirContext, parametersResult, expression).orElse(null));
+        parametersResult =
+            this.evaluate(theLibraryToBeEvaluated, theSubjectId, theParameters, theBundle,
+                Collections.singleton(theExpression));
+        results = resolveParameterValues(ParametersUtil
+            .getNamedParameters(fhirContext, parametersResult, theExpression));
         break;
       case "text/fhirpath":
         List<IBase> outputs;
         try {
-          outputs = fhirPath.evaluate(getSubject(patientId, subjectType), expression, IBase.class);
+          outputs =
+              fhirPath.evaluate(getSubject(theSubjectId, theSubjectType), theExpression,
+                  IBase.class);
         } catch (FhirPathExecutionException e) {
           throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
         }
         if (outputs != null && outputs.size() == 1) {
-          result = outputs.get(0);
+          results = Collections.singletonList(outputs.get(0));
         } else {
           throw new IllegalArgumentException(
-              "Expected only one value when evaluating FHIRPath expression: " + expression);
+              "Expected only one value when evaluating FHIRPath expression: " + theExpression);
         }
         break;
       default:
-        logger.warn("An action language other than CQL was found: {}", language);
+        logger.warn("An action language other than CQL was found: {}", theLanguage);
     }
 
-    return result;
+    return results;
   }
 
-  public void validateExpression(String language, String expression, String libraryUrl) {
-    if (language == null) {
+  public void validateExpression(String theLanguage, String theExpression, String theLibraryUrl) {
+    if (theLanguage == null) {
       logger.error("Missing language type for the Expression");
       throw new IllegalArgumentException("Missing language type for the Expression");
-    } else if (expression == null) {
+    } else if (theExpression == null) {
       logger.error("Missing expression for the Expression");
       throw new IllegalArgumentException("Missing expression for the Expression");
-    } else if (libraryUrl == null) {
+    } else if (theLibraryUrl == null) {
       logger.error("Missing library for the Expression");
       throw new IllegalArgumentException("Missing library for the Expression");
     }
   }
 
-  public Object resolveParameterValue(IBase value) {
-    if (value == null) {
+  public List<IBase> resolveParameterValues(List<IBase> theValues) {
+    if (theValues == null || theValues.isEmpty()) {
       return null;
     }
+
+    List<IBase> returnValues = new ArrayList<>();
     switch (fhirContext.getVersion().getVersion()) {
       case DSTU3:
-        return ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) value)
-            .getValue();
+        theValues.forEach(v -> {
+          var param = (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) v;
+          if (param.hasValue()) {
+            returnValues.add(param.getValue());
+          } else if (param.hasResource()) {
+            returnValues.add(param.getResource());
+          }
+        });
+        break;
       case R4:
-        return ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) value).getValue();
+        theValues.forEach(v -> {
+          var param = (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) v;
+          if (param.hasValue()) {
+            returnValues.add(param.getValue());
+          } else if (param.hasResource()) {
+            returnValues.add(param.getResource());
+          }
+        });
+        break;
       case R5:
-        return ((org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent) value).getValue();
+        theValues.forEach(v -> {
+          var param = (org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent) v;
+          if (param.hasValue()) {
+            returnValues.add(param.getValue());
+          } else if (param.hasResource()) {
+            returnValues.add(param.getResource());
+          }
+        });
+        break;
       default:
         throw new IllegalArgumentException(
             String.format("unsupported FHIR version: %s", fhirContext));
     }
+
+    return returnValues;
   }
 
   protected IBaseResource getSubject(String subjectId, String subjectType) {

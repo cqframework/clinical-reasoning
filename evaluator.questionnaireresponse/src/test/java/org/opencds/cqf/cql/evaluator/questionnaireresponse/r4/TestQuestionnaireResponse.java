@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.r4;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -9,10 +10,12 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -50,42 +53,104 @@ public class TestQuestionnaireResponse {
     public static Extract that(String questionnaireResponseName) {
       return new Extract(questionnaireResponseName);
     }
+
+    public static Extract that(IdType theId) {
+      return new Extract(theId);
+    }
   }
 
   static class Extract {
+    private IdType questionnaireResponseId;
     private Repository repository;
-    private QuestionnaireResponse baseResource;
+    private QuestionnaireResponse questionnaireResponse;
+    private IdType expectedBundleId;
 
     public Extract(String questionnaireResponseName) {
-      baseResource = (QuestionnaireResponse) parse(questionnaireResponseName);
-      FhirRepository data = new FhirRepository(this.getClass(), List.of("tests"), false);
-      FhirRepository content = new FhirRepository(this.getClass(), List.of("content/"), false);
-      FhirRepository terminology = new FhirRepository(this.getClass(),
-          List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+      questionnaireResponseId = null;
+      questionnaireResponse = (QuestionnaireResponse) parse(questionnaireResponseName);
+    }
 
-      this.repository = Repositories.proxy(data, content, terminology);
+    public Extract(IdType theId) {
+      questionnaireResponseId = theId;
+      questionnaireResponse = null;
+    }
+
+    private void buildRepository() {
+      if (repository == null) {
+        FhirRepository data = new FhirRepository(this.getClass(), List.of("tests"), false);
+        FhirRepository content = new FhirRepository(this.getClass(), List.of("content/"), false);
+        FhirRepository terminology = new FhirRepository(this.getClass(),
+            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+
+        repository = Repositories.proxy(data, content, terminology);
+      }
+
+      if (questionnaireResponse == null) {
+        questionnaireResponse =
+            repository.read(QuestionnaireResponse.class, questionnaireResponseId);
+      }
+    }
+
+    public Extract withRepository(Repository theRepository) {
+      repository = theRepository;
+
+      return this;
+    }
+
+    public Extract withExpectedBundleId(IdType theBundleId) {
+      expectedBundleId = theBundleId;
+
+      return this;
     }
 
     public GeneratedBundle extract() {
-      return new GeneratedBundle((Bundle) buildProcessor(repository).extract(baseResource));
+      buildRepository();
+      Bundle expectedBundle = null;
+      if (expectedBundleId != null) {
+        try {
+          expectedBundle = repository.read(Bundle.class, expectedBundleId);
+        } catch (Exception e) {
+        }
+      }
+      var libraryEngine = new LibraryEngine(repository);
+      return new GeneratedBundle(
+          (Bundle) buildProcessor(repository).extract(questionnaireResponse, null, null,
+              libraryEngine),
+          expectedBundle);
     }
   }
 
   static class GeneratedBundle {
-    Bundle bundle;
+    Bundle myGeneratedBundle;
+    Bundle myExpectedBundle;
 
-    public GeneratedBundle(Bundle bundle) {
-      this.bundle = bundle;
+    public GeneratedBundle(Bundle theGeneratedBundle, Bundle theExpectedBundle) {
+      myGeneratedBundle = theGeneratedBundle;
+      myExpectedBundle = theExpectedBundle;
     }
 
     public void isEqualsTo(String expectedBundleAssetName) {
       try {
         JSONAssert.assertEquals(load(expectedBundleAssetName),
-            jsonParser.encodeResourceToString(bundle), true);
+            jsonParser.encodeResourceToString(myGeneratedBundle), true);
       } catch (JSONException | IOException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
+    }
+
+    public void isEqualsToExpected() {
+      try {
+        JSONAssert.assertEquals(jsonParser.encodeResourceToString(myExpectedBundle),
+            jsonParser.encodeResourceToString(myGeneratedBundle), true);
+      } catch (JSONException e) {
+        e.printStackTrace();
+        fail("Unable to compare Jsons: " + e.getMessage());
+      }
+    }
+
+    public void hasEntry(int theCount) {
+      assertEquals(myGeneratedBundle.getEntry().size(), theCount);
     }
   }
 }

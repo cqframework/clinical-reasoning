@@ -100,6 +100,19 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public abstract void extractQuestionnaireResponse();
 
+  public abstract IBaseBundle packagePlanDefinition(T thePlanDefinition, boolean theIsPut);
+
+  public IBaseBundle packagePlanDefinition(T thePlanDefinition) {
+    return packagePlanDefinition(thePlanDefinition, false);
+  }
+
+  public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packagePlanDefinition(
+      IIdType theId, CanonicalType theCanonical, IBaseResource thePlanDefinition,
+      boolean theIsPut) {
+    return packagePlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition),
+        theIsPut);
+  }
+
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
       CanonicalType theCanonical, IBaseResource thePlanDefinition, String patientId,
       String encounterId, String practitionerId, String organizationId, String userType,
@@ -208,8 +221,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
       result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, altExpression,
           altLanguage, libraryUrl, params, this.bundle);
     }
+    if (result != null && result.size() > 1) {
+      throw new IllegalArgumentException(String.format(
+          "Dynamic value resolution received multiple values for expression: %s", expression));
+    }
+    var value = result == null || result.isEmpty() ? null : result.get(0);
     if (path.startsWith("action.")) {
-      resolveCdsHooksDynamicValue(resource, result, path);
+      resolveCdsHooksDynamicValue(resource, value, path);
     }
     // backwards compatibility where CDS Hooks indicator was set with activity.extension or
     // action.extension path
@@ -218,9 +236,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
         throw new IllegalArgumentException(
             "Please use the priority path when setting indicator values when using FHIR R5 for CDS Hooks evaluation");
       }
-      resolveCdsHooksDynamicValue(resource, result, path);
+      resolveCdsHooksDynamicValue(resource, value, path);
     } else {
-      modelResolver.setValue(resource, path, result);
+      modelResolver.setValue(resource, path, value);
     }
   }
 
@@ -234,7 +252,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
       result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, altExpression,
           altLanguage, libraryUrl, params, this.bundle);
     }
+    if (result != null && result.size() > 1) {
+      throw new IllegalArgumentException(String.format(
+          "Dynamic value resolution received multiple values for expression: %s", expression));
+    }
 
-    return result;
+    return result == null || result.isEmpty() ? null : result.get(0);
   }
 }

@@ -79,6 +79,9 @@ public class QuestionnaireResponseProcessor
   }
 
   @Override
+  protected void setup(QuestionnaireResponse theQuestionnaireResponse) {}
+
+  @Override
   public List<IBaseResource> processItems(QuestionnaireResponse questionnaireResponse) {
     var questionnaireCanonical = questionnaireResponse.getQuestionnaire().getReference();
     if (questionnaireCanonical == null || questionnaireCanonical.isEmpty()) {
@@ -155,6 +158,8 @@ public class QuestionnaireResponseProcessor
       Reference subject) {
     // Definition-based extraction -
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
+    // var contextExpression = (Expression) itemExtractionContext.getValue();
+
     var resourceType = getFhirType(itemExtractionContext).toCode();
     var resource =
         (Resource) this.repository.fhirContext().getResourceDefinition(resourceType).newInstance();

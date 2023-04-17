@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class ItemGeneratorTests {
   @Test
   void testGenerateItem() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestItemGenerator.Assert.that("Patient",
         "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient", "OPA-Patient1")
         .withRepository(repository)
@@ -18,7 +18,7 @@ public class ItemGeneratorTests {
 
   @Test
   void testSleepStudyOrder() {
-    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp", this.getClass());
     TestItemGenerator.Assert.that("ServiceRequest",
         "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order", "positive")
         .withRepository(repository)

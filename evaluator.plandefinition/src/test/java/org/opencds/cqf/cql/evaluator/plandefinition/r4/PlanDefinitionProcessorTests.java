@@ -56,7 +56,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "ANCDT17";
     var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
     var encounterID = "Encounter/helloworld-patient-1-encounter-1";
-    var repository = new TestRepository().createRepositoryForPath("anc-dak");
+    var repository = new TestRepository().createRepositoryForPath("anc-dak", this.getClass());
     var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
         .withParameters(parameters)
@@ -86,7 +86,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "us-ecr-specification";
     var patientID = "helloworld-patient-1";
     var encounterID = "helloworld-patient-1-encounter-1";
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
         .withRepository(repository)
         .withExpectedCarePlanId(new IdType("CarePlan", "us-ecr-specification")).apply()
@@ -102,7 +102,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "hello-world-patient-view";
     var patientID = "helloworld-patient-1";
     var encounterID = "helloworld-patient-1-encounter-1";
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
         .withRepository(repository)
         .withExpectedCarePlanId(new IdType("CarePlan", "hello-world-patient-view")).apply()
@@ -118,7 +118,8 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
-    var repository = new TestRepository().createRepositoryForPath("opioid-Rec10-patient-view");
+    var repository =
+        new TestRepository().createRepositoryForPath("opioid-Rec10-patient-view", this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
         .withRepository(repository)
         .withExpectedCarePlanId(new IdType("CarePlan", "opioidcds-10-patient-view")).apply()
@@ -176,7 +177,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "prepopulate";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null)
         .withRepository(repository).withParameters(parameters)
         .withExpectedCarePlanId(new IdType("CarePlan", "prepopulate"))
@@ -192,7 +193,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "prepopulate-noLibrary";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
         .withParameters(parameters)
         .apply().hasOperationOutcome();
@@ -208,7 +209,7 @@ public class PlanDefinitionProcessorTests {
     var dataId =
         new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1");
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
         .withAdditionalDataId(dataId).withParameters(parameters)
         .apply().hasContained(6);
@@ -222,7 +223,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "generate-questionnaire";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
         .withParameters(parameters)
         .withExpectedCarePlanId(new IdType("CarePlan", "generate-questionnaire"))
@@ -240,7 +241,7 @@ public class PlanDefinitionProcessorTests {
     var parameters = parameters(stringPart("Service Request Id", "SleepStudy"),
         stringPart("Service Request Id", "SleepStudy2"),
         stringPart("Coverage Id", "Coverage-positive"));
-    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp", this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null)
         .withParameters(parameters).withRepository(repository).applyR5()
         .hasEntry(2);
@@ -249,7 +250,7 @@ public class PlanDefinitionProcessorTests {
   @Test
   public void testPackageASLPA1() {
     var planDefinitionID = "ASLPA1";
-    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp", this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, null, null)
         .withRepository(repository).packagePlanDefinition().hasEntry(20);
   }

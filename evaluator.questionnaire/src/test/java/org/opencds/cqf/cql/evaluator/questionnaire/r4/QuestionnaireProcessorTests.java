@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 public class QuestionnaireProcessorTests {
   @Test
   void testPrePopulate() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
         .withRepository(repository)
@@ -24,7 +24,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPrePopulate_NoLibrary() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
             "OPA-Patient1")
@@ -34,7 +34,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPrePopulate_HasErrors() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"),
             "OPA-Patient1")
@@ -45,7 +45,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPrePopulate_noQuestionnaire_throwsException() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     assertThrows(IllegalArgumentException.class, () -> {
       TestQuestionnaire.Assert.that("", null).withRepository(repository).prePopulate();
     });
@@ -53,7 +53,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPrePopulate_notQuestionnaire_throwsException() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     assertThrows(ClassCastException.class, () -> {
       TestQuestionnaire.Assert
           .that("questionnaire-invalid-questionnaire.json", null)
@@ -64,7 +64,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPopulate() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
         .withRepository(repository)
@@ -74,7 +74,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPopulate_NoLibrary() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
             "OPA-Patient1")
@@ -84,7 +84,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPopulate_HasErrors() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"),
             "OPA-Patient1")
@@ -95,7 +95,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPopulate_noQuestionnaire_throwsException() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     assertThrows(IllegalArgumentException.class, () -> {
       TestQuestionnaire.Assert.that("", null).withRepository(repository).populate();
     });
@@ -103,7 +103,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPopulate_notQuestionnaire_throwsException() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     assertThrows(ClassCastException.class, () -> {
       TestQuestionnaire.Assert.that("questionnaire-invalid-questionnaire.json", null)
           .withRepository(repository)
@@ -113,7 +113,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testQuestionnairePackage() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     var generatedPackage = TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), null)
         .withRepository(repository)
@@ -126,7 +126,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPA_ASLP_PrePopulate() {
-    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp", this.getClass());
     TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
         .withRepository(repository)
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
@@ -137,7 +137,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPA_ASLP_Populate() {
-    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp", this.getClass());
     TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
         .withRepository(repository)
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
@@ -148,7 +148,7 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPA_ASLP_Package() {
-    var repository = new TestRepository().createRepositoryForPath("pa-aslp");
+    var repository = new TestRepository().createRepositoryForPath("pa-aslp", this.getClass());
     var generatedPackage = TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "ASLPA1"), null).withRepository(repository)
         .questionnairePackage();

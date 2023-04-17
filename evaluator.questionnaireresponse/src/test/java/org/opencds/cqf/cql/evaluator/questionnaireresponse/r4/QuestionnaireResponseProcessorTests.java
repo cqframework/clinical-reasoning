@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 
 public class QuestionnaireResponseProcessorTests {
   private void testExtract(String questionnaireResponse) {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaireResponse.Assert
         .that(new IdType("QuestionnaireResponse", questionnaireResponse))
         .withRepository(repository)
@@ -36,7 +36,7 @@ public class QuestionnaireResponseProcessorTests {
 
   @Test
   void testDefinitionBasedExtraction() {
-    var repository = new TestRepository().createRepository();
+    var repository = new TestRepository().createRepository(this.getClass());
     TestQuestionnaireResponse.Assert
         .that(
             new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1"))

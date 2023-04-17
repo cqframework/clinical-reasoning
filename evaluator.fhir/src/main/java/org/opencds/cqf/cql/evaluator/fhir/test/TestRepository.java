@@ -1,11 +1,10 @@
-package org.opencds.cqf.cql.evaluator.fhir.repository.r5;
+package org.opencds.cqf.cql.evaluator.fhir.test;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -13,55 +12,63 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.cql.evaluator.fhir.test.FhirResourceLoader;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
-import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
+import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 
 
-public class FhirRepository implements Repository {
+public class TestRepository implements Repository {
 
-  FhirContext context = FhirContext.forCached(FhirVersionEnum.R5);
-  IFhirPath fhirPath = FhirPathCache.cachedForContext(context);
+  private final Map<IIdType, IBaseResource> resourceMap;
 
-  private Map<IdType, IBaseResource> resourceMap;
-  private Random random;
+  protected final FhirContext context;
+  protected final IFhirPath fhirPath;
 
-  public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
+  private final Random random;
+
+  private TestRepository(FhirContext fhirContext) {
+    this.context = fhirContext;
+    this.fhirPath = FhirPathCache.cachedForContext(context);
     resourceMap = new LinkedHashMap<>();
     random = new Random();
-
-    var resourceLoader = new FhirResourceLoader(context, clazz, directoryList, recursive);
-    resourceLoader.getResources()
-        .forEach(resource -> resourceMap.put(new IdType(resource.getIdElement().getResourceType(),
-            resource.getIdElement().getIdPart()), resource));
   }
 
-  public FhirRepository(Bundle bundle) {
-    resourceMap = new LinkedHashMap<>();
-    random = new Random();
+  public TestRepository(FhirContext fhirContext, Class<?> clazz, List<String> directoryList,
+      boolean recursive) {
+    this(fhirContext);
 
-    BundleUtil.toListOfResources(this.context, bundle).forEach(resource -> resourceMap.put(
-        new IdType(resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart()),
+
+    FhirResourceLoader resourceLoader =
+        new FhirResourceLoader(context, clazz, directoryList, recursive);
+    resourceLoader.getResources().forEach(resource -> resourceMap.put(
+        Ids.newId(fhirContext, resource.getIdElement().getResourceType(),
+            resource.getIdElement().getIdPart()),
         resource));
+  }
+
+  public TestRepository(FhirContext fhirContext, IBaseBundle bundle) {
+    this(fhirContext);
+    BundleUtil.toListOfResources(this.context, bundle).forEach(resource -> resourceMap.put(
+        Ids.newId(fhirContext, resource.getIdElement().getResourceType(),
+            resource.getIdElement().getIdPart()),
+        resource));
+
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
       Map<String, String> headers) {
-    IdType theId = new IdType(resourceType.getSimpleName(), id.getIdPart());
+    var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
     if (resourceMap.containsKey(theId)) {
       return (T) resourceMap.get(theId);
     }
@@ -74,17 +81,17 @@ public class FhirRepository implements Repository {
 
     if (IBaseResource.class.isAssignableFrom(resource.getClass())) {
 
-      var iBaseResource = (IBaseResource) resource;
+      IBaseResource iBaseResource = resource;
 
-      var theId = new IdType(iBaseResource.getIdElement().getResourceType(),
+      var theId = Ids.newId(context, iBaseResource.getIdElement().getResourceType(),
           iBaseResource.getIdElement().getIdPart());
       if (!resourceMap.containsKey(theId)) {
         resourceMap.put(theId, iBaseResource);
         methodOutcome.setCreated(true);
       } else {
         Long nextLong = random.nextLong();
-        theId = new IdType(iBaseResource.getIdElement().getResourceType(),
-            iBaseResource.getIdElement().getIdPart(), nextLong.toString());
+        theId = Ids.newId(context, iBaseResource.getIdElement().getResourceType(),
+            iBaseResource.getIdElement().getIdPart() + nextLong.toString());
         resourceMap.put(theId, iBaseResource);
         methodOutcome.setCreated(true);
       }
@@ -108,9 +115,9 @@ public class FhirRepository implements Repository {
 
     if (IBaseResource.class.isAssignableFrom(resource.getClass())) {
 
-      var iBaseResource = (IBaseResource) resource;
+      IBaseResource iBaseResource = resource;
 
-      var theId = new IdType(iBaseResource.getIdElement().getResourceType(),
+      var theId = Ids.newId(context, iBaseResource.getIdElement().getResourceType(),
           iBaseResource.getIdElement().getIdPart());
       if (resourceMap.containsKey(theId)) {
         resourceMap.put(theId, iBaseResource);
@@ -130,7 +137,7 @@ public class FhirRepository implements Repository {
       I id, Map<String, String> headers) {
     MethodOutcome methodOutcome = new MethodOutcome();
 
-    IdType theId = new IdType(resourceType.getSimpleName(), id.getIdPart());
+    var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
 
     if (resourceMap.containsKey(theId)) {
       resourceMap.remove(theId);
@@ -146,9 +153,6 @@ public class FhirRepository implements Repository {
       Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
       Map<String, String> headers) {
 
-    Bundle bundle = Resources.newResource(Bundle.class, UUID.randomUUID().toString());
-    bundle.setType(Bundle.BundleType.SEARCHSET);
-
     List<IBaseResource> resourceList = new ArrayList<>();
     for (IBaseResource resource : resourceMap.values()) {
       if (resource.getIdElement() != null
@@ -157,17 +161,21 @@ public class FhirRepository implements Repository {
       }
     }
 
+    BundleBuilder b = new BundleBuilder(context);
+
+
+
     if (searchParameters != null && searchParameters.containsKey("url")) {
       Iterable<IBaseResource> bundleResources = searchByUrl(resourceList,
           searchParameters.get("url").get(0).getValueAsQueryToken(context));
-      bundleResources.forEach(resource -> bundle
-          .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+      bundleResources.forEach(b::addCollectionEntry);
     } else {
-      resourceList.forEach(resource -> bundle
-          .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+      resourceList.forEach(b::addCollectionEntry);
     }
 
-    return (B) bundle;
+    b.setType(BundleTypeEnum.SEARCHSET.getCode());
+
+    return (B) b.getBundle();
   }
 
   private Iterable<IBaseResource> searchByUrl(List<IBaseResource> resources, String url) {

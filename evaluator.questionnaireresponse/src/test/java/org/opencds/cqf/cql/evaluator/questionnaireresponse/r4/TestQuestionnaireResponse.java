@@ -13,10 +13,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -65,6 +65,8 @@ public class TestQuestionnaireResponse {
     private QuestionnaireResponse questionnaireResponse;
     private IdType expectedBundleId;
 
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
+
     public Extract(String questionnaireResponseName) {
       questionnaireResponseId = null;
       questionnaireResponse = (QuestionnaireResponse) parse(questionnaireResponseName);
@@ -77,9 +79,11 @@ public class TestQuestionnaireResponse {
 
     private void buildRepository() {
       if (repository == null) {
-        FhirRepository data = new FhirRepository(this.getClass(), List.of("tests"), false);
-        FhirRepository content = new FhirRepository(this.getClass(), List.of("content/"), false);
-        FhirRepository terminology = new FhirRepository(this.getClass(),
+        TestRepository data =
+            new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
+        TestRepository content =
+            new TestRepository(fhirContext, this.getClass(), List.of("content/"), false);
+        TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
             List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
         repository = Repositories.proxy(data, content, terminology);

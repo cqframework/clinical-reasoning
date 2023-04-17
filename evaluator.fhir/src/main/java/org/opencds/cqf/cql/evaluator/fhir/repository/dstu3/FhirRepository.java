@@ -16,8 +16,8 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.evaluator.fhir.test.FhirResourceLoader;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
-import org.opencds.cqf.cql.evaluator.fhir.util.FhirResourceLoader;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
 import org.opencds.cqf.fhir.api.Repository;
 

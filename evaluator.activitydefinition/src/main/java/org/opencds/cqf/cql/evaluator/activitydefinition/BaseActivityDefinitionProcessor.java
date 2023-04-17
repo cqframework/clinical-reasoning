@@ -11,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -46,7 +45,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   protected BaseActivityDefinitionProcessor(Repository repository) {
     requireNonNull(repository, "repository can not be null");
     this.repository = repository;
-    this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
+    this.fhirPath = org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache
+        .cachedForContext(repository.fhirContext());
     modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }

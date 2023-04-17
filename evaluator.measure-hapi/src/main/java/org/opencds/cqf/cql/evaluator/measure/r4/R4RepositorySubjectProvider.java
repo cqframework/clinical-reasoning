@@ -1,11 +1,14 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.IdType;
@@ -13,8 +16,11 @@ import org.hl7.fhir.r4.model.Patient;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
+import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
 
 public class R4RepositorySubjectProvider implements SubjectProvider {
 
@@ -25,26 +31,25 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
   }
 
   @Override
-  public List<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
+  public Stream<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
     if (subjectId == null) {
-      // TODO: Use the Bundle iterable
-      // Iterable<IBaseResource> resources = repo.search("Patient");
-      // List<String> ids = new ArrayList<>();
-      // for (IBaseResource r : resources) {
-      // ids.add(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
-      // }
+      var bundle = this.repo.search(Bundle.class, Patient.class, Searches.ALL);
+      var iterator = new BundleIterator<>(repo, Bundle.class, bundle);
+      return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+          iterator,
+          Spliterator.ORDERED), false)
+          .map(BundleEntryParts::getResource)
+          .map(x -> x.getIdElement().toUnqualifiedVersionless().getValue());
 
-      // return ids;
-      return null;
     } else if (subjectId.indexOf("/") == -1) {
       IdType id = new IdType("Patient/" + subjectId);
-      IBaseResource r = repo.read(Patient.class, id);
+      Patient r = repo.read(Patient.class, id);
 
       if (r == null) {
         throw new ResourceNotFoundException(id);
       }
-      return Collections
-          .singletonList(r.getIdElement().getResourceType() + "/" + r.getIdElement().getIdPart());
+
+      return Stream.of(r.getIdElement().toUnqualifiedVersionless().getValue());
     } else if (subjectId.startsWith("Group")) {
       IdType id = new IdType(subjectId);
       Group r = repo.read(Group.class, id);
@@ -59,7 +64,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         subjectIds.add(ref.getResourceType() + "/" + ref.getIdPart());
       }
 
-      return subjectIds;
+      return subjectIds.stream();
     } else {
       throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectId));
     }

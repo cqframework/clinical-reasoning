@@ -15,10 +15,12 @@ import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.RepositoryTerminologyProvider;
-import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class RepositoryRetrieveProviderTests {
 
@@ -28,7 +30,8 @@ public class RepositoryRetrieveProviderTests {
 
   private RetrieveProvider getRepositoryRetrieveProvider(TerminologyProvider terminologyProvider) {
     RepositoryRetrieveProvider brp = new RepositoryRetrieveProvider(
-        new FhirRepository(this.getClass(), List.of("test1/", "../terminology/test1/"), false));
+        new TestRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("test1/", "../terminology/test1/"), false));
     brp.setTerminologyProvider(terminologyProvider);
 
     return brp;
@@ -153,7 +156,8 @@ public class RepositoryRetrieveProviderTests {
   @Test
   public void test_filterToValueSet() {
     TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(
-        new FhirRepository(this.getClass(), List.of("../terminology/test1/"), false));
+        new TestRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("../terminology/test1/"), false));
 
     RetrieveProvider retrieve = this.getRepositoryRetrieveProvider(terminologyProvider);
 

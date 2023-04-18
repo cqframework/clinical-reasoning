@@ -24,10 +24,10 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -81,6 +81,8 @@ public class TestQuestionnaire {
     private Bundle bundle;
     private Parameters parameters;
 
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
+
     public QuestionnaireResult(String questionnaireName, String patientId) {
       questionnaire = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
       questionnaireId = null;
@@ -94,19 +96,19 @@ public class TestQuestionnaire {
     }
 
     public QuestionnaireResult withData(String dataAssetName) {
-      dataRepository = new FhirRepository((Bundle) parse(dataAssetName));
+      dataRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public QuestionnaireResult withContent(String dataAssetName) {
-      contentRepository = new FhirRepository((Bundle) parse(dataAssetName));
+      contentRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public QuestionnaireResult withTerminology(String dataAssetName) {
-      terminologyRepository = new FhirRepository((Bundle) parse(dataAssetName));
+      terminologyRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
@@ -136,13 +138,15 @@ public class TestQuestionnaire {
     private void buildRepository() {
       if (repository == null) {
         if (dataRepository == null) {
-          dataRepository = new FhirRepository(this.getClass(), List.of("tests"), false);
+          dataRepository =
+              new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
         }
         if (contentRepository == null) {
-          contentRepository = new FhirRepository(this.getClass(), List.of("content/"), false);
+          contentRepository =
+              new TestRepository(fhirContext, this.getClass(), List.of("content/"), false);
         }
         if (terminologyRepository == null) {
-          terminologyRepository = new FhirRepository(this.getClass(),
+          terminologyRepository = new TestRepository(fhirContext, this.getClass(),
               List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
         }
 

@@ -5,9 +5,11 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.stringPar
 
 import java.util.List;
 
-import org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.FhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.fhir.utility.Repositories;
 import org.testng.annotations.Test;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class PlanDefinitionProcessorTests {
   @Test
@@ -31,11 +33,14 @@ public class PlanDefinitionProcessorTests {
 
   @Test(enabled = false) // Unable to get the cql to run against dstu3
   public void testOpioidRec10PatientView() {
+    FhirContext fhirContext = FhirContext.forDstu3Cached();
     var data =
-        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
+        new TestRepository(fhirContext, this.getClass(), List.of("opioid-Rec10-patient-view/tests"),
+            false);
     var content =
-        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/content"), false);
-    var terminology = new FhirRepository(this.getClass(),
+        new TestRepository(fhirContext, this.getClass(),
+            List.of("opioid-Rec10-patient-view/content"), false);
+    var terminology = new TestRepository(fhirContext, this.getClass(),
         List.of("opioid-Rec10-patient-view/vocabulary/CodeSystem",
             "opioid-Rec10-patient-view/vocabulary/ValueSet"),
         false);

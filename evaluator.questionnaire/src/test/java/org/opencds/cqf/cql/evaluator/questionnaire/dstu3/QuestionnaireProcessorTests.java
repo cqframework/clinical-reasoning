@@ -18,7 +18,7 @@ public class QuestionnaireProcessorTests {
   @Test(enabled = false)
   void testPrePopulate() {
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
         .isEqualsTo("questionnaire-for-order-populated.json");
   }
@@ -29,7 +29,7 @@ public class QuestionnaireProcessorTests {
         new TestRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .prePopulate().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
   }
@@ -37,7 +37,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPrePopulate_HasErrors() {
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
         .isEqualsTo("questionnaire-for-order-populated-errors.json");
@@ -53,7 +53,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPrePopulate_notQuestionnaire_throwsException() {
     assertThrows(ClassCastException.class, () -> {
-      TestQuestionnaire.Assert.that("content/Questionnaire-invalid-questionnaire.json", null)
+      TestQuestionnaire.Assert.that("resources/Questionnaire-invalid-questionnaire.json", null)
           .prePopulate();
     });
   }
@@ -61,7 +61,7 @@ public class QuestionnaireProcessorTests {
   @Test(enabled = false)
   void testPopulate() {
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
         .isEqualsTo("questionnaire-response-populated.json");
   }
@@ -72,7 +72,7 @@ public class QuestionnaireProcessorTests {
         new TestRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .populate().isEqualsTo("questionnaire-response-populated-noLibrary.json");
   }
@@ -80,7 +80,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPopulate_HasErrors() {
     TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
         .isEqualsTo("questionnaire-response-populated-errors.json");
@@ -96,7 +96,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPopulate_notQuestionnaire_throwsException() {
     assertThrows(ClassCastException.class, () -> {
-      TestQuestionnaire.Assert.that("content/Questionnaire-invalid-questionnaire.json", null)
+      TestQuestionnaire.Assert.that("resources/Questionnaire-invalid-questionnaire.json", null)
           .populate();
     });
   }
@@ -104,7 +104,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testQuestionnairePackage() {
     var generatedPackage = TestQuestionnaire.Assert
-        .that("content/Questionnaire-OutpatientPriorAuthorizationRequest.json", null)
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", null)
         .questionnairePackage();
 
     assertEquals(generatedPackage.getEntry().size(), 3);

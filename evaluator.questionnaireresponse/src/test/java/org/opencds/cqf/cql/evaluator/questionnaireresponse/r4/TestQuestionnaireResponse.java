@@ -82,7 +82,7 @@ public class TestQuestionnaireResponse {
         TestRepository data =
             new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
         TestRepository content =
-            new TestRepository(fhirContext, this.getClass(), List.of("content/"), false);
+            new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
         TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
             List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 

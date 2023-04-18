@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.fhir.util;
+package org.opencds.cqf.cql.evaluator.fhir.test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +29,6 @@ public class FhirResourceLoader implements ResourceLoader {
       locations.addAll(getFilePaths(getDirectoryOrFileLocation(dir), recursive));
     });
 
-    System.out.println(locations);
     locations.forEach(item -> {
       IBaseResource resource = loadTestResources(item);
       resources.add(resource);

@@ -35,7 +35,7 @@ public class R4RepositoryTest {
     TestRepository data =
         new TestRepository(fhirContext, this.getClass(), List.of("res/tests"), false);
     TestRepository content =
-        new TestRepository(fhirContext, this.getClass(), List.of("res/content/"), false);
+        new TestRepository(fhirContext, this.getClass(), List.of("res/resources/"), false);
     TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
         List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
 

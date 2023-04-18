@@ -17,11 +17,13 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierCompon
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.evaluator.measure.TestRepositories;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.TestException;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class Measure {
 
@@ -58,7 +60,8 @@ public class Measure {
     }
 
     Given repositoryFor(String repositoryPath) {
-      this.repository = TestRepositories.createRepositoryForPath(repositoryPath);
+      this.repository = TestRepositoryFactory.createRepository(FhirContext.forDstu3Cached(),
+          this.getClass(), repositoryPath);
       return this;
     }
 

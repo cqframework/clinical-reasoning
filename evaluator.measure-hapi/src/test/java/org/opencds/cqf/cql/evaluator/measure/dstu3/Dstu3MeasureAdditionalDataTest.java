@@ -9,14 +9,15 @@ import ca.uhn.fhir.context.FhirContext;
 public class Dstu3MeasureAdditionalDataTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("dstu3/EXM105FHIR3Measure");
+      Measure.given().repositoryFor("EXM105FHIR3MeasurePartBundle");
 
   @Test
   public void testMeasureAdditionalData() {
 
     var parser = FhirContext.forDstu3Cached().newJsonParser();
     var additionalData = (Bundle) parser.parseResource(Dstu3MeasureAdditionalDataTest.class
-        .getResourceAsStream("EXM105FHIR3MeasureAdditionalBundle.json"));
+        .getResourceAsStream(
+            "EXM105FHIR3MeasurePartBundle/EXM105FHIR3MeasureAdditionalBundle.json"));
 
     given.when()
         .measureId("EXM105-FHIR3-8.0.000")

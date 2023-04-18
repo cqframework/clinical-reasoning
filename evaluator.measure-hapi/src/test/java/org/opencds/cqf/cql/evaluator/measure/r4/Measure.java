@@ -17,11 +17,13 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.cql.evaluator.measure.TestRepositories;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.TestException;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class Measure {
 
@@ -58,7 +60,8 @@ public class Measure {
     }
 
     Given repositoryFor(String repositoryPath) {
-      this.repository = TestRepositories.createRepositoryForPath(repositoryPath);
+      this.repository = TestRepositoryFactory.createRepository(FhirContext.forR4Cached(),
+          this.getClass(), repositoryPath);
       return this;
     }
 

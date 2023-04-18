@@ -5,9 +5,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -25,18 +27,15 @@ public class FhirResourceLoader implements ResourceLoader {
   public FhirResourceLoader(FhirContext context, Class<?> clazz, List<String> directoryList,
       boolean recursive) {
     this.fhirContext = context;
-    this.resources = new ArrayList<>();
     this.relativeToClazz = clazz;
-    List<String> locations = new ArrayList<>();
 
-    directoryList.forEach(dir -> {
-      locations.addAll(getFilePaths(getDirectoryOrFileLocation(dir), recursive));
-    });
-
-    locations.forEach(item -> {
-      IBaseResource resource = loadTestResources(item);
-      resources.add(resource);
-    });
+    this.resources = directoryList.stream()
+        .map(this::getDirectoryOrFileLocation)
+        .filter(x -> x != null)
+        .map(x -> this.getFilePaths(x, recursive))
+        .flatMap(Collection::stream)
+        .map(this::loadTestResources)
+        .collect(Collectors.toList());
   }
 
   public Class<?> getRelativeClass() {
@@ -44,15 +43,17 @@ public class FhirResourceLoader implements ResourceLoader {
   }
 
   public List<IBaseResource> getResources() {
-    if (resources == null) {
-      resources = new ArrayList<>();
-    }
     return resources;
   }
 
   private String getDirectoryOrFileLocation(String relativePath) {
-    String directoryLocationUrl = this.relativeToClazz.getResource(relativePath).toString();
+    var resource = this.relativeToClazz.getResource(relativePath);
 
+    if (resource == null) {
+      return null;
+    }
+
+    String directoryLocationUrl = resource.toString();
 
     if (directoryLocationUrl.startsWith("file:/")) {
       directoryLocationUrl = directoryLocationUrl.substring("file:/".length() - 1);

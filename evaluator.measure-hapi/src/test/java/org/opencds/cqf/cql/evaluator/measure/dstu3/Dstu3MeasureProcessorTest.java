@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 public class Dstu3MeasureProcessorTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("dstu3/EXM105FHIR3Measure");
+      Measure.given().repositoryFor("EXM105FHIR3Measure");
 
   @Test
   public void exm105_fullSubjectId() {

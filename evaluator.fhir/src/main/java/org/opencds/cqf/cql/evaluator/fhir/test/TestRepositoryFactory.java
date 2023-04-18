@@ -14,7 +14,7 @@ public class TestRepositoryFactory {
 
   public static Repository createRepository(FhirContext fhirContext, Class<?> clazz) {
     var data = new TestRepository(fhirContext, clazz, Lists.newArrayList("tests"), true);
-    var content = new TestRepository(fhirContext, clazz, Lists.newArrayList("content"), true);
+    var content = new TestRepository(fhirContext, clazz, Lists.newArrayList("resources"), true);
     var terminology =
         new TestRepository(fhirContext, clazz, Lists.newArrayList("vocabulary"), true);
 
@@ -26,7 +26,7 @@ public class TestRepositoryFactory {
     var data =
         new TestRepository(fhirContext, clazz, Lists.newArrayList(path + "/tests"), true);
     var content =
-        new TestRepository(fhirContext, clazz, Lists.newArrayList(path + "/content"), true);
+        new TestRepository(fhirContext, clazz, Lists.newArrayList(path + "/resources"), true);
     var terminology =
         new TestRepository(fhirContext, clazz, Lists.newArrayList(path + "/vocabulary"),
             true);

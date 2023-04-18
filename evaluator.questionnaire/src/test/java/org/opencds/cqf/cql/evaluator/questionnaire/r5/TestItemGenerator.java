@@ -131,7 +131,7 @@ public class TestItemGenerator {
       }
       if (contentRepository == null) {
         contentRepository =
-            new TestRepository(fhirContext, this.getClass(), List.of("content"), false);
+            new TestRepository(fhirContext, this.getClass(), List.of("resources"), false);
       }
       if (terminologyRepository == null) {
         terminologyRepository = new TestRepository(fhirContext, this.getClass(),

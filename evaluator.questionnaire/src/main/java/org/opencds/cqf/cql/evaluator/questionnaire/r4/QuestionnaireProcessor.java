@@ -186,7 +186,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     var populationContext =
         getExpressionResult(contextExpression, groupItem.getLinkId(), null);
     if (populationContext == null || populationContext.isEmpty()) {
-      return Collections.emptyList();
+      return Collections.singletonList(groupItem.copy());
     }
     for (var context : populationContext) {
       var contextItem = groupItem.copy();

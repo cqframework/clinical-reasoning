@@ -200,8 +200,10 @@ public class RestRepository implements Repository {
   }
 
   protected <T extends IClientExecutable<T, ?>> T addHeaders(T op, Map<String, String> headers) {
-    for (var entry : headers.entrySet()) {
-      op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+    if (headers != null) {
+      for (var entry : headers.entrySet()) {
+        op = op.withAdditionalHeader(entry.getKey(), entry.getValue());
+      }
     }
 
     return op;

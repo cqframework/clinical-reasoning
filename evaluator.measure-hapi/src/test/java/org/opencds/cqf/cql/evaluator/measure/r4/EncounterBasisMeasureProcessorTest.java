@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class EncounterBasisMeasureProcessorTest {
   protected static Given given =
-      Measure.given().repositoryFor("r4/DischargedonAntithromboticTherapyFHIR");
+      Measure.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
 
   @Test
   public void exm104_singlePatient() {

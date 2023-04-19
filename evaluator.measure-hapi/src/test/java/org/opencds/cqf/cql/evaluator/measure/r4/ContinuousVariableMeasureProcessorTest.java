@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class ContinuousVariableMeasureProcessorTest {
 
-  protected static Given given = Measure.given().repositoryFor("r4/CMS111");
+  protected static Given given = Measure.given().repositoryFor("CMS111");
 
   @Test
   public void cms111_singlePatient() {

@@ -50,16 +50,14 @@ public class TestRepository implements Repository {
     FhirResourceLoader resourceLoader =
         new FhirResourceLoader(context, clazz, directoryList, recursive);
     resourceLoader.getResources().forEach(resource -> resourceMap.put(
-        Ids.newId(fhirContext, resource.getIdElement().getResourceType(),
-            resource.getIdElement().getIdPart()),
+        resource.getIdElement().toUnqualifiedVersionless(),
         resource));
   }
 
   public TestRepository(FhirContext fhirContext, IBaseBundle bundle) {
     this(fhirContext);
     BundleUtil.toListOfResources(this.context, bundle).forEach(resource -> resourceMap.put(
-        Ids.newId(fhirContext, resource.getIdElement().getResourceType(),
-            resource.getIdElement().getIdPart()),
+        resource.getIdElement().toUnqualifiedVersionless(),
         resource));
 
   }
@@ -68,11 +66,18 @@ public class TestRepository implements Repository {
   @SuppressWarnings("unchecked")
   public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
       Map<String, String> headers) {
-    var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
-    if (resourceMap.containsKey(theId)) {
-      return (T) resourceMap.get(theId);
+
+    if (!id.hasResourceType()) {
+      throw new IllegalArgumentException(
+          "The TestRepository requires all ids to have a resource type set.");
     }
-    throw new ResourceNotFoundException("Resource not found with id " + theId);
+
+    var r = resourceMap.get(id.toUnqualifiedVersionless());
+    if (r == null) {
+      throw new ResourceNotFoundException("Resource not found with id " + id.toString());
+    }
+
+    return (T) r;
   }
 
   @Override

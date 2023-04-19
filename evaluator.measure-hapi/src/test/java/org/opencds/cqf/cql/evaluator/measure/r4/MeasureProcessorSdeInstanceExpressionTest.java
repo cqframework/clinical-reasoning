@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class MeasureProcessorSdeInstanceExpressionTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/ConditionCategoryPoc");
+      Measure.given().repositoryFor("ConditionCategoryPoc");
 
   @Test
   // TODO: The is supposed to fail because some resource is missing, but it's failing for a

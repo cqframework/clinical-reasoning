@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 public class SimpleMeasureProcessorTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/EXM108");
+      Measure.given().repositoryFor("EXM108");
 
 
   @Test(enabled = false, description = "Need to test at the service level to enable this")

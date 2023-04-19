@@ -10,7 +10,7 @@ public class StratifierThreadedMeasureProcessorTest {
 
   protected static Given given =
       Measure.given()
-          .repositoryFor("r4/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
+          .repositoryFor("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
 
   @Test(enabled = false)
   public void exm74_subject_list_threaded() {

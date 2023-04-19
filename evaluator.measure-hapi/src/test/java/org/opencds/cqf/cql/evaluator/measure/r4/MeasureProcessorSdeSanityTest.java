@@ -11,7 +11,7 @@ public class MeasureProcessorSdeSanityTest {
 
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/DM1Measure");
+      Measure.given().repositoryFor("DM1Measure");
 
   @Test
   public void measure_eval_unique_extension_list() {

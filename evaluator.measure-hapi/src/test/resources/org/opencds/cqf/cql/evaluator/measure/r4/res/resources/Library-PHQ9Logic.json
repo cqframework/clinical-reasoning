@@ -117,7 +117,7 @@
     },
     {
       "contentType": "application/elm+json",
-      "url": "res/cql/PHQ9Logic.cql"
+      "url": "../cql/PHQ9Logic.cql"
     }
   ]
 }

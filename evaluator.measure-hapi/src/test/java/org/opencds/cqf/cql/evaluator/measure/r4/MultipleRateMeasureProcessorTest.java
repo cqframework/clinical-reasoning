@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 public class MultipleRateMeasureProcessorTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/FHIR347");
+      Measure.given().repositoryFor("FHIR347");
 
   @Test
   public void fhir347_singlePatient() {

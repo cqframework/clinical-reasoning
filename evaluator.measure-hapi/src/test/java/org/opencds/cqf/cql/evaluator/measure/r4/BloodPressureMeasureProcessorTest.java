@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class BloodPressureMeasureProcessorTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/ControllingBloodPressureFHIR");
+      Measure.given().repositoryFor("ControllingBloodPressureFHIR");
 
 
   @Test(enabled = false, description = "source bundle is missing needed data")

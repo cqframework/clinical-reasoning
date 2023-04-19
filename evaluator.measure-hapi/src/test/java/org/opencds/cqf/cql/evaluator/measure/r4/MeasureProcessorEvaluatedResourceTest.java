@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 public class MeasureProcessorEvaluatedResourceTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/ContentBundleUpdated");
+      Measure.given().repositoryFor("ContentBundleUpdated");
 
   @Test
   public void measure_eval_contained_is_unique() {

@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 @Test(singleThreaded = true)
 public class MeasureProcessorSdeAddCriteriaExtensionTest {
 
-  protected static Given given = Measure.given().repositoryFor("r4/InitialInpatientPopulation");
+  protected static Given given = Measure.given().repositoryFor("InitialInpatientPopulation");
 
   @Test
   public void exm124_subject_list() {

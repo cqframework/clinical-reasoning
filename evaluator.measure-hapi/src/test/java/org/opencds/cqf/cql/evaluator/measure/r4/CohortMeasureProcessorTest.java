@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class CohortMeasureProcessorTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/SeenPatients");
+      Measure.given().repositoryFor("SeenPatients");
 
   @Test
   public void seenPatients_singlePatient() {

@@ -9,6 +9,7 @@ import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -56,9 +57,11 @@ public class Dstu3MeasureProcessor {
 
     var reference = measure.getLibrary().get(0);
 
+    var library = this.repository.read(Library.class, reference.getReferenceElement());
+
     var context = Contexts.forRepositoryAndSettings(
         this.measureEvaluationOptions.getEvaluationSettings(), this.repository,
-        new VersionedIdentifier().withId(reference.getId()));
+        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
 
     Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure);
     return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds,

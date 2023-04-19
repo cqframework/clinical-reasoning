@@ -8,7 +8,7 @@ public class StratifierMeasureProcessorTest {
 
   protected static Given given =
       Measure.given()
-          .repositoryFor("r4/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
+          .repositoryFor("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
 
   @Test
   public void exm74_singlePatient_denominator() {

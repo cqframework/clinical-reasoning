@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 
 public class DaVinciExtensionMeasureProcessorTest {
 
-  protected static Given given = Measure.given().repositoryFor("r4/BreastCancerScreeningFHIR");
+  protected static Given given = Measure.given().repositoryFor("BreastCancerScreeningFHIR");
 
   @Test
   // TODO: Huh. Why is patient not showing up in the 'initial-population' list?

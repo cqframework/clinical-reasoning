@@ -11,7 +11,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class DiabetesMeasureProcessorTest {
 
   protected static Given given =
-      Measure.given().repositoryFor("r4/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
+      Measure.given().repositoryFor("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
 
   @Test
   public void a1c_singlePatient_numerator() {

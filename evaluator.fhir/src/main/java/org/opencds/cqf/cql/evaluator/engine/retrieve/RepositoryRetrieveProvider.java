@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.TerserUtil;
 
 public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider {
   private static final Logger logger = LoggerFactory.getLogger(RepositoryRetrieveProvider.class);
@@ -45,15 +44,17 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Iterable<Object> retrieve(final String context, final String contextPath,
       final Object contextValue, final String dataType, final String templateId,
       final String codePath, final Iterable<Code> codes, final String valueSet,
       final String datePath, final String dateLowPath, final String dateHighPath,
       final Interval dateRange) {
 
-    IBaseBundle bundle = TerserUtil.newResource(fhirContext, "Bundle");
+    var bundleClass = (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
+        .getImplementingClass();
     List<? extends IBaseResource> resources =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(bundle.getClass(),
+        BundleUtil.toListOfResources(this.fhirContext, repository.search(bundleClass,
             this.fhirContext.getResourceDefinition(dataType).getImplementingClass(), null, null));
 
     resources = this.filterByTemplateId(dataType, templateId, resources);

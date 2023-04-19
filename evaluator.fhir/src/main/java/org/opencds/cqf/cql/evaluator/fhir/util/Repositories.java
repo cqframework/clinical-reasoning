@@ -32,7 +32,6 @@ public class Repositories {
 
   public static Repository proxy(Repository localRepository, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-    // var fhirDalRepository = getDalRepository(fhirContext, fhirDal);
     Repository data = dataEndpoint == null ? null
         : new RestRepository(getClient(localRepository.fhirContext(), dataEndpoint));
     Repository content = contentEndpoint == null ? null

@@ -44,14 +44,17 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Iterable<Object> retrieve(final String context, final String contextPath,
       final Object contextValue, final String dataType, final String templateId,
       final String codePath, final Iterable<Code> codes, final String valueSet,
       final String datePath, final String dateLowPath, final String dateHighPath,
       final Interval dateRange) {
 
+    var bundleClass = (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
+        .getImplementingClass();
     List<? extends IBaseResource> resources =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
+        BundleUtil.toListOfResources(this.fhirContext, repository.search(bundleClass,
             this.fhirContext.getResourceDefinition(dataType).getImplementingClass(), null, null));
 
     resources = this.filterByTemplateId(dataType, templateId, resources);

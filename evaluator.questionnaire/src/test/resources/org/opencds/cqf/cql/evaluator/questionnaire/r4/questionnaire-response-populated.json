@@ -3,10 +3,21 @@
   "id": "OutpatientPriorAuthorizationRequest-OPA-Patient1-response",
   "contained": [
     {
+      "resourceType": "OperationOutcome",
+      "id": "populate-outcome-OutpatientPriorAuthorizationRequest-OPA-Patient1",
+      "issue": [
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "Error encountered evaluating expression (RequestDetailsResubmitionUTN) for item (5.1.2): Could not resolve expression reference 'RequestDetailsResubmitionUTN' in library 'OutpatientPriorAuthorizationPrepopulation'."
+        }
+      ]
+    },
+    {
       "resourceType": "Questionnaire",
       "id": "OutpatientPriorAuthorizationRequest-OPA-Patient1",
       "meta": {
-        "source": "#Szj0RYKKLb3zYK89",
+        "source": "#gleANq6sb4bT35uw",
         "profile": [
           "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire-r4"
         ]
@@ -14,16 +25,23 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-          "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+          "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation|1.0.0"
         },
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject",
           "valueReference": {
             "reference": "Patient/OPA-Patient1"
           }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+          "valueReference": {
+            "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-OPA-Patient1"
+          }
         }
       ],
-      "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+      "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+      "version": "1.0.0",
       "name": "OutpatientPriorAuthorizationRequest",
       "title": "Outpatient Prior Authorization Request",
       "status": "active",
@@ -60,7 +78,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "FacilityName"
                   }
                 }
@@ -88,7 +106,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "FacilityNPI"
                   }
                 }
@@ -112,12 +130,30 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "FacilityPTAN"
+                  }
+                }
+              ],
               "linkId": "1.3",
               "text": "PTAN",
               "type": "string",
               "required": true
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "FacilityContractRegion"
+                  }
+                }
+              ],
               "linkId": "1.4",
               "text": "Contract/Region",
               "type": "choice",
@@ -157,7 +193,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "BeneficiaryFirstName"
                   }
                 }
@@ -185,7 +221,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "BeneficiaryLastName"
                   }
                 }
@@ -213,7 +249,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "BeneficiaryDOB"
                   }
                 }
@@ -241,7 +277,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "BeneficiaryMedicareID"
                   }
                 }
@@ -269,7 +305,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "BeneficiaryGender"
                   }
                 }
@@ -335,7 +371,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "OperatingPhysicianFirstName"
                   }
                 }
@@ -363,7 +399,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "OperatingPhysicianLastName"
                   }
                 }
@@ -391,7 +427,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "OperatingPhysicianNPI"
                   }
                 }
@@ -415,6 +451,15 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "OperatingPhysicianPTAN"
+                  }
+                }
+              ],
               "linkId": "3.4",
               "text": "PTAN",
               "type": "string",
@@ -431,7 +476,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "OperatingPhysicianAddress1"
                       }
                     }
@@ -459,7 +504,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "OperatingPhysicianAddress2"
                       }
                     }
@@ -474,7 +519,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "OperatingPhysicianAddressCity"
                       }
                     }
@@ -502,7 +547,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "OperatingPhysicianAddressState"
                       }
                     }
@@ -530,7 +575,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "OperatingPhysicianAddressZip"
                       }
                     }
@@ -567,7 +612,7 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                   "valueExpression": {
-                    "language": "text/cql.identifier",
+                    "language": "text/cql-identifier",
                     "expression": "AttendingPhysicianSame"
                   }
                 }
@@ -607,7 +652,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "AttendingPhysicianFirstName"
                       }
                     }
@@ -635,7 +680,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "AttendingPhysicianLastName"
                       }
                     }
@@ -663,7 +708,7 @@
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                       "valueExpression": {
-                        "language": "text/cql.identifier",
+                        "language": "text/cql-identifier",
                         "expression": "AttendingPhysicianNPI"
                       }
                     }
@@ -687,6 +732,15 @@
                   ]
                 },
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "AttendingPhysicianPTAN"
+                      }
+                    }
+                  ],
                   "linkId": "4.2.4",
                   "text": "PTAN",
                   "type": "string",
@@ -703,7 +757,7 @@
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                           "valueExpression": {
-                            "language": "text/cql.identifier",
+                            "language": "text/cql-identifier",
                             "expression": "AttendingPhysicianAddress1"
                           }
                         }
@@ -731,7 +785,7 @@
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                           "valueExpression": {
-                            "language": "text/cql.identifier",
+                            "language": "text/cql-identifier",
                             "expression": "AttendingPhysicianAddress2"
                           }
                         }
@@ -746,7 +800,7 @@
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                           "valueExpression": {
-                            "language": "text/cql.identifier",
+                            "language": "text/cql-identifier",
                             "expression": "AttendingPhysicianAddressCity"
                           }
                         }
@@ -774,7 +828,7 @@
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                           "valueExpression": {
-                            "language": "text/cql.identifier",
+                            "language": "text/cql-identifier",
                             "expression": "AttendingPhysicianAddressState"
                           }
                         }
@@ -802,7 +856,7 @@
                         {
                           "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
                           "valueExpression": {
-                            "language": "text/cql.identifier",
+                            "language": "text/cql-identifier",
                             "expression": "AttendingPhysicianAddressZip"
                           }
                         }
@@ -830,11 +884,1610 @@
               ]
             }
           ]
+        },
+        {
+          "linkId": "5",
+          "text": "Request Details",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "5.1",
+              "text": "Is this a ",
+              "type": "group",
+              "item": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "RequestDetailsResubmition"
+                      }
+                    }
+                  ],
+                  "linkId": "5.1.1",
+                  "text": "Resubmission?",
+                  "type": "boolean",
+                  "required": false
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "RequestDetailsResubmitionUTN"
+                      }
+                    }
+                  ],
+                  "linkId": "5.1.2",
+                  "text": "Please provide UTN",
+                  "type": "string",
+                  "enableWhen": [
+                    {
+                      "question": "5.1.1",
+                      "operator": "=",
+                      "answerBoolean": true
+                    }
+                  ],
+                  "required": true
+                }
+              ]
+            },
+            {
+              "linkId": "5.2",
+              "text": "Is this ",
+              "type": "group",
+              "item": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "RequestDetailsLifeThreatening"
+                      }
+                    }
+                  ],
+                  "linkId": "5.2.1",
+                  "text": "Life Threatening?",
+                  "type": "boolean",
+                  "required": false
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "RequestDetailsLifeThreateningExplanation"
+                      }
+                    }
+                  ],
+                  "linkId": "5.2.2",
+                  "text": "Please explain",
+                  "type": "string",
+                  "enableWhen": [
+                    {
+                      "question": "5.2.1",
+                      "operator": "=",
+                      "answerBoolean": true
+                    }
+                  ],
+                  "required": true
+                }
+              ]
+            },
+            {
+              "linkId": "5.3",
+              "text": "Diagnosis",
+              "type": "group",
+              "item": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "RequestDetailsPrimaryDiagnosisCode"
+                      }
+                    }
+                  ],
+                  "linkId": "5.3.1",
+                  "text": "Primary Diagnosis Code",
+                  "type": "string",
+                  "required": true,
+                  "initial": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueString": "G1221"
+                    }
+                  ]
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "RequestDetailsSecondaryDiagnosisCode"
+                      }
+                    }
+                  ],
+                  "linkId": "5.3.2",
+                  "text": "Secondary Diagnosis Code",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "linkId": "5.3.3",
+                  "text": "Additional Diagnosis Code(s)",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsAdditionalDiagnosisCode1"
+                          }
+                        }
+                      ],
+                      "linkId": "5.3.3.1",
+                      "text": "Diagnosis Code 1",
+                      "type": "string",
+                      "required": false
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsAdditionalDiagnosisCode2"
+                          }
+                        }
+                      ],
+                      "linkId": "5.3.3.2",
+                      "text": "Diagnosis Code 2",
+                      "type": "string",
+                      "required": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "linkId": "5.4",
+              "text": "Procedure Codes -Please select all procedure codes for this request",
+              "type": "group",
+              "item": [
+                {
+                  "linkId": "5.4.1",
+                  "text": "Botox",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode64612"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.1.1",
+                      "text": "64612",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": true
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCodeJ0585"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.1.2",
+                      "text": "J0585",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCodeJ0587"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.1.3",
+                      "text": "J0587",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode64615"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.1.4",
+                      "text": "64615",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": true
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCodeJ0586"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.1.5",
+                      "text": "J0586",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCodeJ0588"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.1.6",
+                      "text": "J0588",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2",
+                  "text": "Blepharoplasty",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode15820"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.1",
+                      "text": "15820",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode15821"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.2",
+                      "text": "15821",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode15822"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.3",
+                      "text": "15822",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode15823"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.4",
+                      "text": "15823",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode67900"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.5",
+                      "text": "67900",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode67901"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.6",
+                      "text": "67901",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode67902"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.7",
+                      "text": "67902",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode67903"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.8",
+                      "text": "67903",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode67904"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.9",
+                      "text": "67904",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode67906"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.10",
+                      "text": "67906",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode67908"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.2.11",
+                      "text": "67908",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.3",
+                  "text": "Cervical Fusion with Disc Removal",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode22551"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.3.1",
+                      "text": "22551",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode22552"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.3.2",
+                      "text": "22552",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.4",
+                  "text": "Implanted Spinal Neurostimulators",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode63650"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.4.1",
+                      "text": "63650",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.5",
+                  "text": "Panniculectomy",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode15830"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.5.1",
+                      "text": "15830",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode15847"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.5.2",
+                      "text": "15847",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode15877"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.5.3",
+                      "text": "15877",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6",
+                  "text": "Rhinoplasty",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode20912"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.1",
+                      "text": "20912",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode21210"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.2",
+                      "text": "21210",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30400"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.3",
+                      "text": "30400",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30410"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.4",
+                      "text": "30410",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30420"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.5",
+                      "text": "30420",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30430"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.6",
+                      "text": "30430",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30435"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.7",
+                      "text": "30435",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30450"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.8",
+                      "text": "30450",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30460"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.9",
+                      "text": "30460",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30462"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.10",
+                      "text": "30462",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30465"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.11",
+                      "text": "30465",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode30520"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.6.12",
+                      "text": "30520",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7",
+                  "text": "Vein Ablation",
+                  "type": "group",
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36473"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.1",
+                      "text": "36473",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36474"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.2",
+                      "text": "36474",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36475"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.3",
+                      "text": "36475",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36476"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.4",
+                      "text": "36476",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36478"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.5",
+                      "text": "36478",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36479"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.6",
+                      "text": "36479",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36482"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.7",
+                      "text": "36482",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCode36483"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.8",
+                      "text": "36483",
+                      "type": "boolean",
+                      "required": false,
+                      "initial": [
+                        {
+                          "extension": [
+                            {
+                              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                              "valueReference": {
+                                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                              }
+                            }
+                          ],
+                          "valueBoolean": false
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                          "valueExpression": {
+                            "language": "text/cql-identifier",
+                            "expression": "RequestDetailsProcedureCodeStaged"
+                          }
+                        }
+                      ],
+                      "linkId": "5.4.7.9",
+                      "text": "Staged Procedure",
+                      "type": "boolean",
+                      "required": false
+                    }
+                  ]
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql-identifier",
+                        "expression": "RequestDetailsProcedureCodeStaged"
+                      }
+                    }
+                  ],
+                  "linkId": "5.4.8",
+                  "text": "Number of Units Requested (Required for requests with J0585, J0586, J0587, or J0588 only)",
+                  "type": "string",
+                  "enableWhen": [
+                    {
+                      "question": "5.4.1.2",
+                      "operator": "=",
+                      "answerBoolean": true
+                    },
+                    {
+                      "question": "5.4.1.3",
+                      "operator": "=",
+                      "answerBoolean": true
+                    },
+                    {
+                      "question": "5.4.1.5",
+                      "operator": "exists",
+                      "answerBoolean": true
+                    },
+                    {
+                      "question": "5.4.1.6",
+                      "operator": "exists",
+                      "answerBoolean": true
+                    }
+                  ],
+                  "enableBehavior": "any",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "6",
+          "text": "Requestor Information",
+          "type": "group",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "RequestorInformationName"
+                  }
+                }
+              ],
+              "linkId": "6.1",
+              "text": "Requestor Name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "RequestorInformationRepresentative"
+                  }
+                }
+              ],
+              "linkId": "6.2",
+              "text": "Requestor is a representative of the...",
+              "type": "choice",
+              "required": false,
+              "answerOption": [
+                {
+                  "id": "RequestorInformationRepresentative-Hospital",
+                  "valueCoding": {
+                    "code": "hospital",
+                    "display": "Hospital Outpatient Department"
+                  }
+                },
+                {
+                  "id": "RequestorInformationRepresentativePhysNpp",
+                  "valueCoding": {
+                    "code": "physnpp",
+                    "display": "Physician/NPP"
+                  }
+                }
+              ]
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "RequestorInformationPhone"
+                  }
+                }
+              ],
+              "linkId": "6.3",
+              "text": "Requestor Phone",
+              "type": "string",
+              "required": true
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "RequestorInformationFax"
+                  }
+                }
+              ],
+              "linkId": "6.4",
+              "text": "Requestor Fax",
+              "type": "string",
+              "required": true
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "RequestorInformationFacilityFax"
+                  }
+                }
+              ],
+              "linkId": "6.5",
+              "text": "Requestor Facility Fax",
+              "type": "string",
+              "required": true
+            }
+          ]
         }
       ]
     }
   ],
   "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+      "valueReference": {
+        "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-OPA-Patient1"
+      }
+    },
     {
       "url": "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire",
       "valueReference": {
@@ -842,7 +2495,7 @@
       }
     }
   ],
-  "questionnaire": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+  "questionnaire": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
   "status": "in-progress",
   "subject": {
     "reference": "Patient/OPA-Patient1"
@@ -857,6 +2510,14 @@
           "text": "Name",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "Acme Clinic"
             }
           ]
@@ -866,6 +2527,14 @@
           "text": "NPI",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "1407071236"
             }
           ]
@@ -889,6 +2558,14 @@
           "text": "First Name",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "Peter"
             }
           ]
@@ -898,6 +2575,14 @@
           "text": "Last Name",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "Chalmers"
             }
           ]
@@ -907,6 +2592,14 @@
           "text": "Date of Birth",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueDate": "1974-12-25"
             }
           ]
@@ -916,6 +2609,14 @@
           "text": "Medicare ID",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "525697298M"
             }
           ]
@@ -925,6 +2626,14 @@
           "text": "Gender",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "male"
             }
           ]
@@ -940,6 +2649,14 @@
           "text": "First Name",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "Fielding"
             }
           ]
@@ -949,6 +2666,14 @@
           "text": "Last Name",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "Kathy"
             }
           ]
@@ -958,6 +2683,14 @@
           "text": "NPI",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueString": "1245319599"
             }
           ]
@@ -975,6 +2708,14 @@
               "text": "Address1",
               "answer": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "valueString": "1080 FIRST COLONIAL RD"
                 }
               ]
@@ -988,6 +2729,14 @@
               "text": "City",
               "answer": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "valueString": "Virginia Beach"
                 }
               ]
@@ -997,6 +2746,14 @@
               "text": "State",
               "answer": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "valueString": "VA"
                 }
               ]
@@ -1006,6 +2763,14 @@
               "text": "Zip",
               "answer": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "valueString": "21454-2406"
                 }
               ]
@@ -1023,6 +2788,14 @@
           "text": "Same as Operating Physician?",
           "answer": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "valueBoolean": false
             }
           ]
@@ -1036,6 +2809,14 @@
               "text": "First Name",
               "answer": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "valueString": "Ronald"
                 }
               ]
@@ -1045,6 +2826,14 @@
               "text": "Last Name",
               "answer": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "valueString": "Bone"
                 }
               ]
@@ -1054,6 +2843,14 @@
               "text": "NPI",
               "answer": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "valueString": "9941339108"
                 }
               ]
@@ -1071,6 +2868,14 @@
                   "text": "Address1",
                   "answer": [
                     {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
                       "valueString": "1003 Healthcare Drive"
                     }
                   ]
@@ -1084,6 +2889,14 @@
                   "text": "City",
                   "answer": [
                     {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
                       "valueString": "Amherst"
                     }
                   ]
@@ -1093,6 +2906,14 @@
                   "text": "State",
                   "answer": [
                     {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
                       "valueString": "MA"
                     }
                   ]
@@ -1102,6 +2923,14 @@
                   "text": "Zip",
                   "answer": [
                     {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
                       "valueString": "01002"
                     }
                   ]
@@ -1109,6 +2938,894 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      "linkId": "5",
+      "text": "Request Details",
+      "item": [
+        {
+          "linkId": "5.1",
+          "text": "Is this a ",
+          "item": [
+            {
+              "linkId": "5.1.1",
+              "text": "Resubmission?"
+            },
+            {
+              "linkId": "5.1.2",
+              "text": "Please provide UTN"
+            }
+          ]
+        },
+        {
+          "linkId": "5.2",
+          "text": "Is this ",
+          "item": [
+            {
+              "linkId": "5.2.1",
+              "text": "Life Threatening?"
+            },
+            {
+              "linkId": "5.2.2",
+              "text": "Please explain"
+            }
+          ]
+        },
+        {
+          "linkId": "5.3",
+          "text": "Diagnosis",
+          "item": [
+            {
+              "linkId": "5.3.1",
+              "text": "Primary Diagnosis Code",
+              "answer": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
+                  "valueString": "G1221"
+                }
+              ]
+            },
+            {
+              "linkId": "5.3.2",
+              "text": "Secondary Diagnosis Code"
+            },
+            {
+              "linkId": "5.3.3",
+              "text": "Additional Diagnosis Code(s)",
+              "item": [
+                {
+                  "linkId": "5.3.3.1",
+                  "text": "Diagnosis Code 1"
+                },
+                {
+                  "linkId": "5.3.3.2",
+                  "text": "Diagnosis Code 2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "5.4",
+          "text": "Procedure Codes -Please select all procedure codes for this request",
+          "item": [
+            {
+              "linkId": "5.4.1",
+              "text": "Botox",
+              "item": [
+                {
+                  "linkId": "5.4.1.1",
+                  "text": "64612",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": true
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.1.2",
+                  "text": "J0585",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.1.3",
+                  "text": "J0587",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.1.4",
+                  "text": "64615",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": true
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.1.5",
+                  "text": "J0586",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.1.6",
+                  "text": "J0588",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "linkId": "5.4.2",
+              "text": "Blepharoplasty",
+              "item": [
+                {
+                  "linkId": "5.4.2.1",
+                  "text": "15820",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.2",
+                  "text": "15821",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.3",
+                  "text": "15822",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.4",
+                  "text": "15823",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.5",
+                  "text": "67900",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.6",
+                  "text": "67901",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.7",
+                  "text": "67902",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.8",
+                  "text": "67903",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.9",
+                  "text": "67904",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.10",
+                  "text": "67906",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.2.11",
+                  "text": "67908",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "linkId": "5.4.3",
+              "text": "Cervical Fusion with Disc Removal",
+              "item": [
+                {
+                  "linkId": "5.4.3.1",
+                  "text": "22551",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.3.2",
+                  "text": "22552",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "linkId": "5.4.4",
+              "text": "Implanted Spinal Neurostimulators",
+              "item": [
+                {
+                  "linkId": "5.4.4.1",
+                  "text": "63650",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "linkId": "5.4.5",
+              "text": "Panniculectomy",
+              "item": [
+                {
+                  "linkId": "5.4.5.1",
+                  "text": "15830",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.5.2",
+                  "text": "15847",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.5.3",
+                  "text": "15877",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "linkId": "5.4.6",
+              "text": "Rhinoplasty",
+              "item": [
+                {
+                  "linkId": "5.4.6.1",
+                  "text": "20912",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.2",
+                  "text": "21210",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.3",
+                  "text": "30400",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.4",
+                  "text": "30410",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.5",
+                  "text": "30420",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.6",
+                  "text": "30430",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.7",
+                  "text": "30435",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.8",
+                  "text": "30450",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.9",
+                  "text": "30460",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.10",
+                  "text": "30462",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.11",
+                  "text": "30465",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.6.12",
+                  "text": "30520",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "linkId": "5.4.7",
+              "text": "Vein Ablation",
+              "item": [
+                {
+                  "linkId": "5.4.7.1",
+                  "text": "36473",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.2",
+                  "text": "36474",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.3",
+                  "text": "36475",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.4",
+                  "text": "36476",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.5",
+                  "text": "36478",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.6",
+                  "text": "36479",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.7",
+                  "text": "36482",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.8",
+                  "text": "36483",
+                  "answer": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                          "valueReference": {
+                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                          }
+                        }
+                      ],
+                      "valueBoolean": false
+                    }
+                  ]
+                },
+                {
+                  "linkId": "5.4.7.9",
+                  "text": "Staged Procedure"
+                }
+              ]
+            },
+            {
+              "linkId": "5.4.8",
+              "text": "Number of Units Requested (Required for requests with J0585, J0586, J0587, or J0588 only)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "6",
+      "text": "Requestor Information",
+      "item": [
+        {
+          "linkId": "6.1",
+          "text": "Requestor Name"
+        },
+        {
+          "linkId": "6.2",
+          "text": "Requestor is a representative of the..."
+        },
+        {
+          "linkId": "6.3",
+          "text": "Requestor Phone"
+        },
+        {
+          "linkId": "6.4",
+          "text": "Requestor Fax"
+        },
+        {
+          "linkId": "6.5",
+          "text": "Requestor Facility Fax"
         }
       ]
     }

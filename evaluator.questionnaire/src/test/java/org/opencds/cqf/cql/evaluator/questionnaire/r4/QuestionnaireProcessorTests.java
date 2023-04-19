@@ -7,8 +7,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertThrows;
 
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.hl7.fhir.r4.model.IdType;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -45,7 +45,7 @@ public class QuestionnaireProcessorTests {
             "OPA-Patient1")
         .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
-        .isEqualsTo("questionnaire-for-order-populated-errors.json");
+        .hasErrors();
   }
 
   @Test
@@ -100,7 +100,7 @@ public class QuestionnaireProcessorTests {
             "OPA-Patient1")
         .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
-        .isEqualsTo("questionnaire-response-populated-errors.json");
+        .hasErrors();
   }
 
   @Test

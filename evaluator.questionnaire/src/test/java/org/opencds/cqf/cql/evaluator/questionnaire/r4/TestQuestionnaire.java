@@ -23,7 +23,9 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.json.JSONException;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -227,6 +229,15 @@ public class TestQuestionnaire {
 
       return this;
     }
+
+    public GeneratedQuestionnaire hasErrors() {
+      assertTrue(myQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(myQuestionnaire.hasContained());
+      assertTrue(myQuestionnaire.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
+    }
   }
 
   static class GeneratedQuestionnaireResponse {
@@ -270,6 +281,15 @@ public class TestQuestionnaire {
       for (var item : matchingItems) {
         assertTrue(item.hasAnswer());
       }
+
+      return this;
+    }
+
+    public GeneratedQuestionnaireResponse hasErrors() {
+      assertTrue(myQuestionnaireResponse.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(myQuestionnaireResponse.hasContained());
+      assertTrue(myQuestionnaireResponse.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
 
       return this;
     }

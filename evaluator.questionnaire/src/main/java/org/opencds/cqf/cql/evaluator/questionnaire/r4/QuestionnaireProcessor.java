@@ -267,9 +267,15 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         responseItem.setItem(nestedResponseItems);
       } else if (item.hasInitial()) {
         item.getInitial()
-            .forEach(answer -> responseItem
-                .addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-                    .setValue(answer.getValue())));
+            .forEach(initial -> {
+              var answer = new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                  .setValue(initial.getValue());
+              if (initial.hasExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR)) {
+                answer.addExtension(
+                    initial.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
+              }
+              responseItem.addAnswer(answer);
+            });
       }
       responseItems.add(responseItem);
     });

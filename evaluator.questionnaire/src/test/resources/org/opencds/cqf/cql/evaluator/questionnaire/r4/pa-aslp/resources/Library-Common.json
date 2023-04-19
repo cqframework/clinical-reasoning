@@ -100,7 +100,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "pa-aslp/cql/Common.cql"
+      "url": "../cql/Common.cql"
     }
   ]
 }

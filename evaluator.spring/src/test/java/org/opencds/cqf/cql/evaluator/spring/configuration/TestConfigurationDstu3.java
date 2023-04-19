@@ -1,6 +1,10 @@
 package org.opencds.cqf.cql.evaluator.spring.configuration;
 
+import static org.mockito.Mockito.mock;
+
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.EvaluatorConfiguration;
+import org.opencds.cqf.fhir.api.Repository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -15,6 +19,16 @@ public class TestConfigurationDstu3 {
   @Bean
   FhirContext fhirContext() {
     return FhirContext.forCached(FhirVersionEnum.DSTU3);
+  }
+
+  @Bean
+  Repository repository() {
+    return mock(Repository.class);
+  }
+
+  @Bean
+  MeasureEvaluationOptions measureEvaluationOptions() {
+    return MeasureEvaluationOptions.defaultOptions();
   }
 
 }

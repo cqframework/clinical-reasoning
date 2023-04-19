@@ -64,7 +64,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "pa-aslp/cql/SDHCommon.cql"
+      "url": "../cql/SDHCommon.cql"
     }
   ]
 }

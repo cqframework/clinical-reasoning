@@ -1382,2051 +1382,2393 @@
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Patient",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Patient"
-    }, {
+    },
+    {
       "name": "Contact date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Reason for coming to facility",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "ANC contact number",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "integer"
-    }, {
+    },
+    {
       "name": "Unique identification",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "First name",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Last name",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Date of birth",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "date"
-    }, {
+    },
+    {
       "name": "Address",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Mobile phone number",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Alternative contact's name",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Alternative contact's phone number",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Woman wants to receive reminders during pregnancy",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Highest level of education achieved",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Occupation",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Co-habitants",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Pregnancy confirmed",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Danger signs",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Specific health concern(s)",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Tetanus toxoid-containing vaccine (TTCV) immunization history",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Flu immunization history",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Current medications",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Daily caffeine intake",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Last menstrual period (LMP) date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Clinical enquiry for alcohol and other substance use done",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Current alcohol and/or other substance use",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Ultrasound done",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Tobacco use",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Recently quit tobacco products",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Exposure to second-hand smoke",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Partner HIV status (reported)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Contraceptive use of male condoms",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Contraceptive use of female condoms",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Gestational age",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Source of gestational age",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Expected date of delivery (EDD)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Number of pregnancies (gravida)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "integer"
-    }, {
+    },
+    {
       "name": "Number of miscarriages and/or abortions",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "integer"
-    }, {
+    },
+    {
       "name": "Number of live births",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "integer"
-    }, {
+    },
+    {
       "name": "Whether last live birth was preterm",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Number of stillbirths",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "integer"
-    }, {
+    },
+    {
       "name": "Parity",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "integer"
-    }, {
+    },
+    {
       "name": "Number of caesarian sections",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "integer"
-    }, {
+    },
+    {
       "name": "Past pregnancy complications",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Substance use during past pregnancy specification",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Allergies",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Past surgeries",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Existing chronic health conditions",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "HIV diagnosis date",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Ultrasound date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Ultrasound scan conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Medication follow-up",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Persistent physiological symptoms",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Current physiological symptoms",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Presenting signs and symptoms that trigger suspicion of IPV and clinical inquiry",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Woman discloses or is suspected to be subjected to intimate partner violence",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Fetal movement",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Persistent behaviours",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Has the woman  been subjected to intimate partner violence",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Height",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Expected weight gain",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Oedema severity",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Symphysis-fundal height (SFH)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Fetal heartbeat present",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Fetal heart rate",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Second fetal heart rate",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Number of fetuses",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Number of fetuses unknown",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Fetal presentation",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Presenting signs/conditions for IPV",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Clinical enquiry for IPV",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Reason clinical enquiry not done",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Types of IPV",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Average weight gain per week",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Total weight gain (kg)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Systolic blood pressure",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Diastolic blood pressure",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Pre-gestational weight",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Repeat systolic blood pressure",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Repeat diastolic blood pressure",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Blood pressure cannot be taken",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Reason blood pressure cannot be taken",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Symptoms of severe pre-eclampsia",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Current  weight",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Body temperature",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Second body temperature",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Pulse rate",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Second pulse rate",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Pallor present",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Respiratory exam result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "BMI",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Oximetry",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Weight category",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Cardiac exam result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Breast exam result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Abdominal exam result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Pelvic exam result (visual)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Cervical exam conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Cervical dilation",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Oedema present",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Oedema type",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Ultrasound required",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Reason syphilis test not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Syphilis test result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Syphilis diagnosis",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Urine test required",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Urine test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Urine test type",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason urine test not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Midstream urine culture (recommended)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Midstream urine Gram-staining",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Placenta location",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Urine dipstick result - nitrites",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Urine dipstick result - leukocytes",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Urine dipstick result - protein",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Urine dipstick result - glucose",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Asymptomatic bacteriuria (ASB) diagnosis",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood glucose test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood glucose test type",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Fasting plasma glucose",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "75 g oral glucose tolerance test (OGTT) - fasting glucose",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "75 g oral glucose tolerance test (OGTT) - 1 hour",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "75 g oral glucose tolerance test (OGTT) - 2 hours",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Random plasma glucose",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Blood glucose test result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Gestational diabetes mellitus (GDM) diagnosis",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Diabetes mellitus (DM) during pregnancy diagnosis",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood haemoglobin test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood haemoglobin test type",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason blood haemoglobin test not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood haemoglobin test result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Anaemia diagnosis",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hematocrit (Ht)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "White blood cell (WBC) count",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Platelet count",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "TB screening recommended",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "TB screening ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason TB screening not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Ultrasound scan ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "TB screening result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood type test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Other test(s) result(s)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood type",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Rh factor",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "HIV test required",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "HIV test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason HIV test not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "HIV test result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "HIV status",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Partner HIV test result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Partner HIV test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason ultrasound scan not done",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Partner HIV status (confirmed)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "High risk for HIV",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Hepatitis B test required",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Hepatitis B test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis B test type",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis B test result",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis B diagnosis",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis C test required",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Hepatitis C test ordered",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Hepatitis C test type",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason Hepatitis C test not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis C test result",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Amniotic fluid level",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis C diagnosis",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Syphilis test ordered",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Syphilis test type",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood glucose test date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Blood haemoglobin test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood haemoglobin test date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Blood type test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Blood type test date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Hepatitis B test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis B test date",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Procedure"
-    }, {
+    },
+    {
       "name": "Hepatitis C test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hepatitis C test date",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Procedure"
-    }, {
+    },
+    {
       "name": "HIV test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "HIV test date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Other tests conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Other test(s) name",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "string"
-    }, {
+    },
+    {
       "name": "Other test(s) date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Partner HIV test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Partner HIV test date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Syphilis test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Syphilis test date",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Procedure"
-    }, {
+    },
+    {
       "name": "TB screening conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "TB screening date",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Procedure"
-    }, {
+    },
+    {
       "name": "Urine test conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Urine test date",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Procedure"
-    }, {
+    },
+    {
       "name": "Counselling conducted on caffeine reduction",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on second-hand smoke was not conducted",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on condom use",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on condom use was not conducted",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on alcohol / substance use",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on alcohol / substance use was not conducted",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on caffeine reduction was not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on tobacco cessation",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on tobacco cessation was not conducted",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on second-hand smoke",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on non-pharma measures to relieve nausea and vomiting",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on non-pharma measures to relieve nausea and vomiting was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on pharmacological treatments for nausea and vomiting",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on pharmacological treatments for nausea and vomiting was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on diet and lifestyle changes to prevent and relieve heartburn",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on diet and lifestyle changes to prevent and relieve heartburn was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on antacid preparations to relieve heartburn",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on antacid preparations to relieve heartburn was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling on non-pharmacological treatment for the relief of leg cramps",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on non-pharmacological treatment for the relief of leg cramps was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on use of magnesium and calcium to relieve leg cramps",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on use of magnesium and calcium to relieve leg cramps was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on dietary modifications to relieve constipation",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on dietary modifications to relieve constipation was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on use of wheat bran or other fibre supplements to relieve constipation",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on use of wheat bran or other fibre supplements to relieve constipation was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on regular exercise, physiotherapy, support belts and acupuncture to relieve low back and pelvic pain",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on regular exercise, physiotherapy, support belts and acupuncture to relieve low back and pelvic pain was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on non-pharmacological options for varicose veins and oedema",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on non-pharmacological options for varicose veins and oedema was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on healthy eating and keeping physically active",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on healthy eating and keeping physically active was not conducted",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on increasing daily energy and protein intake",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on increasing daily energy and protein intake was not conducted",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on balanced energy and protein dietary supplementation",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason counselling on balanced energy and protein dietary supplementation was not conducted",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Hypertension",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Severe hypertension",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Pre-eclampsia",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Severe pre-eclampsia",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on hypertension",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on HIV positive",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on hepatitis B positive",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on hepatitis C positive",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Syphilis counselling and treatment",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Syphilis counselling, treatment and further testing",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Seven-day antibiotic regimen for asymptomatic bacteriuria (ASB) provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason seven-day antibiotic regimen for asymptomatic bacteriuria (ASB) not provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on TB screening positive",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on gestational diabetes mellitus (GDM)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on diabetes mellitus (DM)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on anaemia",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Vitamin A supplementation not provided",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Amount of daily calcium supplements provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Reason calcium not prescribed",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Amount of daily dose of folic acid prescribed",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Reason iron and folic acid not prescribed",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Amount of iron prescribed",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Type of iron supplement dosage provided",
       "use": "out",
       "min": 0,
       "max": "*"
-    }, {
+    },
+    {
       "name": "Amount of vitamin A supplementation provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Type of vitamin A supplement dosage provided",
       "use": "out",
       "min": 0,
       "max": "*"
-    }, {
+    },
+    {
       "name": "Risk of pre-eclampsia",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Pre-eclampsia risk counselling provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Amount of daily aspirin prescribed until delivery",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Reason aspirin not prescribed",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Risk of gestational diabetes mellitus (GDM)",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Gestational diabetes mellitus (GDM) risk counselling conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on HIV risk",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "PrEP for HIV prevention provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason PrEP for HIV prevention was not provided",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Amount of oral PrEP provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "Quantity"
-    }, {
+    },
+    {
       "name": "Counselling conducted on seeking care when danger signs occur",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counsel to immediately go to the hospital if severe danger signs are present",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling on ANC contact schedule conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on birth preparedness and complications readiness",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Planned birth place",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on Rh factor negative",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on intrapartum antibiotic to prevent early neonatal Group B Streptococcus (GBS) infection",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling on postpartum family planning conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Family planning method selected",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on breastfeeding",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason tetanus toxoid (TT) vaccination not provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on Hep B negative",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "No doses of hepatitis B",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason Hep B vaccination not provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason flu vaccine not provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Flu immunization provided",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Immunization"
-    }, {
+    },
+    {
       "name": "Date flu immunization was received",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Immunization"
-    }, {
+    },
+    {
       "name": "Hepatitis B-1 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date hepatitis B-1 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Hepatitis B-2 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date hepatitis B-2 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Hepatitis B-3 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date hepatitis B-3 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Tetanus toxoid (TT) 1 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date tetanus toxoid 1 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Tetanus toxoid (TT) 2 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date tetanus toxoid 2 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Tetanus toxoid (TT) 3 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date tetanus toxoid 3 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Tetanus toxoid (TT) 4 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date tetanus toxoid 4 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Tetanus toxoid (TT) 5 immunization provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Date tetanus toxoid 5 immunization was received",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "IPV first-line support provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason IPV first line support not done",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "What additional type of care provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Safety assessement",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Has the physical violence happened more often or gotten worse over the past 6 months",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Has he ever used a weapon or threatened you with a weapon",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Has he ever tried to strangle you",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Has he ever beaten you when you were pregnant",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Is he violently and constantly jealous of you",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Do you believe he could kill you",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "boolean"
-    }, {
+    },
+    {
       "name": "Referrals made as part of first-line support and care",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Was client referred",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Preventive antihelminthic treatment provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason no preventative treatment provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Counselling conducted on malaria prevention",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Procedure"
-    }, {
+    },
+    {
       "name": "Reason counselling on malaria prevention was not conducted",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason malaria prophylaxis not provided",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "IPTp-SP dose 1 provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "IPTp-SP dose 1 date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "IPTp-SP dose 2 provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "IPTp-SP dose 2 date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "IPTp-SP dose 3 provided",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "IPTp-SP dose 3 date",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "dateTime"
-    }, {
+    },
+    {
       "name": "Referred to hospital",
       "use": "out",
       "min": 0,
       "max": "1",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Reason referral not done",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "CodeableConcept"
-    }, {
+    },
+    {
       "name": "Emergency referral",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Date of scheduled referral",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Location of referral",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Date referral was made",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Provider who made referral",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Referral notes",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Client history summary",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Reason for referral",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
-    }, {
+    },
+    {
       "name": "Any treatment given before referral",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Provider's facility",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "PractitionerRole"
-    }, {
+    },
+    {
       "name": "Provider's telephone number",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "PractitionerRole"
-    }, {
+    },
+    {
       "name": "Reason for closing ANC record",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Delivery date",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Place of delivery",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Encounter"
-    }, {
+    },
+    {
       "name": "Preterm Birth",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Delivery mode",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Birth weight",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Exclusively breastfeeding",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Delivery complications",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Date of miscarriage or abortion",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Date of death",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    }, {
+    },
+    {
       "name": "Cause of death",
       "use": "out",
       "min": 0,
       "max": "*",
       "type": "Observation"
-    } ],
+    }
+  ],
   "dataRequirement": [
     {
       "type": "Observation",
@@ -8276,7 +8618,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "anc-dak/cql/ANCContactDataElements.cql"
+      "url": "../cql/ANCContactDataElements.cql"
     }
   ]
 }

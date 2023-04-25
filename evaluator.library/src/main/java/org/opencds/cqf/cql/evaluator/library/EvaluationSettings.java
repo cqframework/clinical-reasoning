@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.library;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +31,7 @@ public class EvaluationSettings {
     settings.setCqlOptions(CqlOptions.defaultOptions());
     settings.setGlobalModelCache(new ConcurrentHashMap<>());
     settings.setEngineOptions(CqlEngineOptions.defaultOptions());
+    settings.setLibraryCache(new HashMap<>());
 
     return settings;
   }

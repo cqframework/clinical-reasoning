@@ -851,32 +851,38 @@ public class R4MeasureReportBuilder
     }
 
     public String getKey() {
+      String key = null;
       if (value instanceof Coding) {
         Coding c = ((Coding) value);
         // ASSUMPTION: We won't have different systems with the same code
         // within a given stratifier / sde
-        return joinValues("coding", c.getCode());
+        key = joinValues("coding", c.getCode());
       } else if (value instanceof CodeableConcept) {
         CodeableConcept c = ((CodeableConcept) value);
-        return joinValues("codeable-concept", c.getCodingFirstRep().getCode());
+        key = joinValues("codeable-concept", c.getCodingFirstRep().getCode());
       } else if (value instanceof Code) {
         Code c = (Code) value;
-        return joinValues("code", c.getCode());
+        key = joinValues("code", c.getCode());
       } else if (value instanceof Enum) {
         Enum<?> e = (Enum<?>) value;
-        return joinValues("enum", e.toString());
+        key = joinValues("enum", e.toString());
       } else if (value instanceof IPrimitiveType<?>) {
         IPrimitiveType<?> p = (IPrimitiveType<?>) value;
-        return joinValues("primitive", p.getValueAsString());
+        key = joinValues("primitive", p.getValueAsString());
       } else if (value instanceof Identifier) {
-        return ((Identifier) value).getValue();
+        key = ((Identifier) value).getValue();
       } else if (value instanceof Resource) {
-        return ((Resource) value).getIdElement().toVersionless().getValue();
+        key = ((Resource) value).getIdElement().toVersionless().getValue();
       } else if (value != null) {
-        return value.toString();
-      } else {
-        return "<null>";
+        key = value.toString();
       }
+
+      if (key == null) {
+        throw new IllegalArgumentException(
+            String.format("found a null key for the wrapped value: %s", value));
+      }
+
+      return key;
     }
 
     public String getValueAsString() {
@@ -902,7 +908,7 @@ public class R4MeasureReportBuilder
       } else if (value != null) {
         return value.toString();
       } else {
-        return null;
+        return "<null>";
       }
     }
 

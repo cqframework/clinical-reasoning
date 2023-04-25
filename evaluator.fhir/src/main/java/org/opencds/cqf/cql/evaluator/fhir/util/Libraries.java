@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -34,19 +35,19 @@ public class Libraries {
    * @param contentType the library content type used like XML/JSON
    * @return the content
    */
-  static byte[] getContent(IBaseResource library, LibraryFunctions libraryFunctions,
+  static Optional<byte[]> getContent(IBaseResource library, LibraryFunctions libraryFunctions,
       String contentType) {
     for (IBase attachment : libraryFunctions.getAttachments().apply(library)) {
       String libraryContentType = libraryFunctions.getContentType().apply(attachment);
       if (libraryContentType != null && libraryContentType.equals(contentType)) {
         byte[] content = libraryFunctions.getContent().apply(attachment);
         if (content != null) {
-          return content;
+          return Optional.of(content);
         }
       }
     }
 
-    return null;
+    return Optional.empty();
   }
 
   /**
@@ -56,7 +57,7 @@ public class Libraries {
    * @param contentType the library content type used like XML/JSON
    * @return the content
    */
-  public static byte[] getContent(IBaseResource library, String contentType) {
+  public static Optional<byte[]> getContent(IBaseResource library, String contentType) {
     checkNotNull(library);
     checkArgument(library.fhirType().equals(LIBRARY_RESOURCE_TYPE));
     checkNotNull(contentType);

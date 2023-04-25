@@ -26,11 +26,11 @@ public class StratifierMeasureProcessorTest {
         .population("numerator").hasCount(0).up()
         .population("denominator").hasCount(1).up()
         .population("initial-population").hasCount(1).up()
-        .firstStratifier(); // TODO: Stratifier validation
-
-
-    // validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 1);
-    // validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("0.0"));
+        .firstStratifier()
+        .firstStratum().hasScore("0.0")
+        .population("initial-population").hasCount(1).up()
+        .population("denominator").hasCount(1).up()
+        .population("numerator").hasCount(0);
   }
 
   @Test
@@ -48,11 +48,10 @@ public class StratifierMeasureProcessorTest {
         .population("numerator").hasCount(1).up()
         .population("denominator").hasCount(1).up()
         .population("initial-population").hasCount(1).up()
-        .firstStratifier(); // TODO: Stratifier validation
-
-    // validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 1);
-    // validateStratifier(mrgc.getStratifierFirstRep(), "true", "numerator", 1);
-    // validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("1.0"));
+        .firstStratifier()
+        .firstStratum().hasScore("1.0")
+        .population("initial-population").hasCount(1).up()
+        .population("numerator").hasCount(1);
   }
 
   @Test
@@ -71,18 +70,15 @@ public class StratifierMeasureProcessorTest {
         .population("denominator").hasCount(12).up()
         .population("denominator-exclusion").hasCount(3).up()
         .population("initial-population").hasCount(15).up()
-        .firstStratifier(); // TODO: Stratifier validation
-
-    // Stratifiers should cover the total population, so we expect
-    // initial-population true (5) + initial-population false (10) = initial-population total
-    // (15)
-    // validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 5);
-    // validateStratifier(mrgc.getStratifierFirstRep(), "true", "numerator", 2);
-    // validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("0.5"));
-
-    // validateStratifier(mrgc.getStratifierFirstRep(), "false", "initial-population", 10);
-    // validateStratifier(mrgc.getStratifierFirstRep(), "false", "numerator", 4);
-    // validateStratumScore(mrgc.getStratifierFirstRep(), "false", new BigDecimal("0.5"));
+        .firstStratifier()
+        .stratum("true").hasScore("0.5")
+        .population("initial-population").hasCount(5).up()
+        .population("numerator").hasCount(5).up()
+        .population("numerator").hasCount(2).up().up()
+        .stratum("false").hasScore("0.5")
+        .population("initial-population").hasCount(10).up()
+        .population("numerator").hasCount(8).up()
+        .population("numerator").hasCount(4);
   }
 
   @Test
@@ -100,7 +96,15 @@ public class StratifierMeasureProcessorTest {
         .population("denominator").hasCount(12).up()
         .population("denominator-exclusion").hasCount(3).up()
         .population("initial-population").hasCount(15).up()
-        .firstStratifier(); // TODO: Stratifier validation
+        .firstStratifier()
+        .stratum("true").hasScore("0.5")
+        .population("initial-population").hasCount(5).up()
+        .population("numerator").hasCount(5).up()
+        .population("numerator").hasCount(2).up().up()
+        .stratum("false").hasScore("0.5")
+        .population("initial-population").hasCount(10).up()
+        .population("numerator").hasCount(8).up()
+        .population("numerator").hasCount(4);
 
     // Stratifiers should cover the total population, so we expect
     // initial-population true (5) + initial-population false (10) = initial-population total

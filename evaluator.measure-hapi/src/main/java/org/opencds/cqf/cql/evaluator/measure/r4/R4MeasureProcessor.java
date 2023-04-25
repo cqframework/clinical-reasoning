@@ -3,15 +3,19 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.library.VersionedIdentifiers;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
@@ -19,6 +23,8 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 
 @Named
 public class R4MeasureProcessor {
@@ -33,14 +39,13 @@ public class R4MeasureProcessor {
 
   }
 
-  public MeasureReport evaluateMeasure(IdType measureId, String periodStart, String periodEnd,
+  public MeasureReport evaluateMeasure(Either3<CanonicalType, IdType, Measure> measure,
+      String periodStart, String periodEnd,
       String reportType, List<String> subjectIds) {
-    var measure = this.repository.read(Measure.class, measureId);
-    return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds);
+    var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
+    return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds);
   }
 
-  // NOTE: Do not make a top-level function that takes a Measure resource. This ensures that
-  // the repositories are set up correctly.
   protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd,
       String reportType, List<String> subjectIds) {
 
@@ -59,8 +64,24 @@ public class R4MeasureProcessor {
         this.measureEvaluationOptions.getEvaluationSettings(), this.repository, id);
 
     R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
-    return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds,
+    return measureEvaluator.evaluate(
+        MeasureEvalType.fromCode(reportType).orElse(MeasureEvalType.POPULATION), subjectIds,
         measurementPeriod);
+  }
+
+  protected Measure resolveByUrl(CanonicalType url) {
+    var parts = Canonicals.getParts(url);
+    var result = this.repository.search(
+        Bundle.class,
+        Measure.class,
+        Searches.byNameAndVersion(
+            parts.idPart(),
+            parts.version()));
+    return (Measure) result.getEntryFirstRep().getResource();
+  }
+
+  protected Measure resolveById(IdType id) {
+    return this.repository.read(Measure.class, id);
   }
 
   protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -21,6 +22,7 @@ import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.testng.TestException;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -42,10 +44,28 @@ public class Measure {
   }
 
   interface SelectedOf<T> {
-    T selected();
+    T value();
   }
 
+  protected static class Selected<T, P> implements SelectedOf<T>, ChildOf<P> {
+    private final P parent;
+    private final T value;
 
+    public Selected(T value, P parent) {
+      this.parent = parent;
+      this.value = value;
+    }
+
+    @Override
+    public T value() {
+      return value;
+    }
+
+    @Override
+    public P up() {
+      return parent;
+    }
+  }
 
   public static Given given() {
     return new Given();
@@ -93,8 +113,6 @@ public class Measure {
 
     private Supplier<MeasureReport> operation;
 
-
-
     public When measureId(String measureId) {
       this.measureId = measureId;
       return this;
@@ -109,7 +127,6 @@ public class Measure {
       this.periodStart = periodStart;
       return this;
     }
-
 
     public When subject(String subjectId) {
       this.subjectId = subjectId;
@@ -129,7 +146,9 @@ public class Measure {
 
     public When evaluate() {
       this.operation =
-          () -> processor.evaluateMeasure(new IdType("Measure", measureId), periodStart,
+          () -> processor.evaluateMeasure(
+              Eithers.forMiddle3(new IdType("Measure", measureId)),
+              periodStart,
               periodEnd, reportType, Collections.singletonList(this.subjectId));
       return this;
     }
@@ -150,21 +169,18 @@ public class Measure {
       return new SelectedReport(report);
     }
   }
-  static class SelectedReport implements SelectedOf<MeasureReport>, ChildOf<Void> {
-
-    private final MeasureReport report;
-
+  static class SelectedReport extends Selected<MeasureReport, Void> {
     public SelectedReport(MeasureReport report) {
-      this.report = report;
+      super(report, null);
     }
 
     public SelectedReport passes(Validator<MeasureReport> measureReportValidator) {
-      measureReportValidator.validate(report);
+      measureReportValidator.validate(value());
       return this;
     }
 
     public MeasureReport report() {
-      return this.report;
+      return this.value();
     }
 
     public SelectedGroup firstGroup() {
@@ -177,14 +193,14 @@ public class Measure {
     }
 
     public SelectedGroup group(Selector<MeasureReportGroupComponent, MeasureReport> groupSelector) {
-      var g = groupSelector.select(report);
-      return new SelectedGroup(this, g);
+      var g = groupSelector.select(value());
+      return new SelectedGroup(g, this);
     }
 
     public SelectedReference<SelectedReport> reference(
         Selector<Reference, MeasureReport> referenceSelector) {
-      var r = referenceSelector.select(report);
-      return new SelectedReference<>(this, r);
+      var r = referenceSelector.select(value());
+      return new SelectedReference<>(r, this);
     }
 
     public SelectedReference<SelectedReport> evaluatedResource(String name) {
@@ -211,44 +227,24 @@ public class Measure {
 
     // TODO: SelectedExtension class?
     public SelectedReport hasExtension(String url, int count) {
-      var ex = this.report.getExtensionsByUrl(url);
+      var ex = this.value().getExtensionsByUrl(url);
       assertEquals(ex.size(), count);
 
       return this;
     }
-
-    @Override
-    public MeasureReport selected() {
-      return this.report;
-    }
-
-    @Override
-    public Void up() {
-      return null;
-    }
   }
 
-
   static class SelectedGroup
-      implements ChildOf<SelectedReport>, SelectedOf<MeasureReport.MeasureReportGroupComponent> {
-    private final SelectedReport selectedReport;
-    private final MeasureReport.MeasureReportGroupComponent group;
+      extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
 
-    public SelectedGroup(SelectedReport generatedReport,
-        MeasureReport.MeasureReportGroupComponent group) {
-      this.selectedReport = generatedReport;
-      this.group = group;
-    }
-
-    public SelectedReport up() {
-      return this.selectedReport;
+    public SelectedGroup(MeasureReportGroupComponent value, SelectedReport parent) {
+      super(value, parent);
     }
 
     public SelectedGroup hasScore(String score) {
-      MeasureValidationUtils.validateGroupScore(this.group, score);
+      MeasureValidationUtils.validateGroupScore(this.value(), score);
       return this;
     }
-
 
     public SelectedPopulation population(String name) {
       return this.population(
@@ -258,8 +254,8 @@ public class Measure {
 
     public SelectedPopulation population(
         Selector<MeasureReportGroupPopulationComponent, MeasureReportGroupComponent> populationSelector) {
-      var p = populationSelector.select(group);
-      return new SelectedPopulation(this, p);
+      var p = populationSelector.select(value());
+      return new SelectedPopulation(p, this);
     }
 
     public SelectedPopulation firstPopulation() {
@@ -267,7 +263,7 @@ public class Measure {
     }
 
     public SelectedGroup hasStratifierCount(int count) {
-      assertEquals(this.group.getStratifier().size(), count);
+      assertEquals(this.value().getStratifier().size(), count);
       return this;
     }
 
@@ -277,32 +273,19 @@ public class Measure {
 
     public SelectedStratifier stratifier(
         Selector<MeasureReportGroupStratifierComponent, MeasureReportGroupComponent> stratifierSelector) {
-      var s = stratifierSelector.select(group);
-      return new SelectedStratifier(this, s);
+      var s = stratifierSelector.select(value());
+      return new SelectedStratifier(s, this);
     }
 
-    @Override
-    public MeasureReportGroupComponent selected() {
-      return this.group;
-    }
+    static class SelectedReference<P> extends Selected<Reference, P> {
 
-    static class SelectedReference<T> implements ChildOf<T>, SelectedOf<Reference> {
-      private final T parent;
-      private final Reference reference;
-
-      public SelectedReference(T parent, Reference reference) {
-        this.parent = parent;
-        this.reference = reference;
+      public SelectedReference(Reference value, P parent) {
+        super(value, parent);
       }
-
-      public T up() {
-        return parent;
-      }
-
 
       // Hmm.. may need to rethink this one a bit.
-      public SelectedReference<T> hasPopulations(String... population) {
-        var ex = this.reference.getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
+      public SelectedReference<P> hasPopulations(String... population) {
+        var ex = this.value().getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
         if (ex.isEmpty()) {
           throw new TestException(String.format(
               "no evaluated resource extensions were found, and expected %s", population.length));
@@ -321,68 +304,99 @@ public class Measure {
 
         return this;
       }
-
-      @Override
-      public Reference selected() {
-        return this.reference;
-      }
     }
 
-    static class SelectedPopulation implements ChildOf<SelectedGroup>,
-        SelectedOf<MeasureReport.MeasureReportGroupPopulationComponent> {
-      private final SelectedGroup selectedGroup;
-      private final MeasureReport.MeasureReportGroupPopulationComponent population;
+    static class SelectedPopulation
+        extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
-      public SelectedPopulation(SelectedGroup selectedGroup,
-          MeasureReport.MeasureReportGroupPopulationComponent population) {
-        this.selectedGroup = selectedGroup;
-        this.population = population;
-      }
-
-      public SelectedGroup up() {
-        return this.selectedGroup;
+      public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
+        super(value, parent);
       }
 
       public SelectedPopulation hasCount(int count) {
-        MeasureValidationUtils.validatePopulation(population, count);
+        MeasureValidationUtils.validatePopulation(value(), count);
         return this;
       }
 
       public SelectedPopulation passes(
           Validator<MeasureReport.MeasureReportGroupPopulationComponent> populationValidator) {
-        populationValidator.validate(this.population);
+        populationValidator.validate(value());
         return this;
       }
-
-      @Override
-      public MeasureReportGroupPopulationComponent selected() {
-        return this.population;
-      }
     }
   }
 
+  static class SelectedStratifier
+      extends Selected<MeasureReport.MeasureReportGroupStratifierComponent, SelectedGroup> {
 
-  static class SelectedStratifier implements ChildOf<SelectedGroup>,
-      SelectedOf<MeasureReport.MeasureReportGroupStratifierComponent> {
-
-    private final SelectedGroup selectedGroup;
-    private final MeasureReport.MeasureReportGroupStratifierComponent stratifier;
-
-    public SelectedStratifier(SelectedGroup selectedGroup,
-        MeasureReport.MeasureReportGroupStratifierComponent stratifier) {
-      this.selectedGroup = selectedGroup;
-      this.stratifier = stratifier;
+    public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
+      super(value, parent);
     }
 
-    @Override
-    public MeasureReportGroupStratifierComponent selected() {
-      return stratifier;
+    public SelectedStratum firstStratum() {
+      return stratum(MeasureReport.MeasureReportGroupStratifierComponent::getStratumFirstRep);
     }
 
-    @Override
-    public SelectedGroup up() {
-      return selectedGroup;
+    public SelectedStratum stratum(CodeableConcept value) {
+      return stratum(
+          s -> s.getStratum().stream().filter(x -> x.hasValue() && x.getValue().equalsDeep(value))
+              .findFirst().get());
+    }
+
+    public SelectedStratum stratum(String textValue) {
+      return stratum(
+          s -> s.getStratum().stream().filter(x -> x.hasValue() && x.getValue().hasText())
+              .filter(x -> x.getValue().getText().equals(textValue))
+              .findFirst().get());
+    }
+
+    public SelectedStratum stratum(
+        Selector<MeasureReport.StratifierGroupComponent, MeasureReport.MeasureReportGroupStratifierComponent> stratumSelector) {
+      var s = stratumSelector.select(value());
+      return new SelectedStratum(s, this);
+    }
+  }
+  static class SelectedStratum
+      extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
+
+    public SelectedStratum(MeasureReport.StratifierGroupComponent value,
+        SelectedStratifier parent) {
+      super(value, parent);
+    }
+
+    public SelectedStratum hasScore(String score) {
+      MeasureValidationUtils.validateStratumScore(value(), score);
+      return this;
+    }
+
+    public SelectedStratumPopulation firstPopulation() {
+      return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
+    }
+
+    public SelectedStratumPopulation population(String name) {
+      return population(
+          s -> s.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
+              && x.getCode().getCoding().get(0).getCode().equals(name)).findFirst().get());
+    }
+
+    public SelectedStratumPopulation population(
+        Selector<MeasureReport.StratifierGroupPopulationComponent, MeasureReport.StratifierGroupComponent> populationSelector) {
+      var p = populationSelector.select(value());
+      return new SelectedStratumPopulation(p, this);
     }
   }
 
+  static class SelectedStratumPopulation
+      extends Selected<MeasureReport.StratifierGroupPopulationComponent, SelectedStratum> {
+
+    public SelectedStratumPopulation(MeasureReport.StratifierGroupPopulationComponent value,
+        SelectedStratum parent) {
+      super(value, parent);
+    }
+
+    public SelectedStratumPopulation hasCount(int count) {
+      assertEquals(this.value().getCount(), count);
+      return this;
+    }
+  }
 }

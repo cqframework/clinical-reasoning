@@ -64,7 +64,8 @@ public class Dstu3MeasureProcessor {
         new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
 
     Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure);
-    return measureEvaluator.evaluate(MeasureEvalType.fromCode(reportType), subjectIds,
+    return measureEvaluator.evaluate(
+        MeasureEvalType.fromCode(reportType).orElse(MeasureEvalType.POPULATION), subjectIds,
         measurementPeriod);
   }
 

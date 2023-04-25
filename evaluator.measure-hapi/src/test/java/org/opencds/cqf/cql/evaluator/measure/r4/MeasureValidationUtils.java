@@ -82,9 +82,19 @@ public class MeasureValidationUtils {
         String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
 
     MeasureReport.StratifierGroupComponent stratum = stratumOpt.get();
+    validateStratumScore(stratum, score);
+  }
+
+  protected static void validateStratumScore(
+      MeasureReport.StratifierGroupComponent stratum, BigDecimal score) {
     assertTrue(stratum.hasMeasureScore(),
         String.format("stratum \"%s\" does not have a score", stratum.getId()));
     assertEquals(stratum.getMeasureScore().getValue(), score);
+  }
+
+  protected static void validateStratumScore(
+      MeasureReport.StratifierGroupComponent stratum, String score) {
+    validateStratumScore(stratum, new BigDecimal(score));
   }
 
   protected static void validateEvaluatedResourceExtension(List<Reference> measureReferences,

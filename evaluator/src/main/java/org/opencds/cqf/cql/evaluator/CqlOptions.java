@@ -33,6 +33,9 @@ public class CqlOptions {
   }
 
   public static CqlOptions defaultOptions() {
-    return new CqlOptions();
+    var opt = new CqlOptions();
+    // opt.getCqlTranslatorOptions().getOptions().add(Options.EnableLocators);
+    // opt.getCqlTranslatorOptions().getOptions().add(Options.EnableAnnotations);
+    return opt;
   }
 }

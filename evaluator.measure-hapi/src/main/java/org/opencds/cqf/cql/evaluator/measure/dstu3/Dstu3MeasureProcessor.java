@@ -16,6 +16,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
@@ -45,7 +46,6 @@ import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
@@ -342,7 +342,7 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
 
     /* NOTE: Npm package support not implemented for Dstu3 measure processing */
     TranslatorOptionAwareLibraryLoader libraryLoader =
-        new TranslatingLibraryLoader(new CacheAwareModelManager(globalModelCache),
+        new TranslatingLibraryLoader(new ModelManager(globalModelCache),
             librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), null);
 
     if (this.libraryCache != null) {

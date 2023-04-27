@@ -2,9 +2,7 @@ package org.opencds.cqf.cql.evaluator.engine.util;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,15 +44,16 @@ public class TranslatorOptionsUtil {
 
   public static EnumSet<CqlTranslatorOptions.Options> getTranslatorOptions(Library library,
       boolean excludeOptional) {
-    EnumSet<CqlTranslatorOptions.Options> filteredSet = getTranslatorOptions(library);
-    if (excludeOptional) {
-      filteredSet.remove(optionalEnumSet);
+    EnumSet<CqlTranslatorOptions.Options> originalSet = getTranslatorOptions(library);
+    if (originalSet != null && excludeOptional) {
+      originalSet.removeAll(OPTIONAL_ENUM_SET);
     }
-    return filteredSet;
+
+    return originalSet;
   }
 
-  public static Set<CqlTranslatorOptions.Options> optionalEnumSet =
-      new HashSet<>((Arrays.asList(Options.EnableAnnotations, Options.EnableLocators)));
+  public static final EnumSet<CqlTranslatorOptions.Options> OPTIONAL_ENUM_SET =
+      EnumSet.of(Options.EnableAnnotations, Options.EnableLocators);
 
   private static String getTranslatorOptions(List<CqlToElmBase> annotations) {
     for (CqlToElmBase o : annotations) {
@@ -100,13 +99,14 @@ public class TranslatorOptionsUtil {
     return optionSet;
   }
 
-  public static EnumSet<CqlTranslatorOptions.Options> parseTranslatorOptions(
+  public static Set<CqlTranslatorOptions.Options> parseTranslatorOptions(
       String translatorOptions, boolean excludeOptional) {
-    EnumSet<CqlTranslatorOptions.Options> excludedSet = parseTranslatorOptions(translatorOptions);
-    if (excludeOptional) {
-      excludedSet.remove(optionalEnumSet);
+    Set<CqlTranslatorOptions.Options> options = parseTranslatorOptions(translatorOptions);
+    if (options != null && excludeOptional) {
+      options.removeAll(OPTIONAL_ENUM_SET);
     }
-    return excludedSet;
+
+    return options;
   }
 
 

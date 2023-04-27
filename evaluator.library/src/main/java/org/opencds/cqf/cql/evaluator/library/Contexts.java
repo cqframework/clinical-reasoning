@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
@@ -24,7 +25,6 @@ import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.RepositoryFhirLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
@@ -69,7 +69,7 @@ public class Contexts {
 
     var dataProviders = buildDataProviders(theRepository, theAdditionalData, terminologyProvider);
     var cqlEvaluator = new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
-        theSettings.getEngineOptions().getOptions());
+        theSettings.getCqlOptions().getCqlEngineOptions().getOptions());
 
     return new LibraryEvaluator(theCqlFhirParametersConverter, cqlEvaluator);
   }
@@ -90,7 +90,7 @@ public class Contexts {
     }
 
     TranslatorOptionAwareLibraryLoader libraryLoader =
-        new TranslatingLibraryLoader(new CacheAwareModelManager(ourGlobalModelCache),
+        new TranslatingLibraryLoader(new ModelManager(ourGlobalModelCache),
             theLibrarySourceProviders, theSettings.getCqlOptions().getCqlTranslatorOptions(), null);
 
     if (theSettings.getLibraryCache() != null) {

@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.engine.execution;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
-import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
 
 /**
  * The CacheAwareLibraryLoaderDecorator wraps a TranslatorOptionAwareLibraryLoader with a cache
@@ -21,9 +19,9 @@ import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
  */
 public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLibraryLoader {
 
-  private TranslatorOptionAwareLibraryLoader innerLoader;
+  private final TranslatorOptionAwareLibraryLoader innerLoader;
 
-  private Map<VersionedIdentifier, Library> libraryCache = new HashMap<>();
+  private final Map<VersionedIdentifier, Library> libraryCache;
 
   public CacheAwareLibraryLoaderDecorator(TranslatorOptionAwareLibraryLoader libraryLoader,
       Map<VersionedIdentifier, Library> libraryCache) {
@@ -43,7 +41,7 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
   public Library load(VersionedIdentifier libraryIdentifier) {
     Library library = this.libraryCache.get(libraryIdentifier);
     if (library != null && this.translatorOptionsMatch(library)) { // Bug on xml libraries not
-                                                                   // getting annotations
+      // getting annotations
       return library;
     }
 
@@ -54,16 +52,6 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
     this.libraryCache.put(libraryIdentifier, library);
 
     return library;
-  }
-
-  protected Boolean translatorOptionsMatch(Library library) {
-    EnumSet<CqlTranslatorOptions.Options> options =
-        TranslatorOptionsUtil.getTranslatorOptions(library);
-    if (options == null) {
-      return false;
-    }
-
-    return options.equals(this.getCqlTranslatorOptions().getOptions());
   }
 
   @Override
@@ -77,5 +65,10 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
 
   public void loadNamespaces(List<NamespaceInfo> namespaceInfos) {
     this.innerLoader.loadNamespaces(namespaceInfos);
+  }
+
+  @Override
+  public boolean translatorOptionsMatch(Library library) {
+    return this.innerLoader.translatorOptionsMatch(library);
   }
 }

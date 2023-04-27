@@ -31,7 +31,6 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
@@ -307,7 +306,7 @@ public class CqlEvaluatorBuilder {
 
   private LibraryLoader buildLibraryLoader() {
     Collections.reverse(this.librarySourceProviders);
-    ModelManager modelManager = new CacheAwareModelManager(globalModelCache);
+    ModelManager modelManager = new ModelManager(globalModelCache);
     // TODO: Would be good to plug this in through DI, but I ran into so many issues
     // doing that, I just went this route
     if (npmProcessor != null) {

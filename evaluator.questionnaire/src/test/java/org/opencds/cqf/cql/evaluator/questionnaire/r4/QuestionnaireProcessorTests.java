@@ -74,11 +74,14 @@ public class QuestionnaireProcessorTests {
     var repository =
         TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
 
-    TestQuestionnaire.Assert
-        .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
-        .withRepository(repository)
-        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
-        .isEqualsTo("questionnaire-response-populated.json");
+    for (int i = 0; i < 10000; i++) {
+      TestQuestionnaire.Assert
+          .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
+          .withRepository(repository)
+          .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
+          .isEqualsTo("questionnaire-response-populated.json");
+
+    }
   }
 
   @Test

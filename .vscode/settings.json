@@ -142,6 +142,9 @@
   "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
   "java.format.settings.profile": "GoogleStyle",
   "json.schemaDownload.enable": true,
+  "[cql]": {
+    "editor.formatOnSave": false
+  },
   "[markdown]": {
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.unicodeHighlight.ambiguousCharacters": true,

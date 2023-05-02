@@ -110,6 +110,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
+
     var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass(),
         "opioid-Rec10-patient-view");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)

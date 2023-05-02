@@ -20,3 +20,8 @@ jobs:
         run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 test-compile
       - name: Tests and additional checks
         run: mvn --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v3
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: '**/junitreports/TEST-*.xml'

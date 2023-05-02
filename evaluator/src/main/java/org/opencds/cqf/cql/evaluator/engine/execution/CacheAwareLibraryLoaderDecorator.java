@@ -40,8 +40,10 @@ public class CacheAwareLibraryLoaderDecorator implements TranslatorOptionAwareLi
   @Override
   public Library load(VersionedIdentifier libraryIdentifier) {
     Library library = this.libraryCache.get(libraryIdentifier);
-    if (library != null && this.translatorOptionsMatch(library)) { // Bug on xml libraries not
-      // getting annotations
+    if (library != null && this.translatorOptionsMatch(library)) {
+      // TODO: Need to push this upstream, but using a cached library _should also_
+      // load and validate any dependencies such as other libraries and models.
+      // Otherwise, we can get into a case where a cached library is incorrectly used.
       return library;
     }
 

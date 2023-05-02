@@ -73,7 +73,6 @@ public class QuestionnaireProcessorTests {
   void testPopulate() {
     var repository =
         TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
-
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
         .withRepository(repository)

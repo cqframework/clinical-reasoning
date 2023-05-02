@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -14,13 +15,11 @@ import javax.inject.Named;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
-import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
@@ -56,8 +55,6 @@ public class CqlEvaluatorBuilder {
 
   private static Logger logger = LoggerFactory.getLogger(CqlEvaluatorBuilder.class);
 
-  private static Map<ModelIdentifier, Model> globalModelCache = new HashMap<>();
-
   private List<LibrarySourceProvider> librarySourceProviders;
 
   private List<TerminologyProvider> terminologyProviders;
@@ -84,7 +81,7 @@ public class CqlEvaluatorBuilder {
     this.librarySourceProviders = new ArrayList<>();
     this.terminologyProviders = new ArrayList<>();
     this.dataProviderParts = new HashMap<>();
-    this.libraryCache = new HashMap<>();
+    this.libraryCache = new ConcurrentHashMap<>();
     this.retrieveProviderConfig = RetrieveProviderConfig.defaultConfig();
     this.cqlOptions = CqlOptions.defaultOptions();
   }
@@ -306,7 +303,8 @@ public class CqlEvaluatorBuilder {
 
   private LibraryLoader buildLibraryLoader() {
     Collections.reverse(this.librarySourceProviders);
-    ModelManager modelManager = new ModelManager(globalModelCache);
+    // TODO: Some bug in the current model manager is preventing the use of caching correctly
+    ModelManager modelManager = new ModelManager();
     // TODO: Would be good to plug this in through DI, but I ran into so many issues
     // doing that, I just went this route
     if (npmProcessor != null) {

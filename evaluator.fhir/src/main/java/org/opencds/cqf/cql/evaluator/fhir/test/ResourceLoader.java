@@ -66,7 +66,9 @@ public interface ResourceLoader {
   default String stringFromResource(String theLocation) {
     InputStream is = null;
     try {
-      if (theLocation.startsWith(File.separator)) {
+      File f = new File(theLocation);
+      if (f.isFile()) {
+      //if (theLocation.startsWith(File.separator)) {
         is = new FileInputStream(theLocation);
       } else {
         is = getRelativeClass().getResourceAsStream(theLocation);

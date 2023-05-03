@@ -19,6 +19,7 @@ import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -64,10 +65,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected IBaseResource questionnaire;
   protected Collection<IBaseResource> requestResources;
   protected Collection<IBaseResource> extractedResources;
+  protected EvaluationSettings evaluationSettings;
 
-  protected BasePlanDefinitionProcessor(Repository repository) {
-    requireNonNull(repository, "localRepository can not be null");
-    this.repository = repository;
+  protected BasePlanDefinitionProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
+    this.repository = requireNonNull(repository, "repository can not be null");
+    this.evaluationSettings =
+        requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
     this.operationParametersParser = new OperationParametersParser(
         Contexts.getAdapterFactory(repository.fhirContext()),
@@ -123,7 +127,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return apply(theId, theCanonical, thePlanDefinition, patientId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
-        parameters, useServerData, bundle, prefetchData, new LibraryEngine(repository));
+        parameters, useServerData, bundle, prefetchData,
+        new LibraryEngine(repository, this.evaluationSettings));
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,

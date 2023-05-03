@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -48,7 +50,7 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected static final String subjectType = "Patient";
 
   protected BaseQuestionnaireResponseProcessor(Repository repository) {
-    this.repository = repository;
+    this.repository = requireNonNull(repository, "repository can not be null");
     this.parser = this.repository.fhirContext().newJsonParser();
   }
 

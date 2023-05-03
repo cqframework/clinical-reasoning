@@ -2,21 +2,21 @@ package org.opencds.cqf.cql.evaluator.engine.execution;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
+import static org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil.OVERLOAD_SAFE_SIGNATURE_LEVELS;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -45,27 +45,36 @@ import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
  */
 public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoader {
 
-  protected CqlTranslatorOptions cqlTranslatorOptions;
-  protected List<LibrarySourceProvider> librarySourceProviders;
+  protected final CqlTranslatorOptions cqlTranslatorOptions;
 
-  protected LibraryManager libraryManager;
+  protected final LibraryManager libraryManager;
+  protected final ModelManager modelManager;
 
-  private static EnumSet<LibraryBuilder.SignatureLevel> OVERLOAD_SAFE_SIGNATURE_LEVELS =
-      EnumSet.of(SignatureLevel.All, SignatureLevel.Overloads);
+  protected final Map<VersionedIdentifier, Library> libraryCache;
 
-  private final EnumSet<CqlTranslatorOptions.Options> binaryOptionSet;
+  protected final EnumSet<CqlTranslatorOptions.Options> binaryOptionSet;
+
+  protected final List<LibrarySourceProvider> librarySourceProviders;
+
+  public TranslatingLibraryLoader(ModelManager modelManager,
+      List<LibrarySourceProvider> librarySourceProviders, CqlTranslatorOptions translatorOptions) {
+    this(modelManager, librarySourceProviders, translatorOptions, null);
+  }
 
   public TranslatingLibraryLoader(ModelManager modelManager,
       List<LibrarySourceProvider> librarySourceProviders, CqlTranslatorOptions translatorOptions,
-      NamespaceInfo namespaceInfo) {
+      Map<VersionedIdentifier, Library> libraryCache) {
+
     this.librarySourceProviders =
         requireNonNull(librarySourceProviders, "librarySourceProviders can not be null");
+    this.modelManager = requireNonNull(modelManager, "modelManager can not be null");
+    this.libraryCache = libraryCache != null ? libraryCache : new ConcurrentHashMap<>();
 
     this.cqlTranslatorOptions =
         translatorOptions != null ? translatorOptions : CqlTranslatorOptions.defaultOptions();
-
-    if (namespaceInfo != null) {
-      modelManager.getNamespaceManager().addNamespace(namespaceInfo);
+    if (!OVERLOAD_SAFE_SIGNATURE_LEVELS.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
+      throw new IllegalArgumentException(
+          "TranslatingLibraryLoader requires an overload-safe SignatureLevel: {All, Overloads}");
     }
 
     this.libraryManager = new LibraryManager(modelManager);
@@ -80,11 +89,6 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
       libraryManager.getLibrarySourceLoader().registerProvider(provider);
     }
 
-    if (!OVERLOAD_SAFE_SIGNATURE_LEVELS.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
-      throw new IllegalArgumentException(
-          "TranslatingLibraryLoader requires an overload-safe SignatureLevel: {All, Overloads}");
-    }
-
     this.binaryOptionSet = this.cqlTranslatorOptions.getOptions().clone();
     binaryOptionSet.removeAll(TranslatorOptionsUtil.OPTIONAL_ENUM_SET);
   }
@@ -96,17 +100,50 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   }
 
   public Library load(VersionedIdentifier libraryIdentifier) {
-    ensureNamespaceUpdate(libraryIdentifier);
-    if (this.cqlTranslatorOptions.getEnableCqlOnly()) {
-      return this.translate(libraryIdentifier);
+    // Don't use "computeIfAbsent" here. The cache may be synchronized and this will deadlock
+    // because libraries are loaded recursively.
+    Library library = null;
+    if (this.libraryCache.containsKey(libraryIdentifier)) {
+      // NOTE: This assumes there are no issues with library
+      // dependencies. If we've lost the ability to reload
+      // a model or dependencies (for example, a SourceLoader was removed)
+      // this will put us in an invalid state.
+      library = this.libraryCache.get(libraryIdentifier);
+    } else {
+      library = this.tryElmElseTranslate(libraryIdentifier);
+      this.libraryCache.put(libraryIdentifier, library);
     }
 
-    Library library = this.getLibraryFromElm(libraryIdentifier);
-    if (checkBinaryCompatibility(library)) {
-      return library;
+    return library;
+  }
+
+  protected Library tryElmElseTranslate(VersionedIdentifier libraryIdentifier) {
+    Library library = null;
+    if (!this.getCqlTranslatorOptions().getEnableCqlOnly()) {
+      library = this.getLibraryFromElm(libraryIdentifier);
     }
 
-    return this.translate(libraryIdentifier);
+    if (library == null) {
+      library = this.translate(libraryIdentifier);
+    }
+
+    return library;
+  }
+
+  public void ensureDependencies(Library library) {
+    if (library.getIncludes() != null) {
+      for (var include : library.getIncludes().getDef()) {
+        this.load(
+            new VersionedIdentifier().withId(include.getLocalIdentifier())
+                .withVersion(include.getVersion()));
+      }
+    }
+
+    if (library.getUsings() != null) {
+      for (var model : library.getUsings().getDef()) {
+        this.modelManager.resolveModel(model.getLocalIdentifier(), model.getVersion());
+      }
+    }
   }
 
   private void ensureNamespaceUpdate(VersionedIdentifier libraryIdentifier) {
@@ -140,18 +177,28 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
   protected Library getLibraryFromElm(VersionedIdentifier libraryIdentifier) {
     org.hl7.elm.r1.VersionedIdentifier versionedIdentifier = toElmIdentifier(libraryIdentifier);
+
+    Library library = null;
     for (var type : new LibraryContentType[] {LibraryContentType.JSON, LibraryContentType.XML}) {
       InputStream is = this.getLibraryContent(versionedIdentifier, type);
       if (is != null) {
         try {
-          return CqlLibraryReaderFactory.getReader(type.mimeType()).read(is);
-        } catch (IOException e) {
-          return null;
+          // Even if we successfully read the library from ELM, we still need to ensure that all the
+          // dependencies are loaded correctly and that all translator options and so on match
+          var candidateLibrary = CqlLibraryReaderFactory.getReader(type.mimeType()).read(is);
+          ensureDependencies(candidateLibrary);
+          ensureNamespaceUpdate(candidateLibrary.getIdentifier());
+          if (checkBinaryCompatibility(candidateLibrary)) {
+            library = candidateLibrary;
+            break;
+          }
+        } catch (Exception e) {
+          // intentionally empty, move on to the next candidate library
         }
       }
     }
 
-    return null;
+    return library;
   }
 
   public boolean translatorOptionsMatch(Library library) {

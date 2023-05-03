@@ -9,29 +9,20 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.ModelIdentifier;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class EvaluationSettings {
-
-
-  private static final Map<ModelIdentifier, Model> GLOBAL_MODEL_CACHE = new ConcurrentHashMap<>();
-  private static final Map<VersionedIdentifier, Library> GLOBAL_LIBRARY_CACHE =
-      new ConcurrentHashMap<>();
 
   private Map<ModelIdentifier, Model> modelCache;
   private Map<VersionedIdentifier, Library> libraryCache;
 
   private CqlOptions cqlOptions;
 
-  private FhirContext fhirContext;
-
   public static EvaluationSettings getDefault() {
     EvaluationSettings settings = new EvaluationSettings();
 
     var options = CqlOptions.defaultOptions();
     settings.setCqlOptions(options);
-    settings.setModelCache(GLOBAL_MODEL_CACHE);
-    settings.setLibraryCache(GLOBAL_LIBRARY_CACHE);
+    settings.setModelCache(new ConcurrentHashMap<>());
+    settings.setLibraryCache(new ConcurrentHashMap<>());
 
     return settings;
   }
@@ -74,18 +65,4 @@ public class EvaluationSettings {
   public void setCqlOptions(CqlOptions cqlOptions) {
     this.cqlOptions = cqlOptions;
   }
-
-  public FhirContext getFhirContext() {
-    return this.fhirContext;
-  }
-
-  public void setFhirContext(FhirContext fhirContext) {
-    this.fhirContext = fhirContext;
-  }
-
-  public EvaluationSettings withFhirContext(FhirContext fhirContext) {
-    setFhirContext(fhirContext);
-    return this;
-  }
-
 }

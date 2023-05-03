@@ -30,9 +30,7 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
@@ -303,7 +301,6 @@ public class CqlEvaluatorBuilder {
 
   private LibraryLoader buildLibraryLoader() {
     Collections.reverse(this.librarySourceProviders);
-    // TODO: Some bug in the current model manager is preventing the use of caching correctly
     ModelManager modelManager = new ModelManager();
     // TODO: Would be good to plug this in through DI, but I ran into so many issues
     // doing that, I just went this route
@@ -323,17 +320,18 @@ public class CqlEvaluatorBuilder {
       this.librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
 
-    TranslatorOptionAwareLibraryLoader libraryLoader = new TranslatingLibraryLoader(modelManager,
-        librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.namespaceInfo);
-    if (this.libraryCache != null) {
-      libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
+    var libraryLoader = new TranslatingLibraryLoader(modelManager,
+        librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.libraryCache);
+
+    if (this.namespaceInfo != null) {
+      libraryLoader.loadNamespaces(Collections.singletonList(this.namespaceInfo));
     }
 
     if (npmProcessor != null) {
       libraryLoader.loadNamespaces(npmProcessor.getNamespaces());
     }
 
-    return this.decorate(libraryLoader);
+    return libraryLoader;
   }
 
   private TerminologyProvider buildTerminologyProvider() {
@@ -358,10 +356,6 @@ public class CqlEvaluatorBuilder {
 
   protected TerminologyProvider decorate(TerminologyProvider terminologyProvider) {
     return new PrivateCachingTerminologyProviderDecorator(terminologyProvider);
-  }
-
-  protected LibraryLoader decorate(LibraryLoader libraryLoader) {
-    return libraryLoader;
   }
 
   /**

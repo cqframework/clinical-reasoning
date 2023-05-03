@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -48,7 +49,7 @@ public class TestQuestionnaire {
   }
 
   public static QuestionnaireProcessor buildProcessor(Repository repository) {
-    return new QuestionnaireProcessor(repository);
+    return new QuestionnaireProcessor(repository, EvaluationSettings.getDefault());
   }
 
   /** Fluent interface starts here **/

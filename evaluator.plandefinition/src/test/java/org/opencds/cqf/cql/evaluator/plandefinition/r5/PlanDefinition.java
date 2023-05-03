@@ -17,6 +17,7 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -47,7 +48,7 @@ public class PlanDefinition {
   }
 
   public static PlanDefinitionProcessor buildProcessor(Repository repository) {
-    return new PlanDefinitionProcessor(repository);
+    return new PlanDefinitionProcessor(repository, EvaluationSettings.getDefault());
   }
 
   /** Fluent interface starts here **/

@@ -47,9 +47,7 @@ import org.opencds.cqf.cql.evaluator.builder.LibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.TerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.dal.BundleFhirDal;
@@ -418,16 +416,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     if (this.cqlOptions.useEmbeddedLibraries()) {
       librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
-
-    TranslatorOptionAwareLibraryLoader libraryLoader =
-        new TranslatingLibraryLoader(new ModelManager(globalModelCache),
-            librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), null);
-
-    if (this.libraryCache != null) {
-      libraryLoader = new CacheAwareLibraryLoaderDecorator(libraryLoader, this.libraryCache);
-    }
-
-    return libraryLoader;
+    return new TranslatingLibraryLoader(new ModelManager(globalModelCache),
+        librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.libraryCache);
   }
 
   private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {

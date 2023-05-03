@@ -34,6 +34,7 @@ import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
@@ -43,7 +44,11 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   protected Questionnaire populatedQuestionnaire;
 
   public QuestionnaireProcessor(Repository repository) {
-    super(repository);
+    this(repository, EvaluationSettings.getDefault());
+  }
+
+  public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    super(repository, evaluationSettings);
   }
 
   @Override

@@ -6,6 +6,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.MedicationRequest;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -30,7 +31,8 @@ public class ActivityDefinitionProcessorTests {
         List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
     repository = Repositories.proxy(data, content, terminology);
-    activityDefinitionProcessor = new ActivityDefinitionProcessor(repository);
+    activityDefinitionProcessor =
+        new ActivityDefinitionProcessor(repository, EvaluationSettings.getDefault());
   }
 
   @Test

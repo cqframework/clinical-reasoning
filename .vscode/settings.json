@@ -128,7 +128,7 @@
   "editor.tabSize": 2,
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.dependency.packagePresentation": "hierarchical",
-  "java.jdt.ls.vmargs": "-Xmx16G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
   // "java.test.defaultConfig": "show-inline",
   // "java.test.config": {
   //   "name": "show-inline",

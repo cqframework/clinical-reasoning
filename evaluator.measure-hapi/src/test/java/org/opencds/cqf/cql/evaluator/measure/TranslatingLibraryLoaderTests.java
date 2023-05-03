@@ -70,7 +70,7 @@ public class TranslatingLibraryLoaderTests {
 
     this.libraryLoader = new TranslatingLibraryLoader(modelManger,
         Collections.singletonList(testFhirLibrarySourceProvider),
-        cqlOptions.getCqlTranslatorOptions(), null);
+        cqlOptions.getCqlTranslatorOptions());
   }
 
   @Test

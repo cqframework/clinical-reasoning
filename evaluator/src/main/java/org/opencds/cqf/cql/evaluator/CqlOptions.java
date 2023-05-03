@@ -1,6 +1,8 @@
 package org.opencds.cqf.cql.evaluator;
 
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions.Options;
+import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 
 public class CqlOptions {
@@ -33,6 +35,10 @@ public class CqlOptions {
   }
 
   public static CqlOptions defaultOptions() {
-    return new CqlOptions();
+    var opt = new CqlOptions();
+    opt.getCqlTranslatorOptions().setSignatureLevel(SignatureLevel.All);
+    opt.getCqlTranslatorOptions().getOptions().add(Options.EnableLocators);
+    opt.getCqlTranslatorOptions().getOptions().add(Options.EnableAnnotations);
+    return opt;
   }
 }

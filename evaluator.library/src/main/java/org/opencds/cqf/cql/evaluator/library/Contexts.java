@@ -6,12 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.cqframework.cql.cql2elm.model.Model;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
@@ -24,11 +22,8 @@ import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.RepositoryFhirLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatorOptionAwareLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.RepositoryRetrieveProvider;
@@ -69,12 +64,10 @@ public class Contexts {
 
     var dataProviders = buildDataProviders(theRepository, theAdditionalData, terminologyProvider);
     var cqlEvaluator = new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
-        theSettings.getEngineOptions().getOptions());
+        theSettings.getCqlOptions().getCqlEngineOptions().getOptions());
 
     return new LibraryEvaluator(theCqlFhirParametersConverter, cqlEvaluator);
   }
-
-  private static Map<ModelIdentifier, Model> ourGlobalModelCache = new ConcurrentHashMap<>();
 
   private static LibrarySourceProvider buildLibrarySource(Repository theRepository) {
     AdapterFactory adapterFactory = getAdapterFactory(theRepository.fhirContext());
@@ -89,16 +82,13 @@ public class Contexts {
       theLibrarySourceProviders.add(new FhirLibrarySourceProvider());
     }
 
-    TranslatorOptionAwareLibraryLoader libraryLoader =
-        new TranslatingLibraryLoader(new CacheAwareModelManager(ourGlobalModelCache),
-            theLibrarySourceProviders, theSettings.getCqlOptions().getCqlTranslatorOptions(), null);
+    var modelManger =
+        theSettings.getModelCache() != null ? new ModelManager(theSettings.getModelCache())
+            : new ModelManager();
 
-    if (theSettings.getLibraryCache() != null) {
-      libraryLoader =
-          new CacheAwareLibraryLoaderDecorator(libraryLoader, theSettings.getLibraryCache());
-    }
-
-    return libraryLoader;
+    return new TranslatingLibraryLoader(modelManger,
+        theLibrarySourceProviders, theSettings.getCqlOptions().getCqlTranslatorOptions(),
+        theSettings.getLibraryCache());
   }
 
   private static Map<String, DataProvider> buildDataProviders(Repository theRepository,

@@ -1,12 +1,10 @@
 package org.opencds.cqf.cql.evaluator.fhir.npm;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.cqframework.fhir.npm.NpmPackageManager;
 import org.cqframework.fhir.utilities.IGContext;
-import org.cqframework.fhir.utilities.exception.IGInitializationException;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
@@ -39,15 +37,7 @@ public class NpmProcessor {
   public NpmProcessor(IGContext igContext) {
     this.igContext = igContext;
     if (igContext != null) {
-      try {
-        packageManager = new NpmPackageManager(igContext.getSourceIg(), igContext.getFhirVersion());
-      } catch (IOException e) {
-        String message =
-            String.format("Exceptions occurred loading npm package manager from source Ig: %s",
-                igContext.getSourceIg().getName());
-        igContext.logMessage(message);
-        throw new IGInitializationException(message, e);
-      }
+      packageManager = new NpmPackageManager(igContext.getSourceIg());
     }
   }
 

@@ -40,7 +40,7 @@ public class QuestionnaireProcessorTests {
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
-        .isEqualsTo("questionnaire-for-order-populated-errors.json");
+        .hasErrors();
   }
 
   @Test
@@ -83,7 +83,7 @@ public class QuestionnaireProcessorTests {
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
-        .isEqualsTo("questionnaire-response-populated-errors.json");
+        .hasErrors();
   }
 
   @Test

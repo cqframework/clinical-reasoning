@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public static final String MISSING_CODE_PROPERTY = "Missing required code property";
   private final IFhirPath fhirPath;
   private final ModelResolver modelResolver;
+  protected final EvaluationSettings evaluationSettings;
   protected Repository repository;
 
   protected String subjectId;
@@ -42,9 +44,13 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   protected IBaseParameters parameters;
   protected LibraryEngine libraryEngine;
 
-  protected BaseActivityDefinitionProcessor(Repository repository) {
-    requireNonNull(repository, "repository can not be null");
-    this.repository = repository;
+
+
+  protected BaseActivityDefinitionProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
+    this.evaluationSettings =
+        requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+    this.repository = requireNonNull(repository, "repository can not be null");
     this.fhirPath = org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache
         .cachedForContext(repository.fhirContext());
     modelResolver = new FhirModelResolverFactory()
@@ -72,7 +78,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
 
     return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
-        parameters, new LibraryEngine(this.repository));
+        parameters, new LibraryEngine(this.repository, this.evaluationSettings));
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,

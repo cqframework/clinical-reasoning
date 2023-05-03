@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3;
 
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -15,8 +16,10 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -173,6 +176,15 @@ public class TestQuestionnaire {
         fail("Unable to compare Jsons: " + e.getMessage());
       }
     }
+
+    public GeneratedQuestionnaire hasErrors() {
+      assertTrue(questionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaire.hasContained());
+      assertTrue(questionnaire.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
+    }
   }
 
   static class GeneratedQuestionnaireResponse {
@@ -190,6 +202,15 @@ public class TestQuestionnaire {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
+    }
+
+    public GeneratedQuestionnaireResponse hasErrors() {
+      assertTrue(questionnaireResponse.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaireResponse.hasContained());
+      assertTrue(questionnaireResponse.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
     }
   }
 }

@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.library</artifactId>
-  <version>3.0.0-PRE2</version>
+  <version>3.0.0-PRE3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>evaluator.library</name>
@@ -14,29 +14,29 @@
   <parent>
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>3.0.0-PRE2</version>
+    <version>3.0.0-PRE3-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator</artifactId>
-      <version>3.0.0-PRE2</version>
+      <version>3.0.0-PRE3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE2</version>
+      <version>3.0.0-PRE3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.builder</artifactId>
-      <version>3.0.0-PRE2</version>
+      <version>3.0.0-PRE3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.jackson-deps</artifactId>
-      <version>3.0.0-PRE2</version>
+      <version>3.0.0-PRE3-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>

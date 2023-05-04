@@ -8,6 +8,7 @@ import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.ModelIdentifier;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
+import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 
 public class EvaluationSettings {
 
@@ -55,6 +56,15 @@ public class EvaluationSettings {
 
   public CqlOptions getCqlOptions() {
     return this.cqlOptions;
+  }
+
+  /**
+   * @deprecated Left in for backwards compatibility. getCqlOptions().getCqlEngineOptions() should
+   *             be used instead.
+   */
+  @Deprecated
+  public CqlEngineOptions getEngineOptions() {
+    return this.cqlOptions.getCqlEngineOptions();
   }
 
   public EvaluationSettings withCqlOptions(CqlOptions cqlOptions) {

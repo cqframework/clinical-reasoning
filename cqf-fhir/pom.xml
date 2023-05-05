@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir</artifactId>
-  <version>3.0.0-PRE2</version>
+  <version>3.0.0-PRE3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>FHIR Clinical Reasoning</name>
   <description>FHIR Clinical Reasoning Implementations</description>

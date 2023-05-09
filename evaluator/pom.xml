@@ -51,12 +51,6 @@
     </dependency>
     <dependency>
       <groupId>info.cqframework</groupId>
-      <artifactId>qdm</artifactId>
-      <version>${cql.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
       <artifactId>quick</artifactId>
       <version>${cql.version}</version>
       <scope>test</scope>

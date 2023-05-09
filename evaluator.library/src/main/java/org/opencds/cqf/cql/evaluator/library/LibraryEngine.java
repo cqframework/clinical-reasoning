@@ -38,18 +38,13 @@ public class LibraryEngine {
   protected final FhirContext myFhirContext;
   protected final IFhirPath myFhirPath;
   protected final ModelResolver myModelResolver;
-  protected EvaluationSettings mySettings;
-
-  public LibraryEngine(Repository theRepository) {
-    this(theRepository, EvaluationSettings.getDefault());
-  }
+  protected final EvaluationSettings mySettings;
 
   public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
     this.myRepository = requireNonNull(repository, "repository can not be null");
     this.mySettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     myFhirContext = myRepository.fhirContext();
     myFhirPath = FhirPathCache.cachedForContext(myFhirContext);
-    mySettings = EvaluationSettings.getDefault();
     myModelResolver = new FhirModelResolverFactory()
         .create(myRepository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }

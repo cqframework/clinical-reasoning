@@ -62,7 +62,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return prePopulate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId,
-        parameters, bundle, new LibraryEngine(repository));
+        parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
   }
 
   public abstract T prePopulate(T theQuestionnaire, String thePatientId,
@@ -74,7 +74,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return populate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId, parameters,
-        bundle, new LibraryEngine(repository));
+        bundle, new LibraryEngine(repository, this.evaluationSettings));
   }
 
   public abstract IBaseResource populate(T theQuestionnaire, String thePatientId,

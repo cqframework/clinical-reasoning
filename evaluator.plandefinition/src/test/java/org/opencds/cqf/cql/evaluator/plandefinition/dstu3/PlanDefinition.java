@@ -31,6 +31,7 @@ import ca.uhn.fhir.parser.IParser;
 public class PlanDefinition {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return PlanDefinition.class.getResourceAsStream(asset);
@@ -142,7 +143,7 @@ public class PlanDefinition {
 
     public GeneratedCarePlan apply() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(this.repository);
+      var libraryEngine = new LibraryEngine(this.repository, evaluationSettings);
       return new GeneratedCarePlan((CarePlan) buildProcessor(repository).apply(
           new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
           null, null, null, null, null, null, parameters, null, additionalData, null,

@@ -74,9 +74,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
-  public PlanDefinitionProcessor(Repository repository) {
-    this(repository, EvaluationSettings.getDefault());
-  }
+  // public PlanDefinitionProcessor(Repository repository) {
+  // this(repository, EvaluationSettings.getDefault());
+  // }
 
   public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
     super(repository, evaluationSettings);

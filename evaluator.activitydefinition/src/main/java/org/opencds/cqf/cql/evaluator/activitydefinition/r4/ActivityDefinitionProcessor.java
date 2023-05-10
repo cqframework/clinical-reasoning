@@ -36,6 +36,10 @@ public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
+  public ActivityDefinitionProcessor(Repository repository) {
+    this(repository, EvaluationSettings.getDefault());
+  }
+
   public ActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
     super(repository, evaluationSettings);
   }

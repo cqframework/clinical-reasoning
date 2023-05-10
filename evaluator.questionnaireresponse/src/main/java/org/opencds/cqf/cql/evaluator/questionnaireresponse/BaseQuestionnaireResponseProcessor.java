@@ -83,7 +83,8 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   public IBaseBundle extract(IIdType theId, IBaseResource theQuestionnaireResponse,
       IBaseParameters theParameters, IBaseBundle theBundle, LibraryEngine theLibraryEngine) {
     return extract(resolveQuestionnaireResponse(theId, theQuestionnaireResponse), theParameters,
-        theBundle, theLibraryEngine);
+        theBundle, theLibraryEngine == null ? new LibraryEngine(repository, evaluationSettings)
+            : theLibraryEngine);
   }
 
   public IBaseBundle extract(T theQuestionnaireResponse, IBaseParameters theParameters,

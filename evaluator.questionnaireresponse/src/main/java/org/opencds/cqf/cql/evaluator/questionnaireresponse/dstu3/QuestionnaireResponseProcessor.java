@@ -43,7 +43,7 @@ public class QuestionnaireResponseProcessor
     extends BaseQuestionnaireResponseProcessor<QuestionnaireResponse> {
 
   public QuestionnaireResponseProcessor(Repository repository) {
-    super(repository, EvaluationSettings.getDefault());
+    this(repository, EvaluationSettings.getDefault());
   }
 
   public QuestionnaireResponseProcessor(Repository repository,

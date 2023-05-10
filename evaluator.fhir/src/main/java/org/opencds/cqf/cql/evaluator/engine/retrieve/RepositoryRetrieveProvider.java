@@ -51,10 +51,10 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
       final String datePath, final String dateLowPath, final String dateHighPath,
       final Interval dateRange) {
 
-    var bundleClass = (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
-        .getImplementingClass();
     List<? extends IBaseResource> resources =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(bundleClass,
+        BundleUtil.toListOfResources(this.fhirContext, repository.search(
+            (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
+                .getImplementingClass(),
             this.fhirContext.getResourceDefinition(dataType).getImplementingClass(), null, null));
 
     resources = this.filterByTemplateId(dataType, templateId, resources);

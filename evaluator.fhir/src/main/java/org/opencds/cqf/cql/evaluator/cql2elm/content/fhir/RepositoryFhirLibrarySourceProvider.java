@@ -48,9 +48,12 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
     List<? extends IBaseResource> resources =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
+        BundleUtil.toListOfResources(this.fhirContext, repository.search(
+            (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
+                .getImplementingClass(),
             this.fhirContext.getResourceDefinition("Library").getImplementingClass(), null, null));
     if (resources == null || resources.isEmpty()) {
       return null;

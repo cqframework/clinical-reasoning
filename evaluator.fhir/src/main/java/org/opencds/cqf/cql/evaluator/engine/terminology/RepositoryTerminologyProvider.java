@@ -38,13 +38,16 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
 
   private boolean initialized = false;
 
+  @SuppressWarnings("unchecked")
   public RepositoryTerminologyProvider(Repository repository) {
     requireNonNull(repository, "repository can not be null.");
 
     this.fhirContext = repository.fhirContext();
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     this.valueSets =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
+        BundleUtil.toListOfResources(this.fhirContext, repository.search(
+            (Class<? extends IBaseBundle>) this.fhirContext.getResourceDefinition("Bundle")
+                .getImplementingClass(),
             this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass(), null, null));
   }
 

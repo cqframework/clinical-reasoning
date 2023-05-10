@@ -15,10 +15,10 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <hapi.version>6.2.1</hapi.version>
+    <hapi.version>6.4.4</hapi.version>
     <junit.version>5.9.1</junit.version>
     <slf4j.version>2.0.4</slf4j.version>
-    <cql.version>2.7.0-SNAPSHOT</cql.version>
+    <cql.version>2.9.0</cql.version>
   </properties>
   <licenses>
     <license>

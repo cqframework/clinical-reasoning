@@ -175,11 +175,6 @@
       </dependency>
       <dependency>
         <groupId>info.cqframework</groupId>
-        <artifactId>qdm</artifactId>
-        <version>${cql.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>info.cqframework</groupId>
         <artifactId>quick</artifactId>
         <version>${cql.version}</version>
       </dependency>

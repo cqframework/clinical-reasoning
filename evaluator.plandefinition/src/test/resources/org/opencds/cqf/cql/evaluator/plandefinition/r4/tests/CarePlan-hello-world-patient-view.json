@@ -6,7 +6,7 @@
       "resourceType": "RequestGroup",
       "id": "hello-world-patient-view",
       "instantiatesCanonical": [
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
+        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
       ],
       "status": "draft",
       "intent": "proposal",
@@ -25,7 +25,7 @@
     }
   ],
   "instantiatesCanonical": [
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
+    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
   ],
   "status": "draft",
   "intent": "proposal",

@@ -8,7 +8,7 @@
         "resourceType": "RequestGroup",
         "id": "plandefinition-RuleFilters-1.0.0",
         "instantiatesCanonical": [
-          "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0"
+          "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0|1.1.0"
         ],
         "status": "draft",
         "intent": "proposal",

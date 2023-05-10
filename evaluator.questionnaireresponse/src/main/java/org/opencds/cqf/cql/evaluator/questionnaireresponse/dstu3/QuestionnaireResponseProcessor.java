@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Searches;
@@ -42,7 +43,12 @@ public class QuestionnaireResponseProcessor
     extends BaseQuestionnaireResponseProcessor<QuestionnaireResponse> {
 
   public QuestionnaireResponseProcessor(Repository repository) {
-    super(repository);
+    super(repository, EvaluationSettings.getDefault());
+  }
+
+  public QuestionnaireResponseProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
+    super(repository, evaluationSettings);
   }
 
   @Override

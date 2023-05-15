@@ -1,16 +1,16 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter;
 
-import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 
+import java.util.List;
+
 /**
  * This interface exposes common functionality across all FHIR Library versions.
  */
-public interface LibraryAdapter extends KnowledgeArtifactAdapter {
+public interface ValueSetAdapter extends KnowledgeArtifactAdapter {
 
   IBaseResource get();
 
@@ -29,14 +29,6 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
   String getVersion();
 
   void setVersion(String version);
-
-  boolean hasContent();
-
-  List<ICompositeType> getContent();
-
-  void setContent(List<ICompositeType> attachments);
-
-  ICompositeType addContent();
 
   List<DependencyInfo> getDependencies();
 }

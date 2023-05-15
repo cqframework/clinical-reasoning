@@ -1,16 +1,20 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter.r5;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Library;
+import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
+import org.opencds.cqf.cql.evaluator.fhir.visitor.KnowledgeArtifactVisitor;
 
-class LibraryAdapter extends ResourceAdapter
-    implements org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter {
+class LibraryAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter {
 
   private Library library;
 
@@ -23,6 +27,10 @@ class LibraryAdapter extends ResourceAdapter
     }
 
     this.library = (Library) library;
+  }
+
+  public void accept(KnowledgeArtifactVisitor visitor) {
+    visitor.visit(this);
   }
 
   protected Library getLibrary() {
@@ -94,5 +102,47 @@ class LibraryAdapter extends ResourceAdapter
   @Override
   public ICompositeType addContent() {
     return this.getLibrary().addContent();
+  }
+
+  @Override
+  public List<DependencyInfo> getDependencies() {
+    List<DependencyInfo> references = new ArrayList<>();
+
+    // relatedArtifact[].resource
+    references.addAll(getRelatedArtifactReferences(this.library, this.library.getRelatedArtifact()));
+
+    // dataRequirement
+    List<DataRequirement> dataRequirements = this.library.getDataRequirement();
+    for (DataRequirement dr : dataRequirements) {
+      // dataRequirement.profile[]
+      List<CanonicalType> profiles = dr.getProfile();
+      for (CanonicalType ct : profiles) {
+        if (ct.hasValue()) {
+          String referenceSource = this.library.getUrl();
+          if (this.library.getVersion() != null && !this.getVersion().isEmpty()) {
+            referenceSource = referenceSource + "|" + this.library.getVersion();
+          }
+
+          DependencyInfo dependency = new DependencyInfo(referenceSource, ct.getValue());
+          references.add(dependency);
+        }
+      }
+
+      // dataRequirement.codeFilter[].valueset
+      List<DataRequirement.DataRequirementCodeFilterComponent> codeFilters = dr.getCodeFilter();
+      for (DataRequirement.DataRequirementCodeFilterComponent cf : codeFilters) {
+        if (cf.hasValueSet()) {
+          String referenceSource = this.library.getUrl();
+          if (this.library.getVersion() != null && !this.getVersion().isEmpty()) {
+            referenceSource = referenceSource + "|" + this.library.getVersion();
+          }
+
+          DependencyInfo dependency = new DependencyInfo(referenceSource, cf.getValueSet());
+          references.add(dependency);
+        }
+      }
+    }
+
+    return references;
   }
 }

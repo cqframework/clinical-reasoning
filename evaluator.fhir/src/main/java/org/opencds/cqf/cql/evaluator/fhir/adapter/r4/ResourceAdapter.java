@@ -4,9 +4,13 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Resource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
+import java.util.List;
 
 class ResourceAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.ResourceAdapter {
 

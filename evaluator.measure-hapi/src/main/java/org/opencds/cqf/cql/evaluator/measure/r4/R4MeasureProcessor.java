@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -305,18 +306,20 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
     }
   }
 
+
   protected CompletableFuture<MeasureReport> runEvaluate(Measure measure, String periodStart,
       String periodEnd, String reportType, List<String> subjectIds, FhirDal fhirDal,
       Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint,
       Bundle additionalData) {
 
     if (measureEvaluationOptions.isThreadedEnabled()) {
-      ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
-      executor = new DelegatingSecurityContextExecutorService(executor);
+
+      var myMeasureExecutor = this.measureEvaluationOptions.getMeasureExecutor();
+
       return CompletableFuture.supplyAsync(
           () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
               fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
-          executor);
+          myMeasureExecutor);
     } else {
       return CompletableFuture.completedFuture(
           this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,

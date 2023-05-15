@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -39,7 +40,8 @@ import ca.uhn.fhir.parser.IParser;
 public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected static final Logger logger =
       LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
-  protected IParser parser;
+  protected final EvaluationSettings evaluationSettings;
+  protected final IParser parser;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
 
@@ -49,9 +51,13 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected String libraryUrl;
   protected static final String subjectType = "Patient";
 
-  protected BaseQuestionnaireResponseProcessor(Repository repository) {
+  protected BaseQuestionnaireResponseProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
     this.repository = requireNonNull(repository, "repository can not be null");
-    this.parser = this.repository.fhirContext().newJsonParser();
+    this.evaluationSettings =
+        requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+
+    parser = this.repository.fhirContext().newJsonParser();
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -77,7 +83,8 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   public IBaseBundle extract(IIdType theId, IBaseResource theQuestionnaireResponse,
       IBaseParameters theParameters, IBaseBundle theBundle, LibraryEngine theLibraryEngine) {
     return extract(resolveQuestionnaireResponse(theId, theQuestionnaireResponse), theParameters,
-        theBundle, theLibraryEngine);
+        theBundle, theLibraryEngine == null ? new LibraryEngine(repository, evaluationSettings)
+            : theLibraryEngine);
   }
 
   public IBaseBundle extract(T theQuestionnaireResponse, IBaseParameters theParameters,

@@ -174,7 +174,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return applyR5(theId, theCanonical, thePlanDefinition, patientId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
-        parameters, useServerData, bundle, prefetchData, new LibraryEngine(repository));
+        parameters, useServerData, bundle, prefetchData,
+        new LibraryEngine(repository, this.evaluationSettings));
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource applyR5(IIdType theId,

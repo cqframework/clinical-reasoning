@@ -50,11 +50,13 @@ public class PlanDefinitionProcessorTests {
     var repository =
         TestRepositoryFactory.createRepository(fhirContext, this.getClass(), "anc-dak");
     var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
         .withParameters(parameters)
         .withExpectedCarePlanId(new IdType("CarePlan", "ANCDT17"))
         .apply().isEqualsToExpected();
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
         .withParameters(parameters)
         .withExpectedBundleId(new IdType("Bundle", "ANCDT17"))
         .applyR5().isEqualsToExpected();

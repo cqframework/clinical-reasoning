@@ -8,7 +8,7 @@
         "resourceType": "RequestGroup",
         "id": "opioidcds-10-patient-view",
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view"
+          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view|2022.1.0"
         ],
         "status": "draft",
         "intent": "proposal",

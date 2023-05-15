@@ -35,6 +35,7 @@ import ca.uhn.fhir.parser.IParser;
 public class PlanDefinition {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return PlanDefinition.class.getResourceAsStream(asset);
@@ -53,7 +54,7 @@ public class PlanDefinition {
   }
 
   public static PlanDefinitionProcessor buildProcessor(Repository repository) {
-    return new PlanDefinitionProcessor(repository, EvaluationSettings.getDefault());
+    return new PlanDefinitionProcessor(repository, evaluationSettings);
   }
 
   /** Fluent interface starts here **/
@@ -79,8 +80,6 @@ public class PlanDefinition {
     private Parameters parameters;
     private IdType expectedBundleId;
     private IdType expectedCarePlanId;
-
-    private final FhirContext fhirContext = FhirContext.forR4Cached();
 
     public Apply(String planDefinitionID, String patientID, String encounterID) {
       this.planDefinitionID = planDefinitionID;
@@ -172,7 +171,7 @@ public class PlanDefinition {
 
     public GeneratedBundle applyR5() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(this.repository);
+      var libraryEngine = new LibraryEngine(this.repository, evaluationSettings);
       Bundle expectedBundle = null;
       if (expectedBundleId != null) {
         try {
@@ -194,7 +193,7 @@ public class PlanDefinition {
 
     public GeneratedCarePlan apply() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(this.repository);
+      var libraryEngine = new LibraryEngine(this.repository, evaluationSettings);
       CarePlan expectedCarePlan = null;
       if (expectedCarePlanId != null) {
         try {

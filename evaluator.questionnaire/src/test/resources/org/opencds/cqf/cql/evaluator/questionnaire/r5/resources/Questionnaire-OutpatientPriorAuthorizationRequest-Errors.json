@@ -12,7 +12,7 @@
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-      "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+      "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation-Errors"
     }
   ],
   "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",

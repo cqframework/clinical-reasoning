@@ -29,7 +29,8 @@ public class QuestionnaireProcessorTests {
         new TestRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .prePopulate().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
   }
@@ -72,7 +73,8 @@ public class QuestionnaireProcessorTests {
         new TestRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .populate().isEqualsTo("questionnaire-response-populated-noLibrary.json");
   }

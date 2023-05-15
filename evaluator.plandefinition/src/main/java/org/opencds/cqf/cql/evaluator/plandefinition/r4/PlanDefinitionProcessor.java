@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Goal;
+import org.hl7.fhir.r4.model.Goal.GoalLifecycleStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -164,9 +165,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   @Override
   public IBaseResource applyPlanDefinition(PlanDefinition planDefinition) {
     // Each Group of actions shares a RequestGroup
+    var canonical = planDefinition.getUrl();
+    if (planDefinition.hasVersion()) {
+      canonical = String.format("%s|%s", canonical, planDefinition.getVersion());
+    }
     var requestGroup =
         new RequestGroup().setStatus(RequestStatus.DRAFT).setIntent(RequestIntent.PROPOSAL)
-            .addInstantiatesCanonical(planDefinition.getUrl()).setSubject(new Reference(patientId));
+            .addInstantiatesCanonical(canonical).setSubject(new Reference(patientId));
 
     requestGroup
         .setId(new IdType(requestGroup.fhirType(), planDefinition.getIdElement().getIdPart()));
@@ -300,6 +305,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     myGoal.setDescription(goal.getDescription());
     myGoal.setPriority(goal.getPriority());
     myGoal.setStart(goal.getStart());
+    myGoal.setLifecycleStatus(GoalLifecycleStatus.PROPOSED);
+    myGoal.setSubject(new Reference(patientId));
 
     myGoal.setTarget(goal.getTarget().stream().map(target -> {
       Goal.GoalTargetComponent myTarget = new Goal.GoalTargetComponent();

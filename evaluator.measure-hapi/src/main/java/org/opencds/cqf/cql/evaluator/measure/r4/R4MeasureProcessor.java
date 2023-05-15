@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
 // TODO: This class needs a bit of refactoring to match the patterns that
 // have been defined in other parts of the cql-evaluator project. The main issue
@@ -310,8 +311,8 @@ public class R4MeasureProcessor implements MeasureProcessor<MeasureReport, Endpo
       Bundle additionalData) {
 
     if (measureEvaluationOptions.isThreadedEnabled()) {
-      ExecutorService executor =
-          Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+      ExecutorService executor = Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+      executor = new DelegatingSecurityContextExecutorService(executor);
       return CompletableFuture.supplyAsync(
           () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
               fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),

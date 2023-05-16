@@ -2,6 +2,8 @@ package org.opencds.cqf.cql.evaluator.measure;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+
 
 import org.opencds.cqf.cql.evaluator.fhir.util.ValidationProfile;
 
@@ -11,11 +13,20 @@ public class MeasureEvaluationOptions {
   }
 
   private boolean isThreadedEnabled = false;
+
+  private Executor measureExecutor;
   private Integer threadedBatchSize = 200;
   private Integer numThreads = null;
   private boolean isValidationEnabled = false;
   private Map<String, ValidationProfile> validationProfiles = new HashMap<>();
 
+  public Executor getMeasureExecutor(){
+    return this.measureExecutor;
+  }
+
+  public void setMeasureExecutor(Executor cqlExecutor){
+    this.measureExecutor = cqlExecutor;
+  }
   public boolean isThreadedEnabled() {
     return this.isThreadedEnabled;
   }

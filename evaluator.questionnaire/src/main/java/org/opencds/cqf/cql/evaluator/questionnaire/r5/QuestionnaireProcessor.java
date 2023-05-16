@@ -174,11 +174,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
       if (results != null && !results.isEmpty()) {
         for (var result : results) {
           if (result != null) {
-            var initial = new Questionnaire.QuestionnaireItemInitialComponent()
-                .setValue(transformInitial(result));
-            initial.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
+            item.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
                 new Reference(Constants.CQL_ENGINE_DEVICE));
-            item.addInitial(initial);
+            item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent()
+                .setValue(transformInitial(result)));
           }
         }
       }
@@ -201,11 +200,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
           if (initialProperty.isList()) {
             // TODO: handle lists
           } else {
-            var initial = new Questionnaire.QuestionnaireItemInitialComponent()
-                .setValue(transformInitial(initialProperty.getValues().get(0)));
-            initial.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
+            item.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
                 new Reference(Constants.CQL_ENGINE_DEVICE));
-            item.addInitial(initial);
+            item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent()
+                .setValue(transformInitial(initialProperty.getValues().get(0))));
           }
         }
       }
@@ -270,6 +268,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         processResponseItems(item.getItem(), nestedResponseItems);
         responseItem.setItem(nestedResponseItems);
       } else if (item.hasInitial()) {
+        if (item.hasExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR)) {
+          responseItem
+              .addExtension(item.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
+        }
         item.getInitial()
             .forEach(answer -> responseItem
                 .addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()

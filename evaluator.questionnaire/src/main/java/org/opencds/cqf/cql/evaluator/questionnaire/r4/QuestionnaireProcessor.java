@@ -201,11 +201,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
           if (initialProperty.isList()) {
             // TODO: handle lists
           } else {
-            var initial = new Questionnaire.QuestionnaireItemInitialComponent()
-                .setValue(transformInitial(initialProperty.getValues().get(0)));
-            initial.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
+            item.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
                 new Reference(Constants.CQL_ENGINE_DEVICE));
-            item.addInitial(initial);
+            item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent()
+                .setValue(transformInitial(initialProperty.getValues().get(0))));
           }
         }
       }

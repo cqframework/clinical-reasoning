@@ -64,10 +64,6 @@
       <version>3.0.0-PRE3-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-    </dependency>
   </dependencies>
 
   <build>

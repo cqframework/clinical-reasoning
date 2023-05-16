@@ -265,6 +265,12 @@
                 "language": "text/cql.identifier",
                 "expression": "BeneficiaryFirstName"
               }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
             }
           ],
           "linkId": "2.1",
@@ -273,14 +279,6 @@
           "required": true,
           "initial": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
-                }
-              ],
               "valueString": "Peter"
             }
           ]
@@ -293,6 +291,12 @@
                 "language": "text/cql.identifier",
                 "expression": "BeneficiaryLastName"
               }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
             }
           ],
           "linkId": "2.2",
@@ -301,14 +305,6 @@
           "required": true,
           "initial": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
-                }
-              ],
               "valueString": "Chalmers"
             }
           ]
@@ -321,6 +317,12 @@
                 "language": "text/cql.identifier",
                 "expression": "BeneficiaryDOB"
               }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
             }
           ],
           "linkId": "2.3",
@@ -329,14 +331,6 @@
           "required": true,
           "initial": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
-                }
-              ],
               "valueDate": "1974-12-25"
             }
           ]
@@ -363,6 +357,12 @@
               "valueExpression": {
                 "language": "text/cql.identifier",
                 "expression": "BeneficiaryGender"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
               }
             }
           ],
@@ -403,14 +403,6 @@
           ],
           "initial": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
-                }
-              ],
               "valueString": "male"
             }
           ]

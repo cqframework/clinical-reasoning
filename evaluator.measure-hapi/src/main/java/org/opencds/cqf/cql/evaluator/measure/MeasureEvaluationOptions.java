@@ -3,11 +3,9 @@ package org.opencds.cqf.cql.evaluator.measure;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 import org.opencds.cqf.cql.evaluator.fhir.util.ValidationProfile;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
 public class MeasureEvaluationOptions {
   public static MeasureEvaluationOptions defaultOptions() {

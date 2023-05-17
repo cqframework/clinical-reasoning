@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -255,12 +253,11 @@ public class Dstu3MeasureProcessor implements MeasureProcessor<MeasureReport, En
       Bundle additionalData) {
 
     if (measureEvaluationOptions.isThreadedEnabled()) {
-      ExecutorService executor =
-          Executors.newFixedThreadPool(this.measureEvaluationOptions.getNumThreads());
+      var myMeasureExecutor = this.measureEvaluationOptions.getMeasureExecutor();
       return CompletableFuture.supplyAsync(
           () -> this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
               fhirDal, contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData),
-          executor);
+          myMeasureExecutor);
     } else {
       return CompletableFuture.completedFuture(
           this.innerEvaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,

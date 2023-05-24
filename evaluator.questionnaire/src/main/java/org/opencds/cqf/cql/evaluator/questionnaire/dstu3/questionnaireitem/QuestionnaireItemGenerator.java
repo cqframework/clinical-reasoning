@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QuestionnaireItemGenerator {
-  protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
+  protected Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
   protected BundleParser bundleParser;
   protected QuestionnaireItemComponent questionnaireItem;
   protected QuestionnaireItemService questionnaireItemService;
@@ -97,7 +97,7 @@ public class QuestionnaireItemGenerator {
     return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
   }
 
-  public String getElementType(ElementDefinition element) {
+  protected String getElementType(ElementDefinition element) {
     return element.hasType() ? element.getType().get(0).getCode() : null;
     // StructureDefinition profile) {
     // if (elementType == null) {

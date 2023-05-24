@@ -1,30 +1,50 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.questionnaireitem;
 
+import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionDifferentialComponent;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import org.mockito.Mockito;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.bundle.BundleParser;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.slf4j.Logger;
 import org.testng.Assert;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-import static org.mockito.Mockito.spy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class QuestionnaireItemGeneratorTest {
   final static String ERROR_MESSAGE = "Expected error message";
+  final static String EXCEPTION_ERROR_PREFIX = "An error occurred during item creation";
+  final static String EXPECTED_ERROR_MESSAGE = EXCEPTION_ERROR_PREFIX + ": " + ERROR_MESSAGE;
+  final static String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
+  final static String PROFILE_URL = "http://www.sample.com/profile/profileId";
+  final static String QUESTIONNAIRE_TEXT = "Questionnaire Text";
+  final static String CHILD_LINK_ID = "linkId.1";
   final static String LINK_ID = "linkId";
   final static String TYPE_CODE = "typeCode";
   final static String TYPE_CODE_2 = "typeCode2";
@@ -34,26 +54,34 @@ class QuestionnaireItemGeneratorTest {
   final static String PATH_VALUE_3 = "pathValue3";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.DISPLAY;
   @Mock
+  private Logger logger;
+  @Mock
+  private BundleParser bundleParser;
+  @Mock
   private NestedQuestionnaireItemService nestedQuestionnaireItemService;
+  @Mock
+  private QuestionnaireItemService questionnaireItemService;
   @Spy
   @InjectMocks
   private QuestionnaireItemGenerator myFixture;
 
   @BeforeEach
   void setUp() {
-    myFixture = new QuestionnaireItemGenerator();
-    myFixture.nestedQuestionnaireItemService = new NestedQuestionnaireItemService();
+    myFixture.questionnaireItem = withQuestionnaireItemComponent();
   }
 
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(nestedQuestionnaireItemService);
+    verifyNoMoreInteractions(logger);
+    verifyNoMoreInteractions(bundleParser);
+    verifyNoMoreInteractions(questionnaireItemService);
   }
 
   @Test
   void createErrorItemShouldCreateErrorItem() {
     // setup
-    final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
+    final QuestionnaireItemComponent expected = withErrorItem(ERROR_MESSAGE);
     // execute
     final QuestionnaireItemComponent actual = myFixture.createErrorItem(LINK_ID, ERROR_MESSAGE);
     // validate
@@ -84,7 +112,11 @@ class QuestionnaireItemGeneratorTest {
   void getElementsWithNonNullElementTypeShouldReturnListOfElementDefinitions() {
     // setup
     final StructureDefinition profile = withProfile();
-    final List<ElementDefinition> expected = List.of(withElementDefinition(), withElementDefinition2());
+    final List<ElementDefinition> expected = List.of(
+        withElementDefinition(),
+        withElementDefinition2(),
+        withElementDefinition3()
+    );
     // execute
     final List<ElementDefinition> actual = myFixture.getElementsWithNonNullElementType(profile);
     // validate
@@ -92,33 +124,158 @@ class QuestionnaireItemGeneratorTest {
     assertEquals(actual, expected);
   }
 
-//  @Test
-//  void processElementsShouldCallProcessElementForEveryElementWithNonNullElementType() {
-//    // setup
-//    myFixture.questionnaireItem = withQuestionnaireItemComponent();
-//    final StructureDefinition profile = withProfile();
-//    final List<ElementDefinition> expectedElements = List.of(
-//        withElementDefinition(),
-//        withElementDefinition2(),
-//        withElementDefinition3()
-//    );
-//    // execute
-//    myFixture.processElements(profile);
-//    // validate
-//    for (int i = 0; i < expectedElements.size(); i++) {
-//      verify(myFixture).processElement(profile, expectedElements.get(i), i);
+  @Test
+  void processElementsShouldCallProcessElementForEveryElementWithNonNullElementType() {
+    // setup
+    final StructureDefinition profile = withProfile();
+    final List<ElementDefinition> expectedElements = List.of(
+        withElementDefinition(),
+        withElementDefinition2(),
+        withElementDefinition3()
+    );
+    doNothing().when(myFixture).processElement(
+        any(StructureDefinition.class),
+        any(ElementDefinition.class),
+        anyInt()
+    );
+    doReturn(expectedElements).when(myFixture).getElementsWithNonNullElementType(profile);
+    // execute
+    myFixture.processElements(profile);
+    // validate
+    for (int i = 0; i < expectedElements.size(); i++) {
+      verify(myFixture).processElement(profile, expectedElements.get(i), i + 1);
+    }
+  }
+
+  @Test
+  void processElementShouldAddNestedQuestionnaireItem() throws Exception {
+    // setup
+    final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
+    final StructureDefinition profile = withProfile();
+    final ElementDefinition element = withElementDefinition();
+    final int childCount = 1;
+    doReturn(questionnaireItem).when(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    // execute
+    myFixture.processElement(profile, element, childCount);
+    // validate
+    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    assertEquals(myFixture.questionnaireItem.getItem().get(0), questionnaireItem);
+    Assert.assertEquals(myFixture.paths.get(0), element.getPath());
+  }
+
+  @Test
+  void processElementShouldAddErrorItemWhenQuestionnaireParsingExceptionThrown() throws QuestionnaireParsingException {
+    // setup
+    final QuestionnaireItemComponent errorItem = withErrorItem(ERROR_MESSAGE);
+    final StructureDefinition profile = withProfile();
+    final ElementDefinition element = withElementDefinition();
+    final int childCount = 1;
+    doThrow(new QuestionnaireParsingException(ERROR_MESSAGE)).when(nestedQuestionnaireItemService)
+        .getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    doReturn(errorItem).when(myFixture).createErrorItem(CHILD_LINK_ID, ERROR_MESSAGE);
+    // execute
+    myFixture.processElement(profile, element, childCount);
+    // validate
+    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    verify(logger).warn(ERROR_MESSAGE);
+    assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
+  }
+
+  @Test
+  void processElementShouldAddErrorItemWhenExceptionThrown() throws Exception {
+    // setup
+    final QuestionnaireItemComponent errorItem = withErrorItem(EXPECTED_ERROR_MESSAGE);
+    final StructureDefinition profile = withProfile();
+    final ElementDefinition element = withElementDefinition();
+    final int childCount = 1;
+    when(nestedQuestionnaireItemService.getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID))
+        .thenAnswer(invocation -> {throw new Exception(ERROR_MESSAGE);});
+    doReturn(errorItem).when(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
+    // execute
+    myFixture.processElement(profile, element, childCount);
+    // validate
+    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    verify(logger).error(EXPECTED_ERROR_MESSAGE);
+    assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
+  }
+
+  @Test
+  void generateItemShouldThrowArgumentIfNoProfileExists() {
+    // setup
+    final DataRequirement actionInput = withActionInputWithNoProfile();
+    final int itemCount = 3;
+    // execute
+    IllegalArgumentException actual = assertThrows(
+        IllegalArgumentException.class, () -> myFixture.generateItem(actionInput, itemCount));
+    // validate
+    Assert.assertEquals(actual.getMessage(), NO_PROFILE_ERROR);
+  }
+
+  @Test
+  void generateItemShouldProcessElements() {
+    // setup
+    final DataRequirement actionInput = withActionInput();
+    final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
+    final StructureDefinition profile = withProfile();
+    final int itemCount = 3;
+    doReturn(profile).when(bundleParser).getProfileDefinition(actionInput);
+    doReturn(expected).when(questionnaireItemService).getQuestionnaireItem(actionInput, "4", profile);
+    doNothing().when(myFixture).processElements(profile);
+    // execute
+    final QuestionnaireItemComponent actual = myFixture.generateItem(actionInput, itemCount);
+    // validate
+    verify(bundleParser).getProfileDefinition(actionInput);
+    verify(questionnaireItemService).getQuestionnaireItem(actionInput, "4", profile);
+    verify(myFixture).processElements(profile);
+    assertEquals(actual, expected);
+  }
+
+  //  public Questionnaire.QuestionnaireItemComponent generateItem(
+//      DataRequirement actionInput,
+//      int itemCount
+//  ) {
+//    if (!actionInput.hasProfile()) {
+//      throw new IllegalArgumentException(NO_PROFILE_ERROR);
 //    }
+//    final String linkId = String.valueOf(itemCount + 1);
+//    try {
+//      final StructureDefinition profile = bundleParser.getProfileDefinition(actionInput);
+//      this.questionnaireItem = questionnaireItemService.getQuestionnaireItem(actionInput, linkId, profile);
+//      processElements(profile);
+//      // Should we do this?
+//      // var requiredElements = profile.getSnapshot().getElement().stream()
+//      // .filter(e -> !paths.contains(e.getPath()) && e.getPath().split("\\.").length == 2 &&
+//      // e.getMin() > 0).collect(Collectors.toList());
+//      // processElements(requiredElements, profile, item, paths);
+//    } catch (Exception ex) {
+//      final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
+//      logger.error(message);
+//      return createErrorItem(linkId, message);
+//    }
+//    return questionnaireItem;
 //  }
-//
-//  @Test
-//  void processElementShouldAddNestedQuestionnaireItem() {
-//
-//  }
-//
-//  @Test
-//  void processElementShouldProcessElement() {
-//
-//  }
+
+
+  @Test
+  void generateItemShouldReturnErrorItemIfExceptionThrown() {
+    // setup
+    final int itemCount = 3;
+    final String linkId = "4";
+    final DataRequirement actionInput = withActionInput();
+    final QuestionnaireItemComponent expected = withErrorItem(EXPECTED_ERROR_MESSAGE, linkId);
+    final StructureDefinition profile = withProfile();
+    doReturn(expected).when(questionnaireItemService).getQuestionnaireItem(actionInput, linkId, profile);
+    doReturn(profile).when(bundleParser).getProfileDefinition(actionInput);
+    doAnswer((invocation) -> {
+      throw new Exception(ERROR_MESSAGE);
+    }).when(myFixture).processElements(profile);
+    // execute
+    final QuestionnaireItemComponent actual = myFixture.generateItem(actionInput, itemCount);
+    // validate
+    verify(bundleParser).getProfileDefinition(actionInput);
+    verify(logger).error(EXPECTED_ERROR_MESSAGE);
+    assertEquals(actual, expected);
+  }
 
   void assertEquals(QuestionnaireItemComponent actual, QuestionnaireItemComponent expected) {
     Assert.assertEquals(actual.getType(), expected.getType());
@@ -141,8 +298,32 @@ class QuestionnaireItemGeneratorTest {
   }
 
   @Nonnull
+  DataRequirement withActionInputWithNoProfile() {
+    return new DataRequirement();
+  }
+
+  @Nonnull
+  DataRequirement withActionInput() {
+    DataRequirement actionInput = new DataRequirement();
+    UriType uri = new UriType();
+    uri.setValue(PROFILE_URL);
+    actionInput.setProfile(List.of(uri));
+    return actionInput;
+  }
+
+  @Nonnull
   QuestionnaireItemComponent withQuestionnaireItemComponent() {
-    return new QuestionnaireItemComponent().setType(QUESTIONNAIRE_ITEM_TYPE).setLinkId(LINK_ID).setText(ERROR_MESSAGE);
+    return new QuestionnaireItemComponent().setType(QUESTIONNAIRE_ITEM_TYPE).setLinkId(LINK_ID).setText(QUESTIONNAIRE_TEXT);
+  }
+
+  @Nonnull
+  QuestionnaireItemComponent withErrorItem(String errorMessage) {
+    return new QuestionnaireItemComponent().setLinkId(LINK_ID).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
+  }
+
+  @Nonnull
+  QuestionnaireItemComponent withErrorItem(String errorMessage, String linkId) {
+    return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
   }
 
   @Nonnull

@@ -55,9 +55,9 @@ public class NestedQuestionnaireItemService {
         .setText(childText);
   }
 
-  protected QuestionnaireItemType getItemType(ElementDefinition element) throws QuestionnaireParsingException {
+  public QuestionnaireItemType getItemType(ElementDefinition element) throws QuestionnaireParsingException {
     final String elementType = element.getType().get(0).getCode();
-    final QuestionnaireItemType itemType = getItemType(elementType, element.hasBinding());
+    final QuestionnaireItemType itemType = parseItemType(elementType, element.hasBinding());
     if (itemType == null) {
       final String message = String.format(ITEM_TYPE_ERROR, element.getId());
       throw new QuestionnaireParsingException(message);
@@ -65,7 +65,7 @@ public class NestedQuestionnaireItemService {
     return itemType;
   }
 
-  protected static QuestionnaireItemType getItemType(String elementType, Boolean hasBinding) {
+  public QuestionnaireItemType parseItemType(String elementType, Boolean hasBinding) {
     if (Boolean.TRUE.equals(hasBinding)) {
       return QuestionnaireItemType.CHOICE;
     }

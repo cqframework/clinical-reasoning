@@ -187,11 +187,6 @@ public abstract class BaseMeasureProcessorTest {
 
     MeasureEvaluationOptions config = MeasureEvaluationOptions.defaultOptions();
 
-    if (threadedEnabled) {
-      config.setThreadedEnabled(true);
-      config.setThreadedBatchSize(threadedBatchSize);
-    }
-
     this.measureProcessor = new Dstu3MeasureProcessor(terminologyProviderFactory,
         dataProviderFactory, librarySourceProviderFactory, fhirDalFactory, endpointConverter, null,
         null, null, null, config, null, null);

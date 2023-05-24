@@ -2,10 +2,14 @@ package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.nestedquestionnaireite
 
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+
+import java.util.List;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
 
@@ -16,15 +20,36 @@ public class ElementHasCqfExtension {
   protected LibraryEngine libraryEngine;
   protected static final String subjectType = "Patient";
   public QuestionnaireItemComponent addProperties(QuestionnaireItemComponent questionnaireItem) {
-    var expressionExtension = getExtensionByUrl(questionnaireItem, Constants.CQF_EXPRESSION);
-    var expression = expressionExtension.getValue().toString();
-    var languageExtension = getExtensionByUrl(questionnaireItem, Constants.CQF_EXPRESSION_LANGUAGE);
-    var language = languageExtension.getValue().toString();
-    var libraryExtension = getExtensionByUrl(questionnaireItem, Constants.CQF_LIBRARY);
-    var library = libraryExtension.getValue().toString();
     // TODO: is a list result valid here?
-    var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, expression, language, library, parameters, this.bundle);
+    final List<IBase> result = this.libraryEngine.getExpressionResult(
+        this.patientId,
+        subjectType,
+        getExpression(questionnaireItem),
+        getLanguage(questionnaireItem),
+        getLibrary(questionnaireItem),
+        parameters,
+        this.bundle
+    );
     questionnaireItem.setInitial((Type) result);
     return questionnaireItem;
+  }
+
+  protected String getExpression(QuestionnaireItemComponent questionnaireItem) {
+    final IBaseExtension<?, ?> expressionExtension = getExtension(questionnaireItem, Constants.CQF_EXPRESSION);
+    return expressionExtension.getValue().toString();
+  }
+
+  protected String getLanguage(QuestionnaireItemComponent questionnaireItem) {
+    final IBaseExtension<?, ?> languageExtension = getExtension(questionnaireItem, Constants.CQF_EXPRESSION_LANGUAGE);
+    return languageExtension.getValue().toString();
+  }
+
+  protected String getLibrary(QuestionnaireItemComponent questionnaireItem) {
+    final IBaseExtension<?, ?> libraryExtension = getExtension(questionnaireItem, Constants.CQF_LIBRARY);
+    return libraryExtension.getValue().toString();
+  }
+
+  IBaseExtension<?, ?> getExtension(QuestionnaireItemComponent questionnaireItem, String theExtensionUrl) {
+    return getExtensionByUrl(questionnaireItem, theExtensionUrl);
   }
 }

@@ -23,7 +23,7 @@ public class BundleParser {
   public StructureDefinition getProfileDefinition(DataRequirement actionInput) {
     final String profileUrl = actionInput.getProfile().get(0).getValue();
     final Optional<StructureDefinition> profile = parseProfileFromBundle(profileUrl);
-    if (profile.isEmpty()) {
+    if (!profile.isPresent()) {
       throw new IllegalArgumentException(String.format(STRUCTURE_DEFINITION_ERROR, profileUrl));
     }
     return profile.get();
@@ -31,7 +31,7 @@ public class BundleParser {
 
   public ValueSet getValueSet(String url) throws QuestionnaireParsingException {
     final Optional<ValueSet> valueSet = parseValueSet(url);
-    if (valueSet.isEmpty()) {
+    if (!valueSet.isPresent()) {
       throw new QuestionnaireParsingException(String.format(VALUE_SET_ERROR, url));
     }
     return valueSet.get();

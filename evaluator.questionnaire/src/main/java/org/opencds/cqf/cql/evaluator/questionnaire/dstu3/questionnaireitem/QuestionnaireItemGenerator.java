@@ -93,12 +93,13 @@ public class QuestionnaireItemGenerator {
         .collect(Collectors.toList());
   }
 
-  protected static Questionnaire.QuestionnaireItemComponent createErrorItem(String linkId, String errorMessage) {
+  protected Questionnaire.QuestionnaireItemComponent createErrorItem(String linkId, String errorMessage) {
     return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
   }
 
-  public String getElementType(ElementDefinition element) { // , StructureDefinition profile) {
+  public String getElementType(ElementDefinition element) {
     return element.hasType() ? element.getType().get(0).getCode() : null;
+    // StructureDefinition profile) {
     // if (elementType == null) {
     // var snapshot = profile.getSnapshot().getElement().stream().filter(e ->
     // e.getId().equals(element.getId())).collect(Collectors.toList());

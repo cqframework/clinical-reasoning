@@ -230,32 +230,6 @@ class QuestionnaireItemGeneratorTest {
     assertEquals(actual, expected);
   }
 
-  //  public Questionnaire.QuestionnaireItemComponent generateItem(
-//      DataRequirement actionInput,
-//      int itemCount
-//  ) {
-//    if (!actionInput.hasProfile()) {
-//      throw new IllegalArgumentException(NO_PROFILE_ERROR);
-//    }
-//    final String linkId = String.valueOf(itemCount + 1);
-//    try {
-//      final StructureDefinition profile = bundleParser.getProfileDefinition(actionInput);
-//      this.questionnaireItem = questionnaireItemService.getQuestionnaireItem(actionInput, linkId, profile);
-//      processElements(profile);
-//      // Should we do this?
-//      // var requiredElements = profile.getSnapshot().getElement().stream()
-//      // .filter(e -> !paths.contains(e.getPath()) && e.getPath().split("\\.").length == 2 &&
-//      // e.getMin() > 0).collect(Collectors.toList());
-//      // processElements(requiredElements, profile, item, paths);
-//    } catch (Exception ex) {
-//      final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
-//      logger.error(message);
-//      return createErrorItem(linkId, message);
-//    }
-//    return questionnaireItem;
-//  }
-
-
   @Test
   void generateItemShouldReturnErrorItemIfExceptionThrown() {
     // setup

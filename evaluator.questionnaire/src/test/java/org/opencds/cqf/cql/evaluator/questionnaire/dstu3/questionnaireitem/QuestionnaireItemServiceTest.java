@@ -8,19 +8,27 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.testng.Assert;
 import org.junit.jupiter.api.Test;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
 class QuestionnaireItemServiceTest {
   final static String PROFILE_URL = "http://www.sample.com/profile/profileId";
   final static String LINK_ID = "profileId";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.GROUP;
   final static String PROFILE_TITLE = "Profile Title";
   final static String PROFILE_TYPE = "ProfileType";
-  QuestionnaireItemService myFixture = new QuestionnaireItemService();
+  @Spy
+  private QuestionnaireItemService myFixture;
 
   @Test
   void getProfileTextShouldReturnTextWhenProfileHasTitle() {
@@ -69,6 +77,28 @@ class QuestionnaireItemServiceTest {
     Assert.assertEquals(actual, PROFILE_URL);
   }
 
+  @Test
+  void getQuestionnaireItemShouldAssembleAndReturnQuestionnaireItem() {
+    // setup
+    final DataRequirement actionInput = withActionInput();
+    final StructureDefinition profile = withProfileWithTitle();
+    final Extension extension = withExtension();
+    final QuestionnaireItemComponent questionnaireItemComponent = withQuestionnaireItemComponent();
+    final QuestionnaireItemComponent expected = withQuestionnaireItemComponentWithExtension();
+    doReturn(PROFILE_URL).when(myFixture).getProfileUrl(actionInput);
+    doReturn(PROFILE_TITLE).when(myFixture).getProfileText(PROFILE_URL, profile);
+    doReturn(extension).when(myFixture).createExtension(profile);
+    doReturn(questionnaireItemComponent).when(myFixture).createQuestionnaireItemComponent(PROFILE_TITLE, LINK_ID);
+    // execute
+    final QuestionnaireItemComponent actual = myFixture.getQuestionnaireItem(actionInput, LINK_ID, profile);
+    // validate
+    verify(myFixture).getProfileUrl(actionInput);
+    verify(myFixture).getProfileText(PROFILE_URL, profile);
+    verify(myFixture).createExtension(profile);
+    verify(myFixture).createQuestionnaireItemComponent(PROFILE_TITLE, LINK_ID);
+    assertEquals(actual, expected);
+  }
+
   void assertEquals(QuestionnaireItemComponent actual, QuestionnaireItemComponent expected) {
     Assert.assertEquals(actual.getType(), expected.getType());
     Assert.assertEquals(actual.getLinkId(), expected.getLinkId());
@@ -99,6 +129,17 @@ class QuestionnaireItemServiceTest {
         .setType(QUESTIONNAIRE_ITEM_TYPE)
         .setLinkId(LINK_ID)
         .setText(PROFILE_TITLE);
+  }
+
+  @Nonnull
+  QuestionnaireItemComponent withQuestionnaireItemComponentWithExtension() {
+    final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent()
+        .setType(QUESTIONNAIRE_ITEM_TYPE)
+        .setLinkId(LINK_ID)
+        .setText(PROFILE_TITLE);
+    final Extension extension = withExtension();
+    questionnaireItemComponent.addExtension(extension);
+    return questionnaireItemComponent;
   }
 
   @Nonnull

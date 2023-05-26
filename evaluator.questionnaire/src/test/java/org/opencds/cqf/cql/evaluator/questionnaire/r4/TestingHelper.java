@@ -8,15 +8,13 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public class TestingHelper {
-  final static String PATH_VALUE = "pathValue";
-  final static String TYPE_CODE = "typeCode";
   final static String PROFILE_URL = "http://www.sample.com/profile/profileId";
 
   @Nonnull
-  public static ElementDefinition withElementDefinition() {
-    final ElementDefinition elementDefinition = new ElementDefinition().setPath(PATH_VALUE);
+  public static ElementDefinition withElementDefinition(String typeCode, String pathValue) {
+    final ElementDefinition elementDefinition = new ElementDefinition().setPath(pathValue);
     final TypeRefComponent type = new TypeRefComponent();
-    type.setCode(TYPE_CODE);
+    type.setCode(typeCode);
     elementDefinition.setType(List.of(type));
     return elementDefinition;
   }

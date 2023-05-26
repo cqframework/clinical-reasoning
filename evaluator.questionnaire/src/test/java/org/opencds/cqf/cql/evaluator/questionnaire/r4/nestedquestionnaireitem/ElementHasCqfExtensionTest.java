@@ -28,6 +28,8 @@ class ElementHasCqfExtensionTest {
   final static String LINK_ID = "profileId";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.GROUP;
   final static String PROFILE_TITLE = "Profile Title";
+  final static String TYPE_CODE = "typeCode";
+  final static String PATH_VALUE = "pathValue";
   @InjectMocks
   @Spy
   private ElementHasCqfExtension myFixture;
@@ -36,7 +38,7 @@ class ElementHasCqfExtensionTest {
   void addPropertiesShouldAddAllProperties() {
     // setup
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
-    final ElementDefinition element = TestingHelper.withElementDefinition();
+    final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
 
     // execute
     final QuestionnaireItemComponent actual = myFixture.addProperties(questionnaireItem, element);

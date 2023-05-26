@@ -42,6 +42,7 @@ class QuestionnaireItemGeneratorTest {
   final static String TYPE_CODE = "typeCode";
   final static String TYPE_CODE_2 = "typeCode2";
   final static String TYPE_CODE_3 = "typeCode3";
+  final static String PATH_VALUE = "pathValue";
   final static String PATH_VALUE_2 = "pathValue2";
   final static String PATH_VALUE_3 = "pathValue3";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.DISPLAY;
@@ -83,7 +84,7 @@ class QuestionnaireItemGeneratorTest {
   @Test
   void getElementTypeShouldReturnString() {
     // setup
-    final ElementDefinition elementDefinition = TestingHelper.withElementDefinition();
+    final ElementDefinition elementDefinition = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     // execute
     final String actual = myFixture.getElementType(elementDefinition);
     // validate
@@ -105,9 +106,9 @@ class QuestionnaireItemGeneratorTest {
     // setup
     final StructureDefinition profile = withProfile();
     final List<ElementDefinition> expected = List.of(
-        TestingHelper.withElementDefinition(),
-        withElementDefinition2(),
-        withElementDefinition3()
+        TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE),
+        TestingHelper.withElementDefinition(TYPE_CODE_2, PATH_VALUE_2),
+        TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3)
     );
     // execute
     final List<ElementDefinition> actual = myFixture.getElementsWithNonNullElementType(profile);
@@ -121,9 +122,9 @@ class QuestionnaireItemGeneratorTest {
     // setup
     final StructureDefinition profile = withProfile();
     final List<ElementDefinition> expectedElements = List.of(
-        TestingHelper.withElementDefinition(),
-        withElementDefinition2(),
-        withElementDefinition3()
+        TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE),
+        TestingHelper.withElementDefinition(TYPE_CODE_2, PATH_VALUE_2),
+        TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3)
     );
     doNothing().when(myFixture).processElement(
         any(StructureDefinition.class),
@@ -144,7 +145,7 @@ class QuestionnaireItemGeneratorTest {
     // setup
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
     final StructureDefinition profile = withProfile();
-    final ElementDefinition element = TestingHelper.withElementDefinition();
+    final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
     doReturn(questionnaireItem).when(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
     // execute
@@ -160,7 +161,7 @@ class QuestionnaireItemGeneratorTest {
     // setup
     final QuestionnaireItemComponent errorItem = withErrorItem(ERROR_MESSAGE);
     final StructureDefinition profile = withProfile();
-    final ElementDefinition element = TestingHelper.withElementDefinition();
+    final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
     doThrow(new QuestionnaireParsingException(ERROR_MESSAGE)).when(nestedQuestionnaireItemService)
         .getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
@@ -178,7 +179,7 @@ class QuestionnaireItemGeneratorTest {
     // setup
     final QuestionnaireItemComponent errorItem = withErrorItem(EXPECTED_ERROR_MESSAGE);
     final StructureDefinition profile = withProfile();
-    final ElementDefinition element = TestingHelper.withElementDefinition();
+    final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
     when(nestedQuestionnaireItemService.getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID))
         .thenAnswer(invocation -> {throw new Exception(ERROR_MESSAGE);});
@@ -284,15 +285,6 @@ class QuestionnaireItemGeneratorTest {
   }
 
   @Nonnull
-  ElementDefinition withElementDefinition2() {
-    final ElementDefinition elementDefinition = new ElementDefinition().setPath(PATH_VALUE_2);
-    final TypeRefComponent type = new TypeRefComponent();
-    type.setCode(TYPE_CODE_2);
-    elementDefinition.setType(List.of(type));
-    return elementDefinition;
-  }
-
-  @Nonnull
   ElementDefinition withElementDefinition3() {
     final ElementDefinition elementDefinition = new ElementDefinition().setPath(PATH_VALUE_3);
     final TypeRefComponent type = new TypeRefComponent();
@@ -309,10 +301,10 @@ class QuestionnaireItemGeneratorTest {
   @Nonnull
   StructureDefinition withProfile() {
     final StructureDefinition profile = new StructureDefinition();
-    final ElementDefinition elementDefinition1 = TestingHelper.withElementDefinition();
-    final ElementDefinition elementDefinition2 = withElementDefinition2();
-    final ElementDefinition elementDefinition3 = withElementDefinitionWithNullType();
-    final ElementDefinition elementDefinition4 = withElementDefinition3();
+    final ElementDefinition elementDefinition1 = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
+    final ElementDefinition elementDefinition2 = TestingHelper.withElementDefinition(TYPE_CODE_2, PATH_VALUE_2);
+    final ElementDefinition elementDefinition3 = TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3);
+    final ElementDefinition elementDefinition4 = withElementDefinitionWithNullType();
     final StructureDefinitionDifferentialComponent differential = new StructureDefinitionDifferentialComponent();
     differential.addElement(elementDefinition1);
     differential.addElement(elementDefinition2);

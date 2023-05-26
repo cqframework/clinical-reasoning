@@ -16,10 +16,16 @@ public class ElementHasCqfExtension {
   protected IBaseBundle bundle;
   protected IBaseParameters parameters;
   protected LibraryEngine libraryEngine;
-  protected static final String subjectType = "Patient";
+  protected String subjectType = "Patient";
   public QuestionnaireItemComponent addProperties(QuestionnaireItemComponent questionnaireItem, ElementDefinition element) {
-    final Expression expression = (Expression) element.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
-    final List<IBase> results = this.libraryEngine.getExpressionResult(
+    final Expression expression = getExpression(element);
+    final List<IBase> results = getExpressionResults(expression);
+    results.forEach(result -> questionnaireItem.addInitial().setValue((Type) result));
+    return questionnaireItem;
+  }
+
+  protected final List<IBase> getExpressionResults(Expression expression) {
+    return this.libraryEngine.getExpressionResult(
         this.patientId,
         subjectType,
         expression.getExpression(),
@@ -28,7 +34,11 @@ public class ElementHasCqfExtension {
         parameters,
         this.bundle
     );
-    results.forEach(result -> questionnaireItem.addInitial().setValue((Type) result));
-    return questionnaireItem;
   }
+
+  protected Expression getExpression(ElementDefinition element) {
+    final Type type = element.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
+    return (Expression) type;
+  }
+
 }

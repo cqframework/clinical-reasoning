@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.library;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,25 +38,15 @@ public class LibraryEngine {
   protected final FhirContext fhirContext;
   protected final IFhirPath fhirPath;
   protected final ModelResolver modelResolver;
-  protected EvaluationSettings settings;
+  protected final EvaluationSettings settings;
 
-  public LibraryEngine(Repository theRepository) {
-    repository = theRepository;
+  public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
+    this.repository = requireNonNull(repository, "repository can not be null");
+    this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     fhirContext = repository.fhirContext();
     fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    settings = EvaluationSettings.getDefault().withFhirContext(fhirContext);
     modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
-  }
-
-  public void setSettings(EvaluationSettings theSettings) {
-    settings = theSettings;
-  }
-
-  public LibraryEngine withSettings(EvaluationSettings theSettings) {
-    setSettings(theSettings);
-
-    return this;
   }
 
   private Pair<String, Object> buildContextParameter(String thePatientId) {

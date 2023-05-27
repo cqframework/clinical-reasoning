@@ -131,11 +131,23 @@
   "editor.tabSize": 2,
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.dependency.packagePresentation": "hierarchical",
-  "java.jdt.ls.vmargs": "-Xmx16G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  // "java.test.defaultConfig": "show-inline",
+  // "java.test.config": {
+  //   "name": "show-inline",
+  //   "vmArgs": [
+  //     "-XX:+PrintCompilation",
+  //     "-XX:+UnlockDiagnosticVMOptions",
+  //     "-XX:+PrintInlining"
+  //   ]
+  // },
   "java.compile.nullAnalysis.mode": "automatic",
   "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
   "java.format.settings.profile": "GoogleStyle",
   "json.schemaDownload.enable": true,
+  "[cql]": {
+    "editor.formatOnSave": false
+  },
   "[markdown]": {
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.unicodeHighlight.ambiguousCharacters": true,

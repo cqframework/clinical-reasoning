@@ -36,8 +36,8 @@ public class ProxyRepository implements Repository {
 
     this.local = local;
     this.data = data == null ? this.local : data;
-    this.content = content == null ? this.data : content;
-    this.terminology = terminology == null ? this.data : terminology;
+    this.content = content == null ? this.local : content;
+    this.terminology = terminology == null ? this.local : terminology;
   }
 
   public ProxyRepository(Repository data, Repository content, Repository terminology) {

@@ -51,6 +51,7 @@ import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinition
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
@@ -73,9 +74,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
   public PlanDefinitionProcessor(Repository repository) {
-    super(repository);
-    this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository);
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository);
+    this(repository, EvaluationSettings.getDefault());
+  }
+
+  public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    super(repository, evaluationSettings);
+    this.activityDefinitionProcessor =
+        new ActivityDefinitionProcessor(this.repository, evaluationSettings);
+    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
     this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
   }
 

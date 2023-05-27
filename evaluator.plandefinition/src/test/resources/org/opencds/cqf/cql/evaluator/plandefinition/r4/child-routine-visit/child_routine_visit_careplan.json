@@ -39,6 +39,7 @@
     {
       "resourceType": "Goal",
       "id": "1",
+      "lifecycleStatus": "proposed",
       "category": [
         {
           "coding": [
@@ -58,6 +59,9 @@
             "display": "High Priority"
           }
         ]
+      },
+      "subject": {
+        "reference": "Patient/ChildRoutine-Reportable"
       },
       "startCodeableConcept": {
         "coding": [

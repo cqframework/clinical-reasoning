@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Goal;
+import org.hl7.fhir.r4.model.Goal.GoalLifecycleStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -52,6 +53,7 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
@@ -74,9 +76,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
   public PlanDefinitionProcessor(Repository repository) {
-    super(repository);
-    this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository);
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository);
+    this(repository, EvaluationSettings.getDefault());
+  }
+
+  public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    super(repository, evaluationSettings);
+    this.activityDefinitionProcessor =
+        new ActivityDefinitionProcessor(this.repository, evaluationSettings);
+    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
     this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
   }
 
@@ -158,9 +165,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   @Override
   public IBaseResource applyPlanDefinition(PlanDefinition planDefinition) {
     // Each Group of actions shares a RequestGroup
+    var canonical = planDefinition.getUrl();
+    if (planDefinition.hasVersion()) {
+      canonical = String.format("%s|%s", canonical, planDefinition.getVersion());
+    }
     var requestGroup =
         new RequestGroup().setStatus(RequestStatus.DRAFT).setIntent(RequestIntent.PROPOSAL)
-            .addInstantiatesCanonical(planDefinition.getUrl()).setSubject(new Reference(patientId));
+            .addInstantiatesCanonical(canonical).setSubject(new Reference(patientId));
 
     requestGroup
         .setId(new IdType(requestGroup.fhirType(), planDefinition.getIdElement().getIdPart()));
@@ -294,6 +305,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     myGoal.setDescription(goal.getDescription());
     myGoal.setPriority(goal.getPriority());
     myGoal.setStart(goal.getStart());
+    myGoal.setLifecycleStatus(GoalLifecycleStatus.PROPOSED);
+    myGoal.setSubject(new Reference(patientId));
 
     myGoal.setTarget(goal.getTarget().stream().map(target -> {
       Goal.GoalTargetComponent myTarget = new Goal.GoalTargetComponent();

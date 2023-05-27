@@ -19,8 +19,9 @@ public class SearchHelper {
     var resourceType = theRepository.fhirContext()
         .getResourceDefinition(Canonicals.getResourceType(theCanonical)).getImplementingClass();
 
-    var searchResult =
-        theRepository.search(Bundle.class, resourceType, Searches.byUrlAndVersion(url, version));
+    var searchParams =
+        version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
+    var searchResult = theRepository.search(Bundle.class, resourceType, searchParams);
     if (!searchResult.hasEntry()) {
       throw new FHIRException(String.format("No resource of type %s found for url: %s|%s",
           resourceType.getSimpleName(), url, version));

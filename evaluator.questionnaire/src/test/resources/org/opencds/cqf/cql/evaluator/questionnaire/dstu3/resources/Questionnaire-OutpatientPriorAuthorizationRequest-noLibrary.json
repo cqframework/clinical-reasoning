@@ -1,133 +1,35 @@
 {
   "resourceType": "Questionnaire",
-  "id": "OutpatientPriorAuthorizationRequest-Errors",
+  "id": "OutpatientPriorAuthorizationRequest-noLibrary",
   "meta": {
     "versionId": "2",
     "lastUpdated": "2022-11-21T17:34:01.764+00:00",
+    "source": "#Szj0RYKKLb3zYK89",
     "profile": [
       "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire-r4"
     ]
   },
-  "contained": [
-    {
-      "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors",
-      "issue": [
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (FacilityName) for item (1.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (FacilityNPI) for item (1.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianFirstName) for item (3.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianLastName) for item (3.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianNPI) for item (3.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress1) for item (3.5.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddress2) for item (3.5.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressCity) for item (3.5.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressState) for item (3.5.4): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (OperatingPhysicianAddressZip) for item (3.5.5): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianSame) for item (4.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianFirstName) for item (4.2.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianLastName) for item (4.2.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianNPI) for item (4.2.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress1) for item (4.2.5.1): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddress2) for item (4.2.5.2): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressCity) for item (4.2.5.3): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressState) for item (4.2.5.4): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        },
-        {
-          "severity": "error",
-          "code": "exception",
-          "diagnostics": "Error encountered evaluating expression (AttendingPhysicianAddressZip) for item (4.2.5.5): Could not resolve type MimeType. Primary package(s) for this resolver are org.hl7.fhir.dstu3.model"
-        }
-      ]
-    }
-  ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-      "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation|1.0.0"
-    },
-    {
-      "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
-      "valueReference": {
-        "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest-Errors"
-      }
+      "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/noLibrary"
     }
   ],
-  "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-Errors",
+  "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary",
   "name": "OutpatientPriorAuthorizationRequest",
   "title": "Outpatient Prior Authorization Request",
   "status": "active",
+  "subjectType": [
+    "Patient",
+    "Organization",
+    "Claim"
+  ],
   "date": "2022-01-04T00:00:00+00:00",
+  "contact": [
+    {
+      "name": "Palmetto GBA"
+    }
+  ],
   "description": "Testing the form",
   "jurisdiction": [
     {
@@ -138,16 +40,6 @@
         }
       ]
     }
-  ],
-  "contact": [
-    {
-      "name": "Palmetto GBA"
-    }
-  ],
-  "subjectType": [
-    "Patient",
-    "Organization",
-    "Claim"
   ],
   "item": [
     {
@@ -188,6 +80,16 @@
           "required": true
         },
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
+              "valueString": "text/cql.identifier"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueString": "FacilityPTAN"
+            }
+          ],
           "linkId": "1.3",
           "text": "PTAN",
           "type": "string",
@@ -197,7 +99,29 @@
           "linkId": "1.4",
           "text": "Contract/Region",
           "type": "choice",
-          "required": false
+          "required": false,
+          "answerOption": [
+            {
+              "id": "FacilityContractRegion-11501",
+              "valueCoding": {
+                "code": "11001",
+                "display": "Part A South Carolina"
+              }
+            },
+            {
+              "id": "FacilityContractRegion-11003",
+              "valueCoding": {
+                "code": "11501",
+                "display": "Part A North Carolina"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "11003",
+                "display": "Part A Virginia/West Virginia"
+              }
+            }
+          ]
         }
       ]
     },
@@ -220,8 +144,7 @@
           "linkId": "2.1",
           "text": "First Name",
           "type": "string",
-          "required": true,
-          "initialString": "Peter"
+          "required": true
         },
         {
           "extension": [
@@ -237,8 +160,7 @@
           "linkId": "2.2",
           "text": "Last Name",
           "type": "text",
-          "required": true,
-          "initialString": "Chalmers"
+          "required": true
         },
         {
           "extension": [
@@ -254,8 +176,7 @@
           "linkId": "2.3",
           "text": "Date of Birth",
           "type": "date",
-          "required": true,
-          "initialDate": "1974-12-25"
+          "required": true
         },
         {
           "extension": [
@@ -271,8 +192,7 @@
           "linkId": "2.4",
           "text": "Medicare ID",
           "type": "string",
-          "required": true,
-          "initialString": "525697298M"
+          "required": true
         },
         {
           "extension": [
@@ -289,7 +209,37 @@
           "text": "Gender",
           "type": "choice",
           "required": true,
-          "initialString": "male"
+          "answerOption": [
+            {
+              "id": "unknown",
+              "valueCoding": {
+                "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
+                "code": "male",
+                "display": "Male"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
+                "code": "female",
+                "display": "Female"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
+                "code": "other",
+                "display": "Other"
+              }
+            },
+            {
+              "valueCoding": {
+                "system": "http://hl7.org/fhir/ValueSet/administrative-gender",
+                "code": "unknown",
+                "display": "Unknown"
+              }
+            }
+          ]
         }
       ]
     },
@@ -470,6 +420,7 @@
           "enableWhen": [
             {
               "question": "4.1",
+              "operator": "=",
               "answerBoolean": false
             }
           ],

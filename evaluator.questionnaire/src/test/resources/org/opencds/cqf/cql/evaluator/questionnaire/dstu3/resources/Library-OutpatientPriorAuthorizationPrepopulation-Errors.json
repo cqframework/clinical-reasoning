@@ -50,7 +50,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "..cql/OutpatientPriorAuthorizationPrepopulation-Errors.cql"
+      "url": "cql/OutpatientPriorAuthorizationPrepopulation-Errors.cql"
     }
   ]
 }

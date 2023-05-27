@@ -18,6 +18,7 @@ import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.parser.IParser;
 public class TestQuestionnaire {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return TestQuestionnaire.class.getResourceAsStream(asset);
@@ -48,7 +50,7 @@ public class TestQuestionnaire {
   }
 
   public static QuestionnaireProcessor buildProcessor(Repository repository) {
-    return new QuestionnaireProcessor(repository);
+    return new QuestionnaireProcessor(repository, evaluationSettings);
   }
 
   /** Fluent interface starts here **/
@@ -137,14 +139,14 @@ public class TestQuestionnaire {
 
     public GeneratedQuestionnaire prePopulate() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(repository);
+      var libraryEngine = new LibraryEngine(repository, evaluationSettings);
       return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(questionnaire,
           patientId, parameters, bundle, libraryEngine));
     }
 
     public GeneratedQuestionnaireResponse populate() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(repository);
+      var libraryEngine = new LibraryEngine(repository, evaluationSettings);
       return new GeneratedQuestionnaireResponse(
           (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire, patientId,
               parameters, bundle, libraryEngine));

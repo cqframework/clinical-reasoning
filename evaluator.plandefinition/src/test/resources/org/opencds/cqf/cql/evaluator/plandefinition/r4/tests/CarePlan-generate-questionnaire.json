@@ -6,8 +6,8 @@
       "resourceType": "RequestGroup",
       "id": "generate-questionnaire",
       "instantiatesCanonical": [
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire|1.0.0",
+        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
       ],
       "status": "draft",
       "intent": "proposal",
@@ -426,7 +426,7 @@
       "resourceType": "RequestGroup",
       "id": "route-one",
       "instantiatesCanonical": [
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
       ],
       "status": "draft",
       "intent": "proposal",
@@ -450,8 +450,8 @@
     }
   ],
   "instantiatesCanonical": [
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire|1.0.0",
+    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
   ],
   "status": "draft",
   "intent": "proposal",

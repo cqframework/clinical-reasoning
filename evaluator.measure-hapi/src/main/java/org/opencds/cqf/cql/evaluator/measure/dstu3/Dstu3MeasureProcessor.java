@@ -7,9 +7,9 @@ import java.util.Objects;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.opencds.cqf.cql.engine.runtime.DateTime;

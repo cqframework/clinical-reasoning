@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -35,7 +37,7 @@ public abstract class BaseMeasureEvaluationTest {
     LibraryManager libraryManager = new LibraryManager(modelManager);
     libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
     CqlTranslator translator = CqlTranslator.fromStream(new ByteArrayInputStream(cql.getBytes()),
-        modelManager, libraryManager);
+        modelManager, libraryManager, ErrorSeverity.Error, SignatureLevel.Overloads);
 
     List<CqlCompilerException> badStuff = new ArrayList<>();
     // the translator will duplicate exceptions with assigned severity in the errors, warnings,

@@ -17,6 +17,7 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.parser.IParser;
 public class PlanDefinition {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return PlanDefinition.class.getResourceAsStream(asset);
@@ -47,7 +49,7 @@ public class PlanDefinition {
   }
 
   public static PlanDefinitionProcessor buildProcessor(Repository repository) {
-    return new PlanDefinitionProcessor(repository);
+    return new PlanDefinitionProcessor(repository, EvaluationSettings.getDefault());
   }
 
   /** Fluent interface starts here **/
@@ -139,7 +141,7 @@ public class PlanDefinition {
 
     public GeneratedBundle apply() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(this.repository);
+      var libraryEngine = new LibraryEngine(this.repository, evaluationSettings);
       return new GeneratedBundle(
           (Bundle) buildProcessor(repository).apply(new IdType("PlanDefinition", planDefinitionID),
               null, null, patientID, encounterID, null, null, null, null, null, null, null,

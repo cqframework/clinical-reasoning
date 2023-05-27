@@ -11,44 +11,12 @@ public class MeasureEvaluationOptions {
     var options = new MeasureEvaluationOptions();
     options.setEvaluationSettings(EvaluationSettings.getDefault());
     return options;
-
   }
 
-  private boolean isThreadedEnabled = false;
-  private Integer threadedBatchSize = 200;
-  private Integer numThreads = null;
   private boolean isValidationEnabled = false;
   private Map<String, ValidationProfile> validationProfiles = new HashMap<>();
 
   private EvaluationSettings evaluationSettings = null;
-
-  public boolean isThreadedEnabled() {
-    return this.isThreadedEnabled;
-  }
-
-  public void setThreadedEnabled(Boolean isThreadedEnabled) {
-    this.isThreadedEnabled = isThreadedEnabled;
-  }
-
-  public Integer getThreadedBatchSize() {
-    return this.threadedBatchSize;
-  }
-
-  public void setThreadedBatchSize(Integer threadedBatchSize) {
-    this.threadedBatchSize = threadedBatchSize;
-  }
-
-  public Integer getNumThreads() {
-    if (this.numThreads == null) {
-      return Runtime.getRuntime().availableProcessors();
-    }
-
-    return this.numThreads;
-  }
-
-  public void setNumThreads(Integer value) {
-    this.numThreads = value;
-  }
 
   public boolean isValidationEnabled() {
     return this.isValidationEnabled;

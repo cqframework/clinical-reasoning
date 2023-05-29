@@ -24,31 +24,31 @@ public class QuestionnaireTypeIsChoice {
     final String valueSetUrl = element.getBinding().getValueSet();
     final ValueSet valueSet = parsingService.getValueSet(valueSetUrl);
     if (valueSet.hasExpansion()) {
-      valueSetIsExpanded(valueSet, item);
+      addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
     } else {
-      valueSetIsNotExpanded(valueSet, item);
+      addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
     }
     return item;
   }
 
-  protected void valueSetIsExpanded(ValueSet valueSet, QuestionnaireItemComponent item) {
-    final List<ValueSetExpansionContainsComponent> expansion = valueSet.getExpansion().getContains();
-    for (var code : expansion) {
-      Coding coding = getCoding(code);
+  protected void addAnswerOptionsForValueSetWithExpansionComponent(ValueSet valueSet, QuestionnaireItemComponent item) {
+    final List<ValueSetExpansionContainsComponent> expansionList = valueSet.getExpansion().getContains();
+    expansionList.forEach(expansion -> {
+      final Coding coding = getCoding(expansion);
       item.addAnswerOption().setValue(coding);
-    }
+    });
   }
 
-  protected void valueSetIsNotExpanded(ValueSet valueSet, QuestionnaireItemComponent item) {
+  protected void addAnswerOptionsForValueSetWithComposeComponent(ValueSet valueSet, QuestionnaireItemComponent item) {
     final List<ConceptSetComponent> systems = valueSet.getCompose().getInclude();
-    for (var system : systems) {
-      final String systemUri = system.getSystem();
-      for (var concept : system.getConcept()) {
-        Coding coding = getCoding(concept, systemUri);
-        item.addAnswerOption().setValue(coding);
-      }
-    }
+    systems.forEach(system ->
+        system.getConcept().forEach(concept -> {
+          final Coding coding = getCoding(concept, system.getSystem());
+          item.addAnswerOption().setValue(coding);
+        })
+    );
   }
+
 
   protected Coding getCoding(ConceptReferenceComponent code, String systemUri) {
     return new Coding().setCode(code.getCode()).setSystem(systemUri).setDisplay(code.getDisplay());

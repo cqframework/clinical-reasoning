@@ -28,12 +28,10 @@ import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper.withQuestionnaireItemComponent;
 
 @ExtendWith(MockitoExtension.class)
 class ElementHasCqfExtensionTest {
-  final static String LINK_ID = "profileId";
-  final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.GROUP;
-  final static String PROFILE_TITLE = "Profile Title";
   final static String TYPE_CODE = "typeCode";
   final static String PATH_VALUE = "pathValue";
   final static String PATIENT_ID = "patientId";
@@ -126,14 +124,6 @@ class ElementHasCqfExtensionTest {
     for (int i = 0; i < results.size(); i++) {
       Assert.assertEquals(initial.get(i).getValue(), results.get(i));
     }
-  }
-
-  @Nonnull
-  QuestionnaireItemComponent withQuestionnaireItemComponent() {
-    return new QuestionnaireItemComponent()
-        .setType(QUESTIONNAIRE_ITEM_TYPE)
-        .setLinkId(LINK_ID)
-        .setText(PROFILE_TITLE);
   }
 
   @Nonnull

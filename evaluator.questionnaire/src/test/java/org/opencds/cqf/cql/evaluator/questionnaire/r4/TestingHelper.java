@@ -4,11 +4,16 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import javax.annotation.Nonnull;
 import java.util.List;
 
 public class TestingHelper {
   final static String PROFILE_URL = "http://www.sample.com/profile/profileId";
+  final static String LINK_ID = "profileId";
+  final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.GROUP;
+  final static String PROFILE_TITLE = "Profile Title";
 
   @Nonnull
   public static ElementDefinition withElementDefinition(String typeCode, String pathValue) {
@@ -26,6 +31,14 @@ public class TestingHelper {
     canonicalType.setValue(PROFILE_URL);
     actionInput.setProfile(List.of(canonicalType));
     return actionInput;
+  }
+
+  @Nonnull
+  public static QuestionnaireItemComponent withQuestionnaireItemComponent() {
+    return new QuestionnaireItemComponent()
+        .setType(QUESTIONNAIRE_ITEM_TYPE)
+        .setLinkId(LINK_ID)
+        .setText(PROFILE_TITLE);
   }
 
 }

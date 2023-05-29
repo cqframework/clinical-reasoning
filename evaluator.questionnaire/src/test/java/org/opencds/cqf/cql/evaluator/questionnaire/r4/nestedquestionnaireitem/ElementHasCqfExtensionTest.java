@@ -1,15 +1,17 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.nestedquestionnaireitem;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +31,6 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ElementHasCqfExtensionTest {
-  final static String EXPECTED_VALUE = "expectedValueString";
   final static String LINK_ID = "profileId";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.GROUP;
   final static String PROFILE_TITLE = "Profile Title";
@@ -57,7 +58,7 @@ class ElementHasCqfExtensionTest {
   void getExpressionResultsShouldCallLibraryEngine() {
     // setup
     final Expression expression = withExpression();
-    final List<IBase> expected = withResult();
+    final List<IBase> expected = withResultsAsResources();
     final Bundle bundle = withBundle();
     final Parameters parameters = withParameters();
     myFixture.parameters = parameters;
@@ -86,17 +87,46 @@ class ElementHasCqfExtensionTest {
   }
 
   @Test
-  void addPropertiesShouldAddAllProperties() {
+  void addPropertiesShouldAddAllPropertiesWhenLibraryEngineReturnsListOfTypes() {
     // setup
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
     final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
-
+    final Expression expression = withExpression();
+    final List<IBase> results = withResultsAsTypes();
+    doReturn(expression).when(myFixture).getExpression(element);
+    doReturn(results).when(myFixture).getExpressionResults(expression);
     // execute
     final QuestionnaireItemComponent actual = myFixture.addProperties(questionnaireItem, element);
     // validate
-
+    verify(myFixture).getExpression(element);
+    verify(myFixture).getExpressionResults(expression);
+    final List<QuestionnaireItemInitialComponent> initial = actual.getInitial();
+    Assert.assertEquals(initial.size(), results.size());
+    for (int i = 0; i < results.size(); i++) {
+      Assert.assertEquals(initial.get(i).getValue(), results.get(i));
+    }
   }
 
+  @Test
+  void addPropertiesShouldAddAllPropertiesWhenLibraryEngineReturnsListOfResources() {
+    // setup
+    final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
+    final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
+    final Expression expression = withExpression();
+    final List<IBase> results = withResultsAsResources();
+    doReturn(expression).when(myFixture).getExpression(element);
+    doReturn(results).when(myFixture).getExpressionResults(expression);
+    // execute
+    final QuestionnaireItemComponent actual = myFixture.addProperties(questionnaireItem, element);
+    // validate
+    verify(myFixture).getExpression(element);
+    verify(myFixture).getExpressionResults(expression);
+    final List<QuestionnaireItemInitialComponent> initial = actual.getInitial();
+    Assert.assertEquals(initial.size(), results.size());
+    for (int i = 0; i < results.size(); i++) {
+      Assert.assertEquals(initial.get(i).getValue(), results.get(i));
+    }
+  }
 
   @Nonnull
   QuestionnaireItemComponent withQuestionnaireItemComponent() {
@@ -107,24 +137,35 @@ class ElementHasCqfExtensionTest {
   }
 
   @Nonnull
-  MockIBaseDatatype withValue() {
-    final MockIBaseDatatype mockIBaseDatatype = new MockIBaseDatatype();
-    mockIBaseDatatype.setMockValue(EXPECTED_VALUE);
-    return mockIBaseDatatype;
+  Resource withResourceValue() {
+    final Patient patient = new Patient();
+    patient.setId("patientId");
+    return patient;
   }
 
   @Nonnull
-  <D, T>
-  IBaseExtension<?, ?> withIBaseExtension() {
-    final MockIBaseExtension<?, ?> mockExtension = new MockIBaseExtension<D, T>();
-    final MockIBaseDatatype value = withValue();
-    mockExtension.setValue(value);
-    return mockExtension;
+  List<IBase> withResultsAsResources() {
+    return List.of(
+        withResourceValue(),
+        withResourceValue(),
+        withResourceValue()
+    );
   }
 
   @Nonnull
-  List<IBase> withResult() {
-    return List.of(withValue(), withValue(), withValue());
+  Type withTypeValue() {
+    final CodeType codeType = new CodeType();
+    codeType.setValue("someValue");
+    return codeType;
+  }
+
+  @Nonnull
+  List<IBase> withResultsAsTypes() {
+    return List.of(
+        withTypeValue(),
+        withTypeValue(),
+        withTypeValue()
+    );
   }
 
   @Nonnull
@@ -144,6 +185,4 @@ class ElementHasCqfExtensionTest {
   Bundle withBundle() {
     return new Bundle();
   }
-
-
 }

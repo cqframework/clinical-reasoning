@@ -17,7 +17,7 @@ public class ElementHasCqfExtension {
   protected IBaseParameters parameters;
   protected LibraryEngine libraryEngine;
   protected String subjectType = "Patient";
-  public QuestionnaireItemComponent addProperties(QuestionnaireItemComponent questionnaireItem, ElementDefinition element) {
+  public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent questionnaireItem) {
     final Expression expression = getExpression(element);
     final List<IBase> results = getExpressionResults(expression);
     results.forEach(result -> questionnaireItem.addInitial().setValue((Type) result));

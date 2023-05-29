@@ -8,7 +8,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
@@ -94,7 +93,7 @@ class ElementHasCqfExtensionTest {
     doReturn(expression).when(myFixture).getExpression(element);
     doReturn(results).when(myFixture).getExpressionResults(expression);
     // execute
-    final QuestionnaireItemComponent actual = myFixture.addProperties(questionnaireItem, element);
+    final QuestionnaireItemComponent actual = myFixture.addProperties(element, questionnaireItem);
     // validate
     verify(myFixture).getExpression(element);
     verify(myFixture).getExpressionResults(expression);
@@ -115,7 +114,7 @@ class ElementHasCqfExtensionTest {
     doReturn(expression).when(myFixture).getExpression(element);
     doReturn(results).when(myFixture).getExpressionResults(expression);
     // execute
-    final QuestionnaireItemComponent actual = myFixture.addProperties(questionnaireItem, element);
+    final QuestionnaireItemComponent actual = myFixture.addProperties(element, questionnaireItem);
     // validate
     verify(myFixture).getExpression(element);
     verify(myFixture).getExpressionResults(expression);

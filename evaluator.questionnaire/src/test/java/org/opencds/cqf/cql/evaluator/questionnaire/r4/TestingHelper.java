@@ -40,5 +40,4 @@ public class TestingHelper {
         .setLinkId(LINK_ID)
         .setText(PROFILE_TITLE);
   }
-
 }

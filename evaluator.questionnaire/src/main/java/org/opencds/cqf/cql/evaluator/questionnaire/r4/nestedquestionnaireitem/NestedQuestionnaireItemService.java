@@ -31,7 +31,7 @@ public class NestedQuestionnaireItemService {
     } else if (element.hasDefaultValue()) {
       item.addInitial().setValue(element.getDefaultValue());
     } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
-      item = elementHasCqfExtension.addProperties(item, element);
+      item = elementHasCqfExtension.addProperties(element, item);
     }
     item.setRequired(element.hasMin() && element.getMin() == 1);
     // set repeat based on? if expression result type is a list?

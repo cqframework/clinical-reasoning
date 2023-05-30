@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.questionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Questionnaire;

@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.questionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

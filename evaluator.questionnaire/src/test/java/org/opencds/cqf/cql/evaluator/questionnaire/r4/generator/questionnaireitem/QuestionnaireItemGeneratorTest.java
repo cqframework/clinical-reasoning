@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.questionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -15,10 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.slf4j.Logger;
 import org.testng.Assert;
 import javax.annotation.Nonnull;

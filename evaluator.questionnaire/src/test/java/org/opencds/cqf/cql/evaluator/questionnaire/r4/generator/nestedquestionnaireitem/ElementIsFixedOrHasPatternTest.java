@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.nestedquestionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Extension;
@@ -10,8 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.testng.Assert;
 
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper.withElementDefinition;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper.withQuestionnaireItemComponent;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
 
 @ExtendWith(MockitoExtension.class)
 class ElementIsFixedOrHasPatternTest {

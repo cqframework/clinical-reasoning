@@ -1,7 +1,6 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.nestedquestionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -27,8 +26,8 @@ import java.util.List;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper.withElementDefinition;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper.withQuestionnaireItemComponent;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
 
 @ExtendWith(MockitoExtension.class)
 class NestedQuestionnaireItemServiceTest {

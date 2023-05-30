@@ -1,11 +1,9 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.questionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import java.util.List;
 import javax.annotation.Nonnull;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Extension;
@@ -18,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.testng.Assert;
 
 @ExtendWith(MockitoExtension.class)

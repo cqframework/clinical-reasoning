@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.nestedquestionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.testng.Assert;
 
 import javax.annotation.Nonnull;
@@ -27,7 +27,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.TestingHelper.withQuestionnaireItemComponent;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
 
 @ExtendWith(MockitoExtension.class)
 class ElementHasCqfExtensionTest {

@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +17,20 @@ import java.util.List;
 
 public class QuestionnaireTypeIsChoice {
   protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireTypeIsChoice.class);
-  protected BundleParser parsingService;
+  protected BundleParser bundleParser;
+  public static QuestionnaireTypeIsChoice of(Repository repository) {
+    final BundleParser bundleParser = new BundleParser(repository);
+    return new QuestionnaireTypeIsChoice(bundleParser);
+  }
+  QuestionnaireTypeIsChoice(BundleParser theBundleParser) {
+    bundleParser = theBundleParser;
+  }
   public QuestionnaireItemComponent addProperties(
       ElementDefinition element,
       QuestionnaireItemComponent item
   ) throws QuestionnaireParsingException {
     final String valueSetUrl = element.getBinding().getValueSet();
-    final ValueSet valueSet = parsingService.getValueSet(valueSetUrl);
+    final ValueSet valueSet = bundleParser.getValueSet(valueSetUrl);
     if (valueSet.hasExpansion()) {
       addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
     } else {
@@ -48,7 +56,6 @@ public class QuestionnaireTypeIsChoice {
         })
     );
   }
-
 
   protected Coding getCoding(ConceptReferenceComponent code, String systemUri) {
     return new Coding().setCode(code.getCode()).setSystem(systemUri).setDisplay(code.getDisplay());

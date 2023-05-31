@@ -19,6 +19,7 @@ import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.testng.Assert;
 import javax.annotation.Nonnull;
@@ -47,8 +48,6 @@ class QuestionnaireItemGeneratorTest {
   final static String PATH_VALUE_3 = "pathValue3";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.DISPLAY;
   @Mock
-  private Logger logger;
-  @Mock
   private BundleParser bundleParser;
   @Mock
   private NestedQuestionnaireItemService nestedQuestionnaireItemService;
@@ -66,7 +65,6 @@ class QuestionnaireItemGeneratorTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(nestedQuestionnaireItemService);
-    verifyNoMoreInteractions(logger);
     verifyNoMoreInteractions(bundleParser);
     verifyNoMoreInteractions(questionnaireItemService);
   }
@@ -170,7 +168,6 @@ class QuestionnaireItemGeneratorTest {
     myFixture.processElement(profile, element, childCount);
     // validate
     verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
-    verify(logger).warn(ERROR_MESSAGE);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
   }
 
@@ -188,7 +185,6 @@ class QuestionnaireItemGeneratorTest {
     myFixture.processElement(profile, element, childCount);
     // validate
     verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
-    verify(logger).error(EXPECTED_ERROR_MESSAGE);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
   }
 
@@ -240,7 +236,6 @@ class QuestionnaireItemGeneratorTest {
     final QuestionnaireItemComponent actual = myFixture.generateItem(actionInput, itemCount);
     // validate
     verify(bundleParser).getProfileDefinition(actionInput);
-    verify(logger).error(EXPECTED_ERROR_MESSAGE);
     assertEquals(actual, expected);
   }
 

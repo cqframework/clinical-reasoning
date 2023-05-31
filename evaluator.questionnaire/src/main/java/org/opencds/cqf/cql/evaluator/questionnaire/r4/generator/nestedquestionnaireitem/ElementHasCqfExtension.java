@@ -17,6 +17,20 @@ public class ElementHasCqfExtension {
   protected IBaseParameters parameters;
   protected LibraryEngine libraryEngine;
   protected String subjectType = "Patient";
+
+  public ElementHasCqfExtension(
+      String thePatientId,
+      IBaseParameters theParameters,
+      IBaseBundle theBundle,
+      LibraryEngine theLibraryEngine
+  ) {
+    patientId = thePatientId;
+    parameters = theParameters;
+    bundle = theBundle;
+    libraryEngine = theLibraryEngine;
+  }
+
+
   public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent questionnaireItem) {
     final Expression expression = getExpression(element);
     final List<IBase> results = getExpressionResults(expression);

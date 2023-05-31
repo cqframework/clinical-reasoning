@@ -20,6 +20,10 @@ public class BundleParser {
   protected static final String STRUCTURE_DEFINITION_ERROR = "Unable to retrieve StructureDefinition for profile: %s";
   protected static final String VALUE_SET_ERROR = "Unable to retrieve ValueSet for Choice item: %s";
 
+  public BundleParser(Repository theRepository) {
+    repository = theRepository;
+  }
+
   public StructureDefinition getProfileDefinition(DataRequirement actionInput) {
     final String profileUrl = actionInput.getProfile().get(0).getValue();
     final Optional<StructureDefinition> profile = parseProfileFromBundle(profileUrl);
@@ -36,7 +40,7 @@ public class BundleParser {
     }
     return valueSet.get();
   }
-  protected Optional<StructureDefinition> parseProfileFromBundle(String profileUrl) {
+  public Optional<StructureDefinition> parseProfileFromBundle(String profileUrl) {
     try {
       final Bundle bundle = repository.search(Bundle.class, StructureDefinition.class, Searches.byUrl(profileUrl));
       return bundle.getEntry().stream()
@@ -49,7 +53,7 @@ public class BundleParser {
     return Optional.empty();
   }
 
-  protected Optional<ValueSet> parseValueSet(String url) {
+  public Optional<ValueSet> parseValueSet(String url) {
     try {
       final Bundle searchBundle = repository.search(Bundle.class, ValueSet.class, Searches.byUrl(url));
       return searchBundle.getEntry().stream()

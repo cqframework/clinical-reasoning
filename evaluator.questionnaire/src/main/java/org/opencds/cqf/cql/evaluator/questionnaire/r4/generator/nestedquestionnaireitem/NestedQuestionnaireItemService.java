@@ -1,11 +1,15 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +19,38 @@ public class NestedQuestionnaireItemService {
   protected ElementHasCqfExtension elementHasCqfExtension;
   protected static final String ITEM_TYPE_ERROR = "Unable to determine type for element: %s";
   protected static final Logger logger = LoggerFactory.getLogger(NestedQuestionnaireItemService.class);
+
+  public static NestedQuestionnaireItemService of(
+      Repository repository,
+      String patientId,
+      IBaseParameters parameters,
+      IBaseBundle bundle,
+      LibraryEngine libraryEngine
+  ) {
+    final QuestionnaireTypeIsChoice questionnaireTypeIsChoice = QuestionnaireTypeIsChoice.of(repository);
+    final ElementIsFixedOrHasPattern elementIsFixedOrHasPattern = new ElementIsFixedOrHasPattern();
+    final ElementHasCqfExtension elementHasCqfExtension = new ElementHasCqfExtension(
+        patientId,
+        parameters,
+        bundle,
+        libraryEngine
+    );
+    return new NestedQuestionnaireItemService(
+        questionnaireTypeIsChoice,
+        elementIsFixedOrHasPattern,
+        elementHasCqfExtension
+    );
+  }
+
+  NestedQuestionnaireItemService(
+      QuestionnaireTypeIsChoice theQuestionnaireTypeIsChoice,
+      ElementIsFixedOrHasPattern theElementIsFixedOrHasPattern,
+      ElementHasCqfExtension theElementHasCqfExtension
+  ) {
+    questionnaireTypeIsChoice = theQuestionnaireTypeIsChoice;
+    elementIsFixedOrHasPattern = theElementIsFixedOrHasPattern;
+    elementHasCqfExtension = theElementHasCqfExtension;
+  }
 
   public QuestionnaireItemComponent getNestedQuestionnaireItem(
       StructureDefinition profile,

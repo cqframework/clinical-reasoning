@@ -19,7 +19,8 @@ public class ItemGeneratorTests {
     TestItemGenerator.Assert.that("Patient",
         "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient", "OPA-Patient1")
         .withRepository(repository)
-        .generateItem().isEqualsTo("../" + QUESTIONNAIRE_PATIENT_FILE_NAME);
+        .generateItem()
+        .isEqualsTo("../" + QUESTIONNAIRE_PATIENT_FILE_NAME);
   }
 
   @Test

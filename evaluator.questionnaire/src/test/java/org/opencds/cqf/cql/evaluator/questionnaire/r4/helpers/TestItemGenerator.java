@@ -24,7 +24,10 @@ import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireItemGenerator;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -56,7 +59,7 @@ public class TestItemGenerator {
 
   public static QuestionnaireItemGenerator buildGenerator(Repository repository, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-    return new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+    return QuestionnaireItemGenerator.of(repository, patientId, parameters, bundle, libraryEngine);
   }
 
   /** Fluent interface starts here **/

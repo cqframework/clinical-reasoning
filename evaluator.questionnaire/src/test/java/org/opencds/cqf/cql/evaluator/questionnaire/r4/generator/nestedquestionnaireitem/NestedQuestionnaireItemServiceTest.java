@@ -1,6 +1,8 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -8,6 +10,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,12 +20,21 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 import org.testng.Assert;
+import org.w3._1999.xhtml.B;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -38,12 +50,15 @@ class NestedQuestionnaireItemServiceTest {
   final static String LABEL = "label";
   final static String CHILD_LINK_ID = "childLinkId";
   @Mock
+  protected Repository repository;
+  @Mock
+  protected BundleParser bundleParser;
+  @Mock
   protected QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
   @Mock
   protected ElementIsFixedOrHasPattern elementIsFixedOrHasPattern;
   @Mock
   protected ElementHasCqfExtension elementHasCqfExtension;
-
   @InjectMocks
   @Spy
   private NestedQuestionnaireItemService myFixture;
@@ -53,6 +68,9 @@ class NestedQuestionnaireItemServiceTest {
     verifyNoMoreInteractions(questionnaireTypeIsChoice);
     verifyNoMoreInteractions(elementIsFixedOrHasPattern);
     verifyNoMoreInteractions(elementHasCqfExtension);
+    verifyNoMoreInteractions(elementHasCqfExtension);
+    verifyNoMoreInteractions(bundleParser);
+    verifyNoMoreInteractions(repository);
   }
 
   @Test

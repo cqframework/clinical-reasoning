@@ -4,28 +4,61 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QuestionnaireItemGenerator {
-  protected Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
-  protected BundleParser bundleParser;
-  protected QuestionnaireItemComponent questionnaireItem;
-  protected QuestionnaireItemService questionnaireItemService;
-  protected NestedQuestionnaireItemService nestedQuestionnaireItemService;
-  protected List<String> paths = new ArrayList<>();
   protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
   protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
   protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
+  protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
+  // services
+  protected BundleParser bundleParser;
+  protected QuestionnaireItemService questionnaireItemService;
+  protected NestedQuestionnaireItemService nestedQuestionnaireItemService;
+  // ROSIE TODO: this paths value is never actually used
+  // states
+  protected List<String> paths = new ArrayList<>();
+  protected QuestionnaireItemComponent questionnaireItem;
+
+  public static QuestionnaireItemGenerator of(
+      Repository repository,
+      String patientId,
+      IBaseParameters parameters,
+      IBaseBundle bundle,
+      LibraryEngine libraryEngine
+  ) {
+    BundleParser bundleParser = new BundleParser(repository);
+    QuestionnaireItemService questionnaireItemService = new QuestionnaireItemService();
+    NestedQuestionnaireItemService nestedQuestionnaireItemService = NestedQuestionnaireItemService.of(
+        repository,
+        patientId,
+        parameters,
+        bundle,
+        libraryEngine
+    );
+    return new QuestionnaireItemGenerator(bundleParser, questionnaireItemService, nestedQuestionnaireItemService);
+  }
+
+  QuestionnaireItemGenerator(BundleParser theBundleParser, QuestionnaireItemService theQuestionnaireItemService, NestedQuestionnaireItemService theNestedQuestionnaireItemService) {
+      bundleParser = theBundleParser;
+      questionnaireItemService = theQuestionnaireItemService;
+      nestedQuestionnaireItemService = theNestedQuestionnaireItemService;
+  }
 
   public Questionnaire.QuestionnaireItemComponent generateItem(
       DataRequirement actionInput,

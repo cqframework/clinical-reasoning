@@ -55,8 +55,8 @@ import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Searches;
@@ -157,7 +157,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     this.questionnaire
         .setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), planDefinition.getIdPart()));
     this.questionnaireItemGenerator =
-        new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+        QuestionnaireItemGenerator.of(repository, patientId, parameters, bundle, libraryEngine);
 
     return planDefinition;
   }

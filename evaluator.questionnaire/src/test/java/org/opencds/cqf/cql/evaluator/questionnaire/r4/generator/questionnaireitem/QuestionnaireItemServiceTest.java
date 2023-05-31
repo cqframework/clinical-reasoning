@@ -50,7 +50,11 @@ class QuestionnaireItemServiceTest {
     // setup
     final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
     // execute
-    final QuestionnaireItemComponent actual = myFixture.createQuestionnaireItemComponent(PROFILE_TITLE, LINK_ID);
+    final QuestionnaireItemComponent actual = myFixture.createQuestionnaireItemComponent(
+        PROFILE_TITLE,
+        LINK_ID,
+        PROFILE_URL
+    );
     // validate
     assertEquals(actual, expected);
   }
@@ -74,13 +78,21 @@ class QuestionnaireItemServiceTest {
     final QuestionnaireItemComponent expected = withQuestionnaireItemComponentWithExtension();
     doReturn(PROFILE_URL).when(myFixture).getProfileUrl(actionInput);
     doReturn(PROFILE_TITLE).when(myFixture).getProfileText(PROFILE_URL, profile);
-    doReturn(questionnaireItemComponent).when(myFixture).createQuestionnaireItemComponent(PROFILE_TITLE, LINK_ID);
+    doReturn(questionnaireItemComponent).when(myFixture).createQuestionnaireItemComponent(
+        PROFILE_TITLE,
+        LINK_ID,
+        PROFILE_URL
+    );
     // execute
     final QuestionnaireItemComponent actual = myFixture.getQuestionnaireItem(actionInput, LINK_ID, profile);
     // validate
     verify(myFixture).getProfileUrl(actionInput);
     verify(myFixture).getProfileText(PROFILE_URL, profile);
-    verify(myFixture).createQuestionnaireItemComponent(PROFILE_TITLE, LINK_ID);
+    verify(myFixture).createQuestionnaireItemComponent(
+        PROFILE_TITLE,
+        LINK_ID,
+        PROFILE_URL
+    );
     assertEquals(actual, expected);
   }
 

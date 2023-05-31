@@ -14,7 +14,7 @@ public class QuestionnaireItemService {
     final String profileUrl = getProfileUrl(actionInput);
     final String text = getProfileText(profileUrl, profile);
     // ROSIE TODO: WE ARE NOT ADDING AN EXTENSION HERE LIKE IN DSTU3
-    return createQuestionnaireItemComponent(text, linkId);
+    return createQuestionnaireItemComponent(text, linkId, profileUrl);
   }
 
   protected String getProfileText(String profileUrl, StructureDefinition profile) {
@@ -24,9 +24,10 @@ public class QuestionnaireItemService {
         profileUrl.substring(profileUrl.lastIndexOf("/") + 1);
   }
 
-  protected QuestionnaireItemComponent createQuestionnaireItemComponent(String text, String linkId) {
+  protected QuestionnaireItemComponent createQuestionnaireItemComponent(String text, String linkId, String profileUrl) {
     return new QuestionnaireItemComponent()
         .setType(Questionnaire.QuestionnaireItemType.GROUP)
+        .setDefinition(profileUrl)
         .setLinkId(linkId)
         .setText(text);
   }

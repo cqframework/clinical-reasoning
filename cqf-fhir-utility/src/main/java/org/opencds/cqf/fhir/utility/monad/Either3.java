@@ -17,7 +17,7 @@ public class Either3<L, M, R> {
   private final R right;
 
   Either3(L left, M middle, R right) {
-    checkArgument(left == null ^ middle == null ^ right == null,
+    checkArgument((left == null ^ middle == null) && (middle == null ^ right == null),
         "left, middle, and right are mutually exclusive");
     this.left = left;
     this.middle = middle;

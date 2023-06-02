@@ -9,6 +9,7 @@ public class ContinuousVariableMeasureProcessorTest {
 
   @Test
   public void cms111_singlePatient() {
+    // TODO: Stratification 2 results are coming back with a null value. Not sure why.
     given.when()
         .measureId("CMS111")
         .periodStart("2019-01-01")

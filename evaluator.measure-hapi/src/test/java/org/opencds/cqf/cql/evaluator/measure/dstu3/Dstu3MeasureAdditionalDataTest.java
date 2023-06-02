@@ -20,7 +20,7 @@ public class Dstu3MeasureAdditionalDataTest {
             "EXM105FHIR3MeasurePartBundle/EXM105FHIR3MeasureAdditionalBundle.json"));
 
     given.when()
-        .measureId("EXM105-FHIR3-8.0.000")
+        .measureId("measure-EXM105-FHIR3-8.0.000")
         .periodStart("2019-01-01")
         .periodEnd("2020-01-01")
         .subject("Patient/denom-EXM105-FHIR3")

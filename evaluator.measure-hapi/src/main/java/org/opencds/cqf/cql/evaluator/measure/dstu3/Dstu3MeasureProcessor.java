@@ -7,11 +7,12 @@ import java.util.Objects;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
@@ -35,15 +36,16 @@ public class Dstu3MeasureProcessor {
   }
 
   public MeasureReport evaluateMeasure(IdType measureId, String periodStart, String periodEnd,
-      String reportType, List<String> subjectIds) {
+      String reportType, List<String> subjectIds, IBaseBundle additionalData) {
     var measure = this.repository.read(Measure.class, measureId);
-    return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds);
+    return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds,
+        additionalData);
   }
 
   // NOTE: Do not make a top-level function that takes a Measure resource. This ensures that
   // the repositories are set up correctly.
   protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd,
-      String reportType, List<String> subjectIds) {
+      String reportType, List<String> subjectIds, IBaseBundle additionalData) {
 
     if (!measure.hasLibrary()) {
       throw new IllegalArgumentException(
@@ -61,7 +63,8 @@ public class Dstu3MeasureProcessor {
 
     var context = Contexts.forRepositoryAndSettings(
         this.measureEvaluationOptions.getEvaluationSettings(), this.repository,
-        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
+        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()),
+        additionalData);
 
     Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure);
     return measureEvaluator.evaluate(

@@ -75,7 +75,7 @@ public class SimpleMeasureProcessorTest {
         .reportType("population")
         .evaluate()
         .then()
-        .firstGroup().hasScore("1.0")
+        .firstGroup().hasScore("0.5")
         .population("numerator").hasCount(1).up()
         .population("denominator").hasCount(2).up()
         .population("initial-population").hasCount(2).up().up()
@@ -85,7 +85,6 @@ public class SimpleMeasureProcessorTest {
   }
 
   @Test
-  // TODO: Fix the Measure eval behavior
   public void exm108_noReportType_noSubject_runsPopulation() {
     // This default behavior if no type or subject is specified is "population"
     var report = given.when()
@@ -94,7 +93,7 @@ public class SimpleMeasureProcessorTest {
         .periodEnd("2019-12-31")
         .evaluate()
         .then()
-        .firstGroup().hasScore("1.0")
+        .firstGroup().hasScore("0.5")
         .population("numerator").hasCount(1).up()
         .population("denominator").hasCount(2).up()
         .population("initial-population").hasCount(2).up().up()
@@ -105,7 +104,6 @@ public class SimpleMeasureProcessorTest {
 
 
   @Test
-  // TODO: Fix the Measure eval behavior
   public void exm108_noType_hasSubject_runsIndividual() {
     // This default behavior if no type is specified is "individual"
     var report = given.when()

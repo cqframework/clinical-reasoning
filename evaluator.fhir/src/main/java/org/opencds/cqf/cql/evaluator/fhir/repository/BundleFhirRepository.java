@@ -47,21 +47,24 @@ public class BundleFhirRepository implements Repository {
     return null;
   }
 
+  // private boolean compareResource() {}
+
   // wip: search
   @Override
   @SuppressWarnings("unchecked")
   public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
       Class<T> resourceType, Map<String, List<IQueryParameterType>> searchParameters,
       Map<String, String> headers) {
-    IBaseResource bundle = Resources.newResource(IBaseBundle.class, UUID.randomUUID().toString());
+    var result = Resources.newResource(IBaseBundle.class, UUID.randomUUID().toString());
     // HashMap<String, List<List<IQueryParameterType>>>
     Iterable<IBaseResource> iterable =
         (Iterable<IBaseResource>) BundleUtil.toListOfResourcesOfType(this.context, this.bundle,
             this.context.getResourceDefinition(resourceType).getImplementingClass());
 
+    // iterable.forEach(r -> );
 
 
-    return (B) bundle;
+    return (B) result;
   }
 
   @Override

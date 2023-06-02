@@ -43,8 +43,7 @@ public class DiabetesMeasureProcessorTest {
         .population("denominator").hasCount(2);
   }
 
-  // TODO: Work on the additional data Bundle integration with the Subject provider
-  @Test(enabled = false, description = "Additional data is not yet supported for Subjects")
+  @Test
   public void a1c_additionalData() {
 
     Bundle additionalData = (Bundle) FhirContext.forR4Cached().newJsonParser()

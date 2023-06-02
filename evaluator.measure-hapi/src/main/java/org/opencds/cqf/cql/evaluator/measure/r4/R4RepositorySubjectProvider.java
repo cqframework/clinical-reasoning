@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -32,7 +33,13 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
   @Override
   public Stream<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
-    if (subjectId == null) {
+    return getSubjects(measureEvalType, Collections.singletonList(subjectId));
+  }
+
+  @Override
+  public Stream<String> getSubjects(MeasureEvalType measureEvalType, List<String> subjectIds) {
+    if (subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+        || subjectIds.get(0).isEmpty()) {
       var bundle = this.repo.search(Bundle.class, Patient.class, Searches.ALL);
       var iterator = new BundleIterator<>(repo, Bundle.class, bundle);
       return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
@@ -40,33 +47,40 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
           Spliterator.ORDERED), false)
           .map(BundleEntryParts::getResource)
           .map(x -> x.getIdElement().toUnqualifiedVersionless().getValue());
-
-    } else if (subjectId.indexOf("/") == -1) {
-      IdType id = new IdType("Patient/" + subjectId);
-      Patient r = repo.read(Patient.class, id);
-
-      if (r == null) {
-        throw new ResourceNotFoundException(id);
-      }
-
-      return Stream.of(r.getIdElement().toUnqualifiedVersionless().getValue());
-    } else if (subjectId.startsWith("Group")) {
-      IdType id = new IdType(subjectId);
-      Group r = repo.read(Group.class, id);
-
-      if (r == null) {
-        throw new ResourceNotFoundException(id);
-      }
-
-      List<String> subjectIds = new ArrayList<>();
-      for (GroupMemberComponent gmc : r.getMember()) {
-        IIdType ref = gmc.getEntity().getReferenceElement();
-        subjectIds.add(ref.getResourceType() + "/" + ref.getIdPart());
-      }
-
-      return subjectIds.stream();
-    } else {
-      throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectId));
     }
+
+    List<String> subjects = new ArrayList<>();
+    subjectIds.forEach(subjectId -> {
+      if (subjectId.indexOf("/") == -1) {
+        subjectId = "Patient/".concat(subjectId);
+      }
+      if (subjectId.startsWith("Patient")) {
+        IdType id = new IdType(subjectId);
+        Patient r = repo.read(Patient.class, id);
+
+        if (r == null) {
+          throw new ResourceNotFoundException(id);
+        }
+
+        subjects.add(r.getIdElement().toUnqualifiedVersionless().getValue());
+      } else if (subjectId.startsWith("Group")) {
+        IdType id = new IdType(subjectId);
+        Group r = repo.read(Group.class, id);
+
+        if (r == null) {
+          throw new ResourceNotFoundException(id);
+        }
+
+        for (GroupMemberComponent gmc : r.getMember()) {
+          IIdType ref = gmc.getEntity().getReferenceElement();
+          subjects.add(ref.getResourceType() + "/" + ref.getIdPart());
+        }
+
+      } else {
+        throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectIds));
+      }
+    });
+
+    return subjects.stream();
   }
 }

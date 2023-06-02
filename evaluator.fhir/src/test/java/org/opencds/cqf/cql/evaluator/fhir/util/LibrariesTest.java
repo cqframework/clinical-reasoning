@@ -11,6 +11,8 @@ import org.testng.annotations.Test;
 
 public class LibrariesTest {
 
+  private final byte[] testData = "test-data".getBytes();
+
   @Test
   public void libraryNoContentReturnsNull() {
     Library library = new Library();
@@ -23,11 +25,11 @@ public class LibrariesTest {
   @Test
   public void libraryWithContentReturnsContent() {
     Library library = new Library();
-    library.addContent().setContentType("text/cql").setData("test-data".getBytes());
+    library.addContent().setContentType("text/cql").setData(testData);
 
     var content = Libraries.getContent(library, "text/cql");
 
-    assertEquals("test-data", content.get());
+    assertEquals(content.get(), testData);
   }
 
   @Test
@@ -37,17 +39,17 @@ public class LibrariesTest {
 
     var content = Libraries.getContent(library, "text/elm");
 
-    assertNull(content);
+    assertTrue(content.isEmpty());
   }
 
   @Test
   public void libraryDstu3WithContentReturnsContent() {
     org.hl7.fhir.dstu3.model.Library library = new org.hl7.fhir.dstu3.model.Library();
-    library.addContent().setContentType("text/cql").setData("test-data".getBytes());
+    library.addContent().setContentType("text/cql").setData(testData);
 
     var content = Libraries.getContent(library, "text/cql");
 
-    assertEquals("test-data", content.get());
+    assertEquals(content.get(), testData);
   }
 
   @Test

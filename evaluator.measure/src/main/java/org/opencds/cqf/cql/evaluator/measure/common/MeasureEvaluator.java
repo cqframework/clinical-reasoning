@@ -205,6 +205,9 @@ public class MeasureEvaluator {
     }
 
     for (String subjectId : subjectIds) {
+      if (subjectId == null) {
+        throw new RuntimeException("SubjectId is required in order to calculate.");
+      }
       Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
       String subjectTypePart = subjectInfo.getLeft();
       String subjectIdPart = subjectInfo.getRight();

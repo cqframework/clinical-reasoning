@@ -1,8 +1,5 @@
 package org.opencds.cqf.cql.evaluator.measure.common;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -47,8 +44,8 @@ public enum MeasureEvalType {
 
   // This method can be used for reverse lookup purposes
   public static Optional<MeasureEvalType> fromCode(String code) {
-    checkNotNull(code);
-    checkArgument(!code.isEmpty());
+    // checkNotNull(code);
+    // checkArgument(!code.isEmpty());
 
     return Optional.ofNullable(lookup.get(code));
   }

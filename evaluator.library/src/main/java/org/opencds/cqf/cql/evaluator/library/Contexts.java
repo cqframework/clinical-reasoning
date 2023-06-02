@@ -42,7 +42,7 @@ public class Contexts {
 
   // TODO: Need to refactor this a bit more once I understand how this will be used - JP
   public static Context forRepositoryAndSettings(EvaluationSettings settings, Repository repository,
-      VersionedIdentifier id) {
+      VersionedIdentifier id, IBaseBundle additionalData) {
     checkNotNull(settings);
     checkNotNull(repository);
     checkNotNull(id);
@@ -51,7 +51,7 @@ public class Contexts {
     var sourceProviders = new ArrayList<LibrarySourceProvider>();
     sourceProviders.add(buildLibrarySource(repository));
     var libraryLoader = buildLibraryLoader(settings, sourceProviders);
-    var dataProviders = buildDataProviders(repository, null, terminologyProvider);
+    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider);
 
     var context = new Context(libraryLoader.load(id));
     context.registerLibraryLoader(libraryLoader);

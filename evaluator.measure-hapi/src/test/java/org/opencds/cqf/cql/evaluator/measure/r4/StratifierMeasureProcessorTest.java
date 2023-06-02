@@ -73,12 +73,12 @@ public class StratifierMeasureProcessorTest {
         .firstStratifier()
         .stratum("true").hasScore("0.5")
         .population("initial-population").hasCount(5).up()
-        .population("numerator").hasCount(5).up()
-        .population("numerator").hasCount(2).up().up()
+        .population("numerator").hasCount(2).up()
+        .population("denominator").hasCount(4).up().up()
         .stratum("false").hasScore("0.5")
         .population("initial-population").hasCount(10).up()
-        .population("numerator").hasCount(8).up()
-        .population("numerator").hasCount(4);
+        .population("numerator").hasCount(4).up()
+        .population("denominator").hasCount(8);
   }
 
   @Test
@@ -99,12 +99,12 @@ public class StratifierMeasureProcessorTest {
         .firstStratifier()
         .stratum("true").hasScore("0.5")
         .population("initial-population").hasCount(5).up()
-        .population("numerator").hasCount(5).up()
-        .population("numerator").hasCount(2).up().up()
+        .population("numerator").hasCount(2).up()
+        .population("denominator").hasCount(4).up().up()
         .stratum("false").hasScore("0.5")
         .population("initial-population").hasCount(10).up()
-        .population("numerator").hasCount(8).up()
-        .population("numerator").hasCount(4);
+        .population("numerator").hasCount(4).up()
+        .population("denominator").hasCount(8);
 
     // Stratifiers should cover the total population, so we expect
     // initial-population true (5) + initial-population false (10) = initial-population total

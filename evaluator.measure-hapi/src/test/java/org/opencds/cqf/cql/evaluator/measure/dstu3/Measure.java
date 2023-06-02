@@ -123,14 +123,13 @@ public class Measure {
 
     public When additionalData(Bundle additionalData) {
       this.additionalData = additionalData;
-      throw new TestException("additional data is not yet supported in tests");
-      // return this;
+      return this;
     }
 
     public When evaluate() {
       this.operation =
           () -> processor.evaluateMeasure(new IdType("Measure", measureId), periodStart,
-              periodEnd, reportType, Collections.singletonList(this.subjectId));
+              periodEnd, reportType, Collections.singletonList(this.subjectId), additionalData);
       return this;
     }
 

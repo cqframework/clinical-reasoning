@@ -4,10 +4,12 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
@@ -21,6 +23,7 @@ import org.opencds.cqf.cql.evaluator.library.VersionedIdentifiers;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
+import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Searches;
@@ -30,24 +33,25 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 public class R4MeasureProcessor {
   private final Repository repository;
   private final MeasureEvaluationOptions measureEvaluationOptions;
+  private final SubjectProvider subjectProvider;
 
   public R4MeasureProcessor(Repository repository,
-      MeasureEvaluationOptions measureEvaluationOptions) {
+      MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
     this.repository = Objects.requireNonNull(repository);
     this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions
         : MeasureEvaluationOptions.defaultOptions();
-
+    this.subjectProvider = subjectProvider;
   }
 
   public MeasureReport evaluateMeasure(Either3<CanonicalType, IdType, Measure> measure,
       String periodStart, String periodEnd,
-      String reportType, List<String> subjectIds) {
+      String reportType, List<String> subjectIds, IBaseBundle additionalData) {
     var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-    return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds);
+    return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, additionalData);
   }
 
   protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd,
-      String reportType, List<String> subjectIds) {
+      String reportType, List<String> subjectIds, IBaseBundle additionalData) {
 
     if (!measure.hasLibrary()) {
       throw new IllegalArgumentException(
@@ -61,12 +65,16 @@ public class R4MeasureProcessor {
 
     var id = VersionedIdentifiers.forUrl(measure.getLibrary().get(0).asStringValue());
     var context = Contexts.forRepositoryAndSettings(
-        this.measureEvaluationOptions.getEvaluationSettings(), this.repository, id);
+        this.measureEvaluationOptions.getEvaluationSettings(), this.repository, id, additionalData);
+
+    var evalType = MeasureEvalType.fromCode(reportType)
+        .orElse(subjectIds == null || subjectIds.isEmpty() ? MeasureEvalType.POPULATION
+            : MeasureEvalType.SUBJECT);
+
+    var subjects = subjectProvider.getSubjects(evalType, subjectIds).collect(Collectors.toList());
 
     R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
-    return measureEvaluator.evaluate(
-        MeasureEvalType.fromCode(reportType).orElse(MeasureEvalType.POPULATION), subjectIds,
-        measurementPeriod);
+    return measureEvaluator.evaluate(evalType, subjects, measurementPeriod);
   }
 
   protected Measure resolveByUrl(CanonicalType url) {

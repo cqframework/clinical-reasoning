@@ -3,6 +3,8 @@ package org.opencds.cqf.cql.evaluator.spring.configuration;
 import static org.mockito.Mockito.mock;
 
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
+import org.opencds.cqf.cql.evaluator.measure.dstu3.Dstu3RepositorySubjectProvider;
 import org.opencds.cqf.cql.evaluator.spring.EvaluatorConfiguration;
 import org.opencds.cqf.fhir.api.Repository;
 import org.springframework.context.annotation.Bean;
@@ -31,4 +33,9 @@ public class TestConfigurationDstu3 {
     return MeasureEvaluationOptions.defaultOptions();
   }
 
+
+  @Bean
+  SubjectProvider subjectProvider() {
+    return new Dstu3RepositorySubjectProvider(repository());
+  }
 }

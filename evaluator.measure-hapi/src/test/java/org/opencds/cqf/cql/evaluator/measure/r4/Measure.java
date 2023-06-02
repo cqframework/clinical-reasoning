@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -86,7 +87,7 @@ public class Measure {
     }
 
     private static R4MeasureProcessor buildProcessor(Repository repository) {
-      return new R4MeasureProcessor(repository, null);
+      return new R4MeasureProcessor(repository, null, new R4RepositorySubjectProvider(repository));
     }
 
     When when() {
@@ -106,7 +107,7 @@ public class Measure {
     private String periodStart;
     private String periodEnd;
 
-    private String subjectId;
+    private List<String> subjectIds;
     private String reportType;
 
     private Bundle additionalData;
@@ -129,7 +130,12 @@ public class Measure {
     }
 
     public When subject(String subjectId) {
-      this.subjectId = subjectId;
+      this.subjectIds = Collections.singletonList(subjectId);
+      return this;
+    }
+
+    public When subjects(List<String> subjectIds) {
+      this.subjectIds = subjectIds;
       return this;
     }
 
@@ -140,16 +146,14 @@ public class Measure {
 
     public When additionalData(Bundle additionalData) {
       this.additionalData = additionalData;
-      throw new TestException("additional data is not yet supported in tests");
-      // return this;
+      return this;
     }
 
     public When evaluate() {
       this.operation =
           () -> processor.evaluateMeasure(
               Eithers.forMiddle3(new IdType("Measure", measureId)),
-              periodStart,
-              periodEnd, reportType, Collections.singletonList(this.subjectId));
+              periodStart, periodEnd, reportType, subjectIds, additionalData);
       return this;
     }
 

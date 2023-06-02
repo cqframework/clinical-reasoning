@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collections;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -9,10 +8,11 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.evaluator.fhir.repository.BundleFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 public class R4MeasureService {
@@ -35,33 +35,36 @@ public class R4MeasureService {
     var repo =
         this.proxyAndFederate(contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
 
-    var evalType = MeasureEvalType.fromCode(reportType)
-        .orElse(MeasureEvalType.POPULATION);
+    // var evalType = MeasureEvalType.fromCode(reportType)
+    // .orElse(MeasureEvalType.POPULATION);
 
-    var subjects = this.getSubjects(repo, evalType, subjectId);
+    // var subjects = this.getSubjects(repo, evalType, subjectId);
 
-    var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions);
+    var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions,
+        new R4RepositorySubjectProvider(repo));
 
     return processor.evaluateMeasure(
         measure,
         periodStart,
         periodEnd,
         reportType,
-        subjects.collect(Collectors.toList()));
+        Collections.singletonList(subjectId),
+        null);
   }
 
 
-  public Stream<String> getSubjects(Repository repo, MeasureEvalType evalType, String subjectId) {
-    var subjectProvider = new R4RepositorySubjectProvider(repo);
-    return subjectProvider.getSubjects(evalType, subjectId);
-  }
+  // public Stream<String> getSubjects(Repository repo, MeasureEvalType evalType, String subjectId)
+  // {
+  // var subjectProvider = new R4RepositorySubjectProvider(repo);
+  // return subjectProvider.getSubjects(evalType, subjectId);
+  // }
 
 
   public Repository proxyAndFederate(Endpoint contentEndpoint,
       Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
     var proxy = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-    // TODO: Federation for additional data.
-    return proxy;
+    return new FederatedRepository(proxy,
+        new BundleFhirRepository(proxy.fhirContext(), additionalData));
   }
 }

@@ -33,7 +33,6 @@ class QuestionnaireItemGeneratorTest {
   final static String EXCEPTION_ERROR_PREFIX = "An error occurred during item creation";
   final static String EXPECTED_ERROR_MESSAGE = EXCEPTION_ERROR_PREFIX + ": " + ERROR_MESSAGE;
   final static String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
-  final static String PROFILE_URL = "http://www.sample.com/profile/profileId";
   final static String QUESTIONNAIRE_TEXT = "Questionnaire Text";
   final static String CHILD_LINK_ID = "linkId.1";
   final static String LINK_ID = "linkId";
@@ -152,23 +151,6 @@ class QuestionnaireItemGeneratorTest {
   }
 
   @Test
-  void processElementShouldAddErrorItemWhenQuestionnaireParsingExceptionThrown() throws Exception {
-    // setup
-    final QuestionnaireItemComponent errorItem = withErrorItem(ERROR_MESSAGE);
-    final StructureDefinition profile = withProfile();
-    final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
-    final int childCount = 1;
-    doThrow(new Exception(ERROR_MESSAGE)).when(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
-    doReturn(errorItem).when(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
-    // execute
-    myFixture.processElement(profile, element, childCount);
-    // validate
-    verify(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
-    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
-    assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
-  }
-
-  @Test
   void processElementShouldAddErrorItemWhenExceptionThrown() throws Exception {
     // setup
     final QuestionnaireItemComponent errorItem = withErrorItem(EXPECTED_ERROR_MESSAGE);
@@ -181,6 +163,7 @@ class QuestionnaireItemGeneratorTest {
     // execute
     myFixture.processElement(profile, element, childCount);
     // validate
+    verify(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
     verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
   }
@@ -274,15 +257,6 @@ class QuestionnaireItemGeneratorTest {
   @Nonnull
   QuestionnaireItemComponent withErrorItem(String errorMessage, String linkId) {
     return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
-  }
-
-  @Nonnull
-  ElementDefinition withElementDefinition3() {
-    final ElementDefinition elementDefinition = new ElementDefinition().setPath(PATH_VALUE_3);
-    final TypeRefComponent type = new TypeRefComponent();
-    type.setCode(TYPE_CODE_3);
-    elementDefinition.setType(List.of(type));
-    return elementDefinition;
   }
 
   @Nonnull

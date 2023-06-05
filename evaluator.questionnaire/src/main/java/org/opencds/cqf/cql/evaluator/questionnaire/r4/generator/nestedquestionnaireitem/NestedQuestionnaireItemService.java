@@ -8,7 +8,6 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,7 @@ public class NestedQuestionnaireItemService {
       StructureDefinition profile,
       ElementDefinition element,
       String childLinkId
-  ) throws QuestionnaireParsingException {
+  ) throws Exception {
     final QuestionnaireItemType itemType = getItemType(element);
     QuestionnaireItemComponent item = initializeQuestionnaireItem(itemType, profile, element, childLinkId);
     if (itemType == QuestionnaireItemType.CHOICE) {
@@ -91,12 +90,12 @@ public class NestedQuestionnaireItemService {
         .setText(childText);
   }
 
-  public QuestionnaireItemType getItemType(ElementDefinition element) throws QuestionnaireParsingException {
+  public QuestionnaireItemType getItemType(ElementDefinition element) throws Exception {
     final String elementType = element.getType().get(0).getCode();
     final QuestionnaireItemType itemType = parseItemType(elementType, element.hasBinding());
     if (itemType == null) {
       final String message = String.format(ITEM_TYPE_ERROR, element.getId());
-      throw new QuestionnaireParsingException(message);
+      throw new Exception(message);
     }
     return itemType;
   }

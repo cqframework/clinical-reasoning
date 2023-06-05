@@ -5,7 +5,6 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
@@ -33,10 +32,10 @@ public class BundleParser {
     return profile.get();
   }
 
-  public ValueSet getValueSet(String url) throws QuestionnaireParsingException {
+  public ValueSet getValueSet(String url) throws Exception {
     final Optional<ValueSet> valueSet = parseValueSet(url);
     if (!valueSet.isPresent()) {
-      throw new QuestionnaireParsingException(String.format(VALUE_SET_ERROR, url));
+      throw new Exception(String.format(VALUE_SET_ERROR, url));
     }
     return valueSet.get();
   }

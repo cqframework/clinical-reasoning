@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -15,7 +14,6 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -30,7 +28,7 @@ public class QuestionnaireItemGenerator {
   protected BundleParser bundleParser;
   protected QuestionnaireItemService questionnaireItemService;
   protected NestedQuestionnaireItemService nestedQuestionnaireItemService;
-  // ROSIE TODO: this paths value is never actually used
+  // ROSIE TODO: get rid of paths and remove references to it
   // states
   protected List<String> paths = new ArrayList<>();
   protected QuestionnaireItemComponent questionnaireItem;
@@ -109,12 +107,9 @@ public class QuestionnaireItemGenerator {
       );
       questionnaireItem.addItem(nestedQuestionnaireItem);
       paths.add(element.getPath());
-    } catch (QuestionnaireParsingException ex) {
-      logger.warn(ex.getMessage());
-      questionnaireItem.addItem(createErrorItem(childLinkId, ex.getMessage()));
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
-      logger.error(message);
+      logger.warn(message);
       questionnaireItem.addItem(createErrorItem(childLinkId, message));
     }
   }

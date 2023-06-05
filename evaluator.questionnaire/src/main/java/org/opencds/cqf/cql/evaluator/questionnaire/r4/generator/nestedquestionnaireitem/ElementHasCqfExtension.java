@@ -30,10 +30,10 @@ public class ElementHasCqfExtension {
     libraryEngine = theLibraryEngine;
   }
 
-
   public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent questionnaireItem) {
     final Expression expression = getExpression(element);
     final List<IBase> results = getExpressionResults(expression);
+    // ROSIE TODO: If result is Resource, setValue as resource cast to Reference
     results.forEach(result -> questionnaireItem.addInitial().setValue((Type) result));
     return questionnaireItem;
   }

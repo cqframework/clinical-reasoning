@@ -17,10 +17,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
-import org.opencds.cqf.fhir.api.Repository;
-import org.slf4j.Logger;
 import org.testng.Assert;
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -155,18 +152,18 @@ class QuestionnaireItemGeneratorTest {
   }
 
   @Test
-  void processElementShouldAddErrorItemWhenQuestionnaireParsingExceptionThrown() throws QuestionnaireParsingException {
+  void processElementShouldAddErrorItemWhenQuestionnaireParsingExceptionThrown() throws Exception {
     // setup
     final QuestionnaireItemComponent errorItem = withErrorItem(ERROR_MESSAGE);
     final StructureDefinition profile = withProfile();
     final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
-    doThrow(new QuestionnaireParsingException(ERROR_MESSAGE)).when(nestedQuestionnaireItemService)
-        .getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
-    doReturn(errorItem).when(myFixture).createErrorItem(CHILD_LINK_ID, ERROR_MESSAGE);
+    doThrow(new Exception(ERROR_MESSAGE)).when(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    doReturn(errorItem).when(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
     // execute
     myFixture.processElement(profile, element, childCount);
     // validate
+    verify(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
     verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
   }

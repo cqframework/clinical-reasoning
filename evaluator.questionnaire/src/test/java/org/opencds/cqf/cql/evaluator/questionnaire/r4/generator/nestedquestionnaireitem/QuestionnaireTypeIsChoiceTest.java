@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
 import javax.annotation.Nonnull;
@@ -53,7 +52,7 @@ class QuestionnaireTypeIsChoiceTest {
   }
 
   @Test
-  void addPropertiesShouldAddPropertiesIfValueSetHasExpansion() throws QuestionnaireParsingException {
+  void addPropertiesShouldAddPropertiesIfValueSetHasExpansion() throws Exception {
     // setup
     final ElementDefinition elementDefinition = withElementDefinitionWithBindingComponent();
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
@@ -68,7 +67,7 @@ class QuestionnaireTypeIsChoiceTest {
   }
 
   @Test
-  void addPropertiesShouldAddPropertiesIfValueSetDoesNotHaveExpansion() throws QuestionnaireParsingException {
+  void addPropertiesShouldAddPropertiesIfValueSetDoesNotHaveExpansion() throws Exception {
     // setup
     final ElementDefinition elementDefinition = withElementDefinitionWithBindingComponent();
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();

@@ -8,7 +8,6 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.exceptions.QuestionnaireParsingException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +27,9 @@ public class QuestionnaireTypeIsChoice {
   public QuestionnaireItemComponent addProperties(
       ElementDefinition element,
       QuestionnaireItemComponent item
-  ) throws QuestionnaireParsingException {
+  ) throws Exception {
     final String valueSetUrl = element.getBinding().getValueSet();
+    // ROSIE TODO: treat valueSetUrl as Cannonical
     final ValueSet valueSet = bundleParser.getValueSet(valueSetUrl);
     if (valueSet.hasExpansion()) {
       addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);

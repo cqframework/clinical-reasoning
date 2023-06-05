@@ -13,7 +13,6 @@ public class QuestionnaireItemService {
   ) {
     final String profileUrl = getProfileUrl(actionInput);
     final String text = getProfileText(profileUrl, profile);
-    // ROSIE TODO: WE ARE NOT ADDING AN EXTENSION HERE LIKE IN DSTU3
     return createQuestionnaireItemComponent(text, linkId, profileUrl);
   }
 

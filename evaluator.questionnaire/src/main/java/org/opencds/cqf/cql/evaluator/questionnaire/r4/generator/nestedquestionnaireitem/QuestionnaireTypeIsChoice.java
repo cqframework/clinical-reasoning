@@ -1,36 +1,36 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
+
 public class QuestionnaireTypeIsChoice {
   protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireTypeIsChoice.class);
-  protected BundleParser bundleParser;
-  public static QuestionnaireTypeIsChoice of(Repository repository) {
-    final BundleParser bundleParser = new BundleParser(repository);
-    return new QuestionnaireTypeIsChoice(bundleParser);
+  protected Repository repository;
+  public static QuestionnaireTypeIsChoice of(Repository theRepository) {
+    return new QuestionnaireTypeIsChoice(theRepository);
   }
-  QuestionnaireTypeIsChoice(BundleParser theBundleParser) {
-    bundleParser = theBundleParser;
+  QuestionnaireTypeIsChoice(Repository theRepository) {
+    repository = theRepository;
   }
   public QuestionnaireItemComponent addProperties(
       ElementDefinition element,
       QuestionnaireItemComponent item
-  ) throws Exception {
-    final String valueSetUrl = element.getBinding().getValueSet();
-    // ROSIE TODO: treat valueSetUrl as Cannonical
-    final ValueSet valueSet = bundleParser.getValueSet(valueSetUrl);
+  ) {
+    final ValueSet valueSet = getValueSet(element);
     if (valueSet.hasExpansion()) {
       addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
     } else {
@@ -63,5 +63,13 @@ public class QuestionnaireTypeIsChoice {
 
   protected Coding getCoding(ValueSetExpansionContainsComponent code) {
     return new Coding().setCode(code.getCode()).setSystem(code.getSystem()).setDisplay(code.getDisplay());
+  }
+
+  protected ValueSet getValueSet(ElementDefinition element) {
+    final String valueSetUrl = element.getBinding().getValueSet();
+    final CanonicalType type = new CanonicalType();
+    type.setValue(valueSetUrl);
+    final Resource valueSet = searchRepositoryByCanonical(repository, type);
+    return (ValueSet) valueSet;
   }
 }

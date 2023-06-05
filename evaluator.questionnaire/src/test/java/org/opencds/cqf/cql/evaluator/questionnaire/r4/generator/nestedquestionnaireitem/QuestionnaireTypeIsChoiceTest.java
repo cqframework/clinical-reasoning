@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
 import javax.annotation.Nonnull;
@@ -40,14 +40,12 @@ class QuestionnaireTypeIsChoiceTest {
   final static String VALUE_SET_URL = "valueSetUrl";
   @Mock
   protected Repository repository;
-  @Mock
-  protected BundleParser bundleParser;
+  @Spy
   @InjectMocks
   private QuestionnaireTypeIsChoice myFixture;
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(bundleParser);
     verifyNoMoreInteractions(repository);
   }
 
@@ -57,12 +55,12 @@ class QuestionnaireTypeIsChoiceTest {
     final ElementDefinition elementDefinition = withElementDefinitionWithBindingComponent();
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
     final ValueSet valueSet = withValueSetWithExpansionComponent();
-    doReturn(valueSet).when(bundleParser).getValueSet(VALUE_SET_URL);
+    doReturn(valueSet).when(myFixture).getValueSet(elementDefinition);
     // execute
     final QuestionnaireItemComponent actual = myFixture.addProperties(elementDefinition, questionnaireItem);
     // validate
     Assert.assertTrue(valueSet.hasExpansion());
-    verify(bundleParser).getValueSet(VALUE_SET_URL);
+    verify(myFixture).getValueSet(elementDefinition);
     assertQuestionnaireItemsGetAppendedFromExpansionComponent(valueSet, actual);
   }
 
@@ -72,12 +70,12 @@ class QuestionnaireTypeIsChoiceTest {
     final ElementDefinition elementDefinition = withElementDefinitionWithBindingComponent();
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
     final ValueSet valueSet = withValueSetWithComposeComponent();
-    doReturn(valueSet).when(bundleParser).getValueSet(VALUE_SET_URL);
+    doReturn(valueSet).when(myFixture).getValueSet(elementDefinition);
     // execute
     final QuestionnaireItemComponent actual = myFixture.addProperties(elementDefinition, questionnaireItem);
     // validate
     Assert.assertFalse(valueSet.hasExpansion());
-    verify(bundleParser).getValueSet(VALUE_SET_URL);
+    verify(myFixture).getValueSet(elementDefinition);
     assertQuestionnaireItemsGetAppendedFromConceptSets(valueSet, actual);
   }
 

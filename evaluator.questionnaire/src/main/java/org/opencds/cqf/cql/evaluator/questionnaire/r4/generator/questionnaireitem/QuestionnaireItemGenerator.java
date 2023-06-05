@@ -6,30 +6,31 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
 public class QuestionnaireItemGenerator {
   protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
   protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
   protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
   protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
-  // services
-  protected BundleParser bundleParser;
+  protected Repository repository;
   protected QuestionnaireItemService questionnaireItemService;
   protected NestedQuestionnaireItemService nestedQuestionnaireItemService;
   // ROSIE TODO: get rid of paths and remove references to it
-  // states
   protected List<String> paths = new ArrayList<>();
   protected QuestionnaireItemComponent questionnaireItem;
 
@@ -40,7 +41,6 @@ public class QuestionnaireItemGenerator {
       IBaseBundle bundle,
       LibraryEngine libraryEngine
   ) {
-    BundleParser bundleParser = new BundleParser(repository);
     QuestionnaireItemService questionnaireItemService = new QuestionnaireItemService();
     NestedQuestionnaireItemService nestedQuestionnaireItemService = NestedQuestionnaireItemService.of(
         repository,
@@ -49,11 +49,15 @@ public class QuestionnaireItemGenerator {
         bundle,
         libraryEngine
     );
-    return new QuestionnaireItemGenerator(bundleParser, questionnaireItemService, nestedQuestionnaireItemService);
+    return new QuestionnaireItemGenerator(repository, questionnaireItemService, nestedQuestionnaireItemService);
   }
 
-  QuestionnaireItemGenerator(BundleParser theBundleParser, QuestionnaireItemService theQuestionnaireItemService, NestedQuestionnaireItemService theNestedQuestionnaireItemService) {
-      bundleParser = theBundleParser;
+  QuestionnaireItemGenerator(
+      Repository theRepository,
+      QuestionnaireItemService theQuestionnaireItemService,
+      NestedQuestionnaireItemService theNestedQuestionnaireItemService
+  ) {
+      repository = theRepository;
       questionnaireItemService = theQuestionnaireItemService;
       nestedQuestionnaireItemService = theNestedQuestionnaireItemService;
   }
@@ -67,7 +71,7 @@ public class QuestionnaireItemGenerator {
     }
     final String linkId = String.valueOf(itemCount + 1);
     try {
-      final StructureDefinition profile = bundleParser.getProfileDefinition(actionInput);
+      final StructureDefinition profile = getProfileDefinition(actionInput);
       this.questionnaireItem = questionnaireItemService.getQuestionnaireItem(actionInput, linkId, profile);
       processElements(profile);
       // Should we do this?
@@ -135,5 +139,11 @@ public class QuestionnaireItemGenerator {
     // ? snapshot.get(0).getType().get(0).getCode() : null;
     // }
     // return elementType;
+  }
+
+  protected StructureDefinition getProfileDefinition(DataRequirement actionInput) {
+    final CanonicalType type = actionInput.getProfile().get(0);
+    final Resource profile = searchRepositoryByCanonical(repository, type);
+    return (StructureDefinition) profile;
   }
 }

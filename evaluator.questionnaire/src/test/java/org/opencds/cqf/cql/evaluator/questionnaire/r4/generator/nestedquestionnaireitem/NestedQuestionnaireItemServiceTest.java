@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.bundle.BundleParser;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
 
@@ -41,8 +40,6 @@ class NestedQuestionnaireItemServiceTest {
   @Mock
   protected Repository repository;
   @Mock
-  protected BundleParser bundleParser;
-  @Mock
   protected QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
   @Mock
   protected ElementIsFixedOrHasPattern elementIsFixedOrHasPattern;
@@ -58,7 +55,6 @@ class NestedQuestionnaireItemServiceTest {
     verifyNoMoreInteractions(elementIsFixedOrHasPattern);
     verifyNoMoreInteractions(elementHasCqfExtension);
     verifyNoMoreInteractions(elementHasCqfExtension);
-    verifyNoMoreInteractions(bundleParser);
     verifyNoMoreInteractions(repository);
   }
 

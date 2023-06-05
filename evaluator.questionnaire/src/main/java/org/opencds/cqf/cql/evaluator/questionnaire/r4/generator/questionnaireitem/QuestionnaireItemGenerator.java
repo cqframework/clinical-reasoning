@@ -30,8 +30,6 @@ public class QuestionnaireItemGenerator {
   protected Repository repository;
   protected QuestionnaireItemService questionnaireItemService;
   protected NestedQuestionnaireItemService nestedQuestionnaireItemService;
-  // ROSIE TODO: get rid of paths and remove references to it
-  protected List<String> paths = new ArrayList<>();
   protected QuestionnaireItemComponent questionnaireItem;
 
   public static QuestionnaireItemGenerator of(
@@ -74,11 +72,6 @@ public class QuestionnaireItemGenerator {
       final StructureDefinition profile = getProfileDefinition(actionInput);
       this.questionnaireItem = questionnaireItemService.getQuestionnaireItem(actionInput, linkId, profile);
       processElements(profile);
-      // Should we do this?
-      // var requiredElements = profile.getSnapshot().getElement().stream()
-      // .filter(e -> !paths.contains(e.getPath()) && e.getPath().split("\\.").length == 2 &&
-      // e.getMin() > 0).collect(Collectors.toList());
-      // processElements(requiredElements, profile, item, paths);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
       logger.error(message);
@@ -110,7 +103,6 @@ public class QuestionnaireItemGenerator {
           childLinkId
       );
       questionnaireItem.addItem(nestedQuestionnaireItem);
-      paths.add(element.getPath());
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
       logger.warn(message);

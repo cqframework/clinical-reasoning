@@ -213,7 +213,7 @@ class NestedQuestionnaireItemServiceTest {
   }
 
   @Test
-  void getItemTypeShouldReturnQuestionnaireItemType() throws Exception {
+  void getItemTypeShouldReturnQuestionnaireItemType() {
     // setup
     final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
     // execute
@@ -227,8 +227,8 @@ class NestedQuestionnaireItemServiceTest {
     // setup
     final ElementDefinition elementDefinition = withElementDefinition("", PATH_VALUE);
     // execute
-    final Exception actual = Assertions.assertThrows(
-        Exception.class, () -> myFixture.getItemType(elementDefinition));
+    final IllegalArgumentException actual = Assertions.assertThrows(
+        IllegalArgumentException.class, () -> myFixture.getItemType(elementDefinition));
     // validate
     Assert.assertEquals(actual.getMessage(), "Unable to determine type for element: null");
   }

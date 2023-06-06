@@ -84,7 +84,7 @@ class QuestionnaireItemServiceTest {
         PROFILE_URL
     );
     // execute
-    final QuestionnaireItemComponent actual = myFixture.getQuestionnaireItem(actionInput, LINK_ID, profile);
+    final QuestionnaireItemComponent actual = myFixture.createQuestionnaireItem(actionInput, LINK_ID, profile);
     // validate
     verify(myFixture).getProfileUrl(actionInput);
     verify(myFixture).getProfileText(PROFILE_URL, profile);

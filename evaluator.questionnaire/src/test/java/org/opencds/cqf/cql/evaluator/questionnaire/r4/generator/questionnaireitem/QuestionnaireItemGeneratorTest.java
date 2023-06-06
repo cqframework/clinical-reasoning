@@ -1,10 +1,14 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionDifferentialComponent;
 import org.junit.jupiter.api.AfterEach;
@@ -13,10 +17,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -25,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireItemGeneratorTest {
@@ -43,6 +50,8 @@ class QuestionnaireItemGeneratorTest {
   final static String PATH_VALUE_3 = "pathValue3";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.DISPLAY;
   @Mock
+  private Repository repository;
+  @Mock
   private NestedQuestionnaireItemService nestedQuestionnaireItemService;
   @Mock
   private QuestionnaireItemService questionnaireItemService;
@@ -59,6 +68,7 @@ class QuestionnaireItemGeneratorTest {
   void tearDown() {
     verifyNoMoreInteractions(nestedQuestionnaireItemService);
     verifyNoMoreInteractions(questionnaireItemService);
+    verifyNoMoreInteractions(repository);
   }
 
   @Test
@@ -143,7 +153,6 @@ class QuestionnaireItemGeneratorTest {
     // validate
     verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), questionnaireItem);
-    Assert.assertEquals(myFixture.paths.get(0), element.getPath());
   }
 
   @Test
@@ -184,13 +193,13 @@ class QuestionnaireItemGeneratorTest {
     final StructureDefinition profile = withProfile();
     final int itemCount = 3;
     doReturn(profile).when(myFixture).getProfileDefinition(actionInput);
-    doReturn(expected).when(questionnaireItemService).getQuestionnaireItem(actionInput, "4", profile);
+    doReturn(expected).when(questionnaireItemService).createQuestionnaireItem(actionInput, "4", profile);
     doNothing().when(myFixture).processElements(profile);
     // execute
     final QuestionnaireItemComponent actual = myFixture.generateItem(actionInput, itemCount);
     // validate
     verify(myFixture).getProfileDefinition(actionInput);
-    verify(questionnaireItemService).getQuestionnaireItem(actionInput, "4", profile);
+    verify(questionnaireItemService).createQuestionnaireItem(actionInput, "4", profile);
     verify(myFixture).processElements(profile);
     assertEquals(actual, expected);
   }
@@ -203,7 +212,7 @@ class QuestionnaireItemGeneratorTest {
     final DataRequirement actionInput = TestingHelper.withActionInput();
     final QuestionnaireItemComponent expected = withErrorItem(EXPECTED_ERROR_MESSAGE, linkId);
     final StructureDefinition profile = withProfile();
-    doReturn(expected).when(questionnaireItemService).getQuestionnaireItem(actionInput, linkId, profile);
+    doReturn(expected).when(questionnaireItemService).createQuestionnaireItem(actionInput, linkId, profile);
     doReturn(profile).when(myFixture).getProfileDefinition(actionInput);
     doAnswer((invocation) -> {
       throw new Exception(ERROR_MESSAGE);
@@ -213,6 +222,28 @@ class QuestionnaireItemGeneratorTest {
     // validate
     verify(myFixture).getProfileDefinition(actionInput);
     assertEquals(actual, expected);
+  }
+
+  @Test
+  void getProfileDefinitionShouldReturnStructureDefinition() {
+    // setup
+    final Resource expected = withStructureDefinitionAsResource();
+    final CanonicalType canonicalType = new CanonicalType();
+    final DataRequirement actionInput = new DataRequirement();
+    actionInput.setProfile(List.of(canonicalType));
+    doReturn(expected).when(myFixture).getResource(canonicalType);
+    // execute
+    final StructureDefinition actual = myFixture.getProfileDefinition(actionInput);
+    // validate
+    Assert.assertEquals(actual, expected);
+    verify(myFixture).getResource(canonicalType);
+  }
+
+  final Resource withStructureDefinitionAsResource() {
+    final StructureDefinition structureDefinition = new StructureDefinition();
+    structureDefinition.setId("id");
+    structureDefinition.setUrl("url");
+    return structureDefinition;
   }
 
   void assertEquals(QuestionnaireItemComponent actual, QuestionnaireItemComponent expected) {

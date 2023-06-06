@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,10 +22,10 @@ import org.slf4j.LoggerFactory;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
 public class QuestionnaireItemGenerator {
+  protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
   protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
   protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
   protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
-  protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
   protected Repository repository;
   protected QuestionnaireItemService questionnaireItemService;
   protected NestedQuestionnaireItemService nestedQuestionnaireItemService;
@@ -70,12 +69,12 @@ public class QuestionnaireItemGenerator {
     final String linkId = String.valueOf(itemCount + 1);
     try {
       final StructureDefinition profile = getProfileDefinition(actionInput);
-      this.questionnaireItem = questionnaireItemService.getQuestionnaireItem(actionInput, linkId, profile);
+      this.questionnaireItem = questionnaireItemService.createQuestionnaireItem(actionInput, linkId, profile);
       processElements(profile);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
       logger.error(message);
-      return createErrorItem(linkId, message);
+      this.questionnaireItem = createErrorItem(linkId, message);
     }
     return questionnaireItem;
   }
@@ -84,7 +83,7 @@ public class QuestionnaireItemGenerator {
       StructureDefinition profile
   ) {
     int childCount = questionnaireItem.getItem().size();
-    for (var element : getElementsWithNonNullElementType(profile)) {
+    for (ElementDefinition element : getElementsWithNonNullElementType(profile)) {
       childCount++;
       processElement(profile, element, childCount);
     }
@@ -135,7 +134,11 @@ public class QuestionnaireItemGenerator {
 
   protected StructureDefinition getProfileDefinition(DataRequirement actionInput) {
     final CanonicalType type = actionInput.getProfile().get(0);
-    final Resource profile = searchRepositoryByCanonical(repository, type);
+    final Resource profile = getResource(type);
     return (StructureDefinition) profile;
+  }
+
+  protected Resource getResource(CanonicalType type) {
+    return searchRepositoryByCanonical(repository, type);
   }
 }

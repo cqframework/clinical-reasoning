@@ -55,7 +55,7 @@ public class NestedQuestionnaireItemService {
       StructureDefinition profile,
       ElementDefinition element,
       String childLinkId
-  ) throws Exception {
+  ) {
     final QuestionnaireItemType itemType = getItemType(element);
     QuestionnaireItemComponent item = initializeQuestionnaireItem(itemType, profile, element, childLinkId);
     if (itemType == QuestionnaireItemType.CHOICE) {
@@ -90,12 +90,12 @@ public class NestedQuestionnaireItemService {
         .setText(childText);
   }
 
-  public QuestionnaireItemType getItemType(ElementDefinition element) throws Exception {
+  public QuestionnaireItemType getItemType(ElementDefinition element) {
     final String elementType = element.getType().get(0).getCode();
     final QuestionnaireItemType itemType = parseItemType(elementType, element.hasBinding());
     if (itemType == null) {
       final String message = String.format(ITEM_TYPE_ERROR, element.getId());
-      throw new Exception(message);
+      throw new IllegalArgumentException(message);
     }
     return itemType;
   }

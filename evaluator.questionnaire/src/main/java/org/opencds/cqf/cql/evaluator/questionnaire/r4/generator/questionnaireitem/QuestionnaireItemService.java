@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 public class QuestionnaireItemService {
-  public QuestionnaireItemComponent getQuestionnaireItem(
+  public QuestionnaireItemComponent createQuestionnaireItem(
       DataRequirement actionInput,
       String linkId,
       StructureDefinition profile
@@ -17,7 +17,6 @@ public class QuestionnaireItemService {
   }
 
   protected String getProfileText(String profileUrl, StructureDefinition profile) {
-    // TODO: define an extension for the text?
     return profile.hasTitle() ?
         profile.getTitle() :
         profileUrl.substring(profileUrl.lastIndexOf("/") + 1);

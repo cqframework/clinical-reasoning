@@ -194,14 +194,8 @@ public abstract class BaseMeasureProcessorTest {
 
     MeasureEvaluationOptions config = MeasureEvaluationOptions.defaultOptions();
 
-    if (threadedEnabled) {
-      config.setThreadedEnabled(true);
-      config.setThreadedBatchSize(threadedBatchSize);
-    }
-
     this.measureProcessor = new R4MeasureProcessor(terminologyProviderFactory, dataProviderFactory,
         librarySourceProviderFactory, fhirDalFactory, endpointConverter, null, null, null, null,
         config, null, null);
-
   }
 }

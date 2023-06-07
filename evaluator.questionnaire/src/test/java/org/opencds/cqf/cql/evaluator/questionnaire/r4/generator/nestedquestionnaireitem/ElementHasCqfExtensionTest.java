@@ -1,5 +1,9 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BaseReference;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
@@ -9,6 +13,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +28,7 @@ import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.testng.Assert;
 
 import javax.annotation.Nonnull;
+import java.sql.Ref;
 import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
@@ -121,8 +127,46 @@ class ElementHasCqfExtensionTest {
     final List<QuestionnaireItemInitialComponent> initial = actual.getInitial();
     Assert.assertEquals(initial.size(), results.size());
     for (int i = 0; i < results.size(); i++) {
-      Assert.assertEquals(initial.get(i).getValue(), results.get(i));
+      final IBase expected = results.get(i);
+      final Type actualType = initial.get(i).getValue();
+      final Reference actualRef = (Reference) actualType;
+      Assert.assertEquals(actualRef.getResource(), expected);
     }
+  }
+
+  @Test
+  void addTypeValueShouldAddValueToQuestionnaireItem() {
+    // setup
+    final IBase result = withTypeValue();
+    final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
+    // execute
+    myFixture.addTypeValue(result, questionnaireItem);
+    // validate
+    Assert.assertTrue(Type.class.isAssignableFrom(result.getClass()));
+    Assert.assertFalse(questionnaireItem.getInitial().isEmpty());
+    final QuestionnaireItemInitialComponent actual = questionnaireItem.getInitial().get(0);
+    Assert.assertNotNull(actual.getValue());
+    final Type type = actual.getValue();
+    Assert.assertEquals(type, result);
+  }
+
+  @Test
+  void addResourceValueShouldAddValueToQuestionnaireItem() {
+    // setup
+    final IBase result = withResourceValue();
+    final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
+    // execute
+    myFixture.addResourceValue(result, questionnaireItem);
+    // validate
+    Assert.assertTrue(Resource.class.isAssignableFrom(result.getClass()));
+    Assert.assertFalse(questionnaireItem.getInitial().isEmpty());
+    final QuestionnaireItemInitialComponent actual = questionnaireItem.getInitial().get(0);
+    Assert.assertNotNull(actual.getValue());
+    final Type type = actual.getValue();
+    Assert.assertTrue(Reference.class.isAssignableFrom(type.getClass()));
+    final Reference typeAsRef = (Reference) type;
+    final IBaseResource resource =  typeAsRef.getResource();
+    Assert.assertEquals(resource, result);
   }
 
   @Nonnull

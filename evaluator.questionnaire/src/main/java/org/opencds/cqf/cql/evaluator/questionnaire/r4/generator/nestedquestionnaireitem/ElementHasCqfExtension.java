@@ -1,9 +1,12 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -33,9 +36,25 @@ public class ElementHasCqfExtension {
   public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent questionnaireItem) {
     final Expression expression = getExpression(element);
     final List<IBase> results = getExpressionResults(expression);
-    // ROSIE TODO: If result is Resource, setValue as resource cast to Reference
-    results.forEach(result -> questionnaireItem.addInitial().setValue((Type) result));
+    results.forEach(result -> {
+      if (Resource.class.isAssignableFrom(result.getClass())) {
+        addResourceValue(result, questionnaireItem);
+      } else {
+        addTypeValue(result, questionnaireItem);
+      }
+    });
     return questionnaireItem;
+  }
+
+  void addResourceValue(IBase result, QuestionnaireItemComponent questionnaireItem) {
+    final IAnyResource resource = (IAnyResource) result;
+    final Reference reference = new Reference(resource);
+    questionnaireItem.addInitial().setValue(reference);
+  }
+
+  void addTypeValue(IBase result, QuestionnaireItemComponent questionnaireItem) {
+    final Type type = (Type) result;
+    questionnaireItem.addInitial().setValue(type);
   }
 
   protected final List<IBase> getExpressionResults(Expression expression) {

@@ -1,9 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BaseReference;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
@@ -28,7 +25,6 @@ import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.testng.Assert;
 
 import javax.annotation.Nonnull;
-import java.sql.Ref;
 import java.util.List;
 
 import static org.mockito.Mockito.doReturn;

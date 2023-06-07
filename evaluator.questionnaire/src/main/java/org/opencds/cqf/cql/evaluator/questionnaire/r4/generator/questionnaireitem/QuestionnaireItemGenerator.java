@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -68,7 +67,7 @@ public class QuestionnaireItemGenerator {
     }
     final String linkId = String.valueOf(itemCount + 1);
     try {
-      final StructureDefinition profile = getProfileDefinition(actionInput);
+      final StructureDefinition profile = (StructureDefinition) getProfileDefinition(actionInput);
       this.questionnaireItem = questionnaireItemService.createQuestionnaireItem(actionInput, linkId, profile);
       processElements(profile);
     } catch (Exception ex) {
@@ -132,13 +131,13 @@ public class QuestionnaireItemGenerator {
     // return elementType;
   }
 
-  protected StructureDefinition getProfileDefinition(DataRequirement actionInput) {
-    final CanonicalType type = actionInput.getProfile().get(0);
-    final Resource profile = getResource(type);
-    return (StructureDefinition) profile;
-  }
 
-  protected Resource getResource(CanonicalType type) {
-    return searchRepositoryByCanonical(repository, type);
+
+//  protected StructureDefinition getProfileDefinition(DataRequirement actionInput) {
+//    return (StructureDefinition) searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));
+//  }
+
+  protected Resource getProfileDefinition(DataRequirement actionInput) {
+    return searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));
   }
 }

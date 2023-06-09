@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-elm</artifactId>
-  <version>3.0.0-PRE3</version>
+  <version>3.0.0-PRE4-SNAPSHOT</version>
 
   <name>FHIR Clinical Reasoning (ELM)</name>
   <description>Runtime support for CQL/ELM</description>
@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE3</version>
+    <version>3.0.0-PRE4-SNAPSHOT</version>
     <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
@@ -21,7 +21,7 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-api</artifactId>
-      <version>3.0.0-PRE3</version>
+      <version>3.0.0-PRE4-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

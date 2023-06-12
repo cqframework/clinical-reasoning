@@ -6,7 +6,7 @@
       "extension": [
         {
           "url": "dateLastUpdated",
-          "valueDateTime": "2022-04-28"
+          "valueDateTime": "2023-04-28"
         },
         {
           "url": "frequency",
@@ -43,7 +43,7 @@
   "subject": {
     "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
   },
-  "effectiveDateTime": "2022-04-01",
+  "effectiveDateTime": "2023-04-01",
   "valueString": "NEG",
   "interpretation": [
     {

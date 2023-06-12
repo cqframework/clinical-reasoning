@@ -76,6 +76,9 @@ public abstract class BaseResourceMatcher {
       // Terminology - in value set
       else if (param instanceof TokenParam) {
         TokenParam tp = (TokenParam) param;
+        if (tp.getValue() == null) {
+          match = true;
+        }
         // in value set
         if (tp.getModifier() == TokenParamModifier.IN) {
           // TODO - not sure what to do here... when populating search params, this is used when

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.fhir.helper.matcher.ResourceMatcherR4;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirResourceLoader;
 import org.opencds.cqf.cql.evaluator.fhir.util.Resources;
@@ -35,9 +37,9 @@ public class FhirRepository implements Repository {
   FhirContext context = FhirContext.forCached(FhirVersionEnum.R4);
   IFhirPath fhirPath = FhirPathCache.cachedForContext(context);
 
-  private Map<IdType, IBaseResource> resourceMap;
+  private final Map<IdType, IBaseResource> resourceMap;
 
-  private Random random;
+  private final Random random;
 
   public FhirRepository(Class<?> clazz, List<String> directoryList, boolean recursive) {
     FhirResourceLoader resourceLoader =
@@ -76,27 +78,16 @@ public class FhirRepository implements Repository {
   public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
     MethodOutcome methodOutcome = new MethodOutcome();
 
-    if (IBaseResource.class.isAssignableFrom(resource.getClass())) {
-
-      IBaseResource iBaseResource = resource;
-
-      IdType theId = new IdType(iBaseResource.getIdElement().getResourceType(),
-          iBaseResource.getIdElement().getIdPart());
-      if (!resourceMap.containsKey(theId)) {
-        resourceMap.put(theId, iBaseResource);
-        methodOutcome.setCreated(true);
-      } else {
-        Long nextLong = random.nextLong();
-        theId = new IdType(iBaseResource.getIdElement().getResourceType(),
-            iBaseResource.getIdElement().getIdPart(), nextLong.toString());
-        resourceMap.put(theId, iBaseResource);
-        methodOutcome.setCreated(true);
-      }
-
-    } else {
-      // IBaseResource.class is not super class of resource
-      methodOutcome.setStatusCode(400);
+    IdType theId = new IdType(resource.getIdElement().getResourceType(),
+        resource.getIdElement().getIdPart());
+    if (resourceMap.containsKey(theId)) {
+      long nextLong = random.nextLong();
+      theId = new IdType(resource.getIdElement().getResourceType(),
+          resource.getIdElement().getIdPart(), Long.toString(nextLong));
     }
+    resourceMap.put(theId, resource);
+    methodOutcome.setCreated(true);
+
     return methodOutcome;
   }
 
@@ -110,21 +101,13 @@ public class FhirRepository implements Repository {
   public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
     MethodOutcome methodOutcome = new MethodOutcome();
 
-    if (IBaseResource.class.isAssignableFrom(resource.getClass())) {
-
-      IBaseResource iBaseResource = resource;
-
-      IdType theId = new IdType(iBaseResource.getIdElement().getResourceType(),
-          iBaseResource.getIdElement().getIdPart());
-      if (resourceMap.containsKey(theId)) {
-        resourceMap.put(theId, iBaseResource);
-      } else {
-        resourceMap.put(theId, iBaseResource);
-        methodOutcome.setCreated(true);
-      }
+    IdType theId = new IdType(resource.getIdElement().getResourceType(),
+        resource.getIdElement().getIdPart());
+    if (resourceMap.containsKey(theId)) {
+      resourceMap.put(theId, resource);
     } else {
-      // IBaseResource.class is not super class of resource
-      methodOutcome.setStatusCode(400);
+      resourceMap.put(theId, resource);
+      methodOutcome.setCreated(true);
     }
     return methodOutcome;
   }
@@ -160,12 +143,40 @@ public class FhirRepository implements Repository {
       }
     }
 
-    if (searchParameters != null && searchParameters.containsKey("url")) {
-      Iterable<IBaseResource> bundleResources = searchByUrl(resourceList,
-          searchParameters.get("url").get(0).getValueAsQueryToken(context));
-      bundleResources.forEach(resource -> bundle
-          .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
-    } else {
+    List<IBaseResource> filteredResources = new ArrayList<>();
+    if (searchParameters != null && !searchParameters.isEmpty()) {
+      ResourceMatcherR4 resourceMatcher = new ResourceMatcherR4();
+      for (IBaseResource resource : resourceList) {
+        boolean include = false;
+        for (Entry<String, List<IQueryParameterType>> nextEntry : searchParameters.entrySet()) {
+          String paramName = nextEntry.getKey();
+          if (resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
+            include = true;
+          }
+          else {
+            include = false;
+            break;
+          }
+        }
+        if (include) {
+          filteredResources.add(resource);
+        }
+      }
+    }
+
+    if (searchParameters != null) {
+      if (searchParameters.containsKey("url")) {
+        Iterable<IBaseResource> bundleResources = searchByUrl(resourceList,
+            searchParameters.get("url").get(0).getValueAsQueryToken(context));
+        bundleResources.forEach(resource -> bundle
+            .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+      }
+      else {
+        filteredResources.forEach(resource -> bundle
+            .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
+      }
+    }
+    else {
       resourceList.forEach(resource -> bundle
           .addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)));
     }

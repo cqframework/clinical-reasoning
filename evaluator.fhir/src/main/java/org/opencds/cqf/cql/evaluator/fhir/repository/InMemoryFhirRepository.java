@@ -1,12 +1,11 @@
 package org.opencds.cqf.cql.evaluator.fhir.repository;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.BundleBuilder;
-import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -18,12 +17,18 @@ import org.opencds.cqf.cql.evaluator.fhir.repository.matcher.ResourceMatcherDSTU
 import org.opencds.cqf.cql.evaluator.fhir.repository.matcher.ResourceMatcherR4;
 import org.opencds.cqf.cql.evaluator.fhir.repository.matcher.ResourceMatcherR5;
 import org.opencds.cqf.cql.evaluator.fhir.test.FhirResourceLoader;
+import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.opencds.cqf.fhir.api.Repository;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
+import com.google.common.collect.Maps;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
 
 public class InMemoryFhirRepository implements Repository {
 
@@ -39,17 +44,30 @@ public class InMemoryFhirRepository implements Repository {
       List<String> directoryList, boolean recursive) {
     this.context = context;
     var resourceLoader = new FhirResourceLoader(context, clazz, directoryList, recursive);
-    this.resourceMap = Maps.uniqueIndex(resourceLoader.getResources(), IBaseResource::getIdElement);
+    this.resourceMap = Maps.uniqueIndex(resourceLoader.getResources(),
+        r -> Ids.newId(this.context, r.getIdElement().getResourceType(),
+            r.getIdElement().getIdPart()));
+  }
+
+  public InMemoryFhirRepository(FhirContext context, IBaseBundle bundle) {
+    this.context = context;
+    this.resourceMap = Maps.uniqueIndex(BundleUtil.toListOfResources(this.context, bundle),
+        r -> Ids.newId(this.context, r.getIdElement().getResourceType(),
+            r.getIdElement().getIdPart()));
   }
 
   public BaseResourceMatcher getResourceMatcher() {
     switch (this.context.getVersion().getVersion()) {
-      case DSTU3: return new ResourceMatcherDSTU3();
-      case R4: return new ResourceMatcherR4();
-      case R5: return new ResourceMatcherR5();
-      default: throw new NotImplementedException(
-          "Resource matching is not implemented for FHIR version "
-              + this.context.getVersion().getVersion());
+      case DSTU3:
+        return new ResourceMatcherDSTU3();
+      case R4:
+        return new ResourceMatcherR4();
+      case R5:
+        return new ResourceMatcherR5();
+      default:
+        throw new NotImplementedException(
+            "Resource matching is not implemented for FHIR version "
+                + this.context.getVersion().getVersion());
     }
   }
 
@@ -57,7 +75,8 @@ public class InMemoryFhirRepository implements Repository {
   @SuppressWarnings("unchecked")
   public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
       Map<String, String> headers) {
-    IIdType theId = new IdDt(resourceType.getSimpleName(), id.getIdPart());
+    // IIdType theId = new IdDt(resourceType.getSimpleName(), id.getIdPart());
+    var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
     if (resourceMap.containsKey(theId)) {
       return (T) resourceMap.get(theId);
     }
@@ -67,7 +86,9 @@ public class InMemoryFhirRepository implements Repository {
   @Override
   public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
     var outcome = new MethodOutcome();
-    var theId = IdDt.newRandomUuid();
+    // var theId = IdDt.newRandomUuid();
+    var theId = Ids.newId(context, resource.getIdElement().getResourceType(),
+        resource.getIdElement().getIdPart());
     while (resourceMap.containsKey(theId)) {
       theId = IdDt.newRandomUuid();
     }
@@ -86,7 +107,9 @@ public class InMemoryFhirRepository implements Repository {
   @Override
   public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
     var outcome = new MethodOutcome();
-    var theId = new IdDt(resource.getIdElement());
+    // var theId = new IdDt(resource.getIdElement());
+    var theId = Ids.newId(context, resource.getIdElement().getResourceType(),
+        resource.getIdElement().getIdPart());
     if (!resourceMap.containsKey(theId)) {
       outcome.setCreated(true);
     }
@@ -98,7 +121,8 @@ public class InMemoryFhirRepository implements Repository {
   public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
       I id, Map<String, String> headers) {
     var outcome = new MethodOutcome();
-    var theId = new IdDt(resourceType.getSimpleName(), id.getIdPart());
+    // var theId = new IdDt(resourceType.getSimpleName(), id.getIdPart());
+    var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
     if (resourceMap.containsKey(theId)) {
       resourceMap.remove(theId);
     } else {
@@ -127,8 +151,7 @@ public class InMemoryFhirRepository implements Repository {
           var paramName = nextEntry.getKey();
           if (resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
             include = true;
-          }
-          else {
+          } else {
             include = false;
             break;
           }
@@ -138,8 +161,7 @@ public class InMemoryFhirRepository implements Repository {
         }
       }
       filteredResources.forEach(builder::addCollectionEntry);
-    }
-    else {
+    } else {
       resourceList.forEach(builder::addCollectionEntry);
     }
 

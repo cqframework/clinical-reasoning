@@ -1,16 +1,15 @@
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.InternalCodingDt;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.util.ExtensionUtil;
+import static java.util.Objects.requireNonNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -28,23 +27,26 @@ import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Predicate;
-
-import static java.util.Objects.requireNonNull;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.InternalCodingDt;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.util.ExtensionUtil;
 
 public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider {
   private static final Logger logger = LoggerFactory.getLogger(RetrieveProvider.class);
   private final CodeUtil codeUtil;
   private final IFhirPath fhirPath;
   private boolean filterBySearchParam = false;
+  private boolean searchByTemplate = false;
 
-  public RetrieveProvider(final FhirContext fhirContext) {
+  protected RetrieveProvider(final FhirContext fhirContext) {
     requireNonNull(fhirContext, "The FhirContext can not be null.");
     this.codeUtil = new CodeUtil(fhirContext);
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
@@ -265,7 +267,7 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
 
   public void populateTemplateSearchParams(Map<String, List<IQueryParameterType>> searchParams,
       final String templateId) {
-    if (StringUtils.isNotBlank(templateId)) {
+    if (Boolean.TRUE.equals(this.searchByTemplate) && StringUtils.isNotBlank(templateId)) {
       searchParams.put("_profile", Collections.singletonList(new ReferenceParam(templateId)));
     }
   }
@@ -289,16 +291,15 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
           codeList.add(new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode()));
         }
         searchParams.put(codePath, codeList);
-      }
-      else if (valueSet != null) {
+      } else if (valueSet != null) {
         if (this.terminologyProvider != null && this.isExpandValueSets()) {
           List<IQueryParameterType> codeList = new ArrayList<>();
-          for(Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
-            codeList.add(new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode()));
+          for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
+            codeList
+                .add(new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode()));
           }
           searchParams.put(codePath, codeList);
-        }
-        else {
+        } else {
           searchParams.put(codePath, Collections.singletonList(
               new TokenParam().setModifier(TokenParamModifier.IN).setValue(valueSet)));
         }
@@ -365,7 +366,13 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
     return filterBySearchParam;
   }
 
-  public void setFilterBySearchParam(boolean filterBySearchParam) {
+  public RetrieveProvider setFilterBySearchParam(boolean filterBySearchParam) {
     this.filterBySearchParam = filterBySearchParam;
+    return this;
+  }
+
+  public RetrieveProvider setSearchByTemplate(boolean searchByTemplate) {
+    this.searchByTemplate = searchByTemplate;
+    return this;
   }
 }

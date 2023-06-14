@@ -11,7 +11,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -63,11 +63,11 @@ public class TestQuestionnaireResponse {
 
     public Extract(String questionnaireResponseName) {
       baseResource = (QuestionnaireResponse) parse(questionnaireResponseName);
-      TestRepository data =
-          new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
-      TestRepository content =
-          new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
-      TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
+      var data =
+          new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+      var content =
+          new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+      var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
           List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
       this.repository = Repositories.proxy(data, content, terminology);

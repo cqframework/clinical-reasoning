@@ -18,7 +18,6 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
@@ -31,16 +30,8 @@ public class RepositoryRetrieveProviderTests {
     return this.getRepositoryRetrieveProvider(null);
   }
 
-  private RepositoryRetrieveProvider getRepositoryRetrieveProvider(TerminologyProvider terminologyProvider) {
-    RepositoryRetrieveProvider brp = new RepositoryRetrieveProvider(
-        new TestRepository(FhirContext.forR4Cached(), this.getClass(),
-            List.of("test1/", "../terminology/test1/"), false));
-    brp.setTerminologyProvider(terminologyProvider);
-
-    return brp;
-  }
-
-  private RepositoryRetrieveProvider getInMemoryRepositoryRetrieveProvider(TerminologyProvider terminologyProvider) {
+  private RepositoryRetrieveProvider getRepositoryRetrieveProvider(
+      TerminologyProvider terminologyProvider) {
     RepositoryRetrieveProvider brp = new RepositoryRetrieveProvider(
         new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
             List.of("test1/", "../terminology/test1/"), false));
@@ -114,7 +105,7 @@ public class RepositoryRetrieveProviderTests {
   @Test
   @SuppressWarnings("unchecked")
   public void test_filterById() {
-    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider().setFilterBySearchParam(false);
 
     // Id does exist
     Iterable<Code> codes = (Iterable<Code>) (Iterable<?>) Collections.singletonList("test-med");
@@ -159,7 +150,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test(expectedExceptions = IllegalStateException.class)
   public void test_filterToValueSet_noTerminologyProvider() {
-    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider().setFilterBySearchParam(false);
 
     retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null,
         "value-set-url", null, null, null, null);
@@ -168,10 +159,11 @@ public class RepositoryRetrieveProviderTests {
   @Test
   public void test_filterToValueSet() {
     TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(
-        new TestRepository(FhirContext.forR4Cached(), this.getClass(),
+        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
             List.of("../terminology/test1/"), false));
 
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider(terminologyProvider);
+    RetrieveProvider retrieve =
+        this.getRepositoryRetrieveProvider(terminologyProvider).setFilterBySearchParam(false);
 
     // Not in the value set
     Iterable<Object> results =
@@ -215,9 +207,11 @@ public class RepositoryRetrieveProviderTests {
   @Test
   public void test_filterToCode() {
     TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(
-        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(), List.of("../terminology/test1/"), false));
+        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("../terminology/test1/"), false));
 
-    RepositoryRetrieveProvider retrieve = this.getInMemoryRepositoryRetrieveProvider(terminologyProvider);
+    RepositoryRetrieveProvider retrieve =
+        this.getRepositoryRetrieveProvider(terminologyProvider);
     retrieve.setExpandValueSets(true);
     retrieve.setFilterBySearchParam(true);
 
@@ -244,9 +238,11 @@ public class RepositoryRetrieveProviderTests {
   @Test
   public void test_filterValueSet() {
     TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(
-        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(), List.of("../terminology/test1/"), false));
+        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("../terminology/test1/"), false));
 
-    RepositoryRetrieveProvider retrieve = this.getInMemoryRepositoryRetrieveProvider(terminologyProvider);
+    RepositoryRetrieveProvider retrieve =
+        this.getRepositoryRetrieveProvider(terminologyProvider);
     retrieve.setExpandValueSets(true);
     retrieve.setFilterBySearchParam(true);
 
@@ -270,9 +266,11 @@ public class RepositoryRetrieveProviderTests {
   @Test
   public void test_filterDatePath() {
     TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(
-        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(), List.of("../terminology/test1/"), false));
+        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("../terminology/test1/"), false));
 
-    RepositoryRetrieveProvider retrieve = this.getInMemoryRepositoryRetrieveProvider(terminologyProvider);
+    RepositoryRetrieveProvider retrieve =
+        this.getRepositoryRetrieveProvider(terminologyProvider);
     retrieve.setExpandValueSets(true);
     retrieve.setFilterBySearchParam(true);
 
@@ -298,9 +296,11 @@ public class RepositoryRetrieveProviderTests {
   @Test
   public void test_filterProfile() {
     TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(
-        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(), List.of("../terminology/test1/"), false));
+        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("../terminology/test1/"), false));
 
-    RepositoryRetrieveProvider retrieve = this.getInMemoryRepositoryRetrieveProvider(terminologyProvider);
+    var retrieve =
+        this.getRepositoryRetrieveProvider(terminologyProvider).setSearchByTemplate(true);
     retrieve.setExpandValueSets(true);
     retrieve.setFilterBySearchParam(true);
 
@@ -326,9 +326,11 @@ public class RepositoryRetrieveProviderTests {
   @Test
   public void test_filterEncounterContext() {
     TerminologyProvider terminologyProvider = new RepositoryTerminologyProvider(
-        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(), List.of("../terminology/test1/"), false));
+        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("../terminology/test1/"), false));
 
-    RepositoryRetrieveProvider retrieve = this.getInMemoryRepositoryRetrieveProvider(terminologyProvider);
+    RepositoryRetrieveProvider retrieve =
+        this.getRepositoryRetrieveProvider(terminologyProvider);
     retrieve.setExpandValueSets(true);
     retrieve.setFilterBySearchParam(true);
 

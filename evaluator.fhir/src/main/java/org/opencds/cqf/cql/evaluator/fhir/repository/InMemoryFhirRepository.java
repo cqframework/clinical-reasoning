@@ -75,7 +75,6 @@ public class InMemoryFhirRepository implements Repository {
   @SuppressWarnings("unchecked")
   public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
       Map<String, String> headers) {
-    // IIdType theId = new IdDt(resourceType.getSimpleName(), id.getIdPart());
     var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
     if (resourceMap.containsKey(theId)) {
       return (T) resourceMap.get(theId);
@@ -86,7 +85,6 @@ public class InMemoryFhirRepository implements Repository {
   @Override
   public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
     var outcome = new MethodOutcome();
-    // var theId = IdDt.newRandomUuid();
     var theId = Ids.newId(context, resource.getIdElement().getResourceType(),
         resource.getIdElement().getIdPart());
     while (resourceMap.containsKey(theId)) {
@@ -107,7 +105,6 @@ public class InMemoryFhirRepository implements Repository {
   @Override
   public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
     var outcome = new MethodOutcome();
-    // var theId = new IdDt(resource.getIdElement());
     var theId = Ids.newId(context, resource.getIdElement().getResourceType(),
         resource.getIdElement().getIdPart());
     if (!resourceMap.containsKey(theId)) {
@@ -121,7 +118,6 @@ public class InMemoryFhirRepository implements Repository {
   public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
       I id, Map<String, String> headers) {
     var outcome = new MethodOutcome();
-    // var theId = new IdDt(resourceType.getSimpleName(), id.getIdPart());
     var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
     if (resourceMap.containsKey(theId)) {
       resourceMap.remove(theId);

@@ -288,15 +288,16 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
       if (codes != null) {
         List<IQueryParameterType> codeList = new ArrayList<>();
         for (Code code : codes) {
-          codeList.add(new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode()));
+          codeList.add(new TokenParam(
+              new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode())));
         }
         searchParams.put(codePath, codeList);
       } else if (valueSet != null) {
         if (this.terminologyProvider != null && this.isExpandValueSets()) {
           List<IQueryParameterType> codeList = new ArrayList<>();
           for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
-            codeList
-                .add(new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode()));
+            codeList.add(new TokenParam(
+                new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode())));
           }
           searchParams.put(codePath, codeList);
         } else {

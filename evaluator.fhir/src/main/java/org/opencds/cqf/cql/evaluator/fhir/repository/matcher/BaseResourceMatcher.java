@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.fhir.repository.matcher;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,16 +27,16 @@ public interface BaseResourceMatcher {
     if (pathResult == null) {
       return false;
     }
-    List<BaseCodingDt> resourcePathCodes = new ArrayList<>();
     for (IQueryParameterType param : params) {
       if (param instanceof ReferenceParam) {
         match = isMatchReference(param, pathResult);
       } else if (param instanceof DateParam) {
         match = isMatchDate((DateParam) param, pathResult);
       } else if (param instanceof TokenParam) {
-        match = isMatchToken((TokenParam) param, pathResult, resourcePathCodes);
-      } else if (param instanceof BaseCodingDt) {
-        if (isMatchCoding((BaseCodingDt) param, pathResult, resourcePathCodes)) {
+        var codes = getCodes(pathResult);
+        if (codes == null) {
+          match = isMatchToken((TokenParam) param, pathResult);
+        } else if (isMatchCoding((TokenParam) param, pathResult, codes)) {
           return true;
         }
       } else if (param instanceof UriParam) {
@@ -99,27 +98,19 @@ public interface BaseResourceMatcher {
     return matchesDateBounds(dateRange, new DateRangeParam(param));
   }
 
-  default boolean isMatchToken(TokenParam param, Object pathResult,
-      List<BaseCodingDt> resourcePathCodes) {
+  default boolean isMatchToken(TokenParam param, Object pathResult) {
     if (param.getValue() == null) {
       return true;
-    }
-    // in value set
-    if (param.getModifier() == TokenParamModifier.IN) {
-      if (resourcePathCodes.isEmpty()) {
-        resourcePathCodes = getCodes(pathResult);
-      }
-      return inValueSet(resourcePathCodes);
     }
     return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
   }
 
-  default boolean isMatchCoding(BaseCodingDt param, Object pathResult,
-      List<BaseCodingDt> resourcePathCodes) {
-    if (resourcePathCodes.isEmpty()) {
-      resourcePathCodes = getCodes(pathResult);
+  default boolean isMatchCoding(TokenParam param, Object pathResult, List<BaseCodingDt> codes) {
+    // in value set
+    if (param.getModifier() == TokenParamModifier.IN) {
+      return inValueSet(codes);
     }
-    return resourcePathCodes.stream().anyMatch((param)::matchesToken);
+    return codes.stream().anyMatch((param.getValueAsCoding())::matchesToken);
   }
 
   default boolean isMatchUri(UriParam param, Object pathResult) {

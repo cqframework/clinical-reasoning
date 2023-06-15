@@ -84,9 +84,9 @@ public class TestQuestionnaireResponse {
         TestRepository data =
             new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
         TestRepository content =
-            new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+            new TestRepository(fhirContext, this.getClass(), List.of("resources"), false);
         TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+            List.of("vocabulary/CodeSystem", "vocabulary/ValueSet"), false);
 
         repository = Repositories.proxy(data, content, terminology);
       }

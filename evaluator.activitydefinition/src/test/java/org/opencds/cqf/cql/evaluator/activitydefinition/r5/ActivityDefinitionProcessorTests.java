@@ -27,9 +27,9 @@ public class ActivityDefinitionProcessorTests {
   @BeforeClass
   public void setup() {
     var data = new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
-    var content = new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+    var content = new TestRepository(fhirContext, this.getClass(), List.of("resources"), false);
     var terminology = new TestRepository(fhirContext, this.getClass(),
-        List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+        List.of("vocabulary/CodeSystem", "vocabulary/ValueSet"), false);
 
     repository = Repositories.proxy(data, content, terminology);
     activityDefinitionProcessor =

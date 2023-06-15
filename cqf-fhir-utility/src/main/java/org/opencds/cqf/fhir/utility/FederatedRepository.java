@@ -118,7 +118,7 @@ public class FederatedRepository implements Repository {
     this.repositoryList.forEach(r -> futureList.add(CompletableFuture
         .supplyAsync(() -> conductSearch(r, bundleType, resourceType, searchParameters, headers))));
 
-    var futureArray = futureList.toArray(new CompletableFuture[futureList.size()]);
+    var futureArray = futureList.toArray(new CompletableFuture<?>[futureList.size()]);
 
     var resultsFuture =
         CompletableFuture.allOf(futureArray);
@@ -126,7 +126,7 @@ public class FederatedRepository implements Repository {
     try {
       resultsFuture.get();
       List<IBaseResource> resources = Stream.of(futureArray)
-          .map(CompletableFuture::join)
+          .map(CompletableFuture<?>::join)
           .map(b -> (List<IBaseResource>) b)
           // .map((IBaseBundle b) -> BundleUtil.toListOfResources(fhirContext(), b))
           .flatMap(b -> b.stream())

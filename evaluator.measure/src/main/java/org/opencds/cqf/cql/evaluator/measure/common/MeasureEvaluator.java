@@ -430,7 +430,9 @@ public class MeasureEvaluator {
         }
       }
 
-      sd.putResult(subjectId, result, this.context.getEvaluatedResources());
+      if (result != null) {
+        sd.putResult(subjectId, result, this.context.getEvaluatedResources());
+      }
 
       clearEvaluatedResources();
     }

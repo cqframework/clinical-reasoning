@@ -29,7 +29,6 @@ public class DiabetesMeasureProcessorTest {
   }
 
   @Test
-  // TODO: Need a subject provider / processor that can load multiple subjects
   public void a1c_population() throws IOException {
     given.when()
         .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")

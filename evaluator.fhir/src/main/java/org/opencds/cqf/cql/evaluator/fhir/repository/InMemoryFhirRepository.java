@@ -24,7 +24,6 @@ import com.google.common.collect.Maps;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -85,10 +84,9 @@ public class InMemoryFhirRepository implements Repository {
   @Override
   public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
     var outcome = new MethodOutcome();
-    var theId = Ids.newId(context, resource.getIdElement().getResourceType(),
-        resource.getIdElement().getIdPart());
+    var theId = Ids.newRandomId(context, resource.getIdElement().getResourceType());
     while (resourceMap.containsKey(theId)) {
-      theId = IdDt.newRandomUuid();
+      theId = Ids.newRandomId(context, resource.getIdElement().getResourceType());
     }
     resource.setId(theId);
     resourceMap.put(theId, resource);

@@ -3,6 +3,8 @@ package org.opencds.cqf.cql.evaluator.fhir.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.UUID;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -50,6 +52,23 @@ public class Ids {
 
     FhirVersionEnum versionEnum = FhirVersions.forClass(theBaseTypeClass);
     return newId(versionEnum, theResourceName, theId);
+  }
+
+  /**
+   * Creates a new random Id of the appropriate IIdType for a given FhirContext
+   *
+   * @param <IdType> an IIdType type
+   * @param theFhirContext the FhirContext to use for Id generation
+   * @param theResourceType the type of the Resource to create an Id for
+   * @return the id
+   */
+  public static <IdType extends IIdType> IdType newRandomId(FhirContext theFhirContext,
+      String theResourceType) {
+    checkNotNull(theFhirContext);
+    checkNotNull(theResourceType);
+
+    return newId(theFhirContext.getVersion().getVersion(), theResourceType,
+        UUID.randomUUID().toString());
   }
 
   /**

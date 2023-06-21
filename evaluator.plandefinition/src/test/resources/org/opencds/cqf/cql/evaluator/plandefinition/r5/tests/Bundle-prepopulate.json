@@ -5,7 +5,7 @@
   "entry": [
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "RequestOrchestration",
         "id": "prepopulate",
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
@@ -71,7 +71,7 @@
             }
           }
         ],
-        "url": "http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+        "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
         "name": "OutpatientPriorAuthorizationRequest",
         "title": "Outpatient Prior Authorization Request",
         "status": "active",
@@ -739,8 +739,8 @@
         "id": "complete-questionnaire",
         "basedOn": [
           {
-            "reference": "RequestGroup/prepopulate",
-            "type": "RequestGroup"
+            "reference": "RequestOrchestration/prepopulate",
+            "type": "RequestOrchestration"
           }
         ],
         "status": "draft",

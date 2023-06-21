@@ -2,14 +2,17 @@ package org.opencds.cqf.cql.evaluator.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Optional;
+
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -31,56 +34,92 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public static final String MISSING_CODE_PROPERTY = "Missing required code property";
   private final IFhirPath fhirPath;
   private final ModelResolver modelResolver;
+  protected final EvaluationSettings evaluationSettings;
   protected Repository repository;
 
-  protected BaseActivityDefinitionProcessor(Repository repository) {
-    requireNonNull(repository, "repository can not be null");
-    this.repository = repository;
-    this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
+  protected String subjectId;
+  protected String encounterId;
+  protected String practitionerId;
+  protected String organizationId;
+  protected IBaseParameters parameters;
+  protected LibraryEngine libraryEngine;
+
+
+
+  protected BaseActivityDefinitionProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
+    this.evaluationSettings =
+        requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+    this.repository = requireNonNull(repository, "repository can not be null");
+    this.fhirPath = org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache
+        .cachedForContext(repository.fhirContext());
     modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
 
-  protected String subjectId;
-  protected IBaseParameters parameters;
-  protected LibraryEngine libraryEngine;
+  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
+      String errorMessage) {
+    if (obj == null)
+      return Optional.empty();
+    if (type.isInstance(obj)) {
+      return Optional.of(type.cast(obj));
+    }
+    throw new IllegalArgumentException(errorMessage);
+  }
 
-  public IBaseResource apply(IIdType theId, String subjectId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
+      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
       IBaseResource dataEndpoint) {
     this.repository =
         Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-    return apply(theId, subjectId, encounterId, practitionerId, organizationId, userType,
-        userLanguage, userTaskContext, setting, settingContext, parameters,
-        new LibraryEngine(this.repository));
+    return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, new LibraryEngine(this.repository, this.evaluationSettings));
   }
 
-  @SuppressWarnings("unchecked")
-  public IBaseResource apply(IIdType theId, String subjectId, String encounterId,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
+      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, LibraryEngine libraryEngine) {
+    return apply(resolveActivityDefinition(theId, theCanonical, theActivityDefinition), subjectId,
+        encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext,
+        setting, settingContext, parameters, libraryEngine);
+  }
+
+  public IBaseResource apply(T theActivityDefinition, String subjectId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
       LibraryEngine libraryEngine) {
     this.subjectId = subjectId;
+    this.encounterId = encounterId;
+    this.practitionerId = practitionerId;
+    this.organizationId = organizationId;
     this.parameters = parameters;
     this.libraryEngine = libraryEngine;
-    T activityDefinition = (T) this.repository.read(ActivityDefinition.class, theId);
-    if (activityDefinition == null) {
-      throw new IllegalArgumentException("Couldn't find ActivityDefinition " + theId);
-    }
-    return resolveActivityDefinition(activityDefinition, subjectId, practitionerId, organizationId);
+
+    return applyActivityDefinition(theActivityDefinition);
   }
 
-  public abstract IBaseResource resolveActivityDefinition(T activityDefinition, String patientId,
-      String practitionerId, String organizationId);
+  public abstract <CanonicalType extends IPrimitiveType<String>> T resolveActivityDefinition(
+      IIdType theId, CanonicalType theCanonical, IBaseResource theActivityDefinition);
+
+  public abstract IBaseResource applyActivityDefinition(T theActivityDefinition);
 
   public void resolveDynamicValue(String language, String expression, String libraryUrl,
       String path, IBaseResource resource, String subjectType) {
 
-    var value = this.libraryEngine.getExpressionResult(this.subjectId, subjectType, expression,
+    var result = this.libraryEngine.getExpressionResult(this.subjectId, subjectType, expression,
         language, libraryUrl, this.parameters, null);
+    if (result != null && result.size() > 1) {
+      throw new IllegalArgumentException(String.format(
+          "Dynamic value resolution received multiple values for expression: %s", expression));
+    }
+    var value = result == null || result.isEmpty() ? null : result.get(0);
     modelResolver.setValue(resource, path, value);
   }
 

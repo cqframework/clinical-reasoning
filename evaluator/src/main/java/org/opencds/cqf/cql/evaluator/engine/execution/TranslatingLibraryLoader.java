@@ -2,29 +2,30 @@ package org.opencds.cqf.cql.evaluator.engine.execution;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
+import static org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil.OVERLOAD_SAFE_SIGNATURE_LEVELS;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.elm.execution.FunctionDef;
-import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.ExpressionDef;
+import org.cqframework.cql.elm.execution.FunctionDef;
+import org.cqframework.cql.elm.execution.FunctionRef;
+import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.engine.exception.CqlException;
@@ -44,32 +45,52 @@ import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
  */
 public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoader {
 
-  protected NamespaceInfo namespaceInfo;
-  protected CqlTranslatorOptions cqlTranslatorOptions;
-  protected List<LibrarySourceProvider> librarySourceProviders;
+  protected final CqlTranslatorOptions cqlTranslatorOptions;
 
-  protected LibraryManager libraryManager;
+  protected final LibraryManager libraryManager;
+  protected final ModelManager modelManager;
 
-  private static Set<LibraryBuilder.SignatureLevel> overloadSafeSignatureLevels =
-      new HashSet<>((Arrays.asList(SignatureLevel.All, SignatureLevel.Overloads)));
+  protected final Map<VersionedIdentifier, Library> libraryCache;
+
+  protected final EnumSet<CqlTranslatorOptions.Options> binaryOptionSet;
+
+  protected final List<LibrarySourceProvider> librarySourceProviders;
+
+  public TranslatingLibraryLoader(ModelManager modelManager,
+      List<LibrarySourceProvider> librarySourceProviders, CqlTranslatorOptions translatorOptions) {
+    this(modelManager, librarySourceProviders, translatorOptions, null);
+  }
 
   public TranslatingLibraryLoader(ModelManager modelManager,
       List<LibrarySourceProvider> librarySourceProviders, CqlTranslatorOptions translatorOptions,
-      NamespaceInfo namespaceInfo) {
+      Map<VersionedIdentifier, Library> libraryCache) {
+
     this.librarySourceProviders =
         requireNonNull(librarySourceProviders, "librarySourceProviders can not be null");
+    this.modelManager = requireNonNull(modelManager, "modelManager can not be null");
+    this.libraryCache = libraryCache != null ? libraryCache : new ConcurrentHashMap<>();
 
     this.cqlTranslatorOptions =
         translatorOptions != null ? translatorOptions : CqlTranslatorOptions.defaultOptions();
-
-    if (namespaceInfo != null) {
-      modelManager.getNamespaceManager().addNamespace(namespaceInfo);
+    if (!OVERLOAD_SAFE_SIGNATURE_LEVELS.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
+      throw new IllegalArgumentException(
+          "TranslatingLibraryLoader requires an overload-safe SignatureLevel: {All, Overloads}");
     }
 
     this.libraryManager = new LibraryManager(modelManager);
+
+    // TODO: Dual caching here between this layer and the LibraryManager.
+    // The LibraryManager only allows loading one version at a time.
+    // So disable that cache. That impacts compilation speed.
+    // But since compilation is most likely a one-time expense, this
+    // produces better performance overall.
+    this.libraryManager.disableCache();
     for (LibrarySourceProvider provider : librarySourceProviders) {
       libraryManager.getLibrarySourceLoader().registerProvider(provider);
     }
+
+    this.binaryOptionSet = this.cqlTranslatorOptions.getOptions().clone();
+    binaryOptionSet.removeAll(TranslatorOptionsUtil.OPTIONAL_ENUM_SET);
   }
 
   public void loadNamespaces(List<NamespaceInfo> namespaceInfos) {
@@ -79,22 +100,74 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   }
 
   public Library load(VersionedIdentifier libraryIdentifier) {
-    Library library = this.getLibraryFromElm(libraryIdentifier);
-
-    boolean requireFunctionSignature = false;
-
-    if (hasOverloadedFunctions(library) &&
-        !overloadSafeSignatureLevels.contains(this.cqlTranslatorOptions.getSignatureLevel())) {
-      this.cqlTranslatorOptions.setSignatureLevel(SignatureLevel.Overloads);
-      requireFunctionSignature = true;
+    // Don't use "computeIfAbsent" here. The cache may be synchronized and this will deadlock
+    // because libraries are loaded recursively.
+    Library library = null;
+    if (this.libraryCache.containsKey(libraryIdentifier)) {
+      // NOTE: This assumes there are no issues with library
+      // dependencies. If we've lost the ability to reload
+      // a model or dependencies (for example, a SourceLoader was removed)
+      // this will put us in an invalid state.
+      library = this.libraryCache.get(libraryIdentifier);
+    } else {
+      library = this.tryElmElseTranslate(libraryIdentifier);
+      this.libraryCache.put(libraryIdentifier, library);
     }
 
-    if (library != null && !requireFunctionSignature && this.translatorOptionsMatch(library)) {
-      return library;
+    return library;
+  }
+
+  protected Library tryElmElseTranslate(VersionedIdentifier libraryIdentifier) {
+    Library library = null;
+    if (!this.getCqlTranslatorOptions().getEnableCqlOnly()) {
+      library = this.getLibraryFromElm(libraryIdentifier);
     }
 
-    this.cqlTranslatorOptions.setEnableCqlOnly(true);
-    return this.translate(libraryIdentifier);
+    if (library == null) {
+      library = this.translate(libraryIdentifier);
+    }
+
+    return library;
+  }
+
+  public void ensureDependencies(Library library) {
+    if (library.getIncludes() != null) {
+      for (var include : library.getIncludes().getDef()) {
+        this.load(
+            new VersionedIdentifier().withId(include.getLocalIdentifier())
+                .withVersion(include.getVersion()));
+      }
+    }
+
+    if (library.getUsings() != null) {
+      for (var model : library.getUsings().getDef()) {
+        this.modelManager.resolveModel(model.getLocalIdentifier(), model.getVersion());
+      }
+    }
+  }
+
+  private void ensureNamespaceUpdate(VersionedIdentifier libraryIdentifier) {
+    // Need to ensure namespaces are preserved when recompiling
+    if (libraryIdentifier.getSystem() != null && !libraryIdentifier.getSystem().isEmpty()
+        && libraryManager.getNamespaceManager()
+            .getNamespaceInfoFromUri(libraryIdentifier.getSystem()) == null) {
+      libraryManager.getNamespaceManager().addNamespace(
+          new NamespaceInfo(libraryIdentifier.getId(), libraryIdentifier.getSystem()));
+    }
+  }
+
+  private boolean checkBinaryCompatibility(Library library) {
+    if (library == null) {
+      return false;
+    }
+
+    return this.isSignatureCompatible(library)
+        && this.isVersionCompatible(library)
+        && this.translatorOptionsMatch(library);
+  }
+
+  private boolean isSignatureCompatible(Library library) {
+    return !hasOverloadedFunctions(library) || hasSignature(library);
   }
 
   @Override
@@ -104,28 +177,38 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
 
   protected Library getLibraryFromElm(VersionedIdentifier libraryIdentifier) {
     org.hl7.elm.r1.VersionedIdentifier versionedIdentifier = toElmIdentifier(libraryIdentifier);
+
+    Library library = null;
     for (var type : new LibraryContentType[] {LibraryContentType.JSON, LibraryContentType.XML}) {
       InputStream is = this.getLibraryContent(versionedIdentifier, type);
       if (is != null) {
         try {
-          return CqlLibraryReaderFactory.getReader(type.mimeType()).read(is);
-        } catch (IOException e) {
-          e.printStackTrace();
+          // Even if we successfully read the library from ELM, we still need to ensure that all the
+          // dependencies are loaded correctly and that all translator options and so on match
+          var candidateLibrary = CqlLibraryReaderFactory.getReader(type.mimeType()).read(is);
+          ensureDependencies(candidateLibrary);
+          ensureNamespaceUpdate(candidateLibrary.getIdentifier());
+          if (checkBinaryCompatibility(candidateLibrary)) {
+            library = candidateLibrary;
+            break;
+          }
+        } catch (Exception e) {
+          // intentionally empty, move on to the next candidate library
         }
       }
     }
 
-    return null;
+    return library;
   }
 
-  protected Boolean translatorOptionsMatch(Library library) {
+  public boolean translatorOptionsMatch(Library library) {
     EnumSet<CqlTranslatorOptions.Options> options =
-        TranslatorOptionsUtil.getTranslatorOptions(library);
+        TranslatorOptionsUtil.getTranslatorOptions(library, true);
     if (options == null) {
       return false;
     }
 
-    return options.equals(this.cqlTranslatorOptions.getOptions());
+    return options.equals(this.binaryOptionSet);
   }
 
   protected InputStream getLibraryContent(org.hl7.elm.r1.VersionedIdentifier libraryIdentifier,
@@ -144,12 +227,22 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
   protected Library translate(VersionedIdentifier libraryIdentifier) {
     CompiledLibrary library;
     List<CqlCompilerException> errors = new ArrayList<>();
+
+    // TODO: Huh. Big ole issue here. Need to update the LibraryManager to
+    // to be able to have all the same tests for binary compatibility as the
+    // translating library loader. In the meantime, fake it and tell it
+    // to only use CQL when we resolve a library. And then reset
+    // to our default state.
+    boolean enableCql = this.cqlTranslatorOptions.getEnableCqlOnly();
     try {
+      this.cqlTranslatorOptions.setEnableCqlOnly(true);
       library = this.libraryManager.resolveLibrary(toElmIdentifier(libraryIdentifier),
           this.cqlTranslatorOptions, errors);
     } catch (Exception e) {
       throw new CqlException(String.format("Unable to resolve library (%s): %s",
           libraryIdentifier.getId(), e.getMessage()), e);
+    } finally {
+      this.cqlTranslatorOptions.setEnableCqlOnly(enableCql);
     }
 
     if (!errors.isEmpty()) {
@@ -170,18 +263,49 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     }
   }
 
+  private boolean isVersionCompatible(Library library) {
+    if (!StringUtils.isEmpty(cqlTranslatorOptions.getCompatibilityLevel())) {
+      if (library.getAnnotation() != null) {
+        String version = TranslatorOptionsUtil.getTranslationVersion(library);
+        if (version != null) {
+          return version.equals(cqlTranslatorOptions.getCompatibilityLevel());
+        }
+      }
+    }
+
+    return false;
+  }
+
   private boolean hasOverloadedFunctions(Library library) {
+    if (library == null || library.getStatements() == null) {
+      return false;
+    }
+
     Set<FunctionSig> functionNames = new HashSet<>();
+    for (ExpressionDef ed : library.getStatements().getDef()) {
+      if (ed instanceof FunctionDef) {
+        FunctionDef fd = (FunctionDef) ed;
+        var sig = new FunctionSig(fd.getName(),
+            fd.getOperand() == null ? 0 : fd.getOperand().size());
+        if (functionNames.contains(sig)) {
+          return true;
+        } else {
+          functionNames.add(sig);
+        }
+      }
+    }
+    return false;
+  }
+
+  boolean hasSignature(Library library) {
     if (library != null && library.getStatements() != null) {
+      // Just a quick top-level scan for signatures. To fully verify we'd have to recurse all
+      // the way down. At that point, let's just translate.
       for (ExpressionDef ed : library.getStatements().getDef()) {
-        if (ed instanceof FunctionDef) {
-          FunctionDef fd = (FunctionDef) ed;
-          var sig = new FunctionSig(fd.getName(),
-              fd.getOperand() == null ? 0 : fd.getOperand().size());
-          if (functionNames.contains(sig)) {
+        if (ed.getExpression() instanceof FunctionRef) {
+          FunctionRef fr = (FunctionRef) ed.getExpression();
+          if (fr.getSignature() != null && !fr.getSignature().isEmpty()) {
             return true;
-          } else {
-            functionNames.add(sig);
           }
         }
       }
@@ -189,7 +313,7 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     return false;
   }
 
-  class FunctionSig {
+  static class FunctionSig {
 
     private final String name;
     private final int numArguments;
@@ -200,24 +324,24 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
     }
 
     @Override
-    public boolean equals(Object other) {
-      if (other == null) {
-        return false;
-      }
-
-      FunctionSig func = (FunctionSig) other;
-
-      if (func == null) {
-        return false;
-      }
-
-      return this.name.equals(func.name) && this.numArguments == func.numArguments;
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + name.hashCode();
+      result = prime * result + numArguments;
+      return result;
     }
 
     @Override
-    public int hashCode() {
-      int start = 17;
-      return start + name.hashCode() * 31 + numArguments * 31;
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      FunctionSig other = (FunctionSig) obj;
+      return other.name.equals(this.name) && other.numArguments == this.numArguments;
     }
   }
 

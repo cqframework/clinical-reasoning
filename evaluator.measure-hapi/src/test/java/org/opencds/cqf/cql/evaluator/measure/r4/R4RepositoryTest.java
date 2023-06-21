@@ -16,10 +16,12 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
-import org.opencds.cqf.cql.evaluator.fhir.repository.r4.FhirRepository;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.testng.annotations.Test;
+
+import ca.uhn.fhir.context.FhirContext;
 
 
 public class R4RepositoryTest {
@@ -27,9 +29,14 @@ public class R4RepositoryTest {
   Repository repository;
 
   public R4RepositoryTest() {
-    FhirRepository data = new FhirRepository(this.getClass(), List.of("res/tests"), false);
-    FhirRepository content = new FhirRepository(this.getClass(), List.of("res/content/"), false);
-    FhirRepository terminology = new FhirRepository(this.getClass(),
+    var fhirContext = FhirContext.forR4Cached();
+
+
+    TestRepository data =
+        new TestRepository(fhirContext, this.getClass(), List.of("res/tests"), false);
+    TestRepository content =
+        new TestRepository(fhirContext, this.getClass(), List.of("res/resources/"), false);
+    TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
         List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
 
     repository = Repositories.proxy(data, content, terminology);

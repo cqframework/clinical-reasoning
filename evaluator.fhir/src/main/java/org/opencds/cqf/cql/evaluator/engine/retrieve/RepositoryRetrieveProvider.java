@@ -44,6 +44,7 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Iterable<Object> retrieve(final String context, final String contextPath,
       final Object contextValue, final String dataType, final String templateId,
       final String codePath, final Iterable<Code> codes, final String valueSet,
@@ -51,7 +52,9 @@ public class RepositoryRetrieveProvider extends TerminologyAwareRetrieveProvider
       final Interval dateRange) {
 
     List<? extends IBaseResource> resources =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
+        BundleUtil.toListOfResources(this.fhirContext, repository.search(
+            (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
+                .getImplementingClass(),
             this.fhirContext.getResourceDefinition(dataType).getImplementingClass(), null, null));
 
     resources = this.filterByTemplateId(dataType, templateId, resources);

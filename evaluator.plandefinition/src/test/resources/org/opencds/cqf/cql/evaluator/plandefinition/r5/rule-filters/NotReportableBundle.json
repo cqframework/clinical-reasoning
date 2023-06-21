@@ -4,7 +4,7 @@
   "entry": [
     {
       "resource": {
-        "resourceType": "RequestGroup",
+        "resourceType": "RequestOrchestration",
         "id": "plandefinition-RuleFilters-1.0.0",
         "instantiatesCanonical": [
           "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0"
@@ -104,7 +104,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "ready",
@@ -290,7 +290,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -341,7 +341,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -354,7 +354,7 @@
         "id": "check-reportable",
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -380,7 +380,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -431,7 +431,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -482,7 +482,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -495,7 +495,7 @@
         "id": "create-and-report-eicr",
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -521,7 +521,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -547,7 +547,7 @@
         ],
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",
@@ -560,7 +560,7 @@
         "id": "route-and-send-eicr",
         "basedOn": [
           {
-            "reference": "RequestGroup/plandefinition-RuleFilters-1.0.0"
+            "reference": "RequestOrchestration/plandefinition-RuleFilters-1.0.0"
           }
         ],
         "status": "draft",

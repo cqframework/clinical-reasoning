@@ -17,10 +17,11 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.repository.dstu3.FhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.parser.IParser;
 public class PlanDefinition {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return PlanDefinition.class.getResourceAsStream(asset);
@@ -48,7 +50,7 @@ public class PlanDefinition {
   }
 
   public static PlanDefinitionProcessor buildProcessor(Repository repository) {
-    return new PlanDefinitionProcessor(repository);
+    return new PlanDefinitionProcessor(repository, EvaluationSettings.getDefault());
   }
 
   /** Fluent interface starts here **/
@@ -72,6 +74,8 @@ public class PlanDefinition {
     private Bundle additionalData;
     private Parameters parameters;
 
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+
     public Apply(String planDefinitionID, String patientID, String encounterID) {
       this.planDefinitionID = planDefinitionID;
       this.patientID = patientID;
@@ -79,19 +83,19 @@ public class PlanDefinition {
     }
 
     public Apply withData(String dataAssetName) {
-      dataRepository = new FhirRepository((Bundle) parse(dataAssetName));
+      dataRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public Apply withContent(String dataAssetName) {
-      contentRepository = new FhirRepository((Bundle) parse(dataAssetName));
+      contentRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public Apply withTerminology(String dataAssetName) {
-      terminologyRepository = new FhirRepository((Bundle) parse(dataAssetName));
+      terminologyRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
@@ -123,13 +127,14 @@ public class PlanDefinition {
         return;
       }
       if (dataRepository == null) {
-        dataRepository = new FhirRepository(this.getClass(), List.of("tests"), false);
+        dataRepository = new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
       }
       if (contentRepository == null) {
-        contentRepository = new FhirRepository(this.getClass(), List.of("content"), false);
+        contentRepository =
+            new TestRepository(fhirContext, this.getClass(), List.of("resources"), false);
       }
       if (terminologyRepository == null) {
-        terminologyRepository = new FhirRepository(this.getClass(),
+        terminologyRepository = new TestRepository(fhirContext, this.getClass(),
             List.of("vocabulary/CodeSystem", "vocabulary/ValueSet"), false);
       }
 
@@ -138,10 +143,11 @@ public class PlanDefinition {
 
     public GeneratedCarePlan apply() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(this.repository);
+      var libraryEngine = new LibraryEngine(this.repository, evaluationSettings);
       return new GeneratedCarePlan((CarePlan) buildProcessor(repository).apply(
-          new IdType("PlanDefinition", planDefinitionID), patientID, encounterID, null, null, null,
-          null, null, null, null, parameters, null, additionalData, null, libraryEngine));
+          new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
+          null, null, null, null, null, null, parameters, null, additionalData, null,
+          libraryEngine));
     }
   }
 

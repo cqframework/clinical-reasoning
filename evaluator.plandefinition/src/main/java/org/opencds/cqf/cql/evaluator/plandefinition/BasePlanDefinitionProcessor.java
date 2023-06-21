@@ -4,12 +4,14 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
@@ -17,6 +19,7 @@ import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -32,6 +35,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
       "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression";
   protected static final String REQUEST_GROUP_EXT =
       "http://fl7.org/fhir/StructureDefinition/RequestGroup-Goal";
+
+  protected static final String REQUEST_ORCHESTRATION_EXT =
+      "http://fl7.org/fhir/StructureDefinition/RequestOrchestration-Goal";
 
   protected static final String subjectType = "Patient";
 
@@ -59,10 +65,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected IBaseResource questionnaire;
   protected Collection<IBaseResource> requestResources;
   protected Collection<IBaseResource> extractedResources;
+  protected EvaluationSettings evaluationSettings;
 
-  protected BasePlanDefinitionProcessor(Repository repository) {
-    requireNonNull(repository, "localRepository can not be null");
-    this.repository = repository;
+  protected BasePlanDefinitionProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
+    this.repository = requireNonNull(repository, "repository can not be null");
+    this.evaluationSettings =
+        requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
     this.operationParametersParser = new OperationParametersParser(
         Contexts.getAdapterFactory(repository.fhirContext()),
@@ -71,7 +80,18 @@ public abstract class BasePlanDefinitionProcessor<T> {
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
 
-  public abstract T resolvePlanDefinition(IIdType theId);
+  public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
+      String errorMessage) {
+    if (obj == null)
+      return Optional.empty();
+    if (type.isInstance(obj)) {
+      return Optional.of(type.cast(obj));
+    }
+    throw new IllegalArgumentException(errorMessage);
+  }
+
+  public abstract <CanonicalType extends IPrimitiveType<String>> T resolvePlanDefinition(
+      IIdType theId, CanonicalType theCanonical, IBaseResource thePlanDefinition);
 
   public abstract IBaseResource applyPlanDefinition(T planDefinition);
 
@@ -84,27 +104,43 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public abstract void extractQuestionnaireResponse();
 
-  public IBaseResource apply(IIdType theId, String patientId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
-      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
-      IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
-    return apply(theId, patientId, encounterId, practitionerId, organizationId, userType,
-        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
-        prefetchData, new LibraryEngine(repository));
+  public abstract IBaseBundle packagePlanDefinition(T thePlanDefinition, boolean theIsPut);
+
+  public IBaseBundle packagePlanDefinition(T thePlanDefinition) {
+    return packagePlanDefinition(thePlanDefinition, false);
   }
 
-  public IBaseResource apply(IIdType theId, String patientId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
-      LibraryEngine libraryEngine) {
+  public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packagePlanDefinition(
+      IIdType theId, CanonicalType theCanonical, IBaseResource thePlanDefinition,
+      boolean theIsPut) {
+    return packagePlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition),
+        theIsPut);
+  }
+
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
+      CanonicalType theCanonical, IBaseResource thePlanDefinition, String patientId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
+      IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
+    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    return apply(theId, theCanonical, thePlanDefinition, patientId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, useServerData, bundle, prefetchData,
+        new LibraryEngine(repository, this.evaluationSettings));
+  }
+
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
+      CanonicalType theCanonical, IBaseResource thePlanDefinition, String patientId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
+      IBaseParameters prefetchData, LibraryEngine libraryEngine) {
     if (repository.fhirContext().getVersion().getVersion() == FhirVersionEnum.R5) {
-      return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
-          userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
-          prefetchData, libraryEngine);
+      return applyR5(theId, theCanonical, thePlanDefinition, patientId, encounterId, practitionerId,
+          organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+          parameters, useServerData, bundle, prefetchData, libraryEngine);
     }
     this.patientId = patientId;
     this.encounterId = encounterId;
@@ -124,26 +160,30 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
     extractQuestionnaireResponse();
-    return transformToCarePlan(applyPlanDefinition(resolvePlanDefinition(theId)));
+    return transformToCarePlan(
+        applyPlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition)));
   }
 
-  public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
-      IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource applyR5(IIdType theId,
+      CanonicalType theCanonical, IBaseResource thePlanDefinition, String patientId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
+      IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
-    return applyR5(theId, patientId, encounterId, practitionerId, organizationId, userType,
-        userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle,
-        prefetchData, new LibraryEngine(repository));
+    return applyR5(theId, theCanonical, thePlanDefinition, patientId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        parameters, useServerData, bundle, prefetchData,
+        new LibraryEngine(repository, this.evaluationSettings));
   }
 
-  public IBaseResource applyR5(IIdType theId, String patientId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      Boolean useServerData, IBaseBundle bundle, IBaseParameters prefetchData,
-      LibraryEngine libraryEngine) {
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource applyR5(IIdType theId,
+      CanonicalType theCanonical, IBaseResource thePlanDefinition, String patientId,
+      String encounterId, String practitionerId, String organizationId, String userType,
+      String userLanguage, String userTaskContext, String setting, String settingContext,
+      IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
+      IBaseParameters prefetchData, LibraryEngine libraryEngine) {
     this.patientId = patientId;
     this.encounterId = encounterId;
     this.practitionerId = practitionerId;
@@ -162,7 +202,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
     extractQuestionnaireResponse();
-    return transformToBundle(applyPlanDefinition(resolvePlanDefinition(theId)));
+    return transformToBundle(
+        applyPlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition)));
   }
 
   public void validateExpressionWithPath(String language, String expression, String path,
@@ -186,8 +227,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
       result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, altExpression,
           altLanguage, libraryUrl, params, this.bundle);
     }
+    if (result != null && result.size() > 1) {
+      throw new IllegalArgumentException(String.format(
+          "Dynamic value resolution received multiple values for expression: %s", expression));
+    }
+    var value = result == null || result.isEmpty() ? null : result.get(0);
     if (path.startsWith("action.")) {
-      resolveCdsHooksDynamicValue(resource, result, path);
+      resolveCdsHooksDynamicValue(resource, value, path);
     }
     // backwards compatibility where CDS Hooks indicator was set with activity.extension or
     // action.extension path
@@ -196,9 +242,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
         throw new IllegalArgumentException(
             "Please use the priority path when setting indicator values when using FHIR R5 for CDS Hooks evaluation");
       }
-      resolveCdsHooksDynamicValue(resource, result, path);
+      resolveCdsHooksDynamicValue(resource, value, path);
     } else {
-      modelResolver.setValue(resource, path, result);
+      modelResolver.setValue(resource, path, value);
     }
   }
 
@@ -212,7 +258,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
       result = this.libraryEngine.getExpressionResult(this.patientId, subjectType, altExpression,
           altLanguage, libraryUrl, params, this.bundle);
     }
+    if (result != null && result.size() > 1) {
+      throw new IllegalArgumentException(String.format(
+          "Dynamic value resolution received multiple values for expression: %s", expression));
+    }
 
-    return result;
+    return result == null || result.isEmpty() ? null : result.get(0);
   }
 }

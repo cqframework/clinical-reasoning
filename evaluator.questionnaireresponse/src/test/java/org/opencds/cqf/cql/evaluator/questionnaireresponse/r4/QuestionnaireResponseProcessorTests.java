@@ -2,13 +2,22 @@ package org.opencds.cqf.cql.evaluator.questionnaireresponse.r4;
 
 import static org.testng.Assert.assertThrows;
 
+import org.hl7.fhir.r4.model.IdType;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.testng.annotations.Test;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireResponseProcessorTests {
   private void testExtract(String questionnaireResponse) {
+    var repository =
+        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestQuestionnaireResponse.Assert
-        .that("tests/QuestionnaireResponse-" + questionnaireResponse + ".json").extract()
-        .isEqualsTo("tests/Bundle-" + questionnaireResponse + ".json");
+        .that(new IdType("QuestionnaireResponse", questionnaireResponse))
+        .withRepository(repository)
+        .withExpectedBundleId(new IdType("Bundle", "extract-" + questionnaireResponse))
+        .extract()
+        .isEqualsToExpected();
   }
 
   @Test
@@ -30,7 +39,15 @@ public class QuestionnaireResponseProcessorTests {
 
   @Test
   void testDefinitionBasedExtraction() {
-    testExtract("OutpatientPriorAuthorizationRequest");
+    var repository =
+        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
+    TestQuestionnaireResponse.Assert
+        .that(
+            new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1"))
+        .withRepository(repository)
+        .withExpectedBundleId(
+            new IdType("Bundle", "extract-OutpatientPriorAuthorizationRequest-OPA-Patient1"))
+        .extract().hasEntry(2);
   }
 
   @Test(enabled = false)

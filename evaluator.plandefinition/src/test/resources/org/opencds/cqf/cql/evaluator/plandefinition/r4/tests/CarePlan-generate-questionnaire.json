@@ -6,8 +6,8 @@
       "resourceType": "RequestGroup",
       "id": "generate-questionnaire",
       "instantiatesCanonical": [
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire|1.0.0",
+        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
       ],
       "status": "draft",
       "intent": "proposal",
@@ -28,13 +28,8 @@
       "id": "generate-questionnaire",
       "item": [
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-              "valueCode": "Claim"
-            }
-          ],
           "linkId": "1",
+          "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim",
           "text": "Prior Auth Claim",
           "type": "group",
           "item": [
@@ -67,13 +62,8 @@
           ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-              "valueCode": "Organization"
-            }
-          ],
           "linkId": "2",
+          "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization",
           "text": "Facility Information",
           "type": "group",
           "item": [
@@ -147,13 +137,8 @@
           ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-              "valueCode": "Patient"
-            }
-          ],
           "linkId": "3",
+          "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient",
           "text": "Beneficiary Information",
           "type": "group",
           "item": [
@@ -262,13 +247,8 @@
           ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-              "valueCode": "Practitioner"
-            }
-          ],
           "linkId": "4",
+          "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating",
           "text": "Operation Physician Information",
           "type": "group",
           "item": [
@@ -354,13 +334,8 @@
           ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-              "valueCode": "Practitioner"
-            }
-          ],
           "linkId": "5",
+          "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending",
           "text": "Attending Physician Information",
           "type": "group",
           "item": [
@@ -451,7 +426,7 @@
       "resourceType": "RequestGroup",
       "id": "route-one",
       "instantiatesCanonical": [
-        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+        "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
       ],
       "status": "draft",
       "intent": "proposal",
@@ -475,8 +450,8 @@
     }
   ],
   "instantiatesCanonical": [
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
-    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire|1.0.0",
+    "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
   ],
   "status": "draft",
   "intent": "proposal",

@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure;
 
 
 import static org.opencds.cqf.cql.evaluator.converter.VersionedIdentifierConverter.toElmIdentifier;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -11,7 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.execution.ExpressionDef;
@@ -19,15 +20,17 @@ import org.cqframework.cql.elm.execution.FunctionRef;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Mockito;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;
+import org.opencds.cqf.cql.evaluator.CqlOptions;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
+import org.opencds.cqf.cql.evaluator.engine.util.TranslatorOptionsUtil;
+import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.mockito.Mockito;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BaseFhirLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -49,22 +52,25 @@ public class TranslatingLibraryLoaderTests {
 
   @BeforeMethod
   public void initialize() {
-    this.testFhirLibrarySourceProvider = Mockito.spy(new BaseFhirLibrarySourceProvider(new
-        AdapterFactory()) {
-      @Override
-      public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
-        String name = versionedIdentifier.getId();
+    this.testFhirLibrarySourceProvider =
+        Mockito.spy(new BaseFhirLibrarySourceProvider(new AdapterFactory()) {
+          @Override
+          public IBaseResource getLibrary(org.hl7.elm.r1.VersionedIdentifier versionedIdentifier) {
+            String name = versionedIdentifier.getId();
 
-        InputStream libraryStream = TranslatingLibraryLoaderTests.class.getResourceAsStream(name +
-            ".json");
+            InputStream libraryStream =
+                TranslatingLibraryLoaderTests.class.getResourceAsStream(name +
+                    ".json");
 
-        return parser.parseResource(new InputStreamReader(libraryStream));
-      }
-    });
+            return parser.parseResource(new InputStreamReader(libraryStream));
+          }
+        });
+
+    var cqlOptions = CqlOptions.defaultOptions();
 
     this.libraryLoader = new TranslatingLibraryLoader(modelManger,
         Collections.singletonList(testFhirLibrarySourceProvider),
-        CqlTranslatorOptions.defaultOptions(), null);
+        cqlOptions.getCqlTranslatorOptions());
   }
 
   @Test
@@ -78,6 +84,33 @@ public class TranslatingLibraryLoaderTests {
     assertNotNull(library);
 
     assertTrue(hasSignature(library));
+  }
+
+  @Test
+  public void loadLibraryTranslateWithVersionMismatch() {
+    VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("VersionMismatch");
+
+    Library storedElmLibrary = getElmLibrary(libraryIdentifier);
+    assertEquals(TranslatorOptionsUtil.getTranslationVersion(storedElmLibrary), "1.4");
+
+    Library library = this.libraryLoader.load(libraryIdentifier);
+    assertNotNull(library);
+
+    assertEquals(TranslatorOptionsUtil.getTranslationVersion(library),
+        CqlTranslator.class.getPackage().getImplementationVersion());
+  }
+
+  @Test
+  public void loadLibraryTranslateWithOptionsMismatch() {
+    VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId("OptionsMismatch");
+
+    Library storedElmLibrary = getElmLibrary(libraryIdentifier);
+    assertEquals(TranslatorOptionsUtil.getTranslatorOptions(storedElmLibrary).size(), 2);
+
+    Library library = this.libraryLoader.load(libraryIdentifier);
+    assertNotNull(library);
+
+    assertEquals(TranslatorOptionsUtil.getTranslatorOptions(library).size(), 4);
   }
 
   private Library getElmLibrary(VersionedIdentifier vi) {

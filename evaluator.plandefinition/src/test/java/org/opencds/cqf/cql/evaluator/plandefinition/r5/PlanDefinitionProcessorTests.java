@@ -6,11 +6,15 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.stringPart;
 import java.util.List;
 
 import org.hl7.fhir.r5.model.Parameters;
-import org.opencds.cqf.cql.evaluator.fhir.repository.r5.FhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.fhir.utility.Repositories;
 import org.testng.annotations.Test;
 
-public class PlanDefinitionProcessorTests extends PlanDefinition {
+import ca.uhn.fhir.context.FhirContext;
+
+public class PlanDefinitionProcessorTests {
+
+  private final FhirContext fhirContext = FhirContext.forR5Cached();
 
   @Test()
   public void testChildRoutineVisit() {
@@ -36,10 +40,12 @@ public class PlanDefinitionProcessorTests extends PlanDefinition {
   @Test(enabled = false)
   public void testOpioidRec10PatientView() {
     var data =
-        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
+        new TestRepository(fhirContext, this.getClass(), List.of("opioid-Rec10-patient-view/tests"),
+            false);
     var content =
-        new FhirRepository(this.getClass(), List.of("opioid-Rec10-patient-view/content"), false);
-    var terminology = new FhirRepository(this.getClass(),
+        new TestRepository(fhirContext, this.getClass(),
+            List.of("opioid-Rec10-patient-view/content"), false);
+    var terminology = new TestRepository(fhirContext, this.getClass(),
         List.of("opioid-Rec10-patient-view/vocabulary/CodeSystem",
             "opioid-Rec10-patient-view/vocabulary/ValueSet"),
         false);

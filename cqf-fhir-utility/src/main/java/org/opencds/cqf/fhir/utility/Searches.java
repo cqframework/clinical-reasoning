@@ -7,6 +7,8 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 
 public class Searches {
 
@@ -19,16 +21,20 @@ public class Searches {
   }
 
   public static Map<String, List<IQueryParameterType>> byUrl(String url) {
-    return builder().withToken("url", url).build();
+    return builder().withUriParam("url", url).build();
+  }
+
+  public static Map<String, List<IQueryParameterType>> byUrlAndVersion(String url, String version) {
+    return builder().withUriParam("url", url).withTokenParam("version", version).build();
   }
 
   public static Map<String, List<IQueryParameterType>> byName(String name) {
-    return builder().withToken("name", name).build();
+    return builder().withTokenParam("name", name).build();
   }
 
   public static Map<String, List<IQueryParameterType>> byNameAndVersion(String name,
       String version) {
-    return builder().withToken("name", name).withToken("version", version).build();
+    return builder().withTokenParam("name", name).withTokenParam("version", version).build();
   }
 
   public static class SearchBuilder {
@@ -38,19 +44,34 @@ public class Searches {
       return this.values;
     }
 
-    SearchBuilder withToken(String name, String value) {
-      // var paramValue = new StringParam(value);
-      // var paramList = new ArrayList<IQueryParameterType>();
-      // paramList.add(paramValue);
+    SearchBuilder withStringParam(String name, String value) {
       if (values == null) {
-        values = new HashMap<String, List<IQueryParameterType>>();
+        values = new HashMap<>();
       }
       values.put(name, Collections.singletonList(new StringParam(value)));
 
       return this;
     }
 
-    SearchBuilder withToken(String name, String value, String... values) {
+    SearchBuilder withTokenParam(String name, String value) {
+      if (values == null) {
+        values = new HashMap<>();
+      }
+      values.put(name, Collections.singletonList(new TokenParam(value)));
+
+      return this;
+    }
+
+    SearchBuilder withUriParam(String name, String value) {
+      if (values == null) {
+        values = new HashMap<>();
+      }
+      values.put(name, Collections.singletonList(new UriParam(value)));
+
+      return this;
+    }
+
+    SearchBuilder withTokenParam(String name, String value, String... values) {
 
       return this;
     }

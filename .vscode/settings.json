@@ -1,7 +1,12 @@
 {
   "cSpell.words": [
     "activitydefinition",
+    "aggregatable",
+    "ANCDT",
     "argfile",
+    "aslp",
+    "ASLPA",
+    "careplan",
     "cdshooks",
     "clinicalreasoning",
     "Codeable",
@@ -12,11 +17,15 @@
     "debuggable",
     "DENOMINATOREXCEPTION",
     "DENOMINATOREXCLUSION",
+    "DEPENDSON",
+    "DERIVEDFROM",
     "dstu",
     "Fhir",
     "fhirpath",
     "Gson",
+    "helloworld",
     "INITIALPOPULATION",
+    "INPROGRESS",
     "Javadoc",
     "JXSON",
     "MEASUREOBSERVATION",
@@ -32,6 +41,7 @@
     "numer",
     "NUMERATOREXCLUSION",
     "opencds",
+    "opioidcds",
     "PATIENTLIST",
     "plandefinition",
     "ppca",
@@ -40,6 +50,7 @@
     "qicore",
     "questionnaireresponse",
     "sdes",
+    "SEARCHSET",
     "sgpc",
     "Sonarlint",
     "SUBJECTLIST",
@@ -117,11 +128,23 @@
   "editor.tabSize": 2,
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.dependency.packagePresentation": "hierarchical",
-  "java.jdt.ls.vmargs": "-Xmx16G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  // "java.test.defaultConfig": "show-inline",
+  // "java.test.config": {
+  //   "name": "show-inline",
+  //   "vmArgs": [
+  //     "-XX:+PrintCompilation",
+  //     "-XX:+UnlockDiagnosticVMOptions",
+  //     "-XX:+PrintInlining"
+  //   ]
+  // },
   "java.compile.nullAnalysis.mode": "automatic",
   "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
   "java.format.settings.profile": "GoogleStyle",
   "json.schemaDownload.enable": true,
+  "[cql]": {
+    "editor.formatOnSave": false
+  },
   "[markdown]": {
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.unicodeHighlight.ambiguousCharacters": true,

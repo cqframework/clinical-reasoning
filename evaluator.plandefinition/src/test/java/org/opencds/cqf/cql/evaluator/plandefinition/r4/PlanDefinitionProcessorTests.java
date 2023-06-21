@@ -62,8 +62,6 @@ public class PlanDefinitionProcessorTests {
         .applyR5().isEqualsToExpected();
   }
 
-  // I think this is failing because we've enabled CQL only for the short term.
-  @Test(enabled = false)
   public void testANCDT17WithElm() {
     PlanDefinition.Assert.that(
         "ANCDT17",

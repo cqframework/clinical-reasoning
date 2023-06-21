@@ -186,8 +186,8 @@ public class TranslatingLibraryLoader implements TranslatorOptionAwareLibraryLoa
           // Even if we successfully read the library from ELM, we still need to ensure that all the
           // dependencies are loaded correctly and that all translator options and so on match
           var candidateLibrary = CqlLibraryReaderFactory.getReader(type.mimeType()).read(is);
-          ensureDependencies(candidateLibrary);
           ensureNamespaceUpdate(candidateLibrary.getIdentifier());
+          ensureDependencies(candidateLibrary);
           if (checkBinaryCompatibility(candidateLibrary)) {
             library = candidateLibrary;
             break;

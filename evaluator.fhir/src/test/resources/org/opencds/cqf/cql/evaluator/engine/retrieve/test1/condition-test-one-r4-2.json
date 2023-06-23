@@ -37,5 +37,9 @@
   },
   "subject": {
     "reference": "Patient/test-one-r4"
-  }
+  },
+  "encounter": {
+    "reference": "Encounter/test-one-r4-1"
+  },
+  "recordedDate": "2022-04-04"
 }

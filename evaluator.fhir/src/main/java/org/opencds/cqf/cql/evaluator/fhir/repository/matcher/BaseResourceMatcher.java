@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.fhir.repository.matcher;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -102,7 +103,17 @@ public interface BaseResourceMatcher {
     if (param.getValue() == null) {
       return true;
     }
-    return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+    if (pathResult instanceof IPrimitiveType) {
+      return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+    }
+    if (pathResult instanceof ArrayList) {
+      var firstValue = ((ArrayList<?>) pathResult).get(0);
+      var codes = getCodes(firstValue);
+      if (codes != null) {
+        return isMatchCoding(param, pathResult, codes);
+      }
+    }
+    return false;
   }
 
   default boolean isMatchCoding(TokenParam param, Object pathResult, List<BaseCodingDt> codes) {

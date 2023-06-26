@@ -9,7 +9,7 @@
         "id": "ChildRoutineVisit-PlanDefinition-1.0.0",
         "extension": [
           {
-            "url": "http://fl7.org/fhir/StructureDefinition/RequestOrchestration-Goal",
+            "url": "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal",
             "valueReference": {
               "reference": "Goal/1"
             }

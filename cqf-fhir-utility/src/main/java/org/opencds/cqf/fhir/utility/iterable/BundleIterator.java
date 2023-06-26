@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.bundle;
+package org.opencds.cqf.fhir.utility.iterable;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -8,7 +8,6 @@ import java.util.NoSuchElementException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.fhir.api.Repository;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 
@@ -18,16 +17,14 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
   protected B bundle;
   protected int index = 0;
   protected List<BundleEntryParts> parts;
-  protected FhirContext fhirContext;
   protected Class<B> bundleType;
 
-  public BundleIterator(FhirContext fhirContext, Repository repository, Class<B> bundleType,
+  public BundleIterator(Repository repository, Class<B> bundleType,
       B bundle) {
-    this.fhirContext = fhirContext;
     this.repository = repository;
     this.bundle = bundle;
     this.bundleType = bundleType;
-    this.parts = BundleUtil.toListOfEntries(fhirContext, bundle);
+    this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle);
   }
 
   @Override
@@ -52,7 +49,8 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
   }
 
   protected void getNextBundle() {
-    var nextLink = BundleUtil.getLinkUrlOfType(fhirContext, bundle, IBaseBundle.LINK_NEXT);
+    var nextLink =
+        BundleUtil.getLinkUrlOfType(this.repository.fhirContext(), bundle, IBaseBundle.LINK_NEXT);
     if (nextLink == null) {
       return;
     }
@@ -62,7 +60,7 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
     if (bundle == null) {
       this.parts = Collections.emptyList();
     } else {
-      this.parts = BundleUtil.toListOfEntries(fhirContext, bundle);
+      this.parts = BundleUtil.toListOfEntries(this.repository.fhirContext(), bundle);
     }
   }
 }

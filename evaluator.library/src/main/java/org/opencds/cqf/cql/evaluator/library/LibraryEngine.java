@@ -18,8 +18,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,9 +98,8 @@ public class LibraryEngine {
   }
 
   public List<IBase> getExpressionResult(String theSubjectId, String theSubjectType,
-      String theExpression,
-      String theLanguage, String theLibraryToBeEvaluated, IBaseParameters theParameters,
-      IBaseBundle theBundle) {
+      String theExpression, String theLanguage, String theLibraryToBeEvaluated,
+      IBaseParameters theParameters, IBaseBundle theBundle) {
     validateExpression(theLanguage, theExpression, theLibraryToBeEvaluated);
     List<IBase> results = null;
     IBaseParameters parametersResult;
@@ -127,8 +128,12 @@ public class LibraryEngine {
       case "text/fhirpath":
         List<IBase> outputs;
         try {
+          var repository = theBundle == null ? myRepository
+              : new FederatedRepository(myRepository,
+                  new InMemoryFhirRepository(myFhirContext, theBundle));
           outputs =
-              myFhirPath.evaluate(getSubject(theSubjectId, theSubjectType), theExpression,
+              myFhirPath.evaluate(getSubject(repository, theSubjectId, theSubjectType),
+                  theExpression,
                   IBase.class);
         } catch (FhirPathExecutionException e) {
           throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
@@ -154,7 +159,7 @@ public class LibraryEngine {
     } else if (theExpression == null) {
       ourLogger.error("Missing expression for the Expression");
       throw new IllegalArgumentException("Missing expression for the Expression");
-    } else if (theLibraryUrl == null) {
+    } else if (theLibraryUrl == null && !theLanguage.equals("text/fhirpath")) {
       ourLogger.error("Missing library for the Expression");
       throw new IllegalArgumentException("Missing library for the Expression");
     }
@@ -205,21 +210,27 @@ public class LibraryEngine {
     return returnValues;
   }
 
-  protected IBaseResource getSubject(String theSubjectId, String theSubjectType) {
-    if (theSubjectType == null || theSubjectType.isEmpty()) {
-      theSubjectType = "Patient";
+  protected IBaseResource getSubject(Repository repository, String subjectId, String subjectType) {
+    var id = subjectId;
+    if (subjectId.contains("/")) {
+      var split = subjectId.split("/");
+      subjectType = split[0];
+      id = split[1];
     }
-    var resourceType = (IBaseResource) myModelResolver.createInstance(theSubjectType);
+    if (subjectType == null || subjectType.isEmpty()) {
+      subjectType = "Patient";
+    }
+    var resourceType = (IBaseResource) myModelResolver.createInstance(subjectType);
     switch (myFhirContext.getVersion().getVersion()) {
       case DSTU3:
-        return myRepository.read(resourceType.getClass(),
-            new org.hl7.fhir.dstu3.model.IdType(theSubjectType, theSubjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.dstu3.model.IdType(subjectType, id));
       case R4:
-        return myRepository.read(resourceType.getClass(),
-            new org.hl7.fhir.r4.model.IdType(theSubjectType, theSubjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.r4.model.IdType(subjectType, id));
       case R5:
-        return myRepository.read(resourceType.getClass(),
-            new org.hl7.fhir.r5.model.IdType(theSubjectType, theSubjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.r5.model.IdType(subjectType, id));
       default:
         throw new IllegalArgumentException(
             String.format("unsupported FHIR version: %s", myFhirContext));

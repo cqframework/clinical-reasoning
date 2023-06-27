@@ -100,7 +100,7 @@ public class LibraryEngine {
   public List<IBase> getExpressionResult(String theSubjectId, String theSubjectType,
       String theExpression, String theLanguage, String theLibraryToBeEvaluated,
       IBaseParameters theParameters, IBaseBundle theBundle) {
-    validateExpression(theLanguage, theExpression, theLibraryToBeEvaluated);
+    validateExpression(theLanguage, theExpression);
     List<IBase> results = null;
     IBaseParameters parametersResult;
     switch (theLanguage) {
@@ -119,6 +119,7 @@ public class LibraryEngine {
       case "text/cql.identifier":
       case "text/cql.name":
       case "text/cql-name":
+        validateLibrary(theLibraryToBeEvaluated);
         parametersResult =
             this.evaluate(theLibraryToBeEvaluated, theSubjectId, theParameters, theBundle,
                 Collections.singleton(theExpression));
@@ -152,14 +153,18 @@ public class LibraryEngine {
     return results;
   }
 
-  public void validateExpression(String theLanguage, String theExpression, String theLibraryUrl) {
+  public void validateExpression(String theLanguage, String theExpression) {
     if (theLanguage == null) {
       ourLogger.error("Missing language type for the Expression");
       throw new IllegalArgumentException("Missing language type for the Expression");
     } else if (theExpression == null) {
       ourLogger.error("Missing expression for the Expression");
       throw new IllegalArgumentException("Missing expression for the Expression");
-    } else if (theLibraryUrl == null && !theLanguage.equals("text/fhirpath")) {
+    }
+  }
+
+  public void validateLibrary(String theLibraryUrl) {
+    if (theLibraryUrl == null) {
       ourLogger.error("Missing library for the Expression");
       throw new IllegalArgumentException("Missing library for the Expression");
     }

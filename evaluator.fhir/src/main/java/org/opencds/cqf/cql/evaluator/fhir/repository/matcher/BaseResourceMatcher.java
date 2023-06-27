@@ -23,7 +23,8 @@ import ca.uhn.fhir.rest.param.UriParam;
 public interface BaseResourceMatcher {
   default boolean matches(String path, List<IQueryParameterType> params, IBaseResource resource) {
     boolean match = false;
-    var pathResult = path.equals("_profile") ? resource.getMeta().getProfile()
+    path = path.replaceFirst("_", "");
+    var pathResult = path.equals("profile") ? resource.getMeta().getProfile()
         : getModelResolver().resolvePath(resource, path);
     if (pathResult == null) {
       return false;

@@ -206,24 +206,11 @@ public abstract class BasePlanDefinitionProcessor<T> {
         applyPlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition)));
   }
 
-  public void validateExpressionWithPath(String language, String expression, String path,
-      String libraryUrl) {
-    this.libraryEngine.validateExpression(language, expression, libraryUrl);
-    if (path == null) {
-      logger.error("Missing element path for the Expression");
-      throw new IllegalArgumentException("Missing element path for the Expression");
-    }
-  }
-
   public List<IBase> resolveExpression(CqfExpression expression, IBaseParameters params) {
-    this.libraryEngine.validateExpression(expression.getLanguage(), expression.getExpression(),
-        expression.getLibraryUrl());
     var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
         expression.getExpression(), expression.getLanguage(), expression.getLibraryUrl(), params,
         this.bundle);
     if (result == null && expression.getAltExpression() != null) {
-      this.libraryEngine.validateExpression(expression.getAltLanguage(),
-          expression.getAltExpression(), expression.getAltLibraryUrl());
       result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
           expression.getAltExpression(),
           expression.getAltLanguage(), expression.getAltLibraryUrl(), params, this.bundle);

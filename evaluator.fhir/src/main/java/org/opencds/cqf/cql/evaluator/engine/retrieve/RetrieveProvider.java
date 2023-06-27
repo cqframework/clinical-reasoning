@@ -278,7 +278,8 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
       IdDt ref = StringUtils.isNotBlank(context)
           ? new IdDt((String) contextValue).withResourceType(context)
           : new IdDt((String) contextValue);
-      searchParams.put(contextPath, Collections.singletonList(new ReferenceParam(ref)));
+      var path = contextPath.equals("id") ? "_id" : contextPath;
+      searchParams.put(path, Collections.singletonList(new ReferenceParam(ref)));
     }
   }
 

@@ -320,6 +320,7 @@ public class QuestionnaireResponseProcessor
               questionnaireCodeMap, resources, subject));
         } else {
           if (questionnaireCodeMap != null && !questionnaireCodeMap.isEmpty()
+              && questionnaireCodeMap.get(item.getLinkId()) != null
               && !questionnaireCodeMap.get(item.getLinkId()).isEmpty()) {
             resources.add(createObservationFromItemAnswer(answer, item.getLinkId(),
                 questionnaireResponse, subject, questionnaireCodeMap));
@@ -429,7 +430,7 @@ public class QuestionnaireResponseProcessor
       Map<String, List<Coding>> questionnaireCodeMap) {
     if (item.hasItem()) {
       item.getItem().forEach(qItem -> processQuestionnaireItems(qItem, questionnaireCodeMap));
-    } else {
+    } else if (item.hasExtension(Constants.SDC_QUESTIONNAIRE_OBSERVATION_EXTRACT)) {
       questionnaireCodeMap.put(item.getLinkId(), item.getCode());
     }
   }

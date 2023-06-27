@@ -87,6 +87,10 @@
             {
               "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-answerValueSetSource",
               "valueCanonical": "http://fhir.org/guides/cqf/cds4cpm/ValueSet/pain-types"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+              "valueBoolean": true
             }
           ],
           "linkId": "1.1",
@@ -472,6 +476,10 @@
             {
               "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-answerValueSetSource",
               "valueCanonical": "http://fhir.org/guides/cqf/cds4cpm/ValueSet/pain-types"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+              "valueBoolean": true
             }
           ],
           "linkId": "1.6",
@@ -1272,6 +1280,10 @@
             {
               "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-answerValueSetSource",
               "valueCanonical": "http://loinc.org/vs/LL2949-7"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+              "valueBoolean": true
             }
           ],
           "linkId": "2.1",
@@ -1341,6 +1353,10 @@
             {
               "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-answerValueSetSource",
               "valueCanonical": "http://loinc.org/vs/LL2949-7"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+              "valueBoolean": true
             }
           ],
           "linkId": "2.2",
@@ -1410,6 +1426,10 @@
             {
               "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-answerValueSetSource",
               "valueCanonical": "http://loinc.org/vs/LL2951-3"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract",
+              "valueBoolean": true
             }
           ],
           "linkId": "2.3",

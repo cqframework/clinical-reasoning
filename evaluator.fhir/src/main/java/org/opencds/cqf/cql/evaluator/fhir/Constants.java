@@ -46,6 +46,8 @@ public class Constants {
       "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages";
   public static final String SDC_QUESTIONNAIRE_HIDDEN =
       "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden";
+  public static final String SDC_QUESTIONNAIRE_OBSERVATION_EXTRACT =
+      "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observationExtract";
   public static final String SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT =
       "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext";
   public static final String SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT =

@@ -12,7 +12,7 @@ import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
+import org.opencds.cqf.cql.evaluator.engine.model.DynamicModelResolver;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r5.R5FhirModelResolver;
 import org.opencds.cqf.cql.evaluator.fhir.util.VersionUtilities;
@@ -42,16 +42,16 @@ public class FhirModelResolverFactory
       ModelResolver resolver = null;
       switch (fhirVersionEnum) {
         case DSTU2:
-          resolver = new CachingModelResolverDecorator(new Dstu2FhirModelResolver());
+          resolver = new DynamicModelResolver(new Dstu2FhirModelResolver());
           break;
         case DSTU3:
-          resolver = new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
+          resolver = new DynamicModelResolver(new Dstu3FhirModelResolver());
           break;
         case R4:
-          resolver = new CachingModelResolverDecorator(new R4FhirModelResolver());
+          resolver = new DynamicModelResolver(new R4FhirModelResolver());
           break;
         case R5:
-          resolver = new CachingModelResolverDecorator(new R5FhirModelResolver());
+          resolver = new DynamicModelResolver(new R5FhirModelResolver());
           break;
         default:
           throw new IllegalArgumentException("unknown or unsupported FHIR version");

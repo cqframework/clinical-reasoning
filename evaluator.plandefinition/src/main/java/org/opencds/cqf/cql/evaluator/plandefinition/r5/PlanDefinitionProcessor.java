@@ -211,30 +211,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return resultBundle;
   }
 
-  // @Override
-  // public void resolveCdsHooksDynamicValue(IBaseResource rg, Object value, String path) {
-  // RequestOrchestration requestGroup = (RequestOrchestration) rg;
-  // int matchCount = StringUtils.countMatches(path, "action.");
-  // if (!requestGroup.hasAction()) {
-  // for (int i = 0; i < matchCount; ++i) {
-  // requestGroup.addAction();
-  // }
-  // }
-  // if (path.equals("activity.extension") || path.equals("action.extension")) {
-  // // default to adding extension to last action
-  // requestGroup.getAction().get(requestGroup.getAction().size() - 1).addExtension()
-  // .setValue((DataType) value);
-  // return;
-  // }
-  // if (requestGroup.hasAction() && requestGroup.getAction().size() < matchCount) {
-  // for (int i = matchCount - requestGroup.getAction().size(); i < matchCount; ++i) {
-  // requestGroup.addAction();
-  // }
-  // }
-  // modelResolver.setValue(requestGroup.getAction().get(matchCount - 1),
-  // path.replace("action.", ""), value);
-  // }
-
   @Override
   public void resolveDynamicExtension(IElement requestAction, IBase resource, Object value,
       String path) {
@@ -615,8 +591,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           var message = String.format("DynamicValue expression %s encountered exception: %s",
               dynamicValue.getExpression().getExpression(), e.getMessage());
           logger.error(message);
-          // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-          // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
         }
       }
     });
@@ -640,8 +614,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           var message = String.format("Condition expression %s encountered exception: %s",
               condition.getExpression(), e.getMessage());
           logger.error(message);
-          // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-          // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
         }
         if (result == null) {
           logger.warn("Condition expression {} returned null",

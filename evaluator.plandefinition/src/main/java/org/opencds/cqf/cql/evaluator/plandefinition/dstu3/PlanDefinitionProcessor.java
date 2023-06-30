@@ -627,8 +627,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           var message = String.format("DynamicValue expression %s encountered exception: %s",
               dynamicValue.getExpression(), e.getMessage());
           logger.error(message);
-          // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-          // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
         }
       }
     });
@@ -652,8 +650,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           var message = String.format("Condition expression %s encountered exception: %s",
               condition.getExpression(), e.getMessage());
           logger.error(message);
-          // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-          // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
         }
         if (result == null) {
           logger.warn("Condition expression {} returned null", condition.getExpression());

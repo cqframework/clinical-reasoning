@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator</artifactId>
-  <version>3.0.0-PRE3-SNAPSHOT</version>
+  <version>3.0.0-PRE4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>evaluator</name>
@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>3.0.0-PRE3-SNAPSHOT</version>
+    <version>3.0.0-PRE4-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -64,7 +64,7 @@
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.jackson-deps</artifactId>
-      <version>3.0.0-PRE3-SNAPSHOT</version>
+      <version>3.0.0-PRE4-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-api</artifactId>
-      <version>3.0.0-PRE3-SNAPSHOT</version>
+      <version>3.0.0-PRE4-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

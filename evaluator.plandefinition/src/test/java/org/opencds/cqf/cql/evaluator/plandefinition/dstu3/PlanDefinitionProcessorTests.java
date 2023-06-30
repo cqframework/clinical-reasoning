@@ -5,7 +5,7 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.stringPar
 
 import java.util.List;
 
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.testng.annotations.Test;
 
@@ -35,12 +35,13 @@ public class PlanDefinitionProcessorTests {
   public void testOpioidRec10PatientView() {
     FhirContext fhirContext = FhirContext.forDstu3Cached();
     var data =
-        new TestRepository(fhirContext, this.getClass(), List.of("opioid-Rec10-patient-view/tests"),
+        new InMemoryFhirRepository(fhirContext, this.getClass(),
+            List.of("opioid-Rec10-patient-view/tests"),
             false);
     var content =
-        new TestRepository(fhirContext, this.getClass(),
+        new InMemoryFhirRepository(fhirContext, this.getClass(),
             List.of("opioid-Rec10-patient-view/content"), false);
-    var terminology = new TestRepository(fhirContext, this.getClass(),
+    var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
         List.of("opioid-Rec10-patient-view/vocabulary/CodeSystem",
             "opioid-Rec10-patient-view/vocabulary/ValueSet"),
         false);

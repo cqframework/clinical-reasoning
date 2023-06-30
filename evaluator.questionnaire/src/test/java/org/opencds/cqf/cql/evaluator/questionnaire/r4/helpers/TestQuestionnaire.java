@@ -26,7 +26,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
@@ -101,19 +101,20 @@ public class TestQuestionnaire {
     }
 
     public QuestionnaireResult withData(String dataAssetName) {
-      dataRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public QuestionnaireResult withContent(String dataAssetName) {
-      contentRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public QuestionnaireResult withTerminology(String dataAssetName) {
-      terminologyRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      terminologyRepository =
+          new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
@@ -144,14 +145,15 @@ public class TestQuestionnaire {
       if (repository == null) {
         if (dataRepository == null) {
           dataRepository =
-              new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
+              new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
         }
         if (contentRepository == null) {
           contentRepository =
-              new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+              new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"),
+                  false);
         }
         if (terminologyRepository == null) {
-          terminologyRepository = new TestRepository(fhirContext, this.getClass(),
+          terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
               List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
         }
 

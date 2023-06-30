@@ -62,8 +62,7 @@ public class PlanDefinitionProcessorTests {
         .applyR5().isEqualsToExpected();
   }
 
-  // I think this is failing because we've enabled CQL only for the short term.
-  @Test(enabled = false)
+  @Test
   public void testANCDT17WithElm() {
     PlanDefinition.Assert.that(
         "ANCDT17",
@@ -72,6 +71,7 @@ public class PlanDefinitionProcessorTests {
         .withData("anc-dak/data-bundle.json")
         .withContent("anc-dak/content-bundle.json")
         .withTerminology("anc-dak/terminology-bundle.json")
+        .withParameters(parameters(part("encounter", "ANCDT17-encounter")))
         .apply()
         .isEqualsTo("anc-dak/output-careplan.json");
   }

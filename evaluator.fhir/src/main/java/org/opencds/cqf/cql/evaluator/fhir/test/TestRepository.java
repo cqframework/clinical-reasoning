@@ -8,8 +8,9 @@ import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import ca.uhn.fhir.context.FhirContext;
 
 /**
- * This class has been deprecated. Use InMemoryFhirRepository instead.
+ * @deprecated This class has been deprecated. Use InMemoryFhirRepository instead.
  */
+@Deprecated
 public class TestRepository extends InMemoryFhirRepository {
 
   public TestRepository(FhirContext context) {

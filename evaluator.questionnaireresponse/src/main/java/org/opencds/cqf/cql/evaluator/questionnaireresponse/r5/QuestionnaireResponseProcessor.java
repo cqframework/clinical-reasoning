@@ -54,7 +54,7 @@ public class QuestionnaireResponseProcessor
       IBaseResource theQuestionnaireResponse) {
     var baseQuestionnaireResponse = theQuestionnaireResponse;
     if (baseQuestionnaireResponse == null && theId != null) {
-      baseQuestionnaireResponse = this.repository.read(Questionnaire.class, theId);
+      baseQuestionnaireResponse = this.repository.read(QuestionnaireResponse.class, theId);
     }
 
     return castOrThrow(baseQuestionnaireResponse, QuestionnaireResponse.class,

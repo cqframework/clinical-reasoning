@@ -16,15 +16,13 @@
       "action": [
         {
           "title": "Summary",
-          "description": "Detail"
-        },
-        {
-          "title": "Summary 1",
-          "description": "Detail 1"
-        },
-        {
-          "title": "Child Monthly Routine Visit",
-          "description": "This action will performed every month for a patient < 5 years old. The start date with be next month after registration while the end date will be the 60th week after birth."
+          "description": "Detail",
+          "action": [
+            {
+              "title": "Summary 1",
+              "description": "Detail 1"
+            }
+          ]
         }
       ]
     }

@@ -124,10 +124,13 @@ public class ActivityDefinitionProcessor
         throw new FHIRException(msg);
     }
 
+    var defaultLibraryUrl =
+        activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getReference()
+            : null;
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
         resolveDynamicValue(dynamicValue.getLanguage(), dynamicValue.getExpression(),
-            activityDefinition.getLibrary().get(0).getReference(), dynamicValue.getPath(), result,
+            defaultLibraryUrl, dynamicValue.getPath(), result,
             "Patient");
       }
     }

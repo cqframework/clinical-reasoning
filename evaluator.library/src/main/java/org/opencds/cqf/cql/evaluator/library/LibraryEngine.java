@@ -18,8 +18,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,10 +98,9 @@ public class LibraryEngine {
   }
 
   public List<IBase> getExpressionResult(String theSubjectId, String theSubjectType,
-      String theExpression,
-      String theLanguage, String theLibraryToBeEvaluated, IBaseParameters theParameters,
-      IBaseBundle theBundle) {
-    validateExpression(theLanguage, theExpression, theLibraryToBeEvaluated);
+      String theExpression, String theLanguage, String theLibraryToBeEvaluated,
+      IBaseParameters theParameters, IBaseBundle theBundle) {
+    validateExpression(theLanguage, theExpression);
     List<IBase> results = null;
     IBaseParameters parametersResult;
     switch (theLanguage) {
@@ -118,6 +119,7 @@ public class LibraryEngine {
       case "text/cql.identifier":
       case "text/cql.name":
       case "text/cql-name":
+        validateLibrary(theLibraryToBeEvaluated);
         parametersResult =
             this.evaluate(theLibraryToBeEvaluated, theSubjectId, theParameters, theBundle,
                 Collections.singleton(theExpression));
@@ -127,8 +129,12 @@ public class LibraryEngine {
       case "text/fhirpath":
         List<IBase> outputs;
         try {
+          var fedRepo = theBundle == null ? repository
+              : new FederatedRepository(repository,
+                  new InMemoryFhirRepository(repository, theBundle));
           outputs =
-              fhirPath.evaluate(getSubject(theSubjectId, theSubjectType), theExpression,
+              fhirPath.evaluate(getSubject(fedRepo, theSubjectId, theSubjectType),
+                  theExpression,
                   IBase.class);
         } catch (FhirPathExecutionException e) {
           throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
@@ -147,14 +153,18 @@ public class LibraryEngine {
     return results;
   }
 
-  public void validateExpression(String theLanguage, String theExpression, String theLibraryUrl) {
+  public void validateExpression(String theLanguage, String theExpression) {
     if (theLanguage == null) {
       logger.error("Missing language type for the Expression");
       throw new IllegalArgumentException("Missing language type for the Expression");
     } else if (theExpression == null) {
       logger.error("Missing expression for the Expression");
       throw new IllegalArgumentException("Missing expression for the Expression");
-    } else if (theLibraryUrl == null) {
+    }
+  }
+
+  public void validateLibrary(String theLibraryUrl) {
+    if (theLibraryUrl == null) {
       logger.error("Missing library for the Expression");
       throw new IllegalArgumentException("Missing library for the Expression");
     }
@@ -205,20 +215,27 @@ public class LibraryEngine {
     return returnValues;
   }
 
-  protected IBaseResource getSubject(String subjectId, String subjectType) {
+  protected IBaseResource getSubject(Repository repository, String subjectId, String subjectType) {
+    var id = subjectId;
+    if (subjectId.contains("/")) {
+      var split = subjectId.split("/");
+      subjectType = split[0];
+      id = split[1];
+    }
     if (subjectType == null || subjectType.isEmpty()) {
       subjectType = "Patient";
     }
+    var resourceType = (IBaseResource) modelResolver.createInstance(subjectType);
     switch (fhirContext.getVersion().getVersion()) {
       case DSTU3:
-        return repository.read(org.hl7.fhir.dstu3.model.Patient.class,
-            new org.hl7.fhir.dstu3.model.IdType(subjectType, subjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.dstu3.model.IdType(subjectType, id));
       case R4:
-        return repository.read(org.hl7.fhir.r4.model.Patient.class,
-            new org.hl7.fhir.r4.model.IdType(subjectType, subjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.r4.model.IdType(subjectType, id));
       case R5:
-        return repository.read(org.hl7.fhir.r5.model.Patient.class,
-            new org.hl7.fhir.r5.model.IdType(subjectType, subjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.r5.model.IdType(subjectType, id));
       default:
         throw new IllegalArgumentException(
             String.format("unsupported FHIR version: %s", fhirContext));

@@ -28,6 +28,10 @@ public class Constants {
       ImmutableMap.of("FHIR", FHIR_MODEL_URI, "QUICK", FHIR_MODEL_URI, "QDM", QDM_MODEL_URI);
 
 
+  public static final String ALT_EXPRESSION_EXT =
+      "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression";
+  public static final String PERTAINS_TO_GOAL =
+      "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal";
   public static final String QUESTIONNAIRE_RESPONSE_AUTHOR =
       "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
   public static final String CPG_QUESTIONNAIRE_GENERATE =

@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -81,12 +81,12 @@ public class TestQuestionnaireResponse {
 
     private void buildRepository() {
       if (repository == null) {
-        TestRepository data =
-            new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
-        TestRepository content =
-            new TestRepository(fhirContext, this.getClass(), List.of("resources"), false);
-        TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem", "vocabulary/ValueSet"), false);
+        var data =
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+        var content =
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+        var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
+            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
         repository = Repositories.proxy(data, content, terminology);
       }

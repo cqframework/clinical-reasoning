@@ -131,7 +131,7 @@ public class LibraryEngine {
         try {
           var fedRepo = theBundle == null ? repository
               : new FederatedRepository(repository,
-                  new InMemoryFhirRepository(repository, theBundle));
+                  new InMemoryFhirRepository(repository.fhirContext(), theBundle));
           outputs =
               fhirPath.evaluate(getSubject(fedRepo, theSubjectId, theSubjectType),
                   theExpression,

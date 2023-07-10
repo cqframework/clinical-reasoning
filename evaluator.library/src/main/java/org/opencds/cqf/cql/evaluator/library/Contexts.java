@@ -29,6 +29,7 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.RepositoryRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.cql.evaluator.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
@@ -51,7 +52,8 @@ public class Contexts {
     var sourceProviders = new ArrayList<LibrarySourceProvider>();
     sourceProviders.add(buildLibrarySource(repository));
     var libraryLoader = buildLibraryLoader(settings, sourceProviders);
-    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider);
+    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
+        settings.getRetrieveSettings());
 
     var context = new Context(libraryLoader.load(id));
     context.registerLibraryLoader(libraryLoader);
@@ -86,7 +88,8 @@ public class Contexts {
     librarySourceProviders.add(buildLibrarySource(repository));
     var libraryLoader = buildLibraryLoader(settings, librarySourceProviders);
 
-    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider);
+    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
+        settings.getRetrieveSettings());
     var cqlEvaluator = new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
         settings.getCqlOptions().getCqlEngineOptions().getOptions());
 
@@ -116,13 +119,15 @@ public class Contexts {
   }
 
   private static Map<String, DataProvider> buildDataProviders(Repository repository,
-      IBaseBundle additionalData, TerminologyProvider theTerminologyProvider) {
+      IBaseBundle additionalData, TerminologyProvider theTerminologyProvider,
+      RetrieveSettings retrieveSettings) {
     Map<String, DataProvider> dataProviders = new HashMap<>();
 
     var providers = new ArrayList<RetrieveProvider>();
     var modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
-    var retrieveProvider = new RepositoryRetrieveProvider(repository);
+    var retrieveProvider =
+        new RepositoryRetrieveProvider(repository, retrieveSettings);
     providers.add(retrieveProvider);
     if (additionalData != null) {
       providers.add(new BundleRetrieveProvider(repository.fhirContext(), additionalData));

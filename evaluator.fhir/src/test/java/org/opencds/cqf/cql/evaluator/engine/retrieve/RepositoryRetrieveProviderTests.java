@@ -34,7 +34,8 @@ public class RepositoryRetrieveProviderTests {
       TerminologyProvider terminologyProvider) {
     RepositoryRetrieveProvider brp = new RepositoryRetrieveProvider(
         new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
-            List.of("test1/", "../terminology/test1/"), false));
+            List.of("test1/", "../terminology/test1/"), false),
+        new RetrieveSettings());
     brp.setTerminologyProvider(terminologyProvider);
 
     return brp;

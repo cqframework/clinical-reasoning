@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.fhir.util;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.assertTrue;
 
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -10,23 +11,25 @@ import org.testng.annotations.Test;
 
 public class LibrariesTest {
 
+  private final byte[] testData = "test-data".getBytes();
+
   @Test
   public void libraryNoContentReturnsNull() {
     Library library = new Library();
 
-    byte[] content = Libraries.getContent(library, "text/cql");
+    var content = Libraries.getContent(library, "text/cql");
 
-    assertNull(content);
+    assertTrue(content.isEmpty());
   }
 
   @Test
   public void libraryWithContentReturnsContent() {
     Library library = new Library();
-    library.addContent().setContentType("text/cql").setData("test-data".getBytes());
+    library.addContent().setContentType("text/cql").setData(testData);
 
-    byte[] content = Libraries.getContent(library, "text/cql");
+    var content = Libraries.getContent(library, "text/cql");
 
-    assertEquals("test-data", new String(content));
+    assertEquals(content.get(), testData);
   }
 
   @Test
@@ -34,19 +37,19 @@ public class LibrariesTest {
     Library library = new Library();
     library.addContent().setContentType("text/cql").setData("test-data".getBytes());
 
-    byte[] content = Libraries.getContent(library, "text/elm");
+    var content = Libraries.getContent(library, "text/elm");
 
-    assertNull(content);
+    assertTrue(content.isEmpty());
   }
 
   @Test
   public void libraryDstu3WithContentReturnsContent() {
     org.hl7.fhir.dstu3.model.Library library = new org.hl7.fhir.dstu3.model.Library();
-    library.addContent().setContentType("text/cql").setData("test-data".getBytes());
+    library.addContent().setContentType("text/cql").setData(testData);
 
-    byte[] content = Libraries.getContent(library, "text/cql");
+    var content = Libraries.getContent(library, "text/cql");
 
-    assertEquals("test-data", new String(content));
+    assertEquals(content.get(), testData);
   }
 
   @Test

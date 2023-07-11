@@ -140,7 +140,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "anc-dak/cql/ANCConfig.cql"
+      "url": "../cql/ANCConfig.cql"
     }
   ]
 }

@@ -205,6 +205,9 @@ public class MeasureEvaluator {
     }
 
     for (String subjectId : subjectIds) {
+      if (subjectId == null) {
+        throw new RuntimeException("SubjectId is required in order to calculate.");
+      }
       Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
       String subjectTypePart = subjectInfo.getLeft();
       String subjectIdPart = subjectInfo.getRight();
@@ -427,7 +430,9 @@ public class MeasureEvaluator {
         }
       }
 
-      sd.putResult(subjectId, result, this.context.getEvaluatedResources());
+      if (result != null) {
+        sd.putResult(subjectId, result, this.context.getEvaluatedResources());
+      }
 
       clearEvaluatedResources();
     }

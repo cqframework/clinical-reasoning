@@ -1,0 +1,20 @@
+{
+  "resourceType": "Observation",
+  "id": "denomexcl3-EXM347-Observation",
+  "status": "final",
+  "code": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "13457-7",
+      "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by calculation"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcl3-EXM347"
+  },
+  "effectiveDateTime": "2018-01-01T08:30:00",
+  "valueQuantity": {
+    "value": 95,
+    "unit": "mg/dL"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "resourceType": "Condition",
+  "id": "denomexcpt3-EXM347-Condition2",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  },
+  "verificationStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+      "code": "confirmed",
+      "display": "Confirmed"
+    } ]
+  },
+  "code": {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "236436003",
+      "display": "End stage renal failure with renal transplant (disorder)"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcpt3-EXM347"
+  },
+  "onsetDateTime": "2018-12-31T11:59:00",
+  "abatementDateTime": "2019-12-31T11:59:00"
+}

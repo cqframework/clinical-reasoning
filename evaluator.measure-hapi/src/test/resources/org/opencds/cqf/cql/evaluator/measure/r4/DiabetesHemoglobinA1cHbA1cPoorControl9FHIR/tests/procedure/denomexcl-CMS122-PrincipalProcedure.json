@@ -1,0 +1,27 @@
+{
+  "resourceType": "Procedure",
+  "id": "denomexcl-CMS122-PrincipalProcedure",
+  "text": {
+    "status": "generated"
+  },
+  "partOf": [ {
+    "reference": "Procedure/denomexcl-CMS122-Procedure",
+    "display": "General or Neuraxial Anesthesia"
+  } ],
+  "status": "completed",
+  "code": {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "47458005",
+      "display": "Repair of hip joint (procedure)"
+    } ],
+    "text": "Hip Fracture Surgery"
+  },
+  "subject": {
+    "reference": "Patient/denomexcl-CMS122-Patient"
+  },
+  "performedPeriod": {
+    "start": "2019-01-17T09:00:00",
+    "end": "2019-01-17T10:00:00"
+  }
+}

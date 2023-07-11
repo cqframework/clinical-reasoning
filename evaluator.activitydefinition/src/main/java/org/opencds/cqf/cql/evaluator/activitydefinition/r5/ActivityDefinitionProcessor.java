@@ -141,18 +141,6 @@ public class ActivityDefinitionProcessor
     return result;
   }
 
-  // @Override
-  // public Object resolveParameterValue(IBase value) {
-  // if (value == null)
-  // return null;
-  // return ((Parameters.ParametersParameterComponent) value).getValue();
-  // }
-
-  // @Override
-  // public IBaseResource getSubject(String subjectType) {
-  // return this.fhirDal.read(new IdType(subjectType, this.subjectId));
-  // }
-
   private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {
     var task = new Task();
     if (activityDefinition.hasExtension(TARGET_STATUS_URL)) {

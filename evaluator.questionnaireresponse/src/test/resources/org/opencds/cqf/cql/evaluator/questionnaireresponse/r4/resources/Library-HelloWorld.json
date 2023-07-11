@@ -88,7 +88,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "cql/HelloWorld.cql"
+      "url": "../cql/HelloWorld.cql"
     }
   ]
 }

@@ -9,6 +9,7 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.ModelIdentifier;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
+import org.opencds.cqf.cql.evaluator.engine.retrieve.RetrieveSettings;
 
 public class EvaluationSettings {
 
@@ -17,6 +18,8 @@ public class EvaluationSettings {
 
   private CqlOptions cqlOptions;
 
+  private RetrieveSettings retrieveSettings;
+
   public static EvaluationSettings getDefault() {
     EvaluationSettings settings = new EvaluationSettings();
 
@@ -24,6 +27,7 @@ public class EvaluationSettings {
     settings.setCqlOptions(options);
     settings.setModelCache(new ConcurrentHashMap<>());
     settings.setLibraryCache(new ConcurrentHashMap<>());
+    settings.setRetrieveSettings(new RetrieveSettings());
 
     return settings;
   }
@@ -74,5 +78,18 @@ public class EvaluationSettings {
 
   public void setCqlOptions(CqlOptions cqlOptions) {
     this.cqlOptions = cqlOptions;
+  }
+
+  public RetrieveSettings getRetrieveSettings() {
+    return this.retrieveSettings;
+  }
+
+  public EvaluationSettings withRetrieveSettings(RetrieveSettings retrieveSettings) {
+    setRetrieveSettings(retrieveSettings);
+    return this;
+  }
+
+  public void setRetrieveSettings(RetrieveSettings retrieveSettings) {
+    this.retrieveSettings = retrieveSettings;
   }
 }

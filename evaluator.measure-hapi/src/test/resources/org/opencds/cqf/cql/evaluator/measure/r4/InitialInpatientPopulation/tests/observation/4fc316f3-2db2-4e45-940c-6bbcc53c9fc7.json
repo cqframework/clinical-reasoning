@@ -1,0 +1,53 @@
+{
+  "resourceType": "Observation",
+  "id": "4fc316f3-2db2-4e45-940c-6bbcc53c9fc7",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2022-02-16T20:28:28.186+00:00",
+    "source": "#v6q943RmZyQ4QdA2",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab" ]
+  },
+  "status": "final",
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "code": "laboratory",
+      "display": "laboratory"
+    } ]
+  } ],
+  "code": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "2339-0",
+      "display": "Glucose Bld-mCnc"
+    } ],
+    "text": "Glucose Bld-mCnc"
+  },
+  "subject": {
+    "reference": "Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47"
+  },
+  "encounter": {
+    "reference": "Encounter/9485ef37-aa19-4b16-b586-aec5788b96c2"
+  },
+  "effectiveDateTime": "2021-03-26T01:23:12-04:00",
+  "issued": "2021-03-26T01:23:12.459-04:00",
+  "valueQuantity": {
+    "value": 90.0,
+    "unit": "mg/dL",
+    "system": "http://unitsofmeasure.org"
+  },
+  "referenceRange": [ {
+    "low": {
+      "value": 40.0,
+      "unit": "mg/dL",
+      "system": "http://unitsofmeasure.org",
+      "code": "mg/dL"
+    },
+    "high": {
+      "value": 109.0,
+      "unit": "mg/dL",
+      "system": "http://unitsofmeasure.org",
+      "code": "mg/dL"
+    }
+  } ]
+}

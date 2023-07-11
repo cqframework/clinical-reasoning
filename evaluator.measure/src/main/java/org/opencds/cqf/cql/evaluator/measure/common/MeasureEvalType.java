@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This enum represents the values defined inline for the reportType parameter of the Measure
@@ -42,12 +43,11 @@ public enum MeasureEvalType {
   }
 
   // This method can be used for reverse lookup purposes
-  public static MeasureEvalType fromCode(String code) {
-    if (code != null && !code.isEmpty() && lookup.containsKey(code)) {
-      return lookup.get(code);
-    }
+  public static Optional<MeasureEvalType> fromCode(String code) {
+    // checkNotNull(code);
+    // checkArgument(!code.isEmpty());
 
-    return null;
+    return Optional.ofNullable(lookup.get(code));
   }
 
   public String getSystem() {

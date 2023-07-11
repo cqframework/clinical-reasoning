@@ -1,0 +1,95 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1047.100",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1047.100",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1047.100"
+  } ],
+  "version": "20200307",
+  "name": "Hypercholesterolemia",
+  "title": "Hypercholesterolemia",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E78.00",
+      "display": "Pure hypercholesterolemia, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "E78.01",
+      "display": "Familial hypercholesterolemia"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "13644009",
+      "display": "Hypercholesterolemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238076009",
+      "display": "Primary hypercholesterolemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238077000",
+      "display": "Polygenic hypercholesterolemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238078005",
+      "display": "Familial hypercholesterolemia - homozygous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238079002",
+      "display": "Familial hypercholesterolemia - heterozygous (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "238082007",
+      "display": "Secondary hypercholesterolemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "267432004",
+      "display": "Pure hypercholesterolemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "398036000",
+      "display": "Familial hypercholesterolemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "398796005",
+      "display": "Familial type 3 hyperlipoproteinemia (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403829002",
+      "display": "Familial hypercholesterolemia due to heterozygous low density lipoprotein receptor mutation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403830007",
+      "display": "Familial hypercholesterolemia due to homozygous low density lipoprotein receptor mutation (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "403831006",
+      "display": "Familial hypercholesterolemia due to genetic defect of apolipoprotein B (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414416008",
+      "display": "History of hypercholesterolemia (situation)"
+    } ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "resourceType": "Observation",
+  "id": "HTN1-patient-1-observation-5",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation" ]
+  },
+  "identifier": [ {
+    "system": "http://cds.optum.com/deqm",
+    "value": "urn:uuid:f8216874-1979-466a-91ef-8d8c5d07cf0a"
+  } ],
+  "status": "final",
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+      "version": "4.0.1",
+      "code": "vital-signs",
+      "display": "Vital Signs"
+    } ]
+  } ],
+  "code": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "55284-4",
+      "display": "Blood pressure systolic and diastolic"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/HTN1-patient-1"
+  },
+  "effectiveDateTime": "2021-12-12T14:00:00-00:00",
+  "component": [ {
+    "code": {
+      "coding": [ {
+        "system": "http://loinc.org",
+        "version": "2.72",
+        "code": "8480-6",
+        "display": "Systolic blood pressure"
+      } ]
+    },
+    "valueQuantity": {
+      "value": 132,
+      "unit": "mm[Hg]",
+      "system": "http://unitsofmeasure.org",
+      "code": "mm[Hg]"
+    }
+  } ]
+}

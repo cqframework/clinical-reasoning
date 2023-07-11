@@ -1,0 +1,16 @@
+{
+  "resourceType": "Practitioner",
+  "id": "HTN1-practitioner-3",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-practitioner" ]
+  },
+  "identifier": [ {
+    "system": "http://cds.optum.com/deqm",
+    "value": "urn:uuid:65a8dd0b-dd24-451c-bb15-98b937168757"
+  } ],
+  "name": [ {
+    "family": "Appleseed",
+    "given": [ "Johnny" ],
+    "prefix": [ "Dr" ]
+  } ]
+}

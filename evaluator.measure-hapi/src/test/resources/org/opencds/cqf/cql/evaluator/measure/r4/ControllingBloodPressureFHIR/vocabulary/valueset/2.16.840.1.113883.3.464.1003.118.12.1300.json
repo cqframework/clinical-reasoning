@@ -1,0 +1,183 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.118.12.1300",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/valueset-warning",
+    "valueMarkdown": "CAUTION: The compose element in this ValueSet resource was inferred from the expansion element. It is NOT an authoritative definition of the value set and is provided only for convenience for systems that assume a compose will be present."
+  } ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.118.12.1300"
+  } ],
+  "version": "20200310",
+  "name": "FrailtyDevice",
+  "title": "Frailty Device",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "compose": {
+    "include": [ {
+      "system": "http://snomed.info/sct",
+      "concept": [ {
+        "code": "105501005",
+        "display": "Dependence on enabling machine or device (finding)"
+      }, {
+        "code": "105503008",
+        "display": "Dependence on wheelchair (finding)"
+      }, {
+        "code": "105504002",
+        "display": "Dependence on walking stick (finding)"
+      }, {
+        "code": "152921000119101",
+        "display": "Dependence on respiratory device (finding)"
+      }, {
+        "code": "160683008",
+        "display": "Needs walking aid in home (finding)"
+      }, {
+        "code": "160684002",
+        "display": "Confined to chair (finding)"
+      }, {
+        "code": "160685001",
+        "display": "Bed-ridden (finding)"
+      }, {
+        "code": "16419651000119103",
+        "display": "Dependence on biphasic positive airway pressure ventilation co-occurrent and due to central sleep apnea syndrome (finding)"
+      }, {
+        "code": "165243005",
+        "display": "Independent in wheelchair (finding)"
+      }, {
+        "code": "165244004",
+        "display": "Minimal help in wheelchair (finding)"
+      }, {
+        "code": "225612007",
+        "display": "Wheelchair bound (finding)"
+      }, {
+        "code": "413121008",
+        "display": "Dependent on helper pushing wheelchair (finding)"
+      }, {
+        "code": "429091008",
+        "display": "Dependence on biphasic positive airway pressure ventilation (finding)"
+      }, {
+        "code": "429487005",
+        "display": "Dependence on continuous positive airway pressure ventilation (finding)"
+      }, {
+        "code": "444932008",
+        "display": "Dependence on ventilator (finding)"
+      }, {
+        "code": "60631000119109",
+        "display": "Dependence on home ventilator (finding)"
+      }, {
+        "code": "60651000119103",
+        "display": "Dependence on continuous supplemental oxygen (finding)"
+      }, {
+        "code": "713655003",
+        "display": "Dependence on non-invasive ventilation (finding)"
+      }, {
+        "code": "79021000119104",
+        "display": "Dependence on aspirator (finding)"
+      }, {
+        "code": "79031000119101",
+        "display": "Dependence on respirator (finding)"
+      }, {
+        "code": "89201000119106",
+        "display": "Dependence on supplemental oxygen when ambulating (finding)"
+      }, {
+        "code": "931000119107",
+        "display": "Dependence on supplemental oxygen (finding)"
+      } ]
+    } ]
+  },
+  "expansion": {
+    "timestamp": "2021-08-11T18:13:40-06:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "code": "105501005",
+      "display": "Dependence on enabling machine or device (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "105503008",
+      "display": "Dependence on wheelchair (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "105504002",
+      "display": "Dependence on walking stick (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "152921000119101",
+      "display": "Dependence on respiratory device (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "160683008",
+      "display": "Needs walking aid in home (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "160684002",
+      "display": "Confined to chair (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "160685001",
+      "display": "Bed-ridden (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "16419651000119103",
+      "display": "Dependence on biphasic positive airway pressure ventilation co-occurrent and due to central sleep apnea syndrome (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "165243005",
+      "display": "Independent in wheelchair (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "165244004",
+      "display": "Minimal help in wheelchair (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "225612007",
+      "display": "Wheelchair bound (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "413121008",
+      "display": "Dependent on helper pushing wheelchair (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "429091008",
+      "display": "Dependence on biphasic positive airway pressure ventilation (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "429487005",
+      "display": "Dependence on continuous positive airway pressure ventilation (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "444932008",
+      "display": "Dependence on ventilator (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "60631000119109",
+      "display": "Dependence on home ventilator (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "60651000119103",
+      "display": "Dependence on continuous supplemental oxygen (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "713655003",
+      "display": "Dependence on non-invasive ventilation (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "79021000119104",
+      "display": "Dependence on aspirator (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "79031000119101",
+      "display": "Dependence on respirator (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "89201000119106",
+      "display": "Dependence on supplemental oxygen when ambulating (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "931000119107",
+      "display": "Dependence on supplemental oxygen (finding)"
+    } ]
+  }
+}

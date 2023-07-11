@@ -18,13 +18,18 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 public class MeasureValidationUtils {
 
   protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group,
+      String score) {
+    validateGroupScore(group, new BigDecimal(score));
+  }
+
+  protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group,
       BigDecimal score) {
     assertTrue(group.hasMeasureScore(),
         String.format("group \"%s\" does not have a score", group.getId()));
     assertEquals(group.getMeasureScore(), score);
   }
 
-  public static void validateGroup(MeasureReport.MeasureReportGroupComponent group,
+  protected static void validateGroup(MeasureReport.MeasureReportGroupComponent group,
       String populationName, int count) {
     Optional<MeasureReport.MeasureReportGroupPopulationComponent> population =
         group.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
@@ -32,9 +37,16 @@ public class MeasureValidationUtils {
 
     assertTrue(population.isPresent(),
         String.format("Unable to locate a population with id \"%s\"", populationName));
-    assertEquals(population.get().getCount(), count,
-        String.format("expected count for population \"%s\" did not match", populationName));
+
+    validatePopulation(population.get(), count);
   }
+
+  protected static void validatePopulation(
+      MeasureReport.MeasureReportGroupPopulationComponent population, int count) {
+    assertEquals(population.getCount(), count,
+        String.format("expected count for population \"%s\" did not match", population.getId()));
+  }
+
 
   protected static void validateStratifier(
       MeasureReport.MeasureReportGroupStratifierComponent stratifierComponent, String stratumValue,

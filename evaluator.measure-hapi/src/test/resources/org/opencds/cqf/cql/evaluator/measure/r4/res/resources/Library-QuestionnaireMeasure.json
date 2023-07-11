@@ -103,7 +103,7 @@
     },
     {
       "contentType": "application/elm+json",
-      "url": "res/cql/QuestionnaireMeasure.cql"
+      "url": "../cql/QuestionnaireMeasure.cql"
     }
   ]
 }

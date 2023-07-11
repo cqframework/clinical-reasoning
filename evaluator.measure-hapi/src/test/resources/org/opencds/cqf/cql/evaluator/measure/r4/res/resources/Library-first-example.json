@@ -97,7 +97,7 @@
     },
     {
       "contentType": "application/elm+json",
-      "url": "res/cql/FirstExample.cql"
+      "url": "../cql/FirstExample.cql"
     }
   ]
 }

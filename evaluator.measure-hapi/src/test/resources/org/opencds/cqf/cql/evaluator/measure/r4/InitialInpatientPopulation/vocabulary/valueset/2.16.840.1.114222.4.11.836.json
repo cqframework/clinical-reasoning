@@ -1,0 +1,65 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.836",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2022-02-25T16:32:39.905+00:00",
+    "source": "#88a7c23ec8a5bd79"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n         <h3>Value Set Contents</h3>\n         <p>This value set contains 6 concepts</p>\n         <p>All codes from system \n            <code>urn:oid:2.16.840.1.113883.6.238</code>\n         </p>\n         <table class=\"codes\">\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <b>Code</b>\n               </td>\n               <td>\n                  <b>Display</b>\n               </td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-1002-5\"> </a>1002-5\n               </td>\n               <td>American Indian or Alaska Native</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-2028-9\"> </a>2028-9\n               </td>\n               <td>Asian</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-2054-5\"> </a>2054-5\n               </td>\n               <td>Black or African American</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-2076-8\"> </a>2076-8\n               </td>\n               <td>Native Hawaiian or Other Pacific Islander</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-2106-3\"> </a>2106-3\n               </td>\n               <td>White</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-2131-1\"> </a>2131-1\n               </td>\n               <td>Other Race</td>\n            </tr>\n         </table>\n      </div>"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.836",
+  "version": "20121025",
+  "name": "Race",
+  "title": "Race",
+  "status": "active",
+  "date": "2012-10-25T12:28:31-04:00",
+  "publisher": "CDC NCHS",
+  "description": " The race of a person used for administrative purposes.",
+  "expansion": {
+    "identifier": "urn:uuid:f4542d76-1dee-4865-93e3-f683e040d6c3",
+    "timestamp": "2022-02-14T15:53:19-05:00",
+    "total": 6,
+    "offset": 0,
+    "parameter": [ {
+      "name": "count",
+      "valueInteger": 1000
+    }, {
+      "name": "offset",
+      "valueInteger": 0
+    } ],
+    "contains": [ {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "1002-5",
+      "display": "American Indian or Alaska Native"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "2028-9",
+      "display": "Asian"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "2054-5",
+      "display": "Black or African American"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "2076-8",
+      "display": "Native Hawaiian or Other Pacific Islander"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "2106-3",
+      "display": "White"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "2131-1",
+      "display": "Other Race"
+    } ]
+  }
+}

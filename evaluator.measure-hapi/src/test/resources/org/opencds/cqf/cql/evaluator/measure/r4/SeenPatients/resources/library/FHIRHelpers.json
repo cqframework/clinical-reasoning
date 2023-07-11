@@ -1,0 +1,40 @@
+{
+  "resourceType": "Library",
+  "id": "FHIRHelpers",
+  "meta": {
+    "versionId": "2",
+    "lastUpdated": "2021-01-28T16:14:23.000-07:00",
+    "source": "#PpDYvPj7eECy0LB5",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
+  },
+  "language": "en",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "cqf-tooling"
+    }
+  } ],
+  "url": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers",
+  "version": "4.0.001",
+  "name": "FHIRHelpers",
+  "status": "active",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "date": "2021-01-28T23:14:22+00:00",
+  "publisher": "Mathematica",
+  "description": "FHIRHelpers",
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/FHIRHelpers.cql"
+  } ]
+}

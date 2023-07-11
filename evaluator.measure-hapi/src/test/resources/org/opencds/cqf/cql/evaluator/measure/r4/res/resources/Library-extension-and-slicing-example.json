@@ -135,7 +135,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "res/cql/ExtensionAndSlicingExample.cql"
+      "url": "../cql/ExtensionAndSlicingExample.cql"
     }
   ]
 }

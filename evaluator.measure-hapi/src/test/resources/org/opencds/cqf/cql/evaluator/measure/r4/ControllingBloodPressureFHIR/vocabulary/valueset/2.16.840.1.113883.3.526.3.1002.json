@@ -1,0 +1,46 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.1002",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/valueset-warning",
+    "valueMarkdown": "CAUTION: The compose element in this ValueSet resource was inferred from the expansion element. It is NOT an authoritative definition of the value set and is provided only for convenience for systems that assume a compose will be present."
+  } ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1002",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.1002"
+  } ],
+  "version": "20200307",
+  "name": "ChronicKidneyDisease,Stage5",
+  "title": "Chronic Kidney Disease, Stage 5",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "compose": {
+    "include": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "concept": [ {
+        "code": "N18.5",
+        "display": "Chronic kidney disease, stage 5"
+      } ]
+    }, {
+      "system": "http://snomed.info/sct",
+      "concept": [ {
+        "code": "433146000",
+        "display": "Chronic kidney disease stage 5 (disorder)"
+      } ]
+    } ]
+  },
+  "expansion": {
+    "timestamp": "2021-08-11T18:13:40-06:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "N18.5",
+      "display": "Chronic kidney disease, stage 5"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "433146000",
+      "display": "Chronic kidney disease stage 5 (disorder)"
+    } ]
+  }
+}

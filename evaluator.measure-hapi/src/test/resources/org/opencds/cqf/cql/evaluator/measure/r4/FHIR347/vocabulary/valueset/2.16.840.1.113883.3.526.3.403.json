@@ -1,0 +1,820 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.526.3.403",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.403",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.526.3.403"
+  } ],
+  "version": "20170823",
+  "name": "MyocardialInfarction",
+  "title": "Myocardial Infarction",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:46-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.01",
+      "display": "ST elevation (STEMI) myocardial infarction involving left main coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.02",
+      "display": "ST elevation (STEMI) myocardial infarction involving left anterior descending coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.09",
+      "display": "ST elevation (STEMI) myocardial infarction involving other coronary artery of anterior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.11",
+      "display": "ST elevation (STEMI) myocardial infarction involving right coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.19",
+      "display": "ST elevation (STEMI) myocardial infarction involving other coronary artery of inferior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.21",
+      "display": "ST elevation (STEMI) myocardial infarction involving left circumflex coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.29",
+      "display": "ST elevation (STEMI) myocardial infarction involving other sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.3",
+      "display": "ST elevation (STEMI) myocardial infarction of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.4",
+      "display": "Non-ST elevation (NSTEMI) myocardial infarction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.9",
+      "display": "Acute myocardial infarction, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.A1",
+      "display": "Myocardial infarction type 2"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.A9",
+      "display": "Other myocardial infarction type"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.0",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of anterior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.1",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of inferior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.2",
+      "display": "Subsequent non-ST elevation (NSTEMI) myocardial infarction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.8",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of other sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.9",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of unspecified site"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.00",
+      "display": "Acute myocardial infarction of anterolateral wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.01",
+      "display": "Acute myocardial infarction of anterolateral wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.02",
+      "display": "Acute myocardial infarction of anterolateral wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.10",
+      "display": "Acute myocardial infarction of other anterior wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.11",
+      "display": "Acute myocardial infarction of other anterior wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.12",
+      "display": "Acute myocardial infarction of other anterior wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.20",
+      "display": "Acute myocardial infarction of inferolateral wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.21",
+      "display": "Acute myocardial infarction of inferolateral wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.22",
+      "display": "Acute myocardial infarction of inferolateral wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.30",
+      "display": "Acute myocardial infarction of inferoposterior wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.31",
+      "display": "Acute myocardial infarction of inferoposterior wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.32",
+      "display": "Acute myocardial infarction of inferoposterior wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.40",
+      "display": "Acute myocardial infarction of other inferior wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.41",
+      "display": "Acute myocardial infarction of other inferior wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.42",
+      "display": "Acute myocardial infarction of other inferior wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.50",
+      "display": "Acute myocardial infarction of other lateral wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.51",
+      "display": "Acute myocardial infarction of other lateral wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.52",
+      "display": "Acute myocardial infarction of other lateral wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.60",
+      "display": "True posterior wall infarction, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.61",
+      "display": "True posterior wall infarction, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.62",
+      "display": "True posterior wall infarction, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.70",
+      "display": "Subendocardial infarction, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.71",
+      "display": "Subendocardial infarction, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.72",
+      "display": "Subendocardial infarction, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.80",
+      "display": "Acute myocardial infarction of other specified sites, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.81",
+      "display": "Acute myocardial infarction of other specified sites, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.82",
+      "display": "Acute myocardial infarction of other specified sites, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.90",
+      "display": "Acute myocardial infarction of unspecified site, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.91",
+      "display": "Acute myocardial infarction of unspecified site, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.92",
+      "display": "Acute myocardial infarction of unspecified site, subsequent episode of care"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10273003",
+      "display": "Acute infarction of papillary muscle (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129574000",
+      "display": "Postoperative myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15990001",
+      "display": "Acute myocardial infarction of posterolateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194802003",
+      "display": "True posterior myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194809007",
+      "display": "Acute atrial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194856005",
+      "display": "Subsequent myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22298006",
+      "display": "Myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233835003",
+      "display": "Acute widespread myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233838001",
+      "display": "Acute posterior myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233843008",
+      "display": "Silent myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30277009",
+      "display": "Acute myocardial infarction with rupture of ventricle (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304914007",
+      "display": "Acute Q wave myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307140009",
+      "display": "Acute non-Q wave infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314207007",
+      "display": "Non-Q wave myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32574007",
+      "display": "Past myocardial infarction diagnosed on electrocardiogram AND/OR other special investigation, but currently presenting no symptoms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371068009",
+      "display": "Myocardial infarction with complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "394710008",
+      "display": "First myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401303003",
+      "display": "Acute ST segment elevation myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401314000",
+      "display": "Acute non-ST segment elevation myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418044006",
+      "display": "Myocardial infarction in recovery phase (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42531007",
+      "display": "Microinfarct of heart (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428196007",
+      "display": "Mixed myocardial ischemia and infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428752002",
+      "display": "Recent myocardial infarction (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52035003",
+      "display": "Acute anteroapical myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54329005",
+      "display": "Acute myocardial infarction of anterior wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57054005",
+      "display": "Acute myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58612006",
+      "display": "Acute myocardial infarction of lateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62695002",
+      "display": "Acute anteroseptal myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65547006",
+      "display": "Acute myocardial infarction of inferolateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70211005",
+      "display": "Acute myocardial infarction of anterolateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70422006",
+      "display": "Acute subendocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73795002",
+      "display": "Acute myocardial infarction of inferior wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79009004",
+      "display": "Acute myocardial infarction of septum (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.01",
+      "display": "ST elevation (STEMI) myocardial infarction involving left main coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.02",
+      "display": "ST elevation (STEMI) myocardial infarction involving left anterior descending coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.09",
+      "display": "ST elevation (STEMI) myocardial infarction involving other coronary artery of anterior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.11",
+      "display": "ST elevation (STEMI) myocardial infarction involving right coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.19",
+      "display": "ST elevation (STEMI) myocardial infarction involving other coronary artery of inferior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.21",
+      "display": "ST elevation (STEMI) myocardial infarction involving left circumflex coronary artery"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.29",
+      "display": "ST elevation (STEMI) myocardial infarction involving other sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.3",
+      "display": "ST elevation (STEMI) myocardial infarction of unspecified site"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.4",
+      "display": "Non-ST elevation (NSTEMI) myocardial infarction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.9",
+      "display": "Acute myocardial infarction, unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.A1",
+      "display": "Myocardial infarction type 2"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I21.A9",
+      "display": "Other myocardial infarction type"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.0",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of anterior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.1",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of inferior wall"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.2",
+      "display": "Subsequent non-ST elevation (NSTEMI) myocardial infarction"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.8",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of other sites"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "I22.9",
+      "display": "Subsequent ST elevation (STEMI) myocardial infarction of unspecified site"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.00",
+      "display": "Acute myocardial infarction of anterolateral wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.01",
+      "display": "Acute myocardial infarction of anterolateral wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.02",
+      "display": "Acute myocardial infarction of anterolateral wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.10",
+      "display": "Acute myocardial infarction of other anterior wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.11",
+      "display": "Acute myocardial infarction of other anterior wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.12",
+      "display": "Acute myocardial infarction of other anterior wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.20",
+      "display": "Acute myocardial infarction of inferolateral wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.21",
+      "display": "Acute myocardial infarction of inferolateral wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.22",
+      "display": "Acute myocardial infarction of inferolateral wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.30",
+      "display": "Acute myocardial infarction of inferoposterior wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.31",
+      "display": "Acute myocardial infarction of inferoposterior wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.32",
+      "display": "Acute myocardial infarction of inferoposterior wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.40",
+      "display": "Acute myocardial infarction of other inferior wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.41",
+      "display": "Acute myocardial infarction of other inferior wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.42",
+      "display": "Acute myocardial infarction of other inferior wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.50",
+      "display": "Acute myocardial infarction of other lateral wall, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.51",
+      "display": "Acute myocardial infarction of other lateral wall, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.52",
+      "display": "Acute myocardial infarction of other lateral wall, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.60",
+      "display": "True posterior wall infarction, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.61",
+      "display": "True posterior wall infarction, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.62",
+      "display": "True posterior wall infarction, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.70",
+      "display": "Subendocardial infarction, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.71",
+      "display": "Subendocardial infarction, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.72",
+      "display": "Subendocardial infarction, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.80",
+      "display": "Acute myocardial infarction of other specified sites, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.81",
+      "display": "Acute myocardial infarction of other specified sites, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.82",
+      "display": "Acute myocardial infarction of other specified sites, subsequent episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.90",
+      "display": "Acute myocardial infarction of unspecified site, episode of care unspecified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.91",
+      "display": "Acute myocardial infarction of unspecified site, initial episode of care"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "410.92",
+      "display": "Acute myocardial infarction of unspecified site, subsequent episode of care"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10273003",
+      "display": "Acute infarction of papillary muscle (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "129574000",
+      "display": "Postoperative myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "15990001",
+      "display": "Acute myocardial infarction of posterolateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194802003",
+      "display": "True posterior myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194809007",
+      "display": "Acute atrial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "194856005",
+      "display": "Subsequent myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "22298006",
+      "display": "Myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233835003",
+      "display": "Acute widespread myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233838001",
+      "display": "Acute posterior myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "233843008",
+      "display": "Silent myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "30277009",
+      "display": "Acute myocardial infarction with rupture of ventricle (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "304914007",
+      "display": "Acute Q wave myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "307140009",
+      "display": "Acute non-Q wave infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "314207007",
+      "display": "Non-Q wave myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "32574007",
+      "display": "Past myocardial infarction diagnosed on electrocardiogram AND/OR other special investigation, but currently presenting no symptoms (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371068009",
+      "display": "Myocardial infarction with complication (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "394710008",
+      "display": "First myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401303003",
+      "display": "Acute ST segment elevation myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "401314000",
+      "display": "Acute non-ST segment elevation myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418044006",
+      "display": "Myocardial infarction in recovery phase (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "42531007",
+      "display": "Microinfarct of heart (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428196007",
+      "display": "Mixed myocardial ischemia and infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "428752002",
+      "display": "Recent myocardial infarction (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "52035003",
+      "display": "Acute anteroapical myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "54329005",
+      "display": "Acute myocardial infarction of anterior wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "57054005",
+      "display": "Acute myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "58612006",
+      "display": "Acute myocardial infarction of lateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "62695002",
+      "display": "Acute anteroseptal myocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "65547006",
+      "display": "Acute myocardial infarction of inferolateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70211005",
+      "display": "Acute myocardial infarction of anterolateral wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "70422006",
+      "display": "Acute subendocardial infarction (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "73795002",
+      "display": "Acute myocardial infarction of inferior wall (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "79009004",
+      "display": "Acute myocardial infarction of septum (disorder)"
+    } ]
+  }
+}

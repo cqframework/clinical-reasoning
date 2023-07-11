@@ -1,0 +1,602 @@
+{
+  "resourceType": "Measure",
+  "id": "DischargedonAntithromboticTherapyFHIR",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2021-05-17T10:33:51.000-06:00",
+    "source": "#iNR3auWTZpYnhQke",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm" ]
+  },
+  "language": "en",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "Encounter"
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "cqf-tooling"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
+    "valueParameterDefinition": {
+      "name": "Measurement Period",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Period"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
+    "valueParameterDefinition": {
+      "name": "Numerator",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
+    "valueParameterDefinition": {
+      "name": "Denominator",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
+    "valueParameterDefinition": {
+      "name": "Initial Population",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
+    "valueParameterDefinition": {
+      "name": "Denominator Exclusions",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
+    "valueParameterDefinition": {
+      "name": "Denominator Exceptions",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement",
+    "valueDataRequirement": {
+      "type": "MedicationRequest",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationRequest" ],
+      "mustSupport": [ "authoredOn", "intent.value", "medication", "category", "intent", "status" ],
+      "codeFilter": [ {
+        "path": "medication",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.201"
+      }, {
+        "path": "intent.value",
+        "code": [ {
+          "code": "order"
+        } ]
+      }, {
+        "path": "intent.value",
+        "code": [ {
+          "code": "order"
+        } ]
+      } ]
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement",
+    "valueDataRequirement": {
+      "type": "ServiceRequest",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/ServiceRequest" ],
+      "mustSupport": [ "code", "intent" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/1.3.6.1.4.1.33895.1.3.0.45"
+      }, {
+        "path": "intent",
+        "code": [ {
+          "code": "order"
+        } ]
+      }, {
+        "path": "intent",
+        "code": [ {
+          "code": "order"
+        } ]
+      } ]
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement",
+    "valueDataRequirement": {
+      "type": "Procedure",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+      "mustSupport": [ "code", "status" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/1.3.6.1.4.1.33895.1.3.0.45"
+      }, {
+        "path": "status",
+        "code": [ {
+          "code": "completed"
+        } ]
+      }, {
+        "path": "status",
+        "code": [ {
+          "code": "completed"
+        } ]
+      } ]
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+    "valueCoding": {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+      "code": "community",
+      "display": "Community"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+    "valueCoding": {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+      "code": "discharge",
+      "display": "Discharge"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "TJCOverallFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Non Elective Inpatient Encounter"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Non Elective Inpatient Encounter\":\n  [\"Encounter\": \"Non-Elective Inpatient Encounter\"] NonElectiveEncounter\n    \t\twhere Global.\"LengthInDays\"(NonElectiveEncounter.period) <= 120\n    \t\t\tand NonElectiveEncounter.period ends during \"Measurement Period\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 0
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "TJCOverallFHIR"
+    }, {
+      "url": "name",
+      "valueString": "All Stroke Encounter"
+    }, {
+      "url": "statement",
+      "valueString": "define \"All Stroke Encounter\":\n  \"Non Elective Inpatient Encounter\" NonElectiveEncounter\n        where Global.PrincipalDiagnosis(NonElectiveEncounter).code in \"Hemorrhagic Stroke\"\n          or Global.PrincipalDiagnosis(NonElectiveEncounter).code in \"Ischemic Stroke\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 1
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "TJCOverallFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Encounter with Principal Diagnosis and Age"
+    }, {
+      "url": "statement",
+      "valueString": "// Translator issue with 1.4.9-SNAPSHOT: https://github.com/cqframework/clinical_quality_language/issues/511define \"Encounter with Principal Diagnosis and Age\":\n  \"All Stroke Encounter\" AllStrokeEncounter\n    \t\twith [\"Patient\"] BirthDate\n    \t\t\tsuch that AgeInYearsAt(start of FHIRHelpers.ToInterval(AllStrokeEncounter.period)) >= 18"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 2
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "TJCOverallFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Ischemic Stroke Encounter"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Ischemic Stroke Encounter\":\n  \"Encounter with Principal Diagnosis and Age\" EncounterWithAge\n    \t\twhere Global.PrincipalDiagnosis(EncounterWithAge).code in \"Ischemic Stroke\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 3
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Antithrombotic Therapy at Discharge"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Antithrombotic Therapy at Discharge\":\n  [\"MedicationRequest\": medication in \"Antithrombotic Therapy\"] Antithrombotic\n    \t  where exists (Antithrombotic.category C where FHIRHelpers.ToConcept(C) ~ Global.\"Community\" or FHIRHelpers.ToConcept(C) ~ Global.\"Discharge\")\n          and Antithrombotic.status in { 'active', 'completed' }\n    \t    and Antithrombotic.intent.value = 'order'"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 4
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Numerator"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Numerator\":\n  TJC.\"Ischemic Stroke Encounter\" IschemicStrokeEncounter\n    \t\twith \"Antithrombotic Therapy at Discharge\" DischargeAntithrombotic\n    \t\t\tsuch that DischargeAntithrombotic.authoredOn during Global.\"Normalize Interval\"(IschemicStrokeEncounter.period)"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 5
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Denominator"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Denominator\":\n  TJC.\"Ischemic Stroke Encounter\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 6
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Initial Population"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Initial Population\":\n  TJC.\"Encounter with Principal Diagnosis and Age\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 7
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "TJCOverallFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Ischemic Stroke Encounters with Discharge Disposition"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Ischemic Stroke Encounters with Discharge Disposition\":\n  \"Ischemic Stroke Encounter\" IschemicStrokeEncounter\n    \t\twhere IschemicStrokeEncounter.hospitalization.dischargeDisposition in \"Discharge To Acute Care Facility\"\n    \t\t\tor IschemicStrokeEncounter.hospitalization.dischargeDisposition in \"Left Against Medical Advice\"\n    \t\t\tor IschemicStrokeEncounter.hospitalization.dischargeDisposition in \"Patient Expired\"\n    \t\t\tor IschemicStrokeEncounter.hospitalization.dischargeDisposition in \"Discharged to Home for Hospice Care\"\n    \t\t\tor IschemicStrokeEncounter.hospitalization.dischargeDisposition in \"Discharged to Health Care Facility for Hospice Care\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 8
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "TJCOverallFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Intervention Comfort Measures"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Intervention Comfort Measures\":\n  ([\"ServiceRequest\": \"Comfort Measures\"] P\n    \t\twhere P.intent = 'order')\n    \t\tunion\n    \t\t([\"Procedure\": \"Comfort Measures\"] InterventionPerformed\n    \t\twhere InterventionPerformed.status = 'completed')"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 9
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "TJCOverallFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Comfort Measures during Hospitalization"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Comfort Measures during Hospitalization\":\n  \"Ischemic Stroke Encounter\" IschemicStrokeEncounter\n       with \"Intervention Comfort Measures\" ComfortMeasure\n       such that FHIRHelpers.ToDateTime(Coalesce(ComfortMeasure.performed as dateTime,ComfortMeasure.authoredOn)) during Global.\"HospitalizationWithObservation\"(IschemicStrokeEncounter)"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 10
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Denominator Exclusions"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Denominator Exclusions\":\n  TJC.\"Ischemic Stroke Encounters with Discharge Disposition\"\n    \t\tunion TJC.\"Comfort Measures during Hospitalization\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 11
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Antithrombotic Not Given at Discharge"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Antithrombotic Not Given at Discharge\":\n  [\"MedicationRequest\": medication in \"Antithrombotic Therapy\"] NoAntithromboticDischarge\n        where NoAntithromboticDischarge.doNotPerform is true\n    \t\t\tand (NoAntithromboticDischarge.reasonCode in \"Medical Reason\"\n    \t\t\t\tor NoAntithromboticDischarge.reasonCode in \"Patient Refusal\")\n          and exists (NoAntithromboticDischarge.category C where FHIRHelpers.ToConcept(C) ~ Global.\"Community\" or FHIRHelpers.ToConcept(C) ~ Global.\"Discharge\")\n          and NoAntithromboticDischarge.status = 'completed'\n          and NoAntithromboticDischarge.intent = 'order'"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 12
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Encounter With No Antithrombotic At Discharge"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Encounter With No Antithrombotic At Discharge\":\n  TJC.\"Ischemic Stroke Encounter\" IschemicStrokeEncounter\n    \t\twith \"Antithrombotic Not Given at Discharge\" NoDischargeAntithrombotic\n    \t\t\tsuch that NoDischargeAntithrombotic.authoredOn during IschemicStrokeEncounter.period"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 13
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Pharmacological Contraindications for Antithrombotic Therapy at Discharge"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Pharmacological Contraindications for Antithrombotic Therapy at Discharge\":\n  [\"MedicationRequest\": medication in \"Pharmacological Contraindications For Antithrombotic Therapy\"] Pharmacological\n        where exists (Pharmacological.category C where FHIRHelpers.ToConcept(C) ~ Global.\"Community\" or FHIRHelpers.ToConcept(C) ~ Global.\"Discharge\")\n          and Pharmacological.status in { 'active', 'completed' }\n          and Pharmacological.intent = 'order'"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 14
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Encounter With Pharmacological Contraindications for Antithrombotic Therapy at Discharge"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Encounter With Pharmacological Contraindications for Antithrombotic Therapy at Discharge\":\n  TJC.\"Ischemic Stroke Encounter\" IschemicStrokeEncounter\n        with \"Pharmacological Contraindications for Antithrombotic Therapy at Discharge\" DischargePharmacological\n          such that DischargePharmacological.authoredOn during IschemicStrokeEncounter.period"
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 15
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+    "extension": [ {
+      "url": "libraryName",
+      "valueString": "DischargedonAntithromboticTherapyFHIR"
+    }, {
+      "url": "name",
+      "valueString": "Denominator Exceptions"
+    }, {
+      "url": "statement",
+      "valueString": "define \"Denominator Exceptions\":\n  \"Encounter With No Antithrombotic At Discharge\"\n    \t\tunion \"Encounter With Pharmacological Contraindications for Antithrombotic Therapy at Discharge\""
+    }, {
+      "url": "displaySequence",
+      "valueInteger": 16
+    } ]
+  } ],
+  "url": "http://ecqi.healthit.gov/ecqms/Measure/DischargedonAntithromboticTherapyFHIR",
+  "identifier": [ {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/guid",
+    "value": "755216b2-5fa4-474d-bb29-ae8eaa209460"
+  } ],
+  "version": "1.0.001",
+  "name": "DischargedonAntithromboticTherapyFHIR",
+  "title": "Discharged on Antithrombotic Therapy FHIR",
+  "status": "draft",
+  "experimental": false,
+  "date": "2021-07-28T15:17:23-06:00",
+  "publisher": "The Joint Commission",
+  "contact": [ {
+    "telecom": [ {
+      "system": "url",
+      "value": "https://cms.gov"
+    } ]
+  } ],
+  "description": "Ischemic stroke patients prescribed or continuing to take antithrombotic therapy at hospital discharge",
+  "purpose": "Unknown",
+  "copyright": "Measure specifications are in the Public Domain\n\nLOINC(R) copyright 2004-2020 Regenstrief Institute, Inc. \nThis material contains SNOMED Clinical Terms(R) (SNOMED CT[R]) copyright 2004-2020 International Health Terminology Standards Development Organisation. All Rights Reserved.",
+  "effectivePeriod": {
+    "start": "2021-01-01",
+    "end": "2021-12-31"
+  },
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "Library TJC",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/TJCOverallFHIR|1.1.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library Global",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/MATGlobalCommonFunctionsFHIR4|6.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers|4.0.001"
+  }, {
+    "type": "depends-on",
+    "display": "Code system MedicationRequestCategory",
+    "resource": "http://terminology.hl7.org/CodeSystem/medicationrequest-category"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Non-Elective Inpatient Encounter",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.424"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Hemorrhagic Stroke",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.212"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Ischemic Stroke",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.247"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Antithrombotic Therapy",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.201"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Discharge To Acute Care Facility",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.87"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Left Against Medical Advice",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.308"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Patient Expired",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.309"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Discharged to Home for Hospice Care",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.209"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Discharged to Health Care Facility for Hospice Care",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.207"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Comfort Measures",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/1.3.6.1.4.1.33895.1.3.0.45"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Observation Services",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Emergency Department Visit",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Medical Reason",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.473"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Patient Refusal",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.93"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Pharmacological Contraindications For Antithrombotic Therapy",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.52"
+  } ],
+  "library": [ "http://ecqi.healthit.gov/ecqms/Library/DischargedonAntithromboticTherapyFHIR" ],
+  "disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "proportion",
+      "display": "Proportion"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "code": "process"
+    } ]
+  } ],
+  "rationale": "The effectiveness of antithrombotic agents in reducing stroke mortality, stroke-related morbidity and recurrence rates has been studied in several large clinical trials. While the use of these agents for patients with acute ischemic stroke and transient ischemic attacks continues to be the subject of study, substantial evidence is available from completed studies. Data at this time suggest that antithrombotic therapy should be prescribed at discharge following acute ischemic stroke to reduce stroke mortality and morbidity as long as no contraindications exist.\n\nFor patients with a stroke due to a cardioembolic source (e.g. atrial fibrillation, mechanical heart valve), warfarin is recommended unless contraindicated. In recent years, novel oral anticoagulant agents (NOACs) have been developed and approved by the U.S. Food and Drug Administration (FDA) for stroke prevention, and may be considered as an alternative to warfarin for select patients. Anticoagulation therapy is not generally recommended for secondary stroke prevention in patients presumed to have a non-cardioembolic stroke.\nAnticoagulants at doses to prevent venous thromboembolism are insufficient antithrombotic therapy to prevent recurrent ischemic stroke or TIA.",
+  "clinicalRecommendationStatement": "Clinical trial results suggest that antithrombotic therapy should be prescribed at discharge following acute ischemic stroke to reduce stroke mortality and morbidity as long as no contraindications exist",
+  "improvementNotation": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+      "code": "increase"
+    } ]
+  },
+  "guidance": "The \"Non-elective Inpatient Encounter\" value set intends to capture all non-scheduled hospitalizations. This value set is a subset of the \"Inpatient encounter\" value set, excluding concepts that specifically refer to elective hospital admissions. Non-elective admissions include emergency, urgent and unplanned admissions.\n\nThe \"Medication, Discharge\" datatype refers to the discharge medication list and is intended to express medications ordered for post-discharge use.\n\nThis eCQM is an episode-based measure.\n\nThis version of the eCQM uses FHIR version 4.1.0.  Please refer to the eCQI resource center (https://ecqi.healthit.gov/qdm) for more information on FHIR.",
+  "group": [ {
+    "id": "group-1",
+    "population": [ {
+      "id": "3CE6B01B-E19E-4D76-98DE-C89B6E2CEAD3",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Initial Population"
+      }
+    }, {
+      "id": "A76C9797-F730-4A9B-88AD-377DFE9D7621",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Denominator"
+      }
+    }, {
+      "id": "9FE6C863-8DAD-48B7-AF29-BE4D891F52CE",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator-exclusion",
+          "display": "Denominator Exclusion"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Denominator Exclusions"
+      }
+    }, {
+      "id": "9E953F22-73CE-4C14-BBB0-2E50677329FF",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator-exception",
+          "display": "Denominator Exception"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Denominator Exceptions"
+      }
+    }, {
+      "id": "32EB4357-518B-4F0B-811B-6C0B08295C29",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Numerator"
+      }
+    } ]
+  } ]
+}

@@ -37,7 +37,6 @@
       <artifactId>evaluator.builder</artifactId>
       <version>3.0.0-PRE5-SNAPSHOT</version>
     </dependency>
-
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.jackson-deps</artifactId>
@@ -57,7 +56,24 @@
       <version>3.0.0-PRE5-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.library</artifactId>
+      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.skyscreamer</groupId>
+      <artifactId>jsonassert</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.jackson-deps</artifactId>
+      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>

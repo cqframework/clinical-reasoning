@@ -1,0 +1,151 @@
+{
+  "resourceType": "Library",
+  "id": "SeenPatients",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "cqf-tooling"
+    }
+  } ],
+  "url": "http://hl7.org/fhir/us/chronic-ds/Library/SeenPatients",
+  "version": "0.1.0",
+  "name": "SeenPatients",
+  "title": "Seen Patients",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/codesystem-library-type.html",
+      "code": "logic-library"
+    } ]
+  },
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/FHIRHelpers|4.0.001"
+  }, {
+    "type": "depends-on",
+    "display": "Library SDE",
+    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/SupplementalDataElementsFHIR4|2.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library SurveillanceDataElements",
+    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/SurveillanceDataElementsFHIR4|1.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/FHIRHelpers|4.0.001"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/FHIRHelpers|4.0.001"
+  }, {
+    "type": "depends-on",
+    "display": "Library Common",
+    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/MATGlobalCommonFunctionsFHIR4|6.0.000"
+  }, {
+    "type": "depends-on",
+    "display": "Code system LOINC",
+    "resource": "http://loinc.org"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Payer",
+    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+  } ],
+  "parameter": [ {
+    "name": "Measurement Period",
+    "use": "in",
+    "min": 0,
+    "max": "1",
+    "type": "Period"
+  }, {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Patient"
+  }, {
+    "name": "SDE Ethnicity",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Payer",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Any"
+  }, {
+    "name": "SDE Race",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Coding"
+  }, {
+    "name": "SDE Sex",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Coding"
+  }, {
+    "name": "SDE Age",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "integer"
+  }, {
+    "name": "SDE State of Residence",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "SDE Postal Code of Residence",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "SDE Food Insecurity Risk Status",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "CodeableConcept"
+  }, {
+    "name": "Initial Population",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  } ],
+  "dataRequirement": [ {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
+    "mustSupport": [ "extension", "value", "url" ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+    "mustSupport": [ "period" ],
+    "dateFilter": [ {
+      "path": "period",
+      "_valueDateTime": {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Measurement Period"
+          }
+        } ]
+      }
+    } ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/SeenPatients.cql"
+  } ]
+}

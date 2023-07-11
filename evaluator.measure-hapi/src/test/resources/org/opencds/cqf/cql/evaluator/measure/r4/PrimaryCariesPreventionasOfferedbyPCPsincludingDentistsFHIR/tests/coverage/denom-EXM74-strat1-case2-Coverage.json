@@ -1,0 +1,22 @@
+{
+  "resourceType": "Coverage",
+  "id": "denom-EXM74-strat1-case2-Coverage",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/sop",
+      "code": "299",
+      "display": "Medicaid - Dental"
+    } ]
+  },
+  "beneficiary": {
+    "reference": "Patient/denom-EXM74-strat1-case2"
+  },
+  "period": {
+    "start": "2018-05-30T00:00:00-00:00",
+    "end": "2020-05-31T00:00:00-00:00"
+  },
+  "payor": [ {
+    "reference": "Patient/denom-EXM74-strat1-case2"
+  } ]
+}

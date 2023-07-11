@@ -1,0 +1,40 @@
+{
+  "resourceType": "Condition",
+  "id": "numer-EXM165",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  },
+  "clinicalStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+      "code": "active",
+      "display": "Active"
+    } ]
+  },
+  "verificationStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+      "code": "confirmed",
+      "display": "Confirmed"
+    } ]
+  },
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+      "code": "encounter-diagnosis",
+      "display": "Encounter Diagnosis"
+    } ]
+  } ],
+  "code": {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "59720008",
+      "display": "Sustained diastolic hypertension (disorder)"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/numer-EXM165"
+  },
+  "onsetDateTime": "2019-05-02T11:01:33-06:00",
+  "recordedDate": "2019-05-02T11:01:33-06:00"
+}

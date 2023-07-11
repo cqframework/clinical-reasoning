@@ -2198,7 +2198,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "pa-aslp/cql/FHIRHelpers.cql"
+      "url": "../cql/FHIRHelpers.cql"
     }
   ]
 }

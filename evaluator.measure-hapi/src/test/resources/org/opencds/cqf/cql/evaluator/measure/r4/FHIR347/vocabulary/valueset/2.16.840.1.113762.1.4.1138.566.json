@@ -1,0 +1,160 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1138.566",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1138.566",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1138.566"
+  } ],
+  "version": "20180818",
+  "name": "CABG,PCIProcedure",
+  "title": "CABG, PCI Procedure",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33510",
+      "display": "Coronary artery bypass, vein only; single coronary venous graft"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33511",
+      "display": "Coronary artery bypass, vein only; 2 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33512",
+      "display": "Coronary artery bypass, vein only; 3 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33513",
+      "display": "Coronary artery bypass, vein only; 4 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33514",
+      "display": "Coronary artery bypass, vein only; 5 coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33516",
+      "display": "Coronary artery bypass, vein only; 6 or more coronary venous grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33517",
+      "display": "Coronary artery bypass, using venous graft(s) and arterial graft(s); single vein graft (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33518",
+      "display": "Coronary artery bypass, using venous graft(s) and arterial graft(s); 2 venous grafts (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33519",
+      "display": "Coronary artery bypass, using venous graft(s) and arterial graft(s); 3 venous grafts (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33521",
+      "display": "Coronary artery bypass, using venous graft(s) and arterial graft(s); 4 venous grafts (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33522",
+      "display": "Coronary artery bypass, using venous graft(s) and arterial graft(s); 5 venous grafts (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33523",
+      "display": "Coronary artery bypass, using venous graft(s) and arterial graft(s); 6 or more venous grafts (List separately in addition to code for primary procedure)"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33533",
+      "display": "Coronary artery bypass, using arterial graft(s); single arterial graft"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33534",
+      "display": "Coronary artery bypass, using arterial graft(s); 2 coronary arterial grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33535",
+      "display": "Coronary artery bypass, using arterial graft(s); 3 coronary arterial grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "33536",
+      "display": "Coronary artery bypass, using arterial graft(s); 4 or more coronary arterial grafts"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92920",
+      "display": "Percutaneous transluminal coronary angioplasty; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92924",
+      "display": "Percutaneous transluminal coronary atherectomy, with coronary angioplasty when performed; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92928",
+      "display": "Percutaneous transcatheter placement of intracoronary stent(s), with coronary angioplasty when performed; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92933",
+      "display": "Percutaneous transluminal coronary atherectomy, with intracoronary stent, with coronary angioplasty when performed; single major coronary artery or branch"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92937",
+      "display": "Percutaneous transluminal revascularization of or through coronary artery bypass graft (internal mammary, free arterial, venous), any combination of intracoronary stent, atherectomy and angioplasty, including distal protection when performed; single vessel"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92941",
+      "display": "Percutaneous transluminal revascularization of acute total/subtotal occlusion during acute myocardial infarction, coronary artery or coronary artery bypass graft, any combination of intracoronary stent, atherectomy and angioplasty, including aspiration thrombectomy when performed, single vessel"
+    }, {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "version": "2020",
+      "code": "92943",
+      "display": "Percutaneous transluminal revascularization of chronic total occlusion, coronary artery, coronary artery branch, or coronary artery bypass graft, any combination of intracoronary stent, atherectomy and angioplasty; single vessel"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S2205",
+      "display": "Minimally invasive direct coronary artery bypass surgery involving mini-thoracotomy or mini-sternotomy surgery, performed under direct vision; using arterial graft(s), single coronary arterial graft"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S2206",
+      "display": "Minimally invasive direct coronary artery bypass surgery involving mini-thoracotomy or mini-sternotomy surgery, performed under direct vision; using arterial graft(s), two coronary arterial grafts"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S2207",
+      "display": "Minimally invasive direct coronary artery bypass surgery involving mini-thoracotomy or mini-sternotomy surgery, performed under direct vision; using venous graft only, single coronary venous graft"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S2208",
+      "display": "Minimally invasive direct coronary artery bypass surgery involving mini-thoracotomy or mini-sternotomy surgery, performed under direct vision; using single arterial and venous graft(s), single venous graft"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.285",
+      "version": "2020",
+      "code": "S2209",
+      "display": "Minimally invasive direct coronary artery bypass surgery involving mini-thoracotomy or mini-sternotomy surgery, performed under direct vision; using two arterial grafts and single venous graft"
+    } ]
+  }
+}

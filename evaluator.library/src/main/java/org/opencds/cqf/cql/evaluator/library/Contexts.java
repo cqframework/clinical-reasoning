@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
@@ -15,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
@@ -51,7 +53,7 @@ public class Contexts {
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     var sourceProviders = new ArrayList<LibrarySourceProvider>();
     sourceProviders.add(buildLibrarySource(repository));
-    var libraryLoader = buildLibraryLoader(settings, sourceProviders);
+    var libraryLoader = buildEnvironment(settings, sourceProviders);
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
 
@@ -86,7 +88,7 @@ public class Contexts {
 
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     librarySourceProviders.add(buildLibrarySource(repository));
-    var libraryLoader = buildLibraryLoader(settings, librarySourceProviders);
+    var environment = buildEnvironment(settings, librarySourceProviders);
 
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
@@ -103,19 +105,21 @@ public class Contexts {
   }
 
   // TODO: Add NPM library source loader support
-  private static LibraryLoader buildLibraryLoader(EvaluationSettings settings,
+  private static Environment buildEnvironment(EvaluationSettings settings,
       List<LibrarySourceProvider> librarySourceProviders) {
     if (settings.getCqlOptions().useEmbeddedLibraries()) {
       librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
 
-    var modelManger =
+    var modelManager =
         settings.getModelCache() != null ? new ModelManager(settings.getModelCache())
             : new ModelManager();
 
-    return new TranslatingLibraryLoader(modelManger,
-        librarySourceProviders, settings.getCqlOptions().getCqlTranslatorOptions(),
-        settings.getLibraryCache());
+    LibraryManager libraryManager = new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions());
+    libraryManager.getLibrarySourceLoader().clearProviders();
+    librarySourceProviders.forEach(lsp -> {libraryManager.getLibrarySourceLoader().registerProvider(lsp);});
+
+    return new Environment(libraryManager);
   }
 
   private static Map<String, DataProvider> buildDataProviders(Repository repository,

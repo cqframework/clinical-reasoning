@@ -175,7 +175,7 @@ public class CqlCommand implements Callable<Integer> {
 
     if (optionsPath != null) {
       CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-      cqlOptions.setCqlTranslatorOptions(options);
+      cqlOptions.setCqlCompilerOptions(options);
     }
 
     for (LibraryParameter library : libraries) {

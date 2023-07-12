@@ -16,21 +16,19 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.cqframework.cql.elm.execution.Library;
+import org.hl7.elm.r1.Library;
 import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
@@ -65,7 +63,7 @@ public class CqlEvaluatorBuilder {
 
   private NpmProcessor npmProcessor;
 
-  private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
+  private Map<org.hl7.elm.r1.VersionedIdentifier, org.hl7.elm.r1.Library> libraryCache;
 
   private RetrieveProviderConfig retrieveProviderConfig;
 
@@ -248,7 +246,7 @@ public class CqlEvaluatorBuilder {
    * @return this CqlEvaluatorBuilder
    */
   public CqlEvaluatorBuilder withLibraryCache(
-      HashMap<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> libraryCache) {
+      HashMap<org.hl7.elm.r1.VersionedIdentifier, Library> libraryCache) {
     this.libraryCache = libraryCache;
     return this;
   }
@@ -321,7 +319,7 @@ public class CqlEvaluatorBuilder {
     }
 
     var libraryLoader = new TranslatingLibraryLoader(modelManager,
-        librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.libraryCache);
+        librarySourceProviders, this.cqlOptions.getCqlCompilerOptions(), this.libraryCache);
 
     if (this.namespaceInfo != null) {
       libraryLoader.loadNamespaces(Collections.singletonList(this.namespaceInfo));

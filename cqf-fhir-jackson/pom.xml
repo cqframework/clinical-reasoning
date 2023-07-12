@@ -31,9 +31,5 @@
       <artifactId>elm-jackson</artifactId>
       <version>${cql.version}</version>
     </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>engine-jackson</artifactId>
-    </dependency>
   </dependencies>
 </project>

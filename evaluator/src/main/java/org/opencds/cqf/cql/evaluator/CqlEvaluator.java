@@ -7,52 +7,29 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
-import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.CqlEngine.Options;
+import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
 // TODO: Add debug options
 public class CqlEvaluator {
 
-  private LibraryLoader libraryLoader;
-  private Map<String, DataProvider> dataProviders;
-  private TerminologyProvider terminologyProvider;
+  private Environment environment;
   private CqlEngine cqlEngine;
 
-  public CqlEvaluator(LibraryLoader libraryLoader) {
-    this(libraryLoader, null, null, null);
+  public CqlEvaluator(Environment environment) {
+    this(environment, null);
   }
 
-  public CqlEvaluator(LibraryLoader libraryLoader, Map<String, DataProvider> dataProviders,
-      TerminologyProvider terminologyProvider) {
-    this(libraryLoader, dataProviders, terminologyProvider, null);
+  public Environment getEnvironment() {
+    return this.environment;
   }
 
-  public CqlEvaluator(LibraryLoader libraryLoader, EnumSet<Options> engineOptions) {
-    this(libraryLoader, null, null, engineOptions);
-  }
-
-  public LibraryLoader getLibraryLoader() {
-    return this.libraryLoader;
-  }
-
-  public Map<String, DataProvider> getDataProviders() {
-    return this.dataProviders;
-  }
-
-  public TerminologyProvider getTerminologyProvider() {
-    return this.terminologyProvider;
-  }
-
-  public CqlEvaluator(LibraryLoader libraryLoader, Map<String, DataProvider> dataProviders,
-      TerminologyProvider terminologyProvider, Set<Options> engineOptions) {
-    this.libraryLoader = requireNonNull(libraryLoader, "libraryLoader can not be null.");
-    this.cqlEngine = new CqlEngine(this.libraryLoader, dataProviders, terminologyProvider,
-        EnumSet.copyOf(engineOptions));
+  public CqlEvaluator(Environment environment, Set<Options> engineOptions) {
+    this.environment = requireNonNull(environment, "libraryLoader can not be null.");
+    this.cqlEngine = new CqlEngine(this.environment, EnumSet.copyOf(engineOptions));
   }
 
   public EvaluationResult evaluate(VersionedIdentifier libraryIdentifier) {

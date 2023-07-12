@@ -9,11 +9,18 @@ import static org.testng.Assert.assertThrows;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestQuestionnaire;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessorTests {
+  final static String QUESTIONNAIRE_RESPONSE_POPULATED = "questionnaire-response-populated.json";
+  final static String QUESTIONNAIRE_RESPONSE_POPULATED_NO_LIBRARY = "questionnaire-response-populated-noLibrary.json";
+  final static String QUESTIONNAIRE_INVALID_QUESTIONS = "questionnaire-invalid-questionnaire.json";
+  final static String QUESTIONNAIRE_ORDER_POPULATED = "questionnaire-for-order-populated.json";
+  final static String QUESTIONNAIRE_ORDER_POPULATED_NO_LIBRARY = "questionnaire-for-order-populated-noLibrary.json";
+
   @Test
   void testPrePopulate() {
     var repository =
@@ -22,7 +29,7 @@ public class QuestionnaireProcessorTests {
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
         .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
-        .isEqualsTo("questionnaire-for-order-populated.json");
+        .isEqualsTo("../" + QUESTIONNAIRE_ORDER_POPULATED);
   }
 
   @Test
@@ -33,7 +40,7 @@ public class QuestionnaireProcessorTests {
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
             "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-        .prePopulate().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
+        .prePopulate().isEqualsTo("../" + QUESTIONNAIRE_ORDER_POPULATED_NO_LIBRARY);
   }
 
   @Test
@@ -63,7 +70,7 @@ public class QuestionnaireProcessorTests {
         TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     assertThrows(ClassCastException.class, () -> {
       TestQuestionnaire.Assert
-          .that("questionnaire-invalid-questionnaire.json", null)
+          .that("../" + QUESTIONNAIRE_INVALID_QUESTIONS, null)
           .withRepository(repository)
           .prePopulate();
     });
@@ -77,7 +84,7 @@ public class QuestionnaireProcessorTests {
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
         .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
-        .isEqualsTo("questionnaire-response-populated.json");
+        .isEqualsTo("../" + QUESTIONNAIRE_RESPONSE_POPULATED);
   }
 
   @Test
@@ -88,7 +95,7 @@ public class QuestionnaireProcessorTests {
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
             "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-        .populate().isEqualsTo("questionnaire-response-populated-noLibrary.json");
+        .populate().isEqualsTo("../" + QUESTIONNAIRE_RESPONSE_POPULATED_NO_LIBRARY);
   }
 
   @Test
@@ -117,7 +124,7 @@ public class QuestionnaireProcessorTests {
     var repository =
         TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     assertThrows(ClassCastException.class, () -> {
-      TestQuestionnaire.Assert.that("questionnaire-invalid-questionnaire.json", null)
+      TestQuestionnaire.Assert.that("../" + QUESTIONNAIRE_INVALID_QUESTIONS, null)
           .withRepository(repository)
           .populate();
     });

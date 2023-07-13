@@ -1,0 +1,94 @@
+{
+  "resourceType": "ValueSet",
+  "id": "example-hcc189-exclusion",
+  "url": "http://hl7.org/fhir/us/davinci-ra/ValueSet/example-hcc189-exclusion",
+  "identifier": [ {
+    "value": "example-hcc189-exclusion"
+  } ],
+  "version": "Working",
+  "name": "Example_HCC189_Exclusion",
+  "title": "Example HCC189 Exclusion",
+  "status": "active",
+  "expansion": {
+    "timestamp": "2022-07-06T14:51:05-04:00",
+    "total": 1,
+    "offset": 0,
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20",
+      "display": "Acquired deformities of fingers and toes"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20.0",
+      "display": "Deformity of finger(s)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20.1",
+      "display": "Hallux valgus (acquired)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20.2",
+      "display": "Hallux rigidus"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20.3",
+      "display": "Hallux varus (acquired)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20.4",
+      "display": "Other hammer toe(s) (acquired)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20.5",
+      "display": "Other deformities of toe(s) (acquired)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M20.6",
+      "display": "Acquired deformities of toe(s), unspecified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21",
+      "display": "Other acquired deformities of limbs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.0",
+      "display": "Valgus deformity, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.1",
+      "display": "Varus deformity, not elsewhere classified"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.2",
+      "display": "Flexion deformity"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.3",
+      "display": "Wrist or foot drop (acquired)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.4",
+      "display": "Flat foot [pes planus] (acquired)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.5",
+      "display": "Acquired clawhand, clubhand, clawfoot and clubfoot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.6",
+      "display": "Other acquired deformities of foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.7",
+      "display": "Unequal limb length (acquired)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.8",
+      "display": "Other specified acquired deformities of limbs"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "M21.9",
+      "display": "Unspecified acquired deformity of limb and hand"
+    } ]
+  }
+}

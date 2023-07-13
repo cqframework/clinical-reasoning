@@ -1,0 +1,143 @@
+{
+  "resourceType": "ValueSet",
+  "id": "SGLT2i-nocombo",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "shareable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "narrative"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "publishable"
+  }, {
+    "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion",
+    "valueString": "All generics (with different strengths) and brands (with different strengths) mentioned in Rick's prototype"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning",
+    "valueString": "This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."
+  } ],
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/SGLT2i-nocombo",
+  "version": "1.0.1",
+  "name": "SGLT2inocombo",
+  "title": "SGLT2i-nocombo",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-08-05T12:37:01-06:00",
+  "publisher": "Optum Technology CDS",
+  "description": "This value set contains SGLT2i medication codes",
+  "purpose": "Medications documented in a clinical record.",
+  "expansion": {
+    "timestamp": "2022-08-05T12:35:48-06:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1373458",
+      "display": "canagliflozin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1373463",
+      "display": "canagliflozin 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1373469",
+      "display": "canagliflozin 100 MG Oral Tablet [Invokana]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1373471",
+      "display": "canagliflozin 300 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1373473",
+      "display": "canagliflozin 300 MG Oral Tablet [Invokana]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1486977",
+      "display": "dapagliflozin 10 MG Oral Tablet [Farxiga]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1486981",
+      "display": "dapagliflozin 5 MG Oral Tablet [Farxiga]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1488564",
+      "display": "dapagliflozin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1488569",
+      "display": "dapagliflozin 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1488574",
+      "display": "dapagliflozin 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1545653",
+      "display": "empagliflozin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1545658",
+      "display": "empagliflozin 10 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1545664",
+      "display": "empagliflozin 10 MG Oral Tablet [Jardiance]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1545666",
+      "display": "empagliflozin 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1545668",
+      "display": "empagliflozin 25 MG Oral Tablet [Jardiance]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1992672",
+      "display": "ertugliflozin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1992810",
+      "display": "ertugliflozin 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1992816",
+      "display": "ertugliflozin 5 MG Oral Tablet [Steglatro]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1992819",
+      "display": "ertugliflozin 15 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1992821",
+      "display": "ertugliflozin 15 MG Oral Tablet [Steglatro]"
+    } ]
+  }
+}

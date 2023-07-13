@@ -21,11 +21,12 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
   private final Repository repository;
   private final FhirContext fhirContext;
 
-  public RepositoryRetrieveProvider(final Repository repository) {
+  public RepositoryRetrieveProvider(final Repository repository, RetrieveSettings settings) {
     super(repository.fhirContext());
     this.repository = requireNonNull(repository, "repository can not be null.");
     this.fhirContext = repository.fhirContext();
-    this.setFilterBySearchParam(true);
+    this.setSearchByTemplate(settings.getSearchByTemplate());
+    this.setFilterBySearchParam(settings.getFilterBySearchParam());
   }
 
   @Override

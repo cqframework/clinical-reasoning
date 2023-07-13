@@ -4,8 +4,20 @@
   <parent>
     <artifactId>evaluator.shared</artifactId>
     <groupId>org.opencds.cqf.cql</groupId>
-    <version>3.0.0-PRE5</version>
+    <version>3.0.0-PRE5-SNAPSHOT</version>
   </parent>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>14</source>
+          <target>14</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>evaluator.questionnaire</artifactId>
@@ -13,17 +25,17 @@
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE5</version>
+      <version>3.0.0-PRE5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.expression</artifactId>
-      <version>3.0.0-PRE5</version>
+      <version>3.0.0-PRE5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.library</artifactId>
-      <version>3.0.0-PRE5</version>
+      <version>3.0.0-PRE5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.skyscreamer</groupId>
@@ -39,15 +51,51 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
-      <version>3.0.0-PRE5</version>
+      <version>3.0.0-PRE5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.jackson-deps</artifactId>
-      <version>3.0.0-PRE5</version>
+      <version>3.0.0-PRE5-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>
+
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.9.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.3.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>4.6.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+
+    <!--    <dependency>-->
+<!--      <groupId>com.tngtech.archunit</groupId>-->
+<!--      <artifactId>archunit-junit5</artifactId>-->
+<!--      <version>1.0.1</version>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
+
   </dependencies>
 </project>

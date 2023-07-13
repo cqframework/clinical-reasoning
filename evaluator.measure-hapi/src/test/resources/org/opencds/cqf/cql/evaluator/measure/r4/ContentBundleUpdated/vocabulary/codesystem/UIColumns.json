@@ -1,0 +1,35 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "UIColumns",
+  "url": "http://cds.optum.com/dqm-hypertension/fhir/CodeSystem/UIColumns",
+  "version": "1.0.1",
+  "name": "UIColumns",
+  "title": "Allowed codes used by worklists UI Columns.",
+  "status": "active",
+  "date": "2022-08-30T14:45:13-06:00",
+  "description": "Codes used for columns in worklist UI",
+  "content": "complete",
+  "count": 7,
+  "concept": [ {
+    "code": "provider",
+    "display": "Provider"
+  }, {
+    "code": "days-since-appointment",
+    "display": "Days Since Appt."
+  }, {
+    "code": "last-appointment-date",
+    "display": "Last Appt."
+  }, {
+    "code": "essential-hypertension",
+    "display": "Has Essential Hypertension"
+  }, {
+    "code": "bp-systolic",
+    "display": "Systolic Blood Pressure"
+  }, {
+    "code": "bp-diastolic",
+    "display": "Diastolic Blood Pressure"
+  }, {
+    "code": "test",
+    "display": "Test"
+  } ]
+}

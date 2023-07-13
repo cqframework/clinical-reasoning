@@ -1,20 +1,23 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
+public class MultipleRateMeasureProcessorTest {
 
-@Test(singleThreaded = true)
-public class MultipleRateMeasureProcessorTest extends BaseMeasureProcessorTest {
-  public MultipleRateMeasureProcessorTest() {
-    super("FHIR347-bundle.json");
-  }
+  protected static Given given =
+      Measure.given().repositoryFor("FHIR347");
 
   @Test
   public void fhir347_singlePatient() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/FHIR347", "2019-01-01", "2020-01-01", "subject",
-        "numer1-EXM347", null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "initial-population", 1);
+    given.when()
+        .measureId("FHIR347")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/numer1-EXM347")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup().population("initial-population").hasCount(1);
   }
 }

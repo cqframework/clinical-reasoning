@@ -1,0 +1,158 @@
+{
+  "resourceType": "Library",
+  "id": "MATGlobalCommonFunctions-FHIR3-4.0.000",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"grid dict\"><tr><th scope=\"row\"><b>Id: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\">library-MATGlobalCommonFunctions-FHIR3-4.0.000</td></tr><tr><th scope=\"row\"><b>Type: </b></th><td style=\"padding-right: 25px;\"> Logic Library </td></tr><tr><th scope=\"row\"><b>Version: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\">4.0.000</td></tr><tr><th scope=\"row\"><b>Status: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\">active</td></tr><tr style=\"vertical-align: top;\"><th rowspan=\"1\" scope=\"row\"><b>Related: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>depends-on</span></p><p style=\"margin-bottom: 5px;\"><b>Resource: </b><br/><span><span style=\"padding-left: 25px;\"><b>reference: </b><span>Library/FHIRHelpers-3.0.0</span></span></span></p></td></tr><tr style=\"vertical-align: top;\"><th rowspan=\"9\" scope=\"row\"><b>Data Requirements: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Encounter</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>type</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Encounter</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>type</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Encounter</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>type</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Encounter</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>type</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Condition</span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Condition</span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Location</span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Provenance</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>target</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Medication</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>id</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><th scope=\"row\"><b>Content: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\"><b>type: </b><span>text/cql</span></td></tr><tr><td colspan=\"2\" style=\"padding-left: 25px; padding-right: 25px;\"><pre><code class=\"language-cql\">library MATGlobalCommonFunctions_FHIR3 version '4.0.000'\n\n/*\nThis example is a work in progress and should not be considered a final specification\nor recommendation for guidance. This example will help guide and direct the process\nof finding conventions and usage patterns that meet the needs of the various stakeholders\nin the measure development community.\n*/\n\nusing FHIR version '3.0.0'\n\ninclude FHIRHelpers version '3.0.0' called FHIRHelpers\n\ncodesystem &quot;LOINC&quot;: 'http://loinc.org'\ncodesystem &quot;SNOMEDCT&quot;: 'http://snomed.info/sct/731000124108'\ncodesystem &quot;RoleCode&quot;: 'http://hl7.org/fhir/v3/RoleCode'\ncodesystem &quot;Diagnosis Role&quot;: 'http://hl7.org/fhir/diagnosis-role'\n\nvalueset &quot;Encounter Inpatient&quot;: 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307'\nvalueset &quot;Emergency Department Visit&quot;: 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292'\nvalueset &quot;Observation Services&quot;: 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143'\n\ncode &quot;Birthdate&quot;: '21112-8' from &quot;LOINC&quot; display 'Birth date'\ncode &quot;Dead&quot;: '419099009' from &quot;SNOMEDCT&quot; display 'Dead'\ncode &quot;ER&quot;: 'ER' from &quot;RoleCode&quot; display 'Emergency room'\ncode &quot;ICU&quot;: 'ICU' from &quot;RoleCode&quot; display 'Intensive care unit'\ncode &quot;Billing&quot;: 'billing' from &quot;Diagnosis Role&quot; display 'Billing'\n\nparameter &quot;Measurement Period&quot; Interval&lt;DateTime&gt;\n\ncontext Patient\n\ndefine &quot;Inpatient Encounter&quot;:\n\t[Encounter: &quot;Encounter Inpatient&quot;] EncounterInpatient\n\t\twhere EncounterInpatient.status = 'finished'\n\t\t  and &quot;LengthInDays&quot;(EncounterInpatient.period) &lt;= 120\n\t\t\tand EncounterInpatient.period ends during &quot;Measurement Period&quot;\n\ndefine function &quot;ToDate&quot;(Value DateTime):\n\tDateTime(year from Value, month from Value, day from Value, 0, 0, 0, 0, timezone from Value)\n\ndefine function &quot;CalendarAgeInDaysAt&quot;(BirthDateTime DateTime, AsOf DateTime):\n\tdays between ToDate(BirthDateTime)and ToDate(AsOf)\n\ndefine function &quot;CalendarAgeInDays&quot;(BirthDateTime DateTime):\n\tCalendarAgeInDaysAt(BirthDateTime, Today())\n\ndefine function &quot;CalendarAgeInMonthsAt&quot;(BirthDateTime DateTime, AsOf DateTime):\n\tmonths between ToDate(BirthDateTime)and ToDate(AsOf)\n\ndefine function &quot;CalendarAgeInMonths&quot;(BirthDateTime DateTime):\n\tCalendarAgeInMonthsAt(BirthDateTime, Today())\n\ndefine function &quot;CalendarAgeInYearsAt&quot;(BirthDateTime DateTime, AsOf DateTime):\n\tyears between ToDate(BirthDateTime)and ToDate(AsOf)\n\ndefine function &quot;CalendarAgeInYears&quot;(BirthDateTime DateTime):\n\tCalendarAgeInYearsAt(BirthDateTime, Today())\n\ndefine function &quot;LengthInDays&quot;(Value Interval&lt;DateTime&gt;):\n\tdifference in days between start of Value and end of Value\n\ndefine function &quot;ED Visit&quot;(TheEncounter FHIR.Encounter):\n    singleton from (\n        [Encounter: &quot;Emergency Department Visit&quot;] EDVisit\n            where EDVisit.status = 'finished'\n                and EDVisit.period ends 1 hour or less on or before start of FHIRHelpers.ToInterval(TheEncounter.period)\n    )\n\ndefine function &quot;Hospitalization&quot;(TheEncounter FHIR.Encounter):\n\t( &quot;ED Visit&quot;(TheEncounter) ) X\n    return\n        if X is null then TheEncounter.period\n        else Interval[start of FHIRHelpers.ToInterval(X.period), end of FHIRHelpers.ToInterval(TheEncounter.period)]\n\ndefine function &quot;Hospitalization Locations&quot;(TheEncounter FHIR.Encounter):\n\t( &quot;ED Visit&quot;(TheEncounter) ) EDEncounter\n    return\n        if EDEncounter is null then TheEncounter.location\n        else flatten { EDEncounter.location, TheEncounter.location }\n\ndefine function &quot;Hospitalization Length of Stay&quot;(TheEncounter FHIR.Encounter):\n\tLengthInDays(&quot;Hospitalization&quot;(TheEncounter))\n\ndefine function &quot;Hospital Admission Time&quot;(TheEncounter FHIR.Encounter):\n\tstart of &quot;Hospitalization&quot;(TheEncounter)\n\ndefine function &quot;Hospital Discharge Time&quot;(TheEncounter FHIR.Encounter):\n\tend of FHIRHelpers.ToInterval(TheEncounter.period)\n\ndefine function &quot;Hospital Arrival Time&quot;(TheEncounter FHIR.Encounter):\n\tstart of FHIRHelpers.ToInterval(First(\n\t    ( &quot;Hospitalization Locations&quot;(TheEncounter) ) HospitalLocation\n\t\t\tsort by start of FHIRHelpers.ToInterval(period)\n\t).period)\n\ndefine function &quot;HospitalizationWithObservation&quot;(TheEncounter FHIR.Encounter):\n\tTheEncounter Visit\n\t\tlet ObsVisit: Last([Encounter: &quot;Observation Services&quot;] LastObs\n\t\t\t\twhere LastObs.period ends 1 hour or less on or before start of Visit.period\n\t\t\t\tsort by end of period\n\t\t\t),\n\t\t\tVisitStart: Coalesce(start of ObsVisit.period, start of Visit.period),\n\t\t\tEDVisit: Last([Encounter: &quot;Emergency Department Visit&quot;] LastED\n\t\t\t\twhere LastED.period ends 1 hour or less on or before VisitStart\n\t\t\t\tsort by end of period\n\t\t\t)\n\t\treturn Interval[Coalesce(start of EDVisit.period, VisitStart), end of Visit.period]\n\ndefine function &quot;HospitalizationWithObservationLengthofStay&quot;(Encounter FHIR.Encounter):\n\t&quot;LengthInDays&quot;(&quot;HospitalizationWithObservation&quot;(Encounter))\n\n// TODO - fix these (must fetch Location resources and compare id to reference)\n/*define function &quot;Hospital Departure Time&quot;(TheEncounter FHIR.Encounter):\n\tend of FHIRHelpers.ToInterval(Last(\n\t    ( &quot;Hospitalization Locations&quot;(TheEncounter) ) HospitalLocation\n\t\t\tsort by start of FHIRHelpers.ToInterval(period)\n\t).period)\n\ndefine function &quot;Emergency Department Arrival Time&quot;(TheEncounter FHIR.Encounter):\n\tstart of FHIRHelpers.ToInterval((\n\t    singleton from (\n\t        ( &quot;Hospitalization Locations&quot;(TheEncounter) ) HospitalLocation\n\t\t\t\twhere HospitalLocation.type ~ &quot;ER&quot;\n\t\t)\n\t).period)\n\ndefine function &quot;First Inpatient Intensive Care Unit&quot;(TheEncounter FHIR.Encounter):\n\tFirst(\n\t    ( TheEncounter.location ) HospitalLocation\n\t\t\twhere HospitalLocation.type ~ &quot;ICU&quot;\n\t\t\t\tand HospitalLocation.period during TheEncounter.period\n\t\t\tsort by start of FHIRHelpers.ToInterval(period)\n\t)*/\n\n/*\n*\n*    CQFMeasures Common Logic\n*\n*/\n\ndefine function &quot;Normalize Onset&quot;(onset Choice&lt;FHIR.dateTime, FHIR.Age, FHIR.Period, FHIR.Range, FHIR.string&gt;):\n  if onset is FHIR.dateTime then\n\t  Interval[FHIRHelpers.ToDateTime(onset as FHIR.dateTime), FHIRHelpers.ToDateTime(onset as FHIR.dateTime)]\n\telse if onset is FHIR.Period then\n\t  FHIRHelpers.ToInterval(onset as FHIR.Period)\n\telse if onset is FHIR.Age then\n\t  Interval[FHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity(onset as FHIR.Age),\n\t\t  FHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity(onset as FHIR.Age) + 1 year)\n\telse null\n\ndefine function &quot;Normalize Abatement&quot;(condition Condition):\n\tif condition.abatement is FHIR.dateTime then\n\t  Interval[FHIRHelpers.ToDateTime(condition.abatement as FHIR.dateTime), FHIRHelpers.ToDateTime(condition.abatement as FHIR.dateTime)]\n\telse if condition.abatement is FHIR.Period then\n\t  FHIRHelpers.ToInterval(condition.abatement as FHIR.Period)\n\telse if condition.abatement is FHIR.Age then\n\t\tInterval[FHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity(condition.abatement as FHIR.Age),\n\t\t\tFHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity(condition.abatement as FHIR.Age) + 1 year)\n\telse if condition.abatement is FHIR.boolean then\n\t  Interval[end of &quot;Normalize Onset&quot;(condition.onset), condition.assertedDate)\n\telse null\n\ndefine function &quot;GetPrevalencePeriod&quot;(condition Condition):\n  Interval[start of &quot;Normalize Onset&quot;(condition.onset), end of &quot;Normalize Abatement&quot;(condition))\n\ndefine function &quot;Normalize Interval&quot;(choice Choice&lt;FHIR.dateTime, FHIR.Period&gt;):\n  if choice is FHIR.dateTime then\n\t  Interval[FHIRHelpers.ToDateTime(choice as FHIR.dateTime), FHIRHelpers.ToDateTime(choice as FHIR.dateTime)]\n\telse\n\t  FHIRHelpers.ToInterval(choice as FHIR.Period)\n\ndefine function &quot;GetId&quot;(uri String):\n\tLast(Split(uri, '/'))\n\ndefine function &quot;EncounterDiagnosis&quot;(Encounter Encounter):\n  Encounter.diagnosis D\n    return singleton from ([Condition] Condition where Condition.id.value = &quot;GetId&quot;(D.condition.reference))\n\n// Returns the condition that is specified as the principal diagnosis for the encounter\ndefine function &quot;PrincipalDiagnosis&quot;(Encounter Encounter):\n\t(singleton from (Encounter.diagnosis D where D.role ~ ToConcept(&quot;Billing&quot;) and D.rank = 1)) PD\n\t//&quot;GetId&quot;(uri String): returns the last String of a Split by / List therefor cannot use in\n\t\treturn singleton from ([Condition] Condition where Condition.id.value = &quot;GetId&quot;(PD.condition.reference))\n\n// Returns the location for the given location reference\ndefine function GetLocation(reference Reference):\n  singleton from (\n    [Location] Location where Location.id.value = GetId(reference.reference)\n  )\n\n/*\nNOTE: Extensions are not the preferred approach, but are used as a way to access\ncontent that is defined by extensions but not yet surfaced in the\nCQL model info.\n*/\ndefine function &quot;GetExtensions&quot;(domainResource DomainResource, url String):\n  domainResource.extension E\n\t  where E.url = ('http://hl7.org/fhir/us/qicore/StructureDefinition/' + url)\n\t\treturn E\n\ndefine function &quot;GetExtension&quot;(domainResource DomainResource, url String):\n  singleton from &quot;GetExtensions&quot;(domainResource, url)\n\n/*\nNOTE: Extensions are not the preferred approach, but are used as a way to access\ncontent that is defined by extensions but not yet surfaced in the\nCQL model info.\n*/\ndefine function &quot;GetBaseExtensions&quot;(domainResource DomainResource, url String):\n  domainResource.extension E\n\t  where E.url = ('http://hl7.org/fhir/StructureDefinition/' + url)\n\t\treturn E\n\ndefine function &quot;GetBaseExtension&quot;(domainResource DomainResource, url String):\n  singleton from &quot;GetBaseExtensions&quot;(domainResource, url)\n\n/*\nNOTE: Provenance is not the preferred approach, this is provided only as an illustration\nfor what using Provenance could look like, and is not a tested pattern\n*/\ndefine function &quot;GetProvenance&quot;(resource Resource):\n  singleton from ([Provenance: target in resource.id])\n\ndefine function &quot;GetMedicationCode&quot;(request MedicationRequest):\n  if request.medication is CodeableConcept then\n\t  request.medication as CodeableConcept\n\telse\n\t  (singleton from ([Medication: id in GetId((request.medication as Reference).reference)])).code\n</code></pre>\n                    \n                    \n                </td>\n            </tr>\n        \n    </table>\n</div>"
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "cqf-tooling"
+    }
+  } ],
+  "version": "4.0.000",
+  "name": "MATGlobalCommonFunctions_FHIR3",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "resource": {
+      "reference": "Library/FHIR-ModelInfo-3.0.0"
+    }
+  }, {
+    "type": "depends-on",
+    "resource": {
+      "reference": "Library/FHIRHelpers-3.0.0"
+    }
+  }, {
+    "type": "depends-on",
+    "resource": {
+      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+    }
+  }, {
+    "type": "depends-on",
+    "resource": {
+      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+    }
+  }, {
+    "type": "depends-on",
+    "resource": {
+      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143"
+    }
+  } ],
+  "parameter": [ {
+    "name": "Measurement Period",
+    "use": "in",
+    "min": 0,
+    "max": "1",
+    "type": "Period"
+  }, {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Patient"
+  }, {
+    "name": "Inpatient Encounter",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Encounter"
+  } ],
+  "dataRequirement": [ {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Encounter"
+    } ],
+    "type": "Encounter",
+    "codeFilter": [ {
+      "path": "type",
+      "valueSetReference": {
+        "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+      }
+    } ]
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Encounter"
+    } ],
+    "type": "Encounter",
+    "codeFilter": [ {
+      "path": "type",
+      "valueSetReference": {
+        "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+      }
+    } ]
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Encounter"
+    } ],
+    "type": "Encounter",
+    "codeFilter": [ {
+      "path": "type",
+      "valueSetReference": {
+        "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143"
+      }
+    } ]
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Encounter"
+    } ],
+    "type": "Encounter",
+    "codeFilter": [ {
+      "path": "type",
+      "valueSetReference": {
+        "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+      }
+    } ]
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Condition"
+    } ],
+    "type": "Condition"
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Condition"
+    } ],
+    "type": "Condition"
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Location"
+    } ],
+    "type": "Location"
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Provenance"
+    } ],
+    "type": "Provenance",
+    "codeFilter": [ {
+      "path": "target"
+    } ]
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/original-resource-name",
+      "valueCode": "Medication"
+    } ],
+    "type": "Medication",
+    "codeFilter": [ {
+      "path": "id"
+    } ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/MATGlobalCommonFunctions_FHIR3.cql"
+  } ]
+}

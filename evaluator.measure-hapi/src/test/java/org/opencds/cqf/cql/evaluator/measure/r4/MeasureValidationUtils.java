@@ -21,6 +21,11 @@ import org.hl7.fhir.r4.model.ResourceType;
 public class MeasureValidationUtils {
 
   protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group,
+      String score) {
+    validateGroupScore(group, new BigDecimal(score));
+  }
+
+  protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group,
       BigDecimal score) {
     assertTrue(group.hasMeasureScore(),
         String.format("group \"%s\" does not have a score", group.getId()));
@@ -35,8 +40,14 @@ public class MeasureValidationUtils {
 
     assertTrue(population.isPresent(),
         String.format("Unable to locate a population with id \"%s\"", populationName));
-    assertEquals(population.get().getCount(), count,
-        String.format("expected count for population \"%s\" did not match", populationName));
+
+    validatePopulation(population.get(), count);
+  }
+
+  protected static void validatePopulation(
+      MeasureReport.MeasureReportGroupPopulationComponent population, int count) {
+    assertEquals(population.getCount(), count,
+        String.format("expected count for population \"%s\" did not match", population.getId()));
   }
 
   protected static void validateStratifier(
@@ -71,9 +82,19 @@ public class MeasureValidationUtils {
         String.format("Group does not have a stratum with value: \"%s\"", stratumValue));
 
     MeasureReport.StratifierGroupComponent stratum = stratumOpt.get();
+    validateStratumScore(stratum, score);
+  }
+
+  protected static void validateStratumScore(
+      MeasureReport.StratifierGroupComponent stratum, BigDecimal score) {
     assertTrue(stratum.hasMeasureScore(),
         String.format("stratum \"%s\" does not have a score", stratum.getId()));
     assertEquals(stratum.getMeasureScore().getValue(), score);
+  }
+
+  protected static void validateStratumScore(
+      MeasureReport.StratifierGroupComponent stratum, String score) {
+    validateStratumScore(stratum, new BigDecimal(score));
   }
 
   protected static void validateEvaluatedResourceExtension(List<Reference> measureReferences,

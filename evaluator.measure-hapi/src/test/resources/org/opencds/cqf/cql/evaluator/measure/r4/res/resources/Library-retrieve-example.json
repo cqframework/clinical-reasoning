@@ -130,7 +130,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "res/cql/RetrieveExample.cql"
+      "url": "../cql/RetrieveExample.cql"
     }
   ]
 }

@@ -122,8 +122,12 @@ public class QuestionnaireItemGenerator {
     return valueSet;
   }
 
-  protected void processElements(List<ElementDefinition> elements, StructureDefinition profile,
-      Questionnaire.QuestionnaireItemComponent item, List<String> paths) {
+  protected void processElements(
+      List<ElementDefinition> elements,
+      StructureDefinition profile,
+      Questionnaire.QuestionnaireItemComponent item,
+      List<String> paths
+  ) {
     var childCount = item.getItem().size();
     for (var element : elements) {
       var elementType = getElementType(element);
@@ -189,6 +193,7 @@ public class QuestionnaireItemGenerator {
               expression, language, library, parameters, this.bundle);
           childItem.setInitial((Type) result);
         }
+
         childItem.setRequired(element.hasMin() && element.getMin() == 1);
         // set readonly based on?
         // set repeat based on?

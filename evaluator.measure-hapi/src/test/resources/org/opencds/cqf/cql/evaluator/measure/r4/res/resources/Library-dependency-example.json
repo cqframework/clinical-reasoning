@@ -19,7 +19,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "res/cql/DependencyExample.cql"
+      "url": "../cql/DependencyExample.cql"
     }
   ]
 }

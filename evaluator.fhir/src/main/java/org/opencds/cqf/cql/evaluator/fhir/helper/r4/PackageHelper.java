@@ -32,7 +32,7 @@ public class PackageHelper {
 
   private PackageHelper() {}
 
-  protected static final Logger ourLogger = LoggerFactory.getLogger(PackageHelper.class);
+  protected static final Logger logger = LoggerFactory.getLogger(PackageHelper.class);
 
   protected static final List<String> PACKABLE_RESOURCES =
       Arrays.asList(FHIRAllTypes.LIBRARY.toCode(), FHIRAllTypes.PLANDEFINITION.toCode(),
@@ -193,7 +193,7 @@ public class PackageHelper {
             }
           }
         } catch (Exception e) {
-          ourLogger.error(e.getMessage(), e);
+          logger.error(e.getMessage(), e);
         }
       }
     }

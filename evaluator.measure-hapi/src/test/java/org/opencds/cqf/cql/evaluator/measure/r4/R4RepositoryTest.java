@@ -44,13 +44,13 @@ public class R4RepositoryTest {
 
   @Test
   public void testRead() {
-    IBaseResource res = repository.read(Patient.class, new IdType("example"), null);
+    IBaseResource res = repository.read(Patient.class, new IdType("Patient/example"), null);
     assertEquals(res.getIdElement().getIdPart(), "example");
   }
 
   @Test
   public void testReadLibrary() throws IOException {
-    Library res = repository.read(Library.class, new IdType("dependency-example"), null);
+    Library res = repository.read(Library.class, new IdType("Library/dependency-example"), null);
     assertEquals(res.getIdElement().getIdPart(), "dependency-example");
     assertTrue(IOUtils.toString(new ByteArrayInputStream(res.getContent().get(0).getData()),
         StandardCharsets.UTF_8).startsWith("library DependencyExample version '0.1.0'"));

@@ -1,118 +1,120 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertEquals;
-
-import java.math.BigDecimal;
-
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
+public class StratifierMeasureProcessorTest {
 
-@Test(singleThreaded = true)
-public class StratifierMeasureProcessorTest extends BaseMeasureProcessorTest {
-  public StratifierMeasureProcessorTest() {
-    super("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR-bundle.json");
-  }
+
+  protected static Given given =
+      Measure.given()
+          .repositoryFor("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
 
   @Test
   public void exm74_singlePatient_denominator() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR",
-        "2019-01-01", "2020-01-01", "subject", "denom-EXM74-strat1-case1", null, null, endpoint,
-        endpoint, endpoint, null);
 
-    MeasureReportGroupComponent mrgc = report.getGroup().get(0);
-    validateGroup(mrgc, "initial-population", 1);
-    validateGroup(mrgc, "denominator", 1);
-    validateGroup(mrgc, "numerator", 0);
-    validateGroupScore(mrgc, new BigDecimal("0.0"));
-
-    assertEquals(mrgc.getStratifier().size(), 3);
-
-    validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 1);
-    validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("0.0"));
+    given.when()
+        .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/denom-EXM74-strat1-case1")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .hasScore("0.0").hasStratifierCount(3)
+        .population("numerator").hasCount(0).up()
+        .population("denominator").hasCount(1).up()
+        .population("initial-population").hasCount(1).up()
+        .firstStratifier()
+        .firstStratum().hasScore("0.0")
+        .population("initial-population").hasCount(1).up()
+        .population("denominator").hasCount(1).up()
+        .population("numerator").hasCount(0);
   }
 
   @Test
   public void exm74_singlePatient_numerator() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR",
-        "2019-01-01", "2020-01-01", "subject", "numer-EXM74-strat1-case7", null, null, endpoint,
-        endpoint, endpoint, null);
-
-    MeasureReportGroupComponent mrgc = report.getGroup().get(0);
-    validateGroup(mrgc, "initial-population", 1);
-    validateGroup(mrgc, "denominator", 1);
-    validateGroup(mrgc, "numerator", 1);
-    validateGroupScore(mrgc, new BigDecimal("1.0"));
-
-    assertEquals(mrgc.getStratifier().size(), 3);
-
-    validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 1);
-    validateStratifier(mrgc.getStratifierFirstRep(), "true", "numerator", 1);
-    validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("1.0"));
+    given.when()
+        .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/numer-EXM74-strat1-case7")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .hasScore("1.0").hasStratifierCount(3)
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1).up()
+        .population("initial-population").hasCount(1).up()
+        .firstStratifier()
+        .firstStratum().hasScore("1.0")
+        .population("initial-population").hasCount(1).up()
+        .population("numerator").hasCount(1);
   }
 
   @Test
   public void exm74_subject_list() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR",
-        "2019-01-01", "2020-01-01", "subject-list", null, null, null, endpoint, endpoint, endpoint,
-        null);
 
-    MeasureReportGroupComponent mrgc = report.getGroup().get(0);
-    // 16 total patients in the test set.
-    // 15 in initial population, 3 excluded from the denominator
-    // 6 included in the numerator
-    validateGroup(mrgc, "initial-population", 15);
-    validateGroup(mrgc, "denominator-exclusion", 3);
-    validateGroup(mrgc, "denominator", 12);
-    validateGroup(mrgc, "numerator", 6);
-    validateGroupScore(mrgc, new BigDecimal("0.5"));
-
-    assertEquals(mrgc.getStratifier().size(), 3);
-
-    // Stratifiers should cover the total population, so we expect
-    // initial-population true (5) + initial-population false (10) = initial-population total
-    // (15)
-    validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 5);
-    validateStratifier(mrgc.getStratifierFirstRep(), "true", "numerator", 2);
-    validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("0.5"));
-
-    validateStratifier(mrgc.getStratifierFirstRep(), "false", "initial-population", 10);
-    validateStratifier(mrgc.getStratifierFirstRep(), "false", "numerator", 4);
-    validateStratumScore(mrgc.getStratifierFirstRep(), "false", new BigDecimal("0.5"));
+    given.when()
+        .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .reportType("subject-list")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .hasScore("0.5").hasStratifierCount(3)
+        .population("numerator").hasCount(6).up()
+        .population("denominator").hasCount(12).up()
+        .population("denominator-exclusion").hasCount(3).up()
+        .population("initial-population").hasCount(15).up()
+        .firstStratifier()
+        .stratum("true").hasScore("0.5")
+        .population("initial-population").hasCount(5).up()
+        .population("numerator").hasCount(2).up()
+        .population("denominator").hasCount(4).up().up()
+        .stratum("false").hasScore("0.5")
+        .population("initial-population").hasCount(10).up()
+        .population("numerator").hasCount(4).up()
+        .population("denominator").hasCount(8);
   }
 
   @Test
   public void exm74_population() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR",
-        "2019-01-01", "2020-01-01", "population", null, null, null, endpoint, endpoint, endpoint,
-        null);
-
-    MeasureReportGroupComponent mrgc = report.getGroup().get(0);
-    // 16 total patients in the test set.
-    // 15 in initial population, 3 excluded from the denominator
-    // 6 included in the numerator
-    validateGroup(mrgc, "initial-population", 15);
-    validateGroup(mrgc, "denominator-exclusion", 3);
-    validateGroup(mrgc, "denominator", 12);
-    validateGroup(mrgc, "numerator", 6);
-    validateGroupScore(mrgc, new BigDecimal("0.5"));
-
-    assertEquals(mrgc.getStratifier().size(), 3);
+    given.when()
+        .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .reportType("population")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .hasScore("0.5").hasStratifierCount(3)
+        .population("numerator").hasCount(6).up()
+        .population("denominator").hasCount(12).up()
+        .population("denominator-exclusion").hasCount(3).up()
+        .population("initial-population").hasCount(15).up()
+        .firstStratifier()
+        .stratum("true").hasScore("0.5")
+        .population("initial-population").hasCount(5).up()
+        .population("numerator").hasCount(2).up()
+        .population("denominator").hasCount(4).up().up()
+        .stratum("false").hasScore("0.5")
+        .population("initial-population").hasCount(10).up()
+        .population("numerator").hasCount(4).up()
+        .population("denominator").hasCount(8);
 
     // Stratifiers should cover the total population, so we expect
     // initial-population true (5) + initial-population false (10) = initial-population total
     // (15)
-    validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 5);
-    validateStratifier(mrgc.getStratifierFirstRep(), "true", "numerator", 2);
-    validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("0.5"));
+    // validateStratifier(mrgc.getStratifierFirstRep(), "true", "initial-population", 5);
+    // validateStratifier(mrgc.getStratifierFirstRep(), "true", "numerator", 2);
+    // validateStratumScore(mrgc.getStratifierFirstRep(), "true", new BigDecimal("0.5"));
 
-    validateStratifier(mrgc.getStratifierFirstRep(), "false", "initial-population", 10);
-    validateStratifier(mrgc.getStratifierFirstRep(), "false", "numerator", 4);
-    validateStratumScore(mrgc.getStratifierFirstRep(), "false", new BigDecimal("0.5"));
+    // validateStratifier(mrgc.getStratifierFirstRep(), "false", "initial-population", 10);
+    // validateStratifier(mrgc.getStratifierFirstRep(), "false", "numerator", 4);
+    // validateStratumScore(mrgc.getStratifierFirstRep(), "false", new BigDecimal("0.5"));
   }
 }

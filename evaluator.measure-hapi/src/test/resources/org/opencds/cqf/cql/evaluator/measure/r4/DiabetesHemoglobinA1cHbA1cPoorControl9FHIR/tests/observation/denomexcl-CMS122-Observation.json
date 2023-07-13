@@ -1,0 +1,22 @@
+{
+  "resourceType": "Observation",
+  "id": "denomexcl-CMS122-Observation",
+  "text": {
+    "status": "generated"
+  },
+  "status": "final",
+  "code": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "34714-6",
+      "display": "INR in Blood by Coagulation assay"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcl-CMS122-Patient"
+  },
+  "issued": "2019-01-17T12:30:00",
+  "valueQuantity": {
+    "value": 3.5
+  }
+}

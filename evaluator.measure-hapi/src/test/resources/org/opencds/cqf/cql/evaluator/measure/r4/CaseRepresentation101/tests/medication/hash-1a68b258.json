@@ -1,0 +1,62 @@
+{
+  "resourceType": "Medication",
+  "id": "hash-1a68b258",
+  "extension": [
+    {
+      "url": "https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id",
+      "valueString": "eo0l-6m6Q-v-WJmUH1wx7psD2LejzYDZMPgbhGN2GcV2AkZ4VHBPWP8vGefgz2Kq7CdanmxQFD7aRWGU12li2Hws-uSaNiadFWkT3Dr6XZbM3"
+    }
+  ],
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.698288",
+      "value": "40842034"
+    }
+  ],
+  "code": {
+    "text": "ceFAZolin PRE-Assembled 500 mg in 100 mL NS"
+  },
+  "ingredient": [
+    {
+      "itemReference": {
+        "reference": "Medication/ew8cK1L.UyfZ2IJljI9A2sg3",
+        "display": "ceFAZolin"
+      },
+      "strength": {
+        "numerator": {
+          "value": 500,
+          "unit": "mg",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg"
+        },
+        "denominator": {
+          "value": 100,
+          "unit": "mL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        }
+      }
+    },
+    {
+      "itemReference": {
+        "reference": "Medication/eDKJ.1d8578nQuGPlTDTEHeLL.9mJFtGVnpApe3k1R.I3",
+        "display": "sodium chloride 0.9 %"
+      },
+      "strength": {
+        "numerator": {
+          "value": 100,
+          "unit": "mL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        },
+        "denominator": {
+          "value": 100,
+          "unit": "mL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        }
+      }
+    }
+  ]
+}

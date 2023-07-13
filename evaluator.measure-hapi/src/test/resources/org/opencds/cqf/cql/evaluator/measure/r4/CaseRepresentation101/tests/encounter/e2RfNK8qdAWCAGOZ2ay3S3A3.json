@@ -1,0 +1,273 @@
+{
+  "resourceType": "Encounter",
+  "id": "e2RfNK8qdAWCAGOZ2ay3S3A3",
+  "extension": [
+    {
+      "url": "https://www.lantanagroup.com/fhir/StructureDefinition/nhsn-encounter-original-status",
+      "valueCoding": {
+        "code": "FINISHED"
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.3.698084.8",
+      "value": "1000518445"
+    }
+  ],
+  "status": "finished",
+  "class": {
+    "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.696784.13260",
+    "code": "6",
+    "display": "Discharge"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.10110",
+          "code": "101",
+          "display": "Inpatient"
+        }
+      ],
+      "text": "Inpatient"
+    },
+    {
+      "coding": [
+        {
+          "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.30",
+          "code": "3",
+          "display": "Hospital Encounter"
+        }
+      ],
+      "text": "Hospital Encounter"
+    },
+    {
+      "coding": [
+        {
+          "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.18875",
+          "code": "1",
+          "display": "Emergent"
+        }
+      ],
+      "text": "Emergent"
+    }
+  ],
+  "serviceType": {
+    "coding": [
+      {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.18886",
+        "code": "78",
+        "display": "Pediatric General - Blue"
+      }
+    ],
+    "text": "Pediatric General - Blue"
+  },
+  "subject": {
+    "reference": "Patient/eNeMVHWfNoTsMTbrwWQQ30A3",
+    "display": "Hob, Hobevent"
+  },
+  "participant": [
+    {
+      "type": [
+        {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/ParticipationType",
+              "code": "ADM",
+              "display": "admitter"
+            }
+          ],
+          "text": "admitter"
+        }
+      ],
+      "individual": {
+        "reference": "Practitioner/eYwRiC48o70NwnCJN4b7VNQ3",
+        "type": "Practitioner",
+        "display": "Samantha Leigh Kempner, MD"
+      }
+    },
+    {
+      "type": [
+        {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/ParticipationType",
+              "code": "DIS",
+              "display": "discharger"
+            }
+          ],
+          "text": "discharger"
+        }
+      ],
+      "individual": {
+        "reference": "Practitioner/eYwRiC48o70NwnCJN4b7VNQ3",
+        "type": "Practitioner",
+        "display": "Samantha Leigh Kempner, MD"
+      }
+    },
+    {
+      "type": [
+        {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/ParticipationType",
+              "code": "ATND",
+              "display": "attender"
+            }
+          ],
+          "text": "attender"
+        }
+      ],
+      "period": {
+        "start": "2023-01-12T04:55:54Z"
+      },
+      "individual": {
+        "reference": "Practitioner/eYwRiC48o70NwnCJN4b7VNQ3",
+        "type": "Practitioner",
+        "display": "Samantha Leigh Kempner, MD"
+      }
+    }
+  ],
+  "period": {
+    "start": "2023-01-01T23:00:00Z",
+    "end": "2023-01-10T19:00:00Z"
+  },
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "230145002",
+          "display": "Difficulty breathing (finding)"
+        }
+      ],
+      "text": "Difficulty breathing"
+    },
+    {
+      "coding": [
+        {
+          "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.728286",
+          "code": "160490",
+          "display": "Respiratory Distress"
+        }
+      ],
+      "text": "Respiratory Distress"
+    }
+  ],
+  "diagnosis": [
+    {
+      "condition": {
+        "reference": "Condition/eQa8.HtVsqvSOeT38KJ7.tuQyyQVWvVzRF7..iTsYWzA3",
+        "display": "Bacteremia"
+      }
+    }
+  ],
+  "account": [
+    {
+      "identifier": {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.726582",
+        "value": "100068039"
+      },
+      "display": "HOB,HOBEVENT"
+    }
+  ],
+  "hospitalization": {
+    "extension": [
+      {
+        "url": "http://open.epic.com/FHIR/StructureDefinition/extension/ip-admit-datetime",
+        "valueDateTime": "2023-01-02T01:59:00Z"
+      }
+    ],
+    "admitSource": {
+      "coding": [
+        {
+          "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.10310",
+          "code": "41",
+          "display": "ED FR HOME"
+        }
+      ],
+      "text": "ED FR HOME"
+    },
+    "dischargeDisposition": {
+      "coding": [
+        {
+          "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.18888",
+          "code": "1",
+          "display": "11 Home or Self Care"
+        }
+      ],
+      "text": "11 Home or Self Care"
+    }
+  },
+  "location": [
+    {
+      "location": {
+        "reference": "Location/eaA8jQ6JzXsG1s.pYNa6L5NMpnIWhwvEC5pOd4v.WYq43",
+        "display": "MH Childrens Emergency Department"
+      },
+      "period": {
+        "start": "2023-01-01T23:00:00Z",
+        "end": "2023-01-02T02:00:00Z"
+      }
+    },
+    {
+      "location": {
+        "reference": "Location/ea1GRyXwt6.sHaLqHL7jphAqX1qVrSyzBjZzQY3aASx83",
+        "display": "MH 12E GEN CARE"
+      },
+      "period": {
+        "start": "2023-01-02T02:00:00Z",
+        "end": "2023-01-10T19:00:00Z"
+      }
+    },
+    {
+      "location": {
+        "reference": "Location/ea1GRyXwt6.sHaLqHL7jphAqX1qVrSyzBjZzQY3aASx83",
+        "display": "MH 12E GEN CARE"
+      }
+    },
+    {
+      "location": {
+        "reference": "Location/eYJBEaYZeCt0e7EiJLrGTsA3",
+        "display": "Michigan Medicine"
+      }
+    },
+    {
+      "location": {
+        "reference": "Location/exXYgJ9daGD8ZDgiZ3XoXIQ3",
+        "display": "1204"
+      },
+      "physicalType": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+            "code": "ro",
+            "display": "Room"
+          }
+        ],
+        "text": "Room"
+      }
+    },
+    {
+      "location": {
+        "identifier": {
+          "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.666968",
+          "value": "1850"
+        },
+        "display": "1204 / 01"
+      },
+      "physicalType": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+            "code": "bd",
+            "display": "Bed"
+          }
+        ],
+        "text": "Bed"
+      }
+    }
+  ]
+}

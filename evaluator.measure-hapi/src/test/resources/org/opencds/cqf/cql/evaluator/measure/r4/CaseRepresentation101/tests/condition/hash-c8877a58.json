@@ -1,0 +1,50 @@
+{
+  "resourceType": "Condition",
+  "id": "hash-c8877a58",
+  "extension": [
+    {
+      "url": "https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id",
+      "valueString": "eTGYCyjqa4kyXK.j07bEoU0DgV1pCSj88Iu6fml.OhtNeimPW4a8m1dWoZAexe7YW3"
+    }
+  ],
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://open.epic.com/FHIR/StructureDefinition/condition-category",
+          "code": "reason-for-visit",
+          "display": "Reason for Visit"
+        }
+      ],
+      "text": "Reason for Visit"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.728286",
+        "code": "160490",
+        "display": "Respiratory Distress"
+      }
+    ],
+    "text": "Respiratory Distress"
+  },
+  "subject": {
+    "reference": "Patient/eNeMVHWfNoTsMTbrwWQQ30A3",
+    "display": "Hob, Hobevent"
+  },
+  "encounter": {
+    "reference": "Encounter/e2RfNK8qdAWCAGOZ2ay3S3A3",
+    "identifier": {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.3.698084.8",
+      "value": "1000518445"
+    },
+    "display": "Hospital Encounter"
+  },
+  "recordedDate": "2023-01-12T04:41:54Z",
+  "recorder": {
+    "reference": "Practitioner/ehgI99ZMnGr2QH52m1dTIbA3",
+    "display": "Nurse Um_Cln, RN"
+  }
+}

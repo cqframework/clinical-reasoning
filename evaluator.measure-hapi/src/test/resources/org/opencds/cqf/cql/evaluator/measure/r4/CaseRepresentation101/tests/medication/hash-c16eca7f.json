@@ -1,0 +1,139 @@
+{
+  "resourceType": "Medication",
+  "id": "hash-c16eca7f",
+  "extension": [
+    {
+      "url": "https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id",
+      "valueString": "eBHvg5JNObOqJk3gML.E85xDWgoAUl8uvBsgQtTwIRwVOx0HADTxF94BsIcRb0BYq1rosld3jC5xYyy.BdoYYylFnmX5Z737Qem6EeV1RPow3"
+    }
+  ],
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.698288",
+      "value": "88223"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.whocc.no/atc",
+        "code": "R03BA02"
+      },
+      {
+        "system": "urn:oid:2.16.840.1.113883.6.208",
+        "code": "18165"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "19831"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "153171"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "196487"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "196488"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "252559"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "616819"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "1366551"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "2273102"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "2587884"
+      }
+    ],
+    "text": "budesonide (PULMICORT RESPULES) 1 mg/2 mL nebulizer solutionn"
+  },
+  "form": {
+    "coding": [
+      {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.4.698288.310",
+        "code": "NbSp",
+        "display": "Suspension for Nebulization"
+      }
+    ],
+    "text": "Suspension for Nebulization"
+  },
+  "ingredient": [
+    {
+      "itemCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://www.whocc.no/atc",
+            "code": "R03BA02"
+          },
+          {
+            "system": "urn:oid:2.16.840.1.113883.6.208",
+            "code": "18165"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "19831"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "153171"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "196487"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "196488"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "252559"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "616819"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "1366551"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "2273102"
+          },
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "2587884"
+          }
+        ],
+        "text": "budesonide (PULMICORT RESPULES) 1 mg/2 mL nebulizer solutionn"
+      },
+      "strength": {
+        "numerator": {
+          "value": 1,
+          "unit": "mg/2 mL"
+        },
+        "denominator": {
+          "value": 1,
+          "unit": "mg/2 mL"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,737 @@
+{
+  "resourceType": "Measure",
+  "id": "NHSNGlycemicControlHypoglycemicInitialPopulation",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cohort-measure-cqfm", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm" ]
+  },
+  "contained": [
+    {
+      "resourceType": "Library",
+      "id": "effective-data-requirements",
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "ACUTE",
+          "display": "inpatient acute"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "NONAC",
+          "display": "inpatient non-acute"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "SS",
+          "display": "short stay"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "OBSENC",
+          "display": "observation encounter"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "EMER",
+          "display": "emergency"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis",
+          "display": "encounter-diagnosis"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "valueCoding": {
+          "system": "http://terminology.hl7.org/CodeSystem/diagnosis-role",
+          "code": "CC",
+          "display": "Chief complaint"
+        }
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "Inpatient Encounter"
+        }, {
+          "url": "statement",
+          "valueString": "define \"Inpatient Encounter\":   [Encounter: class in {\"inpatient encounter\", \"inpatient acute\", \"inpatient non-acute\", \"short stay\"}]     union [Encounter: \"Encounter Inpatient\"] Encounters   where Encounters.status in {'in-progress', 'finished'}     and Encounters.period overlaps \"Measurement Period\""
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 0
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "Patient Hospital Locations"
+        }, {
+          "url": "statement",
+          "valueString": "define \"Patient Hospital Locations\":   [Encounter] Encounters   where exists(     Encounters.location EncounterLocation     where Global.GetLocation(EncounterLocation.location).type in \"Inpatient, Emergency, and Observation Locations\"       and EncounterLocation.period during Encounters.period   )"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 1
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "Antidiabetic Drugs Administered or Ordered"
+        }, {
+          "url": "statement",
+          "valueString": "define \"Antidiabetic Drugs Administered or Ordered\":   ([MedicationAdministration] ADDMedAdmin     where GetMedicationCode(ADDMedAdmin.medication) in \"Antidiabetic Medications\"       and ADDMedAdmin.status ~ 'completed')   union (     [MedicationRequest] MedicationRequests       where GetMedicationCode(MedicationRequests.medication) in \"Antidiabetic Medications\"   )"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 2
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "Initial Population"
+        }, {
+          "url": "statement",
+          "valueString": "/* @author Arvind Jagannathan */ define \"Initial Population\":   (\"Inpatient Encounter\"   union \"Patient Hospital Locations\") InpatientEncounters   with \"Antidiabetic Drugs Administered or Ordered\" ADD   such that Coalesce(start of Global.\"Normalize Interval\"(ADD.effective), ADD.authoredOn)       during \"HospitalizationWithObservationOrEmergency\"(InpatientEncounters)     and Coalesce(start of Global.\"Normalize Interval\"(ADD.effective), ADD.authoredOn) during \"Measurement Period\""
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 3
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Medication Request"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Medication Request\":  [MedicationRequest] MedicationRequests   with \"Initial Population\" InitialPopulation  such that MedicationRequests.authoredOn during \"HospitalizationWithObservationOrEmergency\"(InitialPopulation)     and MedicationRequests.authoredOn during \"Measurement Period\"   return SharedResource.MedicationRequestResource(MedicationRequests)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 4
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Coverage"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Coverage\":   [Coverage] Coverages   with \"Initial Population\" InitialPopulation   such that start of Coverages.period before day of end of InitialPopulation.period   and (end of Coverages.period is null     or (end of Coverages.period is not null       and end of Coverages.period on or after day of end of InitialPopulation.period))   return SharedResource.CoverageResource(Coverages)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 5
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Encounter Locations"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Encounter Locations\":   \"Initial Population\" InitialPopulation    where exists (      InitialPopulation.location InitialPopulationLocation     where (Global.GetLocation(InitialPopulationLocation.location).type in \"Inpatient, Emergency, and Observation Locations\"       and InitialPopulationLocation.period during InitialPopulation.period)   )   return SharedResource.EncounterResource(InitialPopulation)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 6
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Condition during Encounter"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Condition during Encounter\":   [Condition] ConditionEncounterDiagnosis   with ConditionEncounterDiagnosis.category category   such that category ~ \"encounter-diagnosis\"   return SharedResource.ConditionResource(ConditionEncounterDiagnosis)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 7
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Medication Administration"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Medication Administration\":  [MedicationAdministration] MedicationAdministrations   with \"Initial Population\" InitialPopulation   such that start of Global.\"Normalize Interval\"(MedicationAdministrations.effective) during \"HospitalizationWithObservationOrEmergency\"(InitialPopulation)     and start of Global.\"Normalize Interval\"(MedicationAdministrations.effective) during \"Measurement Period\"   return SharedResource.MedicationAdministrationResource(MedicationAdministrations)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 8
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Initial Population Encounters"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Initial Population Encounters\":   \"Initial Population\" IP   return SharedResource.EncounterResource(IP)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 9
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Blood Glucose Observation"
+        }, {
+          "url": "statement",
+          "valueString": "//Supplemental Data Elements define \"SDE Blood Glucose Observation\":  [Observation: \"Blood Glucose Laboratory and Point of Care Tests\"] Observations    with \"Initial Population\" InitialPopulation   such that start of Global.\"Normalize Interval\"(Observations.effective) during InitialPopulation.period     or Global.\"Normalize Interval\"(GetSpecimen(Observations.specimen).collection.collected) during InitialPopulation.period   return SharedResource.ObservationResource(Observations)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 10
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Condition"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Condition\":   [Condition] Conditions   with \"Initial Population\" InitialPopulation   such that Global.\"Normalize Interval\"(Conditions.onset) overlaps InitialPopulation.period   return SharedResource.ConditionResource(Conditions)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 11
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Encounter Discharge Dispositions"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Encounter Discharge Dispositions\":  \"Initial Population\" DischargeDispositions    where DischargeDispositions.hospitalization.dischargeDisposition in \"Discharge Disposition\"   return SharedResource.EncounterResource(DischargeDispositions)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 12
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Service Request"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Service Request\":   [ServiceRequest] ServiceRequests   with \"Initial Population\" InitialPopulation   such that ServiceRequests.authoredOn during InitialPopulation.period   return SharedResource.ServiceRequestResource(ServiceRequests)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 13
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Minimal Patient"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Minimal Patient\":   Patient p   return SharedResource.PatientResource(p)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 14
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Specimen"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Specimen\":   [Specimen] Specimens   with \"Initial Population\" InitialPopulation   such that Global.\"Normalize Interval\"(Specimens.collection.collected) during InitialPopulation.period   return SharedResource.SpecimenResource(Specimens)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 15
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Medication"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Medication\":   (\"SDE Medication Request\"   union \"SDE Medication Administration\") MedReqOrAdmin   where MedReqOrAdmin.medication is FHIR.Reference   return SharedResource.MedicationResource(GetMedicationFrom(MedReqOrAdmin.medication))"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 16
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+        "extension": [ {
+          "url": "libraryName",
+          "valueString": "NHSNGlycemicControlHypoglycemicInitialPopulation"
+        }, {
+          "url": "name",
+          "valueString": "SDE Chief Complaint"
+        }, {
+          "url": "statement",
+          "valueString": "define \"SDE Chief Complaint\":   \"Initial Population\" IP   with IP.diagnosis InitialPopulationDiagnosis   such that InitialPopulationDiagnosis.use ~ \"Chief Complaint\"   return SharedResource.EncounterResource(IP)"
+        }, {
+          "url": "displaySequence",
+          "valueInteger": 17
+        } ]
+      } ],
+      "status": "active",
+      "type": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/library-type",
+          "code": "module-definition"
+        } ]
+      },
+      "relatedArtifact": [ {
+        "type": "depends-on",
+        "display": "Library FHIRHelpers",
+        "resource": "http://lantanagroup.com/fhir/nhsn-measures/Library/FHIRHelpers|4.0.1"
+      }, {
+        "type": "depends-on",
+        "display": "Library Global",
+        "resource": "http://lantanagroup.com/fhir/nhsn-measures/Library/MATGlobalCommonFunctionsFHIR4|6.1.000"
+      }, {
+        "type": "depends-on",
+        "display": "Library SharedResource",
+        "resource": "http://lantanagroup.com/fhir/nhsn-measures/Library/SharedResourceCreation|0.0.001"
+      }, {
+        "type": "depends-on",
+        "display": "Code system ActCode",
+        "resource": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+      }, {
+        "type": "depends-on",
+        "display": "Code system Condition Category",
+        "resource": "http://terminology.hl7.org/CodeSystem/condition-category"
+      }, {
+        "type": "depends-on",
+        "display": "Code system Diagnosis Role",
+        "resource": "http://terminology.hl7.org/CodeSystem/diagnosis-role"
+      }, {
+        "type": "depends-on",
+        "display": "Value set Encounter Inpatient",
+        "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+      }, {
+        "type": "depends-on",
+        "display": "Value set Inpatient, Emergency, and Observation Locations",
+        "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1046.265"
+      }, {
+        "type": "depends-on",
+        "display": "Value set Antidiabetic Medications",
+        "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58"
+      }, {
+        "type": "depends-on",
+        "display": "Value set Observation Services",
+        "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143"
+      }, {
+        "type": "depends-on",
+        "display": "Value set Emergency Department Visit",
+        "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+      }, {
+        "type": "depends-on",
+        "display": "Value set Blood Glucose Laboratory and Point of Care Tests",
+        "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38"
+      }, {
+        "type": "depends-on",
+        "display": "Value set Discharge Disposition",
+        "resource": "http://terminology.hl7.org/ValueSet/encounter-discharge-disposition"
+      } ],
+      "parameter": [ {
+        "name": "Measurement Period",
+        "use": "in",
+        "min": 0,
+        "max": "1",
+        "type": "Period"
+      }, {
+        "name": "SDE Medication Request",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "MedicationRequest"
+      }, {
+        "name": "SDE Coverage",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Coverage"
+      }, {
+        "name": "SDE Encounter Locations",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Encounter"
+      }, {
+        "name": "SDE Condition during Encounter",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Condition"
+      }, {
+        "name": "SDE Medication Administration",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "MedicationAdministration"
+      }, {
+        "name": "SDE Initial Population Encounters",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Encounter"
+      }, {
+        "name": "SDE Blood Glucose Observation",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Observation"
+      }, {
+        "name": "SDE Condition",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Condition"
+      }, {
+        "name": "Initial Population",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Encounter"
+      }, {
+        "name": "SDE Encounter Discharge Dispositions",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Encounter"
+      }, {
+        "name": "SDE Service Request",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "ServiceRequest"
+      }, {
+        "name": "SDE Minimal Patient",
+        "use": "out",
+        "min": 0,
+        "max": "1",
+        "type": "Patient"
+      }, {
+        "name": "SDE Specimen",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Specimen"
+      }, {
+        "name": "SDE Medication",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Medication"
+      }, {
+        "name": "SDE Chief Complaint",
+        "use": "out",
+        "min": 0,
+        "max": "*",
+        "type": "Encounter"
+      } ],
+      "dataRequirement": [ {
+        "type": "Encounter",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+        "mustSupport": [ "class" ],
+        "codeFilter": [ {
+          "path": "class",
+          "code": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "inpatient encounter"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "ACUTE",
+            "display": "inpatient acute"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "NONAC",
+            "display": "inpatient non-acute"
+          }, {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "SS",
+            "display": "short stay"
+          } ]
+        } ]
+      }, {
+        "type": "Encounter",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+        "mustSupport": [ "type", "status", "period" ],
+        "codeFilter": [ {
+          "path": "type",
+          "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+        } ]
+      }, {
+        "type": "Encounter",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+        "mustSupport": [ "location", "period" ]
+      }, {
+        "type": "Encounter",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+        "mustSupport": [ "type", "class", "period" ],
+        "codeFilter": [ {
+          "path": "type",
+          "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143"
+        } ]
+      }, {
+        "type": "Encounter",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+        "mustSupport": [ "type", "class", "period" ],
+        "codeFilter": [ {
+          "path": "type",
+          "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+        } ]
+      }, {
+        "type": "Location",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Location" ],
+        "mustSupport": [ "id" ]
+      }, {
+        "type": "Medication",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Medication" ],
+        "mustSupport": [ "id" ]
+      }, {
+        "type": "MedicationAdministration",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationAdministration" ],
+        "mustSupport": [ "medication", "status", "effective" ]
+      }, {
+        "type": "MedicationRequest",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationRequest" ],
+        "mustSupport": [ "medication", "authoredOn" ]
+      }, {
+        "type": "Coverage",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Coverage" ],
+        "mustSupport": [ "period" ]
+      }, {
+        "type": "Condition",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+        "mustSupport": [ "category", "onset" ]
+      }, {
+        "type": "Specimen",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Specimen" ],
+        "mustSupport": [ "id", "collection", "collection.collected" ]
+      }, {
+        "type": "Observation",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+        "mustSupport": [ "code", "effective", "specimen", "specimen.collection", "specimen.collection.collected" ],
+        "codeFilter": [ {
+          "path": "code",
+          "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38"
+        } ]
+      }, {
+        "type": "ServiceRequest",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/ServiceRequest" ],
+        "mustSupport": [ "authoredOn" ]
+      }, {
+        "type": "Patient",
+        "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ]
+      } ]
+    } ],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  }, {
+    "id": "effective-data-requirements",
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements",
+    "valueReference": {
+      "reference": "#effective-data-requirements"
+    }
+  } ],
+  "url": "http://lantanagroup.com/fhir/nhsn-measures/Measure/NHSNGlycemicControlHypoglycemicInitialPopulation",
+  "identifier": [ {
+    "system": "https://nhsnlink.org",
+    "value": "nhsnglycemiccontrolhypoglycemicinitialpopulation"
+  } ],
+  "version": "0.000.01",
+  "name": "NHSNGlycemicControlHypoglycemicInitialPopulation",
+  "title": "NHSN Glycemic Control, Hypoglycemia Initial Population",
+  "status": "draft",
+  "experimental": false,
+  "date": "2023-01-31T08:37:12-08:00",
+  "publisher": "Lantana Consulting Group",
+  "description": "All inpatient encounters (including ED/Observation visits that end within 1 hour of the start of the inpatient encounter) for patients of all ages where at least one ADD was ordered or administered during the encounter that is during the measurement period.",
+  "purpose": "The primary purpose of this site is to provide CDC’s NHSN with access to view measure specification content in the dQMs under development by Lantana Consulting Group. Please note, this site is draft and undergoes constant revision and is not intended to serve as an implementation guide.",
+  "copyright": "This measure and specifications are subject to further revisions.      This performance measure is not a clinical guideline, does not establish a standard of medical care and has not been tested for all potential applications.        THE MEASURES AND SPECIFICATIONS ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND.",
+  "library": [ "http://lantanagroup.com/fhir/nhsn-measures/Library/NHSNGlycemicControlHypoglycemicInitialPopulation" ],
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "cohort",
+      "display": "Cohort"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "code": "outcome",
+      "display": "Outcome"
+    } ]
+  } ],
+  "rationale": "The NHSN Glycemic Control, Hypoglycemia module provides a mechanism for facilities to report inpatient medication-related hypoglycemia events, and to provide analytic reports based on these data to inform glycemic control quality improvement efforts and patient safety events. The primary objective of the NHSN Glycemic Control, Hypoglycemia module is to facilitate measurement and benchmarking of medication-related hypoglycemia events within a facility. As additional data are collected by NHSN, an additional objective will be to facilitate inter-facility benchmarking and evaluate national-level trends of medication-related hypoglycemia over time. The IP dQM provides the initial population and FHIR line-level data necessary for calculating the module metrics.",
+  "definition": [ "Antidiabetic Drug Days (ADD): Aggregate number of inpatient encounter days within the facility in which at least one injectable or oral ADD was received. All patients who received ADDs during the hospitalization contribute to the initial population regardless of whether the patient experienced a hypoglycemic event.", "Emergency Department (ED) or Observation (OBS) encounters: ED or observation encounters that ended within an hour of the inpatient admission are included when calculating the start and stop times of the hospitalization. Only Metric 1 includes ED  and OBS encounters.", "Hypoglycemia Day: An inpatient day with at least one documented hypoglycemia event.", "Hypoglycemia Event includes the following during an inpatient hospitalization: A hypoglycemic blood glucose (BG) result during the encounter and ADD administered within 24 hours prior to the start of the hypoglycemic BG result and no subsequent test for blood glucose with a result ≥80 mg/dL within five minutes of the start of the initial low blood glucose test.", "Inpatient Encounter: A hospitalization in any inpatient facility that meets the criteria for reporting to the NHSN Glycemic Control Hypoglycemia Module (refer to CDC Locations and Descriptions manual).", "Measurement Period: From the first day of each calendar month through the last day of that calendar month. Mild hypoglycemia: Blood glucose 54 mg/dL to 69 mg/dL as identified on central laboratory device (CLD) or prescription point-of-care (POC) device.", "Moderate hypoglycemia: Blood glucose 40 mg/dL to 53 mg/dL as identified on CLD or prescription POC device.", "Severe hypoglycemia Blood glucose < 40 mg/dL as identified on CLD or prescription POC device." ],
+  "group": [ {
+    "population": [ {
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "description": "All inpatient encounters, as well as ED and OBS encounters that end within 1 hour of the start of the inpatient encounter, for patients of all ages where at least one antidiabetic drug (ADD) was ordered or administered during the encounter that is during the measurement period.",
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "Initial Population"
+      }
+    } ]
+  } ],
+  "supplementalData": [ {
+    "id": "sde-chief-complaint",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Chief Complaint"
+    }
+  }, {
+    "id": "sde-condition",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Condition"
+    }
+  }, {
+    "id": "sde-condition-during-encounter",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Condition during Encounter"
+    }
+  }, {
+    "id": "sde-encounter-discharge-dispositions",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Encounter Discharge Dispositions"
+    }
+  }, {
+    "id": "sde-encounter-locations",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Encounter Locations"
+    }
+  }, {
+    "id": "sde-medication-administration",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Medication Administration"
+    }
+  }, {
+    "id": "sde-medication-request",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Medication Request"
+    }
+  }, {
+    "id": "sde-blood-glucose-observation",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Blood Glucose Observation"
+    }
+  }, {
+    "id": "sde-coverage",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Coverage"
+    }
+  }, {
+    "id": "sde-specimen",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Specimen"
+    }
+  }, {
+    "id": "sde-minimal-patient",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Minimal Patient"
+    }
+  }, {
+    "id": "sde-initial-population-encounters",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Initial Population Encounters"
+    }
+  }, {
+    "id": "sde-medication",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Medication"
+    }
+  }, {
+    "id": "sde-service-request",
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDE Service Request"
+    }
+  } ]
+}

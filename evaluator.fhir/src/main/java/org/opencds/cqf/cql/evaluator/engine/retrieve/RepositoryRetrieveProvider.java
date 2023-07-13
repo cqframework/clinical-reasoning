@@ -30,6 +30,7 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Iterable<Object> retrieve(final String context, final String contextPath,
       final Object contextValue, final String dataType, final String templateId,
       final String codePath, final Iterable<Code> codes, final String valueSet,
@@ -37,6 +38,9 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
       final Interval dateRange) {
 
     List<? extends IBaseResource> resources;
+    var resourceType = fhirContext.getResourceDefinition(dataType).getImplementingClass();
+    var bundleType = (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
+        .getImplementingClass();
 
     if (isFilterBySearchParam()) {
       Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
@@ -45,13 +49,13 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
       populateTerminologySearchParams(searchParams, codePath, codes, valueSet);
       populateDateSearchParams(searchParams, datePath, dateLowPath, dateHighPath, dateRange);
       resources =
-          BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
-              this.fhirContext.getResourceDefinition(dataType).getImplementingClass(), searchParams,
-              null));
+          BundleUtil.toListOfResources(this.fhirContext,
+              repository.search(bundleType, resourceType, searchParams, null));
     } else {
       resources =
-          BundleUtil.toListOfResources(this.fhirContext, repository.search(IBaseBundle.class,
-              this.fhirContext.getResourceDefinition(dataType).getImplementingClass(), null, null))
+          BundleUtil
+              .toListOfResources(this.fhirContext,
+                  repository.search(bundleType, resourceType, null, null))
               .stream().filter(filterByTemplateId(dataType, templateId))
               .filter(filterByContext(dataType, context, contextPath, contextValue))
               .filter(filterByTerminology(dataType, codePath, codes, valueSet))

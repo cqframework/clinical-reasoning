@@ -4,7 +4,7 @@
   <parent>
     <artifactId>evaluator.shared</artifactId>
     <groupId>org.opencds.cqf.cql</groupId>
-    <version>3.0.0-PRE5-SNAPSHOT</version>
+    <version>3.0.0-PRE6-SNAPSHOT</version>
   </parent>
   <build>
     <plugins>
@@ -25,17 +25,17 @@
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.expression</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.library</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.skyscreamer</groupId>
@@ -51,13 +51,13 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.jackson-deps</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>

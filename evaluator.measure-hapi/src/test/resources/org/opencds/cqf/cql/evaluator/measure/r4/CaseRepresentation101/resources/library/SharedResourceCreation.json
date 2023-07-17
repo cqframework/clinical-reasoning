@@ -12,18 +12,8 @@
       "display": "Logic Library"
     } ]
   },
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "display": "FHIR model information",
-    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-  }, {
-    "type": "depends-on",
-    "display": "Library FHIRHelpers",
-    "resource": "http://lantanagroup.com/fhir/nhsn-measures/Library/FHIRHelpers|4.0.1"
-  } ],
-  "content": [
-    {
+  "content": [ {
     "contentType": "text/cql",
-    "url":  "../../cql/SharedResourceCreation.cql"
-  }]
+    "url": "../../cql/SharedResourceCreation.cql"
+  } ]
 }

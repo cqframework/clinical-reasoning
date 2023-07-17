@@ -1,9 +1,6 @@
 {
   "resourceType": "Encounter",
   "id": "denom-CMS122-Encounter",
-  "text": {
-    "status": "generated"
-  },
   "status": "finished",
   "type": [ {
     "coding": [ {

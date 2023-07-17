@@ -6,18 +6,12 @@
     "lastUpdated": "2022-02-25T16:32:39.905+00:00",
     "source": "#88a7c23ec8a5bd79"
   },
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n         <h3>Value Set Contents</h3>\n         <p>This value set contains 110 concepts</p>\n         <p>All codes from system \n            <code>https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html</code>\n         </p>\n         <table class=\"codes\">\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <b>Code</b>\n               </td>\n               <td>\n                  <b>Display</b>\n               </td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1005-8\"> </a>1005-8\n               </td>\n               <td>Cardiac Catheterization Room/Suite</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1025-6\"> </a>1025-6\n               </td>\n               <td>Trauma Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1026-4\"> </a>1026-4\n               </td>\n               <td>Burn Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1027-2\"> </a>1027-2\n               </td>\n               <td>Medical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1028-0\"> </a>1028-0\n               </td>\n               <td>Medical Cardiac Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1029-8\"> </a>1029-8\n               </td>\n               <td>Medical-Surgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1030-6\"> </a>1030-6\n               </td>\n               <td>Surgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1031-4\"> </a>1031-4\n               </td>\n               <td>Neurosurgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1032-2\"> </a>1032-2\n               </td>\n               <td>Surgical Cardiothoracic Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1033-0\"> </a>1033-0\n               </td>\n               <td>Respiratory Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1034-8\"> </a>1034-8\n               </td>\n               <td>Prenatal Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1035-5\"> </a>1035-5\n               </td>\n               <td>Neurologic Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1038-9\"> </a>1038-9\n               </td>\n               <td>Well Baby Nursery (Level I)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1039-7\"> </a>1039-7\n               </td>\n               <td>Neonatal Critical Care (Level II/III)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1040-5\"> </a>1040-5\n               </td>\n               <td>Neonatal Critical Care (Level III)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1041-3\"> </a>1041-3\n               </td>\n               <td>Step down Neonatal Nursery (Level II)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1042-1\"> </a>1042-1\n               </td>\n               <td>Pediatric Burn Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1043-9\"> </a>1043-9\n               </td>\n               <td>Pediatric Surgical Cardiothoracic Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1044-7\"> </a>1044-7\n               </td>\n               <td>Pediatric Medical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1045-4\"> </a>1045-4\n               </td>\n               <td>Pediatric Medical-Surgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1046-2\"> </a>1046-2\n               </td>\n               <td>Pediatric Neurosurgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1047-0\"> </a>1047-0\n               </td>\n               <td>Pediatric Respiratory Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1048-8\"> </a>1048-8\n               </td>\n               <td>Pediatric Surgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1049-6\"> </a>1049-6\n               </td>\n               <td>Pediatric Trauma Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1051-2\"> </a>1051-2\n               </td>\n               <td>Behavioral Health/Psych Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1052-0\"> </a>1052-0\n               </td>\n               <td>Burn Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1053-8\"> </a>1053-8\n               </td>\n               <td>Ear, Nose, Throat Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1054-6\"> </a>1054-6\n               </td>\n               <td>Gastrointestinal Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1055-3\"> </a>1055-3\n               </td>\n               <td>Genitourinary Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1056-1\"> </a>1056-1\n               </td>\n               <td>Gerontology Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1057-9\"> </a>1057-9\n               </td>\n               <td>Gynecology Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1058-7\"> </a>1058-7\n               </td>\n               <td>Labor and Delivery Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1059-5\"> </a>1059-5\n               </td>\n               <td>Labor, Delivery, Recovery, Postpartum Suite</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1060-3\"> </a>1060-3\n               </td>\n               <td>Medical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1061-1\"> </a>1061-1\n               </td>\n               <td>Medical-Surgical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1062-9\"> </a>1062-9\n               </td>\n               <td>Neurology Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1063-7\"> </a>1063-7\n               </td>\n               <td>Neurosurgical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1064-5\"> </a>1064-5\n               </td>\n               <td>Ophthalmology Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1065-2\"> </a>1065-2\n               </td>\n               <td>Orthopedic Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1066-0\"> </a>1066-0\n               </td>\n               <td>Orthopedic Trauma Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1067-8\"> </a>1067-8\n               </td>\n               <td>Plastic Surgery Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1068-6\"> </a>1068-6\n               </td>\n               <td>Postpartum Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1069-4\"> </a>1069-4\n               </td>\n               <td>Pulmonary Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1070-2\"> </a>1070-2\n               </td>\n               <td>Rehabilitation Ward (within Acute Care Hospital)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1071-0\"> </a>1071-0\n               </td>\n               <td>Stroke (Acute) Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1072-8\"> </a>1072-8\n               </td>\n               <td>Surgical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1073-6\"> </a>1073-6\n               </td>\n               <td>Vascular Surgery Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1075-1\"> </a>1075-1\n               </td>\n               <td>Adolescent Behavioral Health Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1076-9\"> </a>1076-9\n               </td>\n               <td>Pediatric Medical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1077-7\"> </a>1077-7\n               </td>\n               <td>Pediatric Behavioral Health Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1078-5\"> </a>1078-5\n               </td>\n               <td>Pediatric Burn Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1079-3\"> </a>1079-3\n               </td>\n               <td>Pediatric Ear, Nose, Throat Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1081-9\"> </a>1081-9\n               </td>\n               <td>Pediatric Medical-Surgical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1082-7\"> </a>1082-7\n               </td>\n               <td>Pediatric Neurology Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1083-5\"> </a>1083-5\n               </td>\n               <td>Pediatric Neurosurgical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1084-3\"> </a>1084-3\n               </td>\n               <td>Pediatric Orthopedic Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1085-0\"> </a>1085-0\n               </td>\n               <td>Pediatric Rehabilitation Ward (within Acute Care Hospital)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1086-8\"> </a>1086-8\n               </td>\n               <td>Pediatric Surgical Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1091-8\"> </a>1091-8\n               </td>\n               <td>Pediatric Dialysis Specialty Care Area</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1092-6\"> </a>1092-6\n               </td>\n               <td>Solid Organ Transplant Specialty Care Area</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1093-4\"> </a>1093-4\n               </td>\n               <td>Pediatric Solid Organ Transplant Specialty Care Area</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1095-9\"> </a>1095-9\n               </td>\n               <td>Cesarean Section Room/Suite</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1096-7\"> </a>1096-7\n               </td>\n               <td>Operating Room/Suite</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1097-5\"> </a>1097-5\n               </td>\n               <td>Post-Anesthesia Care Unit/Recovery Room</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1099-1\"> </a>1099-1\n               </td>\n               <td>Adult Step Down Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1100-7\"> </a>1100-7\n               </td>\n               <td>Pediatric Step Down Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1102-3\"> </a>1102-3\n               </td>\n               <td>Chronic Care Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1103-1\"> </a>1103-1\n               </td>\n               <td>Chronic Alzheimer's Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1104-9\"> </a>1104-9\n               </td>\n               <td>Chronic Behavioral Health/Psych Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1105-6\"> </a>1105-6\n               </td>\n               <td>Chronic Rehabilitation Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1108-0\"> </a>1108-0\n               </td>\n               <td>Emergency Department</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1109-8\"> </a>1109-8\n               </td>\n               <td>Pediatric Emergency Department</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1160-1\"> </a>1160-1\n               </td>\n               <td>Urgent Care Center</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1162-7\"> </a>1162-7\n               </td>\n               <td>24-Hour Observation Area</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1164-3\"> </a>1164-3\n               </td>\n               <td>Ventilator Dependent Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1165-0\"> </a>1165-0\n               </td>\n               <td>Inpatient Hospice</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1169-2\"> </a>1169-2\n               </td>\n               <td>Post-Anesthesia Care Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1171-8\"> </a>1171-8\n               </td>\n               <td>Jail Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1172-6\"> </a>1172-6\n               </td>\n               <td>School Infirmary</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1174-2\"> </a>1174-2\n               </td>\n               <td>Mobile Emergency Services/EMS</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1198-1\"> </a>1198-1\n               </td>\n               <td>Dialysis Specialty Care Area</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1203-9\"> </a>1203-9\n               </td>\n               <td>Interventional Radiology</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1205-4\"> </a>1205-4\n               </td>\n               <td>Antenatal Care Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1208-8\"> </a>1208-8\n               </td>\n               <td>Telemetry Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1210-4\"> </a>1210-4\n               </td>\n               <td>Adult Mixed Acuity Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1211-2\"> </a>1211-2\n               </td>\n               <td>Pediatric Mixed Acuity Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1212-0\"> </a>1212-0\n               </td>\n               <td>Mixed Age Mixed Acuity Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1214-6\"> </a>1214-6\n               </td>\n               <td>Long Term Acute Care Pediatric Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1217-9\"> </a>1217-9\n               </td>\n               <td>Rehabilitation Ward (freestanding Inpatient Rehabilitation Facility)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1218-7\"> </a>1218-7\n               </td>\n               <td>Rehabilitation Pediatric Ward (freestanding Inpatient Rehabilitation Facility)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1220-3\"> </a>1220-3\n               </td>\n               <td>Long Term Acute Care Intensive Care Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1221-1\"> </a>1221-1\n               </td>\n               <td>Long Term Acute Care Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1222-9\"> </a>1222-9\n               </td>\n               <td>Long Term Acute Care Pediatric Intensive Care Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1223-7\"> </a>1223-7\n               </td>\n               <td>Oncology Medical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1224-5\"> </a>1224-5\n               </td>\n               <td>Oncology Surgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1225-2\"> </a>1225-2\n               </td>\n               <td>Oncology Medical-Surgical Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1226-0\"> </a>1226-0\n               </td>\n               <td>Oncology Leukemia Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1227-8\"> </a>1227-8\n               </td>\n               <td>Oncology Step Down Unit</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1228-6\"> </a>1228-6\n               </td>\n               <td>Oncology Lymphoma Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1229-4\"> </a>1229-4\n               </td>\n               <td>Oncology Leukemia-Lymphoma Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1230-2\"> </a>1230-2\n               </td>\n               <td>Oncology Solid Tumor Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1231-0\"> </a>1231-0\n               </td>\n               <td>Oncology Hematopoietic Stem Cell Transplant Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1232-8\"> </a>1232-8\n               </td>\n               <td>Oncology General Hematology-Oncology Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1233-6\"> </a>1233-6\n               </td>\n               <td>Oncology Pediatric Critical Care</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1234-4\"> </a>1234-4\n               </td>\n               <td>Oncology Pediatric Hematopoietic Stem Cell Transplant Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1235-1\"> </a>1235-1\n               </td>\n               <td>Oncology Pediatric General Hematology-Oncology Ward</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1236-9\"> </a>1236-9\n               </td>\n               <td>Oncology Mixed Acuity Unit (all ages)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1242-7\"> </a>1242-7\n               </td>\n               <td>Outpatient Operating Room/Suite (Attached)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1244-3\"> </a>1244-3\n               </td>\n               <td>Outpatient Operating Room/Suite (Detached)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"https---www.cdc.gov-nhsn-cdaportal-terminology-codesystem-hsloc.html-1269-0\"> </a>1269-0\n               </td>\n               <td>Neonatal Critical Care (Level IV)</td>\n            </tr>\n         </table>\n      </div>"
-  },
   "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1046.265",
   "version": "Draft",
-  "name": "NHSN CDC Inpatient Location Codes",
-  "title": "NHSN CDC Inpatient Location Codes",
+  "name": "CDC Inpatient Location Codes",
+  "title": "CDC Inpatient Location Codes",
   "status": "draft",
   "date": "2022-01-24T17:16:19-05:00",
-  "publisher": "CDC NHSN",
-  "description": "The NHSN health service inpatient locations.",
   "expansion": {
     "identifier": "urn:uuid:bcff285b-d206-4085-9b55-b0c1042aba64",
     "timestamp": "2022-02-14T10:11:19-05:00",
@@ -31,552 +25,552 @@
       "valueInteger": 0
     } ],
     "contains": [ {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1005-8",
       "display": "Cardiac Catheterization Room/Suite"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1025-6",
       "display": "Trauma Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1026-4",
       "display": "Burn Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1027-2",
       "display": "Medical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1028-0",
       "display": "Medical Cardiac Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1029-8",
       "display": "Medical-Surgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1030-6",
       "display": "Surgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1031-4",
       "display": "Neurosurgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1032-2",
       "display": "Surgical Cardiothoracic Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1033-0",
       "display": "Respiratory Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1034-8",
       "display": "Prenatal Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1035-5",
       "display": "Neurologic Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1038-9",
       "display": "Well Baby Nursery (Level I)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1039-7",
       "display": "Neonatal Critical Care (Level II/III)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1040-5",
       "display": "Neonatal Critical Care (Level III)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1041-3",
       "display": "Step down Neonatal Nursery (Level II)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1042-1",
       "display": "Pediatric Burn Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1043-9",
       "display": "Pediatric Surgical Cardiothoracic Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1044-7",
       "display": "Pediatric Medical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1045-4",
       "display": "Pediatric Medical-Surgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1046-2",
       "display": "Pediatric Neurosurgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1047-0",
       "display": "Pediatric Respiratory Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1048-8",
       "display": "Pediatric Surgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1049-6",
       "display": "Pediatric Trauma Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1051-2",
       "display": "Behavioral Health/Psych Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1052-0",
       "display": "Burn Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1053-8",
       "display": "Ear, Nose, Throat Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1054-6",
       "display": "Gastrointestinal Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1055-3",
       "display": "Genitourinary Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1056-1",
       "display": "Gerontology Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1057-9",
       "display": "Gynecology Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1058-7",
       "display": "Labor and Delivery Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1059-5",
       "display": "Labor, Delivery, Recovery, Postpartum Suite"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1060-3",
       "display": "Medical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1061-1",
       "display": "Medical-Surgical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1062-9",
       "display": "Neurology Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1063-7",
       "display": "Neurosurgical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1064-5",
       "display": "Ophthalmology Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1065-2",
       "display": "Orthopedic Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1066-0",
       "display": "Orthopedic Trauma Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1067-8",
       "display": "Plastic Surgery Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1068-6",
       "display": "Postpartum Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1069-4",
       "display": "Pulmonary Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1070-2",
       "display": "Rehabilitation Ward (within Acute Care Hospital)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1071-0",
       "display": "Stroke (Acute) Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1072-8",
       "display": "Surgical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1073-6",
       "display": "Vascular Surgery Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1075-1",
       "display": "Adolescent Behavioral Health Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1076-9",
       "display": "Pediatric Medical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1077-7",
       "display": "Pediatric Behavioral Health Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1078-5",
       "display": "Pediatric Burn Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1079-3",
       "display": "Pediatric Ear, Nose, Throat Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1081-9",
       "display": "Pediatric Medical-Surgical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1082-7",
       "display": "Pediatric Neurology Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1083-5",
       "display": "Pediatric Neurosurgical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1084-3",
       "display": "Pediatric Orthopedic Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1085-0",
       "display": "Pediatric Rehabilitation Ward (within Acute Care Hospital)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1086-8",
       "display": "Pediatric Surgical Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1091-8",
       "display": "Pediatric Dialysis Specialty Care Area"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1092-6",
       "display": "Solid Organ Transplant Specialty Care Area"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1093-4",
       "display": "Pediatric Solid Organ Transplant Specialty Care Area"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1095-9",
       "display": "Cesarean Section Room/Suite"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1096-7",
       "display": "Operating Room/Suite"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1097-5",
       "display": "Post-Anesthesia Care Unit/Recovery Room"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1099-1",
       "display": "Adult Step Down Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1100-7",
       "display": "Pediatric Step Down Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1102-3",
       "display": "Chronic Care Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1103-1",
       "display": "Chronic Alzheimer's Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1104-9",
       "display": "Chronic Behavioral Health/Psych Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1105-6",
       "display": "Chronic Rehabilitation Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1108-0",
       "display": "Emergency Department"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1109-8",
       "display": "Pediatric Emergency Department"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1160-1",
       "display": "Urgent Care Center"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1162-7",
       "display": "24-Hour Observation Area"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1164-3",
       "display": "Ventilator Dependent Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1165-0",
       "display": "Inpatient Hospice"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1169-2",
       "display": "Post-Anesthesia Care Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1171-8",
       "display": "Jail Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1172-6",
       "display": "School Infirmary"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1174-2",
       "display": "Mobile Emergency Services/EMS"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1198-1",
       "display": "Dialysis Specialty Care Area"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1203-9",
       "display": "Interventional Radiology"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1205-4",
       "display": "Antenatal Care Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1208-8",
       "display": "Telemetry Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1210-4",
       "display": "Adult Mixed Acuity Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1211-2",
       "display": "Pediatric Mixed Acuity Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1212-0",
       "display": "Mixed Age Mixed Acuity Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1214-6",
       "display": "Long Term Acute Care Pediatric Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1217-9",
       "display": "Rehabilitation Ward (freestanding Inpatient Rehabilitation Facility)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1218-7",
       "display": "Rehabilitation Pediatric Ward (freestanding Inpatient Rehabilitation Facility)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1220-3",
       "display": "Long Term Acute Care Intensive Care Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1221-1",
       "display": "Long Term Acute Care Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1222-9",
       "display": "Long Term Acute Care Pediatric Intensive Care Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1223-7",
       "display": "Oncology Medical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1224-5",
       "display": "Oncology Surgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1225-2",
       "display": "Oncology Medical-Surgical Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1226-0",
       "display": "Oncology Leukemia Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1227-8",
       "display": "Oncology Step Down Unit"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1228-6",
       "display": "Oncology Lymphoma Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1229-4",
       "display": "Oncology Leukemia-Lymphoma Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1230-2",
       "display": "Oncology Solid Tumor Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1231-0",
       "display": "Oncology Hematopoietic Stem Cell Transplant Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1232-8",
       "display": "Oncology General Hematology-Oncology Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1233-6",
       "display": "Oncology Pediatric Critical Care"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1234-4",
       "display": "Oncology Pediatric Hematopoietic Stem Cell Transplant Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1235-1",
       "display": "Oncology Pediatric General Hematology-Oncology Ward"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1236-9",
       "display": "Oncology Mixed Acuity Unit (all ages)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1242-7",
       "display": "Outpatient Operating Room/Suite (Attached)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1244-3",
       "display": "Outpatient Operating Room/Suite (Detached)"
     }, {
-      "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+      "system": "https://www.cdc.gov/test-case/cdaportal/terminology/codesystem/hsloc.html",
       "version": "2020",
       "code": "1269-0",
       "display": "Neonatal Critical Care (Level IV)"

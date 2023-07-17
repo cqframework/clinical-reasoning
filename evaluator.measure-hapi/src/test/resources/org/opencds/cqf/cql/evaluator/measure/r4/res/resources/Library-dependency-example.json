@@ -8,18 +8,14 @@
   "status": "draft",
   "experimental": true,
   "subjectCodeableConcept": {
-    "coding": [
-      {
-        "system": "hl7.org/fhir/resource-types",
-        "code": "Patient"
-      }
-    ]
+    "coding": [ {
+      "system": "hl7.org/fhir/resource-types",
+      "code": "Patient"
+    } ]
   },
   "description": "Example library illustrating reference to dependencies in dependent implementation guides",
-  "content": [
-    {
-      "contentType": "text/cql",
-      "url": "../cql/DependencyExample.cql"
-    }
-  ]
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../cql/DependencyExample.cql"
+  } ]
 }

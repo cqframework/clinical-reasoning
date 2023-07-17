@@ -7,10 +7,6 @@
     "source": "#88a7c23ec8a5bd79",
     "profile": [ "http://hl7.org/fhir/StructureDefinition/shareablevalueset" ]
   },
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n            <ul>\n                <li>Include all codes defined in \n                    \n                    \n                    \n                    \n                    <a href=\"CodeSystem-diagnosis-role.html\">\n                        <code>http://terminology.hl7.org/CodeSystem/diagnosis-role</code>\n                    </a>\n                </li>\n            </ul>\n        </div>"
-  },
   "extension": [ {
     "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
     "valueCode": "vocab"

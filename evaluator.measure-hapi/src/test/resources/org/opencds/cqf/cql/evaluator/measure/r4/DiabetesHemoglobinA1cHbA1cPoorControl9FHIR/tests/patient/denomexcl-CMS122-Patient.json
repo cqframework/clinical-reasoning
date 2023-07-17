@@ -1,9 +1,6 @@
 {
   "resourceType": "Patient",
   "id": "denomexcl-CMS122-Patient",
-  "text": {
-    "status": "extensions"
-  },
   "extension": [ {
     "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
     "extension": [ {

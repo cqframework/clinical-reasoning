@@ -1,35 +1,27 @@
 {
   "resourceType": "MedicationRequest",
   "id": "eUiVPIA4udhEdqh-pTkrmwgSyQiJ4b3lTggI9WYnyGUk3",
-  "identifier": [
-    {
-      "use": "usual",
-      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.798268",
-      "value": "101960077"
-    }
-  ],
+  "identifier": [ {
+    "use": "usual",
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.798268",
+    "value": "101960077"
+  } ],
   "status": "active",
   "intent": "plan",
-  "category": [
-    {
-      "coding": [
-        {
-          "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-          "code": "community",
-          "display": "Community"
-        }
-      ],
-      "text": "Community"
-    }
-  ],
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+      "code": "community",
+      "display": "Community"
+    } ],
+    "text": "Community"
+  } ],
   "reportedBoolean": true,
   "medicationReference": {
-    "extension": [
-      {
-        "url": "https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id",
-        "valueString": "Medication/eBHvg5JNObOqJk3gML.E85xDWgoAUl8uvBsgQtTwIRwVOx0HADTxF94BsIcRb0BYq1rosld3jC5xYyy.BdoYYylFnmX5Z737Qem6EeV1RPow3"
-      }
-    ],
+    "extension": [ {
+      "url": "https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id",
+      "valueString": "Medication/eBHvg5JNObOqJk3gML.E85xDWgoAUl8uvBsgQtTwIRwVOx0HADTxF94BsIcRb0BYq1rosld3jC5xYyy.BdoYYylFnmX5Z737Qem6EeV1RPow3"
+    } ],
     "reference": "Medication/hash-c16eca7f",
     "display": "budesonide (PULMICORT RESPULES) 1 mg/2 mL nebulizer solutionn"
   },
@@ -48,12 +40,10 @@
   },
   "authoredOn": "2023-01-12T04:43:36Z",
   "requester": {
-    "extension": [
-      {
-        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-        "valueCode": "unknown"
-      }
-    ]
+    "extension": [ {
+      "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+      "valueCode": "unknown"
+    } ]
   },
   "recorder": {
     "reference": "Practitioner/eOhmD54dQwEGyb07KgroY-Q3",
@@ -61,61 +51,48 @@
     "display": "Nurse Um_Cln, RN"
   },
   "courseOfTherapyType": {
-    "coding": [
-      {
-        "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
-        "code": "continuous",
-        "display": "Continuous long term therapy"
-      }
-    ],
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
+      "code": "continuous",
+      "display": "Continuous long term therapy"
+    } ],
     "text": "Continuous long term therapy"
   },
-  "dosageInstruction": [
-    {
-      "text": "Inhale 1 mg via nebulizer two times daily. Use 2mg via nebulizer BID for exacerbations Indications: controller medication for asthma, asthma exacerbation, Historical Med",
-      "patientInstruction": "Inhale 1 mg via nebulizer two times daily. Use 2mg via nebulizer BID for exacerbations Indications: controller medication for asthma, asthma exacerbation",
-      "timing": {
-        "repeat": {
-          "timeOfDay": [
-            "09:00:00",
-            "21:00:00"
-          ]
-        },
-        "code": {
-          "text": "2x Daily"
-        }
+  "dosageInstruction": [ {
+    "text": "Inhale 1 mg via nebulizer two times daily. Use 2mg via nebulizer BID for exacerbations Indications: controller medication for asthma, asthma exacerbation, Historical Med",
+    "patientInstruction": "Inhale 1 mg via nebulizer two times daily. Use 2mg via nebulizer BID for exacerbations Indications: controller medication for asthma, asthma exacerbation",
+    "timing": {
+      "repeat": {
+        "timeOfDay": [ "09:00:00", "21:00:00" ]
       },
-      "asNeededBoolean": false,
-      "route": {
-        "coding": [
-          {
-            "system": "urn:oid:1.2.840.114350.1.13.277.3.7.4.798268.7025",
-            "code": "82",
-            "display": "Nebulization"
-          }
-        ],
-        "text": "Nebulization"
+      "code": {
+        "text": "2x Daily"
+      }
+    },
+    "asNeededBoolean": false,
+    "route": {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.4.798268.7025",
+        "code": "82",
+        "display": "Nebulization"
+      } ],
+      "text": "Nebulization"
+    },
+    "doseAndRate": [ {
+      "type": {
+        "coding": [ {
+          "system": "http://epic.com/CodeSystem/dose-rate-type",
+          "code": "ordered",
+          "display": "ordered"
+        } ],
+        "text": "ordered"
       },
-      "doseAndRate": [
-        {
-          "type": {
-            "coding": [
-              {
-                "system": "http://epic.com/CodeSystem/dose-rate-type",
-                "code": "ordered",
-                "display": "ordered"
-              }
-            ],
-            "text": "ordered"
-          },
-          "doseQuantity": {
-            "value": 1,
-            "unit": "mg",
-            "system": "http://unitsofmeasure.org",
-            "code": "mg"
-          }
-        }
-      ]
-    }
-  ]
+      "doseQuantity": {
+        "value": 1,
+        "unit": "mg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mg"
+      }
+    } ]
+  } ]
 }

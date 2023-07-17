@@ -1,4 +1,4 @@
-library NHSNGlycemicControlHypoglycemicInitialPopulation version '0.0.004'
+library GlycemicControlHypoglycemicInitialPopulation version '0.0.004'
 
 using FHIR version '4.0.1'
 
@@ -107,7 +107,7 @@ define function "GetSpecimen"(reference Reference):
 
 define function "GetIdExtensions"(domainResource DomainResource):
   domainResource.extension E
-  where E.url = 'https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id'
+  where E.url = 'https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id'
   return E
 
 define function "GetPatientExtensions"(domainResource DomainResource):

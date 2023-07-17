@@ -57,7 +57,6 @@
         "meta": {
           "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
         },
-        "verificationStatus": "confirmed",
         "category": [ {
           "coding": [ {
             "system": "http://terminology.hl7.org/CodeSystem/condition-category",
@@ -107,13 +106,6 @@
         "diagnosis": [ {
           "condition": {
             "reference": "Condition/numer-EXM105-FHIR3-1"
-          },
-          "role": {
-            "coding": [ {
-              "system": "http://hl7.org/fhir/diagnosis-role",
-              "code": "billing",
-              "display": "Billing"
-            } ]
           },
           "rank": 1
         } ]
@@ -173,13 +165,13 @@
         "id": "numer-EXM105-FHIR3-5",
         "status": "completed",
         "intent": "order",
-        "category": {
+        "category": [ {
           "coding": [ {
             "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
             "code": "discharge",
             "display": "Discharge"
           } ]
-        },
+        } ],
         "medicationCodeableConcept": {
           "coding": [ {
             "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
@@ -196,24 +188,12 @@
   } ],
   "status": "complete",
   "type": "individual",
-  "measure": {
-    "reference": "Measure/measure-EXM105-FHIR3-8.0.000"
-  },
-  "patient": {
-    "reference": "Patient/numer-EXM105-FHIR3"
-  },
   "period": {
     "start": "2019-01-01T00:00:00-07:00",
     "end": "2019-12-31T00:00:00-07:00"
   },
   "group": [ {
-    "identifier": {
-      "value": "group-1"
-    },
     "population": [ {
-      "identifier": {
-        "value": "initial-population"
-      },
       "code": {
         "coding": [ {
           "code": "initial-population"
@@ -221,9 +201,6 @@
       },
       "count": 1
     }, {
-      "identifier": {
-        "value": "numerator"
-      },
       "code": {
         "coding": [ {
           "code": "numerator"
@@ -231,9 +208,6 @@
       },
       "count": 1
     }, {
-      "identifier": {
-        "value": "denominator"
-      },
       "code": {
         "coding": [ {
           "code": "denominator"
@@ -241,19 +215,12 @@
       },
       "count": 1
     }, {
-      "identifier": {
-        "value": "denominator-exclusion"
-      },
       "code": {
         "coding": [ {
           "code": "denominator-exclusion"
         } ]
       },
       "count": 0
-    } ],
-    "measureScore": 1.0
-  } ],
-  "evaluatedResources": {
-    "reference": "#6be0c760-7a1f-48ad-9e88-7698f751ab24"
-  }
+    } ]
+  } ]
 }

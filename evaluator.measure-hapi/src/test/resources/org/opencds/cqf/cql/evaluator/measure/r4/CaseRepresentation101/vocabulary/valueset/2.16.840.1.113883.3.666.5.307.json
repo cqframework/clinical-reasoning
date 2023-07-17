@@ -5,17 +5,12 @@
     "versionId": "33",
     "lastUpdated": "2021-01-19T09:34:06.000-05:00"
   },
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n         <h3>Value Set Contents</h3>\n         <p>This value set contains 3 concepts</p>\n         <p>All codes from system \n            <code>http://snomed.info/sct</code>\n         </p>\n         <table class=\"codes\">\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <b>Code</b>\n               </td>\n               <td>\n                  <b>Display</b>\n               </td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---snomed.info-sct-183452005\"> </a>\n                  <a href=\"http://browser.ihtsdotools.org/?perspective=full&amp;conceptId1=183452005\">183452005</a>\n               </td>\n               <td>Emergency hospital admission (procedure)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---snomed.info-sct-32485007\"> </a>\n                  <a href=\"http://browser.ihtsdotools.org/?perspective=full&amp;conceptId1=32485007\">32485007</a>\n               </td>\n               <td>Hospital admission (procedure)</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"http---snomed.info-sct-8715000\"> </a>\n                  <a href=\"http://browser.ihtsdotools.org/?perspective=full&amp;conceptId1=8715000\">8715000</a>\n               </td>\n               <td>Hospital admission, elective (procedure)</td>\n            </tr>\n         </table>\n      </div>"
-  },
   "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
   "version": "20200307",
   "name": "Encounter Inpatient",
   "title": "Encounter Inpatient",
   "status": "active",
   "date": "2020-03-07T01:00:21-05:00",
-  "publisher": "Lantana EH Steward",
   "description": "The purpose of this value set is to represent concepts of inpatient hospitalization encounters.",
   "expansion": {
     "identifier": "urn:uuid:b1561d23-7da0-4382-b765-08d32dbf48c2",

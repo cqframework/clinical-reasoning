@@ -1,7 +1,7 @@
 {
   "resourceType": "Library",
   "id": "SharedResourceCreation",
-  "url": "http://lantanagroup.com/fhir/nhsn-measures/Library/SharedResourceCreation",
+  "url": "http://test-case.com/fhir/measures/Library/SharedResourceCreation",
   "version": "0.0.001",
   "name": "SharedResourceCreation",
   "status": "draft",

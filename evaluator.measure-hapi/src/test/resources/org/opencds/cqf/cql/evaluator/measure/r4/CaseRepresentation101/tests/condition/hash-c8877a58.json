@@ -1,32 +1,24 @@
 {
   "resourceType": "Condition",
   "id": "hash-c8877a58",
-  "extension": [
-    {
-      "url": "https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id",
-      "valueString": "eTGYCyjqa4kyXK.j07bEoU0DgV1pCSj88Iu6fml.OhtNeimPW4a8m1dWoZAexe7YW3"
-    }
-  ],
-  "category": [
-    {
-      "coding": [
-        {
-          "system": "http://open.epic.com/FHIR/StructureDefinition/condition-category",
-          "code": "reason-for-visit",
-          "display": "Reason for Visit"
-        }
-      ],
-      "text": "Reason for Visit"
-    }
-  ],
+  "extension": [ {
+    "url": "https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id",
+    "valueString": "eTGYCyjqa4kyXK.j07bEoU0DgV1pCSj88Iu6fml.OhtNeimPW4a8m1dWoZAexe7YW3"
+  } ],
+  "category": [ {
+    "coding": [ {
+      "system": "http://open.epic.com/FHIR/StructureDefinition/condition-category",
+      "code": "reason-for-visit",
+      "display": "Reason for Visit"
+    } ],
+    "text": "Reason for Visit"
+  } ],
   "code": {
-    "coding": [
-      {
-        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.728286",
-        "code": "160490",
-        "display": "Respiratory Distress"
-      }
-    ],
+    "coding": [ {
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.728286",
+      "code": "160490",
+      "display": "Respiratory Distress"
+    } ],
     "text": "Respiratory Distress"
   },
   "subject": {

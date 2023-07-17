@@ -1,10 +1,11 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+
 import java.text.SimpleDateFormat;
 
-import static org.testng.Assert.assertEquals;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
+import org.testng.annotations.Test;
 
 public class ClientRepresentativeTest {
   protected static Given given =
@@ -13,7 +14,7 @@ public class ClientRepresentativeTest {
   @Test
   public void measure_eval() {
     var report = given.when()
-        .measureId("NHSNGlycemicControlHypoglycemicInitialPopulation")
+        .measureId("GlycemicControlHypoglycemicInitialPopulation")
         .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
         .periodStart("2022-01-01")
         .periodEnd("2022-06-29")

@@ -1,74 +1,55 @@
 {
   "resourceType": "Coverage",
   "id": "hash-2c79f7e9",
-  "contained": [
-    {
-      "resourceType": "Organization",
-      "id": "org1",
-      "type": [
-        {
-          "coding": [
-            {
-              "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.678671.120",
-              "code": "3",
-              "display": "Insurance Plan"
-            }
-          ],
-          "text": "Insurance Plan"
-        }
-      ],
-      "contact": [
-        {
-          "purpose": {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/contactentity-type",
-                "code": "BILL",
-                "display": "Billing"
-              }
-            ]
-          },
-          "address": {
-            "use": "billing",
-            "line": [
-              "PO BOX 30043"
-            ],
-            "city": "LANSING",
-            "state": "MI",
-            "postalCode": "48909",
-            "country": "US"
-          }
-        }
-      ]
-    }
-  ],
-  "extension": [
-    {
-      "url": "http://open.epic.com/FHIR/StructureDefinition/extension/billing-organization",
-      "valueReference": {
-        "reference": "#org1"
+  "contained": [ {
+    "resourceType": "Organization",
+    "id": "org1",
+    "type": [ {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.678671.120",
+        "code": "3",
+        "display": "Insurance Plan"
+      } ],
+      "text": "Insurance Plan"
+    } ],
+    "contact": [ {
+      "purpose": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/contactentity-type",
+          "code": "BILL",
+          "display": "Billing"
+        } ]
+      },
+      "address": {
+        "use": "billing",
+        "line": [ "PO BOX 30043" ],
+        "city": "LANSING",
+        "state": "MI",
+        "postalCode": "48909",
+        "country": "US"
       }
-    },
-    {
-      "url": "https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id",
-      "valueString": "ep.v.9yI9bZp7I7h-ttN7jAj3iIr.hp2a-dEJltEFjIdqhdEe4UjZXWcFlIsAz.pB3"
+    } ]
+  } ],
+  "extension": [ {
+    "url": "http://open.epic.com/FHIR/StructureDefinition/extension/billing-organization",
+    "valueReference": {
+      "reference": "#org1"
     }
-  ],
-  "identifier": [
-    {
-      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.678671",
-      "value": "5000304"
-    }
-  ],
+  }, {
+    "url": "https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id",
+    "valueString": "ep.v.9yI9bZp7I7h-ttN7jAj3iIr.hp2a-dEJltEFjIdqhdEe4UjZXWcFlIsAz.pB3"
+  } ],
+  "identifier": [ {
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.678671",
+    "value": "5000304"
+  } ],
   "status": "active",
   "type": {
-    "coding": [
-      {
-        "system": "http://open.epic.com/FHIR/StructureDefinition/coverage-type",
-        "code": "medicaid",
-        "display": "Medicaid"
-      }
-    ],
+    "coding": [ {
+      "system": "http://open.epic.com/FHIR/StructureDefinition/coverage-type",
+      "code": "medicaid",
+      "display": "Medicaid"
+    } ],
     "text": "Medicaid"
   },
   "subscriber": {
@@ -89,58 +70,47 @@
     "display": "Hob, Hobevent"
   },
   "relationship": {
-    "coding": [
-      {
-        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.678671.305",
-        "code": "01",
-        "display": "Self"
-      },
-      {
-        "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
-        "code": "self",
-        "display": "Self"
-      }
-    ],
+    "coding": [ {
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.678671.305",
+      "code": "01",
+      "display": "Self"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+      "code": "self",
+      "display": "Self"
+    } ],
     "text": "Self"
   },
   "period": {
     "start": "2023-01-01"
   },
-  "payor": [
-    {
-      "reference": "Organization/eFlm.Qir.QPogkifIr70FLQ3",
-      "identifier": {
-        "use": "official",
-        "system": "http://open.epic.com/FHIR/StructureDefinition/payer-id",
-        "value": "3001"
-      },
-      "display": "MEDICAID"
-    }
-  ],
-  "class": [
-    {
-      "extension": [
-        {
-          "url": "http://open.epic.com/FHIR/StructureDefinition/extension/epic-id",
-          "valueIdentifier": {
-            "use": "secondary",
-            "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.698080",
-            "value": "300106"
-          }
-        }
-      ],
-      "type": {
-        "coding": [
-          {
-            "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
-            "code": "plan",
-            "display": "Plan"
-          }
-        ]
-      },
-      "value": "300106",
-      "name": "MEDICAID MICHIGAN"
-    }
-  ],
+  "payor": [ {
+    "reference": "Organization/eFlm.Qir.QPogkifIr70FLQ3",
+    "identifier": {
+      "use": "official",
+      "system": "http://open.epic.com/FHIR/StructureDefinition/payer-id",
+      "value": "3001"
+    },
+    "display": "MEDICAID"
+  } ],
+  "class": [ {
+    "extension": [ {
+      "url": "http://open.epic.com/FHIR/StructureDefinition/extension/epic-id",
+      "valueIdentifier": {
+        "use": "secondary",
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.698080",
+        "value": "300106"
+      }
+    } ],
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+        "code": "plan",
+        "display": "Plan"
+      } ]
+    },
+    "value": "300106",
+    "name": "MEDICAID MICHIGAN"
+  } ],
   "order": 1
 }

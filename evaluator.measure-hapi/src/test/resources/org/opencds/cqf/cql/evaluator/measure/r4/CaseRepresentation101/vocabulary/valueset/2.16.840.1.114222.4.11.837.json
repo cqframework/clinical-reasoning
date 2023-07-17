@@ -5,10 +5,6 @@
     "versionId": "1",
     "lastUpdated": "2012-10-25T12:28:31.000-04:00"
   },
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n         <h3>Value Set Contents</h3>\n         <p>This value set contains 2 concepts</p>\n         <p>All codes from system \n            <code>urn:oid:2.16.840.1.113883.6.238</code>\n         </p>\n         <table class=\"codes\">\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <b>Code</b>\n               </td>\n               <td>\n                  <b>Display</b>\n               </td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-2135-2\"> </a>2135-2\n               </td>\n               <td>Hispanic or Latino</td>\n            </tr>\n            <tr>\n               <td style=\"white-space:nowrap\">\n                  <a name=\"urn-oid-2.16.840.1.113883.6.238-2186-5\"> </a>2186-5\n               </td>\n               <td>Not Hispanic or Latino</td>\n            </tr>\n         </table>\n      </div>"
-  },
   "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
   "version": "20121025",
   "name": "Ethnicity",

@@ -19,55 +19,6 @@
   "date": "2022-06-01",
   "publisher": "Optum CDS",
   "description": "HTNConcepts",
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.526.3.1240|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-BloodPressurePanel|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.526.3.1002|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.526.2.1045|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.526.3.353|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.109.12.1014|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.104.12.1011|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.101.12.1016|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.109.12.1012|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.109.12.1029|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.101.12.1001|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.526.3.378|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.101.12.1023|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.464.1003.101.12.1025|1.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "http://cds.optum.com/dqm-hypertension/fhir/ValueSet/HTN-2.16.840.1.113883.3.526.2.1044|1.0.1"
-  } ],
   "content": [ {
     "contentType": "text/cql",
     "url": "../../cql/HTNConcepts.cql"

@@ -1,12 +1,12 @@
 {
   "resourceType": "Library",
-  "id": "NHSNGlycemicControlHypoglycemicInitialPopulation",
+  "id": "GlycemicControlHypoglycemicInitialPopulation",
   "meta": {
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/library-cqfm" ]
   },
-  "url": "http://lantanagroup.com/fhir/nhsn-measures/Library/NHSNGlycemicControlHypoglycemicInitialPopulation",
+  "url": "http://test-case.com/fhir/measures/Library/GlycemicControlHypoglycemicInitialPopulation",
   "version": "0.0.004",
-  "name": "NHSNGlycemicControlHypoglycemicInitialPopulation",
+  "name": "GlycemicControlHypoglycemicInitialPopulation",
   "status": "draft",
   "experimental": false,
   "type": {
@@ -16,10 +16,9 @@
       "display": "Logic Library"
     } ]
   },
-  "publisher": "Lantana Consulting Group",
   "description": "All inpatient encounters (including ED/Observation visits that end within 1 hour of the start of the inpatient encounter) for patients of all ages where at least one ADD was ordered or administered during the encounter that is during the measurement period.",
   "content": [ {
     "contentType": "text/cql",
-    "url": "../../cql/NHSNGlycemicControlHypoglycemicInitialPopulation.cql"
+    "url": "../../cql/GlycemicControlHypoglycemicInitialPopulation.cql"
   } ]
 }

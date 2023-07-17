@@ -28,13 +28,6 @@
     "condition": {
       "reference": "Condition/denom-EXM105-FHIR3-1"
     },
-    "role": {
-      "coding": [ {
-        "system": "http://hl7.org/fhir/diagnosis-role",
-        "code": "billing",
-        "display": "Billing"
-      } ]
-    },
     "rank": 1
   } ]
 }

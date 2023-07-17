@@ -1,47 +1,34 @@
 {
   "resourceType": "Location",
   "id": "eaA8jQ6JzXsG1s.pYNa6L5NMpnIWhwvEC5pOd4v.WYq43",
-  "extension": [
-    {
-      "url": "https://open.epic.com/fhir/extensions/specialty",
-      "valueCodeableConcept": {
-        "coding": [
-          {
-            "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4150",
-            "code": "17",
-            "display": "Emergency Medicine"
-          }
-        ]
-      }
+  "extension": [ {
+    "url": "https://open.epic.com/fhir/extensions/specialty",
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4150",
+        "code": "17",
+        "display": "Emergency Medicine"
+      } ]
     }
-  ],
-  "identifier": [
-    {
-      "use": "usual",
-      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.686980",
-      "value": "100051801"
-    }
-  ],
+  } ],
+  "identifier": [ {
+    "use": "usual",
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.686980",
+    "value": "100051801"
+  } ],
   "name": "MH Childrens Emergency Department",
-  "alias": [
-    "CES"
-  ],
+  "alias": [ "CES" ],
   "mode": "instance",
-  "telecom": [
-    {
-      "system": "phone",
-      "value": "734-936-4230",
-      "rank": 1
-    },
-    {
-      "system": "fax",
-      "value": "734-998-0037"
-    }
-  ],
+  "telecom": [ {
+    "system": "phone",
+    "value": "734-936-4230",
+    "rank": 1
+  }, {
+    "system": "fax",
+    "value": "734-998-0037"
+  } ],
   "address": {
-    "line": [
-      "1540 E Hospital Dr"
-    ],
+    "line": [ "1540 E Hospital Dr" ],
     "city": "Ann Arbor",
     "state": "Michigan",
     "postalCode": "48109"

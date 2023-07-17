@@ -1,9 +1,6 @@
 {
   "resourceType": "Observation",
   "id": "denomexcl-CMS122-Observation",
-  "text": {
-    "status": "generated"
-  },
   "status": "final",
   "code": {
     "coding": [ {

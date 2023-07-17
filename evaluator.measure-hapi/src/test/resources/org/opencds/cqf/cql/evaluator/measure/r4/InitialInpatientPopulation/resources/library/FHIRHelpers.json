@@ -6,21 +6,10 @@
     "lastUpdated": "2022-03-01T19:49:04.118+00:00",
     "source": "#91bc6d5f3b6d892f"
   },
-  "extension": [ {
-    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-    "valueReference": {
-      "reference": "Device/cqf-tooling"
-    }
-  } ],
   "url": "http://hl7.org/fhir/Library/FHIRHelpers",
   "version": "4.0.1",
   "name": "FHIRHelpers",
   "title": "FHIRHelpers",
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "display": "FHIR model information",
-    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-  } ],
   "content": [ {
     "contentType": "text/cql",
     "url": "../../cql/FHIRHelpers.cql"

@@ -1,11 +1,22 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Coverage;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Resource;
@@ -17,21 +28,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
-import javax.annotation.Nonnull;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireItemGeneratorTest {
@@ -84,7 +86,8 @@ class QuestionnaireItemGeneratorTest {
   @Test
   void getElementTypeShouldReturnString() {
     // setup
-    final ElementDefinition elementDefinition = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
+    final ElementDefinition elementDefinition =
+        TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     // execute
     final String actual = myFixture.getElementType(elementDefinition);
     // validate
@@ -108,8 +111,7 @@ class QuestionnaireItemGeneratorTest {
     final List<ElementDefinition> expected = List.of(
         TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE),
         TestingHelper.withElementDefinition(TYPE_CODE_2, PATH_VALUE_2),
-        TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3)
-    );
+        TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3));
     // execute
     final List<ElementDefinition> actual = myFixture.getElementsWithNonNullElementType(profile);
     // validate
@@ -124,13 +126,11 @@ class QuestionnaireItemGeneratorTest {
     final List<ElementDefinition> expectedElements = List.of(
         TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE),
         TestingHelper.withElementDefinition(TYPE_CODE_2, PATH_VALUE_2),
-        TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3)
-    );
+        TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3));
     doNothing().when(myFixture).processElement(
         any(StructureDefinition.class),
         any(ElementDefinition.class),
-        anyInt()
-    );
+        anyInt());
     doReturn(expectedElements).when(myFixture).getElementsWithNonNullElementType(profile);
     // execute
     myFixture.processElements(profile);
@@ -147,11 +147,13 @@ class QuestionnaireItemGeneratorTest {
     final StructureDefinition profile = withProfile();
     final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
-    doReturn(questionnaireItem).when(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    doReturn(questionnaireItem).when(nestedQuestionnaireItemService)
+        .getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
     // execute
     myFixture.processElement(profile, element, childCount);
     // validate
-    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element,
+        CHILD_LINK_ID);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), questionnaireItem);
   }
 
@@ -163,13 +165,16 @@ class QuestionnaireItemGeneratorTest {
     final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
     when(nestedQuestionnaireItemService.getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID))
-        .thenAnswer(invocation -> {throw new Exception(ERROR_MESSAGE);});
+        .thenAnswer(invocation -> {
+          throw new Exception(ERROR_MESSAGE);
+        });
     doReturn(errorItem).when(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
     // execute
     myFixture.processElement(profile, element, childCount);
     // validate
     verify(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
-    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element,
+        CHILD_LINK_ID);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
   }
 
@@ -193,7 +198,8 @@ class QuestionnaireItemGeneratorTest {
     final StructureDefinition profile = withProfile();
     final int itemCount = 3;
     doReturn(profile).when(myFixture).getProfileDefinition(actionInput);
-    doReturn(expected).when(questionnaireItemService).createQuestionnaireItem(actionInput, "4", profile);
+    doReturn(expected).when(questionnaireItemService).createQuestionnaireItem(actionInput, "4",
+        profile);
     doNothing().when(myFixture).processElements(profile);
     // execute
     final QuestionnaireItemComponent actual = myFixture.generateItem(actionInput, itemCount);
@@ -212,7 +218,8 @@ class QuestionnaireItemGeneratorTest {
     final DataRequirement actionInput = TestingHelper.withActionInput();
     final QuestionnaireItemComponent expected = withErrorItem(EXPECTED_ERROR_MESSAGE, linkId);
     final StructureDefinition profile = withProfile();
-    doReturn(expected).when(questionnaireItemService).createQuestionnaireItem(actionInput, linkId, profile);
+    doReturn(expected).when(questionnaireItemService).createQuestionnaireItem(actionInput, linkId,
+        profile);
     doReturn(profile).when(myFixture).getProfileDefinition(actionInput);
     doAnswer((invocation) -> {
       throw new Exception(ERROR_MESSAGE);
@@ -224,20 +231,20 @@ class QuestionnaireItemGeneratorTest {
     assertEquals(actual, expected);
   }
 
-//  @Test
-//  void getProfileDefinitionShouldReturnResource() {
-//    // setup
-//    final Resource expected = withStructureDefinitionAsResource();
-//    final CanonicalType canonicalType = new CanonicalType();
-//    final DataRequirement actionInput = new DataRequirement();
-//    actionInput.setProfile(List.of(canonicalType));
-//    doReturn(expected).when(myFixture).getResource(canonicalType);
-//    // execute
-//    final Resource actual = myFixture.getProfileDefinition(actionInput);
-//    // validate
-//    Assert.assertEquals(actual, expected);
-//    verify(myFixture).getResource(canonicalType);
-//  }
+  // @Test
+  // void getProfileDefinitionShouldReturnResource() {
+  // // setup
+  // final Resource expected = withStructureDefinitionAsResource();
+  // final CanonicalType canonicalType = new CanonicalType();
+  // final DataRequirement actionInput = new DataRequirement();
+  // actionInput.setProfile(List.of(canonicalType));
+  // doReturn(expected).when(myFixture).getResource(canonicalType);
+  // // execute
+  // final Resource actual = myFixture.getProfileDefinition(actionInput);
+  // // validate
+  // Assert.assertEquals(actual, expected);
+  // verify(myFixture).getResource(canonicalType);
+  // }
 
   final Resource withStructureDefinitionAsResource() {
     final StructureDefinition structureDefinition = new StructureDefinition();
@@ -253,12 +260,12 @@ class QuestionnaireItemGeneratorTest {
   }
 
   void assertEquals(List<ElementDefinition> actual, List<ElementDefinition> expected) {
-    for(int i = 0; i < expected.size(); i++) {
+    for (int i = 0; i < expected.size(); i++) {
       final ElementDefinition actualElement = actual.get(i);
       final ElementDefinition expectedElement = expected.get(i);
       Assert.assertEquals(actualElement.getPath(), expectedElement.getPath());
       Assert.assertEquals(actualElement.getType().size(), expectedElement.getType().size());
-      for(int q = 0; q < expectedElement.getType().size(); q++) {
+      for (int q = 0; q < expectedElement.getType().size(); q++) {
         final TypeRefComponent actualType = actualElement.getType().get(q);
         final TypeRefComponent expectedType = expectedElement.getType().get(q);
         Assert.assertEquals(actualType.getCode(), expectedType.getCode());
@@ -273,17 +280,20 @@ class QuestionnaireItemGeneratorTest {
 
   @Nonnull
   QuestionnaireItemComponent withQuestionnaireItemComponent() {
-    return new QuestionnaireItemComponent().setType(QUESTIONNAIRE_ITEM_TYPE).setLinkId(LINK_ID).setText(QUESTIONNAIRE_TEXT);
+    return new QuestionnaireItemComponent().setType(QUESTIONNAIRE_ITEM_TYPE).setLinkId(LINK_ID)
+        .setText(QUESTIONNAIRE_TEXT);
   }
 
   @Nonnull
   QuestionnaireItemComponent withErrorItem(String errorMessage) {
-    return new QuestionnaireItemComponent().setLinkId(LINK_ID).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
+    return new QuestionnaireItemComponent().setLinkId(LINK_ID)
+        .setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
   }
 
   @Nonnull
   QuestionnaireItemComponent withErrorItem(String errorMessage, String linkId) {
-    return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
+    return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY)
+        .setText(errorMessage);
   }
 
   @Nonnull
@@ -294,11 +304,15 @@ class QuestionnaireItemGeneratorTest {
   @Nonnull
   StructureDefinition withProfile() {
     final StructureDefinition profile = new StructureDefinition();
-    final ElementDefinition elementDefinition1 = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
-    final ElementDefinition elementDefinition2 = TestingHelper.withElementDefinition(TYPE_CODE_2, PATH_VALUE_2);
-    final ElementDefinition elementDefinition3 = TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3);
+    final ElementDefinition elementDefinition1 =
+        TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
+    final ElementDefinition elementDefinition2 =
+        TestingHelper.withElementDefinition(TYPE_CODE_2, PATH_VALUE_2);
+    final ElementDefinition elementDefinition3 =
+        TestingHelper.withElementDefinition(TYPE_CODE_3, PATH_VALUE_3);
     final ElementDefinition elementDefinition4 = withElementDefinitionWithNullType();
-    final StructureDefinitionDifferentialComponent differential = new StructureDefinitionDifferentialComponent();
+    final StructureDefinitionDifferentialComponent differential =
+        new StructureDefinitionDifferentialComponent();
     differential.addElement(elementDefinition1);
     differential.addElement(elementDefinition2);
     differential.addElement(elementDefinition3);

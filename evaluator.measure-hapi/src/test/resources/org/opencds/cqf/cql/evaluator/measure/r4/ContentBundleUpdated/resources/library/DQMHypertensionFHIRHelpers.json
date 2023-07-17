@@ -19,10 +19,6 @@
   "date": "2022-06-01",
   "publisher": "Optum CDS",
   "description": "DQMHypertensionFHIRHelpers",
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
-  } ],
   "content": [ {
     "contentType": "text/cql",
     "url": "../../cql/DQMHypertensionFHIRHelpers.cql"

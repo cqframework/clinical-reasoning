@@ -5,12 +5,6 @@
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
   },
   "language": "en",
-  "extension": [ {
-    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-    "valueReference": {
-      "reference": "cqf-tooling"
-    }
-  } ],
   "url": "http://hl7.org/fhir/us/chronic-ds/Library/SurveillanceDataElementsFHIR4",
   "version": "1.0.000",
   "name": "SurveillanceDataElementsFHIR4",
@@ -25,101 +19,6 @@
   "date": "2021-01-28T23:14:24+00:00",
   "publisher": "Health Level 7 (HL7) International - Public Health Work Group",
   "description": "Example Surveillance Data Elements for Chronic disease surveillance using quality measure and public health reporting standards",
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "display": "FHIR model information",
-    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-  }, {
-    "type": "depends-on",
-    "display": "Library FHIRHelpers",
-    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/FHIRHelpers|4.0.001"
-  }, {
-    "type": "depends-on",
-    "display": "Library Common",
-    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/MATGlobalCommonFunctionsFHIR4|6.0.000"
-  }, {
-    "type": "depends-on",
-    "display": "Library AdultOutpatientEncounters",
-    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/AdultOutpatientEncountersFHIR4|2.0.000"
-  }, {
-    "type": "depends-on",
-    "display": "Code system Jurisdictions",
-    "resource": "http://hl7.org/fhir/us/ecr/CodeSystem/ersd-jurisdictions-example"
-  }, {
-    "type": "depends-on",
-    "display": "Code system ISO-8601-Derived Periods",
-    "resource": "http://ohie.org/CodeSystem/iso-8601-derived-periods"
-  }, {
-    "type": "depends-on",
-    "display": "Code system LOINC",
-    "resource": "http://loinc.org"
-  } ],
-  "parameter": [ {
-    "name": "Measurement Period",
-    "use": "in",
-    "min": 0,
-    "max": "1",
-    "type": "Period"
-  }, {
-    "name": "Patient",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "Patient"
-  }, {
-    "name": "Age",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "integer"
-  }, {
-    "name": "Age Group",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "Coding"
-  }, {
-    "name": "Most recent physical home address",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "Address"
-  }, {
-    "name": "State of Residence",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "string"
-  }, {
-    "name": "Postal Code of Residence",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "string"
-  }, {
-    "name": "Food Insecurity Risk Status",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "CodeableConcept"
-  } ],
-  "dataRequirement": [ {
-    "type": "Patient",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
-    "mustSupport": [ "use", "type" ]
-  }, {
-    "type": "Observation",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
-    "mustSupport": [ "code" ],
-    "codeFilter": [ {
-      "path": "code",
-      "code": [ {
-        "system": "http://loinc.org",
-        "code": "88124-3",
-        "display": "Food insecurity risk [HVS]"
-      } ]
-    } ]
-  } ],
   "content": [ {
     "contentType": "text/cql",
     "url": "../../cql/SurveillanceDataElementsFHIR4.cql"

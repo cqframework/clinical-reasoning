@@ -1,43 +1,31 @@
 {
   "resourceType": "Location",
   "id": "ea1GRyXwt6.sHaLqHL7jphAqX1qVrSyzBjZzQY3aASx83",
-  "extension": [
-    {
-      "url": "https://open.epic.com/fhir/extensions/specialty",
-      "valueCodeableConcept": {
-        "coding": [
-          {
-            "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4150",
-            "code": "193",
-            "display": "Inpatient"
-          }
-        ]
-      }
+  "extension": [ {
+    "url": "https://open.epic.com/fhir/extensions/specialty",
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4150",
+        "code": "193",
+        "display": "Inpatient"
+      } ]
     }
-  ],
-  "identifier": [
-    {
-      "use": "usual",
-      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.686980",
-      "value": "100056124"
-    }
-  ],
+  } ],
+  "identifier": [ {
+    "use": "usual",
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.686980",
+    "value": "100056124"
+  } ],
   "name": "MH 12E GEN CARE",
-  "alias": [
-    "12E"
-  ],
+  "alias": [ "12E" ],
   "mode": "instance",
-  "telecom": [
-    {
-      "system": "phone",
-      "value": "734-936-4000",
-      "rank": 1
-    }
-  ],
+  "telecom": [ {
+    "system": "phone",
+    "value": "734-936-4000",
+    "rank": 1
+  } ],
   "address": {
-    "line": [
-      "1540 E Hospital Dr"
-    ],
+    "line": [ "1540 E Hospital Dr" ],
     "city": "Ann Arbor",
     "state": "Michigan",
     "postalCode": "48109"

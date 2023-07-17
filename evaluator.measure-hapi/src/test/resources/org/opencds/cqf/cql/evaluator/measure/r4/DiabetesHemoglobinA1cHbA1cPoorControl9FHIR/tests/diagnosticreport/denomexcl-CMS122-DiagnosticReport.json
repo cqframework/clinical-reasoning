@@ -1,9 +1,6 @@
 {
   "resourceType": "DiagnosticReport",
   "id": "denomexcl-CMS122-DiagnosticReport",
-  "text": {
-    "status": "generated"
-  },
   "status": "final",
   "category": [ {
     "coding": [ {

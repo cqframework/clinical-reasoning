@@ -6,7 +6,7 @@ include FHIRHelpers version '4.0.1' called FHIRHelpers
 
 define function "GetIdExtensions"(domainResource DomainResource):
   domainResource.extension E
-  where E.url = 'https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id'
+  where E.url = 'https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id'
   return E
 
 define function "GetPatientExtensions"(domainResource DomainResource):
@@ -296,7 +296,7 @@ define function "OperationOutcomeResource"(errorId String, resourceId FHIR.id, m
               FHIR.CodeableConcept{
                   coding: {
                       Coding{
-                      system: uri{value: 'https://lantanagroup.com/validation-error'},
+                      system: uri{value: 'https://test-case.com/validation-error'},
                       code: code{value: 'Error'},
                       display: string{value: 'Resource ' + resourceId.value + ' failed validation: ' + message}
                       }

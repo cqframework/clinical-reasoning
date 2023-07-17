@@ -1,34 +1,26 @@
 {
   "resourceType": "MedicationRequest",
   "id": "ecuHJfJ6WKx9z.676acpWOPhzNM7xA3YVCp-ND9jPYWU3",
-  "identifier": [
-    {
-      "use": "usual",
-      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.798268",
-      "value": "101960083"
-    }
-  ],
+  "identifier": [ {
+    "use": "usual",
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.798268",
+    "value": "101960083"
+  } ],
   "status": "stopped",
   "intent": "order",
-  "category": [
-    {
-      "coding": [
-        {
-          "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-          "code": "inpatient",
-          "display": "Inpatient"
-        }
-      ],
-      "text": "Inpatient"
-    }
-  ],
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+      "code": "inpatient",
+      "display": "Inpatient"
+    } ],
+    "text": "Inpatient"
+  } ],
   "medicationReference": {
-    "extension": [
-      {
-        "url": "https://www.cdc.gov/nhsn/fhir/nhsnlink/StructureDefinition/nhsnlink-original-id",
-        "valueString": "Medication/e.-xZ7FyULdOlApHWSMW3jOJa4HHd41YAlTmnWP6qipbgP1B1IxOLiwZa56Llc6xWNCEjw-beVBf9FlIsRoEMXug8ZEnaLKcCLqO1mDx86683"
-      }
-    ],
+    "extension": [ {
+      "url": "https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id",
+      "valueString": "Medication/e.-xZ7FyULdOlApHWSMW3jOJa4HHd41YAlTmnWP6qipbgP1B1IxOLiwZa56Llc6xWNCEjw-beVBf9FlIsRoEMXug8ZEnaLKcCLqO1mDx86683"
+    } ],
     "reference": "Medication/hash-4a138603",
     "display": "budesonide (PULMICORT RESPULES) 0.5 mg/2 mL inhalation solution"
   },
@@ -57,99 +49,83 @@
     "display": "Michael Stuart Montgomery Lanham, MD"
   },
   "courseOfTherapyType": {
-    "coding": [
-      {
-        "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
-        "code": "continuous",
-        "display": "Continuous long term therapy"
-      }
-    ],
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
+      "code": "continuous",
+      "display": "Continuous long term therapy"
+    } ],
     "text": "Continuous long term therapy"
   },
-  "dosageInstruction": [
-    {
-      "text": "1 mg, Nebulization, 2 TIMES DAILY (RT)\nFirst dose on Sun 1/1/23 at 1000, Until Discontinued",
-      "timing": {
-        "repeat": {
-          "boundsPeriod": {
-            "start": "2023-01-01T15:00:00Z",
-            "end": "2023-01-23T05:58:56Z"
-          },
-          "frequency": 2,
-          "period": 1,
-          "periodUnit": "d"
+  "dosageInstruction": [ {
+    "text": "1 mg, Nebulization, 2 TIMES DAILY (RT)\nFirst dose on Sun 1/1/23 at 1000, Until Discontinued",
+    "timing": {
+      "repeat": {
+        "boundsPeriod": {
+          "start": "2023-01-01T15:00:00Z",
+          "end": "2023-01-23T05:58:56Z"
         },
-        "code": {
-          "text": "respiratory use only - 1000, 2200"
-        }
+        "frequency": 2,
+        "period": 1,
+        "periodUnit": "d"
       },
-      "asNeededBoolean": false,
-      "route": {
-        "coding": [
-          {
-            "system": "urn:oid:1.2.840.114350.1.13.277.3.7.4.798268.7025",
-            "code": "82",
-            "display": "Nebulization"
-          }
-        ],
-        "text": "Nebulization"
+      "code": {
+        "text": "respiratory use only - 1000, 2200"
+      }
+    },
+    "asNeededBoolean": false,
+    "route": {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.4.798268.7025",
+        "code": "82",
+        "display": "Nebulization"
+      } ],
+      "text": "Nebulization"
+    },
+    "doseAndRate": [ {
+      "type": {
+        "coding": [ {
+          "system": "http://epic.com/CodeSystem/dose-rate-type",
+          "code": "calculated",
+          "display": "calculated"
+        } ],
+        "text": "calculated"
       },
-      "doseAndRate": [
-        {
-          "type": {
-            "coding": [
-              {
-                "system": "http://epic.com/CodeSystem/dose-rate-type",
-                "code": "calculated",
-                "display": "calculated"
-              }
-            ],
-            "text": "calculated"
-          },
-          "doseQuantity": {
-            "value": 1,
-            "unit": "mg",
-            "system": "http://unitsofmeasure.org",
-            "code": "mg"
-          }
-        },
-        {
-          "type": {
-            "coding": [
-              {
-                "system": "http://epic.com/CodeSystem/dose-rate-type",
-                "code": "admin-amount",
-                "display": "admin-amount"
-              }
-            ],
-            "text": "admin-amount"
-          },
-          "doseQuantity": {
-            "value": 4,
-            "unit": "mL",
-            "system": "http://unitsofmeasure.org",
-            "code": "mL"
-          }
-        },
-        {
-          "type": {
-            "coding": [
-              {
-                "system": "http://epic.com/CodeSystem/dose-rate-type",
-                "code": "ordered",
-                "display": "ordered"
-              }
-            ],
-            "text": "ordered"
-          },
-          "doseQuantity": {
-            "value": 1,
-            "unit": "mg",
-            "system": "http://unitsofmeasure.org",
-            "code": "mg"
-          }
-        }
-      ]
-    }
-  ]
+      "doseQuantity": {
+        "value": 1,
+        "unit": "mg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mg"
+      }
+    }, {
+      "type": {
+        "coding": [ {
+          "system": "http://epic.com/CodeSystem/dose-rate-type",
+          "code": "admin-amount",
+          "display": "admin-amount"
+        } ],
+        "text": "admin-amount"
+      },
+      "doseQuantity": {
+        "value": 4,
+        "unit": "mL",
+        "system": "http://unitsofmeasure.org",
+        "code": "mL"
+      }
+    }, {
+      "type": {
+        "coding": [ {
+          "system": "http://epic.com/CodeSystem/dose-rate-type",
+          "code": "ordered",
+          "display": "ordered"
+        } ],
+        "text": "ordered"
+      },
+      "doseQuantity": {
+        "value": 1,
+        "unit": "mg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mg"
+      }
+    } ]
+  } ]
 }

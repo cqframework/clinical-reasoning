@@ -24,7 +24,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.testng.annotations.Test;
 
 @State(Scope.Benchmark)
-public class MeasureBenchmarkTest {
+public class MeasureBenchmarkIT {
 
   private static DecimalFormat df = new DecimalFormat("0.000");
   private static final double REFERENCE_SCORE = 15; // ops/second
@@ -58,7 +58,7 @@ public class MeasureBenchmarkTest {
   @Test
   public void benchmark() throws Exception {
     Options opt = new OptionsBuilder()
-        .include(MeasureBenchmarkTest.class.getSimpleName())
+        .include(MeasureBenchmarkIT.class.getSimpleName())
         .build();
     Collection<RunResult> runResults = new Runner(opt).run();
     assertFalse(runResults.isEmpty());

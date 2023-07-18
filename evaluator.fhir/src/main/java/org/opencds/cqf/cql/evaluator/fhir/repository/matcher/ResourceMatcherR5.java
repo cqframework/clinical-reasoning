@@ -19,9 +19,11 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 
 public class ResourceMatcherR5 implements BaseResourceMatcher {
+  private final ModelResolver modelResolver = new R5FhirModelResolver();
+
   @Override
   public ModelResolver getModelResolver() {
-    return new R5FhirModelResolver();
+    return modelResolver;
   }
 
   @Override

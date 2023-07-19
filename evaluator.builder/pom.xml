@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.builder</artifactId>
-  <version>3.0.0-PRE5-SNAPSHOT</version>
+  <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>evaluator.builder</name>
@@ -21,17 +21,17 @@
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.fhir-npm</artifactId>
-      <version>3.0.0-PRE5-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>info.cqframework</groupId>

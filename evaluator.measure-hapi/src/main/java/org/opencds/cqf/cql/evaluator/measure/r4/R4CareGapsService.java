@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -76,13 +77,11 @@ import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConsta
 public class R4CareGapsService {
 
   private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsService.class);
-  public static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ofEntries(
-      new AbstractMap.SimpleEntry<>("http://loinc.org/96315-7",
-          new CodeableConceptSettings().add(
-              "http://loinc.org", "96315-7", "Gaps in care report")),
-      new AbstractMap.SimpleEntry<>("http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP",
-          new CodeableConceptSettings().add(
-              "http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps")));
+  public static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ImmutableMap.of(
+      "http://loinc.org/96315-7", new CodeableConceptSettings().add("http://loinc.org", "96315-7", "Gaps in care report"),
+      "http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP", new CodeableConceptSettings().add("http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps")
+  );
+
 
   private final Repository myRepository;
 
@@ -174,11 +173,11 @@ public class R4CareGapsService {
 
   public void validateConfiguration() {
     checkNotNull(myCareGapsProperties,
-        "The measure_report setting properties are required for the $care-gaps operation.");
+        "Setting care-gaps properties are required for the $care-gaps operation.");
     checkArgument(!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsReporter()),
-        "The measure_report.care_gaps_reporter setting is required for the $care-gaps operation.");
+        "Setting care-gaps properties.care_gaps_reporter setting is required for the $care-gaps operation.");
     checkArgument(!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsCompositionSectionAuthor()),
-        "The measure_report.care_gaps_composition_section_author setting is required for the $care-gaps operation.");
+        "Setting care-gaps properties.care_gaps_composition_section_author is required for the $care-gaps operation.");
     checkNotNull(!Strings.isNullOrEmpty(myCareGapsProperties.getMyFhirBaseUrl()),
         "The fhirBaseUrl setting is required for the $care-gaps operation.");
     Resource configuredReporter = addConfiguredResource(Organization.class,
@@ -188,10 +187,10 @@ public class R4CareGapsService {
         "care_gaps_composition_section_author");
 
     checkNotNull(configuredReporter, String.format(
-        "The %s Resource is configured as the measure_report.care_gaps_reporter but the Resource could not be read.",
+        "The %s Resource is configured as the CareGapsProperties.care_gaps_reporter but the Resource could not be read.",
         myCareGapsProperties.getCareGapsReporter()));
     checkNotNull(configuredAuthor, String.format(
-        "The %s Resource is configured as the measure_report.care_gaps_composition_section_author but the Resource could not be read.",
+        "The %s Resource is configured as the CareGapsProperties.care_gaps_composition_section_author but the Resource could not be read.",
         myCareGapsProperties.getCareGapsCompositionSectionAuthor()));
   }
   List<Patient> getPatientListFromSubject(String theSubject) {
@@ -207,7 +206,7 @@ public class R4CareGapsService {
 
   List<Patient> getPatientListFromGroup(String theSubjectGroupId) {
     List<Patient> patientList = new ArrayList<>();
-    var group = myRepository.read(Group.class, newId(theSubjectGroupId));
+    Group group = myRepository.read(Group.class, newId(theSubjectGroupId));
     if (group == null) {
       throw new IllegalArgumentException(Msg.code(2276) + "Could not find Group: " + theSubjectGroupId);
     }
@@ -228,7 +227,7 @@ public class R4CareGapsService {
   }
 
   Patient validatePatientExists(String thePatientRef) {
-    var patient = myRepository.read(Patient.class, newId(thePatientRef));
+    Patient patient = myRepository.read(Patient.class, new IdType(thePatientRef));
     if (patient == null) {
       throw new IllegalArgumentException(Msg.code(2277) + "Could not find Patient: " + thePatientRef);
     }
@@ -250,14 +249,14 @@ public class R4CareGapsService {
 
     if (hasMeasureIds) {
       for (int i = 0; i < theMeasureIds.size(); i++) {
-        var measureById = resolveById(new IdType("Measure", theMeasureIds.get(i)));
+        Measure measureById = resolveById(new IdType("Measure", theMeasureIds.get(i)));
         measureList.add(measureById);
       }
     }
 
     if (hasMeasureUrls) {
       for (int i = 0; i < theMeasureCanonicals.size(); i++) {
-        var measureByUrl = resolveByUrl(theMeasureCanonicals.get(i));
+        Measure measureByUrl = resolveByUrl(theMeasureCanonicals.get(i));
         measureList.add(measureByUrl);
       }
     }
@@ -275,8 +274,8 @@ public class R4CareGapsService {
   }
 
   protected Measure resolveByUrl(CanonicalType url) {
-    var parts = Canonicals.getParts(url);
-    var result = this.myRepository.search(Bundle.class, Measure.class, Searches.byNameAndVersion(
+    Canonicals.CanonicalParts parts = Canonicals.getParts(url);
+    Bundle result = this.myRepository.search(Bundle.class, Measure.class, Searches.byNameAndVersion(
         parts.idPart(),
         parts.version()));
     return (Measure) result.getEntryFirstRep().getResource();
@@ -334,12 +333,12 @@ public class R4CareGapsService {
     List<MeasureReport> reports = new ArrayList<>();
     MeasureReport report;
 
-    var theReportType = MeasureReportType.INDIVIDUAL.toString();
-    var r4MeasureProcessor = new R4MeasureProcessor(myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider(myRepository));
+    String theReportType = MeasureReportType.INDIVIDUAL.toString();
+    R4MeasureProcessor r4MeasureProcessor = new R4MeasureProcessor(myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider(myRepository));
 
     for (Measure measure : theMeasures) {
       
-      var subjects = Collections.singletonList(Ids.simple(thePatient));
+      List<String> subjects = Collections.singletonList(Ids.simple(thePatient));
 
       report = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(measure.getIdElement()), thePeriodStart, thePeriodEnd, theReportType, subjects, null);
 
@@ -485,8 +484,8 @@ public class R4CareGapsService {
         return;
       }
 
-      var resourceType = fhirContext.getResourceDefinition(resourceId.getResourceType()).newInstance().getClass();
-      var resource = myRepository.read(resourceType, resourceId);
+      Class<? extends IBaseResource> resourceType = fhirContext.getResourceDefinition(resourceId.getResourceType()).newInstance().getClass();
+      IBaseResource resource = myRepository.read(resourceType, resourceId);
 
       if (resource instanceof Resource) {
         Resource resourceBase = (Resource) resource;
@@ -505,8 +504,8 @@ public class R4CareGapsService {
           if (sdeRef != null && sdeRef.hasReference() && !sdeRef.getReference().startsWith("#")) {
             IdType sdeId = new IdType(sdeRef.getReference());
             if (!theResources.containsKey(Ids.simple(sdeId))) {
-              var resourceType = fhirContext.getResourceDefinition(sdeId.getResourceType()).newInstance().getClass();
-              var resource = myRepository.read(resourceType, sdeId);
+              Class<? extends IBaseResource> resourceType = fhirContext.getResourceDefinition(sdeId.getResourceType()).newInstance().getClass();
+              IBaseResource resource = myRepository.read(resourceType, sdeId);
               if (resource instanceof Resource) {
                 Resource resourceBase = (Resource) resource;
                 theResources.put(Ids.simple(sdeId), resourceBase);

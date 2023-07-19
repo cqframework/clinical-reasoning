@@ -1,9 +1,6 @@
 {
   "resourceType": "Encounter",
   "id": "numer-CMS122-Encounter",
-  "text": {
-    "status": "generated"
-  },
   "status": "finished",
   "type": [ {
     "coding": [ {

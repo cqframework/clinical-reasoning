@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -29,6 +29,7 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -64,7 +65,7 @@ public class TestQuestionnaire {
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static QuestionnaireResult that(String questionnaireName, String patientId) {
       return new QuestionnaireResult(questionnaireName, patientId);
     }
@@ -74,7 +75,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class QuestionnaireResult {
+  public static class QuestionnaireResult {
     private IdType questionnaireId;
     private Questionnaire questionnaire;
     private String patientId;
@@ -189,7 +190,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class GeneratedQuestionnaire {
+  public static class GeneratedQuestionnaire {
     Questionnaire myQuestionnaire;
     List<QuestionnaireItemComponent> myItems;
 
@@ -244,7 +245,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class GeneratedQuestionnaireResponse {
+  public static class GeneratedQuestionnaireResponse {
     QuestionnaireResponse myQuestionnaireResponse;
     List<QuestionnaireResponseItemComponent> myItems;
 

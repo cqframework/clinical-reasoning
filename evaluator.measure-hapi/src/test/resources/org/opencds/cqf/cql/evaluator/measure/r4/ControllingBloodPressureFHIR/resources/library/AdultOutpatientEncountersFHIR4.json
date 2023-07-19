@@ -5,12 +5,6 @@
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
   },
   "language": "en",
-  "extension": [ {
-    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-    "valueReference": {
-      "reference": "cqf-tooling"
-    }
-  } ],
   "url": "http://hl7.org/fhir/us/chronic-ds/Library/AdultOutpatientEncountersFHIR4",
   "version": "2.0.000",
   "name": "AdultOutpatientEncountersFHIR4",
@@ -25,98 +19,6 @@
   "date": "2021-01-08T13:45:12+00:00",
   "publisher": "Mathematica",
   "description": "AdultOutpatientEncountersFHIR4",
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "display": "FHIR model information",
-    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-  }, {
-    "type": "depends-on",
-    "display": "Library FHIRHelpers",
-    "resource": "http://hl7.org/fhir/us/chronic-ds/Library/FHIRHelpers|4.0.001"
-  }, {
-    "type": "depends-on",
-    "display": "Value set Annual Wellness Visit",
-    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
-  }, {
-    "type": "depends-on",
-    "display": "Value set Home Healthcare Services",
-    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
-  }, {
-    "type": "depends-on",
-    "display": "Value set Office Visit",
-    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
-  }, {
-    "type": "depends-on",
-    "display": "Value set Preventive Care Services - Established Office Visit, 18 and Up",
-    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
-  }, {
-    "type": "depends-on",
-    "display": "Value set Preventive Care Services-Initial Office Visit, 18 and Up",
-    "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
-  } ],
-  "parameter": [ {
-    "name": "Measurement Period",
-    "use": "in",
-    "min": 0,
-    "max": "1",
-    "type": "Period"
-  }, {
-    "name": "Patient",
-    "use": "out",
-    "min": 0,
-    "max": "1",
-    "type": "Patient"
-  }, {
-    "name": "Qualifying Encounters",
-    "use": "out",
-    "min": 0,
-    "max": "*",
-    "type": "Encounter"
-  } ],
-  "dataRequirement": [ {
-    "type": "Patient",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ]
-  }, {
-    "type": "Encounter",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
-    "mustSupport": [ "type" ],
-    "codeFilter": [ {
-      "path": "type",
-      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
-    } ]
-  }, {
-    "type": "Encounter",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
-    "mustSupport": [ "type" ],
-    "codeFilter": [ {
-      "path": "type",
-      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
-    } ]
-  }, {
-    "type": "Encounter",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
-    "mustSupport": [ "type" ],
-    "codeFilter": [ {
-      "path": "type",
-      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
-    } ]
-  }, {
-    "type": "Encounter",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
-    "mustSupport": [ "type" ],
-    "codeFilter": [ {
-      "path": "type",
-      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
-    } ]
-  }, {
-    "type": "Encounter",
-    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
-    "mustSupport": [ "type" ],
-    "codeFilter": [ {
-      "path": "type",
-      "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
-    } ]
-  } ],
   "content": [ {
     "contentType": "text/cql",
     "url": "../../cql/AdultOutpatientEncountersFHIR4.cql"

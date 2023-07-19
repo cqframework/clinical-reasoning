@@ -1,0 +1,131 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "ecNaY9vByB7Ii5BDmDeg0o0k.7h6sKqbu8iDWxN5E6-Y3",
+  "identifier": [ {
+    "use": "usual",
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.798268",
+    "value": "101960086"
+  } ],
+  "status": "stopped",
+  "intent": "order",
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+      "code": "inpatient",
+      "display": "Inpatient"
+    } ],
+    "text": "Inpatient"
+  } ],
+  "medicationReference": {
+    "extension": [ {
+      "url": "https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id",
+      "valueString": "Medication/eo0l-6m6Q-v-WJmUH1wx7psD2LejzYDZMPgbhGN2GcV2AkZ4VHBPWP8vGefgz2Kq7CdanmxQFD7aRWGU12li2Hws-uSaNiadFWkT3Dr6XZbM3"
+    } ],
+    "reference": "Medication/hash-1a68b258",
+    "display": "ceFAZolin PRE-Assembled 500 mg in 100 mL NS"
+  },
+  "subject": {
+    "reference": "Patient/eNeMVHWfNoTsMTbrwWQQ30A3",
+    "display": "Hob, Hobevent"
+  },
+  "encounter": {
+    "reference": "Encounter/e2RfNK8qdAWCAGOZ2ay3S3A3",
+    "identifier": {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.3.698084.8",
+      "value": "1000518445"
+    },
+    "display": "Hospital Encounter"
+  },
+  "authoredOn": "2023-01-12T05:27:12Z",
+  "requester": {
+    "reference": "Practitioner/eFmGhJg.OtWkLRQ5qBvdscA3",
+    "type": "Practitioner",
+    "display": "Faculty Physician Um_Cln, MD"
+  },
+  "recorder": {
+    "reference": "Practitioner/eFmGhJg.OtWkLRQ5qBvdscA3",
+    "type": "Practitioner",
+    "display": "Faculty Physician Um_Cln, MD"
+  },
+  "courseOfTherapyType": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
+      "code": "acute",
+      "display": "Short course (acute) therapy"
+    } ],
+    "text": "Short course (acute) therapy"
+  },
+  "dosageInstruction": [ {
+    "text": "500 mg, Intravenous, EVERY 8 HOURS SCHEDULED\nRecommended INF time: 30 mins. Exp 24 hrs after activation.\nFirst dose on Wed 1/4/23 at 1700",
+    "timing": {
+      "repeat": {
+        "boundsPeriod": {
+          "start": "2023-01-04T22:00:00Z",
+          "end": "2023-01-23T05:58:56Z"
+        },
+        "frequency": 3,
+        "period": 1,
+        "periodUnit": "d"
+      },
+      "code": {
+        "text": "0100, 0900, 1700"
+      }
+    },
+    "asNeededBoolean": false,
+    "route": {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.4.798268.7025",
+        "code": "11",
+        "display": "Intravenous"
+      } ],
+      "text": "Intravenous"
+    },
+    "doseAndRate": [ {
+      "type": {
+        "coding": [ {
+          "system": "http://epic.com/CodeSystem/dose-rate-type",
+          "code": "calculated",
+          "display": "calculated"
+        } ],
+        "text": "calculated"
+      },
+      "doseQuantity": {
+        "value": 500,
+        "unit": "mg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mg"
+      }
+    }, {
+      "type": {
+        "coding": [ {
+          "system": "http://epic.com/CodeSystem/dose-rate-type",
+          "code": "admin-amount",
+          "display": "admin-amount"
+        } ],
+        "text": "admin-amount"
+      },
+      "doseQuantity": {
+        "value": 500,
+        "unit": "mg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mg"
+      }
+    }, {
+      "type": {
+        "coding": [ {
+          "system": "http://epic.com/CodeSystem/dose-rate-type",
+          "code": "ordered",
+          "display": "ordered"
+        } ],
+        "text": "ordered"
+      },
+      "doseQuantity": {
+        "value": 500,
+        "unit": "mg",
+        "system": "http://unitsofmeasure.org",
+        "code": "mg"
+      }
+    } ]
+  } ]
+}

@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir</artifactId>
-  <version>3.0.0-PRE5-SNAPSHOT</version>
+  <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>FHIR Clinical Reasoning</name>
   <description>FHIR Clinical Reasoning Implementations</description>
@@ -19,6 +19,7 @@
     <junit.version>5.9.1</junit.version>
     <slf4j.version>2.0.4</slf4j.version>
     <cql.version>2.9.0</cql.version>
+    <jmh.version>1.36</jmh.version>
   </properties>
   <licenses>
     <license>
@@ -99,6 +100,12 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.openjdk.jmh</groupId>
+        <artifactId>jmh-core</artifactId>
+        <version>${jmh.version}</version>
+        <scope>test</scope>
+      </dependency>
 
       <!-- Logging -->
       <dependency>
@@ -155,6 +162,13 @@
               <arg>-Werror</arg>
               <arg>-implicit:none</arg>
             </compilerArgs>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.openjdk.jmh</groupId>
+                <artifactId>jmh-generator-annprocess</artifactId>
+                <version>${jmh.version}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>

@@ -1,0 +1,157 @@
+{
+  "resourceType": "Patient",
+  "id": "eNeMVHWfNoTsMTbrwWQQ30A3",
+  "meta": {
+    "versionId": "127425491"
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+    "extension": [ {
+      "url": "ombCategory",
+      "valueCoding": {
+        "system": "urn:oid:2.16.840.1.113883.6.238",
+        "code": "2106-3",
+        "display": "White"
+      }
+    }, {
+      "url": "text",
+      "valueString": "White or Caucasian"
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+    "extension": [ {
+      "url": "ombCategory",
+      "valueCoding": {
+        "system": "urn:oid:2.16.840.1.113883.6.238",
+        "code": "2135-2",
+        "display": "Hispanic or Latino"
+      }
+    }, {
+      "url": "text",
+      "valueString": "Hispanic or Latino"
+    } ]
+  }, {
+    "url": "http://open.epic.com/FHIR/StructureDefinition/extension/legal-sex",
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.130.768080.39128",
+        "code": "female",
+        "display": "female"
+      } ]
+    }
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/patient-genderIdentity",
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://hl7.org/fhir/gender-identity",
+        "code": "female",
+        "display": "female"
+      } ]
+    }
+  }, {
+    "url": "http://open.epic.com/FHIR/StructureDefinition/extension/sex-for-clinical-use",
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.698084.130.768080.35144",
+        "code": "female",
+        "display": "female"
+      } ]
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+    "valueCode": "F"
+  } ],
+  "identifier": [ {
+    "use": "usual",
+    "type": {
+      "text": "CEID"
+    },
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.3.688884.100",
+    "value": "UMIWPRM9HC5BRLR"
+  }, {
+    "use": "usual",
+    "type": {
+      "text": "ENTERPRISE"
+    },
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.5.737384.0",
+    "value": "E37928"
+  }, {
+    "use": "usual",
+    "type": {
+      "text": "EXTERNAL"
+    },
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.698084",
+    "value": "Z38550"
+  }, {
+    "use": "usual",
+    "type": {
+      "text": "FHIR"
+    },
+    "system": "http://open.epic.com/FHIR/StructureDefinition/patient-dstu2-fhir-id",
+    "value": "TwFZOmQmAvDKhCccF.Oe31ojMwbcG5wT8LbQ-k9pQK6EB"
+  }, {
+    "use": "usual",
+    "type": {
+      "text": "FHIR STU3"
+    },
+    "system": "http://open.epic.com/FHIR/StructureDefinition/patient-fhir-id",
+    "value": "eNeMVHWfNoTsMTbrwWQQ30A3"
+  }, {
+    "use": "usual",
+    "type": {
+      "text": "INTERNAL"
+    },
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.698084",
+    "value": "    Z38550"
+  }, {
+    "use": "usual",
+    "type": {
+      "text": "MRN"
+    },
+    "system": "urn:oid:1.2.5.8.2.7",
+    "value": "100001602"
+  }, {
+    "use": "usual",
+    "system": "https://open.epic.com/FHIR/StructureDefinition/PayerMemberId",
+    "value": "0100001602"
+  } ],
+  "active": true,
+  "name": [ {
+    "use": "official",
+    "text": "Hobevent Hob",
+    "family": "Hob",
+    "given": [ "Hobevent" ]
+  }, {
+    "use": "usual",
+    "text": "Hobevent Hob",
+    "family": "Hob",
+    "given": [ "Hobevent" ]
+  } ],
+  "telecom": [ {
+    "system": "phone",
+    "value": "999-999-9999",
+    "use": "home"
+  } ],
+  "gender": "female",
+  "birthDate": "2021-07-07",
+  "deceasedBoolean": false,
+  "address": [ {
+    "use": "old",
+    "line": [ "1010 Epic Terr." ],
+    "city": "Verona",
+    "state": "WI",
+    "postalCode": "53593",
+    "country": "US"
+  }, {
+    "use": "home",
+    "line": [ "1010 Epic Terr." ],
+    "city": "Verona",
+    "state": "WI",
+    "postalCode": "53593",
+    "country": "US"
+  } ],
+  "managingOrganization": {
+    "reference": "Organization/eGwhbGrShOH.2ik0adHKdFQ3",
+    "display": "Michigan Medicine"
+  }
+}

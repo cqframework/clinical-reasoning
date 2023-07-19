@@ -8,12 +8,6 @@
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
   },
   "language": "en",
-  "extension": [ {
-    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-    "valueReference": {
-      "reference": "cqf-tooling"
-    }
-  } ],
   "url": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers",
   "version": "4.0.001",
   "name": "FHIRHelpers",
@@ -28,11 +22,6 @@
   "date": "2021-01-28T23:14:22+00:00",
   "publisher": "Mathematica",
   "description": "FHIRHelpers",
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "display": "FHIR model information",
-    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-  } ],
   "content": [ {
     "contentType": "text/cql",
     "url": "../../cql/FHIRHelpers.cql"

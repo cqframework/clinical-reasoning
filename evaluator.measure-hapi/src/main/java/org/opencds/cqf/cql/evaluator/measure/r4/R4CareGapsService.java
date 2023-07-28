@@ -93,16 +93,20 @@ public class R4CareGapsService {
 
   private Executor myCqlExecutor;
 
+  private String myServerBase;
+
   private final Map<String, Resource> myConfiguredResources = new HashMap<>();
 
   public R4CareGapsService(CareGapsProperties theCareGapsProperties,
       Repository theRepository,
       MeasureEvaluationOptions theMeasureEvaluationOptions,
-      Executor theExecutor){
+      Executor theExecutor,
+      String theServerBase){
     this.myRepository = theRepository;
     this.myCareGapsProperties = theCareGapsProperties;
     this.myMeasureEvaluationOptions = theMeasureEvaluationOptions;
     this.myCqlExecutor = theExecutor;
+    this.myServerBase = theServerBase;
   }
 
   /**
@@ -178,7 +182,7 @@ public class R4CareGapsService {
         "Setting care-gaps properties.care_gaps_reporter setting is required for the $care-gaps operation.");
     checkArgument(!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsCompositionSectionAuthor()),
         "Setting care-gaps properties.care_gaps_composition_section_author is required for the $care-gaps operation.");
-    checkNotNull(!Strings.isNullOrEmpty(myCareGapsProperties.getMyFhirBaseUrl()),
+    checkNotNull(!Strings.isNullOrEmpty(myServerBase),
         "The fhirBaseUrl setting is required for the $care-gaps operation.");
     Resource configuredReporter = addConfiguredResource(Organization.class,
         myCareGapsProperties.getCareGapsReporter(), "care_gaps_reporter");
@@ -323,7 +327,7 @@ public class R4CareGapsService {
 
     return initializePatientParameter(thePatient).setResource(
 
-        addBundleEntries(myCareGapsProperties.getMyFhirBaseUrl(), composition, detectedIssues, reports, evalPlusSDE));
+        addBundleEntries(myServerBase, composition, detectedIssues, reports, evalPlusSDE));
   }
 
   private List<MeasureReport> getReports( String thePeriodStart, String thePeriodEnd,

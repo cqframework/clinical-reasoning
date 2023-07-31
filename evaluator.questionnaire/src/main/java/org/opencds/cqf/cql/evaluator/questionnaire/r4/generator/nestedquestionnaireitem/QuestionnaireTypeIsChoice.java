@@ -20,12 +20,12 @@ public class QuestionnaireTypeIsChoice {
   protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireTypeIsChoice.class);
   protected Repository repository;
 
-  public static QuestionnaireTypeIsChoice of(Repository theRepository) {
-    return new QuestionnaireTypeIsChoice(theRepository);
+  public static QuestionnaireTypeIsChoice of(Repository repository) {
+    return new QuestionnaireTypeIsChoice(repository);
   }
 
-  QuestionnaireTypeIsChoice(Repository theRepository) {
-    repository = theRepository;
+  QuestionnaireTypeIsChoice(Repository repository) {
+    this.repository = repository;
   }
 
   public QuestionnaireItemComponent addProperties(

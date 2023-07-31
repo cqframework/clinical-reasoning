@@ -1,12 +1,22 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.StructureDefinition;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
+
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -19,15 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
-
-import javax.annotation.Nonnull;
-import java.util.List;
-
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
 
 @ExtendWith(MockitoExtension.class)
 class NestedQuestionnaireItemServiceTest {
@@ -42,9 +43,9 @@ class NestedQuestionnaireItemServiceTest {
   @Mock
   protected QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
   @Mock
-  protected ElementIsFixedOrHasPattern elementIsFixedOrHasPattern;
+  protected ElementHasDefaultValue elementHasDefaultValue;
   @Mock
-  protected ElementHasCqfExtension elementHasCqfExtension;
+  protected ElementHasCqfExpression elementHasCqfExpression;
   @InjectMocks
   @Spy
   private NestedQuestionnaireItemService myFixture;
@@ -52,9 +53,9 @@ class NestedQuestionnaireItemServiceTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(questionnaireTypeIsChoice);
-    verifyNoMoreInteractions(elementIsFixedOrHasPattern);
-    verifyNoMoreInteractions(elementHasCqfExtension);
-    verifyNoMoreInteractions(elementHasCqfExtension);
+    verifyNoMoreInteractions(elementHasDefaultValue);
+    verifyNoMoreInteractions(elementHasCqfExpression);
+    verifyNoMoreInteractions(elementHasCqfExpression);
     verifyNoMoreInteractions(repository);
   }
 
@@ -70,18 +71,18 @@ class NestedQuestionnaireItemServiceTest {
         QuestionnaireItemType.CHOICE,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
-    doReturn(expected).when(questionnaireTypeIsChoice).addProperties(elementDefinition, initialized);
+        CHILD_LINK_ID);
+    doReturn(expected).when(questionnaireTypeIsChoice).addProperties(elementDefinition,
+        initialized);
     // execute
-    final QuestionnaireItemComponent actual = myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+    final QuestionnaireItemComponent actual =
+        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
         QuestionnaireItemType.CHOICE,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
+        CHILD_LINK_ID);
     verify(questionnaireTypeIsChoice).addProperties(elementDefinition, initialized);
     Assertions.assertEquals(actual, expected);
   }
@@ -98,19 +99,21 @@ class NestedQuestionnaireItemServiceTest {
         QuestionnaireItemType.STRING,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
-    doReturn(expected).when(elementIsFixedOrHasPattern).addProperties(elementDefinition, initialized);
+        CHILD_LINK_ID);
+    doReturn(expected).when(elementHasDefaultValue).addProperties(
+        elementDefinition.getFixedOrPattern(),
+        initialized);
     // execute
-    final QuestionnaireItemComponent actual = myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+    final QuestionnaireItemComponent actual =
+        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
         QuestionnaireItemType.STRING,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
-    verify(elementIsFixedOrHasPattern).addProperties(elementDefinition, initialized);
+        CHILD_LINK_ID);
+    verify(elementHasDefaultValue).addProperties(elementDefinition.getFixedOrPattern(),
+        initialized);
     Assertions.assertEquals(actual, expected);
   }
 
@@ -128,25 +131,29 @@ class NestedQuestionnaireItemServiceTest {
     // setup
     final BooleanType defaultValue = new BooleanType(true);
     final QuestionnaireItemComponent initialized = withQuestionnaireItemComponent();
+    final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
     final StructureDefinition profile = new StructureDefinition();
     final ElementDefinition elementDefinition = withElementDefinitionWithDefaultValue(defaultValue);
     doReturn(initialized).when(myFixture).initializeQuestionnaireItem(
         QuestionnaireItemType.STRING,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
+        CHILD_LINK_ID);
+    doReturn(expected).when(elementHasDefaultValue).addProperties(
+        elementDefinition.getDefaultValue(),
+        initialized);
     // execute
-    final QuestionnaireItemComponent actual = myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+    final QuestionnaireItemComponent actual =
+        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
         QuestionnaireItemType.STRING,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
-    Assertions.assertFalse(actual.getInitial().isEmpty());
-    Assertions.assertEquals(actual.getInitial().get(0).getValue(), defaultValue);
+        CHILD_LINK_ID);
+    verify(elementHasDefaultValue).addProperties(elementDefinition.getDefaultValue(),
+        initialized);
+    Assertions.assertEquals(actual, expected);
   }
 
   @Nonnull
@@ -168,19 +175,18 @@ class NestedQuestionnaireItemServiceTest {
         QuestionnaireItemType.STRING,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
-    doReturn(expected).when(elementHasCqfExtension).addProperties(elementDefinition, initialized);
+        CHILD_LINK_ID);
+    doReturn(expected).when(elementHasCqfExpression).addProperties(elementDefinition, initialized);
     // execute
-    final QuestionnaireItemComponent actual = myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+    final QuestionnaireItemComponent actual =
+        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
         QuestionnaireItemType.STRING,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
-    verify(elementHasCqfExtension).addProperties(elementDefinition, initialized);
+        CHILD_LINK_ID);
+    verify(elementHasCqfExpression).addProperties(elementDefinition, initialized);
     Assertions.assertEquals(actual, expected);
   }
 
@@ -203,11 +209,11 @@ class NestedQuestionnaireItemServiceTest {
         QuestionnaireItemType.GROUP,
         profile,
         elementDefinition,
-        CHILD_LINK_ID
-    );
+        CHILD_LINK_ID);
     // validate
     Assert.assertEquals(actual.getType(), QuestionnaireItemType.GROUP);
-    Assert.assertEquals(actual.getDefinition(), "http://www.sample.com/profile/profileId#pathValue");
+    Assert.assertEquals(actual.getDefinition(),
+        "http://www.sample.com/profile/profileId#pathValue");
     Assert.assertEquals(actual.getLinkId(), CHILD_LINK_ID);
     Assert.assertEquals(actual.getText(), LABEL);
   }
@@ -291,7 +297,8 @@ class NestedQuestionnaireItemServiceTest {
     final FHIRException actual = Assertions.assertThrows(
         FHIRException.class, () -> myFixture.parseItemType(elementType, false));
     // validate
-    Assert.assertEquals(actual.getMessage(), "Unknown QuestionnaireItemType code 'UnknownElementType'");
+    Assert.assertEquals(actual.getMessage(),
+        "Unknown QuestionnaireItemType code 'UnknownElementType'");
   }
 
   @Test
@@ -303,7 +310,7 @@ class NestedQuestionnaireItemServiceTest {
     // validate
     Assert.assertEquals(actual, QuestionnaireItemType.GROUP);
   }
-  
+
   @Test
   void getElementTextShouldReturnElementLabel() {
     // setup
@@ -314,37 +321,36 @@ class NestedQuestionnaireItemServiceTest {
     // validate
     Assert.assertEquals(actual, LABEL);
   }
-  
+
   @Test
-  void getElementTextShouldReturnElementDefinition() {
+  void getElementTextShouldReturnElementDescription() {
     // setup
     final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
-    doReturn(SHORT_DEFINITION).when(myFixture).getElementDefinition(elementDefinition);
+    elementDefinition.setShort(SHORT_DEFINITION);
     // execute
     final String actual = myFixture.getElementText(elementDefinition);
     // validate
-    verify(myFixture).getElementDefinition(elementDefinition);
+    verify(myFixture).getElementDescription(elementDefinition);
     Assert.assertEquals(actual, SHORT_DEFINITION);
   }
+
   @Test
-  void getElementDefinitionShouldGetElementShortDefinition() {
+  void getElementDescriptionShouldGetElementShort() {
     // setup
     final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
-    elementDefinition.setPath(PATH_VALUE);
     elementDefinition.setShort(SHORT_DEFINITION);
     // execute
-    final String actual = myFixture.getElementDefinition(elementDefinition);
+    final String actual = myFixture.getElementDescription(elementDefinition);
     // validate
     Assert.assertEquals(actual, SHORT_DEFINITION);
   }
 
   @Test
-  void getElementDefinitionShouldGetElementPath() {
+  void getElementDescriptionShouldGetElementPath() {
     // setup
     final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
-    elementDefinition.setPath(PATH_VALUE);
     // execute
-    final String actual = myFixture.getElementDefinition(elementDefinition);
+    final String actual = myFixture.getElementDescription(elementDefinition);
     // validate
     Assert.assertEquals(actual, PATH_VALUE);
   }

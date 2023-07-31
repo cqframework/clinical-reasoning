@@ -162,13 +162,6 @@
               <arg>-Werror</arg>
               <arg>-implicit:none</arg>
             </compilerArgs>
-            <annotationProcessorPaths>
-              <path>
-                <groupId>org.openjdk.jmh</groupId>
-                <artifactId>jmh-generator-annprocess</artifactId>
-                <version>${jmh.version}</version>
-              </path>
-            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>

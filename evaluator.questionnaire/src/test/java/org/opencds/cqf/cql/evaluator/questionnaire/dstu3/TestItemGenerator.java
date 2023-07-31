@@ -60,7 +60,7 @@ public class TestItemGenerator {
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static GenerateResult that(String type, String profile, String patientId) {
       return new GenerateResult(type, profile, patientId);
     }

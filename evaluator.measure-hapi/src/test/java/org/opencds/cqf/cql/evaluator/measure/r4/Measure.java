@@ -72,15 +72,15 @@ public class Measure {
     return new Given();
   }
 
-  static class Given {
+  public static class Given {
     private Repository repository;
 
-    Given repository(Repository repository) {
+    public Given repository(Repository repository) {
       this.repository = repository;
       return this;
     }
 
-    Given repositoryFor(String repositoryPath) {
+    public Given repositoryFor(String repositoryPath) {
       this.repository = TestRepositoryFactory.createRepository(FhirContext.forR4Cached(),
           this.getClass(), repositoryPath);
       return this;
@@ -90,12 +90,12 @@ public class Measure {
       return new R4MeasureProcessor(repository, null, new R4RepositorySubjectProvider(repository));
     }
 
-    When when() {
+    public When when() {
       return new When(buildProcessor(this.repository));
     }
   }
 
-  static class When {
+  public static class When {
     private final R4MeasureProcessor processor;
 
     When(R4MeasureProcessor processor) {
@@ -173,7 +173,7 @@ public class Measure {
       return new SelectedReport(report);
     }
   }
-  static class SelectedReport extends Selected<MeasureReport, Void> {
+  public static class SelectedReport extends Selected<MeasureReport, Void> {
     public SelectedReport(MeasureReport report) {
       super(report, null);
     }

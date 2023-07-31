@@ -68,13 +68,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.jackson-deps</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-      <type>pom</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>

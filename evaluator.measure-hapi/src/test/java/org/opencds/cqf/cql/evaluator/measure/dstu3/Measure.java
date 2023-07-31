@@ -51,15 +51,15 @@ public class Measure {
     return new Given();
   }
 
-  static class Given {
+  public static class Given {
     private Repository repository;
 
-    Given repository(Repository repository) {
+    public Given repository(Repository repository) {
       this.repository = repository;
       return this;
     }
 
-    Given repositoryFor(String repositoryPath) {
+    public Given repositoryFor(String repositoryPath) {
       this.repository = TestRepositoryFactory.createRepository(FhirContext.forDstu3Cached(),
           this.getClass(), repositoryPath);
       return this;
@@ -69,12 +69,12 @@ public class Measure {
       return new Dstu3MeasureProcessor(repository, null);
     }
 
-    When when() {
+    public When when() {
       return new When(buildProcessor(this.repository));
     }
   }
 
-  static class When {
+  public static class When {
     private final Dstu3MeasureProcessor processor;
 
     When(Dstu3MeasureProcessor processor) {
@@ -149,7 +149,7 @@ public class Measure {
       return new SelectedReport(report);
     }
   }
-  static class SelectedReport implements SelectedOf<MeasureReport>, ChildOf<Void> {
+  public static class SelectedReport implements SelectedOf<MeasureReport>, ChildOf<Void> {
 
     private final MeasureReport report;
 

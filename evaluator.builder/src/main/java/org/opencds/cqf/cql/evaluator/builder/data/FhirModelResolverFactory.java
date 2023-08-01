@@ -2,10 +2,9 @@ package org.opencds.cqf.cql.evaluator.builder.data;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
@@ -23,10 +22,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 public class FhirModelResolverFactory
     implements org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory {
 
-  @Inject
-  public FhirModelResolverFactory() {}
-
-  private static Map<FhirVersionEnum, ModelResolver> cache = new HashMap<>();
+  private static Map<FhirVersionEnum, ModelResolver> cache =
+      new EnumMap<>(FhirVersionEnum.class);
 
   @Override
   public ModelResolver create(String version) {

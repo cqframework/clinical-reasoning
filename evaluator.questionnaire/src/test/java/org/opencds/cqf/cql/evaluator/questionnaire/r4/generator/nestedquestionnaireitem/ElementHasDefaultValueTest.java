@@ -1,4 +1,8 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
+
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
+
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Extension;
@@ -10,15 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.testng.Assert;
 
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
-
 @ExtendWith(MockitoExtension.class)
-class ElementIsFixedOrHasPatternTest {
+class ElementHasDefaultValueTest {
   final static String TYPE_CODE = "typeCode";
   final static String PATH_VALUE = "pathValue";
   @InjectMocks
-  private ElementIsFixedOrHasPattern myFixture;
+  private ElementHasDefaultValue myFixture;
 
   @Test
   void addPropertiesShouldAddAllPropertiesToQuestionnaireItem() {
@@ -28,7 +29,8 @@ class ElementIsFixedOrHasPatternTest {
     elementDefinition.setFixed(booleanType);
     final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
     // execute
-    final QuestionnaireItemComponent actual = myFixture.addProperties(elementDefinition, questionnaireItem);
+    final QuestionnaireItemComponent actual =
+        myFixture.addProperties(elementDefinition.getFixedOrPattern(), questionnaireItem);
     // validate
     Assert.assertEquals(actual.getInitial().size(), 1);
     Assert.assertEquals(actual.getInitial().get(0).getValue(), booleanType);

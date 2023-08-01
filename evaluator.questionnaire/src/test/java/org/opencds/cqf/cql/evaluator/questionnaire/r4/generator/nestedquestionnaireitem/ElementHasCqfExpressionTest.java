@@ -1,15 +1,23 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
+
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
@@ -24,15 +32,8 @@ import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
 import org.testng.Assert;
 
-import javax.annotation.Nonnull;
-import java.util.List;
-
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
-
 @ExtendWith(MockitoExtension.class)
-class ElementHasCqfExtensionTest {
+class ElementHasCqfExpressionTest {
   final static String TYPE_CODE = "typeCode";
   final static String PATH_VALUE = "pathValue";
   final static String PATIENT_ID = "patientId";
@@ -45,7 +46,7 @@ class ElementHasCqfExtensionTest {
   protected LibraryEngine libraryEngine;
   @InjectMocks
   @Spy
-  private ElementHasCqfExtension myFixture;
+  private ElementHasCqfExpression myFixture;
 
   @BeforeEach
   void setUp() {
@@ -69,8 +70,7 @@ class ElementHasCqfExtensionTest {
         EXPRESSION_LANGUAGE,
         EXPRESSION_REFERENCE,
         parameters,
-        bundle
-    );
+        bundle);
     // execute
     final List<IBase> actual = myFixture.getExpressionResults(expression);
     // validate
@@ -80,8 +80,7 @@ class ElementHasCqfExtensionTest {
         EXPRESSION_LANGUAGE,
         EXPRESSION_REFERENCE,
         parameters,
-        bundle
-    );
+        bundle);
     Assert.assertEquals(actual, expected);
   }
 
@@ -161,7 +160,7 @@ class ElementHasCqfExtensionTest {
     final Type type = actual.getValue();
     Assert.assertTrue(Reference.class.isAssignableFrom(type.getClass()));
     final Reference typeAsRef = (Reference) type;
-    final IBaseResource resource =  typeAsRef.getResource();
+    final IBaseResource resource = typeAsRef.getResource();
     Assert.assertEquals(resource, result);
   }
 
@@ -177,8 +176,7 @@ class ElementHasCqfExtensionTest {
     return List.of(
         withResourceValue(),
         withResourceValue(),
-        withResourceValue()
-    );
+        withResourceValue());
   }
 
   @Nonnull
@@ -193,14 +191,14 @@ class ElementHasCqfExtensionTest {
     return List.of(
         withTypeValue(),
         withTypeValue(),
-        withTypeValue()
-    );
+        withTypeValue());
   }
 
   @Nonnull
   Parameters withParameters() {
     return new Parameters();
   }
+
   @Nonnull
   Expression withExpression() {
     final Expression expression = new Expression();

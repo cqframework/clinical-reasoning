@@ -21,7 +21,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.parser.IParser;
 public class TestItemGenerator {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return TestQuestionnaire.class.getResourceAsStream(asset);
@@ -58,7 +60,7 @@ public class TestItemGenerator {
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static GenerateResult that(String type, String profile, String patientId) {
       return new GenerateResult(type, profile, patientId);
     }
@@ -84,19 +86,20 @@ public class TestItemGenerator {
     }
 
     public GenerateResult withData(String dataAssetName) {
-      dataRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public GenerateResult withContent(String dataAssetName) {
-      contentRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public GenerateResult withTerminology(String dataAssetName) {
-      terminologyRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      terminologyRepository =
+          new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
@@ -128,14 +131,15 @@ public class TestItemGenerator {
         return;
       }
       if (dataRepository == null) {
-        dataRepository = new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
+        dataRepository =
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
       }
       if (contentRepository == null) {
         contentRepository =
-            new TestRepository(fhirContext, this.getClass(), List.of("resources"), false);
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources"), false);
       }
       if (terminologyRepository == null) {
-        terminologyRepository = new TestRepository(fhirContext, this.getClass(),
+        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
             List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
       }
 
@@ -144,7 +148,7 @@ public class TestItemGenerator {
 
     public GeneratedItem generateItem() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(repository);
+      var libraryEngine = new LibraryEngine(repository, evaluationSettings);
       return new GeneratedItem(buildGenerator(this.repository, this.patientId, this.parameters,
           this.bundle, libraryEngine).generateItem(input, 0), profileId);
     }

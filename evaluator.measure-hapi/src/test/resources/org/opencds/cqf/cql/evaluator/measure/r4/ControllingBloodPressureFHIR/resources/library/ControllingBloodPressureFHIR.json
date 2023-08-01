@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "ControllingBloodPressureFHIR",
+  "url": "http://hl7.org/fhir/us/chronic-ds/Library/ControllingBloodPressureFHIR",
+  "version": "9.0.000",
+  "name": "ControllingBloodPressureFHIR",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/codesystem-library-type.html",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ControllingBloodPressureFHIR.cql"
+  } ]
+}

@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.shared</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>evaluator.shared</name>
@@ -15,7 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cql.version>2.7.0</cql.version>
+    <cql.version>2.10.0</cql.version>
     <spring.version>5.3.23</spring.version>
     <fhir-core.version>5.6.971</fhir-core.version>
     <hapi.version>6.4.4</hapi.version>
@@ -29,6 +29,7 @@
     <!-- new modules we are building -->
     <module>cqf-fhir</module>
     <module>cqf-fhir-api</module>
+    <module>cqf-fhir-benchmark</module>
     <module>cqf-fhir-utility</module>
     <module>cqf-fhir-test</module>
     <module>cqf-fhir-cql</module>
@@ -171,11 +172,6 @@
       <dependency>
         <groupId>info.cqframework</groupId>
         <artifactId>engine-jackson</artifactId>
-        <version>${cql.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>info.cqframework</groupId>
-        <artifactId>qdm</artifactId>
         <version>${cql.version}</version>
       </dependency>
       <dependency>
@@ -330,7 +326,6 @@
         <version>3.9.0</version>
         <scope>test</scope>
       </dependency>
-
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-test</artifactId>

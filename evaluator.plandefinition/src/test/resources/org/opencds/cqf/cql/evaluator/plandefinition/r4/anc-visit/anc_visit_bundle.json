@@ -9,7 +9,7 @@
         "id": "AncVisit-PlanDefinition",
         "extension": [
           {
-            "url": "http://fl7.org/fhir/StructureDefinition/RequestGroup-Goal",
+            "url": "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal",
             "valueReference": {
               "reference": "Goal/1"
             }
@@ -36,6 +36,7 @@
       "resource": {
         "resourceType": "Goal",
         "id": "1",
+        "lifecycleStatus": "proposed",
         "category": [
           {
             "coding": [
@@ -55,6 +56,9 @@
               "display": "High Priority"
             }
           ]
+        },
+        "subject": {
+          "reference": "Patient/TEST_PATIENT"
         },
         "startCodeableConcept": {
           "coding": [

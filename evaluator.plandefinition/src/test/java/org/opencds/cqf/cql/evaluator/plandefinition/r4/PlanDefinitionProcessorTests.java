@@ -50,11 +50,13 @@ public class PlanDefinitionProcessorTests {
     var repository =
         TestRepositoryFactory.createRepository(fhirContext, this.getClass(), "anc-dak");
     var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
         .withParameters(parameters)
         .withExpectedCarePlanId(new IdType("CarePlan", "ANCDT17"))
         .apply().isEqualsToExpected();
-    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)
+        .withRepository(repository)
         .withParameters(parameters)
         .withExpectedBundleId(new IdType("Bundle", "ANCDT17"))
         .applyR5().isEqualsToExpected();
@@ -69,6 +71,7 @@ public class PlanDefinitionProcessorTests {
         .withData("anc-dak/data-bundle.json")
         .withContent("anc-dak/content-bundle.json")
         .withTerminology("anc-dak/terminology-bundle.json")
+        .withParameters(parameters(part("encounter", "ANCDT17-encounter")))
         .apply()
         .isEqualsTo("anc-dak/output-careplan.json");
   }
@@ -110,6 +113,7 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
+
     var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass(),
         "opioid-Rec10-patient-view");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID)

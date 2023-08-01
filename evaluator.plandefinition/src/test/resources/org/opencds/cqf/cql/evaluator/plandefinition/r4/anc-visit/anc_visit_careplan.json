@@ -24,6 +24,7 @@
     {
       "resourceType": "Goal",
       "id": "1",
+      "lifecycleStatus": "proposed",
       "category": [
         {
           "coding": [
@@ -43,6 +44,9 @@
             "display": "High Priority"
           }
         ]
+      },
+      "subject": {
+        "reference": "Patient/TEST_PATIENT"
       },
       "startCodeableConcept": {
         "coding": [

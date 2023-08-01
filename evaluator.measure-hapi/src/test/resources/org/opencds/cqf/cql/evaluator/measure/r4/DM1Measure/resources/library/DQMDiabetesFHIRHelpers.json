@@ -1,0 +1,26 @@
+{
+  "resourceType": "Library",
+  "id": "DQMDiabetesFHIRHelpers",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/library-cqfm" ]
+  },
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/Library/DQMDiabetesFHIRHelpers",
+  "version": "1.0.1",
+  "name": "DQMDiabetesFHIRHelpers",
+  "title": "DQMDiabetesFHIRHelpers",
+  "status": "draft",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "date": "2022-06-01",
+  "publisher": "Optum CDS",
+  "description": "DQMDiabetesFHIRHelpers",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/DQMDiabetesFHIRHelpers.cql"
+  } ]
+}

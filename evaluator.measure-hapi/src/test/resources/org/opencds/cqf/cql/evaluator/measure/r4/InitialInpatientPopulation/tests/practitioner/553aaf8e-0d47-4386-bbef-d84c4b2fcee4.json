@@ -1,0 +1,17 @@
+{
+  "resourceType": "Practitioner",
+  "id": "553aaf8e-0d47-4386-bbef-d84c4b2fcee4",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2022-02-22T16:57:01.065+00:00",
+    "source": "#BlYf5MaAdE9uC4EO"
+  },
+  "extension": [ {
+    "url": "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder",
+    "valueBoolean": true
+  } ],
+  "identifier": [ {
+    "system": "http://hl7.org/fhir/sid/us-npi",
+    "value": "9999969196"
+  } ]
+}

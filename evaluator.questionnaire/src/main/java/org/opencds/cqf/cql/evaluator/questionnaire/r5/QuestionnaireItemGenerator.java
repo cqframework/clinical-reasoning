@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 public class QuestionnaireItemGenerator {
   protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
-
   protected Repository repository;
   protected String patientId;
   protected IBaseParameters parameters;

@@ -1,0 +1,41 @@
+{
+  "resourceType": "Location",
+  "id": "eYJBEaYZeCt0e7EiJLrGTsA3",
+  "identifier": [ {
+    "type": {
+      "coding": [ {
+        "system": "http://hl7.org/fhir/sid/us-tin",
+        "code": "TAX"
+      } ],
+      "text": "Tax ID Number"
+    },
+    "value": "386006309"
+  }, {
+    "use": "usual",
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.696570",
+    "value": "10"
+  } ],
+  "name": "Michigan Medicine",
+  "mode": "instance",
+  "type": [ {
+    "coding": [ {
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.696570.5002",
+      "code": "22",
+      "display": "On Campus - Outpatient Hospital"
+    } ],
+    "text": "On Campus - Outpatient Hospital"
+  } ],
+  "telecom": [ {
+    "system": "phone",
+    "value": "855-855-0863",
+    "rank": 1
+  } ],
+  "address": {
+    "line": [ "1500 E MEDICAL CENTER DR" ],
+    "city": "ANN ARBOR",
+    "district": "WASHTENAW",
+    "state": "Michigan",
+    "postalCode": "48109",
+    "country": "United States of America"
+  }
+}

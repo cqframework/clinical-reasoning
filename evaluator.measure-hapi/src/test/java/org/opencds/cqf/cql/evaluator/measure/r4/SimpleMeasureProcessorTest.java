@@ -3,55 +3,83 @@ package org.opencds.cqf.cql.evaluator.measure.r4;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.math.BigDecimal;
-
-import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
+public class SimpleMeasureProcessorTest {
 
-@Test(singleThreaded = true)
-public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
+  protected static Given given =
+      Measure.given().repositoryFor("EXM108");
 
-  public SimpleMeasureProcessorTest() {
-    super("EXM108-8.3.000-bundle.json");
-  }
 
-  @Test
+  @Test(enabled = false, description = "Need to test at the service level to enable this")
   public void exm108_partialSubjectId() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", "subject",
-        "numer-EXM108", null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 1);
+    given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .subject("numer-EXM108")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup().population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1);
 
-    report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", "subject",
-        "denom-EXM108", null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "numerator", 0);
-    validateGroup(report.getGroup().get(0), "denominator", 1);
+    given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .subject("denom-EXM108")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup().population("numerator").hasCount(0).up()
+        .population("denominator").hasCount(1);
   }
 
   @Test
   public void exm108_fullSubjectId() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", "subject",
-        "Patient/numer-EXM108", null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 1);
-    validateGroupScore(report.getGroup().get(0), new BigDecimal("1.0"));
+    given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .subject("Patient/numer-EXM108")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup().hasScore("1.0")
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1);
+
+    given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .subject("Patient/denom-EXM108")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup().hasScore("0.0")
+        .population("numerator").hasCount(0).up()
+        .population("denominator").hasCount(1);
   }
 
   @Test
   public void exm108_population() {
     // This bundle has two patients, a numerator and denominator
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31",
-        "population", null, null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 2);
-    validateGroup(report.getGroup().get(0), "initial-population", 2);
-    validateGroupScore(report.getGroup().get(0), new BigDecimal("0.5"));
+    var report = given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .reportType("population")
+        .evaluate()
+        .then()
+        .firstGroup().hasScore("0.5")
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(2).up()
+        .population("initial-population").hasCount(2).up().up()
+        .report();
 
     assertEquals(report.getType(), MeasureReportType.SUMMARY);
   }
@@ -59,13 +87,17 @@ public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
   @Test
   public void exm108_noReportType_noSubject_runsPopulation() {
     // This default behavior if no type or subject is specified is "population"
-    MeasureReport report =
-        this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108",
-            "2018-12-31", "2019-12-31", null, null, null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 2);
-    validateGroup(report.getGroup().get(0), "initial-population", 2);
-    validateGroupScore(report.getGroup().get(0), new BigDecimal("0.5"));
+    var report = given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .evaluate()
+        .then()
+        .firstGroup().hasScore("0.5")
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(2).up()
+        .population("initial-population").hasCount(2).up().up()
+        .report();
 
     assertEquals(report.getType(), MeasureReportType.SUMMARY);
   }
@@ -74,12 +106,17 @@ public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
   @Test
   public void exm108_noType_hasSubject_runsIndividual() {
     // This default behavior if no type is specified is "individual"
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", null,
-        "Patient/numer-EXM108", null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "numerator", 1);
-    validateGroup(report.getGroup().get(0), "denominator", 1);
-    validateGroupScore(report.getGroup().get(0), new BigDecimal("1.0"));
+    var report = given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .subject("Patient/numer-EXM108")
+        .evaluate()
+        .then()
+        .firstGroup().hasScore("1.0")
+        .population("numerator").hasCount(1).up()
+        .population("denominator").hasCount(1).up().up()
+        .report();
 
 
     assertEquals(report.getType(), MeasureReportType.INDIVIDUAL);
@@ -88,9 +125,15 @@ public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
 
   @Test
   public void exm108_singlePatient_hasMetadata() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108", "2018-12-31", "2019-12-31", "subject",
-        "Patient/numer-EXM108", null, null, endpoint, endpoint, endpoint, null);
+    var report = given.when()
+        .measureId("measure-EXM108-8.3.000")
+        .periodStart("2018-12-31")
+        .periodEnd("2019-12-31")
+        .subject("Patient/numer-EXM108")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .report();
 
     assertEquals(report.getType(), MeasureReportType.INDIVIDUAL);
     assertEquals(report.getMeasure(), "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108");
@@ -109,16 +152,4 @@ public class SimpleMeasureProcessorTest extends BaseMeasureProcessorTest {
     // TODO: Should be the evaluation date. Or approximately "now"
     assertNotNull(report.getDate());
   }
-
-  // @Test
-  // public void exm108_viewOutput() {
-  // MeasureReport report =
-  // this.measureProcessor.evaluateMeasure("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108",
-  // "2018-12-31", "2019-12-31", "population", null, null, null, endpoint, endpoint, endpoint,
-  // null);
-  // ca.uhn.fhir.parser.IParser parser = fhirContext.newJsonParser();
-  // parser.setPrettyPrint(true);
-  // String result = parser.encodeResourceToString(report);
-  // System.out.println(result);
-  // }
 }

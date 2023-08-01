@@ -9,48 +9,39 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.cql.model.ModelIdentifier;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
-
-import ca.uhn.fhir.context.FhirContext;
+import org.opencds.cqf.cql.evaluator.engine.retrieve.RetrieveSettings;
 
 public class EvaluationSettings {
 
-  private Map<ModelIdentifier, Model> globalModelCache;
-
-  private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
+  private Map<ModelIdentifier, Model> modelCache;
+  private Map<VersionedIdentifier, Library> libraryCache;
 
   private CqlOptions cqlOptions;
 
-  private CqlEngineOptions engineOptions;
-
-  private FhirContext fhirContext;
+  private RetrieveSettings retrieveSettings;
 
   public static EvaluationSettings getDefault() {
     EvaluationSettings settings = new EvaluationSettings();
 
-    settings.setCqlOptions(CqlOptions.defaultOptions());
-    settings.setGlobalModelCache(new ConcurrentHashMap<>());
-    settings.setEngineOptions(CqlEngineOptions.defaultOptions());
+    var options = CqlOptions.defaultOptions();
+    settings.setCqlOptions(options);
+    settings.setModelCache(new ConcurrentHashMap<>());
+    settings.setLibraryCache(new ConcurrentHashMap<>());
+    settings.setRetrieveSettings(new RetrieveSettings());
 
     return settings;
   }
 
-  public static EvaluationSettings newInstance() {
-    return new EvaluationSettings();
+  public Map<ModelIdentifier, Model> getModelCache() {
+    return this.modelCache;
   }
 
-  public Map<ModelIdentifier, Model> getGlobalModelCache() {
-    if (this.globalModelCache == null) {
-      this.globalModelCache = new ConcurrentHashMap<>();
-    }
-    return this.globalModelCache;
+  public void setModelCache(Map<ModelIdentifier, Model> modelCache) {
+    this.modelCache = modelCache;
   }
 
-  public void setGlobalModelCache(Map<ModelIdentifier, Model> globalModelCache) {
-    this.globalModelCache = globalModelCache;
-  }
-
-  public EvaluationSettings withGlobalModelCache(Map<ModelIdentifier, Model> globalModelCache) {
-    setGlobalModelCache(globalModelCache);
+  public EvaluationSettings withModelCache(Map<ModelIdentifier, Model> modelCache) {
+    setModelCache(modelCache);
     return this;
   }
 
@@ -68,10 +59,16 @@ public class EvaluationSettings {
   }
 
   public CqlOptions getCqlOptions() {
-    if (this.cqlOptions == null) {
-      this.cqlOptions = CqlOptions.defaultOptions();
-    }
     return this.cqlOptions;
+  }
+
+  /**
+   * @deprecated Left in for backwards compatibility. getCqlOptions().getCqlEngineOptions() should
+   *             be used instead.
+   */
+  @Deprecated
+  public CqlEngineOptions getEngineOptions() {
+    return this.cqlOptions.getCqlEngineOptions();
   }
 
   public EvaluationSettings withCqlOptions(CqlOptions cqlOptions) {
@@ -83,30 +80,16 @@ public class EvaluationSettings {
     this.cqlOptions = cqlOptions;
   }
 
-  public CqlEngineOptions getEngineOptions() {
-    return this.engineOptions;
+  public RetrieveSettings getRetrieveSettings() {
+    return this.retrieveSettings;
   }
 
-  public void setEngineOptions(CqlEngineOptions engineOptions) {
-    this.engineOptions = engineOptions;
-  }
-
-  public EvaluationSettings withEngineOptions(CqlEngineOptions engineOptions) {
-    setEngineOptions(engineOptions);
+  public EvaluationSettings withRetrieveSettings(RetrieveSettings retrieveSettings) {
+    setRetrieveSettings(retrieveSettings);
     return this;
   }
 
-  public FhirContext getFhirContext() {
-    return this.fhirContext;
+  public void setRetrieveSettings(RetrieveSettings retrieveSettings) {
+    this.retrieveSettings = retrieveSettings;
   }
-
-  public void setFhirContext(FhirContext fhirContext) {
-    this.fhirContext = fhirContext;
-  }
-
-  public EvaluationSettings withFhirContext(FhirContext fhirContext) {
-    setFhirContext(fhirContext);
-    return this;
-  }
-
 }

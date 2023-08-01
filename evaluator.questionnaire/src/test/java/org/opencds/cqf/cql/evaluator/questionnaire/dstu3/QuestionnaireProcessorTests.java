@@ -8,7 +8,7 @@ import static org.testng.Assert.assertThrows;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.testng.annotations.Test;
 
@@ -26,10 +26,12 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPrePopulate_NoLibrary() {
     var data =
-        new TestRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"), false);
+        new InMemoryFhirRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"),
+            false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .prePopulate().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
   }
@@ -40,7 +42,7 @@ public class QuestionnaireProcessorTests {
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
-        .isEqualsTo("questionnaire-for-order-populated-errors.json");
+        .hasErrors();
   }
 
   @Test
@@ -69,10 +71,12 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPopulate_NoLibrary() {
     var data =
-        new TestRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"), false);
+        new InMemoryFhirRepository(FhirContext.forDstu3Cached(), this.getClass(), List.of("tests"),
+            false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .populate().isEqualsTo("questionnaire-response-populated-noLibrary.json");
   }
@@ -83,7 +87,7 @@ public class QuestionnaireProcessorTests {
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
-        .isEqualsTo("questionnaire-response-populated-errors.json");
+        .hasErrors();
   }
 
   @Test

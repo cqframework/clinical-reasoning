@@ -8,11 +8,10 @@
         "resourceType": "RequestGroup",
         "id": "opioidcds-10-patient-view",
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view"
+          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view|2022.1.0"
         ],
         "status": "draft",
         "intent": "proposal",
-        "priority": "urgent",
         "subject": {
           "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
         },
@@ -21,33 +20,14 @@
         },
         "action": [
           {
-            "title": "Positive Cocaine or PCP or Opiates in Urine Screening",
-            "description": "<br/>*Positive for Cocaine: <br/>2022-06-02<br/>Note: result may be false positive result or indicate patient is occasional user or addicted to the illicit drug. For guidance on counseling patients regarding the purpose of urine toxicology test, review the draft CDC 2022 Opioid Prescribing Guideline Recommendation 10 page 140 lines 3441 – 3446."
-          },
-          {
-            "description": "Not for chronic pain management. Snooze 3 months"
-          },
-          {
-            "description": "N/A - see comment, snooze 3 months"
-          },
-          {
-            "description": "Will repeat urine drug screen more frequently"
-          },
-          {
-            "description": "Will assess patient for substance abuse disorder"
-          },
-          {
-            "description": "Will access CDS quality improvement and care coordination for prescribing opioids for chronic pain https://www.cdc.gov/drugoverdose/pdf/prescribing/CDC-DUIP-QualityImprovementAndCareCoordination-508.pdf"
-          },
-          {
             "extension": [
               {
                 "url": null,
                 "valueString": "warning"
               }
             ],
-            "title": "Tested Positive for Cocaine, Opiates, or PCP",
-            "description": "Urine screening showed positive for cocaine, opiates or PCP",
+            "title": "Annual Urine Screening Check",
+            "description": "Patients on opioid therapy should have a urine drug test performed every 12 months. For guidance on counseling patients regarding the purpose of urine toxicology test, review the draft CDC 2022 Opioid Prescribing Guideline Recommendation 10 page 140 lines 3441 - 3446.",
             "documentation": [
               {
                 "type": "documentation",
@@ -91,7 +71,18 @@
             ],
             "resource": {
               "reference": "ServiceRequest/opioidcds-urine-screening-request"
-            }
+            },
+            "action": [
+              {
+                "description": "Will perform urine screening"
+              },
+              {
+                "description": "Not for chronic pain management. Snooze 3 months"
+              },
+              {
+                "description": "N/A - see comment, snooze 3 months"
+              }
+            ]
           }
         ]
       }
@@ -102,6 +93,7 @@
         "id": "opioidcds-urine-screening-request",
         "status": "draft",
         "intent": "order",
+        "priority": "urgent",
         "code": {
           "coding": [
             {

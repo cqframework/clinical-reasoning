@@ -1,0 +1,22 @@
+{
+  "resourceType": "Procedure",
+  "id": "denomexcl-EXM74-strat1-case13-Procedure",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+  },
+  "status": "completed",
+  "code": {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "385765002",
+      "display": "Hospice care management (procedure)"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcl-EXM74-strat1-case13"
+  },
+  "performedPeriod": {
+    "start": "2019-08-30T10:00:00",
+    "end": "2019-12-31T23:59:00"
+  }
+}

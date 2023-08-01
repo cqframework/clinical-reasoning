@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3;
 
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -15,9 +16,12 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -30,6 +34,7 @@ import ca.uhn.fhir.parser.IParser;
 public class TestQuestionnaire {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return TestQuestionnaire.class.getResourceAsStream(asset);
@@ -48,12 +53,12 @@ public class TestQuestionnaire {
   }
 
   public static QuestionnaireProcessor buildProcessor(Repository repository) {
-    return new QuestionnaireProcessor(repository);
+    return new QuestionnaireProcessor(repository, evaluationSettings);
   }
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static QuestionnaireResult that(String questionnaireName, String patientId) {
       return new QuestionnaireResult(questionnaireName, patientId);
     }
@@ -77,19 +82,20 @@ public class TestQuestionnaire {
     }
 
     public QuestionnaireResult withData(String dataAssetName) {
-      dataRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public QuestionnaireResult withContent(String dataAssetName) {
-      contentRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
     public QuestionnaireResult withTerminology(String dataAssetName) {
-      terminologyRepository = new TestRepository(fhirContext, (Bundle) parse(dataAssetName));
+      terminologyRepository =
+          new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
@@ -121,14 +127,15 @@ public class TestQuestionnaire {
         return;
       }
       if (dataRepository == null) {
-        dataRepository = new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
+        dataRepository =
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
       }
       if (contentRepository == null) {
         contentRepository =
-            new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
       }
       if (terminologyRepository == null) {
-        terminologyRepository = new TestRepository(fhirContext, this.getClass(),
+        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
             List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
       }
 
@@ -137,14 +144,14 @@ public class TestQuestionnaire {
 
     public GeneratedQuestionnaire prePopulate() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(repository);
+      var libraryEngine = new LibraryEngine(repository, evaluationSettings);
       return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(questionnaire,
           patientId, parameters, bundle, libraryEngine));
     }
 
     public GeneratedQuestionnaireResponse populate() {
       buildRepository();
-      var libraryEngine = new LibraryEngine(repository);
+      var libraryEngine = new LibraryEngine(repository, evaluationSettings);
       return new GeneratedQuestionnaireResponse(
           (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire, patientId,
               parameters, bundle, libraryEngine));
@@ -172,6 +179,15 @@ public class TestQuestionnaire {
         fail("Unable to compare Jsons: " + e.getMessage());
       }
     }
+
+    public GeneratedQuestionnaire hasErrors() {
+      assertTrue(questionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaire.hasContained());
+      assertTrue(questionnaire.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
+    }
   }
 
   static class GeneratedQuestionnaireResponse {
@@ -189,6 +205,15 @@ public class TestQuestionnaire {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
+    }
+
+    public GeneratedQuestionnaireResponse hasErrors() {
+      assertTrue(questionnaireResponse.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaireResponse.hasContained());
+      assertTrue(questionnaireResponse.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
     }
   }
 }

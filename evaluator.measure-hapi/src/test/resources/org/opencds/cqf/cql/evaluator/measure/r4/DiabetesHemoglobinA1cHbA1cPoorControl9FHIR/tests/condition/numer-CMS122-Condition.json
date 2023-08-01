@@ -1,0 +1,37 @@
+{
+  "resourceType": "Condition",
+  "id": "numer-CMS122-Condition",
+  "clinicalStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+      "code": "active",
+      "display": "Active"
+    } ],
+    "text": "Active"
+  },
+  "verificationStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-verification",
+      "code": "confirmed",
+      "display": "confirmed"
+    } ],
+    "text": "confirmed"
+  },
+  "code": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "E10.10",
+      "display": "Type 1 diabetes mellitus with ketoacidosis without coma"
+    } ],
+    "text": "Type 1 diabetes"
+  },
+  "subject": {
+    "reference": "Patient/numer-CMS122-Patient"
+  },
+  "encounter": {
+    "reference": "Encounter/numer-CMS122-Encounter"
+  },
+  "onsetPeriod": {
+    "start": "2009-01-16T08:30:00"
+  }
+}

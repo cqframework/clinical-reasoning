@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -18,6 +17,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.Element;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -44,6 +44,7 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -51,6 +52,8 @@ import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinition
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.library.CqfExpression;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
@@ -60,6 +63,7 @@ import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 @SuppressWarnings({"unused", "squid:S107"})
@@ -73,9 +77,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
   public PlanDefinitionProcessor(Repository repository) {
-    super(repository);
-    this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository);
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository);
+    this(repository, EvaluationSettings.getDefault());
+  }
+
+  public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    super(repository, evaluationSettings);
+    this.activityDefinitionProcessor =
+        new ActivityDefinitionProcessor(this.repository, evaluationSettings);
+    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
     this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
   }
 
@@ -166,9 +175,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     var metConditions = new HashMap<String, PlanDefinition.PlanDefinitionActionComponent>();
 
+    var defaultLibraryUrl =
+        planDefinition.getLibrary() == null || planDefinition.getLibrary().isEmpty() ? null
+            : planDefinition.getLibrary().get(0).getReference();
     for (var action : planDefinition.getAction()) {
       // TODO - Apply input/output dataRequirements?
-      resolveAction(planDefinition, requestGroup, metConditions, action);
+      requestGroup.addAction(
+          resolveAction(defaultLibraryUrl, planDefinition, requestGroup, metConditions, action));
     }
 
     return requestGroup;
@@ -216,27 +229,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
-  public void resolveCdsHooksDynamicValue(IBaseResource rg, Object value, String path) {
-    RequestGroup requestGroup = (RequestGroup) rg;
-    int matchCount = StringUtils.countMatches(path, "action.");
-    if (!requestGroup.hasAction()) {
-      for (int i = 0; i < matchCount; ++i) {
-        requestGroup.addAction();
-      }
-    }
+  public void resolveDynamicExtension(IElement requestAction, IBase resource, Object value,
+      String path) {
     if (path.equals("activity.extension") || path.equals("action.extension")) {
       // default to adding extension to last action
-      requestGroup.getAction().get(requestGroup.getAction().size() - 1).addExtension()
-          .setValue((Type) value);
-      return;
+      ((Element) requestAction).addExtension().setValue((Type) value);
     }
-    if (requestGroup.hasAction() && requestGroup.getAction().size() < matchCount) {
-      for (int i = matchCount - requestGroup.getAction().size(); i < matchCount; ++i) {
-        requestGroup.addAction();
-      }
-    }
-    modelResolver.setValue(requestGroup.getAction().get(matchCount - 1),
-        path.replace("action.", ""), value);
   }
 
   private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
@@ -258,7 +256,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return myGoal;
   }
 
-  private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private RequestGroupActionComponent resolveAction(String defaultLibraryUrl,
+      PlanDefinition planDefinition,
+      RequestGroup requestGroup,
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
     if ((getExtensionByUrl(planDefinition, Constants.CPG_QUESTIONNAIRE_GENERATE) != null)
@@ -271,7 +271,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       }
     }
 
-    if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, action))) {
+    if (Boolean.TRUE.equals(meetsConditions(defaultLibraryUrl, action))) {
       // TODO: Figure out why this was here and what it was trying to do
       // if (action.hasRelatedAction()) {
       // for (var relatedActionComponent : action.getRelatedAction()) {
@@ -285,8 +285,16 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       // }
       metConditions.put(action.getId(), action);
       var requestAction = createRequestAction(action);
+      if (action.hasAction()) {
+        for (var containedAction : action.getAction()) {
+          requestAction.addAction(
+              resolveAction(defaultLibraryUrl, planDefinition, requestGroup, metConditions,
+                  containedAction));
+        }
+      }
+      IBaseResource resource = null;
       if (action.hasDefinition()) {
-        var resource = resolveDefinition(planDefinition, requestGroup, action);
+        resource = resolveDefinition(planDefinition, requestGroup, action);
         if (resource != null) {
           applyAction(requestGroup, resource, action);
           requestAction.setResource(new Reference(resource.getIdElement()));
@@ -297,9 +305,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           }
         }
       }
-      requestGroup.addAction(requestAction);
-      resolveDynamicValues(planDefinition, requestGroup, action);
+      resolveDynamicValues(defaultLibraryUrl, requestAction, resource, action);
+
+      return requestAction;
     }
+
+    return null;
   }
 
   private RequestGroupActionComponent createRequestAction(PlanDefinitionActionComponent action) {
@@ -591,46 +602,55 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return bundle;
   }
 
-  private void resolveDynamicValues(PlanDefinition planDefinition, RequestGroup requestGroup,
-      PlanDefinition.PlanDefinitionActionComponent action) {
+  private CqfExpression getCqfExpression(String language, String expression,
+      String defaultLibraryUrl) {
+    return new CqfExpression().setExpression(expression)
+        .setLanguage(language)
+        .setLibraryUrl(defaultLibraryUrl);
+  }
+
+  private void resolveDynamicValues(String defaultLibraryUrl, IElement requestAction,
+      IBase resource, PlanDefinition.PlanDefinitionActionComponent action) {
     action.getDynamicValue().forEach(dynamicValue -> {
       if (dynamicValue.hasExpression()) {
-        resolveDynamicValue(dynamicValue.getLanguage(), dynamicValue.getExpression(),
-            dynamicValue.getPath(), null, null, null,
-            planDefinition.getLibrary().get(0).getReference(), requestGroup,
-            resolveInputParameters(action.getInput()));
+        Parameters inputParams = resolveInputParameters(action.getInput());
+        if (parameters != null) {
+          inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
+        }
+        List<IBase> result = null;
+        try {
+          result =
+              resolveExpression(getCqfExpression(dynamicValue.getLanguage(),
+                  dynamicValue.getExpression(), defaultLibraryUrl), inputParams);
+          resolveDynamicValue(result, dynamicValue.getPath(), requestAction, resource);
+        } catch (Exception e) {
+          var message = String.format("DynamicValue expression %s encountered exception: %s",
+              dynamicValue.getExpression(), e.getMessage());
+          logger.error(message);
+        }
       }
     });
   }
 
-  private Boolean meetsConditions(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private Boolean meetsConditions(String defaultLibraryUrl,
       PlanDefinition.PlanDefinitionActionComponent action) {
-    // Should we be resolving child actions regardless of whether the conditions are met?
-    if (action.hasAction()) {
-      for (var containedAction : action.getAction()) {
-        var metConditions = new HashMap<String, PlanDefinition.PlanDefinitionActionComponent>();
-        resolveAction(planDefinition, requestGroup, metConditions, containedAction);
-      }
-    }
-    if (planDefinition.getType().hasCoding()) {
-      var planDefinitionTypeCoding = planDefinition.getType().getCoding();
-      for (var coding : planDefinitionTypeCoding) {
-        if (coding.getCode().equals("workflow-definition")) {
-          // logger.info("Found a workflow definition type for PlanDefinition {}
-          // conditions should be evaluated at task execution time.",
-          // planDefinition.getUrl());
-          return true;
-        }
-      }
-    }
     for (var condition : action.getCondition()) {
       if (condition.hasExpression()) {
         Parameters inputParams = resolveInputParameters(action.getInput());
         if (parameters != null) {
           inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
         }
-        var result = resolveCondition(condition.getLanguage(), condition.getExpression(), null,
-            null, planDefinition.getLibrary().get(0).getReference(), inputParams);
+        IBase result = null;
+        try {
+          var results =
+              resolveExpression(getCqfExpression(condition.getLanguage(), condition.getExpression(),
+                  defaultLibraryUrl), inputParams);
+          result = results == null || results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+          var message = String.format("Condition expression %s encountered exception: %s",
+              condition.getExpression(), e.getMessage());
+          logger.error(message);
+        }
         if (result == null) {
           logger.warn("Condition expression {} returned null", condition.getExpression());
           return false;

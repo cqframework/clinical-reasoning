@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "MATGlobalCommonFunctions-FHIR3-4.0.000",
+  "version": "4.0.000",
+  "name": "MATGlobalCommonFunctions_FHIR3",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/MATGlobalCommonFunctions_FHIR3.cql"
+  } ]
+}

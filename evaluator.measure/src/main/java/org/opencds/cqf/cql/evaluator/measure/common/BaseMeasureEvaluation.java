@@ -42,11 +42,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
   public MeasureReportT evaluate(MeasureEvalType measureEvalType, List<String> subjectIds,
       Interval measurementPeriod) {
     Objects.requireNonNull(subjectIds, "subjectIds is a required parameter");
-
-    if (measureEvalType == null) {
-      measureEvalType =
-          subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
-    }
+    Objects.requireNonNull(measureEvalType, "measureEvalType is a required parameter");
 
     MeasureDef measureDef = this.measureDefBuilder.build(measure);
     MeasureEvaluator measureEvaluation =

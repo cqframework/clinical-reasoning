@@ -1,0 +1,90 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.125.12.1003",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.125.12.1003",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.464.1003.125.12.1003"
+  } ],
+  "version": "20170504",
+  "name": "ClinicalOralEvaluation",
+  "title": "Clinical Oral Evaluation",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0120",
+      "display": "periodic oral evaluation - established patient"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0140",
+      "display": "limited oral evaluation - problem focused"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0145",
+      "display": "oral evaluation for a patient under three years of age and counseling with primary caregiver"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0150",
+      "display": "comprehensive oral evaluation - new or established patient"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0160",
+      "display": "detailed and extensive oral evaluation - problem focused, by report"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0170",
+      "display": "re-evaluation - limited, problem focused (established patient; not post-operative visit)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0180",
+      "display": "comprehensive periodontal evaluation - new or established patient"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0120",
+      "display": "periodic oral evaluation - established patient"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0140",
+      "display": "limited oral evaluation - problem focused"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0145",
+      "display": "oral evaluation for a patient under three years of age and counseling with primary caregiver"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0150",
+      "display": "comprehensive oral evaluation - new or established patient"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0160",
+      "display": "detailed and extensive oral evaluation - problem focused, by report"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0170",
+      "display": "re-evaluation - limited, problem focused (established patient; not post-operative visit)"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/CD2",
+      "version": "2020",
+      "code": "D0180",
+      "display": "comprehensive periodontal evaluation - new or established patient"
+    } ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "library-VTEICU-5.0.000",
+  "url": "http://fhir.org/guides/dbcg/connectathon/Library/VTEICU",
+  "version": "5.0.000",
+  "name": "VTEICU",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/VTEICU.cql"
+  } ]
+}

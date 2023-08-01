@@ -20,7 +20,7 @@ Inquires for commercial support can be directed to [info@alphora.com](info@alpho
 
 [CQL Support for VS Code](https://marketplace.visualstudio.com/items?itemName=cqframework.cql) - Open source CQL IDE with syntax highlighting, linting, and local CQL evaluation provided by this project.
 
-[CQF Ruler](https://github.com/cqframework/cqf-ruler) - Integrates this project into the HAPI FHIR server, providing CQL Library evaluation among other functionality.
+[HAPI FHIR](https://github.com/hapifhir/hapi-fhir) - This project provides CQL and Measure evaluation for the HAPI FHIR server, among other functionality.
 
 ## License
 

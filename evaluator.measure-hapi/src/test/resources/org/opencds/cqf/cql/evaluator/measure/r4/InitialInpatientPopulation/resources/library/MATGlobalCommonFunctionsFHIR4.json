@@ -1,0 +1,17 @@
+{
+  "resourceType": "Library",
+  "id": "MATGlobalCommonFunctionsFHIR4",
+  "meta": {
+    "versionId": "6",
+    "lastUpdated": "2022-03-01T19:49:30.831+00:00",
+    "source": "#cf655b4a6d955e16"
+  },
+  "url": "http://fhir.org/guides/cqf/Library/MATGlobalCommonFunctionsFHIR4",
+  "version": "6.1.000",
+  "name": "MATGlobalCommonFunctionsFHIR4",
+  "title": "MATGlobalCommonFunctionsFHIR4",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/MATGlobalCommonFunctionsFHIR4.cql"
+  } ]
+}

@@ -1,0 +1,26 @@
+{
+  "resourceType": "Library",
+  "id": "DM1",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/library-cqfm" ]
+  },
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/Library/DM1",
+  "version": "1.0.1",
+  "name": "DM1",
+  "title": "Diabetes Management Measure 1 - Diabetes Poor Control",
+  "status": "draft",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "date": "2022-06-01",
+  "publisher": "Optum CDS",
+  "description": "List of patients with type 1 or type 2 diabetes who have hemoglobin A1c > 9. ",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/DM1.cql"
+  } ]
+}

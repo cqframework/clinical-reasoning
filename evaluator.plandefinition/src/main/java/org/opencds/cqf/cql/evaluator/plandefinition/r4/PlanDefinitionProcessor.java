@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -22,14 +22,17 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Goal;
+import org.hl7.fhir.r4.model.Goal.GoalLifecycleStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -51,16 +54,22 @@ import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionPro
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+import org.opencds.cqf.cql.evaluator.library.CqfExpression;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 @SuppressWarnings({"unused", "squid:S107"})
@@ -73,10 +82,17 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
+  protected OperationOutcome oc;
+
   public PlanDefinitionProcessor(Repository repository) {
-    super(repository);
-    this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository);
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository);
+    this(repository, EvaluationSettings.getDefault());
+  }
+
+  public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    super(repository, evaluationSettings);
+    this.activityDefinitionProcessor =
+        new ActivityDefinitionProcessor(this.repository, evaluationSettings);
+    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
     this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
   }
 
@@ -146,11 +162,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     logger.info("Performing $apply operation on {}", planDefinition.getIdPart());
 
+    oc = new OperationOutcome();
+    oc.setId("apply-outcome-" + planDefinition.getIdPart());
+
     this.questionnaire = new Questionnaire();
     this.questionnaire
         .setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), planDefinition.getIdPart()));
     this.questionnaireItemGenerator =
-        new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+        QuestionnaireItemGenerator.of(repository, patientId, parameters, bundle, libraryEngine);
 
     return planDefinition;
   }
@@ -158,9 +177,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   @Override
   public IBaseResource applyPlanDefinition(PlanDefinition planDefinition) {
     // Each Group of actions shares a RequestGroup
+    var canonical = planDefinition.getUrl();
+    if (planDefinition.hasVersion()) {
+      canonical = String.format("%s|%s", canonical, planDefinition.getVersion());
+    }
     var requestGroup =
         new RequestGroup().setStatus(RequestStatus.DRAFT).setIntent(RequestIntent.PROPOSAL)
-            .addInstantiatesCanonical(planDefinition.getUrl()).setSubject(new Reference(patientId));
+            .addInstantiatesCanonical(canonical).setSubject(new Reference(patientId));
 
     requestGroup
         .setId(new IdType(requestGroup.fhirType(), planDefinition.getIdElement().getIdPart()));
@@ -179,7 +202,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         requestGroup.addContained(goal);
       } else {
         goal.setIdElement(new IdType("Goal", String.valueOf(i + 1)));
-        requestGroup.addExtension().setUrl(REQUEST_GROUP_EXT)
+        requestGroup.addExtension().setUrl(Constants.PERTAINS_TO_GOAL)
             .setValue(new Reference(goal.getIdElement()));
       }
       // Always add goals to the resource list so they can be added to the CarePlan if needed
@@ -191,9 +214,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     var metConditions = new HashMap<String, PlanDefinition.PlanDefinitionActionComponent>();
 
+    var defaultLibraryUrl =
+        planDefinition.getLibrary() == null || planDefinition.getLibrary().isEmpty() ? null
+            : planDefinition.getLibrary().get(0).getValue();
     for (var action : planDefinition.getAction()) {
       // TODO - Apply input/output dataRequirements?
-      resolveAction(planDefinition, requestGroup, metConditions, action);
+      requestGroup.addAction(
+          resolveAction(defaultLibraryUrl, planDefinition, requestGroup, metConditions, action));
     }
 
     return Boolean.TRUE.equals(containResources)
@@ -204,6 +231,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   @Override
   public CarePlan transformToCarePlan(IBaseResource rg) {
     RequestGroup requestGroup = (RequestGroup) rg;
+    if (!oc.getIssue().isEmpty()) {
+      requestGroup.addContained(oc);
+      requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES,
+          new Reference("#" + oc.getIdPart()));
+    }
     var carePlan = new CarePlan().setInstantiatesCanonical(requestGroup.getInstantiatesCanonical())
         .setSubject(requestGroup.getSubject()).setStatus(CarePlan.CarePlanStatus.DRAFT)
         .setIntent(CarePlan.CarePlanIntent.PROPOSAL);
@@ -247,10 +279,16 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
-  public IBaseResource transformToBundle(IBaseResource requestGroup) {
+  public IBaseResource transformToBundle(IBaseResource rg) {
+    var requestGroup = (RequestGroup) rg;
     var resultBundle = new Bundle().setType(BundleType.COLLECTION);
     resultBundle.setId(requestGroup.getIdElement().getIdPart());
-    resultBundle.addEntry().setResource((Resource) requestGroup);
+    if (!oc.getIssue().isEmpty()) {
+      requestGroup.addContained(oc);
+      requestGroup.addExtension(Constants.EXT_CRMI_MESSAGES,
+          new Reference("#" + oc.getIdPart()));
+    }
+    resultBundle.addEntry().setResource(requestGroup);
     for (var resource : requestResources) {
       resultBundle.addEntry().setResource((Resource) resource);
     }
@@ -265,27 +303,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   @Override
-  public void resolveCdsHooksDynamicValue(IBaseResource rg, Object value, String path) {
-    RequestGroup requestGroup = (RequestGroup) rg;
-    int matchCount = StringUtils.countMatches(path, "action.");
-    if (!requestGroup.hasAction()) {
-      for (int i = 0; i < matchCount; ++i) {
-        requestGroup.addAction();
-      }
-    }
+  public void resolveDynamicExtension(IElement requestAction, IBase resource, Object value,
+      String path) {
     if (path.equals("activity.extension") || path.equals("action.extension")) {
       // default to adding extension to last action
-      requestGroup.getAction().get(requestGroup.getAction().size() - 1).addExtension()
-          .setValue((Type) value);
-      return;
+      ((Element) requestAction).addExtension().setValue((Type) value);
     }
-    if (requestGroup.hasAction() && requestGroup.getAction().size() < matchCount) {
-      for (int i = matchCount - requestGroup.getAction().size(); i < matchCount; ++i) {
-        requestGroup.addAction();
-      }
-    }
-    modelResolver.setValue(requestGroup.getAction().get(matchCount - 1),
-        path.replace("action.", ""), value);
   }
 
   private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
@@ -294,6 +317,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     myGoal.setDescription(goal.getDescription());
     myGoal.setPriority(goal.getPriority());
     myGoal.setStart(goal.getStart());
+    myGoal.setLifecycleStatus(GoalLifecycleStatus.PROPOSED);
+    myGoal.setSubject(new Reference(patientId));
 
     myGoal.setTarget(goal.getTarget().stream().map(target -> {
       Goal.GoalTargetComponent myTarget = new Goal.GoalTargetComponent();
@@ -306,7 +331,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return myGoal;
   }
 
-  private void resolveAction(PlanDefinition planDefinition, RequestGroup requestGroup,
+  private RequestGroupActionComponent resolveAction(String defaultLibraryUrl,
+      PlanDefinition planDefinition, RequestGroup requestGroup,
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
     if (planDefinition.hasExtension(Constants.CPG_QUESTIONNAIRE_GENERATE) && action.hasInput()) {
@@ -318,7 +344,21 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       }
     }
 
-    if (Boolean.TRUE.equals(meetsConditions(planDefinition, requestGroup, action))) {
+    Boolean conditionMet = false;
+    if (planDefinition.getType().hasCoding()) {
+      var planDefinitionTypeCoding = planDefinition.getType().getCoding();
+      for (var coding : planDefinitionTypeCoding) {
+        if (coding.getCode().equals("workflow-definition")) {
+          // logger.info("Found a workflow definition type for PlanDefinition {}
+          // conditions should be evaluated at task execution time.",
+          // planDefinition.getUrl());
+          conditionMet = true;
+        }
+      }
+    }
+    conditionMet = Boolean.FALSE.equals(conditionMet) ? meetsConditions(defaultLibraryUrl, action)
+        : conditionMet;
+    if (Boolean.TRUE.equals(conditionMet)) {
       // TODO: Figure out why this was here and what it was trying to do
       // if (action.hasRelatedAction()) {
       // for (var relatedActionComponent : action.getRelatedAction()) {
@@ -332,8 +372,16 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       // }
       metConditions.put(action.getId(), action);
       var requestAction = createRequestAction(action);
+      if (action.hasAction()) {
+        for (var containedAction : action.getAction()) {
+          requestAction.addAction(
+              resolveAction(defaultLibraryUrl, planDefinition, requestGroup, metConditions,
+                  containedAction));
+        }
+      }
+      IBaseResource resource = null;
       if (action.hasDefinitionCanonicalType()) {
-        var resource = resolveDefinition(planDefinition, requestGroup, action);
+        resource = resolveDefinition(planDefinition, requestGroup, action);
         if (resource != null) {
           applyAction(requestGroup, resource, action);
           requestAction.setResource(new Reference(resource.getIdElement()));
@@ -347,15 +395,20 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var definition = action.getDefinitionUriType();
         requestAction.setResource(new Reference(definition.asStringValue()));
       }
-      requestGroup.addAction(requestAction);
-      resolveDynamicValues(planDefinition, requestGroup, action);
+      resolveDynamicValues(defaultLibraryUrl, requestAction, resource, action);
+
+      return requestAction;
     }
+
+    return null;
   }
 
   private RequestGroupActionComponent createRequestAction(PlanDefinitionActionComponent action) {
+    // TODO: Copy Conditions over
     var requestAction = new RequestGroupActionComponent().setTitle(action.getTitle())
         .setDescription(action.getDescription()).setTextEquivalent(action.getTextEquivalent())
         .setCode(action.getCode()).setDocumentation(action.getDocumentation())
+        // .setCondition(action.getCondition())
         .setTiming(action.getTiming());
     requestAction.setId(action.getId());
 
@@ -390,9 +443,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         result = searchRepositoryByCanonical(repository, definition);
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      logger.error("ERROR: Questionnaire {} could not be applied and threw exception {}",
-          definition, e.toString());
+      var message =
+          String.format("ERROR: Questionnaire %s could not be applied and threw exception %s",
+              definition.asStringValue(), e.toString());
+      logger.error(message);
+      oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+          .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
     }
 
     return result;
@@ -406,15 +462,22 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       var activityDefinition = (ActivityDefinition) (referenceToContained
           ? resolveContained(planDefinition, definition.getValue())
           : searchRepositoryByCanonical(repository, definition));
+      var engine = bundle == null ? libraryEngine
+          : new LibraryEngine(new FederatedRepository(repository,
+              new InMemoryFhirRepository(fhirContext(), bundle)), evaluationSettings);
       result = this.activityDefinitionProcessor.apply(activityDefinition, patientId, encounterId,
           practitionerId, organizationId, userType, userLanguage, userTaskContext, setting,
-          settingContext, parameters, libraryEngine);
+          settingContext, parameters, engine);
       result.setId(referenceToContained
           ? new IdType(result.fhirType(), activityDefinition.getIdPart().replaceFirst("#", ""))
           : activityDefinition.getIdElement().withResourceType(result.fhirType()));
     } catch (Exception e) {
-      logger.error("ERROR: ActivityDefinition {} could not be applied and threw exception {}",
-          definition, e.toString());
+      var message =
+          String.format("ERROR: ActivityDefinition %s could not be applied and threw exception %s",
+              definition.asStringValue(), e.toString());
+      logger.error(message);
+      oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+          .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
     }
 
     return result;
@@ -422,11 +485,21 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup,
       CanonicalType definition) {
-    var planDefinition = (PlanDefinition) searchRepositoryByCanonical(repository, definition);
-    var result = (RequestGroup) applyPlanDefinition(planDefinition);
+    RequestGroup result = null;
+    try {
+      var planDefinition = (PlanDefinition) searchRepositoryByCanonical(repository, definition);
+      result = (RequestGroup) applyPlanDefinition(planDefinition);
 
-    for (var c : result.getInstantiatesCanonical()) {
-      requestGroup.addInstantiatesCanonical(c.getValueAsString());
+      for (var c : result.getInstantiatesCanonical()) {
+        requestGroup.addInstantiatesCanonical(c.getValueAsString());
+      }
+    } catch (Exception e) {
+      var message =
+          String.format("ERROR: PlanDefinition %s could not be applied and threw exception %s",
+              definition.asStringValue(), e.toString());
+      logger.error(message);
+      oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+          .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
     }
 
     return result;
@@ -474,8 +547,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var condition = new Extension();
         condition.setUrl("http://hl7.org/fhir/aphl/StructureDefinition/condition");
         condition.setValue(conditionComponent.getExpression());
-        if (conditionComponent.hasExtension(ALT_EXPRESSION_EXT)) {
-          condition.addExtension(conditionComponent.getExtensionByUrl(ALT_EXPRESSION_EXT));
+        if (conditionComponent.hasExtension(Constants.ALT_EXPRESSION_EXT)) {
+          condition
+              .addExtension(conditionComponent.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT));
         }
         task.addExtension(condition);
       }
@@ -612,73 +686,71 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return bundle;
   }
 
-  private void resolveDynamicValues(PlanDefinition planDefinition, RequestGroup requestGroup,
-      PlanDefinition.PlanDefinitionActionComponent action) {
-    action.getDynamicValue().forEach(dynamicValue -> {
-      if (dynamicValue.hasExpression()) {
-        String altLanguage = null;
-        String altExpression = null;
-        String altPath = null;
-        if (dynamicValue.hasExtension(ALT_EXPRESSION_EXT)) {
-          Extension altExtension = dynamicValue.getExtensionByUrl(ALT_EXPRESSION_EXT);
-          if (altExtension.hasValue() && altExtension.getValue() instanceof Expression) {
-            Expression altExpressionRes = (Expression) altExtension.getValue();
-            if (altExpressionRes.hasExpression()) {
-              altLanguage = altExpressionRes.getLanguage();
-              altExpression = altExpressionRes.getExpression();
-              altPath = dynamicValue.getPath();
-            }
-          }
-        }
-        resolveDynamicValue(dynamicValue.getExpression().getLanguage(),
-            dynamicValue.getExpression().getExpression(), dynamicValue.getPath(), altLanguage,
-            altExpression, altPath, planDefinition.getLibrary().get(0).getValueAsString(),
-            requestGroup, resolveInputParameters(action.getInput()));
+  private CqfExpression getCqfExpression(Expression expression, String defaultLibraryUrl,
+      Extension altExtension) {
+    var result = new CqfExpression().setExpression(expression.getExpression())
+        .setLanguage(expression.getLanguage())
+        .setLibraryUrl(expression.hasReference() ? expression.getReference() : defaultLibraryUrl);
+
+    if (altExtension != null && altExtension.hasValue()
+        && altExtension.getValue() instanceof Expression) {
+      final var altExpressionRes = (Expression) altExtension.getValue();
+      if (altExpressionRes.hasExpression()) {
+        result.setAltLanguage(altExpressionRes.getLanguage())
+            .setAltExpression(altExpressionRes.getExpression())
+            .setAltLibraryUrl(altExpressionRes.hasReference() ? altExpressionRes.getReference()
+                : defaultLibraryUrl);
       }
-    });
+    }
+    return result;
   }
 
-  private Boolean meetsConditions(PlanDefinition planDefinition, RequestGroup requestGroup,
-      PlanDefinition.PlanDefinitionActionComponent action) {
-    // Should we be resolving child actions regardless of whether the conditions are met?
-    if (action.hasAction()) {
-      for (var containedAction : action.getAction()) {
-        var metConditions = new HashMap<String, PlanDefinition.PlanDefinitionActionComponent>();
-        resolveAction(planDefinition, requestGroup, metConditions, containedAction);
-      }
-    }
-    if (planDefinition.getType().hasCoding()) {
-      var planDefinitionTypeCoding = planDefinition.getType().getCoding();
-      for (var coding : planDefinitionTypeCoding) {
-        if (coding.getCode().equals("workflow-definition")) {
-          // logger.info("Found a workflow definition type for PlanDefinition {}
-          // conditions should be evaluated at task execution time.",
-          // planDefinition.getUrl());
-          return true;
-        }
-      }
-    }
-    for (var condition : action.getCondition()) {
-      if (condition.hasExpression()) {
-        String altLanguage = null;
-        String altExpression = null;
-        if (condition.hasExtension(ALT_EXPRESSION_EXT)) {
-          Extension altExtension = condition.getExtensionByUrl(ALT_EXPRESSION_EXT);
-          if (altExtension.hasValue() && altExtension.getValue() instanceof Expression) {
-            Expression altExpressionRes = (Expression) altExtension.getValue();
-            if (altExpressionRes.hasExpression()) {
-              altLanguage = altExpressionRes.getLanguage();
-              altExpression = altExpressionRes.getExpression();
-            }
-          }
-        }
+  private void resolveDynamicValues(String defaultLibraryUrl, IElement requestAction,
+      IBase resource, PlanDefinition.PlanDefinitionActionComponent action) {
+    action.getDynamicValue().forEach(dynamicValue -> {
+      if (dynamicValue.hasExpression()) {
         Parameters inputParams = resolveInputParameters(action.getInput());
         if (parameters != null) {
           inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
         }
-        var result = resolveCondition(condition.getExpression().getLanguage(),
-            condition.getExpression().getExpression(), altLanguage, altExpression,
-            planDefinition.getLibrary().get(0).getValueAsString(), inputParams);
+        List<IBase> result = null;
+        try {
+          result =
+              resolveExpression(getCqfExpression(dynamicValue.getExpression(), defaultLibraryUrl,
+                  dynamicValue.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), inputParams);
+          resolveDynamicValue(result, dynamicValue.getPath(), requestAction, resource);
+        } catch (Exception e) {
+          var message = String.format("DynamicValue expression %s encountered exception: %s",
+              dynamicValue.getExpression().getExpression(), e.getMessage());
+          logger.error(message);
+          oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+              .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+        }
+      }
+    });
+  }
+
+  private Boolean meetsConditions(String defaultLibraryUrl,
+      PlanDefinition.PlanDefinitionActionComponent action) {
+    for (var condition : action.getCondition()) {
+      if (condition.hasExpression()) {
+        Parameters inputParams = resolveInputParameters(action.getInput());
+        if (parameters != null) {
+          inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
+        }
+        IBase result = null;
+        try {
+          var results =
+              resolveExpression(getCqfExpression(condition.getExpression(), defaultLibraryUrl,
+                  condition.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), inputParams);
+          result = results == null || results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+          var message = String.format("Condition expression %s encountered exception: %s",
+              condition.getExpression(), e.getMessage());
+          logger.error(message);
+          oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+              .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
+        }
         if (result == null) {
           logger.warn("Condition expression {} returned null",
               condition.getExpression().getExpression());

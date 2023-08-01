@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.questionnaire;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBase;
@@ -11,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -20,6 +23,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
   protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
 
   protected final ModelResolver modelResolver;
+  protected final EvaluationSettings evaluationSettings;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
 
@@ -29,8 +33,12 @@ public abstract class BaseQuestionnaireProcessor<T> {
   protected String libraryUrl;
   protected static final String subjectType = "Patient";
 
-  protected BaseQuestionnaireProcessor(Repository theRepository) {
-    repository = theRepository;
+  protected BaseQuestionnaireProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
+    this.repository = requireNonNull(repository, "repository can not be null");
+    this.evaluationSettings =
+        requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+
     modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
@@ -54,7 +62,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return prePopulate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId,
-        parameters, bundle, new LibraryEngine(repository));
+        parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
   }
 
   public abstract T prePopulate(T theQuestionnaire, String thePatientId,
@@ -66,7 +74,7 @@ public abstract class BaseQuestionnaireProcessor<T> {
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
     return populate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId, parameters,
-        bundle, new LibraryEngine(repository));
+        bundle, new LibraryEngine(repository, this.evaluationSettings));
   }
 
   public abstract IBaseResource populate(T theQuestionnaire, String thePatientId,

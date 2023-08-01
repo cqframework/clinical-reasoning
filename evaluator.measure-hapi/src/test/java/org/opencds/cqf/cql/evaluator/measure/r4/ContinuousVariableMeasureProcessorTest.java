@@ -1,21 +1,23 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
+public class ContinuousVariableMeasureProcessorTest {
 
-@Test(singleThreaded = true)
-public class ContinuousVariableMeasureProcessorTest extends BaseMeasureProcessorTest {
-
-  public ContinuousVariableMeasureProcessorTest() {
-    super("CMS111-bundle.json");
-  }
+  protected static Given given = Measure.given().repositoryFor("CMS111");
 
   @Test
   public void cms111_singlePatient() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/CMS111", "2019-01-01", "2020-01-01", "subject",
-        "measure-strat1-EXM111", null, null, endpoint, endpoint, endpoint, null);
-    validateGroup(report.getGroup().get(0), "initial-population", 1);
+    given.when()
+        .measureId("CMS111")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/measure-strat1-EXM111")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .population("initial-population").hasCount(1);
   }
 }

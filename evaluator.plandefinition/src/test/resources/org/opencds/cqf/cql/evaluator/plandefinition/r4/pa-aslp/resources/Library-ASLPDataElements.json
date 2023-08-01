@@ -455,7 +455,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "pa-aslp/cql/ASLPDataElements.cql"
+      "url": "../cql/ASLPDataElements.cql"
     }
   ]
 }

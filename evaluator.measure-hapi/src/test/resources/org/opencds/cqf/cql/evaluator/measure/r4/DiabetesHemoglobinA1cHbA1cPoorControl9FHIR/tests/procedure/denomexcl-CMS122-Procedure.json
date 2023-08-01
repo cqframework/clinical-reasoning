@@ -1,0 +1,23 @@
+{
+  "resourceType": "Procedure",
+  "id": "denomexcl-CMS122-Procedure",
+  "status": "completed",
+  "code": {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "112943005",
+      "display": "Epidural injection of anesthetic substance, diagnostic, caudal, continuous (procedure)"
+    } ],
+    "text": "General or Neuraxial Anesthesia"
+  },
+  "subject": {
+    "reference": "Patient/denomexcl-CMS122-Patient"
+  },
+  "encounter": {
+    "reference": "Encounter/denomexcl-CMS122-Encounter"
+  },
+  "performedPeriod": {
+    "start": "2019-01-17T08:30:00",
+    "end": "2019-01-17T10:30:00"
+  }
+}

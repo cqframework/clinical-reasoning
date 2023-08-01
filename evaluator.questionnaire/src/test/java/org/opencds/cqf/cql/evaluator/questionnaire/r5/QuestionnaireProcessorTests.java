@@ -8,7 +8,7 @@ import static org.testng.Assert.assertThrows;
 import java.util.List;
 
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.testng.annotations.Test;
 
@@ -28,10 +28,11 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPrePopulate_NoLibrary() {
-    var data = new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
+    var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .prePopulate().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
   }
@@ -70,10 +71,11 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPopulate_NoLibrary() {
-    var data = new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
+    var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
+        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+            "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .populate().isEqualsTo("questionnaire-response-populated-noLibrary.json");
   }

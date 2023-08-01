@@ -12,11 +12,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
@@ -33,6 +36,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public static final String MISSING_CODE_PROPERTY = "Missing required code property";
   private final IFhirPath fhirPath;
   private final ModelResolver modelResolver;
+  protected final EvaluationSettings evaluationSettings;
   protected Repository repository;
 
   protected String subjectId;
@@ -42,9 +46,11 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   protected IBaseParameters parameters;
   protected LibraryEngine libraryEngine;
 
-  protected BaseActivityDefinitionProcessor(Repository repository) {
-    requireNonNull(repository, "repository can not be null");
-    this.repository = repository;
+  protected BaseActivityDefinitionProcessor(Repository repository,
+      EvaluationSettings evaluationSettings) {
+    this.evaluationSettings =
+        requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+    this.repository = requireNonNull(repository, "repository can not be null");
     this.fhirPath = org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache
         .cachedForContext(repository.fhirContext());
     modelResolver = new FhirModelResolverFactory()
@@ -72,7 +78,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
 
     return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
-        parameters, new LibraryEngine(this.repository));
+        parameters, new LibraryEngine(this.repository, this.evaluationSettings));
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
@@ -109,12 +115,56 @@ public abstract class BaseActivityDefinitionProcessor<T> {
 
     var result = this.libraryEngine.getExpressionResult(this.subjectId, subjectType, expression,
         language, libraryUrl, this.parameters, null);
-    if (result != null && result.size() > 1) {
+    if (result == null || result.isEmpty()) {
+      return;
+    }
+    if (result.size() > 1) {
       throw new IllegalArgumentException(String.format(
           "Dynamic value resolution received multiple values for expression: %s", expression));
     }
-    var value = result == null || result.isEmpty() ? null : result.get(0);
-    modelResolver.setValue(resource, path, value);
+
+    if (path.contains(".")) {
+      setNestedValue(resource, path, result.get(0));
+    } else {
+      modelResolver.setValue(resource, path, result.get(0));
+    }
   }
 
+  protected void setNestedValue(IBase target, String path, IBase value) {
+    var def = (BaseRuntimeElementCompositeDefinition<?>) fhirContext()
+        .getElementDefinition(target.getClass());
+    var identifiers = path.split("\\.");
+    for (int i = 0; i < identifiers.length; i++) {
+      var identifier = identifiers[i];
+      var isList = identifier.contains("[");
+      var isLast = i == identifiers.length - 1;
+      var index =
+          isList ? Character.getNumericValue(identifier.charAt(identifier.indexOf("[") + 1)) : 0;
+      var targetPath = isList ? identifier.replaceAll("\\[\\d\\]", "") : identifier;
+      var targetDef = def.getChildByName(targetPath);
+
+      var targetValues = targetDef.getAccessor().getValues(target);
+      IBase targetValue;
+      if (targetValues.size() >= index + 1 && !isLast) {
+        targetValue = targetValues.get(index);
+      } else {
+        var elementDef = targetDef.getChildByName(targetPath);
+        if (isLast) {
+          targetValue = (IBase) modelResolver.as(value, elementDef.getImplementingClass(), false);
+        } else {
+          targetValue = elementDef.newInstance(targetDef.getInstanceConstructorArguments());
+        }
+        targetDef.getMutator().addValue(target, targetValue);
+      }
+      target = targetValue;
+      if (!isLast) {
+        var nextDef = fhirContext().getElementDefinition(target.getClass());
+        def = (BaseRuntimeElementCompositeDefinition<?>) nextDef;
+      }
+    }
+  }
+
+  protected FhirContext fhirContext() {
+    return repository.fhirContext();
+  }
 }

@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.testng.annotations.Test;
@@ -32,11 +32,11 @@ public class R4RepositoryTest {
     var fhirContext = FhirContext.forR4Cached();
 
 
-    TestRepository data =
-        new TestRepository(fhirContext, this.getClass(), List.of("res/tests"), false);
-    TestRepository content =
-        new TestRepository(fhirContext, this.getClass(), List.of("res/resources/"), false);
-    TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
+    var data =
+        new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("res/tests"), false);
+    var content =
+        new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("res/resources/"), false);
+    var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
         List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
 
     repository = Repositories.proxy(data, content, terminology);
@@ -44,13 +44,13 @@ public class R4RepositoryTest {
 
   @Test
   public void testRead() {
-    IBaseResource res = repository.read(Patient.class, new IdType("example"), null);
+    IBaseResource res = repository.read(Patient.class, new IdType("Patient/example"), null);
     assertEquals(res.getIdElement().getIdPart(), "example");
   }
 
   @Test
   public void testReadLibrary() throws IOException {
-    Library res = repository.read(Library.class, new IdType("dependency-example"), null);
+    Library res = repository.read(Library.class, new IdType("Library/dependency-example"), null);
     assertEquals(res.getIdElement().getIdPart(), "dependency-example");
     assertTrue(IOUtils.toString(new ByteArrayInputStream(res.getContent().get(0).getData()),
         StandardCharsets.UTF_8).startsWith("library DependencyExample version '0.1.0'"));

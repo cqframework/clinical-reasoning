@@ -1,0 +1,992 @@
+{
+  "resourceType": "Measure",
+  "id": "DM1Measure",
+  "meta": {
+    "profile": [ "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/FilterableRelationMeasure", "http://cds.optum.com/fhir/StructureDefinition/FilterableRelationMeasure", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/executable-measure-cqfm", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm" ]
+  },
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/Measure/DM1Measure",
+  "version": "1.0.1",
+  "name": "A1cOver9LastVisitOver6Months",
+  "title": "A1c > 9 and last visit > 6 months",
+  "status": "active",
+  "experimental": true,
+  "date": "2022-06-01",
+  "publisher": "Optum",
+  "contact": [ {
+    "telecom": [ {
+      "system": "url",
+      "value": "http://www.hl7.org/Special/committees/cqi/index.cfm"
+    } ]
+  } ],
+  "description": "Percentage of patients > 18 years of age with diabetes who had hemoglobin A1c > 9.0% during the measurement period",
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "program"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/quality-programs",
+        "code": "ep-ec",
+        "display": "EP/EC"
+      } ]
+    }
+  } ],
+  "jurisdiction": [ {
+    "coding": [ {
+      "system": "urn:iso:std:iso:3166",
+      "code": "US"
+    } ]
+  } ],
+  "purpose": "Improve healthcare",
+  "approvalDate": "2022-01-01",
+  "lastReviewDate": "2022-06-01",
+  "effectivePeriod": {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectivePeriodDuration",
+      "valueDuration": {
+        "value": 2,
+        "system": "http://unitsofmeasure.org",
+        "code": "a"
+      }
+    } ]
+  },
+  "topic": [ {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "57024-2",
+      "display": "Health Quality Measure Document"
+    } ]
+  } ],
+  "library": [ "http://cds.optum.com/dqm-diabetes/fhir/Library/DM1" ],
+  "disclaimer": "The performance Measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications. THE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND.\n \nDue to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "proportion",
+      "display": "Proportion"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "code": "process"
+    } ]
+  } ],
+  "rationale": "Diabetes is the seventh leading cause of death in the United States. In 2017, diabetes affected approximately 34 million Americans (10.5 percent of the U.S. population) and killed approximately 84,000 people (Centers for Disease Control and Prevention [CDC], 2020a). Diabetes is a long-lasting disease marked by high blood glucose levels, resulting from the body's inability to produce or use insulin properly (CDC, 2020a). People with diabetes are at increased risk of serious health complications including vision loss, heart disease, stroke, kidney damage, and amputation of feet or legs (CDC, 2018). \n\nIn 2017, diabetes cost the U.S. an estimated $327 billion: $237 billion in direct medical costs and $90 billion in reduced productivity. This is a 34 percent increase from the estimated $245 billion spent on diabetes in 2012 (American Diabetes Association [ADA], 2018).  \n\nControlling A1c blood levels helps reduce the risk of microvascular complications (eye, kidney and nerve diseases) (ADA, 2020).",
+  "clinicalRecommendationStatement": "American Diabetes Association (2020):\n\n- An A1C goal for many nonpregnant adults of <7% (53 mmol/mol) is appropriate. (Level of evidence: A)\n\n- On the basis of provider judgement and patient preference, achievement of lower A1C goals (such as <6.5%) may be acceptable if this can be achieved safely without significant hypoglycemia or other adverse effects of treatment. (Level of evidence: C)\n\n- Less stringent A1C goals (such as <8% [64 mmol/mol]) may be appropriate for patients with a history of severe hypoglycemia, limited life expectancy, advanced microvascular or macrovascular complications, extensive comorbid conditions, or long-standing diabetes in whom the goal is difficult to achieve despite diabetes self-management education, appropriate glucose monitoring, and effective doses of multiple glucose-lowering agents including insulin. (Level of evidence: B)",
+  "improvementNotation": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+      "code": "decrease",
+      "display": "Decreased score indicates improvement"
+    } ]
+  },
+  "guidance": "If the HbA1c test result is in the medical record, the test can be used to determine numerator compliance.\n\nOnly patients with a diagnosis of Type 1 or Type 2 diabetes should be included in the denominator of this measure; patients with a diagnosis of secondary diabetes due to another condition should not be included.\n\nThis eCQM is a patient-based measure.\n\nThis FHIR-based measure has been derived from the QDM-based measure: CMS122v10",
+  "group": [ {
+    "population": [ {
+      "id": "initial-population",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "Initial Population"
+      }
+    }, {
+      "id": "denominator",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "Denominator"
+      }
+    }, {
+      "id": "denominator-exclusion",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator-exclusion",
+          "display": "Denominator Exclusion"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "Denominator Exclusion"
+      }
+    }, {
+      "id": "numerator",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "Numerator"
+      }
+    } ]
+  } ],
+  "supplementalData": [ {
+    "id": "SDEPractitioner",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": false
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SDEElement",
+      "valueString": "Practitioner.name.given | Practitioner.name.family"
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIColumns",
+        "code": "provider",
+        "display": "Provider"
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEPractitioner"
+    }
+  }, {
+    "id": "SDEDaysSinceAppointment",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": false
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SDEElement",
+      "valueString": "Observation.valueCodeableConcept.coding.code"
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIColumns",
+        "code": "days-since-appointment",
+        "display": "Days Since Appt."
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEDaysSinceAppointment"
+    }
+  }, {
+    "id": "SDELastAppointmentDate",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": false
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SDEElement",
+      "valueString": "Encounter.period.end"
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIColumns",
+        "code": "last-appointment-date",
+        "display": "Last Appt."
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDELastAppointmentDate"
+    }
+  }, {
+    "id": "SDEA1C",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": false
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SDEElement",
+      "valueString": "Observation.valueQuantity.value"
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIColumns",
+        "code": "a1c",
+        "display": "A1C"
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEA1C"
+    }
+  }, {
+    "id": "SDEPractitionersListFilter",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": true
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SDEElement",
+      "valueString": "Practitioner.name.given | Practitioner.name.family"
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIFilters",
+        "code": "provider-filter",
+        "display": "Provider"
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEFilterPractitionersList"
+    }
+  }, {
+    "id": "SDELastAppointmentFilter",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": true
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 1
+      }, {
+        "url": "title",
+        "valueString": "Last month"
+      }, {
+        "url": "type",
+        "valueCode": "Encounter"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "type:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "date"
+        }, {
+          "url": "value",
+          "valueString": "gt{{today() - 1 month}}"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 2
+      }, {
+        "url": "title",
+        "valueString": "Last 2 months"
+      }, {
+        "url": "type",
+        "valueCode": "Encounter"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "type:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "date"
+        }, {
+          "url": "value",
+          "valueString": "gt{{today() - 2 months}}"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 3
+      }, {
+        "url": "title",
+        "valueString": "Last 3 months"
+      }, {
+        "url": "type",
+        "valueCode": "Encounter"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "type:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "date"
+        }, {
+          "url": "value",
+          "valueString": "gt{{today() - 3 months}}"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 4
+      }, {
+        "url": "title",
+        "valueString": "Last 6 months"
+      }, {
+        "url": "type",
+        "valueCode": "Encounter"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "type:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "date"
+        }, {
+          "url": "value",
+          "valueString": "gt{{today() - 6 months}}"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 5
+      }, {
+        "url": "title",
+        "valueString": "Last year"
+      }, {
+        "url": "type",
+        "valueCode": "Encounter"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "type:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "date"
+        }, {
+          "url": "value",
+          "valueString": "gt{{today() - 1 year}}"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 6
+      }, {
+        "url": "title",
+        "valueString": "Last 2 years"
+      }, {
+        "url": "type",
+        "valueCode": "Encounter"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "type:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025%2Chttp://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "date"
+        }, {
+          "url": "value",
+          "valueString": "gt{{today() - 2 years}}"
+        } ]
+      } ]
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIFilters",
+        "code": "last-appointment-date-filter",
+        "display": "Last Appt."
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEFilterLastAppointment"
+    }
+  }, {
+    "id": "SDEA1cFilter",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": true
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 1
+      }, {
+        "url": "title",
+        "valueString": ">1"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013%2C"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt1%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 2
+      }, {
+        "url": "title",
+        "valueString": ">2"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt2%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 3
+      }, {
+        "url": "title",
+        "valueString": ">3"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt3%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 4
+      }, {
+        "url": "title",
+        "valueString": ">4"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt4%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 5
+      }, {
+        "url": "title",
+        "valueString": ">5"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt5%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 6
+      }, {
+        "url": "title",
+        "valueString": ">6"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt6%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 7
+      }, {
+        "url": "title",
+        "valueString": ">7"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt7%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 8
+      }, {
+        "url": "title",
+        "valueString": ">8"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt8%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 9
+      }, {
+        "url": "title",
+        "valueString": ">9"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt9%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 10
+      }, {
+        "url": "title",
+        "valueString": ">10"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt10%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 11
+      }, {
+        "url": "title",
+        "valueString": ">11"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt11%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 12
+      }, {
+        "url": "title",
+        "valueString": ">12"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt12%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 13
+      }, {
+        "url": "title",
+        "valueString": ">13"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt13%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 14
+      }, {
+        "url": "title",
+        "valueString": ">14"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt14%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    }, {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchFilterOption",
+      "extension": [ {
+        "url": "rank",
+        "valuePositiveInt": 15
+      }, {
+        "url": "title",
+        "valueString": ">15"
+      }, {
+        "url": "type",
+        "valueCode": "Observation"
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "code:in"
+        }, {
+          "url": "value",
+          "valueString": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+        } ]
+      }, {
+        "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/SearchParameter",
+        "extension": [ {
+          "url": "name",
+          "valueString": "value-quantity"
+        }, {
+          "url": "value",
+          "valueString": "gt15%7Chttp://unitsofmeasure.org%7C%25"
+        } ]
+      } ]
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIFilters",
+        "code": "a1c-filter",
+        "display": "A1C"
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEFilterA1C"
+    }
+  }, {
+    "id": "SDEResourceConstructionTest",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": false
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIColumns",
+        "code": "construction-test"
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEResourceConstructionTest"
+    }
+  }, {
+    "id": "SDEResourceConstructionTestInlib",
+    "extension": [ {
+      "url": "http://cds.optum.com/dqm-diabetes/fhir/StructureDefinition/Filterable",
+      "valueBoolean": false
+    } ],
+    "code": {
+      "coding": [ {
+        "system": "http://cds.optum.com/dqm-diabetes/fhir/CodeSystem/UIColumns",
+        "code": "construction-test"
+      } ]
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql-identifier",
+      "expression": "SDEResourceConstructionTestInlib"
+    }
+  } ]
+}

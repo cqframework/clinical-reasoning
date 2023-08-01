@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,11 @@ public class ActivityDefinitionProcessor
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
   public ActivityDefinitionProcessor(Repository repository) {
-    super(repository);
+    this(repository, EvaluationSettings.getDefault());
+  }
+
+  public ActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    super(repository, evaluationSettings);
   }
 
   @Override
@@ -119,28 +124,19 @@ public class ActivityDefinitionProcessor
         throw new FHIRException(msg);
     }
 
+    var defaultLibraryUrl =
+        activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getReference()
+            : null;
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
         resolveDynamicValue(dynamicValue.getLanguage(), dynamicValue.getExpression(),
-            activityDefinition.getLibrary().get(0).getReference(), dynamicValue.getPath(), result,
+            defaultLibraryUrl, dynamicValue.getPath(), result,
             "Patient");
       }
     }
 
     return result;
   }
-
-  // @Override
-  // public Object resolveParameterValue(IBase value) {
-  // if (value == null)
-  // return null;
-  // return ((Parameters.ParametersParameterComponent) value).getValue();
-  // }
-
-  // @Override
-  // public IBaseResource getSubject(String subjectType) {
-  // return this.fhirDal.read(new IdType(subjectType, this.subjectId));
-  // }
 
   private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {
     Task task = new Task();

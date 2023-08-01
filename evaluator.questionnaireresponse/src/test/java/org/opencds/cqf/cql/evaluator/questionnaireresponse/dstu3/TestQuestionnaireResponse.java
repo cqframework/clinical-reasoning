@@ -11,7 +11,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
+import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.parser.IParser;
 public class TestQuestionnaireResponse {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+  private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
   private static InputStream open(String asset) {
     return TestQuestionnaireResponse.class.getResourceAsStream(asset);
@@ -47,7 +49,7 @@ public class TestQuestionnaireResponse {
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static Extract that(String questionnaireResponseName) {
       return new Extract(questionnaireResponseName);
     }
@@ -61,18 +63,18 @@ public class TestQuestionnaireResponse {
 
     public Extract(String questionnaireResponseName) {
       baseResource = (QuestionnaireResponse) parse(questionnaireResponseName);
-      TestRepository data =
-          new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
-      TestRepository content =
-          new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
-      TestRepository terminology = new TestRepository(fhirContext, this.getClass(),
+      var data =
+          new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+      var content =
+          new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+      var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
           List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
       this.repository = Repositories.proxy(data, content, terminology);
     }
 
     public GeneratedBundle extract() {
-      var libraryEngine = new LibraryEngine(repository);
+      var libraryEngine = new LibraryEngine(repository, evaluationSettings);
       return new GeneratedBundle(
           (Bundle) buildProcessor(repository).extract(baseResource, null, null, libraryEngine));
     }

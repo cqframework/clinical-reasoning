@@ -1,39 +1,42 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.ItemValueTransformer.transformValue;
+
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import java.util.List;
 
-public class ElementHasCqfExtension {
+public class ElementHasCqfExpression {
   protected String patientId;
   protected IBaseBundle bundle;
   protected IBaseParameters parameters;
   protected LibraryEngine libraryEngine;
   protected String subjectType = "Patient";
 
-  public ElementHasCqfExtension(
+  public ElementHasCqfExpression(
       String thePatientId,
       IBaseParameters theParameters,
       IBaseBundle theBundle,
-      LibraryEngine theLibraryEngine
-  ) {
+      LibraryEngine theLibraryEngine) {
     patientId = thePatientId;
     parameters = theParameters;
     bundle = theBundle;
     libraryEngine = theLibraryEngine;
   }
 
-  public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent questionnaireItem) {
+  public QuestionnaireItemComponent addProperties(ElementDefinition element,
+      QuestionnaireItemComponent questionnaireItem) {
     final Expression expression = getExpression(element);
     final List<IBase> results = getExpressionResults(expression);
     results.forEach(result -> {
@@ -53,7 +56,7 @@ public class ElementHasCqfExtension {
   }
 
   void addTypeValue(IBase result, QuestionnaireItemComponent questionnaireItem) {
-    final Type type = (Type) result;
+    final Type type = transformValue((Type) result);
     questionnaireItem.addInitial().setValue(type);
   }
 
@@ -65,8 +68,7 @@ public class ElementHasCqfExtension {
         expression.getLanguage(),
         expression.getReference(),
         parameters,
-        this.bundle
-    );
+        this.bundle);
   }
 
   protected Expression getExpression(ElementDefinition element) {

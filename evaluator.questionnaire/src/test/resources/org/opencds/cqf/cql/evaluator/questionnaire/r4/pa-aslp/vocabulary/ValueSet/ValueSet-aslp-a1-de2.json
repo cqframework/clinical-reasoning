@@ -44,5 +44,44 @@
         ]
       }
     ]
+  },
+  "expansion": {
+    "contains": [
+      {
+        "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+        "code": "ASLP.A1.DE2",
+        "display": "Home sleep apnea testing (HSAT)"
+      },
+      {
+        "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+        "code": "ASLP.A1.DE3",
+        "display": "Peripheral artery tonometry (PAT)"
+      },
+      {
+        "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+        "code": "ASLP.A1.DE4",
+        "display": "Actigraphy"
+      },
+      {
+        "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+        "code": "ASLP.A1.DE5",
+        "display": "Prescreening devices or procedures"
+      },
+      {
+        "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+        "code": "ASLP.A1.DE6",
+        "display": "Acoustic pharyngometry"
+      },
+      {
+        "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+        "code": "ASLP.A1.DE7",
+        "display": "Digital therapeutics"
+      },
+      {
+        "system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+        "code": "ASLP.A1.DE8",
+        "display": "Home oximetry monitoring"
+      }
+    ]
   }
 }

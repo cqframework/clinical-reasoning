@@ -14,59 +14,57 @@ import org.slf4j.LoggerFactory;
 
 public class NestedQuestionnaireItemService {
   protected QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
-  protected ElementIsFixedOrHasPattern elementIsFixedOrHasPattern;
-  protected ElementHasCqfExtension elementHasCqfExtension;
+  protected ElementHasDefaultValue elementHasDefaultValue;
+  protected ElementHasCqfExpression elementHasCqfExpression;
   protected static final String ITEM_TYPE_ERROR = "Unable to determine type for element: %s";
-  protected static final Logger logger = LoggerFactory.getLogger(NestedQuestionnaireItemService.class);
+  protected static final Logger logger =
+      LoggerFactory.getLogger(NestedQuestionnaireItemService.class);
 
   public static NestedQuestionnaireItemService of(
       Repository repository,
       String patientId,
       IBaseParameters parameters,
       IBaseBundle bundle,
-      LibraryEngine libraryEngine
-  ) {
-    final QuestionnaireTypeIsChoice questionnaireTypeIsChoice = QuestionnaireTypeIsChoice.of(repository);
-    final ElementIsFixedOrHasPattern elementIsFixedOrHasPattern = new ElementIsFixedOrHasPattern();
-    final ElementHasCqfExtension elementHasCqfExtension = new ElementHasCqfExtension(
+      LibraryEngine libraryEngine) {
+    final QuestionnaireTypeIsChoice questionnaireTypeIsChoice =
+        QuestionnaireTypeIsChoice.of(repository);
+    final ElementHasDefaultValue elementHasDefault = new ElementHasDefaultValue();
+    final ElementHasCqfExpression elementHasCqfExpression = new ElementHasCqfExpression(
         patientId,
         parameters,
         bundle,
-        libraryEngine
-    );
+        libraryEngine);
     return new NestedQuestionnaireItemService(
         questionnaireTypeIsChoice,
-        elementIsFixedOrHasPattern,
-        elementHasCqfExtension
-    );
+        elementHasDefault,
+        elementHasCqfExpression);
   }
 
   NestedQuestionnaireItemService(
-      QuestionnaireTypeIsChoice theQuestionnaireTypeIsChoice,
-      ElementIsFixedOrHasPattern theElementIsFixedOrHasPattern,
-      ElementHasCqfExtension theElementHasCqfExtension
-  ) {
-    questionnaireTypeIsChoice = theQuestionnaireTypeIsChoice;
-    elementIsFixedOrHasPattern = theElementIsFixedOrHasPattern;
-    elementHasCqfExtension = theElementHasCqfExtension;
+      QuestionnaireTypeIsChoice questionnaireTypeIsChoice,
+      ElementHasDefaultValue elementHasDefaultValue,
+      ElementHasCqfExpression elementHasCqfExpression) {
+    this.questionnaireTypeIsChoice = questionnaireTypeIsChoice;
+    this.elementHasDefaultValue = elementHasDefaultValue;
+    this.elementHasCqfExpression = elementHasCqfExpression;
   }
 
   public QuestionnaireItemComponent getNestedQuestionnaireItem(
       StructureDefinition profile,
       ElementDefinition element,
-      String childLinkId
-  ) {
+      String childLinkId) {
     final QuestionnaireItemType itemType = getItemType(element);
-    QuestionnaireItemComponent item = initializeQuestionnaireItem(itemType, profile, element, childLinkId);
+    QuestionnaireItemComponent item =
+        initializeQuestionnaireItem(itemType, profile, element, childLinkId);
     if (itemType == QuestionnaireItemType.CHOICE) {
       item = questionnaireTypeIsChoice.addProperties(element, item);
     }
     if (element.hasFixedOrPattern()) {
-      item = elementIsFixedOrHasPattern.addProperties(element, item);
+      item = elementHasDefaultValue.addProperties(element.getFixedOrPattern(), item);
     } else if (element.hasDefaultValue()) {
-      item.addInitial().setValue(element.getDefaultValue());
+      item = elementHasDefaultValue.addProperties(element.getDefaultValue(), item);
     } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
-      item = elementHasCqfExtension.addProperties(element, item);
+      item = elementHasCqfExpression.addProperties(element, item);
     }
     item.setRequired(element.hasMin() && element.getMin() == 1);
     // set repeat based on? if expression result type is a list?
@@ -79,8 +77,7 @@ public class NestedQuestionnaireItemService {
       QuestionnaireItemType itemType,
       StructureDefinition profile,
       ElementDefinition element,
-      String childLinkId
-  ) {
+      String childLinkId) {
     final String definition = profile.getUrl() + "#" + element.getPath();
     final String childText = getElementText(element);
     return new QuestionnaireItemComponent()
@@ -118,10 +115,10 @@ public class NestedQuestionnaireItemService {
   }
 
   public String getElementText(ElementDefinition element) {
-    return element.hasLabel() ? element.getLabel() : getElementDefinition(element);
+    return element.hasLabel() ? element.getLabel() : getElementDescription(element);
   }
 
-  protected String getElementDefinition(ElementDefinition element) {
+  protected String getElementDescription(ElementDefinition element) {
     return element.hasShort() ? element.getShort() : element.getPath();
   }
 }

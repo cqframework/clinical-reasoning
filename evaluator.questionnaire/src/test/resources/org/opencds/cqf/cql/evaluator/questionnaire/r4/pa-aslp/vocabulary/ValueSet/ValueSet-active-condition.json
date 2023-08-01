@@ -85,5 +85,24 @@
         ]
       }
     ]
+  },
+  "expansion": {
+    "contains": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active",
+        "display": "Active"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "recurrence",
+        "display": "Recurrence"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "relapse",
+        "display": "Relapse"
+      }
+    ]
   }
 }

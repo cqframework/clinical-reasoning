@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
 
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,11 +20,10 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
-
 public class QuestionnaireItemGenerator {
   protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireItemGenerator.class);
-  protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
+  protected static final String NO_PROFILE_ERROR =
+      "No profile defined for input. Unable to generate item.";
   protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
   protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
   protected Repository repository;
@@ -35,40 +36,39 @@ public class QuestionnaireItemGenerator {
       String patientId,
       IBaseParameters parameters,
       IBaseBundle bundle,
-      LibraryEngine libraryEngine
-  ) {
+      LibraryEngine libraryEngine) {
     QuestionnaireItemService questionnaireItemService = new QuestionnaireItemService();
-    NestedQuestionnaireItemService nestedQuestionnaireItemService = NestedQuestionnaireItemService.of(
-        repository,
-        patientId,
-        parameters,
-        bundle,
-        libraryEngine
-    );
-    return new QuestionnaireItemGenerator(repository, questionnaireItemService, nestedQuestionnaireItemService);
+    NestedQuestionnaireItemService nestedQuestionnaireItemService =
+        NestedQuestionnaireItemService.of(
+            repository,
+            patientId,
+            parameters,
+            bundle,
+            libraryEngine);
+    return new QuestionnaireItemGenerator(repository, questionnaireItemService,
+        nestedQuestionnaireItemService);
   }
 
   QuestionnaireItemGenerator(
-      Repository theRepository,
-      QuestionnaireItemService theQuestionnaireItemService,
-      NestedQuestionnaireItemService theNestedQuestionnaireItemService
-  ) {
-      repository = theRepository;
-      questionnaireItemService = theQuestionnaireItemService;
-      nestedQuestionnaireItemService = theNestedQuestionnaireItemService;
+      Repository repository,
+      QuestionnaireItemService questionnaireItemService,
+      NestedQuestionnaireItemService nestedQuestionnaireItemService) {
+    this.repository = repository;
+    this.questionnaireItemService = questionnaireItemService;
+    this.nestedQuestionnaireItemService = nestedQuestionnaireItemService;
   }
 
   public Questionnaire.QuestionnaireItemComponent generateItem(
       DataRequirement actionInput,
-      int itemCount
-  ) {
+      int itemCount) {
     if (!actionInput.hasProfile()) {
       throw new IllegalArgumentException(NO_PROFILE_ERROR);
     }
     final String linkId = String.valueOf(itemCount + 1);
     try {
       final StructureDefinition profile = (StructureDefinition) getProfileDefinition(actionInput);
-      this.questionnaireItem = questionnaireItemService.createQuestionnaireItem(actionInput, linkId, profile);
+      this.questionnaireItem =
+          questionnaireItemService.createQuestionnaireItem(actionInput, linkId, profile);
       processElements(profile);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
@@ -78,9 +78,7 @@ public class QuestionnaireItemGenerator {
     return questionnaireItem;
   }
 
-  protected void processElements(
-      StructureDefinition profile
-  ) {
+  protected void processElements(StructureDefinition profile) {
     int childCount = questionnaireItem.getItem().size();
     for (ElementDefinition element : getElementsWithNonNullElementType(profile)) {
       childCount++;
@@ -91,15 +89,15 @@ public class QuestionnaireItemGenerator {
   protected void processElement(
       StructureDefinition profile,
       ElementDefinition element,
-      int childCount
-  ) {
-    final String childLinkId = String.format(CHILD_LINK_ID_FORMAT, questionnaireItem.getLinkId(), childCount);
+      int childCount) {
+    final String childLinkId =
+        String.format(CHILD_LINK_ID_FORMAT, questionnaireItem.getLinkId(), childCount);
     try {
-      final QuestionnaireItemComponent nestedQuestionnaireItem = nestedQuestionnaireItemService.getNestedQuestionnaireItem(
-          profile,
-          element,
-          childLinkId
-      );
+      final QuestionnaireItemComponent nestedQuestionnaireItem =
+          nestedQuestionnaireItemService.getNestedQuestionnaireItem(
+              profile,
+              element,
+              childLinkId);
       questionnaireItem.addItem(nestedQuestionnaireItem);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
@@ -115,27 +113,15 @@ public class QuestionnaireItemGenerator {
         .collect(Collectors.toList());
   }
 
-  protected Questionnaire.QuestionnaireItemComponent createErrorItem(String linkId, String errorMessage) {
-    return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY).setText(errorMessage);
+  protected Questionnaire.QuestionnaireItemComponent createErrorItem(String linkId,
+      String errorMessage) {
+    return new QuestionnaireItemComponent().setLinkId(linkId).setType(QuestionnaireItemType.DISPLAY)
+        .setText(errorMessage);
   }
 
   protected String getElementType(ElementDefinition element) {
     return element.hasType() ? element.getType().get(0).getCode() : null;
-    // StructureDefinition profile) {
-    // if (elementType == null) {
-    // var snapshot = profile.getSnapshot().getElement().stream().filter(e ->
-    // e.getId().equals(element.getId())).collect(Collectors.toList());
-    // elementType = snapshot == null || snapshot.size() == 0 ? null : snapshot.get(0).hasType()
-    // ? snapshot.get(0).getType().get(0).getCode() : null;
-    // }
-    // return elementType;
   }
-
-
-
-//  protected StructureDefinition getProfileDefinition(DataRequirement actionInput) {
-//    return (StructureDefinition) searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));
-//  }
 
   protected Resource getProfileDefinition(DataRequirement actionInput) {
     return searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));

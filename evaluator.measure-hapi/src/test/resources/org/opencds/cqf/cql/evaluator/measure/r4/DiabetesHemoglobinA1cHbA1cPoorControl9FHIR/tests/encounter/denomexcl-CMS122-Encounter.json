@@ -1,0 +1,46 @@
+{
+  "resourceType": "Encounter",
+  "id": "denomexcl-CMS122-Encounter",
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "IMP",
+    "display": "inpatient encounter"
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "32485007",
+      "display": "Encounter Inpatient"
+    } ],
+    "text": "Inpatient Admission"
+  } ],
+  "subject": {
+    "reference": "Patient/denomexcl-CMS122-Patient"
+  },
+  "period": {
+    "start": "2019-01-16T08:30:00",
+    "end": "2019-01-20T08:30:00"
+  },
+  "diagnosis": [ {
+    "condition": {
+      "display": "Cardiac arrest as a complication of care (disorder)"
+    },
+    "use": {
+      "coding": [ {
+        "system": "2.16.840.1.113883.6.96",
+        "code": "213213007",
+        "display": "Cardiopulmonary arrest"
+      } ]
+    }
+  } ],
+  "hospitalization": {
+    "dischargeDisposition": {
+      "coding": [ {
+        "system": "http://snomed.info/sct",
+        "code": "428361000124107",
+        "display": "Discharge to home for hospice care (procedure)"
+      } ]
+    }
+  }
+}

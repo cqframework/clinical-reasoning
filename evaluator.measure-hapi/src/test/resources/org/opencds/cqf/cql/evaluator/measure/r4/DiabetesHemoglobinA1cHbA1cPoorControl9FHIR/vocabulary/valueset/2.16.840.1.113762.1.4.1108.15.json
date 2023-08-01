@@ -1,0 +1,43 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1108.15",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/valueset-warning",
+    "valueMarkdown": "CAUTION: The compose element in this ValueSet resource was inferred from the expansion element. It is NOT an authoritative definition of the value set and is provided only for convenience for systems that assume a compose will be present."
+  } ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1108.15"
+  } ],
+  "version": "20170504",
+  "name": "Hospicecareambulatory",
+  "title": "Hospice care ambulatory",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "compose": {
+    "include": [ {
+      "system": "http://snomed.info/sct",
+      "concept": [ {
+        "code": "385763009",
+        "display": "Hospice care (regime/therapy)"
+      }, {
+        "code": "385765002",
+        "display": "Hospice care management (procedure)"
+      } ]
+    } ]
+  },
+  "expansion": {
+    "timestamp": "2021-08-11T18:13:40-06:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "code": "385763009",
+      "display": "Hospice care (regime/therapy)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "385765002",
+      "display": "Hospice care management (procedure)"
+    } ]
+  }
+}

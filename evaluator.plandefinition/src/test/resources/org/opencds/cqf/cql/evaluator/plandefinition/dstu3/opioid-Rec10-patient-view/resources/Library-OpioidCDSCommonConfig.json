@@ -153,7 +153,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "opioid-Rec10-patient-view/cql/OpioidCDSCommonConfig.cql"
+      "url": "../cql/OpioidCDSCommonConfig.cql"
     }
   ]
 }

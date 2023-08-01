@@ -1,0 +1,65 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1047.102",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1047.102",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113762.1.4.1047.102"
+  } ],
+  "version": "20170504",
+  "name": "Rhabdomyolysis",
+  "title": "Rhabdomyolysis",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:48-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "M62.82",
+      "display": "Rhabdomyolysis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T79.6XXA",
+      "display": "Traumatic ischemia of muscle, initial encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T79.6XXD",
+      "display": "Traumatic ischemia of muscle, subsequent encounter"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "version": "2020",
+      "code": "T79.6XXS",
+      "display": "Traumatic ischemia of muscle, sequela"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "23697004",
+      "display": "Crush syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240125008",
+      "display": "Muscle crush syndrome (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240131006",
+      "display": "Rhabdomyolysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "240132004",
+      "display": "Non-traumatic rhabdomyolysis (disorder)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "72960004",
+      "display": "Exertional rhabdomyolysis (disorder)"
+    } ]
+  }
+}

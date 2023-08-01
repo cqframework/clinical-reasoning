@@ -1,0 +1,113 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "eKm5YPQSGUCrjKxilnWoJz1vdAFOHdedGVMT-EMvVSCc3",
+  "identifier": [ {
+    "use": "official",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code": "PLAC",
+        "display": "Placer Identifier"
+      } ],
+      "text": "Placer Identifier"
+    },
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.798268",
+    "value": "101960085"
+  }, {
+    "use": "official",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code": "FILL",
+        "display": "Filler Identifier"
+      } ],
+      "text": "Filler Identifier"
+    },
+    "system": "urn:oid:1.2.840.114350.1.13.277.3.7.3.798268.800",
+    "value": "C10411065:11"
+  }, {
+    "use": "official",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code": "FILL",
+        "display": "Filler Identifier"
+      } ],
+      "text": "Filler Identifier"
+    },
+    "system": "https://open.epic.com/FHIR/277/order-accession-number/LIS",
+    "value": "C10411065"
+  } ],
+  "basedOn": [ {
+    "reference": "ServiceRequest/eCuiNdfP6vp8UiJegckfNCQLOLefcqHvvoozcQ-2uEJo3",
+    "type": "ServiceRequest"
+  } ],
+  "status": "final",
+  "category": [ {
+    "coding": [ {
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.10.798268.30",
+      "code": "Microbiology"
+    } ],
+    "text": "Microbiology"
+  }, {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+      "code": "LAB",
+      "display": "Laboratory"
+    } ],
+    "text": "Laboratory"
+  } ],
+  "code": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "17928-3"
+    }, {
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.2.696580",
+      "code": "7564",
+      "display": "BLOOD CULTURE"
+    }, {
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.5.737384.74",
+      "code": "BLD"
+    } ],
+    "text": "Blood Culture, Aerobic and Anaerobic Peripheral; Blood"
+  },
+  "subject": {
+    "reference": "Patient/eNeMVHWfNoTsMTbrwWQQ30A3",
+    "display": "Hob, Hobevent"
+  },
+  "encounter": {
+    "reference": "Encounter/e2RfNK8qdAWCAGOZ2ay3S3A3",
+    "identifier": {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.277.3.7.3.698084.8",
+      "value": "1000518445"
+    },
+    "display": "Hospital Encounter"
+  },
+  "effectiveDateTime": "2023-01-05T04:25:00Z",
+  "issued": "2023-01-08T21:08:00Z",
+  "performer": [ {
+    "reference": "Practitioner/eFmGhJg.OtWkLRQ5qBvdscA3",
+    "type": "Practitioner",
+    "display": "Faculty Physician Um_Cln, MD"
+  }, {
+    "reference": "Organization/elZhiz6d-U3AzTLo21LWUvOWjX0yHKMNAAzihBuDqUpY3",
+    "type": "Organization",
+    "display": "MICHIGAN MEDICINE PATHOLOGY AND CLINICAL LABORATORIES"
+  } ],
+  "result": [ {
+    "extension": [ {
+      "url": "https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id",
+      "valueString": "Observation/exSem6hAC4TzccqqaRe3NOSJgTV5iW5SeWaZ-9gv.JOLJUtMASISI1IarL-bsrUH8DxanrtskB7-Gb87oHdDmbg3"
+    } ],
+    "reference": "Observation/hash-b4def66",
+    "display": "Component (1): BLOOD CULTURE"
+  }, {
+    "extension": [ {
+      "url": "https://www.cdc.gov/test-case/fhir/StructureDefinition/original-id",
+      "valueString": "Observation/exSem6hAC4TzccqqaRe3NORq-HBUEgsOhjVgWf5soEcvocw-j7xBFqLHEdFNUW.oa3"
+    } ],
+    "reference": "Observation/hash-be481496",
+    "display": "Isolate (1): STAPHYLOCOCCUS AUREUS"
+  } ]
+}

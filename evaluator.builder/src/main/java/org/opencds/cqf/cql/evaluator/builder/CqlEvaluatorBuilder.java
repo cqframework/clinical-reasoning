@@ -69,7 +69,7 @@ public class CqlEvaluatorBuilder {
 
   private RetrieveProviderConfig retrieveProviderConfig;
 
-  private Boolean stale = false;
+  private boolean stale = false;
 
   /**
    * Constructor for the CqlEvaluator builder
@@ -248,7 +248,7 @@ public class CqlEvaluatorBuilder {
    * @return this CqlEvaluatorBuilder
    */
   public CqlEvaluatorBuilder withLibraryCache(
-      HashMap<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> libraryCache) {
+      Map<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> libraryCache) {
     this.libraryCache = libraryCache;
     return this;
   }

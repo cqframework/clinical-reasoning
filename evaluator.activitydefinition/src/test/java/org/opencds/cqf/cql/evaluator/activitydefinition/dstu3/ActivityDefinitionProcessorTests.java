@@ -5,7 +5,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -24,9 +24,10 @@ public class ActivityDefinitionProcessorTests {
 
   @BeforeClass
   public void setup() {
-    var data = new TestRepository(fhirContext, this.getClass(), List.of("tests"), false);
-    var content = new TestRepository(fhirContext, this.getClass(), List.of("resources/"), false);
-    var terminology = new TestRepository(fhirContext, this.getClass(),
+    var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+    var content =
+        new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+    var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
         List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
     repository = Repositories.proxy(data, content, terminology);
@@ -38,7 +39,8 @@ public class ActivityDefinitionProcessorTests {
   public void testActivityDefinitionApply() throws FHIRException {
     var libraryEngine = new LibraryEngine(repository, evaluationSettings);
 
-    var result = this.activityDefinitionProcessor.apply(new IdType("activityDefinition-test"), null,
+    var result = this.activityDefinitionProcessor.apply(
+        new IdType("ActivityDefinition", "activityDefinition-test"), null,
         null, "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
     Assert.assertTrue(result instanceof ProcedureRequest);
     var request = (ProcedureRequest) result;

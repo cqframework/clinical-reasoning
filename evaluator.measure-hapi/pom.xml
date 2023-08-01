@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.measure-hapi</artifactId>
-  <version>3.0.0-PRE4-SNAPSHOT</version>
+  <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <description>CQL Evaluator - Measure Evaluation for HAPI FHIR</description>
@@ -13,55 +13,64 @@
   <parent>
     <groupId>org.opencds.cqf.cql</groupId>
     <artifactId>evaluator.shared</artifactId>
-    <version>3.0.0-PRE4-SNAPSHOT</version>
+    <version>3.0.0-PRE6-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.measure</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.builder</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
-
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.jackson-deps</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-api</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-utility</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.opencds.cqf.cql</groupId>
+      <artifactId>evaluator.library</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.skyscreamer</groupId>
+      <artifactId>jsonassert</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
-      <version>3.0.0-PRE4-SNAPSHOT</version>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -71,6 +80,17 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

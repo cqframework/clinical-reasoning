@@ -1,0 +1,90 @@
+{
+  "resourceType": "ValueSet",
+  "id": "example-acquired-lower-limb-deformities",
+  "url": "http://hl7.org/fhir/us/davinci-ra/ValueSet/example-acquired-lower-limb-deformities",
+  "identifier": [ {
+    "value": "example-acquired-lower-limb-deformities"
+  } ],
+  "version": "24.1.001",
+  "name": "Example_Acquired_Lower_Limb_Deformities",
+  "title": "Example Acquired Lower Limb Deformities",
+  "status": "active",
+  "expansion": {
+    "timestamp": "2022-06-06T14:51:05-04:00",
+    "total": 1,
+    "offset": 0,
+    "contains": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.411",
+      "display": "Acquired absence of right great toe"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": " Z89.412",
+      "display": "Acquired absence of left great toe"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.419",
+      "display": "Acquired absence of unspecified great toe"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.421",
+      "display": "Acquired absence of other right toe(s)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.422",
+      "display": "Acquired absence of other left toe(s)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.429",
+      "display": "Acquired absence of other toe(s), unspecified side"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.431",
+      "display": "Acquired absence of right foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.432",
+      "display": "Acquired absence of left foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.439",
+      "display": "Acquired absence of unspecified foot"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.441",
+      "display": "Acquired absence of right ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.442",
+      "display": "Acquired absence of left ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.449",
+      "display": "Acquired absence of unspecified ankle"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.511",
+      "display": "Acquired absence of right leg below knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.512",
+      "display": "Acquired absence of left leg below knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.519",
+      "display": "Acquired absence of unspecified leg below knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.611",
+      "display": "Acquired absence of right leg above knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.612",
+      "display": "Acquired absence of left leg above knee"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "Z89.619",
+      "display": "Acquired absence of unspecified leg above knee"
+    } ]
+  }
+}

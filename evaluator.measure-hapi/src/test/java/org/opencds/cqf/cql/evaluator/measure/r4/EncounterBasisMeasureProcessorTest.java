@@ -1,21 +1,23 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
 import org.testng.annotations.Test;
 
-
-@Test(singleThreaded = true)
-public class EncounterBasisMeasureProcessorTest extends BaseMeasureProcessorTest {
-  public EncounterBasisMeasureProcessorTest() {
-    super("DischargedonAntithromboticTherapyFHIR-bundle.json");
-  }
+public class EncounterBasisMeasureProcessorTest {
+  protected static Given given =
+      Measure.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
 
   @Test
   public void exm104_singlePatient() {
-    MeasureReport report = this.measureProcessor.evaluateMeasure(
-        "http://ecqi.healthit.gov/ecqms/Measure/DischargedonAntithromboticTherapyFHIR",
-        "2019-01-01", "2020-01-01", "subject", "numer-EXM104", null, null, endpoint, endpoint,
-        endpoint, null);
-    validateGroup(report.getGroup().get(0), "initial-population", 1);
+    given.when()
+        .measureId("DischargedonAntithromboticTherapyFHIR")
+        .periodStart("2019-01-01")
+        .periodEnd("2020-01-01")
+        .subject("Patient/numer-EXM104")
+        .reportType("subject")
+        .evaluate()
+        .then()
+        .firstGroup()
+        .population("initial-population").hasCount(1);
   }
 }

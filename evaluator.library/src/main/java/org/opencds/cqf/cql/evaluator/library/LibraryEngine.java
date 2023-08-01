@@ -18,8 +18,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,21 +34,21 @@ import ca.uhn.fhir.util.ParametersUtil;
 
 public class LibraryEngine {
 
-  private static Logger ourLogger = LoggerFactory.getLogger(LibraryEngine.class);
+  private static Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
 
-  protected final Repository myRepository;
-  protected final FhirContext myFhirContext;
-  protected final IFhirPath myFhirPath;
-  protected final ModelResolver myModelResolver;
-  protected final EvaluationSettings mySettings;
+  protected final Repository repository;
+  protected final FhirContext fhirContext;
+  protected final IFhirPath fhirPath;
+  protected final ModelResolver modelResolver;
+  protected final EvaluationSettings settings;
 
   public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
-    this.myRepository = requireNonNull(repository, "repository can not be null");
-    this.mySettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-    myFhirContext = myRepository.fhirContext();
-    myFhirPath = FhirPathCache.cachedForContext(myFhirContext);
-    myModelResolver = new FhirModelResolverFactory()
-        .create(myRepository.fhirContext().getVersion().getVersion().getFhirVersionString());
+    this.repository = requireNonNull(repository, "repository can not be null");
+    this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+    fhirContext = repository.fhirContext();
+    fhirPath = FhirPathCache.cachedForContext(fhirContext);
+    modelResolver = new FhirModelResolverFactory()
+        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
 
   private Pair<String, Object> buildContextParameter(String thePatientId) {
@@ -61,15 +63,15 @@ public class LibraryEngine {
     return contextParameter;
   }
 
-  public IBaseParameters evaluate(String theUrl, String thePatientId, IBaseParameters theParameters,
-      IBaseBundle theAdditionalData, Set<String> theExpressions) {
-    return evaluate(getVersionedIdentifier(theUrl), thePatientId, theParameters, theAdditionalData,
-        theExpressions);
+  public IBaseParameters evaluate(String url, String patientId, IBaseParameters parameters,
+      IBaseBundle additionalData, Set<String> expressions) {
+    return this.evaluate(VersionedIdentifiers.forUrl(url), patientId, parameters, additionalData,
+        expressions);
   }
 
   public IBaseParameters evaluate(VersionedIdentifier theId, String thePatientId,
       IBaseParameters theParameters, IBaseBundle theAdditionalData, Set<String> theExpressions) {
-    var libraryEvaluator = Contexts.forRepository(mySettings, myRepository, theAdditionalData);
+    var libraryEvaluator = Contexts.forRepository(settings, repository, theAdditionalData);
 
     return libraryEvaluator.evaluate(theId, buildContextParameter(thePatientId), theParameters,
         theExpressions);
@@ -77,8 +79,8 @@ public class LibraryEngine {
 
   public IBaseParameters evaluateExpression(String theExpression, IBaseParameters theParameters,
       String thePatientId, List<Pair<String, String>> theLibraries, IBaseBundle theBundle) {
-    var libraryConstructor = new LibraryConstructor(myFhirContext);
-    var cqlFhirParametersConverter = Contexts.getCqlFhirParametersConverter(myFhirContext);
+    var libraryConstructor = new LibraryConstructor(fhirContext);
+    var cqlFhirParametersConverter = Contexts.getCqlFhirParametersConverter(fhirContext);
     var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(theParameters);
     var cql = libraryConstructor.constructCqlLibrary(theExpression, theLibraries, cqlParameters);
 
@@ -87,7 +89,7 @@ public class LibraryEngine {
 
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
-    var libraryEvaluator = Contexts.forRepository(mySettings, myRepository, theBundle,
+    var libraryEvaluator = Contexts.forRepository(settings, repository, theBundle,
         librarySourceProviders, cqlFhirParametersConverter);
 
     return libraryEvaluator.evaluate(
@@ -96,10 +98,9 @@ public class LibraryEngine {
   }
 
   public List<IBase> getExpressionResult(String theSubjectId, String theSubjectType,
-      String theExpression,
-      String theLanguage, String theLibraryToBeEvaluated, IBaseParameters theParameters,
-      IBaseBundle theBundle) {
-    validateExpression(theLanguage, theExpression, theLibraryToBeEvaluated);
+      String theExpression, String theLanguage, String theLibraryToBeEvaluated,
+      IBaseParameters theParameters, IBaseBundle theBundle) {
+    validateExpression(theLanguage, theExpression);
     List<IBase> results = null;
     IBaseParameters parametersResult;
     switch (theLanguage) {
@@ -112,23 +113,28 @@ public class LibraryEngine {
         // The expression evaluator creates a library with a single expression defined as "return"
         theExpression = "return";
         results = resolveParameterValues(ParametersUtil
-            .getNamedParameters(myFhirContext, parametersResult, theExpression));
+            .getNamedParameters(fhirContext, parametersResult, theExpression));
         break;
       case "text/cql-identifier":
       case "text/cql.identifier":
       case "text/cql.name":
       case "text/cql-name":
+        validateLibrary(theLibraryToBeEvaluated);
         parametersResult =
             this.evaluate(theLibraryToBeEvaluated, theSubjectId, theParameters, theBundle,
                 Collections.singleton(theExpression));
         results = resolveParameterValues(ParametersUtil
-            .getNamedParameters(myFhirContext, parametersResult, theExpression));
+            .getNamedParameters(fhirContext, parametersResult, theExpression));
         break;
       case "text/fhirpath":
         List<IBase> outputs;
         try {
+          var fedRepo = theBundle == null ? repository
+              : new FederatedRepository(repository,
+                  new InMemoryFhirRepository(repository.fhirContext(), theBundle));
           outputs =
-              myFhirPath.evaluate(getSubject(theSubjectId, theSubjectType), theExpression,
+              fhirPath.evaluate(getSubject(fedRepo, theSubjectId, theSubjectType),
+                  theExpression,
                   IBase.class);
         } catch (FhirPathExecutionException e) {
           throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
@@ -141,21 +147,25 @@ public class LibraryEngine {
         }
         break;
       default:
-        ourLogger.warn("An action language other than CQL was found: {}", theLanguage);
+        logger.warn("An action language other than CQL was found: {}", theLanguage);
     }
 
     return results;
   }
 
-  public void validateExpression(String theLanguage, String theExpression, String theLibraryUrl) {
+  public void validateExpression(String theLanguage, String theExpression) {
     if (theLanguage == null) {
-      ourLogger.error("Missing language type for the Expression");
+      logger.error("Missing language type for the Expression");
       throw new IllegalArgumentException("Missing language type for the Expression");
     } else if (theExpression == null) {
-      ourLogger.error("Missing expression for the Expression");
+      logger.error("Missing expression for the Expression");
       throw new IllegalArgumentException("Missing expression for the Expression");
-    } else if (theLibraryUrl == null) {
-      ourLogger.error("Missing library for the Expression");
+    }
+  }
+
+  public void validateLibrary(String theLibraryUrl) {
+    if (theLibraryUrl == null) {
+      logger.error("Missing library for the Expression");
       throw new IllegalArgumentException("Missing library for the Expression");
     }
   }
@@ -166,7 +176,7 @@ public class LibraryEngine {
     }
 
     List<IBase> returnValues = new ArrayList<>();
-    switch (myFhirContext.getVersion().getVersion()) {
+    switch (fhirContext.getVersion().getVersion()) {
       case DSTU3:
         theValues.forEach(v -> {
           var param = (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) v;
@@ -199,56 +209,36 @@ public class LibraryEngine {
         break;
       default:
         throw new IllegalArgumentException(
-            String.format("unsupported FHIR version: %s", myFhirContext));
+            String.format("unsupported FHIR version: %s", fhirContext));
     }
 
     return returnValues;
   }
 
-  protected IBaseResource getSubject(String theSubjectId, String theSubjectType) {
-    if (theSubjectType == null || theSubjectType.isEmpty()) {
-      theSubjectType = "Patient";
+  protected IBaseResource getSubject(Repository repository, String subjectId, String subjectType) {
+    var id = subjectId;
+    if (subjectId.contains("/")) {
+      var split = subjectId.split("/");
+      subjectType = split[0];
+      id = split[1];
     }
-    var resourceType = (IBaseResource) myModelResolver.createInstance(theSubjectType);
-    switch (myFhirContext.getVersion().getVersion()) {
+    if (subjectType == null || subjectType.isEmpty()) {
+      subjectType = "Patient";
+    }
+    var resourceType = (IBaseResource) modelResolver.createInstance(subjectType);
+    switch (fhirContext.getVersion().getVersion()) {
       case DSTU3:
-        return myRepository.read(resourceType.getClass(),
-            new org.hl7.fhir.dstu3.model.IdType(theSubjectType, theSubjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.dstu3.model.IdType(subjectType, id));
       case R4:
-        return myRepository.read(resourceType.getClass(),
-            new org.hl7.fhir.r4.model.IdType(theSubjectType, theSubjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.r4.model.IdType(subjectType, id));
       case R5:
-        return myRepository.read(resourceType.getClass(),
-            new org.hl7.fhir.r5.model.IdType(theSubjectType, theSubjectId));
+        return repository.read(resourceType.getClass(),
+            new org.hl7.fhir.r5.model.IdType(subjectType, id));
       default:
         throw new IllegalArgumentException(
-            String.format("unsupported FHIR version: %s", myFhirContext));
+            String.format("unsupported FHIR version: %s", fhirContext));
     }
-  }
-
-  protected VersionedIdentifier getVersionedIdentifier(String theUrl) {
-    if (!theUrl.contains("/Library/")) {
-      throw new IllegalArgumentException(
-          "Invalid resource type for determining library version identifier: Library");
-    }
-    String[] urlSplit = theUrl.split("/Library/");
-    if (urlSplit.length != 2) {
-      throw new IllegalArgumentException(
-          "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
-    }
-
-    String cqlName = urlSplit[1];
-    VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
-    if (cqlName.contains("|")) {
-      String[] nameVersion = cqlName.split("\\|");
-      String name = nameVersion[0];
-      String version = nameVersion[1];
-      versionedIdentifier.setId(name);
-      versionedIdentifier.setVersion(version);
-    } else {
-      versionedIdentifier.setId(cqlName);
-    }
-
-    return versionedIdentifier;
   }
 }

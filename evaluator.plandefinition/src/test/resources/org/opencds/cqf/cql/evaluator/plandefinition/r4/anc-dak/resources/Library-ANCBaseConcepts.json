@@ -53,7 +53,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "anc-dak/cql/ANCBaseConcepts.cql"
+      "url": "../cql/ANCBaseConcepts.cql"
     }
   ]
 }

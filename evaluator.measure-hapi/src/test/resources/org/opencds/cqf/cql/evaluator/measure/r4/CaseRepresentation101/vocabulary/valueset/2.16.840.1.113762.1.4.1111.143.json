@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1111.143",
+  "meta": {
+    "versionId": "26",
+    "lastUpdated": "2021-06-11T01:02:23.000-04:00"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143",
+  "version": "20210611",
+  "name": "Observation Services",
+  "title": "Observation Services",
+  "status": "active",
+  "date": "2021-06-11T01:02:23-04:00",
+  "publisher": "TJC EH Steward",
+  "description": "The purpose of this value set is to represent concepts for encounters for observation in the inpatient setting.",
+  "expansion": {
+    "identifier": "urn:uuid:779caa62-0502-433f-86b6-7e36281233b0",
+    "timestamp": "2022-03-09T09:26:12-05:00",
+    "total": 1,
+    "offset": 0,
+    "parameter": [ {
+      "name": "count",
+      "valueInteger": 1000
+    }, {
+      "name": "offset",
+      "valueInteger": 0
+    } ],
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "http://snomed.info/sct/731000124108/version/20210901",
+      "code": "448951000124107",
+      "display": "Admission to observation unit (procedure)"
+    } ]
+  }
+}

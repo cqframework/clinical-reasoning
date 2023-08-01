@@ -1,0 +1,20 @@
+{
+  "resourceType": "Library",
+  "id": "MATGlobalCommonFunctionsFHIR4",
+  "url": "http://fhir.org/guides/cqf/Library/MATGlobalCommonFunctionsFHIR4",
+  "version": "6.1.000",
+  "name": "MATGlobalCommonFunctionsFHIR4",
+  "title": "MAT Global Common Functions FHIRR4",
+  "status": "draft",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library",
+      "display": "Logic Library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/MATGlobalCommonFunctionsFHIR4.cql"
+  } ]
+}

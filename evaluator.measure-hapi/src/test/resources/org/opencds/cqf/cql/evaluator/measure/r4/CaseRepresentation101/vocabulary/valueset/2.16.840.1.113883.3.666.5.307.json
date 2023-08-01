@@ -1,0 +1,44 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.666.5.307",
+  "meta": {
+    "versionId": "33",
+    "lastUpdated": "2021-01-19T09:34:06.000-05:00"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+  "version": "20200307",
+  "name": "Encounter Inpatient",
+  "title": "Encounter Inpatient",
+  "status": "active",
+  "date": "2020-03-07T01:00:21-05:00",
+  "description": "The purpose of this value set is to represent concepts of inpatient hospitalization encounters.",
+  "expansion": {
+    "identifier": "urn:uuid:b1561d23-7da0-4382-b765-08d32dbf48c2",
+    "timestamp": "2022-03-09T10:11:35-05:00",
+    "total": 3,
+    "offset": 0,
+    "parameter": [ {
+      "name": "count",
+      "valueInteger": 1000
+    }, {
+      "name": "offset",
+      "valueInteger": 0
+    } ],
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "http://snomed.info/sct/731000124108/version/20210901",
+      "code": "183452005",
+      "display": "Emergency hospital admission (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "http://snomed.info/sct/731000124108/version/20210901",
+      "code": "32485007",
+      "display": "Hospital admission (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "http://snomed.info/sct/731000124108/version/20210901",
+      "code": "8715000",
+      "display": "Hospital admission, elective (procedure)"
+    } ]
+  }
+}

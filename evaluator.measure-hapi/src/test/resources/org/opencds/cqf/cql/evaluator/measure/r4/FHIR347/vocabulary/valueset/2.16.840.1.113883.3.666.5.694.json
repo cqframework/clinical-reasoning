@@ -1,0 +1,1690 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.666.5.694",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.694",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.666.5.694"
+  } ],
+  "version": "20160331",
+  "name": "CABGSurgeries",
+  "title": "CABG Surgeries",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:47-07:00",
+    "contains": [ {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210083",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210088",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210089",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021008C",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021008F",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021008W",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210093",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210098",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210099",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021009C",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021009F",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021009W",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100A3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100A8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100A9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100AC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100AF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100AW",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100J3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100J8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100J9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100JC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100JF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100JW",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100K3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100K8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100K9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100KC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100KF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100KW",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100Z3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100Z8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100Z9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100ZC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02100ZF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210483",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210488",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210489",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021048C",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021048F",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021048W",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210493",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210498",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0210499",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021049C",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021049F",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021049W",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104A3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104A8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104A9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104AC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104AF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104AW",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104J3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104J8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104J9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104JC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104JF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104JW",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104K3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104K8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104K9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104KC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104KF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104KW",
+      "display": "Bypass Coronary Artery, One Artery from Aorta with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104Z3",
+      "display": "Bypass Coronary Artery, One Artery from Coronary Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104Z8",
+      "display": "Bypass Coronary Artery, One Artery from Right Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104Z9",
+      "display": "Bypass Coronary Artery, One Artery from Left Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104ZC",
+      "display": "Bypass Coronary Artery, One Artery from Thoracic Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02104ZF",
+      "display": "Bypass Coronary Artery, One Artery from Abdominal Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211083",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211088",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211089",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021108C",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021108F",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021108W",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211093",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211098",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211099",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021109C",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021109F",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021109W",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110A3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110A8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110A9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110AC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110AF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110AW",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110J3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110J8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110J9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110JC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110JF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110JW",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110K3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110K8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110K9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110KC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110KF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110KW",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110Z3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110Z8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110Z9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110ZC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02110ZF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211483",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211488",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211489",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021148C",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021148F",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021148W",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211493",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211498",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0211499",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021149C",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021149F",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021149W",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114A3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114A8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114A9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114AC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114AF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114AW",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114J3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114J8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114J9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114JC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114JF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114JW",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114K3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114K8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114K9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114KC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114KF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114KW",
+      "display": "Bypass Coronary Artery, Two Arteries from Aorta with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114Z3",
+      "display": "Bypass Coronary Artery, Two Arteries from Coronary Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114Z8",
+      "display": "Bypass Coronary Artery, Two Arteries from Right Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114Z9",
+      "display": "Bypass Coronary Artery, Two Arteries from Left Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114ZC",
+      "display": "Bypass Coronary Artery, Two Arteries from Thoracic Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02114ZF",
+      "display": "Bypass Coronary Artery, Two Arteries from Abdominal Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212083",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212088",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212089",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021208C",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021208F",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021208W",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212093",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212098",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212099",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021209C",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021209F",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021209W",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120A3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120A8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120A9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120AC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120AF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120AW",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120J3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120J8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120J9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120JC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120JF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120JW",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120K3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120K8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120K9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120KC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120KF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120KW",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120Z3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120Z8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120Z9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120ZC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02120ZF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212488",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212489",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021248C",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021248F",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021248W",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212493",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212498",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0212499",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021249C",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021249F",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021249W",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124A3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124A8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124A9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124AC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124AF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124AW",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124J3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124J8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124J9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124JC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124JF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124JW",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124K3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124K8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124K9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124KC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124KF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124KW",
+      "display": "Bypass Coronary Artery, Three Arteries from Aorta with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124Z3",
+      "display": "Bypass Coronary Artery, Three Arteries from Coronary Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124Z8",
+      "display": "Bypass Coronary Artery, Three Arteries from Right Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124Z9",
+      "display": "Bypass Coronary Artery, Three Arteries from Left Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124ZC",
+      "display": "Bypass Coronary Artery, Three Arteries from Thoracic Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02124ZF",
+      "display": "Bypass Coronary Artery, Three Arteries from Abdominal Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213083",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213088",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213089",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021308C",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021308F",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021308W",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Zooplastic Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213093",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213098",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213099",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021309C",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021309F",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021309W",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Autologous Venous Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130A3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130A8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130A9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130AC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130AF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130AW",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Autologous Arterial Tissue, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130J3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130J8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130J9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130JC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130JF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130JW",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Synthetic Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130K3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130K8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130K9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130KC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130KF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130KW",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Nonautologous Tissue Substitute, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130Z3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130Z8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130Z9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130ZC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02130ZF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery, Open Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213483",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213488",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213489",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021348C",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021348F",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021348W",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Zooplastic Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213493",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213498",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "0213499",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021349C",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021349F",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "021349W",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Autologous Venous Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134A3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134A8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134A9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134AC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134AF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134AW",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Autologous Arterial Tissue, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134J3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134J8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134J9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134JC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134JF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134JW",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Synthetic Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134K3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134K8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134K9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134KC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134KF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134KW",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Aorta with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134Z3",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Coronary Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134Z8",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Right Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134Z9",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Left Internal Mammary, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134ZC",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Thoracic Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+      "version": "2020",
+      "code": "02134ZF",
+      "display": "Bypass Coronary Artery, Four or More Arteries from Abdominal Artery, Percutaneous Endoscopic Approach"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.10",
+      "display": "Aortocoronary bypass for heart revascularization, not otherwise specified"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.11",
+      "display": "(Aorto)coronary bypass of one coronary artery"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.12",
+      "display": "(Aorto)coronary bypass of two coronary arteries"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.13",
+      "display": "(Aorto)coronary bypass of three coronary arteries"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.14",
+      "display": "(Aorto)coronary bypass of four or more coronary arteries"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.15",
+      "display": "Single internal mammary-coronary artery bypass"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.16",
+      "display": "Double internal mammary-coronary artery bypass"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.17",
+      "display": "Abdominal-coronary artery bypass"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/icd9cm",
+      "version": "2013",
+      "code": "36.19",
+      "display": "Other bypass anastomosis for heart revascularization"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10190003",
+      "display": "Aortocoronary bypass of four or more coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "10326007",
+      "display": "Coronary artery bypass with autogenous graft, three grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "119564002",
+      "display": "Internal mammary-coronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "119565001",
+      "display": "Coronary artery bypass graft, anastomosis of artery of thorax to coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "14323007",
+      "display": "Aortocoronary bypass of three coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "17073005",
+      "display": "Aortocoronary artery bypass graft with vein graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175021005",
+      "display": "Allograft bypass of coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175029007",
+      "display": "Prosthetic bypass of coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175036008",
+      "display": "Revision of bypass for coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175037004",
+      "display": "Revision of bypass for one coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175038009",
+      "display": "Revision of bypass for two coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175039001",
+      "display": "Revision of bypass for three coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175040004",
+      "display": "Revision of bypass for four or more coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "175066001",
+      "display": "Percutaneous transluminal balloon angioplasty of bypass graft of coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232717009",
+      "display": "Coronary artery bypass grafting (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232719007",
+      "display": "Coronary artery bypass graft x 1 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232720001",
+      "display": "Coronary artery bypass grafts x 2 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232721002",
+      "display": "Coronary artery bypass grafts x 3 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232722009",
+      "display": "Coronary artery bypass grafts x 4 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232723004",
+      "display": "Coronary artery bypass grafts x 5 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "232724005",
+      "display": "Coronary artery bypass grafts greater than 5 (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "252427007",
+      "display": "Coronary bypass graft angiography (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "29819009",
+      "display": "Aortocoronary bypass of one coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "309814006",
+      "display": "Aortocoronary bypass grafting (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "3546002",
+      "display": "Aortocoronary artery bypass graft with saphenous vein graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359597003",
+      "display": "Single internal mammary-coronary artery bypass (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "359601003",
+      "display": "Coronary artery bypass with autogenous graft of internal mammary artery, single graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39202005",
+      "display": "Coronary artery bypass with autogenous graft, four grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "39724006",
+      "display": "Anastomosis of internal mammary artery to coronary artery, double vessel (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "405598005",
+      "display": "Aortocoronary artery bypass graft with two vein grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "405599002",
+      "display": "Aortocoronary artery bypass graft with three vein grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "414088005",
+      "display": "Emergency coronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "418551006",
+      "display": "Laparoscopic coronary artery bypass using robotic assistance (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "419132001",
+      "display": "Minimally invasive direct coronary artery bypass (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "438530000",
+      "display": "Magnetic resonance angiography of coronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "440332008",
+      "display": "Fluoroscopic angiography of left ventricle and coronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "450506009",
+      "display": "Computed tomography angiography of coronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "67166004",
+      "display": "Aortocoronary artery bypass graft (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736970002",
+      "display": "Allograft bypass of four or more coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736971003",
+      "display": "Allograft bypass of one coronary artery (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736972005",
+      "display": "Allograft bypass of three coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "736973000",
+      "display": "Allograft bypass of two coronary arteries (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "74371005",
+      "display": "Coronary artery bypass with autogenous graft, two grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "82247006",
+      "display": "Coronary artery bypass with autogenous graft, five grafts (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "8876004",
+      "display": "Aortocoronary artery bypass graft with prosthesis (procedure)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "90487008",
+      "display": "Aortocoronary bypass of two coronary arteries (procedure)"
+    } ]
+  }
+}

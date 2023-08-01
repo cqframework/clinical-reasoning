@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "FHIRHelpers-3.0.0",
+  "version": "3.0.0",
+  "name": "FHIRHelpers",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/FHIRHelpers.cql"
+  } ]
+}

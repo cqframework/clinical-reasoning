@@ -1,0 +1,25 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "denomexcl-CMS122-DiagnosticReport",
+  "status": "final",
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+      "code": "LAB"
+    } ]
+  } ],
+  "code": {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "34714-6",
+      "display": "INR in Blood by Coagulation assay"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcl-CMS122-Patient"
+  },
+  "issued": "2019-01-17T12:30:00Z",
+  "result": [ {
+    "reference": "Observation/denomexcl-CMS122-Observation"
+  } ]
+}

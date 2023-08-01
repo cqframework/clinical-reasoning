@@ -1,0 +1,11 @@
+{
+  "resourceType": "Location",
+  "id": "exXYgJ9daGD8ZDgiZ3XoXIQ3",
+  "name": "1204",
+  "alias": [ "12E-1204" ],
+  "mode": "instance",
+  "partOf": {
+    "reference": "Location/ea1GRyXwt6.sHaLqHL7jphAqX1qVrSyzBjZzQY3aASx83",
+    "display": "MH 12E GEN CARE"
+  }
+}

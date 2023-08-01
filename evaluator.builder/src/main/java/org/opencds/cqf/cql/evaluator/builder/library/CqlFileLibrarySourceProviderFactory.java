@@ -72,7 +72,7 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
     try (var fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())) {
       Path jarPath = fileSystem.getPath(path);
       try (Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
-        return walk.map(x -> x.toFile()).filter(x -> x.isFile())
+        return walk.map(Path::toFile).filter(File::isFile)
             .filter(x -> x.getName().endsWith("json") || x.getName().endsWith("xml"))
             .collect(Collectors.toList());
       }
@@ -100,7 +100,7 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
   }
 
   List<String> readFiles(Collection<File> files) {
-    return files.stream().map(x -> x.toPath()).filter(Files::isRegularFile).map(t -> {
+    return files.stream().map(File::toPath).filter(Files::isRegularFile).map(t -> {
       try {
         return Files.readAllBytes(t);
       } catch (IOException e) {

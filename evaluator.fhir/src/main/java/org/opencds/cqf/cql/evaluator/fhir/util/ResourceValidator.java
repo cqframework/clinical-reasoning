@@ -14,7 +14,7 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
+import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -24,23 +24,23 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 
 public class ResourceValidator {
-  protected FhirDal fhirDal;
+  protected Repository repo;
   protected FhirContext context;
   protected FhirValidator validator;
   protected Map<String, ValidationProfile> profiles;
 
 
   public ResourceValidator(FhirContext context, Map<String, ValidationProfile> profiles,
-      FhirDal fhirDal) {
-    this.fhirDal = fhirDal;
+      Repository repo) {
+    this.repo = repo;
     this.context = context;
     this.profiles = profiles == null ? new HashMap<>() : profiles;
     setValidator();
   }
 
   public ResourceValidator(FhirVersionEnum version, Map<String, ValidationProfile> profiles,
-      FhirDal fhirDal) {
-    this.fhirDal = fhirDal;
+      Repository repo) {
+    this.repo = repo;
     this.context = FhirContext.forCached(version);
     this.profiles = profiles == null ? new HashMap<>() : profiles;
     setValidator();
@@ -58,8 +58,9 @@ public class ResourceValidator {
 
       var profileSupport = new PrePopulatedValidationSupport(this.context);
       for (var profile : this.profiles.entrySet()) {
-        var ig = (ImplementationGuide) this.fhirDal
-            .read(new IdType("ImplementationGuide", profile.getValue().getName()));
+        var ig = this.repo
+            .read(ImplementationGuide.class,
+                new IdType("ImplementationGuide", profile.getValue().getName()));
         if (ig == null) {
           continue;
         }
@@ -68,7 +69,8 @@ public class ResourceValidator {
               .contains(resourceComponent.getReference().getReference().split("/")[0])) {
             try {
               var resource =
-                  this.fhirDal.read(new IdType(resourceComponent.getReference().getReference()));
+                  this.repo.read(IBaseResource.class,
+                      new IdType(resourceComponent.getReference().getReference()));
               if (resource != null) {
                 profileSupport.addResource(resource);
               }

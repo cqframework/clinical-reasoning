@@ -62,6 +62,7 @@ public class PlanDefinitionProcessorTests {
         .applyR5().isEqualsToExpected();
   }
 
+  @Test
   public void testANCDT17WithElm() {
     PlanDefinition.Assert.that(
         "ANCDT17",
@@ -70,6 +71,7 @@ public class PlanDefinitionProcessorTests {
         .withData("anc-dak/data-bundle.json")
         .withContent("anc-dak/content-bundle.json")
         .withTerminology("anc-dak/terminology-bundle.json")
+        .withParameters(parameters(part("encounter", "ANCDT17-encounter")))
         .apply()
         .isEqualsTo("anc-dak/output-careplan.json");
   }
@@ -106,7 +108,7 @@ public class PlanDefinitionProcessorTests {
         .isEqualsToExpected();
   }
 
-  // @Test - Have to punt on this one. Need Brenin to take a look.
+  @Test
   public void testOpioidRec10PatientView() {
     var planDefinitionID = "opioidcds-10-patient-view";
     var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";

@@ -1,0 +1,111 @@
+{
+  "resourceType": "ValueSet",
+  "id": "Meglitinides-nocombo",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "shareable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "narrative"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "publishable"
+  }, {
+    "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion",
+    "valueString": "All generics (with different strengths) , brands (with different strengths) for glinides; includes ingridients (IN), generic drug pack (GPCK) and brand drug pack (BPCK)"
+  }, {
+    "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion",
+    "valueString": "All other drug classes that are used for Type 2 DM"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning",
+    "valueString": "This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."
+  } ],
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/Meglitinides-nocombo",
+  "version": "1.0.1",
+  "name": "Meglitinidesnocombo",
+  "title": "Meglitinides-nocombo",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-08-05T12:37:01-06:00",
+  "publisher": "Optum Technology CDS",
+  "description": "This value set intends to capture codes for the glinide class (Meglitinides class) that treat Type 2 DM",
+  "purpose": "Medications documented in a clinical record.",
+  "expansion": {
+    "timestamp": "2022-08-05T12:35:49-06:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "73044",
+      "display": "repaglinide"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "200256",
+      "display": "repaglinide 1 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "200257",
+      "display": "repaglinide 0.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "200258",
+      "display": "repaglinide 2 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "213218",
+      "display": "repaglinide 0.5 MG Oral Tablet [Prandin]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "213219",
+      "display": "repaglinide 1 MG Oral Tablet [Prandin]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "213220",
+      "display": "repaglinide 2 MG Oral Tablet [Prandin]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "274332",
+      "display": "nateglinide"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "284529",
+      "display": "nateglinide 60 MG Oral Tablet [Starlix]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "284530",
+      "display": "nateglinide 120 MG Oral Tablet [Starlix]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "311919",
+      "display": "nateglinide 120 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "314142",
+      "display": "nateglinide 60 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "389139",
+      "display": "nateglinide 180 MG Oral Tablet"
+    } ]
+  }
+}

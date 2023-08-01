@@ -12,7 +12,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepository;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.annotations.Test;
 
@@ -26,15 +26,15 @@ public class RepositoryTerminologyProviderTests {
   TerminologyProvider terminology;
 
   public RepositoryTerminologyProviderTests() {
-    repository = new TestRepository(FhirContext.forR4Cached(), this.getClass(),
+    repository = new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
         List.of("test1/", "test2/"), false);
     terminology = getTerminologyProvider();
   }
 
   private TerminologyProvider getTerminologyProvider() {
     return new RepositoryTerminologyProvider(
-        new TestRepository(FhirContext.forR4Cached(), this.getClass(), List.of("test1/", "test2/"),
-            false));
+        new InMemoryFhirRepository(FhirContext.forR4Cached(), this.getClass(),
+            List.of("test1/", "test2/"), false));
   }
 
   @Test

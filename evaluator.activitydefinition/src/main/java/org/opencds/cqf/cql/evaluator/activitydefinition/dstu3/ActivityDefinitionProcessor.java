@@ -124,28 +124,19 @@ public class ActivityDefinitionProcessor
         throw new FHIRException(msg);
     }
 
+    var defaultLibraryUrl =
+        activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getReference()
+            : null;
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
         resolveDynamicValue(dynamicValue.getLanguage(), dynamicValue.getExpression(),
-            activityDefinition.getLibrary().get(0).getReference(), dynamicValue.getPath(), result,
+            defaultLibraryUrl, dynamicValue.getPath(), result,
             "Patient");
       }
     }
 
     return result;
   }
-
-  // @Override
-  // public Object resolveParameterValue(IBase value) {
-  // if (value == null)
-  // return null;
-  // return ((Parameters.ParametersParameterComponent) value).getValue();
-  // }
-
-  // @Override
-  // public IBaseResource getSubject(String subjectType) {
-  // return this.fhirDal.read(new IdType(subjectType, this.subjectId));
-  // }
 
   private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {
     Task task = new Task();

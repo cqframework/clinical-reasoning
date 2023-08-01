@@ -1,0 +1,811 @@
+{
+  "resourceType": "Measure",
+  "id": "InitialInpatientPopulation",
+  "meta": {
+    "versionId": "8",
+    "lastUpdated": "2022-03-01T19:49:30.831+00:00",
+    "source": "#cf655b4a6d955e16",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm" ]
+  },
+  "contained": [ {
+    "resourceType": "Library",
+    "id": "effective-data-requirements",
+    "extension": [ {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "IMP",
+        "display": "inpatient encounter"
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "ACUTE",
+        "display": "inpatient acute"
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "NONAC",
+        "display": "inpatient non-acute"
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "OBSENC",
+        "display": "observation encounter"
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "EMER",
+        "display": "emergency"
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://terminology.hl7.org/CodeSystem/diagnosis-role",
+        "code": "CC",
+        "display": "Chief complaint"
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "Inpatient Encounter"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Inpatient Encounter\":   [Encounter] Encounters   where (Encounters.class ~ \"inpatient encounter\"     or Encounters.class ~ \"inpatient acute\"     or Encounters.class ~ \"inpatient non-acute\")   and Encounters.period during \"Performance Period\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 0
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "Antidiabetic Drugs Administered or Ordered"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Antidiabetic Drugs Administered or Ordered\":   ([MedicationAdministration: \"Hypoglycemia Drugs\"] ADDMedAdmin     where ADDMedAdmin.status ~ 'completed')   union [MedicationRequest: \"Hypoglycemia Drugs\"]"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 1
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "Initial Population"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Initial Population\":   from     \"Inpatient Encounter\" InpatientEncounters,     \"Antidiabetic Drugs Administered or Ordered\" ADD   where Coalesce(start of Global.\"Normalize Interval\"(ADD.effective), ADD.authoredOn)     during \"HospitalizationWithObservationOrEmergency\"(InpatientEncounters)   and Coalesce(start of Global.\"Normalize Interval\"(ADD.effective), ADD.authoredOn) during \"Performance Period\"   return Tuple{     encounters: InpatientEncounters,     drug: ADD.medication,     drugDateTime: Coalesce(start of Global.\"Normalize Interval\"(ADD.effective), ADD.authoredOn)   }"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 2
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Medication Request"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Medication Request\":  [MedicationRequest] MedicationRequests  where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 3
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Patient ID"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Patient ID\":      [Patient] ThePatient  where exists(\"Initial Population\".encounters)     return ThePatient.identifier"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 4
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Locations"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Locations\":  [Location] Locations     where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 5
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Encounter Locations"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Encounter Locations\":  [Encounter] Encounter     where Global.\"GetLocation\"(Encounter.location.location[0]).type in \"CDC Location Codes\"       and exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 6
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Observation"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Observation\":  [Observation] Observations   where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 7
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "SupplementalDataElementsFHIR4"
+      }, {
+        "url": "name",
+        "valueString": "SDE Race"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Race\":   (flatten (       Patient.extension Extension         where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'           return Extension.extension     )) E       where E.url = 'ombCategory'         or E.url = 'detailed'       return E.value as Coding"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 8
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Race"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Race\":  SDE.\"SDE Race\" Race   where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 9
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Medication Administration"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Medication Administration\":  [MedicationAdministration] MedicationAdministrations     where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 10
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "SupplementalDataElementsFHIR4"
+      }, {
+        "url": "name",
+        "valueString": "SDE Sex"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Sex\":   case       when Patient.gender = 'male' then Code { code: 'M', system: 'http://hl7.org/fhir/v3/AdministrativeGender', display: 'Male' }       when Patient.gender = 'female' then Code { code: 'F', system: 'http://hl7.org/fhir/v3/AdministrativeGender', display: 'Female' }       else null     end"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 11
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Sex"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Sex\":  SDE.\"SDE Sex\" Sex  where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 12
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Zip Code"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Zip Code\":   [Patient] ThePatient   where exists(\"Initial Population\".encounters)     return ThePatient.address.postalCode"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 13
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Patient Death Date"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Patient Death Date\":    singleton from(     [Patient] Patient     where Patient.deceased is FHIR.dateTime        and exists(\"Initial Population\".encounters)     return Patient.deceased   )"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 14
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Condition"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Condition\":  [Condition] Conditions where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 15
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "SupplementalDataElementsFHIR4"
+      }, {
+        "url": "name",
+        "valueString": "SDE Payer"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Payer\":   [Coverage: type in \"Payer\"] Payer         return {           code: Payer.type,           period: Payer.period         }"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 16
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Payer"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Payer\":   SDE.\"SDE Payer\" Payers  where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 17
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "SupplementalDataElementsFHIR4"
+      }, {
+        "url": "name",
+        "valueString": "SDE Ethnicity"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Ethnicity\":   (flatten (       Patient.extension Extension         where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'           return Extension.extension     )) E       where E.url = 'ombCategory'         or E.url = 'detailed'       return E.value as Coding"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 18
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Ethnicity"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Ethnicity\":  SDE.\"SDE Ethnicity\" Ethnicity  where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 19
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Encounter Discharge Dispositions"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Encounter Discharge Dispositions\":  [Encounter: \"Discharge Disposition\"] DischargeDispositions   where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 20
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Service Request"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Service Request\":  [ServiceRequest: \"Blood Glucose Laboratory and Point of Care Tests\"] LabTest       where (LabTest.intent ~ 'order'   and LabTest.status ~ 'completed')   and exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 21
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Chief Complaint"
+      }, {
+        "url": "statement",
+        "valueString": "//Supplement Data Elements define \"SDE Chief Complaint\":   [Encounter] InpatientEncounter   with InpatientEncounter.diagnosis Diagnosis   such that Diagnosis.use ~ \"Chief Complaint\"   where exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 22
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "InitialInpatientPopulation"
+      }, {
+        "url": "name",
+        "valueString": "SDE Gender Identity"
+      }, {
+        "url": "statement",
+        "valueString": "define \"SDE Gender Identity\":  [Patient] Patient     where Patient.gender in \"Gender Identity\"   and exists(\"Initial Population\".encounters)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 23
+      } ]
+    } ],
+    "status": "active",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "module-definition"
+      } ]
+    },
+    "date": "2022-03-01T12:48:58-07:00",
+    "relatedArtifact": [ {
+      "type": "depends-on",
+      "display": "Library FHIRHelpers",
+      "resource": "http://fhir.org/guides/cqf/Library/FHIRHelpers|4.0.1"
+    }, {
+      "type": "depends-on",
+      "display": "Library Global",
+      "resource": "http://fhir.org/guides/cqf/Library/MATGlobalCommonFunctionsFHIR4|6.1.000"
+    }, {
+      "type": "depends-on",
+      "display": "Library SDE",
+      "resource": "http://fhir.org/guides/cqf/Library/SupplementalDataElementsFHIR4|2.0.000"
+    }, {
+      "type": "depends-on",
+      "display": "Code system ActCode",
+      "resource": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+    }, {
+      "type": "depends-on",
+      "display": "Code system Diagnosis Role",
+      "resource": "http://terminology.hl7.org/CodeSystem/diagnosis-role"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Hypoglycemia Drugs",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58"
+    }, {
+      "type": "depends-on",
+      "display": "Value set CDC Location Codes",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1046.265"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Payer",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Discharge Disposition",
+      "resource": "http://terminology.hl7.org/ValueSet/encounter-discharge-disposition"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Blood Glucose Laboratory and Point of Care Tests",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Gender Identity",
+      "resource": "http://hl7.org/fhir/ValueSet/gender-identity"
+    } ],
+    "parameter": [ {
+      "name": "Performance Period",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Period"
+    }, {
+      "name": "SDE Medication Request",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "MedicationRequest"
+    }, {
+      "name": "SDE Patient ID",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Any"
+    }, {
+      "name": "SDE Locations",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Location"
+    }, {
+      "name": "SDE Encounter Locations",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }, {
+      "name": "SDE Observation",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    }, {
+      "name": "SDE Race",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Coding"
+    }, {
+      "name": "SDE Medication Administration",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "MedicationAdministration"
+    }, {
+      "name": "SDE Sex",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Coding"
+    }, {
+      "name": "SDE Zip Code",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Any"
+    }, {
+      "name": "SDE Patient Death Date",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Any"
+    }, {
+      "name": "SDE Condition",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Condition"
+    }, {
+      "name": "SDE Payer",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Any"
+    }, {
+      "name": "Initial Population",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Any"
+    }, {
+      "name": "SDE Ethnicity",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Coding"
+    }, {
+      "name": "SDE Encounter Discharge Dispositions",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }, {
+      "name": "SDE Service Request",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "ServiceRequest"
+    }, {
+      "name": "SDE Chief Complaint",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Encounter"
+    }, {
+      "name": "SDE Gender Identity",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Patient"
+    } ],
+    "dataRequirement": [ {
+      "type": "MedicationAdministration",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationAdministration" ],
+      "mustSupport": [ "medication", "status" ],
+      "codeFilter": [ {
+        "path": "medication",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58"
+      } ]
+    }, {
+      "type": "MedicationAdministration",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationAdministration" ]
+    }, {
+      "type": "MedicationRequest",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationRequest" ],
+      "mustSupport": [ "medication" ],
+      "codeFilter": [ {
+        "path": "medication",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58"
+      } ]
+    }, {
+      "type": "MedicationRequest",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/MedicationRequest" ]
+    }, {
+      "type": "Encounter",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+      "mustSupport": [ "type" ],
+      "codeFilter": [ {
+        "path": "type",
+        "valueSet": "http://terminology.hl7.org/ValueSet/encounter-discharge-disposition"
+      } ]
+    }, {
+      "type": "Encounter",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+      "mustSupport": [ "period", "diagnosis", "location", "class" ]
+    }, {
+      "type": "Patient",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
+      "mustSupport": [ "identifier", "extension", "address", "deceased", "gender", "value", "url" ]
+    }, {
+      "type": "ServiceRequest",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/ServiceRequest" ],
+      "mustSupport": [ "code", "intent", "status" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38"
+      } ]
+    }, {
+      "type": "Condition",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ]
+    }, {
+      "type": "Location",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Location" ],
+      "mustSupport": [ "id" ]
+    }, {
+      "type": "Observation",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ]
+    }, {
+      "type": "Coverage",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Coverage" ],
+      "mustSupport": [ "period", "type" ],
+      "codeFilter": [ {
+        "path": "type",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+      } ]
+    } ]
+  } ],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "Encounter"
+  }, {
+    "id": "effective-data-requirements",
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements",
+    "valueReference": {
+      "reference": "#effective-data-requirements"
+    }
+  } ],
+  "url": "http://test-case.org/fhir/Measure/InitialInpatientPopulation",
+  "identifier": [ {
+    "system": "https://test-case.org",
+    "value": "initialinpatientpopulation"
+  } ],
+  "version": "0.000.01",
+  "name": "Initial Inpatient Population",
+  "title": "Glycemic Control, Initial Inpatient Population (Hypoglycemia)",
+  "date": "2022-03-01T11:48:58-08:00",
+  "description": "All inpatient encounters (including ED/Observation visits that end within 1 hour of the start of the inpatient encounter) for patients of all ages where at least one ADD was ordered or administered during the encounter that is during the performance period.",
+  "effectivePeriod": {
+    "start": "2022-01-01",
+    "end": "2022-12-31T23:59:59+00:00"
+  },
+  "library": [ "http://fhir.org/guides/cqf/Library/InitialInpatientPopulation" ],
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "cohort",
+      "display": "Cohort"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "code": "Outcome",
+      "display": "Outcome"
+    } ]
+  } ],
+  "rationale": "Inpatient hypoglycemia can be severe and life-threatening and is associated with longer hospital stays and increased medical costs (1-7). The prevalence of inpatient hypoglycemia varies with patient severity, hospital unit, time of episodes, and glycemic threshold. Severe hypoglycemia (<40 mg/dL) occurs in 2%-5% of hospitalized patients with diabetes mellitus (DM) while hypoglycemia <70 mg/dL has been reported in up to 10% of patients in the intensive care unit (8). Patients with DM comprise more than 25% of all U.S. inpatient stays and medication-related hypoglycemic events are common causes of adverse drug events (ADEs) occurring in inpatient settings (9,10). Rates of severe hypoglycemia vary across hospitals, suggesting opportunities for improvement in quality of care of glycemic control. Measurement of medication-related hypoglycemia in a meaningful and standardized way may improve glycemic management (11,12).",
+  "group": [ {
+    "id": "group-1",
+    "population": [ {
+      "id": "initial-population",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "description": "Adult Inpatient Encounters",
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Initial Population"
+      }
+    } ]
+  } ],
+  "supplementalData": [ {
+    "id": "sde-chief-complaint",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Chief Complaint"
+    }
+  }, {
+    "id": "sde-chief-condition",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Condition"
+    }
+  }, {
+    "id": "sde-encounter-discharge",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Encounter Discharge Dispositions"
+    }
+  }, {
+    "id": "sde-encounter-location",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Encounter Locations"
+    }
+  }, {
+    "id": "sde-ethnicity",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Ethnicity"
+    }
+  }, {
+    "id": "sde-gender-identify",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Gender Identity"
+    }
+  }, {
+    "id": "sde-locations",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Locations"
+    }
+  }, {
+    "id": "sde-medication-admin",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Medication Administration"
+    }
+  }, {
+    "id": "sde-medication-request",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Medication Request"
+    }
+  }, {
+    "id": "sde-observation",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Observation"
+    }
+  }, {
+    "id": "sde-patient-death",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Patient Death Date"
+    }
+  }, {
+    "id": "sde-patient-id",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Patient ID"
+    }
+  }, {
+    "id": "sde-payer",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Payer"
+    }
+  }, {
+    "id": "sde-race",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Race"
+    }
+  }, {
+    "id": "sde-service-request",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Service Request"
+    }
+  }, {
+    "id": "sde-sex",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Sex"
+    }
+  }, {
+    "id": "sde-zipcode",
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Zip Code"
+    }
+  } ]
+}

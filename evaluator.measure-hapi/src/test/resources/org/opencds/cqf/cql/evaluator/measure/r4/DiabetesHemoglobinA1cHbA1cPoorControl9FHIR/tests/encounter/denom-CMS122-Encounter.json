@@ -1,0 +1,20 @@
+{
+  "resourceType": "Encounter",
+  "id": "denom-CMS122-Encounter",
+  "status": "finished",
+  "type": [ {
+    "coding": [ {
+      "system": "http://www.ama-assn.org/go/cpt",
+      "code": "99202",
+      "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination and straightforward medical decision making. When using time for code selection, 15-29 minutes of total time is spent on the date of the encounter."
+    } ],
+    "text": "Office Visit"
+  } ],
+  "subject": {
+    "reference": "Patient/denom-CMS122-Patient"
+  },
+  "period": {
+    "start": "2019-01-16T08:30:00",
+    "end": "2019-01-20T08:30:00"
+  }
+}

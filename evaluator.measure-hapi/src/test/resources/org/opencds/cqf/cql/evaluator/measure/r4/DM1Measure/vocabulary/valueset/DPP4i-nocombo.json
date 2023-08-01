@@ -1,0 +1,153 @@
+{
+  "resourceType": "ValueSet",
+  "id": "DPP4i-nocombo",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablevalueset", "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "shareable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "narrative"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "publishable"
+  }, {
+    "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion",
+    "valueString": "All generics (with different strengths) and brands (with different strengths) mentioned in Rick's prototype"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "executable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning",
+    "valueString": "This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."
+  } ],
+  "url": "http://cds.optum.com/dqm-diabetes/fhir/ValueSet/DPP4i-nocombo",
+  "version": "1.0.1",
+  "name": "DPP4inocombo",
+  "title": "DPP4i-nocombo",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-08-05T12:37:01-06:00",
+  "publisher": "Optum Technology CDS",
+  "description": "This value set contains DPP4i medication codes",
+  "purpose": "Medications documented in a clinical record.",
+  "expansion": {
+    "timestamp": "2022-08-05T12:35:48-06:00",
+    "contains": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1100699",
+      "display": "linagliptin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1100702",
+      "display": "linagliptin 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1100706",
+      "display": "linagliptin 5 MG Oral Tablet [Tradjenta]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1368001",
+      "display": "alogliptin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1368006",
+      "display": "alogliptin 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1368012",
+      "display": "alogliptin 25 MG Oral Tablet [Nesina]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1368018",
+      "display": "alogliptin 6.25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1368020",
+      "display": "alogliptin 6.25 MG Oral Tablet [Nesina]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1368034",
+      "display": "alogliptin 12.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "1368036",
+      "display": "alogliptin 12.5 MG Oral Tablet [Nesina]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "593411",
+      "display": "sitaGLIPtin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "665033",
+      "display": "SITagliptin 100 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "665036",
+      "display": "sitagliptin 100 MG Oral Tablet [Januvia]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "665038",
+      "display": "sitagliptin 25 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "665040",
+      "display": "sitagliptin 25 MG Oral Tablet [Januvia]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "665042",
+      "display": "sitagliptin 50 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "665044",
+      "display": "sitagliptin 50 MG Oral Tablet [Januvia]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "857974",
+      "display": "saxagliptin"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "858036",
+      "display": "saxagliptin 5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "858040",
+      "display": "saxagliptin 5 MG Oral Tablet [Onglyza]"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "858042",
+      "display": "sAXagliptin 2.5 MG Oral Tablet"
+    }, {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "version": "08-01-2020",
+      "code": "858044",
+      "display": "saxagliptin 2.5 MG Oral Tablet [Onglyza]"
+    } ]
+  }
+}

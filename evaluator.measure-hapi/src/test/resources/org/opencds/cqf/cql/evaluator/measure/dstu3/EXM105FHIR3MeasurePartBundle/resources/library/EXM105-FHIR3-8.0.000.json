@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "EXM105-FHIR3-8.0.000",
+  "version": "8.0.000",
+  "name": "EXM105_FHIR3",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/EXM105_FHIR3.cql"
+  } ]
+}

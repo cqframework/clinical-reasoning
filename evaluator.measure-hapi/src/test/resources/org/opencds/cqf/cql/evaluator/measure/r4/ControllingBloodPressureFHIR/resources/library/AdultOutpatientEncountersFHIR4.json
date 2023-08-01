@@ -1,0 +1,26 @@
+{
+  "resourceType": "Library",
+  "id": "AdultOutpatientEncountersFHIR4",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
+  },
+  "language": "en",
+  "url": "http://hl7.org/fhir/us/chronic-ds/Library/AdultOutpatientEncountersFHIR4",
+  "version": "2.0.000",
+  "name": "AdultOutpatientEncountersFHIR4",
+  "status": "active",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "date": "2021-01-08T13:45:12+00:00",
+  "publisher": "Mathematica",
+  "description": "AdultOutpatientEncountersFHIR4",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/AdultOutpatientEncountersFHIR4.cql"
+  } ]
+}

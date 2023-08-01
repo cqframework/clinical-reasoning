@@ -1,0 +1,27 @@
+{
+  "resourceType": "Library",
+  "id": "DQMHypertensionFHIRCommon",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/library-cqfm" ]
+  },
+  "url": "http://cds.optum.com/dqm-hypertension/fhir/Library/DQMHypertensionFHIRCommon",
+  "version": "1.0.1",
+  "name": "DQMHypertensionFHIRCommon",
+  "title": "FHIR Common",
+  "status": "draft",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "date": "2022-06-01",
+  "publisher": "Alphora",
+  "description": "This library defines terminologies and functions commonly used in FHIR-based CQL artifacts.",
+  "copyright": "Alphora 2019+",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/DQMHypertensionFHIRCommon.cql"
+  } ]
+}

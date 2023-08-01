@@ -1,0 +1,11 @@
+{
+  "resourceType": "Library",
+  "id": "MedicareAdvantage",
+  "url": "http://hl7.org/fhir/us/davinci-ra/Library/MedicareAdvantage",
+  "version": "0.0.001",
+  "name": "MedicareAdvantage",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/MedicareAdvantage.cql"
+  } ]
+}

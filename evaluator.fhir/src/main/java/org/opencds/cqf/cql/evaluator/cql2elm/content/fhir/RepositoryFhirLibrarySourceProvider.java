@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -47,14 +48,13 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
     return this.fhirContext;
   }
 
+  //TODO: add parameter to search for specific library instead of all libraries
   @Override
   @SuppressWarnings("unchecked")
   protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
-    List<? extends IBaseResource> resources =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(
-            (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
-                .getImplementingClass(),
-            this.fhirContext.getResourceDefinition("Library").getImplementingClass(), null, null));
+    List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext, Repositories.searchRepositoryWithPaging(
+        fhirContext, repository, this.fhirContext.getResourceDefinition("Library").getImplementingClass(), null, null));
+
     if (resources == null || resources.isEmpty()) {
       return null;
     }

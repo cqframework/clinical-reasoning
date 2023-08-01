@@ -44,9 +44,9 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     this.fhirContext = repository.fhirContext();
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     this.valueSets =
-        BundleUtil.toListOfResources(fhirContext,
-            searchRepositoryWithPaging(fhirContext, repository,
-                fhirContext.getResourceDefinition("ValueSet").getImplementingClass(), null, null));
+        BundleUtil.toListOfResources(this.fhirContext,
+            searchRepositoryWithPaging(this.fhirContext, repository,
+                this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass(), null, null));
   }
 
   /**

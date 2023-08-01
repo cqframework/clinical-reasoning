@@ -1,9 +1,6 @@
 {
   "resourceType": "Procedure",
   "id": "denomexcl-CMS122-PrincipalProcedure",
-  "text": {
-    "status": "generated"
-  },
   "partOf": [ {
     "reference": "Procedure/denomexcl-CMS122-Procedure",
     "display": "General or Neuraxial Anesthesia"

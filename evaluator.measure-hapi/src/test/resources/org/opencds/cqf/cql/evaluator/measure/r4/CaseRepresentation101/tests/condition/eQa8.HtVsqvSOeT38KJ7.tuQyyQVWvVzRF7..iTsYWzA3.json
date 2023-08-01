@@ -1,0 +1,60 @@
+{
+  "resourceType": "Condition",
+  "id": "eQa8.HtVsqvSOeT38KJ7.tuQyyQVWvVzRF7..iTsYWzA3",
+  "clinicalStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+      "version": "4.0.0",
+      "code": "active",
+      "display": "Active"
+    } ],
+    "text": "Active"
+  },
+  "verificationStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+      "version": "4.0.0",
+      "code": "confirmed",
+      "display": "Confirmed"
+    } ],
+    "text": "Confirmed"
+  },
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+      "code": "problem-list-item",
+      "display": "Problem List Item"
+    } ],
+    "text": "Problem List Item"
+  }, {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "75310-3",
+      "display": "Health concerns"
+    }, {
+      "system": "http://hl7.org/fhir/us/core/CodeSystem/condition-category",
+      "code": "health-concern",
+      "display": "Health Concern"
+    } ],
+    "text": "Health Concern"
+  } ],
+  "code": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/sid/icd-10-cm",
+      "code": "R78.81"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "5758002"
+    } ],
+    "text": "Bacteremia"
+  },
+  "subject": {
+    "reference": "Patient/eNeMVHWfNoTsMTbrwWQQ30A3",
+    "display": "Hob, Hobevent"
+  },
+  "onsetPeriod": {
+    "start": "2023-01-04",
+    "end": "2023-01-04"
+  },
+  "recordedDate": "2023-01-12"
+}

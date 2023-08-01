@@ -49,7 +49,7 @@ public class TestQuestionnaireResponse {
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static Extract that(String questionnaireResponseName) {
       return new Extract(questionnaireResponseName);
     }

@@ -7,11 +7,6 @@
   "extension": [ {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
     "valueCode": "boolean"
-  }, {
-    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-    "valueReference": {
-      "reference": "#cqf-tooling"
-    }
   } ],
   "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108",
   "identifier": [ {
@@ -61,40 +56,6 @@
       "code": "57024-2",
       "display": "Health Quality Measure Document"
     } ]
-  } ],
-  "relatedArtifact": [ {
-    "type": "citation",
-    "citation": "Cohen AT, Tapson VF, Bergmann JF, et al. Venous thromboembolism risk and prophylaxis in the acute hospital care setting (ENDORSE study): a multinational cross-sectional study. Lancet. 2008;371:387-394."
-  }, {
-    "type": "citation",
-    "citation": "\t\nGeerts  WH, Bergqvist D, Pineo GF, Heit JA, Samama CM, Lassen MR, Colwell CW. Prevention of venous thromboembolism. The Eighth ACCP Conference on antithrombotic and thrombolytic therapy. Chest. 2008; 133:381S-453S"
-  }, {
-    "type": "citation",
-    "citation": "Guyatt, G.H., Akl, E.A., Crowther, M., Gutterman, D., Schunemann, H. Antithrombotic Therapy and Prevention of Thrombosis, 9th edition: American College of Chest Physicians Evidence-Based Clinical Practice Guidelines. CHEST 2012; 141(2)(Supp):7S-47S"
-  }, {
-    "type": "citation",
-    "citation": "Kearon C, Akl EA, Comerota AJ, Prandoni P, Bounameaux H, Goldhaber SZ, Nelson ME, Wells PS, Gould MK, Dentali F, Crowther M, Kahn SR. Antithrombotic therapy for VTE disease: Antithrombotic Therapy and Prevention of Thrombosis, 9th Edition: American College of Chest Physicians Evidence-based Clinical Practice Guidelines. CHEST 2012 Feb; 141(2) (Supp):e419S-94S. "
-  }, {
-    "type": "citation",
-    "citation": "National Quality Forum. National Voluntary Consensus Standards for Prevention and Care of Venous Thromboembolism: Policy, Preferred Practices, and Initial Performance Measures. A Consensus Report. Washington, DC. NQF; 2006"
-  }, {
-    "type": "citation",
-    "citation": "\t\nShojania KG, Duncan BW, McDonald DM, et al. (Eds.). (2001). Making healthcare safer; A critical analysis of patient safety practices (Evidence Report/Technology Assessment No. 43). Prepared by the University of California at San Francisco-Stanford Evidenced-based Practice Center under Contract no. 290-97-0013 (AHRQ Publication NO.01-E058). Rockville, MD:Agency for Healthcare Research and Quality."
-  }, {
-    "type": "depends-on",
-    "resource": "Library/library-FHIRHelpers-4.0.1"
-  }, {
-    "type": "depends-on",
-    "resource": "Library/library-MATGlobalCommonFunctions-5.0.000"
-  }, {
-    "type": "depends-on",
-    "resource": "Library/library-SupplementalDataElements-2.0.0"
-  }, {
-    "type": "depends-on",
-    "resource": "Library/library-VTEICU-5.0.000"
-  }, {
-    "type": "depends-on",
-    "resource": "Library/library-TJCOverall-5.0.000"
   } ],
   "library": [ "http://fhir.org/guides/dbcg/connectathon/Library/EXM108" ],
   "disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty",

@@ -16,11 +16,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.hl7.elm.r1.Library;
 import org.cqframework.fhir.npm.ILibraryReader;
+import org.cqframework.fhir.npm.LibraryLoader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.elm.r1.Library;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -67,7 +68,7 @@ public class CqlEvaluatorBuilder {
 
   private RetrieveProviderConfig retrieveProviderConfig;
 
-  private Boolean stale = false;
+  private boolean stale = false;
 
   /**
    * Constructor for the CqlEvaluator builder

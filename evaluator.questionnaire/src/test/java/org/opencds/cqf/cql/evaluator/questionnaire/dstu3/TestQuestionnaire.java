@@ -58,7 +58,7 @@ public class TestQuestionnaire {
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static QuestionnaireResult that(String questionnaireName, String patientId) {
       return new QuestionnaireResult(questionnaireName, patientId);
     }

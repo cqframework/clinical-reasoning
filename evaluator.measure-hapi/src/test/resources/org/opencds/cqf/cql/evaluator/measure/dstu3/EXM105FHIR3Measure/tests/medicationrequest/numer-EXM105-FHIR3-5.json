@@ -3,13 +3,13 @@
   "id": "numer-EXM105-FHIR3-5",
   "status": "completed",
   "intent": "order",
-  "category": {
+  "category": [ {
     "coding": [ {
       "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
       "code": "discharge",
       "display": "Discharge"
     } ]
-  },
+  } ],
   "medicationCodeableConcept": {
     "coding": [ {
       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",

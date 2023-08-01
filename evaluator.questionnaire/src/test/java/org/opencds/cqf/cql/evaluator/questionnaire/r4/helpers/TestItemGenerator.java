@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4;
+package org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers;
 
 import static org.testng.Assert.fail;
 
@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -55,18 +56,18 @@ public class TestItemGenerator {
 
   public static QuestionnaireItemGenerator buildGenerator(Repository repository, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-    return new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+    return QuestionnaireItemGenerator.of(repository, patientId, parameters, bundle, libraryEngine);
   }
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static GenerateResult that(String type, String profile, String patientId) {
       return new GenerateResult(type, profile, patientId);
     }
   }
 
-  static class GenerateResult {
+  public static class GenerateResult {
     private DataRequirement input;
     private String profileId;
     private String patientId;
@@ -155,7 +156,7 @@ public class TestItemGenerator {
     }
   }
 
-  static class GeneratedItem {
+  public static class GeneratedItem {
     Questionnaire questionnaire;
 
     public GeneratedItem(QuestionnaireItemComponent item, String id) {

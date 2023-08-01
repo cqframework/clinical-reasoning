@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "SharedResourceCreation",
+  "url": "http://test-case.com/fhir/measures/Library/SharedResourceCreation",
+  "version": "0.0.001",
+  "name": "SharedResourceCreation",
+  "status": "draft",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library",
+      "display": "Logic Library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/SharedResourceCreation.cql"
+  } ]
+}

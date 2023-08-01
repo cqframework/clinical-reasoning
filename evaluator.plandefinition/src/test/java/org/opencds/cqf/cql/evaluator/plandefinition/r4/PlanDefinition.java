@@ -59,13 +59,13 @@ public class PlanDefinition {
 
   /** Fluent interface starts here **/
 
-  static class Assert {
+  public static class Assert {
     public static Apply that(String planDefinitionID, String patientID, String encounterID) {
       return new Apply(planDefinitionID, patientID, encounterID);
     }
   }
 
-  static class Apply {
+  public static class Apply {
     private String planDefinitionID;
 
     private String patientID;

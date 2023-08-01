@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +17,6 @@ import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.IdType;
@@ -154,12 +154,6 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return null;
   }
 
-  private Type transformInitial(IBase value) {
-    return ((Type) value).fhirType().equals("CodeableConcept")
-        ? ((CodeableConcept) value).getCodingFirstRep()
-        : (Type) value;
-  }
-
   private void getInitial(QuestionnaireItemComponent item, IBase populationContext) {
     var initialExpression = getInitialExpression(item);
     if (initialExpression != null) {
@@ -175,7 +169,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             item.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
                 new Reference(Constants.CQL_ENGINE_DEVICE));
             item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent()
-                .setValue(transformInitial(result)));
+                .setValue(transformValue((Type) result)));
           }
         }
       }
@@ -204,7 +198,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             item.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
                 new Reference(Constants.CQL_ENGINE_DEVICE));
             item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent()
-                .setValue(transformInitial(initialProperty.getValues().get(0))));
+                .setValue(transformValue((Type) initialProperty.getValues().get(0))));
           }
         }
       }

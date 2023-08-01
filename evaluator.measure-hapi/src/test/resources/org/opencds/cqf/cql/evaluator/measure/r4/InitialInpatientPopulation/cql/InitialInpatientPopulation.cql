@@ -6,14 +6,14 @@ include FHIRHelpers version '4.0.1' called FHIRHelpers
 include SupplementalDataElementsFHIR4 version '2.0.000' called SDE
 include MATGlobalCommonFunctionsFHIR4 version '6.1.000' called Global
 
-codesystem "ActCode": 'http://terminology.hl7.org/CodeSystem/v3-ActCode' 
+codesystem "ActCode": 'http://terminology.hl7.org/CodeSystem/v3-ActCode'
 codesystem "Diagnosis Role": 'http://terminology.hl7.org/CodeSystem/diagnosis-role'
 
 valueset "Blood Glucose Laboratory and Point of Care Tests": 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.38'
 valueset "CDC Location Codes": 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1046.265'
 valueset "Discharge Disposition": 'http://terminology.hl7.org/ValueSet/encounter-discharge-disposition'
 valueset "Gender Identity": 'http://hl7.org/fhir/ValueSet/gender-identity'
-valueset "NHSN Hypoglycemia Drugs": 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58'
+valueset "Hypoglycemia Drugs": 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58'
 
 code "Chief Complaint": 'CC' from "Diagnosis Role" display 'Chief complaint'
 code "emergency": 'EMER' from "ActCode" display 'emergency'
@@ -48,9 +48,9 @@ define "Inpatient Encounter":
   and Encounters.period overlaps "Performance Period"
 
 define "Antidiabetic Drugs Administered or Ordered":
-  ([MedicationAdministration: "NHSN Hypoglycemia Drugs"] ADDMedAdmin
+  ([MedicationAdministration: "Hypoglycemia Drugs"] ADDMedAdmin
     where ADDMedAdmin.status ~ 'completed')
-  union [MedicationRequest: "NHSN Hypoglycemia Drugs"]
+  union [MedicationRequest: "Hypoglycemia Drugs"]
 
 define function "HospitalizationWithObservationOrEmergency"(TheEncounter FHIR.Encounter ):
   TheEncounter Visit
@@ -76,14 +76,14 @@ define "SDE Chief Complaint":
 
 define "SDE Condition":
 	[Condition] Conditions where exists("Initial Population".encounters)
-    
+
 define "SDE Encounter Discharge Dispositions":
-	[Encounter: "Discharge Disposition"] DischargeDispositions 
+	[Encounter: "Discharge Disposition"] DischargeDispositions
 	where exists("Initial Population".encounters)
 
 define "SDE Encounter Locations":
 	[Encounter] Encounter
-   	where Global."GetLocation"(Encounter.location.location[0]).type in "CDC Location Codes" 
+   	where Global."GetLocation"(Encounter.location.location[0]).type in "CDC Location Codes"
    		and exists("Initial Population".encounters)
 
 define "SDE Ethnicity":
@@ -94,7 +94,7 @@ define "SDE Gender Identity":
 	[Patient] Patient
     where Patient.gender in "Gender Identity"
 		and exists("Initial Population".encounters)
- 	
+
   define "SDE Locations":
 	[Location] Locations
     where exists("Initial Population".encounters)
@@ -108,22 +108,22 @@ define "SDE Medication Request":
 	where exists("Initial Population".encounters)
 
 define "SDE Observation":
-	[Observation] Observations 
+	[Observation] Observations
 	where exists("Initial Population".encounters)
 
-define "SDE Patient Death Date": 
+define "SDE Patient Death Date":
   singleton from(
     [Patient] Patient
-    where Patient.deceased is FHIR.dateTime 
+    where Patient.deceased is FHIR.dateTime
       and exists("Initial Population".encounters)
     return Patient.deceased
   )
 
-define "SDE Payer": 
+define "SDE Payer":
 	SDE."SDE Payer" Payers
 	where exists("Initial Population".encounters)
 
-define "SDE Patient ID": 
+define "SDE Patient ID":
     [Patient] ThePatient
 	where exists("Initial Population".encounters)
     return ThePatient.identifier
@@ -133,7 +133,7 @@ define "SDE Procedures":
   where exists("Initial Population".encounters)
 
 define "SDE Race":
-	SDE."SDE Race" Race 
+	SDE."SDE Race" Race
 	where exists("Initial Population".encounters)
 
 define "SDE Service Request":
@@ -145,8 +145,8 @@ define "SDE Service Request":
 define "SDE Sex":
 	SDE."SDE Sex" Sex
 	where exists("Initial Population".encounters)
-   
-define "SDE Zip Code": 
-	[Patient] ThePatient 
+
+define "SDE Zip Code":
+	[Patient] ThePatient
 	where exists("Initial Population".encounters)
     return ThePatient.address.postalCode

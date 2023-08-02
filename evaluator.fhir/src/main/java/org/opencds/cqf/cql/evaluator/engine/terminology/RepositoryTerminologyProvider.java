@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.evaluator.engine.terminology;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.cql.evaluator.fhir.util.Repositories.searchRepositoryWithPaging;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -38,17 +38,15 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
 
   private boolean initialized = false;
 
-  @SuppressWarnings("unchecked")
   public RepositoryTerminologyProvider(Repository repository) {
     requireNonNull(repository, "repository can not be null.");
 
     this.fhirContext = repository.fhirContext();
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     this.valueSets =
-        BundleUtil.toListOfResources(this.fhirContext, repository.search(
-            (Class<? extends IBaseBundle>) this.fhirContext.getResourceDefinition("Bundle")
-                .getImplementingClass(),
-            this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass(), null, null));
+        BundleUtil.toListOfResources(this.fhirContext,
+            searchRepositoryWithPaging(this.fhirContext, repository,
+                this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass(), null, null));
   }
 
   /**

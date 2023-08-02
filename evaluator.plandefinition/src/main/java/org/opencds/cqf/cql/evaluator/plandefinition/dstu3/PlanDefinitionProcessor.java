@@ -661,10 +661,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           continue;
         }
         if (!((BooleanType) result).booleanValue()) {
-          logger.info("The result of condition expression {} is false", condition.getExpression());
+          logger.debug("The result of condition expression {} is false", condition.getExpression());
           return false;
         }
-        logger.info("The result of condition expression {} is true", condition.getExpression());
+        logger.debug("The result of condition expression {} is true", condition.getExpression());
       }
     }
     return true;

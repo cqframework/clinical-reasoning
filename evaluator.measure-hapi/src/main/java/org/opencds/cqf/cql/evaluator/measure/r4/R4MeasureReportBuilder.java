@@ -875,6 +875,8 @@ public class R4MeasureReportBuilder
         key = ((Resource) value).getIdElement().toVersionless().getValue();
       } else if (value != null) {
         key = value.toString();
+      } else {
+        key = "<null>";
       }
 
       if (key == null) {

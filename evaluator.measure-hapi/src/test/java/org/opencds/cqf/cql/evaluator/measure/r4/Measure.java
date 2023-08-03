@@ -87,7 +87,7 @@ public class Measure {
     }
 
     private static R4MeasureProcessor buildProcessor(Repository repository) {
-      return new R4MeasureProcessor(repository, null, new R4RepositorySubjectProvider(repository));
+      return new R4MeasureProcessor(repository, null, new R4RepositorySubjectProvider());
     }
 
     public When when() {

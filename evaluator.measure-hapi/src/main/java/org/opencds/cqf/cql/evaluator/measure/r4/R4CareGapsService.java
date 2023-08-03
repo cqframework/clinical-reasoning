@@ -1,11 +1,30 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.hl7.fhir.r4.model.Factory.newId;
+import static org.opencds.cqf.cql.evaluator.fhir.util.Resources.newResource;
+import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_BUNDLE_PROFILE;
+import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
+import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
+import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
+import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
+import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_REPORT_PROFILE;
+import static org.opencds.cqf.cql.evaluator.measure.constant.HtmlConstants.HTML_DIV_PARAGRAPH_CONTENT;
+import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
+import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
+import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,7 +41,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -47,40 +65,23 @@ import org.opencds.cqf.fhir.utility.Searches;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Map.ofEntries;
-import static org.hl7.fhir.r4.model.Factory.newId;
-import static org.opencds.cqf.cql.evaluator.fhir.util.Resources.newResource;
-import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_BUNDLE_PROFILE;
-import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
-import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
-import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
-import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
-import static org.opencds.cqf.cql.evaluator.measure.constant.CareGapsConstants.CARE_GAPS_REPORT_PROFILE;
-import static org.opencds.cqf.cql.evaluator.measure.constant.HtmlConstants.HTML_DIV_PARAGRAPH_CONTENT;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
-import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 
 public class R4CareGapsService {
 
   private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsService.class);
   public static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ImmutableMap.of(
-      "http://loinc.org/96315-7", new CodeableConceptSettings().add("http://loinc.org", "96315-7", "Gaps in care report"),
-      "http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP", new CodeableConceptSettings().add("http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps")
-  );
+      "http://loinc.org/96315-7",
+      new CodeableConceptSettings().add("http://loinc.org", "96315-7", "Gaps in care report"),
+      "http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP", new CodeableConceptSettings()
+          .add("http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps"));
 
 
   private final Repository myRepository;
@@ -101,7 +102,7 @@ public class R4CareGapsService {
       Repository theRepository,
       MeasureEvaluationOptions theMeasureEvaluationOptions,
       Executor theExecutor,
-      String theServerBase){
+      String theServerBase) {
     this.myRepository = theRepository;
     this.myCareGapsProperties = theCareGapsProperties;
     this.myMeasureEvaluationOptions = theMeasureEvaluationOptions;
@@ -111,6 +112,7 @@ public class R4CareGapsService {
 
   /**
    * Calculate measures describing gaps in care
+   *
    * @param thePeriodStart
    * @param thePeriodEnd
    * @param theTopic
@@ -122,8 +124,8 @@ public class R4CareGapsService {
    * @param theMeasureIdentifiers
    * @param theMeasureUrls
    * @param thePrograms
-   * @return Parameters that includes zero to many document bundles that
-   * include Care Gap Measure Reports will be returned.
+   * @return Parameters that includes zero to many document bundles that include Care Gap Measure
+   *         Reports will be returned.
    */
   public Parameters getCareGapsReport(IPrimitiveType<Date> thePeriodStart,
       IPrimitiveType<Date> thePeriodEnd,
@@ -139,13 +141,15 @@ public class R4CareGapsService {
 
     validateConfiguration();
 
-    List<Measure> measures = ensureMeasures(getMeasures(theMeasureIds, theMeasureIdentifiers, theMeasureUrls));
+    List<Measure> measures =
+        ensureMeasures(getMeasures(theMeasureIds, theMeasureIdentifiers, theMeasureUrls));
 
     List<Patient> patients;
     if (!Strings.isNullOrEmpty(theSubject)) {
       patients = getPatientListFromSubject(theSubject);
     } else {
-      throw new NotImplementedOperationException(Msg.code(2275) + "Only the subject parameter has been implemented.");
+      throw new NotImplementedOperationException(
+          Msg.code(2275) + "Only the subject parameter has been implemented.");
     }
 
     List<CompletableFuture<ParametersParameterComponent>> futures = new ArrayList<>();
@@ -155,7 +159,8 @@ public class R4CareGapsService {
           .forEach(
               patient -> {
                 Parameters.ParametersParameterComponent patientReports = patientReports(
-                    thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient, theStatuses, measures,
+                    thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient,
+                    theStatuses, measures,
                     theOrganization);
                 futures.add(CompletableFuture.supplyAsync(() -> patientReports, myCqlExecutor));
               });
@@ -165,7 +170,8 @@ public class R4CareGapsService {
       patients.forEach(
           patient -> {
             Parameters.ParametersParameterComponent patientReports = patientReports(
-                thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient, theStatuses, measures,
+                thePeriodStart.getValueAsString(), thePeriodEnd.getValueAsString(), patient,
+                theStatuses, measures,
                 theOrganization);
             if (patientReports != null) {
               result.addParameter(patientReports);
@@ -180,7 +186,8 @@ public class R4CareGapsService {
         "Setting care-gaps properties are required for the $care-gaps operation.");
     checkArgument(!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsReporter()),
         "Setting care-gaps properties.care_gaps_reporter setting is required for the $care-gaps operation.");
-    checkArgument(!Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsCompositionSectionAuthor()),
+    checkArgument(
+        !Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsCompositionSectionAuthor()),
         "Setting care-gaps properties.care_gaps_composition_section_author is required for the $care-gaps operation.");
     checkNotNull(!Strings.isNullOrEmpty(myServerBase),
         "The fhirBaseUrl setting is required for the $care-gaps operation.");
@@ -197,6 +204,7 @@ public class R4CareGapsService {
         "The %s Resource is configured as the CareGapsProperties.care_gaps_composition_section_author but the Resource could not be read.",
         myCareGapsProperties.getCareGapsCompositionSectionAuthor()));
   }
+
   List<Patient> getPatientListFromSubject(String theSubject) {
     if (theSubject.startsWith("Patient/")) {
       return Collections.singletonList(validatePatientExists(theSubject));
@@ -212,7 +220,8 @@ public class R4CareGapsService {
     List<Patient> patientList = new ArrayList<>();
     Group group = myRepository.read(Group.class, newId(theSubjectGroupId));
     if (group == null) {
-      throw new IllegalArgumentException(Msg.code(2276) + "Could not find Group: " + theSubjectGroupId);
+      throw new IllegalArgumentException(
+          Msg.code(2276) + "Could not find Group: " + theSubjectGroupId);
     }
 
     group.getMember().forEach(member -> {
@@ -223,7 +232,8 @@ public class R4CareGapsService {
       } else if (reference.getReferenceElement().getResourceType().equals("Group")) {
         patientList.addAll(getPatientListFromGroup(reference.getReference()));
       } else {
-        ourLog.info("Group member was not a Patient or a Group, so skipping. \n{}", reference.getReference());
+        ourLog.info("Group member was not a Patient or a Group, so skipping. \n{}",
+            reference.getReference());
       }
     });
 
@@ -233,7 +243,8 @@ public class R4CareGapsService {
   Patient validatePatientExists(String thePatientRef) {
     Patient patient = myRepository.read(Patient.class, new IdType(thePatientRef));
     if (patient == null) {
-      throw new IllegalArgumentException(Msg.code(2277) + "Could not find Patient: " + thePatientRef);
+      throw new IllegalArgumentException(
+          Msg.code(2277) + "Could not find Patient: " + thePatientRef);
     }
 
     return patient;
@@ -289,10 +300,11 @@ public class R4CareGapsService {
     return this.myRepository.read(Measure.class, id);
   }
 
-  private <T extends Resource> T addConfiguredResource(Class<T> theResourceClass, String theId, String theKey) {
+  private <T extends Resource> T addConfiguredResource(Class<T> theResourceClass, String theId,
+      String theKey) {
     T resource = null;
     // read resource from repository
-    resource = myRepository.read(theResourceClass,new IdType(theId));
+    resource = myRepository.read(theResourceClass, new IdType(theId));
     // add resource to configured resources
     myConfiguredResources.put(theKey, resource);
     return resource;
@@ -305,21 +317,24 @@ public class R4CareGapsService {
         theMeasures.remove(measure);
       }
       if (!measure.hasImprovementNotation()) {
-        ourLog.info("Measure does not specify an improvement notation so skipping: {}.", measure.getId());
+        ourLog.info("Measure does not specify an improvement notation so skipping: {}.",
+            measure.getId());
         theMeasures.remove(measure);
       }
     });
     return theMeasures;
   }
 
-  private Parameters.ParametersParameterComponent patientReports( String thePeriodStart,
-      String thePeriodEnd, Patient thePatient, List<String> theStatuses, List<Measure> theMeasures, String theOrganization) {
+  private Parameters.ParametersParameterComponent patientReports(String thePeriodStart,
+      String thePeriodEnd, Patient thePatient, List<String> theStatuses, List<Measure> theMeasures,
+      String theOrganization) {
     // TODO: add organization to report, if it exists.
     Composition composition = getComposition(thePatient);
     List<DetectedIssue> detectedIssues = new ArrayList<>();
     Map<String, Resource> evalPlusSDE = new HashMap<>();
-    List<MeasureReport> reports = getReports(thePeriodStart, thePeriodEnd, thePatient, theStatuses, theMeasures,
-        composition, detectedIssues, evalPlusSDE);
+    List<MeasureReport> reports =
+        getReports(thePeriodStart, thePeriodEnd, thePatient, theStatuses, theMeasures,
+            composition, detectedIssues, evalPlusSDE);
 
     if (reports.isEmpty()) {
       return null;
@@ -330,21 +345,24 @@ public class R4CareGapsService {
         addBundleEntries(myServerBase, composition, detectedIssues, reports, evalPlusSDE));
   }
 
-  private List<MeasureReport> getReports( String thePeriodStart, String thePeriodEnd,
-      Patient thePatient, List<String> theStatuses, List<Measure> theMeasures, Composition theComposition,
+  private List<MeasureReport> getReports(String thePeriodStart, String thePeriodEnd,
+      Patient thePatient, List<String> theStatuses, List<Measure> theMeasures,
+      Composition theComposition,
       List<DetectedIssue> theDetectedIssues, Map<String, Resource> theEvalPlusSDEs) {
 
     List<MeasureReport> reports = new ArrayList<>();
     MeasureReport report;
 
     String theReportType = MeasureReportType.INDIVIDUAL.toString();
-    R4MeasureProcessor r4MeasureProcessor = new R4MeasureProcessor(myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider(myRepository));
+    R4MeasureProcessor r4MeasureProcessor = new R4MeasureProcessor(myRepository,
+        myMeasureEvaluationOptions, new R4RepositorySubjectProvider());
 
     for (Measure measure : theMeasures) {
-      
+
       List<String> subjects = Collections.singletonList(Ids.simple(thePatient));
 
-      report = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(measure.getIdElement()), thePeriodStart, thePeriodEnd, theReportType, subjects, null);
+      report = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(measure.getIdElement()),
+          thePeriodStart, thePeriodEnd, theReportType, subjects, null);
 
 
       if (!report.hasGroup()) {
@@ -397,14 +415,19 @@ public class R4CareGapsService {
     return patientParameter;
   }
 
-  private Bundle addBundleEntries(String theServerBase, Composition theComposition, List<DetectedIssue> theDetectedIssues,
+  private Bundle addBundleEntries(String theServerBase, Composition theComposition,
+      List<DetectedIssue> theDetectedIssues,
       List<MeasureReport> theMeasureReports, Map<String, Resource> theEvalPlusSDEs) {
     Bundle reportBundle = getBundle();
     reportBundle.addEntry(getBundleEntry(theServerBase, theComposition));
-    theMeasureReports.forEach(report -> reportBundle.addEntry(getBundleEntry(theServerBase, report)));
-    theDetectedIssues.forEach(detectedIssue -> reportBundle.addEntry(getBundleEntry(theServerBase, detectedIssue)));
-    myConfiguredResources.values().forEach(resource -> reportBundle.addEntry(getBundleEntry(theServerBase, resource)));
-    theEvalPlusSDEs.values().forEach(resource -> reportBundle.addEntry(getBundleEntry(theServerBase, resource)));
+    theMeasureReports
+        .forEach(report -> reportBundle.addEntry(getBundleEntry(theServerBase, report)));
+    theDetectedIssues.forEach(
+        detectedIssue -> reportBundle.addEntry(getBundleEntry(theServerBase, detectedIssue)));
+    myConfiguredResources.values()
+        .forEach(resource -> reportBundle.addEntry(getBundleEntry(theServerBase, resource)));
+    theEvalPlusSDEs.values()
+        .forEach(resource -> reportBundle.addEntry(getBundleEntry(theServerBase, resource)));
     return reportBundle;
   }
 
@@ -412,14 +435,16 @@ public class R4CareGapsService {
     Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
     theMeasureReport.getGroup().forEach(group -> group.getPopulation().forEach(population -> {
       if (population.hasCode()
-          && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumerator.getKey())
+          && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM,
+              inNumerator.getKey())
           && population.getCount() == 1) {
         inNumerator.setValue(true);
       }
     }));
 
-    boolean isPositive = theMeasure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
-        "increase");
+    boolean isPositive =
+        theMeasure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
+            "increase");
 
     if ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue())) {
       return CareGapsStatusCode.OPEN_GAP;
@@ -433,7 +458,8 @@ public class R4CareGapsService {
         .setFullUrl(getFullUrl(theServerBase, theResource));
   }
 
-  private Composition.SectionComponent getSection(Measure theMeasure, MeasureReport theMeasureReport, DetectedIssue theDetectedIssue,
+  private Composition.SectionComponent getSection(Measure theMeasure,
+      MeasureReport theMeasureReport, DetectedIssue theDetectedIssue,
       CareGapsStatusCode theGapStatus) {
     String narrative = String.format(HTML_DIV_PARAGRAPH_CONTENT,
         theGapStatus == CareGapsStatusCode.CLOSED_GAP ? "No detected issues."
@@ -467,7 +493,8 @@ public class R4CareGapsService {
         .build();
   }
 
-  private DetectedIssue getDetectedIssue(Patient thePatient, MeasureReport theMeasureReport, CareGapsStatusCode theCareGapStatusCode) {
+  private DetectedIssue getDetectedIssue(Patient thePatient, MeasureReport theMeasureReport,
+      CareGapsStatusCode theCareGapStatusCode) {
     return new DetectedIssueBuilder<>(DetectedIssue.class)
         .withProfile(CARE_GAPS_DETECTED_ISSUE_PROFILE)
         .withStatus(DetectedIssue.DetectedIssueStatus.FINAL.toString())
@@ -476,19 +503,23 @@ public class R4CareGapsService {
         .withEvidenceDetail(Ids.simple(theMeasureReport))
         .withModifierExtension(new ImmutablePair<>(
             CARE_GAPS_GAP_STATUS_EXTENSION,
-            new CodeableConceptSettings().add(CARE_GAPS_GAP_STATUS_SYSTEM, theCareGapStatusCode.toString(),
+            new CodeableConceptSettings().add(CARE_GAPS_GAP_STATUS_SYSTEM,
+                theCareGapStatusCode.toString(),
                 theCareGapStatusCode.toDisplayString())))
         .build();
   }
 
-  protected void populateEvaluatedResources(MeasureReport theMeasureReport, Map<String, Resource> theResources) {
+  protected void populateEvaluatedResources(MeasureReport theMeasureReport,
+      Map<String, Resource> theResources) {
     theMeasureReport.getEvaluatedResource().forEach(evaluatedResource -> {
       IIdType resourceId = evaluatedResource.getReferenceElement();
-      if (resourceId.getResourceType() == null || theResources.containsKey(Ids.simple(resourceId))) {
+      if (resourceId.getResourceType() == null
+          || theResources.containsKey(Ids.simple(resourceId))) {
         return;
       }
 
-      Class<? extends IBaseResource> resourceType = fhirContext.getResourceDefinition(resourceId.getResourceType()).newInstance().getClass();
+      Class<? extends IBaseResource> resourceType =
+          fhirContext.getResourceDefinition(resourceId.getResourceType()).newInstance().getClass();
       IBaseResource resource = myRepository.read(resourceType, resourceId);
 
       if (resource instanceof Resource) {
@@ -498,17 +529,20 @@ public class R4CareGapsService {
     });
   }
 
-  protected void populateSDEResources(MeasureReport theMeasureReport, Map<String, Resource> theResources) {
+  protected void populateSDEResources(MeasureReport theMeasureReport,
+      Map<String, Resource> theResources) {
     if (theMeasureReport.hasExtension()) {
       for (Extension extension : theMeasureReport.getExtension()) {
-        if (extension.hasUrl() && extension.getUrl().equals(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION)) {
+        if (extension.hasUrl()
+            && extension.getUrl().equals(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION)) {
           Reference sdeRef = extension.hasValue() && extension.getValue() instanceof Reference
               ? (Reference) extension.getValue()
               : null;
           if (sdeRef != null && sdeRef.hasReference() && !sdeRef.getReference().startsWith("#")) {
             IdType sdeId = new IdType(sdeRef.getReference());
             if (!theResources.containsKey(Ids.simple(sdeId))) {
-              Class<? extends IBaseResource> resourceType = fhirContext.getResourceDefinition(sdeId.getResourceType()).newInstance().getClass();
+              Class<? extends IBaseResource> resourceType = fhirContext
+                  .getResourceDefinition(sdeId.getResourceType()).newInstance().getClass();
               IBaseResource resource = myRepository.read(resourceType, sdeId);
               if (resource instanceof Resource) {
                 Resource resourceBase = (Resource) resource;
@@ -520,6 +554,7 @@ public class R4CareGapsService {
       }
     }
   }
+
   private Parameters initializeResult() {
     return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
   }
@@ -530,8 +565,10 @@ public class R4CareGapsService {
     return getFullUrl(theServerAddress, theResource.fhirType(), Ids.simplePart(theResource));
   }
 
-  public static String getFullUrl(String theServerAddress, String theFhirType, String theElementId) {
-    return String.format("%s%s/%s", theServerAddress + (theServerAddress.endsWith("/") ? "" : "/"), theFhirType,
+  public static String getFullUrl(String theServerAddress, String theFhirType,
+      String theElementId) {
+    return String.format("%s%s/%s", theServerAddress + (theServerAddress.endsWith("/") ? "" : "/"),
+        theFhirType,
         theElementId);
   }
 

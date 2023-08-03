@@ -12,16 +12,16 @@ import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.Timing;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
-import org.opencds.cqf.cql.evaluator.fhir.helper.r5.R5FhirModelResolver;
+import org.opencds.cqf.cql.evaluator.engine.model.FhirModelResolverCache;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 
 public class ResourceMatcherR5 implements BaseResourceMatcher {
   private final ModelResolver modelResolver =
-      new CachingModelResolverDecorator(new R5FhirModelResolver());
+      FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
 
   @Override
   public ModelResolver getModelResolver() {

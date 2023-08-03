@@ -11,17 +11,17 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
+import org.opencds.cqf.cql.evaluator.engine.model.FhirModelResolverCache;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 
 public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
   private final ModelResolver modelResolver =
-      new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
+      FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
 
   @Override
   public ModelResolver getModelResolver() {

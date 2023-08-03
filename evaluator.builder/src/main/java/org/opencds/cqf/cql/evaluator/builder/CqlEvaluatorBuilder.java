@@ -34,7 +34,6 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
-import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
 import org.opencds.cqf.cql.evaluator.fhir.npm.LoggerAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
 import org.slf4j.Logger;
@@ -355,7 +354,7 @@ public class CqlEvaluatorBuilder {
   }
 
   protected TerminologyProvider decorate(TerminologyProvider terminologyProvider) {
-    return new PrivateCachingTerminologyProviderDecorator(terminologyProvider);
+    return terminologyProvider;
   }
 
   /**

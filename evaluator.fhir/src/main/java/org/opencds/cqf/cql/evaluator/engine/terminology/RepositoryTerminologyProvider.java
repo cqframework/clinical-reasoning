@@ -1,14 +1,15 @@
 package org.opencds.cqf.cql.evaluator.engine.terminology;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.cql.evaluator.fhir.util.Repositories.searchRepositoryWithPaging;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -18,10 +19,9 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.cql.evaluator.engine.util.ValueSetUtil;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Iterables;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -29,24 +29,58 @@ import ca.uhn.fhir.util.BundleUtil;
 
 public class RepositoryTerminologyProvider implements TerminologyProvider {
 
+  // eventually, we want to be able to detect expansion capabilities from the
+  // capability statement. For now, we hard code based on the our knowledge
+  // of where we set this terminology provider up.
+  public enum EXPANSION_CAPABILITIES {
+    NO,
+    YES
+  }
+
   private static final Logger logger = LoggerFactory.getLogger(RepositoryTerminologyProvider.class);
 
-  private FhirContext fhirContext;
-  private IFhirPath fhirPath;
-  private List<? extends IBaseResource> valueSets;
-  private Map<String, Iterable<Code>> valueSetIndex = new HashMap<>();
+  private static final Comparator<Code> CODE_COMPARATOR =
+      (x, y) -> x.getCode().compareTo(y.getCode());
+  private final Repository repository;
+  private final FhirContext fhirContext;
+  private final IFhirPath fhirPath;
+  private final Map<String, List<Code>> valueSetIndex;
+  private final EXPANSION_CAPABILITIES repoExpansionCapabilities;
 
-  private boolean initialized = false;
 
-  public RepositoryTerminologyProvider(Repository repository) {
-    requireNonNull(repository, "repository can not be null.");
+  // The cached expansions are sorted by code order
+  // This is used determine the range of codes to check
+  private static class Range {
+
+    public static final Range EMPTY = new Range(-1, -1);
+
+    public Range(int start, int end) {
+      this.start = start;
+      this.end = end;
+    }
+
+    public final int start;
+    public final int end;
+  }
+
+  public RepositoryTerminologyProvider(Repository repository,
+      EXPANSION_CAPABILITIES repoExpansionCapabilities) {
+    this(repository, new HashMap<>(), repoExpansionCapabilities);
+  }
+
+  public RepositoryTerminologyProvider(Repository repository,
+      Map<String, List<Code>> valueSetIndex, EXPANSION_CAPABILITIES repoExpansionCapabilities) {
+    this.repository = requireNonNull(repository, "repository can not be null.");
+    this.valueSetIndex = requireNonNull(valueSetIndex, "valueSetIndex can not be null.");
+    this.repoExpansionCapabilities =
+        requireNonNull(repoExpansionCapabilities, "repoExpansionCapabilities can not be null.");
 
     this.fhirContext = repository.fhirContext();
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    this.valueSets =
-        BundleUtil.toListOfResources(this.fhirContext,
-            searchRepositoryWithPaging(this.fhirContext, repository,
-                this.fhirContext.getResourceDefinition("ValueSet").getImplementingClass(), null, null));
+  }
+
+  public RepositoryTerminologyProvider(Repository repository) {
+    this(repository, new HashMap<>(), EXPANSION_CAPABILITIES.NO);
   }
 
   /**
@@ -61,10 +95,14 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     requireNonNull(code, "code can not be null when using 'expand'");
     requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
-    Iterable<Code> codes = this.expand(valueSet);
-    checkExpansion(codes, valueSet);
-    for (Code c : codes) {
-      if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
+    List<Code> codes = this.expand(valueSet);
+
+    // This range includes all codes that have an equivalent code value,
+    // So we only need to check the code system.
+    Range range = this.getSearchRange(code, codes);
+    for (int i = range.start; i < range.end; i++) {
+      var c = codes.get(i);
+      if (c.getSystem().equals(code.getSystem())) {
         return true;
       }
     }
@@ -83,17 +121,114 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
    */
   @Override
 
-  public Iterable<Code> expand(ValueSetInfo valueSet) {
+  public List<Code> expand(ValueSetInfo valueSet) {
     requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
-    this.initialize();
+    // create a url|version canonical url from the info
+    var url =
+        valueSet.getId() + (valueSet.getVersion() != null ? ("|" + valueSet.getVersion()) : "");
 
-    if (!this.valueSetIndex.containsKey(valueSet.getId())) {
+    var expansion = this.valueSetIndex.computeIfAbsent(url, k -> tryExpand(valueSet));
+    if (expansion == null) {
+      throw new IllegalArgumentException(
+          String.format("Unable to get expansion for ValueSet %s", valueSet.getId()));
+    }
+
+    return expansion;
+  }
+
+  private Class<? extends IBaseResource> classFor(String resourceType) {
+    return this.fhirContext.getResourceDefinition(resourceType).getImplementingClass();
+  }
+
+  private List<Code> tryExpand(ValueSetInfo valueSet) {
+
+    var search = valueSet.getVersion() != null
+        ? Searches.byUrlAndVersion(valueSet.getId(), valueSet.getVersion())
+        : Searches.byUrl(valueSet.getId());
+
+    @SuppressWarnings("unchecked")
+    var results = this.repository.search((Class<? extends IBaseBundle>) classFor("Bundle"),
+        classFor("ValueSet"), search, null);
+
+    var resources = BundleUtil.toListOfResources(fhirContext, results);
+
+    if (resources.isEmpty()) {
       throw new IllegalArgumentException(
           String.format("Unable to locate ValueSet %s", valueSet.getId()));
     }
 
-    return this.valueSetIndex.get(valueSet.getId());
+    if (resources.size() > 1) {
+      throw new IllegalArgumentException(
+          String.format("Multiple ValueSets resolved for %s", valueSet.getId()));
+    }
+
+    var vs = resources.get(0);
+
+    List<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, vs);
+    if (codes != null && Boolean.TRUE.equals(isNaiveExpansion(vs))) {
+      logger.warn(
+          "Codes for ValueSet {} expanded without a terminology server, some results may not be correct.",
+          valueSet.getId());
+    }
+
+    // ValueSet didn't return with an expansion, and the underlying repository
+    // supports expansion, so try to expand it.
+    if (codes == null && this.repoExpansionCapabilities == EXPANSION_CAPABILITIES.YES) {
+      vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
+      codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, vs);
+    }
+
+    // Still don't have any codes, so try a naive expansion
+    if (codes == null) {
+      if (containsExpansionLogic(vs)) {
+        throw new IllegalArgumentException(String.format(
+            "ValueSet %s requires $expand to support correctly, and $expand is not available",
+            valueSet.getId()));
+      }
+
+      logger.warn(
+          "ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ",
+          valueSet.getId());
+
+      codes = ValueSetUtil.getCodesInCompose(fhirContext, vs);
+    }
+
+    if (codes == null) {
+      throw new IllegalArgumentException(
+          String.format("Failed to expand ValueSet %s", valueSet.getId()));
+    }
+
+    Collections.sort(codes, CODE_COMPARATOR);
+    return codes;
+  }
+
+  // Given a set of Codes sorted by ".code", find the range that matching codes
+  // occur in.
+  private Range getSearchRange(Code code, List<Code> expansion) {
+    int index = Collections.binarySearch(
+        expansion,
+        code,
+        CODE_COMPARATOR);
+
+    if (index < 0) {
+      return Range.EMPTY;
+    }
+
+    int first = index;
+    int last = index + 1;
+
+    var value = code.getCode();
+
+    while (first > 0 && expansion.get(first - 1).getCode().equals(value)) {
+      first--;
+    }
+
+    while (last < expansion.size() && expansion.get(last).getCode().equals(value)) {
+      last++;
+    }
+
+    return new Range(first, last);
   }
 
   /**
@@ -114,43 +249,11 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
 
     if (code.getSystem().equals(codeSystem.getId())
         && (code.getVersion() == null || code.getVersion().equals(codeSystem.getVersion()))) {
-      logger.warn("Unvalidated CodeSystem lookup: {} in {}", code.toString(), codeSystem.getId());
+      logger.warn("Unvalidated CodeSystem lookup: {} in {}", code, codeSystem.getId());
       return code;
     }
 
     return null;
-  }
-
-  private void initialize() {
-    if (this.initialized) {
-      return;
-    }
-
-    for (IBaseResource resource : this.valueSets) {
-      String url = ValueSetUtil.getUrl(fhirContext, resource);
-      Iterable<Code> codes = ValueSetUtil.getCodesInExpansion(this.fhirContext, resource);
-
-      if (codes == null) {
-        logger.warn(
-            "ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ",
-            url);
-        codes = ValueSetUtil.getCodesInCompose(this.fhirContext, resource);
-      } else {
-        Boolean isNaiveExpansion = isNaiveExpansion(resource);
-        if (isNaiveExpansion != null && isNaiveExpansion) {
-          logger.warn(
-              "Codes expanded without a terminology server, some results may not be correct.");
-        }
-      }
-
-      if (codes == null) {
-        codes = Collections.emptySet();
-      }
-
-      this.valueSetIndex.put(url, codes);
-    }
-
-    this.initialized = true;
   }
 
   @SuppressWarnings("unchecked")
@@ -176,33 +279,6 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
       return (Boolean) ((IPrimitiveType<?>) param).getValue();
     } else {
       return null;
-    }
-  }
-
-  private void checkExpansion(Iterable<Code> expandedCodes, ValueSetInfo valueSet) {
-    if (expandedCodes != null && !Iterables.isEmpty(expandedCodes)) {
-      return;
-    }
-
-    IBaseResource resource = null;
-    for (IBaseResource res : this.valueSets) {
-      String idPart = res.getIdElement().getIdPart();
-      String versionIdPart = res.getIdElement().getVersionIdPart();
-      if (valueSet.getId().equals(idPart) || valueSet.getId().endsWith(idPart)
-          || valueSet.getId().endsWith(idPart + "|" + versionIdPart)) {
-        resource = res;
-      }
-    }
-
-    if (resource == null) {
-      throw new IllegalArgumentException(
-          String.format("Unable to locate ValueSet %s", valueSet.getId()));
-    }
-
-    if (containsExpansionLogic(resource)) {
-      String msg = "ValueSet {} not expanded and compose contained expansion logic.";
-      logger.error(msg);
-      throw new IllegalArgumentException(msg);
     }
   }
 

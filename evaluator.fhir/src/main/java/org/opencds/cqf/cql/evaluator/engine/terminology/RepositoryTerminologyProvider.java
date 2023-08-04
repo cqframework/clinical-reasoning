@@ -27,6 +27,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.BundleUtil;
 
+/*
+ * The implementation of this class uses a sorted list to perform terminology membership operations.
+ * I tried changing the implementation to use a TreeSet rather than a sorted list and a binary
+ * search, but found that the performance was reduced by ~33%. Please run the benchmarks to verify
+ * that changes to this class do not result in significant performance degradation.
+ */
 public class RepositoryTerminologyProvider implements TerminologyProvider {
 
   // eventually, we want to be able to detect expansion capabilities from the
@@ -92,6 +98,9 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
    */
   @Override
   public boolean in(Code code, ValueSetInfo valueSet) {
+    // Implementation note: This function should be considered inner loop
+    // code. It's called thousands or millions of times by the CQL engine
+    // during evaluation
     requireNonNull(code, "code can not be null when using 'expand'");
     requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
@@ -120,7 +129,6 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
    * @return The Codes in the ValueSet. <b>NOTE:</b> This method never returns null.
    */
   @Override
-
   public List<Code> expand(ValueSetInfo valueSet) {
     requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
@@ -141,6 +149,11 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     return this.fhirContext.getResourceDefinition(resourceType).getImplementingClass();
   }
 
+  // Attempts to perform expansion of the referenced ValueSet. It will first use an
+  // expansion if one is available, and then ask the underlying repository to perform
+  // an expansion if possible, and then fall back to doing a "naive" expansion where
+  // possible. A "naive" expansion includes only codes directly referenced in the ValueSet
+  // It's not possible to run expansion filters without the support of a terminology server.
   private List<Code> tryExpand(ValueSetInfo valueSet) {
 
     var search = valueSet.getVersion() != null
@@ -204,7 +217,8 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
   }
 
   // Given a set of Codes sorted by ".code", find the range that matching codes
-  // occur in.
+  // occur in. This function first performs a binary search to find a matching element
+  // and then iterates backwards and forwards from there to get the set of candidate codes
   private Range getSearchRange(Code code, List<Code> expansion) {
     int index = Collections.binarySearch(
         expansion,
@@ -243,6 +257,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
    */
   @Override
   public Code lookup(Code code, CodeSystemInfo codeSystem) {
+
     if (code.getSystem() == null) {
       return null;
     }

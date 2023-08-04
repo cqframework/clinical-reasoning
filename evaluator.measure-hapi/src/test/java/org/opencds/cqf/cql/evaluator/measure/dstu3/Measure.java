@@ -62,7 +62,7 @@ public class Measure {
     }
 
     public Given repositoryFor(String repositoryPath) {
-      this.repository = TestRepositoryFactory.createRepository(FhirContext.forR4Cached(),
+      this.repository = TestRepositoryFactory.createRepository(FhirContext.forDstu3Cached(),
           this.getClass(), repositoryPath);
       return this;
     }

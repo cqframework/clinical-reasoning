@@ -35,7 +35,7 @@ public class MeasureProcessorEvaluateTest {
   }
 
 
-  // @Test
+  @Test
   public void measure_eval_with_additional_data() {
     Bundle additionalData = (Bundle) FhirContext.forR4Cached().newJsonParser()
         .parseResource(MeasureProcessorEvaluateTest.class
@@ -51,6 +51,6 @@ public class MeasureProcessorEvaluateTest {
         .then().report();
 
     assertEquals(formatter.format(report.getPeriod().getStart()), "2022-01-01");
-    assertEquals(formatter.format(report.getPeriod().getEnd()), "2022-06-29");
+    assertEquals(formatter.format(report.getPeriod().getEnd()), "2022-01-31");
   }
 }

@@ -18,13 +18,19 @@ public class BenchmarksIT {
 
   private static final DecimalFormat df = new DecimalFormat("0.000");
 
-  // ops/second
-  private static final Map<String, Integer> REFERENCE_SCORES = Map.of(
-      "org.opencds.cqf.fhir.benchmark.PlanDefinitions.test", 300,
-      "org.opencds.cqf.fhir.benchmark.Measures.test", 190,
-      "org.opencds.cqf.fhir.benchmark.Questionnaires.test", 530);
+  // These reference scores were produced on an i9-9980HK @ 2.4 Ghz with 32 GB of ram
+  // Your mileage may vary, it's best to run the benchmarks on your local machine
+  // and see what your specific hardware produces and then make modifications.
+  // Check your results against your own personal reference scores.
+  private static final Map<String, Double> REFERENCE_SCORES = Map.of(
+      "org.opencds.cqf.fhir.benchmark.PlanDefinitions.test", 300.0, // ops/second
+      "org.opencds.cqf.fhir.benchmark.Measures.test", 800.0, // ops/second
+      "org.opencds.cqf.fhir.benchmark.MeasuresAdditionalData.test", .35, // ops/second
+      "org.opencds.cqf.fhir.benchmark.Questionnaires.test", 530.0, // ops/second
+      "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testLarge", 6_000_000.0, // ops/second
+      "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testSmall", 6_000_000.0); // ops/second
 
-  private static final double SCORE_DEVIATION = .5; // +/- 50% ops/second allowed
+  private static final double SCORE_DEVIATION = .5; // +/- 50% ops/unit allowed
 
   @Test
   public void benchmark() throws Exception {
@@ -32,6 +38,7 @@ public class BenchmarksIT {
         .include(Questionnaires.class.getSimpleName())
         .include(Measures.class.getSimpleName())
         .include(PlanDefinitions.class.getSimpleName())
+        .include(TerminologyProviders.class.getSimpleName())
         .build();
     Collection<RunResult> runResults = new Runner(opt).run();
     assertFalse(runResults.isEmpty());

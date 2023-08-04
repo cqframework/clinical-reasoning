@@ -38,6 +38,11 @@ public class R4MeasureProcessor {
   private final SubjectProvider subjectProvider;
 
   public R4MeasureProcessor(Repository repository,
+      MeasureEvaluationOptions measureEvaluationOptions) {
+    this(repository, measureEvaluationOptions, new R4RepositorySubjectProvider());
+  }
+
+  public R4MeasureProcessor(Repository repository,
       MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
     this.repository = Objects.requireNonNull(repository);
     this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions

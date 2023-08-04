@@ -1,9 +1,11 @@
 package org.opencds.cqf.fhir.benchmark;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.When;
 import org.opencds.cqf.cql.evaluator.measure.r4.MeasureProcessorEvaluateTest;
@@ -30,12 +32,17 @@ public class MeasuresAdditionalData {
 
   @Setup(Level.Iteration)
   public void setupIteration() throws Exception {
+    var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+    evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
+
     Bundle additionalData = (Bundle) FhirContext.forR4Cached().newJsonParser()
         .parseResource(MeasureProcessorEvaluateTest.class
             .getResourceAsStream(
                 "CaseRepresentation101/generated.json"));
 
-    this.when = Measure.given().repositoryFor("CaseRepresentation101").when()
+    this.when = Measure.given()
+        .repositoryFor("CaseRepresentation101")
+        .evaluationOptions(evaluationOptions).when()
         .measureId("GlycemicControlHypoglycemicInitialPopulation")
         .periodStart("2022-01-01")
         .periodEnd("2022-01-31")

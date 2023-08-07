@@ -189,7 +189,7 @@ public class ValueSetUtil {
     return contains;
   }
 
-  public static Iterable<Code> getCodesInCompose(FhirContext fhirContext, IBaseResource valueSet) {
+  public static List<Code> getCodesInCompose(FhirContext fhirContext, IBaseResource valueSet) {
     List<IBase> includes = getIncludes(fhirContext, valueSet);
 
     if (includes == null) {
@@ -223,7 +223,7 @@ public class ValueSetUtil {
     return codes;
   }
 
-  public static Iterable<Code> getCodesInExpansion(FhirContext fhirContext,
+  public static List<Code> getCodesInExpansion(FhirContext fhirContext,
       IBaseResource valueSet) {
     List<IBase> contains = getContains(fhirContext, valueSet);
 

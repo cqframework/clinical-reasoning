@@ -402,6 +402,12 @@ public class MeasureEvaluator {
       ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.expression());
       Object result = expressionDef.evaluate(this.context);
 
+      // TODO: This is a hack-around for an cql engine bug. Need to investigate.
+      if ((result instanceof List) && (((List<?>) result).size() == 1)
+          && ((List<?>) result).get(0) == null) {
+        result = null;
+      }
+
       sde.putResult(subjectId, result, context.getEvaluatedResources());
 
       clearEvaluatedResources();

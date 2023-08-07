@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
@@ -15,24 +16,33 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
+import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 
 @Named
 public class Dstu3MeasureProcessor {
   private final Repository repository;
   private final MeasureEvaluationOptions measureEvaluationOptions;
+  private final SubjectProvider subjectProvider;
 
   public Dstu3MeasureProcessor(Repository repository,
       MeasureEvaluationOptions measureEvaluationOptions) {
+    this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
+  }
+
+  public Dstu3MeasureProcessor(Repository repository,
+      MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
     this.repository = Objects.requireNonNull(repository);
     this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions
         : MeasureEvaluationOptions.defaultOptions();
-
+    this.subjectProvider = subjectProvider;
   }
 
   public MeasureReport evaluateMeasure(IdType measureId, String periodStart, String periodEnd,
@@ -66,9 +76,22 @@ public class Dstu3MeasureProcessor {
         new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()),
         additionalData);
 
+    var evalType = MeasureEvalType.fromCode(reportType)
+        .orElse(subjectIds == null || subjectIds.isEmpty() ? MeasureEvalType.POPULATION
+            : MeasureEvalType.SUBJECT);
+
+    var actualRepo = this.repository;
+    if (additionalData != null) {
+      actualRepo = new FederatedRepository(this.repository,
+          new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+    }
+
+    var subjects =
+        subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+
     Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure);
     return measureEvaluator.evaluate(
-        MeasureEvalType.fromCode(reportType).orElse(MeasureEvalType.POPULATION), subjectIds,
+        evalType, subjects,
         measurementPeriod);
   }
 

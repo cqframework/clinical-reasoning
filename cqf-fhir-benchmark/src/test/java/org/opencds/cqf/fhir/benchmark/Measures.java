@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.benchmark;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.When;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -26,7 +28,10 @@ public class Measures {
 
   @Setup(Level.Iteration)
   public void setupIteration() throws Exception {
+    var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+    evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
     this.when = Measure.given().repositoryFor("CaseRepresentation101")
+        .evaluationOptions(evaluationOptions)
         .when()
         .measureId("GlycemicControlHypoglycemicInitialPopulation")
         .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")

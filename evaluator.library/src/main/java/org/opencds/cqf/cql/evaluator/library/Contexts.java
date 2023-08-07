@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
@@ -58,6 +59,12 @@ public class Contexts {
     var context = new Context(libraryLoader.load(id));
     context.registerLibraryLoader(libraryLoader);
     context.registerTerminologyProvider(terminologyProvider);
+
+    if (settings.getCqlOptions().getCqlEngineOptions().getOptions()
+        .contains(CqlEngine.Options.EnableExpressionCaching)) {
+      context.setExpressionCaching(true);
+    }
+
     for (var entry : dataProviders.entrySet()) {
       context.registerDataProvider(entry.getKey(), entry.getValue());
     }

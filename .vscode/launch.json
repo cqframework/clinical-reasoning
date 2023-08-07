@@ -6,6 +6,27 @@
   "configurations": [
     {
       "type": "java",
+      "name": "TerminologyProviders",
+      "request": "launch",
+      "mainClass": "org.opencds.cqf.fhir.benchmark.TerminologyProviders",
+      "projectName": "cqf-fhir-benchmark"
+    },
+    {
+      "type": "java",
+      "name": "Measures",
+      "request": "launch",
+      "mainClass": "org.opencds.cqf.fhir.benchmark.Measures",
+      "projectName": "cqf-fhir-benchmark"
+    },
+    {
+      "type": "java",
+      "name": "MeasuresAdditionalData",
+      "request": "launch",
+      "mainClass": "org.opencds.cqf.fhir.benchmark.MeasuresAdditionalData",
+      "projectName": "cqf-fhir-benchmark"
+    },
+    {
+      "type": "java",
       "name": "Questionnaires",
       "request": "launch",
       "mainClass": "org.opencds.cqf.fhir.benchmark.Questionnaires",

@@ -36,6 +36,6 @@ public class TestConfigurationDstu3 {
 
   @Bean
   SubjectProvider subjectProvider() {
-    return new Dstu3RepositorySubjectProvider(repository());
+    return new Dstu3RepositorySubjectProvider();
   }
 }

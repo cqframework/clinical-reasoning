@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.library.VersionedIdentifiers;
@@ -26,6 +27,7 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.opencds.cqf.fhir.utility.Searches;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
@@ -34,6 +36,11 @@ public class R4MeasureProcessor {
   private final Repository repository;
   private final MeasureEvaluationOptions measureEvaluationOptions;
   private final SubjectProvider subjectProvider;
+
+  public R4MeasureProcessor(Repository repository,
+      MeasureEvaluationOptions measureEvaluationOptions) {
+    this(repository, measureEvaluationOptions, new R4RepositorySubjectProvider());
+  }
 
   public R4MeasureProcessor(Repository repository,
       MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
@@ -71,7 +78,14 @@ public class R4MeasureProcessor {
         .orElse(subjectIds == null || subjectIds.isEmpty() ? MeasureEvalType.POPULATION
             : MeasureEvalType.SUBJECT);
 
-    var subjects = subjectProvider.getSubjects(evalType, subjectIds).collect(Collectors.toList());
+    var actualRepo = this.repository;
+    if (additionalData != null) {
+      actualRepo = new FederatedRepository(this.repository,
+          new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+    }
+
+    var subjects =
+        subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
     R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
     return measureEvaluator.evaluate(evalType, subjects, measurementPeriod);

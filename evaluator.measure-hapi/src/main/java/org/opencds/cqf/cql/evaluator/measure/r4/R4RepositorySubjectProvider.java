@@ -25,23 +25,19 @@ import ca.uhn.fhir.util.bundle.BundleEntryParts;
 
 public class R4RepositorySubjectProvider implements SubjectProvider {
 
-  private Repository repo;
-
-  public R4RepositorySubjectProvider(Repository repo) {
-    this.repo = repo;
+  @Override
+  public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType,
+      String subjectId) {
+    return getSubjects(repository, measureEvalType, Collections.singletonList(subjectId));
   }
 
   @Override
-  public Stream<String> getSubjects(MeasureEvalType measureEvalType, String subjectId) {
-    return getSubjects(measureEvalType, Collections.singletonList(subjectId));
-  }
-
-  @Override
-  public Stream<String> getSubjects(MeasureEvalType measureEvalType, List<String> subjectIds) {
+  public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType,
+      List<String> subjectIds) {
     if (subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
         || subjectIds.get(0).isEmpty()) {
-      var bundle = this.repo.search(Bundle.class, Patient.class, Searches.ALL);
-      var iterator = new BundleIterator<>(repo, Bundle.class, bundle);
+      var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
+      var iterator = new BundleIterator<>(repository, Bundle.class, bundle);
       return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
           iterator,
           Spliterator.ORDERED), false)
@@ -56,7 +52,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
       }
       if (subjectId.startsWith("Patient")) {
         IdType id = new IdType(subjectId);
-        Patient r = repo.read(Patient.class, id);
+        Patient r = repository.read(Patient.class, id);
 
         if (r == null) {
           throw new ResourceNotFoundException(id);
@@ -65,7 +61,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         subjects.add(r.getIdElement().toUnqualifiedVersionless().getValue());
       } else if (subjectId.startsWith("Group")) {
         IdType id = new IdType(subjectId);
-        Group r = repo.read(Group.class, id);
+        Group r = repository.read(Group.class, id);
 
         if (r == null) {
           throw new ResourceNotFoundException(id);

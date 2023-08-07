@@ -2,18 +2,11 @@ package org.opencds.cqf.cql.evaluator.builder.data;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import javax.inject.Named;
 
-import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.engine.model.DynamicModelResolver;
+import org.opencds.cqf.cql.evaluator.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.helper.r5.R5FhirModelResolver;
 import org.opencds.cqf.cql.evaluator.fhir.util.VersionUtilities;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -21,10 +14,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 @Named
 public class FhirModelResolverFactory
     implements org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory {
-
-  private static Map<FhirVersionEnum, ModelResolver> cache =
-      new EnumMap<>(FhirVersionEnum.class);
-
   @Override
   public ModelResolver create(String version) {
     requireNonNull(version, "version can not be null");
@@ -34,30 +23,7 @@ public class FhirModelResolverFactory
   }
 
   protected ModelResolver fhirModelResolverForVersion(FhirVersionEnum fhirVersionEnum) {
-    requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
-    if (!cache.containsKey(fhirVersionEnum)) {
-      ModelResolver resolver = null;
-      switch (fhirVersionEnum) {
-        case DSTU2:
-          resolver = new DynamicModelResolver(new Dstu2FhirModelResolver());
-          break;
-        case DSTU3:
-          resolver = new DynamicModelResolver(new Dstu3FhirModelResolver());
-          break;
-        case R4:
-          resolver = new DynamicModelResolver(new R4FhirModelResolver());
-          break;
-        case R5:
-          resolver = new DynamicModelResolver(new R5FhirModelResolver());
-          break;
-        default:
-          throw new IllegalArgumentException("unknown or unsupported FHIR version");
-      }
-
-      cache.put(fhirVersionEnum, resolver);
-    }
-
-    return cache.get(fhirVersionEnum);
+    return FhirModelResolverCache.resolverForVersion(fhirVersionEnum);
   }
 
   @Override

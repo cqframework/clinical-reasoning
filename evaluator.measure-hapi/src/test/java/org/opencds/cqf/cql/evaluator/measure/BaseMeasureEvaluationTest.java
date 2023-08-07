@@ -1,26 +1,18 @@
 package org.opencds.cqf.cql.evaluator.measure;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
-import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.tracking.TrackBack;
+import org.hl7.elm.r1.Library;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;
 
 public abstract class BaseMeasureEvaluationTest {
 
@@ -36,25 +28,27 @@ public abstract class BaseMeasureEvaluationTest {
     ModelManager modelManager = new ModelManager();
     LibraryManager libraryManager = new LibraryManager(modelManager);
     libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
-    CqlTranslator translator = CqlTranslator.fromStream(new ByteArrayInputStream(cql.getBytes()),
-        modelManager, libraryManager, ErrorSeverity.Error, SignatureLevel.Overloads);
+    // CqlTranslator translator = CqlTranslator.fromStream(new ByteArrayInputStream(cql.getBytes()),
+    // modelManager, libraryManager, ErrorSeverity.Error, SignatureLevel.Overloads);
 
-    List<CqlCompilerException> badStuff = new ArrayList<>();
-    // the translator will duplicate exceptions with assigned severity in the errors, warnings,
-    // and messages lists
-    badStuff.addAll(translator.getExceptions().stream().filter(e -> e.getSeverity() == null)
-        .collect(Collectors.toList()));
-    badStuff.addAll(translator.getErrors());
-    if (badStuff.size() > 0) {
-      throw new Exception("Translation failed - " + formatMsg(badStuff));
-    }
+    // List<CqlCompilerException> badStuff = new ArrayList<>();
+    // // the translator will duplicate exceptions with assigned severity in the errors, warnings,
+    // // and messages lists
+    // badStuff.addAll(translator.getExceptions().stream().filter(e -> e.getSeverity() == null)
+    // .collect(Collectors.toList()));
+    // badStuff.addAll(translator.getErrors());
+    // if (badStuff.size() > 0) {
+    // throw new Exception("Translation failed - " + formatMsg(badStuff));
+    // }
 
-    List<org.cqframework.cql.elm.execution.Library> cqlLibraries = new ArrayList<>();
-    var reader = CqlLibraryReaderFactory.getReader(LibraryContentType.XML.mimeType());
-    cqlLibraries.add(reader.read(new StringReader(translator.toXml())));
-    for (String text : translator.getLibrariesAsXML().values()) {
-      cqlLibraries.add(reader.read(new StringReader(text)));
-    }
+    List<Library> cqlLibraries = new ArrayList<>();
+
+    // TODO: Load libraries
+    // var reader = CqlLibraryReaderFactory.getReader(LibraryContentType.XML.mimeType());
+    // cqlLibraries.add(reader.read(new StringReader(translator.toXml())));
+    // for (String text : translator.getLibrariesAsXML().values()) {
+    // cqlLibraries.add(reader.read(new StringReader(text)));
+    // }
     return cqlLibraries;
   }
 

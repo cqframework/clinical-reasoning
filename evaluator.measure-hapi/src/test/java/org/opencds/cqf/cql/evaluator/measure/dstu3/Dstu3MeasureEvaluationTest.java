@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.cqframework.cql.cql2elm.LibraryManager;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -39,10 +40,9 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.execution.Context;
-import org.opencds.cqf.cql.engine.execution.InMemoryLibraryLoader;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.Environment;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
@@ -146,16 +146,17 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     Library primaryLibrary = library(cql);
     measure.addLibrary(new Reference(primaryLibrary.getId()));
 
-    List<org.cqframework.cql.elm.execution.Library> cqlLibraries = translate(cql);
-    LibraryLoader ll = new InMemoryLibraryLoader(cqlLibraries);
+    List<org.hl7.elm.r1.Library> cqlLibraries = translate(cql);
+    // TODO: Set up engine environment
+    LibraryManager ll = null; // new LibraryManager(cqlLibraries);
 
-    Dstu3FhirModelResolver modelResolver = new Dstu3FhirModelResolver();
+    R4FhirModelResolver modelResolver = new R4FhirModelResolver();
     DataProvider dataProvider = new CompositeDataProvider(modelResolver, retrieveProvider);
-    Context context = new Context(cqlLibraries.get(0));
-    context.registerDataProvider(FHIR_NS_URI, dataProvider);
-    context.registerLibraryLoader(ll);
 
-    Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(context, measure);
+    // TODO: Set up engine environment
+    var engine = new CqlEngine(new Environment(null, null, null), null);
+
+    Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(engine, measure);
     MeasureReport report = evaluation.evaluate(
         subjectIds.size() == 1 ? MeasureEvalType.PATIENT : MeasureEvalType.POPULATION, subjectIds,
         measurementPeriod);

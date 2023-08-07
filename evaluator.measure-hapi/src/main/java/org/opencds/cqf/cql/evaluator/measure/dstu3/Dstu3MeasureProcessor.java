@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;

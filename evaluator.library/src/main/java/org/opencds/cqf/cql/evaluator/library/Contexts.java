@@ -11,17 +11,15 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
@@ -43,7 +41,8 @@ public class Contexts {
   private Contexts() {}
 
   // TODO: Need to refactor this a bit more once I understand how this will be used - JP
-  public static Context forRepositoryAndSettings(EvaluationSettings settings, Repository repository,
+  public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
+      Repository repository,
       VersionedIdentifier id, IBaseBundle additionalData) {
     checkNotNull(settings);
     checkNotNull(repository);
@@ -56,20 +55,10 @@ public class Contexts {
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
 
-    var context = new Context(libraryLoader.load(id));
-    context.registerLibraryLoader(libraryLoader);
-    context.registerTerminologyProvider(terminologyProvider);
+    var engine =
+        new CqlEngine(libraryLoader, settings.getCqlOptions().getCqlEngineOptions().getOptions());
 
-    if (settings.getCqlOptions().getCqlEngineOptions().getOptions()
-        .contains(CqlEngine.Options.EnableExpressionCaching)) {
-      context.setExpressionCaching(true);
-    }
-
-    for (var entry : dataProviders.entrySet()) {
-      context.registerDataProvider(entry.getKey(), entry.getValue());
-    }
-
-    return context;
+    return engine;
   }
 
   public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
@@ -95,12 +84,14 @@ public class Contexts {
     librarySourceProviders.add(buildLibrarySource(repository));
     var environment = buildEnvironment(settings, librarySourceProviders);
 
+    // TODO: need to reworok Environment setup
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
-    var cqlEvaluator = new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
-        settings.getCqlOptions().getCqlEngineOptions().getOptions());
 
-    return new LibraryEvaluator(cqlFhirParametersConverter, cqlEvaluator);
+    var cqlEngine =
+        new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
+
+    return new LibraryEvaluator(cqlFhirParametersConverter, cqlEngine);
   }
 
   private static LibrarySourceProvider buildLibrarySource(Repository repository) {

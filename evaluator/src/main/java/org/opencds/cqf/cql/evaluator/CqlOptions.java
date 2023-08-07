@@ -5,6 +5,7 @@ import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 
+// TODO: Migrate upstream to engine project. Or is it duplicated already?
 public class CqlOptions {
   private CqlCompilerOptions cqlCompilerOptions = CqlCompilerOptions.defaultOptions();
   private CqlEngineOptions cqlEngineOptions = CqlEngineOptions.defaultOptions();

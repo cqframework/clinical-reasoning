@@ -3,25 +3,25 @@ package org.opencds.cqf.cql.evaluator.measure.common;
 import java.util.List;
 import java.util.Objects;
 
-import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> {
 
   protected MeasureDefBuilder<MeasureT> measureDefBuilder;
   protected MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder;
-  protected Context context;
+  protected CqlEngine context;
   protected MeasureT measure;
   protected String measurementPeriodParameterName;
 
-  protected BaseMeasureEvaluation(Context context, MeasureT measure,
+  protected BaseMeasureEvaluation(CqlEngine context, MeasureT measure,
       MeasureDefBuilder<MeasureT> measureDefBuilder,
       MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder) {
     this(context, measure, measureDefBuilder, measureReportBuilder,
         MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
   }
 
-  protected BaseMeasureEvaluation(Context context, MeasureT measure,
+  protected BaseMeasureEvaluation(CqlEngine context, MeasureT measure,
       MeasureDefBuilder<MeasureT> measureDefBuilder,
       MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
       String measurementPeriodParameterName) {

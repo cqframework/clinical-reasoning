@@ -17,13 +17,13 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.elm.execution.ExpressionDef;
-import org.cqframework.cql.elm.execution.FunctionDef;
-import org.cqframework.cql.elm.execution.IntervalTypeSpecifier;
-import org.cqframework.cql.elm.execution.Library;
-import org.cqframework.cql.elm.execution.NamedTypeSpecifier;
-import org.cqframework.cql.elm.execution.ParameterDef;
-import org.opencds.cqf.cql.engine.execution.Context;
+import org.hl7.elm.r1.FunctionDef;
+import org.hl7.elm.r1.IntervalTypeSpecifier;
+import org.hl7.elm.r1.Library;
+import org.hl7.elm.r1.NamedTypeSpecifier;
+import org.hl7.elm.r1.ParameterDef;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -48,10 +48,10 @@ public class MeasureEvaluator {
 
   private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
 
-  protected Context context;
+  protected CqlEngine context;
   protected String measurementPeriodParameterName = null;
 
-  public MeasureEvaluator(Context context, String measurementPeriodParameterName) {
+  public MeasureEvaluator(CqlEngine context, String measurementPeriodParameterName) {
     this.context = Objects.requireNonNull(context, "context is a required argument");
     this.measurementPeriodParameterName = Objects.requireNonNull(measurementPeriodParameterName,
         "measurementPeriodParameterName is a required argument");
@@ -88,11 +88,13 @@ public class MeasureEvaluator {
   }
 
   protected Interval getMeasurementPeriod() {
-    return (Interval) this.context.resolveParameterRef(null, this.measurementPeriodParameterName);
+    var param = Libraries.resolveParameterRef(measurementPeriodParameterName,
+        this.context.getState().getCurrentLibrary());
+    return (Interval) this.context.visitParameterDef(param, this.context.getState());
   }
 
   protected ParameterDef getMeasurementPeriodParameterDef() {
-    Library lib = this.context.getCurrentLibrary();
+    Library lib = this.context.getState().getCurrentLibrary();
 
     if (lib.getParameters() == null || lib.getParameters().getDef() == null
         || lib.getParameters().getDef().isEmpty()) {
@@ -123,7 +125,8 @@ public class MeasureEvaluator {
     if (pd == null) {
       logger.warn("Parameter \"{}\" was not found. Unable to validate type.",
           this.measurementPeriodParameterName);
-      this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+      this.context.getState().setParameter(null, this.measurementPeriodParameterName,
+          measurementPeriod);
       return;
     }
 
@@ -132,7 +135,8 @@ public class MeasureEvaluator {
     if (intervalTypeSpecifier == null) {
       logger.debug("No ELM type information available. Unable to validate type of \"{}\"",
           this.measurementPeriodParameterName);
-      this.context.setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+      this.context.getState().setParameter(null, this.measurementPeriodParameterName,
+          measurementPeriod);
       return;
     }
 
@@ -140,7 +144,8 @@ public class MeasureEvaluator {
     String targetType = pointType.getName().getLocalPart();
     Interval convertedPeriod = convertInterval(measurementPeriod, targetType);
 
-    this.context.setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
+    this.context.getState().setParameter(null, this.measurementPeriodParameterName,
+        convertedPeriod);
   }
 
   protected Interval convertInterval(Interval interval, String targetType) {
@@ -180,8 +185,8 @@ public class MeasureEvaluator {
   }
 
   protected void captureEvaluatedResources(Set<Object> outEvaluatedResources) {
-    if (outEvaluatedResources != null && this.context.getEvaluatedResources() != null) {
-      for (Object o : this.context.getEvaluatedResources()) {
+    if (outEvaluatedResources != null && this.context.getState().getEvaluatedResources() != null) {
+      for (Object o : this.context.getState().getEvaluatedResources()) {
         outEvaluatedResources.add(o);
       }
     }
@@ -190,7 +195,7 @@ public class MeasureEvaluator {
 
   // reset evaluated resources followed by a context evaluation
   private void clearEvaluatedResources() {
-    this.context.clearEvaluatedResources();
+    this.context.getState().clearEvaluatedResources();
   }
 
   protected MeasureDef evaluate(MeasureDef measureDef, MeasureReportType type,
@@ -211,7 +216,7 @@ public class MeasureEvaluator {
       Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
       String subjectTypePart = subjectInfo.getLeft();
       String subjectIdPart = subjectInfo.getRight();
-      context.setContextValue(subjectTypePart, subjectIdPart);
+      context.getState().setContextValue(subjectTypePart, subjectIdPart);
       evaluateSubject(measureDef, scoring, subjectTypePart, subjectIdPart);
     }
 
@@ -241,8 +246,10 @@ public class MeasureEvaluator {
 
     if (result instanceof Boolean) {
       if ((Boolean.TRUE.equals(result))) {
+        var ref = Libraries.resolveExpressionRef(subjectType,
+            this.context.getState().getCurrentLibrary());
         Object booleanResult =
-            this.context.resolveExpressionRef(subjectType).evaluate(this.context);
+            this.context.visitExpressionDef(ref, this.context.getState());
         clearEvaluatedResources();
         return Collections.singletonList(booleanResult);
       } else {
@@ -254,7 +261,10 @@ public class MeasureEvaluator {
   }
 
   protected Object evaluateCriteria(String criteriaExpression, Set<Object> outEvaluatedResources) {
-    Object result = context.resolveExpressionRef(criteriaExpression).evaluate(context);
+    var ref = Libraries.resolveExpressionRef(criteriaExpression,
+        this.context.getState().getCurrentLibrary());
+    Object result =
+        this.context.visitExpressionDef(ref, this.context.getState());
 
     captureEvaluatedResources(outEvaluatedResources);
 
@@ -264,20 +274,23 @@ public class MeasureEvaluator {
   protected Object evaluateObservationCriteria(Object resource, String criteriaExpression,
       Set<Object> outEvaluatedResources) {
 
-    ExpressionDef ed = context.resolveExpressionRef(criteriaExpression);
+    var ed = Libraries.resolveExpressionRef(criteriaExpression,
+        this.context.getState().getCurrentLibrary());
+
     if (!(ed instanceof FunctionDef)) {
       throw new IllegalArgumentException(String.format(
           "Measure observation %s does not reference a function definition", criteriaExpression));
     }
 
     Object result = null;
-    context.pushWindow();
+    context.getState().pushWindow();
     try {
-      context.push(new Variable().withName(((FunctionDef) ed).getOperand().get(0).getName())
-          .withValue(resource));
-      result = ed.getExpression().evaluate(context);
+      context.getState()
+          .push(new Variable().withName(((FunctionDef) ed).getOperand().get(0).getName())
+              .withValue(resource));
+      result = context.visitExpression(ed.getExpression(), context.getState());
     } finally {
-      context.popWindow();
+      context.getState().popWindow();
     }
 
     captureEvaluatedResources(outEvaluatedResources);
@@ -399,8 +412,10 @@ public class MeasureEvaluator {
 
   protected void evaluateSdes(String subjectId, List<SdeDef> sdes) {
     for (SdeDef sde : sdes) {
-      ExpressionDef expressionDef = this.context.resolveExpressionRef(sde.expression());
-      Object result = expressionDef.evaluate(this.context);
+      var ref = Libraries.resolveExpressionRef(sde.expression(),
+          this.context.getState().getCurrentLibrary());
+      Object result =
+          this.context.visitExpressionDef(ref, this.context.getState());
 
       // TODO: This is a hack-around for an cql engine bug. Need to investigate.
       if ((result instanceof List) && (((List<?>) result).size() == 1)
@@ -408,7 +423,7 @@ public class MeasureEvaluator {
         result = null;
       }
 
-      sde.putResult(subjectId, result, context.getEvaluatedResources());
+      sde.putResult(subjectId, result, context.getState().getEvaluatedResources());
 
       clearEvaluatedResources();
     }
@@ -422,7 +437,10 @@ public class MeasureEvaluator {
       }
 
       // TODO: Handle list values as components?
-      Object result = this.context.resolveExpressionRef(sd.expression()).evaluate(this.context);
+      var ref = Libraries.resolveExpressionRef(sd.expression(),
+          this.context.getState().getCurrentLibrary());
+      Object result =
+          this.context.visitExpressionDef(ref, this.context.getState());
       if (result instanceof Iterable) {
         var resultIter = ((Iterable<?>) result).iterator();
         if (!resultIter.hasNext()) {
@@ -437,7 +455,7 @@ public class MeasureEvaluator {
       }
 
       if (result != null) {
-        sd.putResult(subjectId, result, this.context.getEvaluatedResources());
+        sd.putResult(subjectId, result, this.context.getState().getEvaluatedResources());
       }
 
       clearEvaluatedResources();

@@ -10,17 +10,17 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
@@ -175,7 +175,7 @@ public class CqlCommand implements Callable<Integer> {
 
     if (optionsPath != null) {
       CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-      cqlOptions.setCqlCompilerOptions(options);
+      cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
     }
 
     for (LibraryParameter library : libraries) {
@@ -229,7 +229,7 @@ public class CqlCommand implements Callable<Integer> {
       cqlEvaluatorBuilder.withModelResolverAndRetrieveProvider(dataProvider.getModelUri(),
           dataProvider.getModelResolver(), dataProvider.getRetrieveProvider());
 
-      CqlEvaluator evaluator = cqlEvaluatorBuilder.build();
+      CqlEngine evaluator = cqlEvaluatorBuilder.build();
 
       VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 

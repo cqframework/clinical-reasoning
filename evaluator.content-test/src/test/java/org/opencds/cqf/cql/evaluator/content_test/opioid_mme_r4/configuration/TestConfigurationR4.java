@@ -35,6 +35,6 @@ public class TestConfigurationR4 {
 
   @Bean
   SubjectProvider subjectProvider() {
-    return new R4RepositorySubjectProvider(repository());
+    return new R4RepositorySubjectProvider();
   }
 }

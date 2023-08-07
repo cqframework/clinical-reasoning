@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
@@ -74,6 +75,7 @@ public class Measure {
 
   public static class Given {
     private Repository repository;
+    private MeasureEvaluationOptions evaluationOptions;
 
     public Given repository(Repository repository) {
       this.repository = repository;
@@ -86,12 +88,18 @@ public class Measure {
       return this;
     }
 
-    private static R4MeasureProcessor buildProcessor(Repository repository) {
-      return new R4MeasureProcessor(repository, null, new R4RepositorySubjectProvider(repository));
+    public Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
+      this.evaluationOptions = evaluationOptions;
+      return this;
+    }
+
+    private R4MeasureProcessor buildProcessor() {
+      return new R4MeasureProcessor(repository, evaluationOptions,
+          new R4RepositorySubjectProvider());
     }
 
     public When when() {
-      return new When(buildProcessor(this.repository));
+      return new When(buildProcessor());
     }
   }
 

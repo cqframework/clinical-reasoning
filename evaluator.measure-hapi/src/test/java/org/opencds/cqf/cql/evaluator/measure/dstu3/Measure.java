@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
@@ -53,6 +54,7 @@ public class Measure {
 
   public static class Given {
     private Repository repository;
+    private MeasureEvaluationOptions evaluationOptions;
 
     public Given repository(Repository repository) {
       this.repository = repository;
@@ -65,12 +67,18 @@ public class Measure {
       return this;
     }
 
-    private static Dstu3MeasureProcessor buildProcessor(Repository repository) {
-      return new Dstu3MeasureProcessor(repository, null);
+    public Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
+      this.evaluationOptions = evaluationOptions;
+      return this;
+    }
+
+    private Dstu3MeasureProcessor buildProcessor() {
+      return new Dstu3MeasureProcessor(repository, evaluationOptions,
+          new Dstu3RepositorySubjectProvider());
     }
 
     public When when() {
-      return new When(buildProcessor(this.repository));
+      return new When(buildProcessor());
     }
   }
 

@@ -41,7 +41,7 @@ public class R4MeasureService {
     // var subjects = this.getSubjects(repo, evalType, subjectId);
 
     var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions,
-        new R4RepositorySubjectProvider(repo));
+        new R4RepositorySubjectProvider());
 
     return processor.evaluateMeasure(
         measure,

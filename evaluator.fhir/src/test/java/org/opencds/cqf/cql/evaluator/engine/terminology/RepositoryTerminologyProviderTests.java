@@ -71,13 +71,18 @@ public class RepositoryTerminologyProviderTests {
   }
 
 
-  @Test
-  public void test_expand_noCodes_returnsEmptySet() {
-    Iterable<Code> codes = terminology
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void test_expand_noExpansion_throws_error() {
+    terminology
         .expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-four"));
+  }
+
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void test_expand_noCodes() {
+    var codes = terminology
+        .expand(new ValueSetInfo().withId("http://localhost/fhir/ValueSet/value-set-five"));
     assertNotNull(codes);
-    List<Code> codesList = Lists.newArrayList(codes);
-    assertEquals(0, codesList.size());
+    assertFalse(codes.iterator().hasNext());
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)

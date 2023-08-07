@@ -10,8 +10,7 @@
     "streetsidesoftware.code-spell-checker-medical-terms",
     "shengchen.vscode-checkstyle",
     "sonarsource.sonarlint-vscode",
-    "redhat.fabric8-analytics",
-    "rioj7.commandOnAllFiles",
+    "redhat.fabric8-analytics"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": [

@@ -16,8 +16,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.Environment;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -27,7 +27,6 @@ import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.RepositoryRetrieveProvider;
@@ -60,6 +59,12 @@ public class Contexts {
     var context = new Context(libraryLoader.load(id));
     context.registerLibraryLoader(libraryLoader);
     context.registerTerminologyProvider(terminologyProvider);
+
+    if (settings.getCqlOptions().getCqlEngineOptions().getOptions()
+        .contains(CqlEngine.Options.EnableExpressionCaching)) {
+      context.setExpressionCaching(true);
+    }
+
     for (var entry : dataProviders.entrySet()) {
       context.registerDataProvider(entry.getKey(), entry.getValue());
     }
@@ -115,9 +120,12 @@ public class Contexts {
         settings.getModelCache() != null ? new ModelManager(settings.getModelCache())
             : new ModelManager();
 
-    LibraryManager libraryManager = new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions());
+    LibraryManager libraryManager =
+        new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions());
     libraryManager.getLibrarySourceLoader().clearProviders();
-    librarySourceProviders.forEach(lsp -> {libraryManager.getLibrarySourceLoader().registerProvider(lsp);});
+    librarySourceProviders.forEach(lsp -> {
+      libraryManager.getLibrarySourceLoader().registerProvider(lsp);
+    });
 
     return new Environment(libraryManager);
   }

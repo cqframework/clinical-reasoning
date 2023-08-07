@@ -1,13 +1,13 @@
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.cql.evaluator.fhir.util.Repositories.searchRepositoryWithPaging;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -30,7 +30,6 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Iterable<Object> retrieve(final String context, final String contextPath,
       final Object contextValue, final String dataType, final String templateId,
       final String codePath, final Iterable<Code> codes, final String valueSet,
@@ -39,8 +38,6 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
 
     List<? extends IBaseResource> resources;
     var resourceType = fhirContext.getResourceDefinition(dataType).getImplementingClass();
-    var bundleType = (Class<? extends IBaseBundle>) fhirContext.getResourceDefinition("Bundle")
-        .getImplementingClass();
 
     if (isFilterBySearchParam()) {
       Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
@@ -49,13 +46,14 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
       populateTerminologySearchParams(searchParams, codePath, codes, valueSet);
       populateDateSearchParams(searchParams, datePath, dateLowPath, dateHighPath, dateRange);
       resources =
-          BundleUtil.toListOfResources(this.fhirContext,
-              repository.search(bundleType, resourceType, searchParams, null));
+          BundleUtil.toListOfResources(fhirContext,
+              searchRepositoryWithPaging(fhirContext, repository, resourceType, searchParams,
+                  null));
     } else {
       resources =
           BundleUtil
-              .toListOfResources(this.fhirContext,
-                  repository.search(bundleType, resourceType, null, null))
+              .toListOfResources(fhirContext,
+                  searchRepositoryWithPaging(fhirContext, repository, resourceType, null, null))
               .stream().filter(filterByTemplateId(dataType, templateId))
               .filter(filterByContext(dataType, context, contextPath, contextValue))
               .filter(filterByTerminology(dataType, codePath, codes, valueSet))

@@ -17,7 +17,6 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
@@ -313,23 +312,24 @@ public class CqlEvaluatorBuilder {
           new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
     }
 
-    // Put this after the NPM provider so that if an embedded library is found on
-    // the NPM pat, it will be used first
-    if (this.cqlOptions.useEmbeddedLibraries()) {
-      this.librarySourceProviders.add(new FhirLibrarySourceProvider());
-    }
 
     var libraryManager =
         new LibraryManager(modelManager, this.cqlOptions.getCqlCompilerOptions(), libraryCache);
 
-    // TODO: Namespaces
-    // if (this.namespaceInfo != null) {
-    // libraryManager.loadNamespaces(Collections.singletonList(this.namespaceInfo));
-    // }
+    var sourceLoader = libraryManager.getLibrarySourceLoader();
+    for (var p : this.librarySourceProviders) {
+      sourceLoader.registerProvider(p);
+    }
 
-    // if (npmProcessor != null) {
-    // libraryManager.loadNamespaces(npmProcessor.getNamespaces());
-    // }
+    if (this.namespaceInfo != null) {
+      libraryManager.getNamespaceManager().addNamespace(namespaceInfo);
+    }
+
+    if (npmProcessor != null) {
+      for (var n : npmProcessor.getNamespaces()) {
+        libraryManager.getNamespaceManager().addNamespace(n);
+      }
+    }
 
     return libraryManager;
   }
@@ -382,5 +382,4 @@ public class CqlEvaluatorBuilder {
     return new CqlEngine(new Environment(libraryLoader, dataProviders, terminologyProvider),
         this.cqlOptions.getCqlEngineOptions().getOptions());
   }
-
 }

@@ -72,7 +72,7 @@ public class LibraryProcessor {
 
     if (!this.fhirModelResolverFactory.getModelUri().equals(Constants.FHIR_MODEL_URI)) {
       throw new IllegalArgumentException(
-          "fhirModelResolverFactory was a FHIR modelResolverFactory");
+          "fhirModelResolverFactory was not a FHIR modelResolverFactory");
     }
   }
 

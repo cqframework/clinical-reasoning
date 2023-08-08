@@ -51,14 +51,13 @@ public class Contexts {
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     var sourceProviders = new ArrayList<LibrarySourceProvider>();
     sourceProviders.add(buildLibrarySource(repository));
-    var libraryLoader = buildEnvironment(settings, sourceProviders);
+
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
-
-    var engine =
-        new CqlEngine(libraryLoader, settings.getCqlOptions().getCqlEngineOptions().getOptions());
-
-    return engine;
+    var environment =
+        buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders);
+    return new CqlEngine(environment,
+        settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
   public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
@@ -82,11 +81,11 @@ public class Contexts {
 
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     librarySourceProviders.add(buildLibrarySource(repository));
-    var environment = buildEnvironment(settings, librarySourceProviders);
 
-    // TODO: need to reworok Environment setup
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
+    var environment =
+        buildEnvironment(settings, librarySourceProviders, terminologyProvider, dataProviders);
 
     var cqlEngine =
         new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
@@ -102,7 +101,8 @@ public class Contexts {
 
   // TODO: Add NPM library source loader support
   private static Environment buildEnvironment(EvaluationSettings settings,
-      List<LibrarySourceProvider> librarySourceProviders) {
+      List<LibrarySourceProvider> librarySourceProviders, TerminologyProvider terminologyProvider,
+      Map<String, DataProvider> dataProviders) {
     if (settings.getCqlOptions().useEmbeddedLibraries()) {
       librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
@@ -114,11 +114,17 @@ public class Contexts {
     LibraryManager libraryManager =
         new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions());
     libraryManager.getLibrarySourceLoader().clearProviders();
+
+
     librarySourceProviders.forEach(lsp -> {
       libraryManager.getLibrarySourceLoader().registerProvider(lsp);
     });
 
-    return new Environment(libraryManager);
+    if (settings.getCqlOptions().useEmbeddedLibraries()) {
+      libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
+    }
+
+    return new Environment(libraryManager, dataProviders, terminologyProvider);
   }
 
   private static Map<String, DataProvider> buildDataProviders(Repository repository,

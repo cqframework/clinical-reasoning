@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
 import static org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -14,9 +15,9 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -30,6 +31,9 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.fhir.api.Repository;
 import org.testng.Assert;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+
 @ExtendWith(MockitoExtension.class)
 class NestedQuestionnaireItemServiceTest {
   final static String TYPE_CODE = "CodeableConcept";
@@ -38,6 +42,8 @@ class NestedQuestionnaireItemServiceTest {
   final static String SHORT_DEFINITION = "shortDefinition";
   final static String LABEL = "label";
   final static String CHILD_LINK_ID = "childLinkId";
+  final static FhirContext fhirContext = FhirContext.forR4Cached();
+  final static IParser parser = fhirContext.newJsonParser();
   @Mock
   protected Repository repository;
   @Mock
@@ -65,26 +71,28 @@ class NestedQuestionnaireItemServiceTest {
     // setup
     final QuestionnaireItemComponent initialized = withQuestionnaireItemComponent();
     final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
-    final StructureDefinition profile = new StructureDefinition();
     final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
     doReturn(initialized).when(myFixture).initializeQuestionnaireItem(
         QuestionnaireItemType.CHOICE,
-        profile,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     doReturn(expected).when(questionnaireTypeIsChoice).addProperties(elementDefinition,
         initialized);
     // execute
     final QuestionnaireItemComponent actual =
-        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+        myFixture.getNestedQuestionnaireItem(PROFILE_URL, elementDefinition, CHILD_LINK_ID, null);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
         QuestionnaireItemType.CHOICE,
-        profile,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     verify(questionnaireTypeIsChoice).addProperties(elementDefinition, initialized);
-    Assertions.assertEquals(actual, expected);
+    var actualQuestionnaire = new Questionnaire().setItem(Collections.singletonList(actual));
+    var expectedQuestionnaire = new Questionnaire().setItem(Collections.singletonList(expected));
+    Assertions.assertEquals(parser.encodeResourceToString(actualQuestionnaire),
+        parser.encodeResourceToString(expectedQuestionnaire));
   }
 
   @Test
@@ -93,11 +101,10 @@ class NestedQuestionnaireItemServiceTest {
     // setup
     final QuestionnaireItemComponent initialized = withQuestionnaireItemComponent();
     final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
-    final StructureDefinition profile = new StructureDefinition();
     final ElementDefinition elementDefinition = withElementDefinitionWithFixedType();
     doReturn(initialized).when(myFixture).initializeQuestionnaireItem(
-        QuestionnaireItemType.STRING,
-        profile,
+        QuestionnaireItemType.BOOLEAN,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     doReturn(expected).when(elementHasDefaultValue).addProperties(
@@ -105,21 +112,24 @@ class NestedQuestionnaireItemServiceTest {
         initialized);
     // execute
     final QuestionnaireItemComponent actual =
-        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+        myFixture.getNestedQuestionnaireItem(PROFILE_URL, elementDefinition, CHILD_LINK_ID, null);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
-        QuestionnaireItemType.STRING,
-        profile,
+        QuestionnaireItemType.BOOLEAN,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     verify(elementHasDefaultValue).addProperties(elementDefinition.getFixedOrPattern(),
         initialized);
-    Assertions.assertEquals(actual, expected);
+    var actualQuestionnaire = new Questionnaire().setItem(Collections.singletonList(actual));
+    var expectedQuestionnaire = new Questionnaire().setItem(Collections.singletonList(expected));
+    Assertions.assertEquals(parser.encodeResourceToString(actualQuestionnaire),
+        parser.encodeResourceToString(expectedQuestionnaire));
   }
 
   @Nonnull
   ElementDefinition withElementDefinitionWithFixedType() {
-    final ElementDefinition elementDefinition = withElementDefinition("Reference", PATH_VALUE);
+    final ElementDefinition elementDefinition = withElementDefinition("boolean", PATH_VALUE);
     final BooleanType booleanType = new BooleanType(true);
     elementDefinition.setFixed(booleanType);
     return elementDefinition;
@@ -132,11 +142,10 @@ class NestedQuestionnaireItemServiceTest {
     final BooleanType defaultValue = new BooleanType(true);
     final QuestionnaireItemComponent initialized = withQuestionnaireItemComponent();
     final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
-    final StructureDefinition profile = new StructureDefinition();
     final ElementDefinition elementDefinition = withElementDefinitionWithDefaultValue(defaultValue);
     doReturn(initialized).when(myFixture).initializeQuestionnaireItem(
-        QuestionnaireItemType.STRING,
-        profile,
+        QuestionnaireItemType.BOOLEAN,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     doReturn(expected).when(elementHasDefaultValue).addProperties(
@@ -144,21 +153,24 @@ class NestedQuestionnaireItemServiceTest {
         initialized);
     // execute
     final QuestionnaireItemComponent actual =
-        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+        myFixture.getNestedQuestionnaireItem(PROFILE_URL, elementDefinition, CHILD_LINK_ID, null);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
-        QuestionnaireItemType.STRING,
-        profile,
+        QuestionnaireItemType.BOOLEAN,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     verify(elementHasDefaultValue).addProperties(elementDefinition.getDefaultValue(),
         initialized);
-    Assertions.assertEquals(actual, expected);
+    var actualQuestionnaire = new Questionnaire().setItem(Collections.singletonList(actual));
+    var expectedQuestionnaire = new Questionnaire().setItem(Collections.singletonList(expected));
+    Assertions.assertEquals(parser.encodeResourceToString(actualQuestionnaire),
+        parser.encodeResourceToString(expectedQuestionnaire));
   }
 
   @Nonnull
   ElementDefinition withElementDefinitionWithDefaultValue(Type defaultValue) {
-    final ElementDefinition elementDefinition = withElementDefinition("Reference", PATH_VALUE);
+    final ElementDefinition elementDefinition = withElementDefinition("boolean", PATH_VALUE);
     elementDefinition.setDefaultValue(defaultValue);
     return elementDefinition;
   }
@@ -169,25 +181,27 @@ class NestedQuestionnaireItemServiceTest {
     // setup
     final QuestionnaireItemComponent initialized = withQuestionnaireItemComponent();
     final QuestionnaireItemComponent expected = withQuestionnaireItemComponent();
-    final StructureDefinition profile = new StructureDefinition();
     final ElementDefinition elementDefinition = withElementDefinitionWithCqfExtension();
     doReturn(initialized).when(myFixture).initializeQuestionnaireItem(
-        QuestionnaireItemType.STRING,
-        profile,
+        QuestionnaireItemType.REFERENCE,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     doReturn(expected).when(elementHasCqfExpression).addProperties(elementDefinition, initialized);
     // execute
     final QuestionnaireItemComponent actual =
-        myFixture.getNestedQuestionnaireItem(profile, elementDefinition, CHILD_LINK_ID);
+        myFixture.getNestedQuestionnaireItem(PROFILE_URL, elementDefinition, CHILD_LINK_ID, null);
     // validate
     verify(myFixture).initializeQuestionnaireItem(
-        QuestionnaireItemType.STRING,
-        profile,
+        QuestionnaireItemType.REFERENCE,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     verify(elementHasCqfExpression).addProperties(elementDefinition, initialized);
-    Assertions.assertEquals(actual, expected);
+    var actualQuestionnaire = new Questionnaire().setItem(Collections.singletonList(actual));
+    var expectedQuestionnaire = new Questionnaire().setItem(Collections.singletonList(expected));
+    Assertions.assertEquals(parser.encodeResourceToString(actualQuestionnaire),
+        parser.encodeResourceToString(expectedQuestionnaire));
   }
 
   @Nonnull
@@ -203,11 +217,9 @@ class NestedQuestionnaireItemServiceTest {
     // setup
     final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
     elementDefinition.setLabel(LABEL);
-    final StructureDefinition profile = new StructureDefinition();
-    profile.setUrl(PROFILE_URL);
     final QuestionnaireItemComponent actual = myFixture.initializeQuestionnaireItem(
         QuestionnaireItemType.GROUP,
-        profile,
+        PROFILE_URL,
         elementDefinition,
         CHILD_LINK_ID);
     // validate
@@ -260,13 +272,23 @@ class NestedQuestionnaireItemServiceTest {
   }
 
   @Test
+  void parseItemTypeShouldReturnQuestionnaireItemTypeGivenQuantityString() {
+    // setup
+    final String elementType = "Quantity";
+    // execute
+    final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
+    // validate
+    Assert.assertEquals(actual, QuestionnaireItemType.QUANTITY);
+  }
+
+  @Test
   void parseItemTypeShouldReturnQuestionnaireItemTypeGivenReferenceString() {
     // setup
     final String elementType = "Reference";
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.STRING);
+    Assert.assertEquals(actual, QuestionnaireItemType.REFERENCE);
   }
 
   @Test
@@ -276,7 +298,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.STRING);
+    Assert.assertEquals(actual, QuestionnaireItemType.URL);
   }
 
   @Test

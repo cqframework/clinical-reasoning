@@ -17,19 +17,19 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
-import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
+import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IElement;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
@@ -39,9 +39,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   protected final OperationParametersParser operationParametersParser;
   protected final ModelResolver modelResolver;
-  protected final IFhirPath fhirPath;
+  // protected final IFhirPath fhirPath;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
+  protected Repository federatedRepository;
   protected ExpressionEvaluator expressionEvaluator;
 
   protected String patientId;
@@ -68,7 +69,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.repository = requireNonNull(repository, "repository can not be null");
     this.evaluationSettings =
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-    this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
+    // this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
     this.operationParametersParser = new OperationParametersParser(
         Contexts.getAdapterFactory(repository.fhirContext()),
         new FhirTypeConverterFactory().create(repository.fhirContext().getVersion().getVersion()));
@@ -88,6 +89,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   public FhirContext fhirContext() {
     return this.repository.fhirContext();
+  }
+
+  public FhirVersionEnum fhirVersion() {
+    return this.fhirContext().getVersion().getVersion();
   }
 
   public abstract <CanonicalType extends IPrimitiveType<String>> T resolvePlanDefinition(
@@ -159,6 +164,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.containResources = true;
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
+    setupFederatedRepository();
     extractQuestionnaireResponse();
     return transformToCarePlan(
         applyPlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition)));
@@ -201,12 +207,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.containResources = false;
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
+    setupFederatedRepository();
     extractQuestionnaireResponse();
     return transformToBundle(
         applyPlanDefinition(resolvePlanDefinition(theId, theCanonical, thePlanDefinition)));
   }
 
-  public List<IBase> resolveExpression(CqfExpression expression, IBaseParameters params) {
+  protected List<IBase> resolveExpression(CqfExpression expression, IBaseParameters params) {
     var result = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
         expression.getExpression(), expression.getLanguage(), expression.getLibraryUrl(), params,
         this.bundle);
@@ -219,7 +226,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
     return result;
   }
 
-  public void resolveDynamicValue(List<IBase> result, String path,
+  protected void resolveDynamicValue(List<IBase> result, String path,
       IElement requestAction, IBase resource) {
     if (result == null || result.isEmpty()) {
       return;
@@ -236,6 +243,40 @@ public abstract class BasePlanDefinitionProcessor<T> {
       modelResolver.setValue(requestAction, path.replace("action.", ""), value);
     } else {
       modelResolver.setValue(resource, path, value);
+    }
+  }
+
+  protected void setupFederatedRepository() {
+    federatedRepository = bundle == null ? repository
+        : new FederatedRepository(repository,
+            new InMemoryFhirRepository(repository.fhirContext(), bundle));
+  }
+
+  protected IBaseResource getResource(String resourceId, String resourceType) {
+    var id = resourceId;
+    if (resourceId.contains("/")) {
+      var split = resourceId.split("/");
+      resourceType = split[0];
+      id = split[1];
+    }
+    if (resourceType == null || resourceType.isEmpty()) {
+      resourceType = subjectType;
+    }
+    var resourceClass =
+        fhirContext().getResourceDefinition(resourceType).getImplementingClass();
+    switch (fhirVersion()) {
+      case DSTU3:
+        return federatedRepository.read(resourceClass,
+            new org.hl7.fhir.dstu3.model.IdType(resourceType, id));
+      case R4:
+        return federatedRepository.read(resourceClass,
+            new org.hl7.fhir.r4.model.IdType(resourceType, id));
+      case R5:
+        return federatedRepository.read(resourceClass,
+            new org.hl7.fhir.r5.model.IdType(resourceType, id));
+      default:
+        throw new IllegalArgumentException(
+            String.format("unsupported FHIR version: %s", fhirVersion()));
     }
   }
 }

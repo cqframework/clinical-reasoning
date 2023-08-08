@@ -19,7 +19,17 @@
       "action": [
         {
           "title": "Hello World!",
-          "description": "The CDS Service is alive and communicating successfully!"
+          "description": "The CDS Service is alive and communicating successfully!",
+          "condition": [
+            {
+              "kind": "start",
+              "expression": {
+                "description": "Whether or not a Hello World! card should be returned",
+                "language": "text/cql.identifier",
+                "expression": "Main Action Condition Expression Is True"
+              }
+            }
+          ]
         }
       ]
     }

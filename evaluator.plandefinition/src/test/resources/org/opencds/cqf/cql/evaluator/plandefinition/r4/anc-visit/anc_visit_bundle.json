@@ -25,6 +25,15 @@
         },
         "action": [
           {
+            "priority": "routine",
+            "type": {
+              "coding": [
+                {
+                  "code": "clinical-protocol",
+                  "display": "Clinical Protocol"
+                }
+              ]
+            },
             "resource": {
               "reference": "Task/careplan-activity"
             }

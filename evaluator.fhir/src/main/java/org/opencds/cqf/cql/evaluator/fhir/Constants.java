@@ -34,8 +34,14 @@ public class Constants {
       "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal";
   public static final String QUESTIONNAIRE_RESPONSE_AUTHOR =
       "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
+  public static final String CPG_FEATURE_EXPRESSION =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression";
   public static final String CPG_QUESTIONNAIRE_GENERATE =
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate";
+  public static final String CPG_INPUT_TEXT =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-text";
+  public static final String CPG_INPUT_DESCRIPTION =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-description";
   // public static final String CQF_QUESTIONNAIRE =
   // "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire";
   public static final String CQF_EXPRESSION =

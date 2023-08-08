@@ -19,6 +19,15 @@
         "action": [
           {
             "title": "Prior Auth Route One",
+            "condition": [
+              {
+                "kind": "applicability",
+                "expression": {
+                  "language": "text/cql.identifier",
+                  "expression": "Claim Is Applicable"
+                }
+              }
+            ],
             "resource": {
               "reference": "RequestGroup/route-one"
             }
@@ -121,7 +130,7 @@
                 "linkId": "2.2",
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization#Organization.identifier.system",
                 "text": "Organization.identifier.system",
-                "type": "string",
+                "type": "url",
                 "required": true,
                 "readOnly": true,
                 "initial": [
@@ -152,7 +161,7 @@
                 "linkId": "2.4",
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization#Organization.identifier.system",
                 "text": "Organization.identifier.system",
-                "type": "string",
+                "type": "url",
                 "required": true,
                 "readOnly": true,
                 "initial": [
@@ -255,7 +264,7 @@
                 "linkId": "3.5",
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient#Patient.identifier.system",
                 "text": "Patient.identifier.system",
-                "type": "string",
+                "type": "url",
                 "required": true,
                 "readOnly": true,
                 "initial": [
@@ -318,7 +327,7 @@
                 "linkId": "4.3",
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating#Practitioner.identifier.system",
                 "text": "Practitioner.identifier.system",
-                "type": "string",
+                "type": "url",
                 "required": true,
                 "readOnly": true,
                 "initial": [
@@ -349,7 +358,7 @@
                 "linkId": "4.5",
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating#Practitioner.identifier.system",
                 "text": "Practitioner.identifier.system",
-                "type": "string",
+                "type": "url",
                 "required": true,
                 "readOnly": true,
                 "initial": [
@@ -405,7 +414,7 @@
                 "linkId": "5.3",
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending#Practitioner.identifier.system",
                 "text": "Practitioner.identifier.system",
-                "type": "string",
+                "type": "url",
                 "required": true,
                 "readOnly": true,
                 "initial": [
@@ -436,7 +445,7 @@
                 "linkId": "5.5",
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending#Practitioner.identifier.system",
                 "text": "Practitioner.identifier.system",
-                "type": "string",
+                "type": "url",
                 "required": true,
                 "readOnly": true,
                 "initial": [

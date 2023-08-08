@@ -19,6 +19,24 @@
           {
             "title": "Summary",
             "description": "Detail",
+            "priority": "routine",
+            "condition": [
+              {
+                "kind": "applicability",
+                "expression": {
+                  "language": "text/cql.identifier",
+                  "expression": "Is Action Applicable?"
+                }
+              }
+            ],
+            "type": {
+              "coding": [
+                {
+                  "code": "clinical-protocol",
+                  "display": "Clinical Protocol"
+                }
+              ]
+            },
             "action": [
               {
                 "title": "Summary 1",

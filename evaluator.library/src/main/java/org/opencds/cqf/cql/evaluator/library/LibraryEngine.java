@@ -14,21 +14,17 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.ParametersUtil;
 
@@ -107,13 +103,13 @@ public class LibraryEngine {
       case "text/cql":
       case "text/cql.expression":
       case "text/cql-expression":
+      case "text/fhirpath":
         parametersResult =
             this.evaluateExpression(theExpression, theParameters, theSubjectId, null, theBundle);
         // The expression is assumed to be the parameter component name
         // The expression evaluator creates a library with a single expression defined as "return"
-        theExpression = "return";
         results = resolveParameterValues(ParametersUtil
-            .getNamedParameters(fhirContext, parametersResult, theExpression));
+            .getNamedParameters(fhirContext, parametersResult, "return"));
         break;
       case "text/cql-identifier":
       case "text/cql.identifier":
@@ -126,26 +122,27 @@ public class LibraryEngine {
         results = resolveParameterValues(ParametersUtil
             .getNamedParameters(fhirContext, parametersResult, theExpression));
         break;
-      case "text/fhirpath":
-        List<IBase> outputs;
-        try {
-          var fedRepo = theBundle == null ? repository
-              : new FederatedRepository(repository,
-                  new InMemoryFhirRepository(repository.fhirContext(), theBundle));
-          outputs =
-              fhirPath.evaluate(getSubject(fedRepo, theSubjectId, theSubjectType),
-                  theExpression,
-                  IBase.class);
-        } catch (FhirPathExecutionException e) {
-          throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
-        }
-        if (outputs != null && outputs.size() == 1) {
-          results = Collections.singletonList(outputs.get(0));
-        } else {
-          throw new IllegalArgumentException(
-              "Expected only one value when evaluating FHIRPath expression: " + theExpression);
-        }
-        break;
+      // case "text/fhirpath":
+      // List<IBase> outputs;
+      // try {
+      // var fedRepo = theBundle == null ? repository
+      // : new FederatedRepository(repository,
+      // new InMemoryFhirRepository(repository.fhirContext(), theBundle));
+      // setEvaluationContext(theParameters);
+      // outputs =
+      // fhirPath.evaluate(getSubject(fedRepo, theSubjectId, theSubjectType),
+      // theExpression,
+      // IBase.class);
+      // } catch (Exception e) {
+      // throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
+      // }
+      // if (outputs != null && outputs.size() == 1) {
+      // results = Collections.singletonList(outputs.get(0));
+      // } else {
+      // throw new IllegalArgumentException(
+      // "Expected only one value when evaluating FHIRPath expression: " + theExpression);
+      // }
+      // break;
       default:
         logger.warn("An action language other than CQL was found: {}", theLanguage);
     }
@@ -215,30 +212,49 @@ public class LibraryEngine {
     return returnValues;
   }
 
-  protected IBaseResource getSubject(Repository repository, String subjectId, String subjectType) {
-    var id = subjectId;
-    if (subjectId.contains("/")) {
-      var split = subjectId.split("/");
-      subjectType = split[0];
-      id = split[1];
-    }
-    if (subjectType == null || subjectType.isEmpty()) {
-      subjectType = "Patient";
-    }
-    var resourceType = (IBaseResource) modelResolver.createInstance(subjectType);
-    switch (fhirContext.getVersion().getVersion()) {
-      case DSTU3:
-        return repository.read(resourceType.getClass(),
-            new org.hl7.fhir.dstu3.model.IdType(subjectType, id));
-      case R4:
-        return repository.read(resourceType.getClass(),
-            new org.hl7.fhir.r4.model.IdType(subjectType, id));
-      case R5:
-        return repository.read(resourceType.getClass(),
-            new org.hl7.fhir.r5.model.IdType(subjectType, id));
-      default:
-        throw new IllegalArgumentException(
-            String.format("unsupported FHIR version: %s", fhirContext));
-    }
-  }
+  // protected IBaseResource getSubject(Repository repository, String subjectId, String subjectType)
+  // {
+  // var id = subjectId;
+  // if (subjectId.contains("/")) {
+  // var split = subjectId.split("/");
+  // subjectType = split[0];
+  // id = split[1];
+  // }
+  // if (subjectType == null || subjectType.isEmpty()) {
+  // subjectType = "Patient";
+  // }
+  // var resourceType = (IBaseResource) modelResolver.createInstance(subjectType);
+  // switch (fhirContext.getVersion().getVersion()) {
+  // case DSTU3:
+  // return repository.read(resourceType.getClass(),
+  // new org.hl7.fhir.dstu3.model.IdType(subjectType, id));
+  // case R4:
+  // return repository.read(resourceType.getClass(),
+  // new org.hl7.fhir.r4.model.IdType(subjectType, id));
+  // case R5:
+  // return repository.read(resourceType.getClass(),
+  // new org.hl7.fhir.r5.model.IdType(subjectType, id));
+  // default:
+  // throw new IllegalArgumentException(
+  // String.format("unsupported FHIR version: %s", fhirContext));
+  // }
+  // }
+
+  // protected void setEvaluationContext(IBaseParameters parameters) {
+  // if (parameters == null) {
+  // return;
+  // }
+  // fhirPath.setEvaluationContext(new IFhirPathEvaluationContext() {
+  // // @Override
+  // // public IBase resolve
+
+  // @Override
+  // public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+  // if ("".equals(theReference.getValue())) {
+  // return null;
+  // }
+  // throw new IllegalArgumentException();
+  // }
+  // });
+  // }
 }

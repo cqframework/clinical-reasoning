@@ -15,6 +15,21 @@
       },
       "action": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter",
+                  "valueString": "ClaimId"
+                },
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
+                  "valueCanonical": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+                }
+              ]
+            }
+          ],
           "title": "Prepopulate!",
           "description": "A simple recommendation to complete a prepopulated Questionnaire",
           "resource": {

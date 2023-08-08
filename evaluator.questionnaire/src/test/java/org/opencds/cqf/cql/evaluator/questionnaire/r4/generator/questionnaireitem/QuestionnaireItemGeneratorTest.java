@@ -130,13 +130,14 @@ class QuestionnaireItemGeneratorTest {
     doNothing().when(myFixture).processElement(
         any(StructureDefinition.class),
         any(ElementDefinition.class),
-        anyInt());
+        anyInt(),
+        null);
     doReturn(expectedElements).when(myFixture).getElementsWithNonNullElementType(profile);
     // execute
     myFixture.processElements(profile);
     // validate
     for (int i = 0; i < expectedElements.size(); i++) {
-      verify(myFixture).processElement(profile, expectedElements.get(i), i + 1);
+      verify(myFixture).processElement(profile, expectedElements.get(i), i + 1, null);
     }
   }
 
@@ -148,12 +149,12 @@ class QuestionnaireItemGeneratorTest {
     final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
     doReturn(questionnaireItem).when(nestedQuestionnaireItemService)
-        .getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID);
+        .getNestedQuestionnaireItem(profile.getUrl(), element, CHILD_LINK_ID, null);
     // execute
-    myFixture.processElement(profile, element, childCount);
+    myFixture.processElement(profile, element, childCount, null);
     // validate
-    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element,
-        CHILD_LINK_ID);
+    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile.getUrl(), element,
+        CHILD_LINK_ID, null);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), questionnaireItem);
   }
 
@@ -164,17 +165,18 @@ class QuestionnaireItemGeneratorTest {
     final StructureDefinition profile = withProfile();
     final ElementDefinition element = TestingHelper.withElementDefinition(TYPE_CODE, PATH_VALUE);
     final int childCount = 1;
-    when(nestedQuestionnaireItemService.getNestedQuestionnaireItem(profile, element, CHILD_LINK_ID))
-        .thenAnswer(invocation -> {
-          throw new Exception(ERROR_MESSAGE);
-        });
+    when(nestedQuestionnaireItemService.getNestedQuestionnaireItem(profile.getUrl(), element,
+        CHILD_LINK_ID, null))
+            .thenAnswer(invocation -> {
+              throw new Exception(ERROR_MESSAGE);
+            });
     doReturn(errorItem).when(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
     // execute
-    myFixture.processElement(profile, element, childCount);
+    myFixture.processElement(profile, element, childCount, null);
     // validate
     verify(myFixture).createErrorItem(CHILD_LINK_ID, EXPECTED_ERROR_MESSAGE);
-    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile, element,
-        CHILD_LINK_ID);
+    verify(nestedQuestionnaireItemService).getNestedQuestionnaireItem(profile.getUrl(), element,
+        CHILD_LINK_ID, null);
     assertEquals(myFixture.questionnaireItem.getItem().get(0), errorItem);
   }
 

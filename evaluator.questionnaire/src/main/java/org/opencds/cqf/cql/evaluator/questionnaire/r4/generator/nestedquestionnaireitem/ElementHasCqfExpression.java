@@ -61,14 +61,14 @@ public class ElementHasCqfExpression {
   }
 
   protected final List<IBase> getExpressionResults(Expression expression) {
-    return this.libraryEngine.getExpressionResult(
-        this.patientId,
+    return libraryEngine.getExpressionResult(
+        patientId,
         subjectType,
         expression.getExpression(),
         expression.getLanguage(),
         expression.getReference(),
         parameters,
-        this.bundle);
+        bundle);
   }
 
   protected Expression getExpression(ElementDefinition element) {

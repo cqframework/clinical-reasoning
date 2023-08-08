@@ -1,6 +1,8 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.Collections;
@@ -43,6 +45,8 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
+import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionConditionComponent;
+import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionRelatedActionComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestIntent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestStatus;
 import org.hl7.fhir.r4.model.Resource;
@@ -344,21 +348,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       }
     }
 
-    Boolean conditionMet = false;
-    if (planDefinition.getType().hasCoding()) {
-      var planDefinitionTypeCoding = planDefinition.getType().getCoding();
-      for (var coding : planDefinitionTypeCoding) {
-        if (coding.getCode().equals("workflow-definition")) {
-          // logger.info("Found a workflow definition type for PlanDefinition {}
-          // conditions should be evaluated at task execution time.",
-          // planDefinition.getUrl());
-          conditionMet = true;
-        }
-      }
-    }
-    conditionMet = Boolean.FALSE.equals(conditionMet) ? meetsConditions(defaultLibraryUrl, action)
-        : conditionMet;
-    if (Boolean.TRUE.equals(conditionMet)) {
+    if (meetsConditions(defaultLibraryUrl, action)) {
       // TODO: Figure out why this was here and what it was trying to do
       // if (action.hasRelatedAction()) {
       // for (var relatedActionComponent : action.getRelatedAction()) {
@@ -405,12 +395,39 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private RequestGroupActionComponent createRequestAction(PlanDefinitionActionComponent action) {
     // TODO: Copy Conditions over
-    var requestAction = new RequestGroupActionComponent().setTitle(action.getTitle())
-        .setDescription(action.getDescription()).setTextEquivalent(action.getTextEquivalent())
-        .setCode(action.getCode()).setDocumentation(action.getDocumentation())
-        // .setCondition(action.getCondition())
-        .setTiming(action.getTiming());
+    var requestAction = new RequestGroupActionComponent()
+        .setTitle(action.getTitle())
+        .setDescription(action.getDescription())
+        .setTextEquivalent(action.getTextEquivalent())
+        .setCode(action.getCode())
+        .setDocumentation(action.getDocumentation())
+        .setTiming(action.getTiming())
+        .setType(action.getType());
     requestAction.setId(action.getId());
+    requestAction.setExtension(action.getExtension());
+
+    if (action.hasCondition()) {
+      action.getCondition()
+          .forEach(c -> requestAction.addCondition(new RequestGroupActionConditionComponent()
+              .setKind(RequestGroup.ActionConditionKind.fromCode(c.getKind().toCode()))
+              .setExpression(c.getExpression())));
+    }
+    if (action.hasPriority()) {
+      requestAction
+          .setPriority(RequestGroup.RequestPriority.fromCode(action.getPriority().toCode()));
+    }
+    if (action.hasRelatedAction()) {
+      action.getRelatedAction().forEach(
+          ra -> requestAction.addRelatedAction(new RequestGroupActionRelatedActionComponent()
+              .setActionId(ra.getActionId())
+              .setRelationship(
+                  RequestGroup.ActionRelationshipType.fromCode(ra.getRelationship().toCode()))
+              .setOffset(ra.getOffset())));
+    }
+    if (action.hasSelectionBehavior()) {
+      requestAction.setSelectionBehavior(
+          RequestGroup.ActionSelectionBehavior.fromCode(action.getSelectionBehavior().toCode()));
+    }
 
     return requestAction;
   }
@@ -707,17 +724,17 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private void resolveDynamicValues(String defaultLibraryUrl, IElement requestAction,
       IBase resource, PlanDefinition.PlanDefinitionActionComponent action) {
+    if (!action.hasDynamicValue()) {
+      return;
+    }
+    // var inputParams = resolveInputParameters(action.getInput());
     action.getDynamicValue().forEach(dynamicValue -> {
       if (dynamicValue.hasExpression()) {
-        Parameters inputParams = resolveInputParameters(action.getInput());
-        if (parameters != null) {
-          inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
-        }
         List<IBase> result = null;
         try {
           result =
               resolveExpression(getCqfExpression(dynamicValue.getExpression(), defaultLibraryUrl,
-                  dynamicValue.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), inputParams);
+                  dynamicValue.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), parameters);
           resolveDynamicValue(result, dynamicValue.getPath(), requestAction, resource);
         } catch (Exception e) {
           var message = String.format("DynamicValue expression %s encountered exception: %s",
@@ -732,21 +749,21 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private Boolean meetsConditions(String defaultLibraryUrl,
       PlanDefinition.PlanDefinitionActionComponent action) {
+    if (!action.hasCondition()) {
+      return true;
+    }
+    // var inputParams = resolveInputParameters(action.getInput());
     for (var condition : action.getCondition()) {
       if (condition.hasExpression()) {
-        Parameters inputParams = resolveInputParameters(action.getInput());
-        if (parameters != null) {
-          inputParams.getParameter().addAll(((Parameters) parameters).getParameter());
-        }
         IBase result = null;
         try {
           var results =
               resolveExpression(getCqfExpression(condition.getExpression(), defaultLibraryUrl,
-                  condition.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), inputParams);
+                  condition.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), parameters);
           result = results == null || results.isEmpty() ? null : results.get(0);
         } catch (Exception e) {
           var message = String.format("Condition expression %s encountered exception: %s",
-              condition.getExpression(), e.getMessage());
+              condition.getExpression().getExpression(), e.getMessage());
           logger.error(message);
           oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
               .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
@@ -789,23 +806,39 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   private Parameters resolveInputParameters(List<DataRequirement> dataRequirements) {
-    if (dataRequirements == null)
-      return new Parameters();
+    // TODO: Revisit this logic and all of FhirPath evaluation in general
+    var params = parameters();
+    if (parameters != null) {
+      params.getParameter().addAll(((Parameters) parameters).getParameter());
+    }
+    params.addParameter(part("%subject", (Resource) getResource(patientId, subjectType)));
+    if (encounterId != null && !encounterId.isEmpty()) {
+      params.addParameter(
+          part("%encounter", (Resource) getResource(encounterId, FHIRAllTypes.ENCOUNTER.toCode())));
+    }
+    if (practitionerId != null && !practitionerId.isEmpty()) {
+      params.addParameter(
+          part("%practitioner",
+              (Resource) getResource(practitionerId, FHIRAllTypes.PRACTITIONER.toCode())));
+    }
 
-    var params = new Parameters();
+    if (bundle == null) {
+      return params;
+    }
+
+    var resources = ((Bundle) bundle).getEntry().stream().filter(e -> e.hasResource())
+        .map(e -> e.getResource()).collect(Collectors.toList());
+
+    // Populate parameters from the bundle passed in
     for (var req : dataRequirements) {
       if (!req.hasId()) {
         continue;
       }
 
-      var resources = repository.search(Bundle.class, IBaseResource.class, Searches.ALL);
-
-      if (resources.hasEntry()) {
+      if (!resources.isEmpty()) {
         var found = true;
-        for (var resource : resources.getEntry().stream().map(e -> e.getResource())
-            .collect(Collectors.toList())) {
-          var parameter =
-              new ParametersParameterComponent().setName("%" + String.format("%s", req.getId()));
+        for (var resource : resources) {
+          var parameter = part("%" + String.format("%s", req.getId()));
           if (req.hasCodeFilter()) {
             for (var filter : req.getCodeFilter()) {
               var codeFilterParam = new Parameters();
@@ -832,19 +865,19 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
               }
             }
           }
-          if (resources.getEntry().size() == 1) {
-            parameter.addExtension(
-                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
-                new ParameterDefinition().setMax("*").setName("%" + req.getId()));
-            if (found) {
-              parameter.setResource(resource);
-            }
-          } else {
-            if (!found) {
-              continue;
-            }
-            parameter.setResource(resource);
+          // if (resources.getEntry().size() == 1) {
+          // parameter.addExtension(
+          // "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+          // new ParameterDefinition().setMax("*").setName("%" + req.getId()));
+          // if (found) {
+          // parameter.setResource(resource);
+          // }
+          // } else {
+          if (!found) {
+            continue;
           }
+          parameter.setResource(resource);
+          // }
           params.addParameter(parameter);
         }
       } else {

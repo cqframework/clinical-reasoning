@@ -1,13 +1,15 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers;
 
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import javax.annotation.Nonnull;
-import java.util.List;
 
 public class TestingHelper {
   final static String PROFILE_URL = "http://www.sample.com/profile/profileId";
@@ -38,6 +40,7 @@ public class TestingHelper {
     return new QuestionnaireItemComponent()
         .setType(QUESTIONNAIRE_ITEM_TYPE)
         .setLinkId(LINK_ID)
-        .setText(PROFILE_TITLE);
+        .setText(PROFILE_TITLE)
+        .setRequired(false);
   }
 }

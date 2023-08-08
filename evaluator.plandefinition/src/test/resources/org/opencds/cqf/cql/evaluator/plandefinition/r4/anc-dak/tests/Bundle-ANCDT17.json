@@ -32,6 +32,16 @@
                     "type": "citation",
                     "label": "Pregnancy, childbirth, postpartum and newborn care guide (IMPAC) (2015): recommendation C3 (1)\nManaging complications guide (IMPAC) (2017): Section S-53, Table S-12 (5)"
                   }
+                ],
+                "condition": [
+                  {
+                    "kind": "applicability",
+                    "expression": {
+                      "description": "((((((((((((((((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Severe headache\"))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Severe headache\")))\n  OR ((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Blurred vision\")))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Blurred vision\")))\n  OR ((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Epigastric pain\")))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Epigastric pain\")))\n  OR ((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Dizziness\")))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Dizziness\")))\n  OR ((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Vomiting\")))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"Vomiting\")))\n  OR ((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"None\")\n  AND (\"Urine dipstick result – protein\" = \"++\")))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"None\")\n  AND (\"Urine dipstick result – protein\" = \"++\")))\n  OR ((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"None\")\n  AND (\"Urine dipstick result – protein\" = \"+++\")))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"None\")\n  AND (\"Urine dipstick result – protein\" = \"+++\")))\n  OR ((\"Systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 140 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"None\")\n  AND (\"Urine dipstick result – protein\" = \"++++\")))\n  OR ((\"Diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 90 mmHg)\n  AND (\"Symptoms of severe pre-eclampsia\" = \"None\")\n  AND (\"Urine dipstick result – protein\" = \"++++\"))",
+                      "language": "text/cql-identifier",
+                      "expression": "Should Refer urgently to a hospital"
+                    }
+                  }
                 ]
               },
               {
@@ -44,6 +54,16 @@
                     "type": "citation",
                     "label": "Managing complications guide (IMPAC) (2017): S-61 (5)\nWHO pre-eclampsia and eclampsia recommendations (2011): 4 (7)"
                   }
+                ],
+                "condition": [
+                  {
+                    "kind": "applicability",
+                    "expression": {
+                      "description": "((((\"Systolic blood pressure\" ≥ 160 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 160 mmHg)\n  AND (\"Urine dipstick result – protein\" = \"+\"))\n  OR ((\"Diastolic blood pressure\" ≥ 110 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 110 mmHg)\n  AND (\"Urine dipstick result – protein\" = \"+\")))\n  OR ((\"Systolic blood pressure\" ≥ 160 mmHg)\n  AND (\"Repeat systolic blood pressure\" ≥ 160 mmHg)\n  AND (\"Urine dipstick result – protein\" = \"None\")))\n  OR ((\"Diastolic blood pressure\" ≥ 110 mmHg)\n  AND (\"Repeat diastolic blood pressure\" ≥ 110 mmHg)\n  AND (\"Urine dipstick result – protein\" = \"None\"))",
+                      "language": "text/cql-identifier",
+                      "expression": "Should Refer urgently to a hospital 3"
+                    }
+                  }
                 ]
               },
               {
@@ -55,6 +75,16 @@
                   {
                     "type": "citation",
                     "label": "Pregnancy, childbirth, postpartum and newborn care guide (IMPAC) (2015): C3 (1)"
+                  }
+                ],
+                "condition": [
+                  {
+                    "kind": "applicability",
+                    "expression": {
+                      "description": "((((\"Existing chronic health conditions\" = \"Hypertension\")\n  OR ((140 mmHg ≤ \"Systolic blood pressure\" < 160 mmHg)\n  AND (140 mmHg ≤ \"Repeat systolic blood pressure\" < 160 mmHg)\n  AND (\"Urine dipstick result – protein\" = \"+\")))\n  OR ((90 mmHg ≤ \"Diastolic blood pressure\" < 110 mmHg)\n  AND (90 mmHg ≤ \"Repeat diastolic blood pressure\" < 110 mmHg)\n  AND (\"Urine dipstick result – protein\" = \"+\")))\n  OR ((140 mmHg ≤ \"Systolic blood pressure\" < 160 mmHg)\n  AND (140 mmHg ≤ \"Repeat systolic blood pressure\" < 160 mmHg)\n  AND (Urine dipstick result – protein\" = \"None\")))\n  OR ((90 mmHg ≤ \"Diastolic blood pressure\" < 110 mmHg)\n  AND (90 mmHg ≤ \"Repeat diastolic blood pressure\" < 110 mmHg)\n  AND (\"Urine dipstick result – protein\" = \"None\"))",
+                      "language": "text/cql-identifier",
+                      "expression": "Should Conduct hypertension counselling"
+                    }
                   }
                 ]
               }

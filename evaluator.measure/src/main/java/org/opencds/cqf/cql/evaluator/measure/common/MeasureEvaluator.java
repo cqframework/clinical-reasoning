@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href=
  *      "http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
  */
+@SuppressWarnings("removal")
 public class MeasureEvaluator {
 
   private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
@@ -90,7 +91,8 @@ public class MeasureEvaluator {
   protected Interval getMeasurementPeriod() {
     var param = Libraries.resolveParameterRef(measurementPeriodParameterName,
         this.context.getState().getCurrentLibrary());
-    return (Interval) this.context.visitParameterDef(param, this.context.getState());
+    return (Interval) this.context.getEvaluationVisitor().visitParameterDef(param,
+        this.context.getState());
   }
 
   protected ParameterDef getMeasurementPeriodParameterDef() {
@@ -249,7 +251,7 @@ public class MeasureEvaluator {
         var ref = Libraries.resolveExpressionRef(subjectType,
             this.context.getState().getCurrentLibrary());
         Object booleanResult =
-            this.context.visitExpressionDef(ref, this.context.getState());
+            this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
         clearEvaluatedResources();
         return Collections.singletonList(booleanResult);
       } else {
@@ -264,7 +266,7 @@ public class MeasureEvaluator {
     var ref = Libraries.resolveExpressionRef(criteriaExpression,
         this.context.getState().getCurrentLibrary());
     Object result =
-        this.context.visitExpressionDef(ref, this.context.getState());
+        this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
 
     captureEvaluatedResources(outEvaluatedResources);
 
@@ -288,7 +290,8 @@ public class MeasureEvaluator {
       context.getState()
           .push(new Variable().withName(((FunctionDef) ed).getOperand().get(0).getName())
               .withValue(resource));
-      result = context.visitExpression(ed.getExpression(), context.getState());
+      result =
+          context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
     } finally {
       context.getState().popWindow();
     }
@@ -415,13 +418,7 @@ public class MeasureEvaluator {
       var ref = Libraries.resolveExpressionRef(sde.expression(),
           this.context.getState().getCurrentLibrary());
       Object result =
-          this.context.visitExpressionDef(ref, this.context.getState());
-
-      // TODO: This is a hack-around for an cql engine bug. Need to investigate.
-      if ((result instanceof List) && (((List<?>) result).size() == 1)
-          && ((List<?>) result).get(0) == null) {
-        result = null;
-      }
+          this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
 
       sde.putResult(subjectId, result, context.getState().getEvaluatedResources());
 
@@ -440,7 +437,7 @@ public class MeasureEvaluator {
       var ref = Libraries.resolveExpressionRef(sd.expression(),
           this.context.getState().getCurrentLibrary());
       Object result =
-          this.context.visitExpressionDef(ref, this.context.getState());
+          this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
       if (result instanceof Iterable) {
         var resultIter = ((Iterable<?>) result).iterator();
         if (!resultIter.hasNext()) {

@@ -13,6 +13,7 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -45,11 +48,15 @@ import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
 import org.testng.annotations.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 @Test(singleThreaded = true)
@@ -230,16 +237,22 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     Library primaryLibrary = library(cql);
     measure.addLibrary(primaryLibrary.getId());
 
-    List<org.hl7.elm.r1.Library> cqlLibraries = translate(cql);
+    LibraryManager ll = new LibraryManager(new ModelManager());
+    ll.getLibrarySourceLoader()
+        .registerProvider(new InMemoryLibrarySourceProvider(Collections.singletonList(cql)));
 
-    // TODO: Set up engine environment
-    LibraryManager ll = null; // new LibraryManager(cqlLibraries);
-
-    R4FhirModelResolver modelResolver = new R4FhirModelResolver();
+    var modelResolver = new CachingModelResolverDecorator(new R4FhirModelResolver());
     DataProvider dataProvider = new CompositeDataProvider(modelResolver, retrieveProvider);
 
+    var dps = new HashMap<String, DataProvider>();
+    dps.put(MeasureConstants.FHIR_MODEL_URI, dataProvider);
+
     // TODO: Set up engine environment
-    var engine = new CqlEngine(new Environment(null, null, null), null);
+    var engine = new CqlEngine(new Environment(ll, dps, null));
+
+    var lib = engine.getEnvironment().getLibraryManager()
+        .resolveLibrary(new VersionedIdentifier().withId("Test"));
+    engine.getState().init(lib.getLibrary());
 
     R4MeasureEvaluation evaluation = new R4MeasureEvaluation(engine, measure);
     MeasureReport report = evaluation.evaluate(
@@ -248,7 +261,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     assertNotNull(report);
 
     // Simulate sending it across the wire
-    IParser parser = modelResolver.getFhirContext().newJsonParser();
+    IParser parser = FhirContext.forR4Cached().newJsonParser();
     report = (MeasureReport) parser.parseResource(parser.encodeResourceToString(report));
 
     return report;

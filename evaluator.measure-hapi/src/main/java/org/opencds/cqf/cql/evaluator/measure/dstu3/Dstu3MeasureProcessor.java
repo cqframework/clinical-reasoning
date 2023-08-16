@@ -73,9 +73,12 @@ public class Dstu3MeasureProcessor {
 
     var context = Contexts.forRepositoryAndSettings(
         this.measureEvaluationOptions.getEvaluationSettings(), this.repository,
-        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()),
         additionalData);
 
+    var lib = context.getEnvironment().getLibraryManager().resolveLibrary(
+        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
+
+    context.getState().init(lib.getLibrary());
     var evalType = MeasureEvalType.fromCode(reportType)
         .orElse(subjectIds == null || subjectIds.isEmpty() ? MeasureEvalType.POPULATION
             : MeasureEvalType.SUBJECT);

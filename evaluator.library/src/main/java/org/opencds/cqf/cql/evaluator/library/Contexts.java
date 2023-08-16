@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.library;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
@@ -40,13 +40,27 @@ public class Contexts {
 
   private Contexts() {}
 
-  // TODO: Need to refactor this a bit more once I understand how this will be used - JP
+  public static CqlEngine forRepository(Repository repository) {
+    return forRepository(repository, EvaluationSettings.getDefault());
+  }
+
+  public static CqlEngine forRepository(Repository repository,
+      EvaluationSettings settings) {
+    var terminologyProvider = new RepositoryTerminologyProvider(repository);
+    var sources = Collections.singletonList(buildLibrarySource(repository));
+
+    var dataProviders = buildDataProviders(repository, null, terminologyProvider,
+        settings.getRetrieveSettings());
+    var environment =
+        buildEnvironment(settings, sources, terminologyProvider, dataProviders);
+
+    return new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
+  }
+
   public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
-      Repository repository,
-      VersionedIdentifier id, IBaseBundle additionalData) {
+      Repository repository, IBaseBundle additionalData) {
     checkNotNull(settings);
     checkNotNull(repository);
-    checkNotNull(id);
 
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     var sourceProviders = new ArrayList<LibrarySourceProvider>();

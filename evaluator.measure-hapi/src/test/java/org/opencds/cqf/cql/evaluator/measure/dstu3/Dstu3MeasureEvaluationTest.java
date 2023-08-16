@@ -12,12 +12,15 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -42,14 +45,18 @@ import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.Environment;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
+import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
 import org.testng.annotations.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
@@ -144,17 +151,24 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     Interval measurementPeriod = measurementPeriod("2000-01-01", "2001-01-01");
 
     Library primaryLibrary = library(cql);
-    measure.addLibrary(new Reference(primaryLibrary.getId()));
+    measure.addLibrary(new Reference(primaryLibrary));
 
-    List<org.hl7.elm.r1.Library> cqlLibraries = translate(cql);
-    // TODO: Set up engine environment
-    LibraryManager ll = null; // new LibraryManager(cqlLibraries);
+    LibraryManager ll = new LibraryManager(new ModelManager());
+    ll.getLibrarySourceLoader()
+        .registerProvider(new InMemoryLibrarySourceProvider(Collections.singletonList(cql)));
 
-    R4FhirModelResolver modelResolver = new R4FhirModelResolver();
+    var modelResolver = new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
     DataProvider dataProvider = new CompositeDataProvider(modelResolver, retrieveProvider);
 
+    var dps = new HashMap<String, DataProvider>();
+    dps.put(MeasureConstants.FHIR_MODEL_URI, dataProvider);
+
     // TODO: Set up engine environment
-    var engine = new CqlEngine(new Environment(null, null, null), null);
+    var engine = new CqlEngine(new Environment(ll, dps, null));
+
+    var lib = engine.getEnvironment().getLibraryManager()
+        .resolveLibrary(new VersionedIdentifier().withId("Test"));
+    engine.getState().init(lib.getLibrary());
 
     Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(engine, measure);
     MeasureReport report = evaluation.evaluate(
@@ -163,7 +177,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     assertNotNull(report);
 
     // Simulate sending it across the wire
-    IParser parser = modelResolver.getFhirContext().newJsonParser();
+    IParser parser = FhirContext.forDstu3Cached().newJsonParser();
     report = (MeasureReport) parser.parseResource(parser.encodeResourceToString(report));
     return report;
   }

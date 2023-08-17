@@ -36,8 +36,18 @@ public class Constants {
       "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
   public static final String CPG_FEATURE_EXPRESSION =
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression";
+  public static final String CPG_KNOWLEDGE_CAPABILITY =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability";
+  public static final String CPG_KNOWLEDGE_REPRESENTATION_LEVEL =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel";
   public static final String CPG_QUESTIONNAIRE_GENERATE =
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate";
+  public static final String CPG_RATIONALE =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-rationale";
+  public static final String CPG_SERVICE_REQUEST =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-servicerequest";
+  public static final String CPG_STRATEGY =
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy";
   public static final String CPG_INPUT_TEXT =
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-text";
   public static final String CPG_INPUT_DESCRIPTION =
@@ -50,6 +60,9 @@ public class Constants {
   public static final String CQF_EXPRESSION_LANGUAGE =
       "http://hl7.org/fhir/StructureDefinition/cqf-expression-language";
   public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
+  public static final String CQFM_SOFTWARE_SYSTEM =
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem";
+
   public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
       "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire";
   public static final String EXT_CRMI_MESSAGES =

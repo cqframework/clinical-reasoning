@@ -43,7 +43,8 @@ public class ActivityDefinitionProcessorTests {
 
     var result = this.activityDefinitionProcessor.apply(
         new IdType("ActivityDefinition", "activityDefinition-test"), null,
-        null, "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
+        null, "patient-1", null, null, null, null, null, null, null, null, null, null,
+        libraryEngine);
     Assert.assertTrue(result instanceof MedicationRequest);
     MedicationRequest request = (MedicationRequest) result;
     Assert.assertTrue(request.getDoNotPerform());

@@ -2,15 +2,19 @@ package org.opencds.cqf.cql.evaluator.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -20,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public abstract class BaseActivityDefinitionProcessor<T> {
@@ -34,7 +37,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public static final String CODE_ERROR_PREAMBLE = "Code does not map to ";
   public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
   public static final String MISSING_CODE_PROPERTY = "Missing required code property";
-  private final IFhirPath fhirPath;
+  protected static final List<String> EXCLUDED_EXTENSION_LIST = Arrays
+      .asList(Constants.CPG_KNOWLEDGE_CAPABILITY, Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL);
   private final ModelResolver modelResolver;
   protected final EvaluationSettings evaluationSettings;
   protected Repository repository;
@@ -44,6 +48,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   protected String practitionerId;
   protected String organizationId;
   protected IBaseParameters parameters;
+  protected IBaseBundle bundle;
   protected LibraryEngine libraryEngine;
 
   protected BaseActivityDefinitionProcessor(Repository repository,
@@ -51,8 +56,6 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     this.evaluationSettings =
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     this.repository = requireNonNull(repository, "repository can not be null");
-    this.fhirPath = org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache
-        .cachedForContext(repository.fhirContext());
     modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
   }
@@ -71,36 +74,38 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
       String encounterId, String practitionerId, String organizationId, String userType,
       String userLanguage, String userTaskContext, String setting, String settingContext,
-      IBaseParameters parameters, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
+      IBaseParameters parameters, IBaseBundle bundle, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint,
       IBaseResource dataEndpoint) {
     this.repository =
         Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
     return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
-        parameters, new LibraryEngine(this.repository, this.evaluationSettings));
+        parameters, bundle, new LibraryEngine(this.repository, this.evaluationSettings));
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
       CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
       String encounterId, String practitionerId, String organizationId, String userType,
       String userLanguage, String userTaskContext, String setting, String settingContext,
-      IBaseParameters parameters, LibraryEngine libraryEngine) {
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
     return apply(resolveActivityDefinition(theId, theCanonical, theActivityDefinition), subjectId,
         encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext,
-        setting, settingContext, parameters, libraryEngine);
+        setting, settingContext, parameters, bundle, libraryEngine);
   }
 
   public IBaseResource apply(T theActivityDefinition, String subjectId, String encounterId,
       String practitionerId, String organizationId, String userType, String userLanguage,
       String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
-      LibraryEngine libraryEngine) {
+      IBaseBundle bundle, LibraryEngine libraryEngine) {
     this.subjectId = subjectId;
     this.encounterId = encounterId;
     this.practitionerId = practitionerId;
     this.organizationId = organizationId;
     this.parameters = parameters;
     this.libraryEngine = libraryEngine;
+    this.bundle = bundle;
 
     return applyActivityDefinition(theActivityDefinition);
   }
@@ -110,11 +115,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
 
   public abstract IBaseResource applyActivityDefinition(T theActivityDefinition);
 
-  public void resolveDynamicValue(String language, String expression, String libraryUrl,
-      String path, IBaseResource resource, String subjectType) {
-
-    var result = this.libraryEngine.getExpressionResult(this.subjectId, subjectType, expression,
-        language, libraryUrl, this.parameters, null);
+  public void resolveDynamicValue(List<IBase> result, String expression, String path,
+      IBaseResource resource) {
     if (result == null || result.isEmpty()) {
       return;
     }

@@ -220,6 +220,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
   }
 
+  @Override
+  public void addOperationOutcomeIssue(String issue) {
+    // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+    // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(issue);
+  }
+
   private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
     var myGoal = new Goal();
     myGoal.setCategory(Collections.singletonList(goal.getCategory()));
@@ -350,7 +356,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           : searchRepositoryByCanonical(repository, definition));
       result = this.activityDefinitionProcessor.apply(activityDefinition, patientId, encounterId,
           practitionerId, organizationId, userType, userLanguage, userTaskContext, setting,
-          settingContext, parameters, libraryEngine);
+          settingContext, parameters, bundle, libraryEngine);
       result.setId(referenceToContained
           ? new IdType(result.fhirType(), activityDefinition.getIdPart().replaceFirst("#", ""))
           : activityDefinition.getIdElement().withResourceType(result.fhirType()));
@@ -556,21 +562,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
   private CqfExpression getCqfExpression(Expression expression, String defaultLibraryUrl,
       Extension altExtension) {
-    var result = new CqfExpression().setExpression(expression.getExpression())
-        .setLanguage(expression.getLanguage())
-        .setLibraryUrl(expression.hasReference() ? expression.getReference() : defaultLibraryUrl);
-
+    if (expression == null) {
+      return null;
+    }
+    Expression altExpression = null;
     if (altExtension != null && altExtension.hasValue()
         && altExtension.getValue() instanceof Expression) {
-      final var altExpressionRes = (Expression) altExtension.getValue();
-      if (altExpressionRes.hasExpression()) {
-        result.setAltLanguage(altExpressionRes.getLanguage())
-            .setAltExpression(altExpressionRes.getExpression())
-            .setAltLibraryUrl(altExpressionRes.hasReference() ? altExpressionRes.getReference()
-                : defaultLibraryUrl);
-      }
+      altExpression = (Expression) altExtension.getValue();
     }
-    return result;
+    return new CqfExpression(expression, defaultLibraryUrl, altExpression);
   }
 
   private void resolveDynamicValues(String defaultLibraryUrl, IElement requestAction,
@@ -583,9 +583,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
         List<IBase> result = null;
         try {
-          result =
-              resolveExpression(getCqfExpression(dynamicValue.getExpression(), defaultLibraryUrl,
-                  dynamicValue.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), inputParams);
+          result = libraryEngine.resolveExpression(patientId, subjectType,
+              getCqfExpression(dynamicValue.getExpression(), defaultLibraryUrl,
+                  dynamicValue.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)),
+              inputParams, bundle);
           resolveDynamicValue(result, dynamicValue.getPath(), requestAction, resource);
         } catch (Exception e) {
           var message = String.format("DynamicValue expression %s encountered exception: %s",
@@ -607,8 +608,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         IBase result = null;
         try {
           var results =
-              resolveExpression(getCqfExpression(condition.getExpression(), defaultLibraryUrl,
-                  condition.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)), inputParams);
+              libraryEngine.resolveExpression(patientId, subjectType,
+                  getCqfExpression(condition.getExpression(), defaultLibraryUrl,
+                      condition.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)),
+                  inputParams, bundle);
           result = results == null || results.isEmpty() ? null : results.get(0);
         } catch (Exception e) {
           var message = String.format("Condition expression %s encountered exception: %s",

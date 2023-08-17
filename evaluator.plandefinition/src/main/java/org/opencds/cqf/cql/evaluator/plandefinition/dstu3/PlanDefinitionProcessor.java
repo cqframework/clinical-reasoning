@@ -237,6 +237,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
   }
 
+  @Override
+  public void addOperationOutcomeIssue(String issue) {
+    // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
+    // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(issue);
+  }
+
   private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
     var myGoal = new Goal();
     myGoal.setCategory(Collections.singletonList(goal.getCategory()));
@@ -369,7 +375,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           : searchRepositoryByCanonical(repository, new StringType(definition.getReference())));
       result = this.activityDefinitionProcessor.apply(activityDefinition, patientId, encounterId,
           practitionerId, organizationId, userType, userLanguage, userTaskContext, setting,
-          settingContext, parameters, libraryEngine);
+          settingContext, parameters, bundle, libraryEngine);
       result.setId(referenceToContained
           ? new IdType(result.fhirType(), activityDefinition.getIdPart().replaceFirst("#", ""))
           : activityDefinition.getIdElement().withResourceType(result.fhirType()));
@@ -602,13 +608,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     return bundle;
   }
 
-  private CqfExpression getCqfExpression(String language, String expression,
-      String defaultLibraryUrl) {
-    return new CqfExpression().setExpression(expression)
-        .setLanguage(language)
-        .setLibraryUrl(defaultLibraryUrl);
-  }
-
   private void resolveDynamicValues(String defaultLibraryUrl, IElement requestAction,
       IBase resource, PlanDefinition.PlanDefinitionActionComponent action) {
     action.getDynamicValue().forEach(dynamicValue -> {
@@ -619,9 +618,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
         List<IBase> result = null;
         try {
-          result =
-              resolveExpression(getCqfExpression(dynamicValue.getLanguage(),
-                  dynamicValue.getExpression(), defaultLibraryUrl), inputParams);
+          result = libraryEngine.resolveExpression(patientId, subjectType,
+              new CqfExpression(dynamicValue.getLanguage(), dynamicValue.getExpression(),
+                  defaultLibraryUrl),
+              inputParams, bundle);
           resolveDynamicValue(result, dynamicValue.getPath(), requestAction, resource);
         } catch (Exception e) {
           var message = String.format("DynamicValue expression %s encountered exception: %s",
@@ -643,8 +643,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         IBase result = null;
         try {
           var results =
-              resolveExpression(getCqfExpression(condition.getLanguage(), condition.getExpression(),
-                  defaultLibraryUrl), inputParams);
+              libraryEngine.resolveExpression(patientId, subjectType,
+                  new CqfExpression(condition.getLanguage(), condition.getExpression(),
+                      defaultLibraryUrl),
+                  inputParams, bundle);
           result = results == null || results.isEmpty() ? null : results.get(0);
         } catch (Exception e) {
           var message = String.format("Condition expression %s encountered exception: %s",

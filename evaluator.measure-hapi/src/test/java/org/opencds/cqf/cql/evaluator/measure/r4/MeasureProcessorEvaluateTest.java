@@ -70,5 +70,38 @@ public class MeasureProcessorEvaluateTest {
         .evaluate();
 
     assertNotNull(when.then().report());
+
+    // Run 10 times to find any crashing due to caching
+    for (int i = 0; i < 10; i++) {
+      when.then().report();
+    }
+  }
+
+  @Test
+  public void test_additional_data_with_custom_options() {
+    var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+    evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
+
+    Bundle additionalData = (Bundle) FhirContext.forR4Cached().newJsonParser()
+        .parseResource(MeasureProcessorEvaluateTest.class
+            .getResourceAsStream(
+                "CaseRepresentation101/generated.json"));
+
+    var when = Measure.given()
+        .repositoryFor("CaseRepresentation101")
+        .evaluationOptions(evaluationOptions).when()
+        .measureId("GlycemicControlHypoglycemicInitialPopulation")
+        .periodStart("2022-01-01")
+        .periodEnd("2022-01-31")
+        .subject("Patient/980babd9-4979-4b76-978c-946719022dbb")
+        .additionalData(additionalData)
+        .evaluate();
+
+    assertNotNull(when.then().report());
+
+    // Run 10 times to find any crashing due to caching
+    for (int i = 0; i < 100; i++) {
+      when.then().report();
+    }
   }
 }

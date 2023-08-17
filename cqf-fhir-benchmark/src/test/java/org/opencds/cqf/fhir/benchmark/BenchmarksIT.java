@@ -27,8 +27,8 @@ public class BenchmarksIT {
       "org.opencds.cqf.fhir.benchmark.Measures.test", 800.0, // ops/second
       "org.opencds.cqf.fhir.benchmark.MeasuresAdditionalData.test", .35, // ops/second
       "org.opencds.cqf.fhir.benchmark.Questionnaires.test", 530.0, // ops/second
-      "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testLarge", 6_000_000.0, // ops/second
-      "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testSmall", 6_000_000.0); // ops/second
+      "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testLarge", 4_000_000.0, // ops/second
+      "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testSmall", 7_000_000.0); // ops/second
 
   private static final double SCORE_DEVIATION = .5; // +/- 50% ops/unit allowed
 

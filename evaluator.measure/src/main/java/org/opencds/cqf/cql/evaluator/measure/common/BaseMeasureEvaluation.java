@@ -49,8 +49,13 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         new MeasureEvaluator(context, this.measurementPeriodParameterName);
     measureDef =
         measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod);
+
+    // TODO: This is a bit hokey. Need to figure out a better way get/set the period.
+    var actualPeriod =
+        (Interval) context.getState().getParameters().get(this.measurementPeriodParameterName);
+
     return this.measureReportBuilder.build(measure, measureDef,
-        this.evalTypeToReportType(measureEvalType), measurementPeriod, subjectIds);
+        this.evalTypeToReportType(measureEvalType), actualPeriod, subjectIds);
   }
 
   protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {

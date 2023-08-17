@@ -3,10 +3,10 @@ package org.opencds.cqf.cql.evaluator.library;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
-import org.hl7.elm.r1.Library;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.RetrieveSettings;
@@ -14,7 +14,7 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.RetrieveSettings;
 public class EvaluationSettings {
 
   private Map<ModelIdentifier, Model> modelCache;
-  private Map<VersionedIdentifier, Library> libraryCache;
+  private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
 
   private CqlOptions cqlOptions;
 
@@ -45,15 +45,16 @@ public class EvaluationSettings {
     return this;
   }
 
-  public Map<VersionedIdentifier, Library> getLibraryCache() {
+  public Map<VersionedIdentifier, CompiledLibrary> getLibraryCache() {
     return this.libraryCache;
   }
 
-  public void setLibraryCache(Map<VersionedIdentifier, Library> libraryCache) {
+  public void setLibraryCache(Map<VersionedIdentifier, CompiledLibrary> libraryCache) {
     this.libraryCache = libraryCache;
   }
 
-  public EvaluationSettings withLibraryCache(Map<VersionedIdentifier, Library> libraryCache) {
+  public EvaluationSettings withLibraryCache(
+      Map<VersionedIdentifier, CompiledLibrary> libraryCache) {
     setLibraryCache(libraryCache);
     return this;
   }

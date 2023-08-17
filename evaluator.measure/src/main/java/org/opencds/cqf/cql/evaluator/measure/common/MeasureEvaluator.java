@@ -70,7 +70,7 @@ public class MeasureEvaluator {
     }
 
     // measurementPeriod is not required, because it's often defaulted in CQL
-    this.setMeasurementPeriod(measureDef, measurementPeriod);
+    this.setMeasurementPeriod(measurementPeriod);
 
     switch (measureEvalType) {
       case PATIENT:
@@ -86,13 +86,6 @@ public class MeasureEvaluator {
         throw new IllegalArgumentException(
             String.format("Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
     }
-  }
-
-  protected Interval getMeasurementPeriod() {
-    var param = Libraries.resolveParameterRef(measurementPeriodParameterName,
-        this.context.getState().getCurrentLibrary());
-    return (Interval) this.context.getEvaluationVisitor().visitParameterDef(param,
-        this.context.getState());
   }
 
   protected ParameterDef getMeasurementPeriodParameterDef() {
@@ -114,19 +107,27 @@ public class MeasureEvaluator {
 
   }
 
-  protected void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod) {
-    if (measurementPeriod == null) {
-      measurementPeriod = getMeasurementPeriod();
-      measureDef.setDefaultMeasurementPeriod(measurementPeriod);
-    }
-    if (measurementPeriod == null) {
+  protected void setMeasurementPeriod(Interval measurementPeriod) {
+    ParameterDef pd = this.getMeasurementPeriodParameterDef();
+    if (measurementPeriod == null && pd.getDefault() == null) {
+      logger.warn(
+          "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
+          this.measurementPeriodParameterName);
       return;
     }
 
-    ParameterDef pd = this.getMeasurementPeriodParameterDef();
     if (pd == null) {
       logger.warn("Parameter \"{}\" was not found. Unable to validate type.",
           this.measurementPeriodParameterName);
+      this.context.getState().setParameter(null, this.measurementPeriodParameterName,
+          measurementPeriod);
+      return;
+    }
+
+    // Use the default, skip validation
+    if (measurementPeriod == null) {
+      measurementPeriod = (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd,
+          this.context.getState());
       this.context.getState().setParameter(null, this.measurementPeriodParameterName,
           measurementPeriod);
       return;
@@ -419,6 +420,12 @@ public class MeasureEvaluator {
           this.context.getState().getCurrentLibrary());
       Object result =
           this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
+
+      // TODO: This is a hack-around for an cql engine bug. Need to investigate.
+      if ((result instanceof List) && (((List<?>) result).size() == 1)
+          && ((List<?>) result).get(0) == null) {
+        result = null;
+      }
 
       sde.putResult(subjectId, result, context.getState().getEvaluatedResources());
 

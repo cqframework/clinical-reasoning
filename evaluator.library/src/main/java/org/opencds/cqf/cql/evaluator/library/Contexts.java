@@ -126,7 +126,8 @@ public class Contexts {
             : new ModelManager();
 
     LibraryManager libraryManager =
-        new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions());
+        new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions(),
+            settings.getLibraryCache());
     libraryManager.getLibrarySourceLoader().clearProviders();
 
 

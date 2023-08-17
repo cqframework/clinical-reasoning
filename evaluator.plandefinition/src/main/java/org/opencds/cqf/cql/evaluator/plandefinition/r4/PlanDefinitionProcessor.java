@@ -376,6 +376,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       // }
       metConditions.put(action.getId(), action);
       var requestAction = createRequestAction(action);
+      resolveExtensions(requestAction.getExtension(), defaultLibraryUrl);
       if (action.hasAction()) {
         for (var containedAction : action.getAction()) {
           requestAction.addAction(

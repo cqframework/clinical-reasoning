@@ -10,6 +10,11 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 
+/*
+ * This is a utility class to help construct search maps, which are then passed into the Repository
+ * to perform a search. If you find that you have a certain type of search that you are repeating
+ * frequently consider adding it to this class.
+ */
 public class Searches {
 
   public static final Map<String, List<IQueryParameterType>> ALL = Collections.emptyMap();

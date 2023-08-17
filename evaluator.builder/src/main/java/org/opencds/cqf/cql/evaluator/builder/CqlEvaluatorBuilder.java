@@ -13,24 +13,23 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.cqframework.cql.elm.execution.Library;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.hl7.cql.model.NamespaceInfo;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PriorityTerminologyProvider;
@@ -64,7 +63,7 @@ public class CqlEvaluatorBuilder {
 
   private NpmProcessor npmProcessor;
 
-  private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> libraryCache;
+  private Map<org.hl7.elm.r1.VersionedIdentifier, CompiledLibrary> libraryCache;
 
   private RetrieveProviderConfig retrieveProviderConfig;
 
@@ -247,7 +246,7 @@ public class CqlEvaluatorBuilder {
    * @return this CqlEvaluatorBuilder
    */
   public CqlEvaluatorBuilder withLibraryCache(
-      Map<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> libraryCache) {
+      HashMap<org.hl7.elm.r1.VersionedIdentifier, CompiledLibrary> libraryCache) {
     this.libraryCache = libraryCache;
     return this;
   }
@@ -298,7 +297,7 @@ public class CqlEvaluatorBuilder {
     return dataProviders;
   }
 
-  private LibraryLoader buildLibraryLoader() {
+  private LibraryManager buildLibraryLoader() {
     Collections.reverse(this.librarySourceProviders);
     ModelManager modelManager = new ModelManager();
     // TODO: Would be good to plug this in through DI, but I ran into so many issues
@@ -313,24 +312,26 @@ public class CqlEvaluatorBuilder {
           new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
     }
 
-    // Put this after the NPM provider so that if an embedded library is found on
-    // the NPM pat, it will be used first
-    if (this.cqlOptions.useEmbeddedLibraries()) {
-      this.librarySourceProviders.add(new FhirLibrarySourceProvider());
+
+    var libraryManager =
+        new LibraryManager(modelManager, this.cqlOptions.getCqlCompilerOptions(), libraryCache);
+
+    var sourceLoader = libraryManager.getLibrarySourceLoader();
+    for (var p : this.librarySourceProviders) {
+      sourceLoader.registerProvider(p);
     }
 
-    var libraryLoader = new TranslatingLibraryLoader(modelManager,
-        librarySourceProviders, this.cqlOptions.getCqlTranslatorOptions(), this.libraryCache);
-
     if (this.namespaceInfo != null) {
-      libraryLoader.loadNamespaces(Collections.singletonList(this.namespaceInfo));
+      libraryManager.getNamespaceManager().addNamespace(namespaceInfo);
     }
 
     if (npmProcessor != null) {
-      libraryLoader.loadNamespaces(npmProcessor.getNamespaces());
+      for (var n : npmProcessor.getNamespaces()) {
+        libraryManager.getNamespaceManager().addNamespace(n);
+      }
     }
 
-    return libraryLoader;
+    return libraryManager;
   }
 
   private TerminologyProvider buildTerminologyProvider() {
@@ -366,7 +367,7 @@ public class CqlEvaluatorBuilder {
    *
    * @return a CqlEvaluator
    */
-  public CqlEvaluator build() {
+  public CqlEngine build() {
     if (this.stale) {
       throw new IllegalStateException(
           "This instance of the CqlEvaluatorBuilder has already been used. Please instantiate a new instance to create another CqlEvaluator.");
@@ -374,12 +375,11 @@ public class CqlEvaluatorBuilder {
 
     this.stale = true;
 
-    LibraryLoader libraryLoader = this.buildLibraryLoader();
+    LibraryManager libraryLoader = this.buildLibraryLoader();
     TerminologyProvider terminologyProvider = this.buildTerminologyProvider();
     Map<String, DataProvider> dataProviders = this.buildDataProviders(terminologyProvider);
 
-    return new CqlEvaluator(libraryLoader, dataProviders, terminologyProvider,
+    return new CqlEngine(new Environment(libraryLoader, dataProviders, terminologyProvider),
         this.cqlOptions.getCqlEngineOptions().getOptions());
   }
-
 }

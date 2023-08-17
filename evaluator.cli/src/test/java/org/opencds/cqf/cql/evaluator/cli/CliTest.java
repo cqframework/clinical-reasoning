@@ -269,7 +269,7 @@ public class CliTest {
 
     String errOutput = errContent.toString();
     assertTrue(errOutput.contains(
-        "org.opencds.cqf.cql.engine.exception.CqlException: Translation of library FluentFunctions failed with the following message: Feature Fluent functions was introduced in version 1.5 and so cannot be used at compatibility level 1.4"));
+        "library FluentFunctions loaded, but had errors"));
   }
 
   @Test

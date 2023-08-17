@@ -463,6 +463,7 @@ public class Dstu3MeasureReportBuilder
     } else if (measureDef.getDefaultMeasurementPeriod() != null) {
       report.setPeriod(getPeriod(measureDef.getDefaultMeasurementPeriod()));
     }
+
     report.setMeasure(new Reference(measure.getId()));
     report.setDate(new java.util.Date());
     report.setImplicitRules(measure.getImplicitRules());

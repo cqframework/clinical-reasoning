@@ -35,5 +35,17 @@
       <version>3.0.0-PRE6-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>model-jackson</artifactId>
+      <version>${cql.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>elm-jackson</artifactId>
+      <version>${cql.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

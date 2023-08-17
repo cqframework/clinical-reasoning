@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.library;
 
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 
 public class VersionedIdentifiers {
 

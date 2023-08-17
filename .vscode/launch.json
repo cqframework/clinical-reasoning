@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "PlanDefinitions",
+      "request": "launch",
+      "mainClass": "org.opencds.cqf.fhir.benchmark.PlanDefinitions",
+      "projectName": "cqf-fhir-benchmark"
+    },
+    {
+      "type": "java",
       "name": "TerminologyProviders",
       "request": "launch",
       "mainClass": "org.opencds.cqf.fhir.benchmark.TerminologyProviders",

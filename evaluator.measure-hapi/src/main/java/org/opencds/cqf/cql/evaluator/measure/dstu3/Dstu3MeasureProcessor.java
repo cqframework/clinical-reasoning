@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
@@ -73,9 +73,12 @@ public class Dstu3MeasureProcessor {
 
     var context = Contexts.forRepositoryAndSettings(
         this.measureEvaluationOptions.getEvaluationSettings(), this.repository,
-        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()),
         additionalData);
 
+    var lib = context.getEnvironment().getLibraryManager().resolveLibrary(
+        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
+
+    context.getState().init(lib.getLibrary());
     var evalType = MeasureEvalType.fromCode(reportType)
         .orElse(subjectIds == null || subjectIds.isEmpty() ? MeasureEvalType.POPULATION
             : MeasureEvalType.SUBJECT);

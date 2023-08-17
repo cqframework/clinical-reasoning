@@ -11,7 +11,7 @@ import javax.inject.Named;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -72,7 +72,7 @@ public class LibraryProcessor {
 
     if (!this.fhirModelResolverFactory.getModelUri().equals(Constants.FHIR_MODEL_URI)) {
       throw new IllegalArgumentException(
-          "fhirModelResolverFactory was a FHIR modelResolverFactory");
+          "fhirModelResolverFactory was not a FHIR modelResolverFactory");
     }
   }
 

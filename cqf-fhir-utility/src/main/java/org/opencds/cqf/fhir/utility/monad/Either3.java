@@ -17,7 +17,8 @@ public class Either3<L, M, R> {
   private final R right;
 
   Either3(L left, M middle, R right) {
-    checkArgument((left == null ^ middle == null) && (middle == null ^ right == null),
+    checkArgument(
+        left != null ^ middle != null ^ right != null,
         "left, middle, and right are mutually exclusive");
     this.left = left;
     this.middle = middle;
@@ -120,7 +121,7 @@ public class Either3<L, M, R> {
   }
 
   public <T> Either3<L, M, T> flatMap(
-      Function<? super R, Either3<L, M, ? extends T>> flatMapRight) {
+      Function<? super R, ? extends Either3<L, M, ? extends T>> flatMapRight) {
     checkNotNull(flatMapRight);
     if (isRight()) {
       return narrow(flatMapRight.apply(right()));

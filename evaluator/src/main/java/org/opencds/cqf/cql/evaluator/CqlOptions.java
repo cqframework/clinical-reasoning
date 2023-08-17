@@ -1,21 +1,22 @@
 package org.opencds.cqf.cql.evaluator;
 
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions.Options;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 
+// TODO: Migrate upstream to engine project. Or is it duplicated already?
 public class CqlOptions {
-  private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
+  private CqlCompilerOptions cqlCompilerOptions = CqlCompilerOptions.defaultOptions();
   private CqlEngineOptions cqlEngineOptions = CqlEngineOptions.defaultOptions();
   private boolean useEmbeddedLibraries = true;
 
-  public CqlTranslatorOptions getCqlTranslatorOptions() {
-    return this.cqlTranslatorOptions;
+  public CqlCompilerOptions getCqlCompilerOptions() {
+    return this.cqlCompilerOptions;
   }
 
-  public void setCqlTranslatorOptions(CqlTranslatorOptions cqlTranslatorOptions) {
-    this.cqlTranslatorOptions = cqlTranslatorOptions;
+  public void setCqlCompilerOptions(CqlCompilerOptions cqlCompilerOptions) {
+    this.cqlCompilerOptions = cqlCompilerOptions;
   }
 
   public CqlEngineOptions getCqlEngineOptions() {
@@ -36,9 +37,9 @@ public class CqlOptions {
 
   public static CqlOptions defaultOptions() {
     var opt = new CqlOptions();
-    opt.getCqlTranslatorOptions().setSignatureLevel(SignatureLevel.All);
-    opt.getCqlTranslatorOptions().getOptions().add(Options.EnableLocators);
-    opt.getCqlTranslatorOptions().getOptions().add(Options.EnableAnnotations);
+    opt.getCqlCompilerOptions().setSignatureLevel(SignatureLevel.All);
+    opt.getCqlCompilerOptions().getOptions().add(Options.EnableLocators);
+    opt.getCqlCompilerOptions().getOptions().add(Options.EnableAnnotations);
     return opt;
   }
 }

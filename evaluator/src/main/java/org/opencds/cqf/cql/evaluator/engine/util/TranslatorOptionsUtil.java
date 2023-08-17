@@ -6,13 +6,13 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions.Options;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
-import org.cqframework.cql.elm.execution.CqlToElmBase;
-import org.cqframework.cql.elm.execution.CqlToElmInfo;
-import org.cqframework.cql.elm.execution.Library;
+import org.hl7.cql_annotations.r1.CqlToElmBase;
+import org.hl7.cql_annotations.r1.CqlToElmInfo;
+import org.hl7.elm.r1.Library;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class TranslatorOptionsUtil {
    * @param library The library to extracts the options from.
    * @return The set of options used to translate the library.
    */
-  public static EnumSet<CqlTranslatorOptions.Options> getTranslatorOptions(Library library) {
+  public static EnumSet<CqlCompilerOptions.Options> getTranslatorOptions(Library library) {
     requireNonNull(library, "library can not be null");
     if (library.getAnnotation() == null || library.getAnnotation().isEmpty()) {
       return null;
@@ -44,9 +44,9 @@ public class TranslatorOptionsUtil {
     return parseTranslatorOptions(translatorOptions);
   }
 
-  public static EnumSet<CqlTranslatorOptions.Options> getTranslatorOptions(Library library,
+  public static EnumSet<CqlCompilerOptions.Options> getTranslatorOptions(Library library,
       boolean excludeOptional) {
-    EnumSet<CqlTranslatorOptions.Options> originalSet = getTranslatorOptions(library);
+    EnumSet<CqlCompilerOptions.Options> originalSet = getTranslatorOptions(library);
     if (originalSet != null && excludeOptional) {
       originalSet.removeAll(OPTIONAL_ENUM_SET);
     }
@@ -54,7 +54,7 @@ public class TranslatorOptionsUtil {
     return originalSet;
   }
 
-  public static final EnumSet<CqlTranslatorOptions.Options> OPTIONAL_ENUM_SET =
+  public static final EnumSet<CqlCompilerOptions.Options> OPTIONAL_ENUM_SET =
       EnumSet.of(Options.EnableAnnotations, Options.EnableLocators);
 
 
@@ -83,14 +83,14 @@ public class TranslatorOptionsUtil {
    * @param translatorOptions the string to parse
    * @return the set of options
    */
-  public static EnumSet<CqlTranslatorOptions.Options> parseTranslatorOptions(
+  public static EnumSet<CqlCompilerOptions.Options> parseTranslatorOptions(
       String translatorOptions) {
     if (translatorOptions == null) {
       return null;
     }
 
-    EnumSet<CqlTranslatorOptions.Options> optionSet =
-        EnumSet.noneOf(CqlTranslatorOptions.Options.class);
+    EnumSet<CqlCompilerOptions.Options> optionSet =
+        EnumSet.noneOf(CqlCompilerOptions.Options.class);
 
     if (translatorOptions.trim().isEmpty()) {
       return optionSet;
@@ -99,15 +99,15 @@ public class TranslatorOptionsUtil {
     String[] options = translatorOptions.trim().split(",");
 
     for (String option : options) {
-      optionSet.add(CqlTranslatorOptions.Options.valueOf(option));
+      optionSet.add(CqlCompilerOptions.Options.valueOf(option));
     }
 
     return optionSet;
   }
 
-  public static Set<CqlTranslatorOptions.Options> parseTranslatorOptions(
+  public static Set<CqlCompilerOptions.Options> parseTranslatorOptions(
       String translatorOptions, boolean excludeOptional) {
-    Set<CqlTranslatorOptions.Options> options = parseTranslatorOptions(translatorOptions);
+    Set<CqlCompilerOptions.Options> options = parseTranslatorOptions(translatorOptions);
     if (options != null && excludeOptional) {
       options.removeAll(OPTIONAL_ENUM_SET);
     }

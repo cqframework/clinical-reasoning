@@ -72,7 +72,11 @@ public class R4MeasureProcessor {
 
     var id = VersionedIdentifiers.forUrl(measure.getLibrary().get(0).asStringValue());
     var context = Contexts.forRepositoryAndSettings(
-        this.measureEvaluationOptions.getEvaluationSettings(), this.repository, id, additionalData);
+        this.measureEvaluationOptions.getEvaluationSettings(), this.repository, additionalData);
+
+    var lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
+
+    context.getState().init(lib.getLibrary());
 
     var evalType = MeasureEvalType.fromCode(reportType)
         .orElse(subjectIds == null || subjectIds.isEmpty() ? MeasureEvalType.POPULATION

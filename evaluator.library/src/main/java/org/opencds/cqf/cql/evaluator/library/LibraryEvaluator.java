@@ -6,25 +6,22 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.evaluator.CqlEvaluator;
 
 public class LibraryEvaluator {
 
-  // private static Logger logger =
-  // LoggerFactory.getLogger(LibraryEvaluator.class);
-
-  private CqlEvaluator cqlEvaluator;
+  private CqlEngine engine;
 
   private CqlFhirParametersConverter cqlFhirParametersConverter;
 
   public LibraryEvaluator(CqlFhirParametersConverter cqlFhirParametersConverter,
-      CqlEvaluator cqlEvaluator) {
+      CqlEngine engine) {
     this.cqlFhirParametersConverter =
         requireNonNull(cqlFhirParametersConverter, "cqlFhirParametersConverter can not be null");
-    this.cqlEvaluator = requireNonNull(cqlEvaluator, "cqlEvaluator can not be null");
+    this.engine = requireNonNull(engine, "engine can not be null");
   }
 
   /**
@@ -46,7 +43,7 @@ public class LibraryEvaluator {
     Map<String, Object> evaluationParameters =
         this.cqlFhirParametersConverter.toCqlParameters(parameters);
 
-    EvaluationResult result = this.cqlEvaluator.evaluate(libraryIdentifier, expressions,
+    EvaluationResult result = this.engine.evaluate(libraryIdentifier.getId(), expressions,
         contextParameter, evaluationParameters);
 
     return this.cqlFhirParametersConverter.toFhirParameters(result);

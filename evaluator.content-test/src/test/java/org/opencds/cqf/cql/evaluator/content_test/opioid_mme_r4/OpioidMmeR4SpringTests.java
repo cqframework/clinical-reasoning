@@ -6,7 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;

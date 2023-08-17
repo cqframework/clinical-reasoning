@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;

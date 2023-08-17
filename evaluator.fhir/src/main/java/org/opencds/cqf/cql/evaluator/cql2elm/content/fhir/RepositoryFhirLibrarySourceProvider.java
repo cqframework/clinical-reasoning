@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
@@ -48,12 +47,14 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
     return this.fhirContext;
   }
 
-  //TODO: add parameter to search for specific library instead of all libraries
+  // TODO: add parameter to search for specific library instead of all libraries
   @Override
   @SuppressWarnings("unchecked")
   protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
-    List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext, Repositories.searchRepositoryWithPaging(
-        fhirContext, repository, this.fhirContext.getResourceDefinition("Library").getImplementingClass(), null, null));
+    List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext,
+        Repositories.searchRepositoryWithPaging(
+            fhirContext, repository,
+            this.fhirContext.getResourceDefinition("Library").getImplementingClass(), null, null));
 
     if (resources == null || resources.isEmpty()) {
       return null;

@@ -16,7 +16,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
@@ -42,7 +41,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected final IFhirPath fhirPath;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
-  protected ExpressionEvaluator expressionEvaluator;
 
   protected String patientId;
   protected String encounterId;

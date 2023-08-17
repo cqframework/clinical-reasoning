@@ -81,7 +81,7 @@ public class Contexts {
         null);
   }
 
-  public static LibraryEvaluator forRepository(EvaluationSettings settings,
+  public static CqlEngine forRepository(EvaluationSettings settings,
       Repository repository,
       IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
       CqlFhirParametersConverter cqlFhirParametersConverter) {
@@ -101,10 +101,7 @@ public class Contexts {
     var environment =
         buildEnvironment(settings, librarySourceProviders, terminologyProvider, dataProviders);
 
-    var cqlEngine =
-        new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
-
-    return new LibraryEvaluator(cqlFhirParametersConverter, cqlEngine);
+    return new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
   private static LibrarySourceProvider buildLibrarySource(Repository repository) {

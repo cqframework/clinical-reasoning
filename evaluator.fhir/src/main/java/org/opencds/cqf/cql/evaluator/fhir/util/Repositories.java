@@ -6,8 +6,8 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.ProxyRepository;
-import org.opencds.cqf.fhir.utility.RestRepository;
+import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
+import org.opencds.cqf.fhir.utility.repository.RestRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;

@@ -19,7 +19,7 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.cql.evaluator.engine.util.ValueSetUtil;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Searches;
+import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

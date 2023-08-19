@@ -27,9 +27,9 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.FederatedRepository;
-import org.opencds.cqf.fhir.utility.Searches;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 @Named
 public class R4MeasureProcessor {

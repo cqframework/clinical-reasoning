@@ -61,7 +61,7 @@ public class LibraryConstructor {
 
     if (libraries != null) {
       for (Pair<String, String> library : libraries) {
-        VersionedIdentifier vi = getVersionedIdentifer(library.getLeft());
+        VersionedIdentifier vi = getVersionedIdentifier(library.getLeft());
         sb.append(String.format("include \"%s\"", vi.getId()));
         if (vi.getVersion() != null) {
           sb.append(String.format(" version '%s'", vi.getVersion()));
@@ -125,7 +125,7 @@ public class LibraryConstructor {
     }
   }
 
-  protected VersionedIdentifier getVersionedIdentifer(String url) {
+  protected VersionedIdentifier getVersionedIdentifier(String url) {
     if (!url.contains("/Library/")) {
       throw new IllegalArgumentException(
           "Invalid resource type for determining library version identifier: Library");

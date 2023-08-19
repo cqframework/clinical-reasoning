@@ -22,7 +22,6 @@
     <picocli.version>4.6.1</picocli.version>
     <slf4j.version>2.0.3</slf4j.version>
     <caffeine.version>2.9.0</caffeine.version>
-    <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <guava.version>31.0.1-jre</guava.version>
   </properties>
   <modules>
@@ -33,12 +32,7 @@
     <module>cqf-fhir-utility</module>
     <module>cqf-fhir-test</module>
     <module>cqf-fhir-cql</module>
-    <module>cqf-fhir-cql-dstu3</module>
-    <module>cqf-fhir-cql-r4</module>
-    <module>cqf-fhir-cql-r5</module>
-    <module>cqf-fhir-elm</module>
     <module>cqf-fhir-cr</module>
-    <module>cqf-fhir-cdshooks</module>
     <module>cqf-fhir-bom</module>
     <!-- doesn't publish a module, but ensures documentation snippets build correctly -->
     <module>docs</module>
@@ -46,7 +40,6 @@
     <!-- old modules we are replacing -->
     <module>evaluator</module>
     <module>evaluator.fhir</module>
-    <module>evaluator.fhir-npm</module>
     <module>evaluator.library</module>
     <module>evaluator.builder</module>
     <module>evaluator.spring</module>
@@ -56,6 +49,7 @@
     <module>evaluator.measure-hapi</module>
     <module>evaluator.activitydefinition</module>
     <module>evaluator.plandefinition</module>
+    <module>evaluator.expression</module>
     <module>evaluator.questionnaireresponse</module>
     <module>evaluator.questionnaire</module>
   </modules>
@@ -367,14 +361,6 @@
         <version>1.5.1</version>
         <scope>test</scope>
       </dependency>
-
-      <!-- Library mapper code gen-->
-      <dependency>
-        <groupId>org.mapstruct</groupId>
-        <artifactId>mapstruct</artifactId>
-        <version>${org.mapstruct.version}</version>
-      </dependency>
-
     </dependencies>
   </dependencyManagement>
 

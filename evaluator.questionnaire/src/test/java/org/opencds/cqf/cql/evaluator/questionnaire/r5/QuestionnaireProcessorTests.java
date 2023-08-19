@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.Repositories;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;

@@ -6,7 +6,7 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.stringPar
 import java.util.List;
 
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.Repositories;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;

@@ -4,10 +4,12 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -15,12 +17,15 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
@@ -36,17 +41,14 @@ public class LibraryEngine {
   protected final IFhirPath fhirPath;
   protected final ModelResolver modelResolver;
   protected final EvaluationSettings settings;
-  protected final CqlFhirParametersConverter converter;
 
-  public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings,
-      CqlFhirParametersConverter converter) {
+  public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
     this.repository = requireNonNull(repository, "repository can not be null");
     this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     fhirContext = repository.fhirContext();
     fhirPath = FhirPathCache.cachedForContext(fhirContext);
     modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
-    this.converter = converter;
   }
 
   private Pair<String, Object> buildContextParameter(String thePatientId) {
@@ -69,36 +71,30 @@ public class LibraryEngine {
 
   public IBaseParameters evaluate(VersionedIdentifier theId, String thePatientId,
       IBaseParameters theParameters, IBaseBundle theAdditionalData, Set<String> theExpressions) {
-    var engine =
-        Contexts.forRepository(settings, repository, theAdditionalData, null, this.converter);
+    var libraryEvaluator = Contexts.forRepository(settings, repository, theAdditionalData);
 
-    var result = engine.evaluate(theId, theExpressions, buildContextParameter(thePatientId),
-        this.converter.toCqlParameters(theParameters), null);
-
-    return this.converter.toFhirParameters(result);
+    return libraryEvaluator.evaluate(theId, buildContextParameter(thePatientId), theParameters,
+        theExpressions);
   }
 
   public IBaseParameters evaluateExpression(String theExpression, IBaseParameters theParameters,
       String thePatientId, List<Pair<String, String>> theLibraries, IBaseBundle theBundle) {
-    // var libraryConstructor = new LibraryConstructor(fhirContext);
-    // var cqlFhirParametersConverter = Contexts.getCqlFhirParametersConverter(fhirContext);
-    // var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(theParameters);
-    // var cql = libraryConstructor.constructCqlLibrary(theExpression, theLibraries, cqlParameters);
+    var libraryConstructor = new LibraryConstructor(fhirContext);
+    var cqlFhirParametersConverter = Contexts.getCqlFhirParametersConverter(fhirContext);
+    var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(theParameters);
+    var cql = libraryConstructor.constructCqlLibrary(theExpression, theLibraries, cqlParameters);
 
-    // Set<String> expressions = new HashSet<>();
-    // expressions.add("return");
+    Set<String> expressions = new HashSet<>();
+    expressions.add("return");
 
-    // List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-    // librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
-    // var libraryEvaluator = Contexts.forRepository(settings, repository, theBundle,
-    // librarySourceProviders, cqlFhirParametersConverter);
+    List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
+    librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
+    var libraryEvaluator = Contexts.forRepository(settings, repository, theBundle,
+        librarySourceProviders, cqlFhirParametersConverter);
 
-    // return libraryEvaluator.evaluate(
-    // new VersionedIdentifier().withId("expression").withVersion("1.0.0"),
-    // buildContextParameter(thePatientId), theParameters, expressions);
-
-    var expEngine = new ExpressionEngine(repository, converter, settings);
-    return expEngine.evaluate(theExpression, thePatientId, theLibraries, theParameters);
+    return libraryEvaluator.evaluate(
+        new VersionedIdentifier().withId("expression").withVersion("1.0.0"),
+        buildContextParameter(thePatientId), theParameters, expressions);
   }
 
   public List<IBase> getExpressionResult(String theSubjectId, String theSubjectType,

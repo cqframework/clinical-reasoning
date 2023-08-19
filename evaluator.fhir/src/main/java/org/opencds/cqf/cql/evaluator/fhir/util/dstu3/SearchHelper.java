@@ -11,7 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Searches;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 

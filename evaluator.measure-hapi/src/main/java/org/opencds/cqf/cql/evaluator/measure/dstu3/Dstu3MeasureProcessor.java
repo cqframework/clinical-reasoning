@@ -24,7 +24,7 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureReportType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 
 @Named
 public class Dstu3MeasureProcessor {

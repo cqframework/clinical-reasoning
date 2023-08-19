@@ -41,26 +41,6 @@
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cql-dstu3</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cql-r4</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cql-r5</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-elm</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-jackson</artifactId>
         <version>${project.version}</version>
         <type>pom</type>
@@ -74,11 +54,6 @@
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cdshooks</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

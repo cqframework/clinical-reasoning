@@ -40,22 +40,6 @@
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-cql-dstu3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-cql-r4</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-cql-r5</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-elm</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cr</artifactId>
     </dependency>
     <dependency>

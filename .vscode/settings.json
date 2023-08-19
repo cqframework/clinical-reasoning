@@ -26,6 +26,7 @@
     "Fhir",
     "fhirpath",
     "Gson",
+    "hamcrest",
     "helloworld",
     "INITIALPOPULATION",
     "INPROGRESS",

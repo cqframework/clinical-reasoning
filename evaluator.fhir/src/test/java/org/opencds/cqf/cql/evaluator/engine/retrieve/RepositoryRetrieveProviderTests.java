@@ -26,7 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class RepositoryRetrieveProviderTests {
 
-  private RepositoryRetrieveProvider getRepositoryRetrieveProvider() {
+  private RepositoryRetrieveProvider getBundleRetrieveProvider() {
     return this.getRepositoryRetrieveProvider(null);
   }
 
@@ -43,7 +43,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test
   public void test_noResults_returnsEmptySet() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
     Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null,
         null, null, null, null, null, null);
@@ -54,7 +54,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test
   public void test_filterToDataType() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
     Iterable<Object> results = retrieve.retrieve(null, null, null, "Patient", null, null, null,
         null, null, null, null, null);
@@ -66,7 +66,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test
   public void test_filterToDataType_dataTypeNotPresent() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
     Iterable<Object> results = retrieve.retrieve(null, null, null, "PlanDefinition", null, null,
         null, null, null, null, null, null);
@@ -77,7 +77,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test
   public void test_filterToContext() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
     Iterable<Object> results = retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition",
         null, null, null, null, null, null, null, null);
@@ -91,7 +91,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test
   public void test_filterToContext_noContextRelation() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
     Iterable<Object> results = retrieve.retrieve("Patient", null, "test-one-r4", "Medication", null,
         null, null, null, null, null, null, null);
@@ -106,7 +106,7 @@ public class RepositoryRetrieveProviderTests {
   @Test
   @SuppressWarnings("unchecked")
   public void test_filterById() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider().setFilterBySearchParam(false);
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider().setFilterBySearchParam(false);
 
     // Id does exist
     Iterable<Code> codes = (Iterable<Code>) (Iterable<?>) Collections.singletonList("test-med");
@@ -126,7 +126,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test
   public void test_filterToCodes() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider();
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider();
 
     // Code doesn't match
     Code code = new Code().withCode("not-a-code").withSystem("not-a-system");
@@ -151,7 +151,7 @@ public class RepositoryRetrieveProviderTests {
 
   @Test(expectedExceptions = IllegalStateException.class)
   public void test_filterToValueSet_noTerminologyProvider() {
-    RetrieveProvider retrieve = this.getRepositoryRetrieveProvider().setFilterBySearchParam(false);
+    RetrieveProvider retrieve = this.getBundleRetrieveProvider().setFilterBySearchParam(false);
 
     retrieve.retrieve("Patient", "subject", "test-one-r4", "Condition", null, "code", null,
         "value-set-url", null, null, null, null);

@@ -23,7 +23,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Searches;
+import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,8 +126,7 @@ public class QuestionnaireItemGenerator {
       List<ElementDefinition> elements,
       StructureDefinition profile,
       Questionnaire.QuestionnaireItemComponent item,
-      List<String> paths
-  ) {
+      List<String> paths) {
     var childCount = item.getItem().size();
     for (var element : elements) {
       var elementType = getElementType(element);

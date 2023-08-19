@@ -21,11 +21,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class Libraries {
 
+  private Libraries() {
+    // intentionally empty
+  }
+
   private static final Map<FhirVersionEnum, LibraryFunctions> cachedFunctions =
       new ConcurrentHashMap<>();
   private static final String LIBRARY_RESOURCE_TYPE = "Library";
-
-  private Libraries() {}
 
   /**
    * Creates the appropriate content for a given library, library function and content type
@@ -77,8 +79,12 @@ public class Libraries {
     Class<? extends IBaseResource> libraryClass =
         fhirContext.getResourceDefinition(LIBRARY_RESOURCE_TYPE).getImplementingClass();
     Function<IBase, List<IBase>> attachments = Reflections.getFunction(libraryClass, "content");
+
+    @SuppressWarnings("null")
     Function<IBase, String> contentType = Reflections.getPrimitiveFunction(
         fhirContext.getElementDefinition("Attachment").getImplementingClass(), "contentType");
+
+    @SuppressWarnings("null")
     Function<IBase, byte[]> content = Reflections.getPrimitiveFunction(
         fhirContext.getElementDefinition("Attachment").getImplementingClass(), "data");
     Function<IBase, String> version = Reflections.getVersionFunction(libraryClass);

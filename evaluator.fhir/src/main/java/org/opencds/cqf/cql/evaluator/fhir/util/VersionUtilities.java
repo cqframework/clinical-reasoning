@@ -4,6 +4,10 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class VersionUtilities {
 
+  private VersionUtilities() {
+    // intentionally empty
+  }
+
   /**
    * Returns a FhirVersionEnum for the supplied version string. Supports partial versions (e.g.
    * "3.0") and named versions (e.g. "R4")
@@ -20,6 +24,7 @@ public class VersionUtilities {
     try {
       return FhirVersionEnum.valueOf(fhirVersion.toUpperCase());
     } catch (Exception e) {
+      // intentionally empty, we want to fall through
     }
 
     // This matches specific FHIR versions that match the structure versions

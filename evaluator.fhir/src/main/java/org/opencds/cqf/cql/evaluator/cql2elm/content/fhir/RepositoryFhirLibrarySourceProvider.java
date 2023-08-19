@@ -29,14 +29,6 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
     this.fhirContext = repository.fhirContext();
     this.libraryVersionSelector =
         requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
-
-    // todo: need to match version
-    // if
-    // (!this.repository..getStructureFhirVersionEnum().equals(fhirContext.getVersion().getVersion()))
-    // {
-    // throw new IllegalArgumentException("the FHIR versions of bundle and fhirContext must
-    // match");
-    // }
   }
 
   protected Repository getRepository() {
@@ -49,7 +41,6 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
 
   // TODO: add parameter to search for specific library instead of all libraries
   @Override
-  @SuppressWarnings("unchecked")
   protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
     List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext,
         Repositories.searchRepositoryWithPaging(

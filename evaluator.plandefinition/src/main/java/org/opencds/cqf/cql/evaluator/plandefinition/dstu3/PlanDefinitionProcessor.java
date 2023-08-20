@@ -54,6 +54,7 @@ import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
@@ -695,6 +696,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
       var resources = repository.search(Bundle.class, IBaseResource.class, Searches.ALL);
 
+      var ee = new ExpressionEngine(repository, evaluationSettings);
+
       if (resources.hasEntry()) {
         var found = true;
         for (var resource : resources.getEntry().stream().map(e -> e.getResource())
@@ -715,7 +718,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                       "%" + String.format("resource.%s.where(code.memberOf('%s'))",
                           filter.getPath(), "%valueset");
                   var codeFilterResult =
-                      expressionEvaluator.evaluate(codeFilterExpression, codeFilterParam);
+                      ee.evaluate(codeFilterExpression, codeFilterParam);
                   var tempResult =
                       operationParametersParser.getValueChild((codeFilterResult), "return");
                   if (tempResult instanceof BooleanType) {

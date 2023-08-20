@@ -2,9 +2,6 @@ package org.opencds.cqf.cql.evaluator.spring;
 
 import static org.testng.Assert.assertNotNull;
 
-import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
-import org.opencds.cqf.cql.evaluator.expression.ExpressionEvaluator;
-import org.opencds.cqf.cql.evaluator.library.LibraryProcessor;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.spring.configuration.TestConfigurationR4;
 import org.springframework.test.context.ContextConfiguration;
@@ -18,25 +15,5 @@ public class CqlEvaluatorR4Test extends AbstractTestNGSpringContextTests {
   public void canInstantiateMeasureProcessor() {
     R4MeasureProcessor measureProcessor = this.applicationContext.getBean(R4MeasureProcessor.class);
     assertNotNull(measureProcessor);
-  }
-
-  @Test
-  public void canInstantiateLibraryProcessor() {
-    LibraryProcessor libraryProcessor = this.applicationContext.getBean(LibraryProcessor.class);
-    assertNotNull(libraryProcessor);
-  }
-
-  @Test
-  public void canInstantiateExpressionEvaluator() {
-    ExpressionEvaluator expressionEvaluator =
-        this.applicationContext.getBean(ExpressionEvaluator.class);
-    assertNotNull(expressionEvaluator);
-  }
-
-  @Test
-  public void canInstantiateBuilder() {
-    CqlEvaluatorBuilder evaluatorBuilder =
-        this.applicationContext.getBean(CqlEvaluatorBuilder.class);
-    assertNotNull(evaluatorBuilder);
   }
 }

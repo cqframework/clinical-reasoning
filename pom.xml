@@ -28,14 +28,15 @@
     <!-- new modules we are building -->
     <module>cqf-fhir</module>
     <module>cqf-fhir-api</module>
-    <module>cqf-fhir-benchmark</module>
     <module>cqf-fhir-utility</module>
     <module>cqf-fhir-test</module>
     <module>cqf-fhir-cql</module>
     <module>cqf-fhir-cr</module>
     <module>cqf-fhir-bom</module>
+
     <!-- doesn't publish a module, but ensures documentation snippets build correctly -->
     <module>docs</module>
+    <module>cqf-fhir-benchmark</module>
 
     <!-- old modules we are replacing -->
     <module>evaluator</module>
@@ -44,12 +45,10 @@
     <module>evaluator.builder</module>
     <module>evaluator.spring</module>
     <module>evaluator.cli</module>
-    <module>evaluator.content-test</module>
     <module>evaluator.measure</module>
     <module>evaluator.measure-hapi</module>
     <module>evaluator.activitydefinition</module>
     <module>evaluator.plandefinition</module>
-    <module>evaluator.expression</module>
     <module>evaluator.questionnaireresponse</module>
     <module>evaluator.questionnaire</module>
   </modules>

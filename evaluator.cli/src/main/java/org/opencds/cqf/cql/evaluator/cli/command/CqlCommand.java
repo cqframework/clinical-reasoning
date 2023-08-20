@@ -20,7 +20,6 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
@@ -30,7 +29,6 @@ import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactor
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.terminology.FhirFileTerminologyProviderFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
@@ -122,7 +120,6 @@ public class CqlCommand implements Callable<Integer> {
   }
 
   private Map<String, LibrarySourceProvider> librarySourceProviderIndex = new HashMap<>();
-  private Map<String, TerminologyProvider> terminologyProviderIndex = new HashMap<>();
 
   private class Logger implements IWorkerContext.ILoggingService {
 
@@ -202,17 +199,18 @@ public class CqlCommand implements Callable<Integer> {
 
       cqlEvaluatorBuilder.withLibrarySourceProvider(librarySourceProvider);
 
-      if (library.terminologyUrl != null) {
-        TerminologyProvider terminologyProvider =
-            this.terminologyProviderIndex.get(library.terminologyUrl);
-        if (terminologyProvider == null) {
-          terminologyProvider = createTerminologyProviderFactory(fhirContext)
-              .create(new EndpointInfo().setAddress(library.terminologyUrl));
-          this.terminologyProviderIndex.put(library.terminologyUrl, terminologyProvider);
-        }
+      // TODO: Replace with FileRepoository and proxied terminology provider
+      // if (library.terminologyUrl != null) {
+      // TerminologyProvider terminologyProvider =
+      // this.terminologyProviderIndex.get(library.terminologyUrl);
+      // if (terminologyProvider == null) {
+      // terminologyProvider = createTerminologyProviderFactory(fhirContext)
+      // .create(new EndpointInfo().setAddress(library.terminologyUrl));
+      // this.terminologyProviderIndex.put(library.terminologyUrl, terminologyProvider);
+      // }
 
-        cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
-      }
+      // cqlEvaluatorBuilder.withTerminologyProvider(terminologyProvider);
+      // }
 
       DataProviderComponents dataProvider = null;
       DataProviderFactory dataProviderFactory = createDataProviderFactory(fhirContext);
@@ -259,13 +257,6 @@ public class CqlCommand implements Callable<Integer> {
         Set.of(new FhirFileLibrarySourceProviderFactory(fhirContext, db, af, lvs),
             new CqlFileLibrarySourceProviderFactory()),
         lvs);
-  }
-
-  private org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory createTerminologyProviderFactory(
-      FhirContext fhirContext) {
-    return new org.opencds.cqf.cql.evaluator.builder.terminology.TerminologyProviderFactory(
-        fhirContext,
-        Set.of(new FhirFileTerminologyProviderFactory(fhirContext, directoryBundler(fhirContext))));
   }
 
   private org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory createDataProviderFactory(

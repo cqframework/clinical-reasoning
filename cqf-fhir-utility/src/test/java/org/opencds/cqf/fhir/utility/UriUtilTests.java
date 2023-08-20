@@ -1,9 +1,10 @@
-package org.opencds.cqf.cql.evaluator.builder.util;
+package org.opencds.cqf.fhir.utility;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 public class UriUtilTests {
   @Test

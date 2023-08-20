@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.builder.util;
+package org.opencds.cqf.fhir.utility;
 
 public class UriUtil {
   private UriUtil() {}

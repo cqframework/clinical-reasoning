@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.builder.data;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.cql.evaluator.builder.util.UriUtil.isFileUri;
+import static org.opencds.cqf.fhir.utility.UriUtil.isFileUri;
 
 import java.util.List;
 import java.util.Set;

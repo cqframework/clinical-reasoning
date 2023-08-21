@@ -1,9 +1,10 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r5;
 
 import static org.opencds.cqf.cql.evaluator.fhir.util.r5.SearchHelper.searchRepositoryByCanonical;
+import static org.opencds.cqf.cql.evaluator.questionnaire.r5.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
@@ -14,10 +15,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
-import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.hl7.fhir.r5.model.Expression;
@@ -29,11 +28,10 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
+import org.opencds.cqf.cql.evaluator.fhir.helper.r5.PackageHelper;
+import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
@@ -78,9 +76,10 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     this.parameters = parameters;
     this.bundle = bundle;
     this.libraryEngine = libraryEngine;
-    libraryUrl =
-        ((CanonicalType) questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY).getValue())
-            .getValue();
+    libraryUrl = questionnaire.hasExtension(Constants.CQF_LIBRARY)
+        ? ((CanonicalType) questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY).getValue())
+            .getValue()
+        : null;
     populatedQuestionnaire = questionnaire.copy();
 
     populatedQuestionnaire.setId(questionnaire.getIdPart() + "-" + patientId);
@@ -101,48 +100,33 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return populatedQuestionnaire;
   }
 
-  private boolean verifyLibraryUrlForItemExpression(String url, String expression,
-      String itemLinkId) {
-    if (url == null || url.isEmpty()) {
+  private List<IBase> getExpressionResult(Expression expression, String itemLinkId,
+      IBase populationContext) {
+    if (expression == null || !expression.hasExpression()) {
+      return null;
+    }
+    try {
+      var subjectId = patientId;
+      var expressionSubjectType = subjectType;
+      if (populationContext != null && !populationContext.isEmpty()) {
+        subjectId = ((Resource) populationContext).getIdPart();
+        expressionSubjectType = ((Resource) populationContext).fhirType();
+      }
+      return libraryEngine.resolveExpression(subjectId, expressionSubjectType,
+          new CqfExpression(expression, libraryUrl, null),
+          parameters, bundle);
+    } catch (Exception ex) {
       var message =
-          String.format("No library specified for expression (%s) for item (%s)",
-              expression, itemLinkId);
+          String.format(
+              "Error encountered evaluating expression (%s) for item (%s): %s",
+              expression.getExpression(), itemLinkId, ex.getMessage());
       logger.error(message);
       oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
           .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-      return false;
-    }
-    return true;
-  }
-
-  private List<IBase> getExpressionResult(Expression expression, String itemLinkId,
-      IBase populationContext) {
-    var expressionLibrary =
-        expression.hasReference() ? expression.getReference() : libraryUrl;
-    if (verifyLibraryUrlForItemExpression(expressionLibrary, expression.getExpression(),
-        itemLinkId)) {
-      try {
-        var subjectId = patientId;
-        var expressionSubjectType = subjectType;
-        if (populationContext != null && !populationContext.isEmpty()) {
-          subjectId = ((Resource) populationContext).getIdPart();
-          expressionSubjectType = ((Resource) populationContext).fhirType();
-        }
-        return libraryEngine.getExpressionResult(subjectId, expressionSubjectType,
-            expression.getExpression(), expression.getLanguage(), expressionLibrary,
-            parameters, bundle);
-      } catch (Exception ex) {
-        var message =
-            String.format(
-                "Error encountered evaluating expression (%s) for item (%s): %s",
-                expression.getExpression(), itemLinkId, ex.getMessage());
-        logger.error(message);
-        oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-            .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-      }
     }
 
     return null;
+
   }
 
   private Expression getInitialExpression(QuestionnaireItemComponent item) {
@@ -154,12 +138,6 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     }
 
     return null;
-  }
-
-  private DataType transformInitial(IBase value) {
-    return ((DataType) value).fhirType().equals("CodeableConcept")
-        ? ((CodeableConcept) value).getCodingFirstRep()
-        : (DataType) value;
   }
 
   private void getInitial(QuestionnaireItemComponent item, IBase populationContext) {
@@ -177,7 +155,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             item.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
                 new Reference(Constants.CQL_ENGINE_DEVICE));
             item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent()
-                .setValue(transformInitial(result)));
+                .setValue(transformValue((DataType) result)));
           }
         }
       }
@@ -191,6 +169,9 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT).getValue();
     var populationContext =
         getExpressionResult(contextExpression, groupItem.getLinkId(), null);
+    if (populationContext == null || populationContext.isEmpty()) {
+      return Collections.singletonList(groupItem.copy());
+    }
     for (var context : populationContext) {
       var contextItem = groupItem.copy();
       for (var item : contextItem.getItem()) {
@@ -203,7 +184,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             item.addExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR,
                 new Reference(Constants.CQL_ENGINE_DEVICE));
             item.addInitial(new Questionnaire.QuestionnaireItemInitialComponent()
-                .setValue(transformInitial(initialProperty.getValues().get(0))));
+                .setValue(transformValue((DataType) initialProperty.getValues().get(0))));
           }
         }
       }
@@ -273,9 +254,11 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
               .addExtension(item.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
         }
         item.getInitial()
-            .forEach(answer -> responseItem
-                .addAnswer(new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-                    .setValue(answer.getValue())));
+            .forEach(initial -> {
+              var answer = new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                  .setValue(initial.getValue());
+              responseItem.addAnswer(answer);
+            });
       }
       responseItems.add(responseItem);
     });
@@ -290,48 +273,20 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return questionnaire;
   }
 
-  private static List<String> packableResources = Arrays.asList(FHIRTypes.LIBRARY.toCode(),
-      FHIRTypes.CODESYSTEM.toCode(), FHIRTypes.VALUESET.toCode());
-
-  private void addRelatedArtifacts(Bundle theBundle, List<RelatedArtifact> theArtifacts) {
-    for (var artifact : theArtifacts) {
-      if (artifact.getType().equals(RelatedArtifactType.DEPENDSON)
-          && artifact.hasResourceElement()) {
-        try {
-          var canonical = artifact.getResourceElement();
-          if (packableResources.contains(Canonicals.getResourceType(canonical))) {
-            var resource = searchRepositoryByCanonical(repository, artifact.getResourceElement());
-            if (resource != null
-                && theBundle.getEntry().stream()
-                    .noneMatch(
-                        e -> e.getResource().getIdElement().equals(resource.getIdElement()))) {
-              theBundle.addEntry(new BundleEntryComponent().setResource(resource));
-              if (resource.fhirType().equals(FHIRTypes.LIBRARY.toCode())
-                  && ((Library) resource).hasRelatedArtifact()) {
-                addRelatedArtifacts(theBundle, ((Library) resource).getRelatedArtifact());
-              }
-            }
-          }
-        } catch (Exception e) {
-          logger.error(e.getMessage(), e);
-        }
-      }
-    }
-  }
-
   @Override
   public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean theIsPut) {
     var bundle = new Bundle();
-    bundle.setType(BundleType.COLLECTION);
-    bundle.addEntry(new BundleEntryComponent().setResource(theQuestionnaire));
+    bundle.setType(BundleType.TRANSACTION);
+    bundle.addEntry(PackageHelper.createEntry(theQuestionnaire, theIsPut));
     var libraryExtension = theQuestionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
     if (libraryExtension != null) {
       var libraryCanonical = (CanonicalType) libraryExtension.getValue();
       var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
       if (library != null) {
-        bundle.addEntry(new BundleEntryComponent().setResource(library));
+        bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
         if (library.hasRelatedArtifact()) {
-          addRelatedArtifacts(bundle, library.getRelatedArtifact());
+          PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository,
+              theIsPut);
         }
       }
     }

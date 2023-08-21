@@ -5,6 +5,11 @@
     {
       "resourceType": "RequestGroup",
       "id": "AncVisit-PlanDefinition",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+        ]
+      },
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/AncVisit-PlanDefinition"
       ],
@@ -76,6 +81,7 @@
           "valueString": "ready"
         }
       ],
+      "instantiatesCanonical": "ActivityDefinition/careplan-activity",
       "basedOn": [
         {
           "reference": "#RequestGroup/AncVisit-PlanDefinition",

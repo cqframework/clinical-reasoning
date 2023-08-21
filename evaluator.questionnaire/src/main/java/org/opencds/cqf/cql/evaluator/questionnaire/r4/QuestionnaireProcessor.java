@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
+import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
@@ -99,45 +100,29 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return populatedQuestionnaire;
   }
 
-  private boolean verifyLibraryUrlForItemExpression(String url, String expression,
-      String itemLinkId) {
-    if (url == null || url.isEmpty()) {
+  private List<IBase> getExpressionResult(Expression expression, String itemLinkId,
+      IBase populationContext) {
+    if (expression == null || !expression.hasExpression()) {
+      return null;
+    }
+    try {
+      var subjectId = patientId;
+      var expressionSubjectType = subjectType;
+      if (populationContext != null && !populationContext.isEmpty()) {
+        subjectId = ((Resource) populationContext).getIdPart();
+        expressionSubjectType = ((Resource) populationContext).fhirType();
+      }
+      return libraryEngine.resolveExpression(subjectId, expressionSubjectType,
+          new CqfExpression(expression, libraryUrl, null),
+          parameters, bundle);
+    } catch (Exception ex) {
       var message =
-          String.format("No library specified for expression (%s) for item (%s)",
-              expression, itemLinkId);
+          String.format(
+              "Error encountered evaluating expression (%s) for item (%s): %s",
+              expression.getExpression(), itemLinkId, ex.getMessage());
       logger.error(message);
       oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
           .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-      return false;
-    }
-    return true;
-  }
-
-  private List<IBase> getExpressionResult(Expression expression, String itemLinkId,
-      IBase populationContext) {
-    var expressionLibrary =
-        expression.hasReference() ? expression.getReference() : libraryUrl;
-    if (verifyLibraryUrlForItemExpression(expressionLibrary, expression.getExpression(),
-        itemLinkId)) {
-      try {
-        var subjectId = patientId;
-        var expressionSubjectType = subjectType;
-        if (populationContext != null && !populationContext.isEmpty()) {
-          subjectId = ((Resource) populationContext).getIdPart();
-          expressionSubjectType = ((Resource) populationContext).fhirType();
-        }
-        return libraryEngine.getExpressionResult(subjectId, expressionSubjectType,
-            expression.getExpression(), expression.getLanguage(), expressionLibrary,
-            parameters, bundle);
-      } catch (Exception ex) {
-        var message =
-            String.format(
-                "Error encountered evaluating expression (%s) for item (%s): %s",
-                expression.getExpression(), itemLinkId, ex.getMessage());
-        logger.error(message);
-        oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-            .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-      }
     }
 
     return null;

@@ -7,6 +7,11 @@
       "resource": {
         "resourceType": "RequestGroup",
         "id": "opioidcds-10-patient-view",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+          ]
+        },
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view|2022.1.0"
         ],
@@ -114,6 +119,9 @@
       "resource": {
         "resourceType": "ServiceRequest",
         "id": "opioidcds-urine-screening-request",
+        "instantiatesCanonical": [
+          "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/opioidcds-urine-screening-request"
+        ],
         "status": "draft",
         "intent": "order",
         "priority": "urgent",

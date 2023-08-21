@@ -73,7 +73,7 @@ public class R5FhirModelResolver extends
     // This forces all Resource types to be loaded.
 
     // force calling of validateInitialized();
-    this.fhirContext.getResourceDefinition(Enumerations.AllResourceTypes.ACCOUNT.toCode());
+    this.fhirContext.getResourceDefinition(Enumerations.FHIRTypes.ACCOUNT.toCode());
 
     Map<String, Class<? extends IBaseResource>> myNameToResourceType;
     try {
@@ -84,7 +84,7 @@ public class R5FhirModelResolver extends
       List<Class<? extends IBaseResource>> toLoad =
           new ArrayList<Class<? extends IBaseResource>>(myNameToResourceType.size());
 
-      for (Enumerations.AllResourceTypes type : Enumerations.AllResourceTypes.values()) {
+      for (Enumerations.FHIRTypes type : Enumerations.FHIRTypes.values()) {
         // These are abstract types that should never be resolved directly.
         switch (type) {
           case DOMAINRESOURCE:

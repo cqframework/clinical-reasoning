@@ -9,13 +9,8 @@
   "authored": "2021-12-01",
   "item": [
     {
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-          "valueCode": "Organization"
-        }
-      ],
       "linkId": "1",
+      "definition": "http://hl7.org/fhir/Organization",
       "text": "Facility Information",
       "item": [
         {
@@ -48,13 +43,8 @@
       ]
     },
     {
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-          "valueCode": "Patient"
-        }
-      ],
       "linkId": "2",
+      "definition": "http://hl7.org/fhir/Patient",
       "text": "Beneficiary Information",
       "item": [
         {

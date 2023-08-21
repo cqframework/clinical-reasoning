@@ -25,6 +25,15 @@ public class Searches {
     return new SearchBuilder();
   }
 
+  public static Map<String, List<IQueryParameterType>> byCanonical(String canonical) {
+    if (canonical.contains("|")) {
+      var split = canonical.split("|");
+      return byUrlAndVersion(split[0], split[1]);
+    } else {
+      return byUrl(canonical);
+    }
+  }
+
   public static Map<String, List<IQueryParameterType>> byUrl(String url) {
     return builder().withUriParam("url", url).build();
   }

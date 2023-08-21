@@ -44,7 +44,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected static final String subjectType = "Patient";
   protected static final List<String> EXCLUDED_EXTENSION_LIST = Arrays
       .asList(Constants.CPG_KNOWLEDGE_CAPABILITY, Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL,
-          Constants.CQFM_SOFTWARE_SYSTEM, Constants.CPG_QUESTIONNAIRE_GENERATE);
+          Constants.CQFM_SOFTWARE_SYSTEM, Constants.CPG_QUESTIONNAIRE_GENERATE,
+          Constants.CQFM_LOGIC_DEFINITION, Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
 
   protected final OperationParametersParser operationParametersParser;
   protected final ModelResolver modelResolver;

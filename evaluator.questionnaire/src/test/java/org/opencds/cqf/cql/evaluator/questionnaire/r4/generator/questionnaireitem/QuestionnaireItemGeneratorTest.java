@@ -131,7 +131,7 @@ class QuestionnaireItemGeneratorTest {
         any(StructureDefinition.class),
         any(ElementDefinition.class),
         anyInt(),
-        null);
+        any());
     doReturn(expectedElements).when(myFixture).getElementsWithNonNullElementType(profile);
     // execute
     myFixture.processElements(profile);

@@ -66,9 +66,10 @@
         ],
         "action": [
           {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",
+                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter",
                 "valueString": "ClaimId"
               },
               {
@@ -93,7 +94,7 @@
         "status": "draft",
         "description": "Create a task to complete a Questionnaire.",
         "library": [],
-        "kind": "RequestOrchestration",
+        "kind": "Task",
         "productCodeableConcept": {
           "coding": [
             {

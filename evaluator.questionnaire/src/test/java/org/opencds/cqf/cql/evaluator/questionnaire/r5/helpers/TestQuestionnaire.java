@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r5;
+package org.opencds.cqf.cql.evaluator.questionnaire.r5.helpers;
 
 import static org.testng.Assert.fail;
 
@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.evaluator.questionnaire.r5.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -61,7 +62,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class QuestionnaireResult {
+  public static class QuestionnaireResult {
     private Questionnaire questionnaire;
     private String patientId;
     private Repository repository;
@@ -125,15 +126,16 @@ public class TestQuestionnaire {
       }
       if (dataRepository == null) {
         dataRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("../tests"), false);
       }
       if (contentRepository == null) {
         contentRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("../resources/"),
+                false);
       }
       if (terminologyRepository == null) {
         terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+            List.of("../vocabulary/CodeSystem/", "../vocabulary/ValueSet/"), false);
       }
 
       repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
@@ -160,7 +162,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class GeneratedQuestionnaire {
+  public static class GeneratedQuestionnaire {
     Questionnaire questionnaire;
 
     public GeneratedQuestionnaire(Questionnaire questionnaire) {
@@ -178,7 +180,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class GeneratedQuestionnaireResponse {
+  public static class GeneratedQuestionnaireResponse {
     QuestionnaireResponse questionnaireResponse;
 
     public GeneratedQuestionnaireResponse(QuestionnaireResponse questionnaireResponse) {

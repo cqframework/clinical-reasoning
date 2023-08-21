@@ -60,6 +60,11 @@ public class Constants {
   public static final String CQF_EXPRESSION_LANGUAGE =
       "http://hl7.org/fhir/StructureDefinition/cqf-expression-language";
   public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
+
+  public static final String CQFM_EFFECTIVE_DATA_REQUIREMENTS =
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements";
+  public static final String CQFM_LOGIC_DEFINITION =
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition";
   public static final String CQFM_SOFTWARE_SYSTEM =
       "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem";
 

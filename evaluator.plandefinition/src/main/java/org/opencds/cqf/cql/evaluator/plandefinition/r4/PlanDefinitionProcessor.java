@@ -98,7 +98,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     this.activityDefinitionProcessor =
         new ActivityDefinitionProcessor(this.repository, evaluationSettings);
     this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
-    this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
+    this.questionnaireResponseProcessor =
+        new QuestionnaireResponseProcessor(this.repository, evaluationSettings);
   }
 
   @Override
@@ -362,7 +363,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       }
     }
 
-    if (meetsConditions(defaultLibraryUrl, action)) {
+    if (Boolean.TRUE.equals(meetsConditions(defaultLibraryUrl, action))) {
       // TODO: Figure out why this was here and what it was trying to do
       // if (action.hasRelatedAction()) {
       // for (var relatedActionComponent : action.getRelatedAction()) {

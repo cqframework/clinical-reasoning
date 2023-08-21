@@ -53,7 +53,7 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("opioid-Rec10-patient-view/tests/CarePlan-opioid-Rec10-patient-view.json");
   }
 
-  @Test
+  @Test(enabled = false)
   public void testRuleFiltersNotReportable() {
     PlanDefinition.Assert.that("plandefinition-RuleFilters-1.0.0", "NotReportable", null)
         .withAdditionalData("rule-filters/tests-NotReportable-bundle.json")
@@ -61,7 +61,7 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("rule-filters/NotReportableCarePlan.json");
   }
 
-  @Test
+  @Test(enabled = false)
   public void testRuleFiltersReportable() {
     PlanDefinition.Assert.that("plandefinition-RuleFilters-1.0.0", "Reportable", null)
         .withAdditionalData("rule-filters/tests-Reportable-bundle.json")

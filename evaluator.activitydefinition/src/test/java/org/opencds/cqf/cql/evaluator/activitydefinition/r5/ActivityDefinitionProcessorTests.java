@@ -29,10 +29,10 @@ public class ActivityDefinitionProcessorTests {
     var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
     var content =
         new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
-    var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
-        List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+    // var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
+    // List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
 
-    repository = Repositories.proxy(data, content, terminology);
+    repository = Repositories.proxy(data, content, null);
     activityDefinitionProcessor =
         new ActivityDefinitionProcessor(repository, evaluationSettings);
   }

@@ -24,7 +24,6 @@ import org.hl7.fhir.r5.model.Enumerations.EventStatus;
 import org.hl7.fhir.r5.model.Enumerations.RequestIntent;
 import org.hl7.fhir.r5.model.Enumerations.RequestStatus;
 import org.hl7.fhir.r5.model.MedicationRequest;
-import org.hl7.fhir.r5.model.MedicationRequest.MedicationRequestDoseComponent;
 import org.hl7.fhir.r5.model.MedicationRequest.MedicationrequestStatus;
 import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.Procedure;
@@ -283,9 +282,7 @@ public class ActivityDefinitionProcessor
     }
 
     if (activityDefinition.hasDosage()) {
-      medicationRequest
-          .setDose(new MedicationRequestDoseComponent()
-              .setDosageInstruction(activityDefinition.getDosage()));
+      activityDefinition.getDosage().forEach(medicationRequest::addDosageInstruction);
     }
 
     if (activityDefinition.hasDoNotPerform()) {

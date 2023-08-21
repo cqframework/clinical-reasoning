@@ -7,6 +7,11 @@
       "resource": {
         "resourceType": "RequestGroup",
         "id": "AncVisit-PlanDefinition",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+          ]
+        },
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal",
@@ -90,6 +95,7 @@
             "valueString": "ready"
           }
         ],
+        "instantiatesCanonical": "ActivityDefinition/careplan-activity",
         "basedOn": [
           {
             "reference": "RequestGroup/AncVisit-PlanDefinition",

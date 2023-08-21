@@ -74,9 +74,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
       String encounterId, String practitionerId, String organizationId, String userType,
       String userLanguage, String userTaskContext, String setting, String settingContext,
-      IBaseParameters parameters, IBaseBundle bundle, IBaseResource contentEndpoint,
-      IBaseResource terminologyEndpoint,
-      IBaseResource dataEndpoint) {
+      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
+      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     this.repository =
         Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 

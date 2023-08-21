@@ -117,7 +117,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         extractedResources.add(questionnaireResponse);
         for (var entry : extractBundle.getEntry()) {
           ((Bundle) bundle).addEntry(entry);
-          extractedResources.add(entry.getResource());
+          // extractedResources.add(entry.getResource());
         }
       }
     }

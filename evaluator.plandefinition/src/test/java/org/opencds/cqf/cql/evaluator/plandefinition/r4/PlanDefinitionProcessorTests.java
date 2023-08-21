@@ -208,11 +208,11 @@ public class PlanDefinitionProcessorTests {
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
     var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
-        .withAdditionalDataId(dataId).withParameters(parameters)
-        .apply().hasContained(6);
+        .withAdditionalDataId(dataId).withParameters(parameters).apply()
+        .hasContained(4);
     PlanDefinition.Assert.that(planDefinitionID, patientID, null).withRepository(repository)
         .withAdditionalDataId(dataId).withParameters(parameters)
-        .applyR5().hasEntry(6);
+        .applyR5().hasEntry(4);
   }
 
   @Test

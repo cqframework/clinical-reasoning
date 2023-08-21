@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -158,6 +159,10 @@ public class PlanDefinition {
 
     public GeneratedCarePlan(CarePlan carePlan) {
       this.carePlan = carePlan;
+    }
+
+    public void hasContained(int theCount) {
+      assertEquals(carePlan.getContained().size(), theCount);
     }
 
     public void isEqualsTo(String expectedCarePlanAssetName) {

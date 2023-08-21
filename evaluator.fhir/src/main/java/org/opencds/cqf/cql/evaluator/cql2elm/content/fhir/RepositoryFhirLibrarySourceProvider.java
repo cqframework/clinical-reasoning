@@ -49,7 +49,6 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
 
   // TODO: add parameter to search for specific library instead of all libraries
   @Override
-  @SuppressWarnings("unchecked")
   protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
     List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext,
         Repositories.searchRepositoryWithPaging(

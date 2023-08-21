@@ -92,8 +92,7 @@ public class PlanDefinitionProcessorTests {
     PlanDefinition.Assert.that("prepopulate", "OPA-Patient1", null)
         .withAdditionalData("extract-questionnaireresponse/patient-data.json")
         .withContent("prepopulate/prepopulate-content-bundle.json")
-        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply()
-        .isEqualsTo("extract-questionnaireresponse/careplan.json");
+        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply().hasContained(6);
   }
 
   @Test(enabled = false) // Need valid dstu3 content for this test

@@ -20,6 +20,12 @@
     <slf4j.version>2.0.4</slf4j.version>
     <cql.version>3.0.0-SNAPSHOT</cql.version>
     <jmh.version>1.36</jmh.version>
+    <spring.version>5.3.23</spring.version>
+    <fhir-core.version>5.6.971</fhir-core.version>
+    <hapi.version>6.4.4</hapi.version>
+    <picocli.version>4.6.1</picocli.version>
+    <caffeine.version>2.9.0</caffeine.version>
+    <guava.version>31.0.1-jre</guava.version>
   </properties>
   <licenses>
     <license>
@@ -75,6 +81,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
       <!-- Stuff missing from the HAPI bom-->
       <dependency>
         <groupId>ca.uhn.hapi.fhir</groupId>
@@ -91,6 +98,14 @@
         <artifactId>hapi-fhir-validation-resources-r5</artifactId>
         <version>${hapi.version}</version>
       </dependency>
+
+      <!--UCUM-->
+      <dependency>
+        <groupId>org.fhir</groupId>
+        <artifactId>ucum</artifactId>
+        <version>1.0.3</version>
+      </dependency>
+
 
       <!-- CQL dependencies -->
       <dependency>
@@ -164,7 +179,63 @@
         <version>${cql.version}</version>
       </dependency>
 
-      <!-- test dependencies -->
+      <!-- Guava-->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <!-- Spring -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <!-- CLI -->
+      <dependency>
+        <groupId>info.picocli</groupId>
+        <artifactId>picocli</artifactId>
+        <version>${picocli.version}</version>
+      </dependency>
+
+      <!-- DI APIs -->
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+      </dependency>
+
+      <!-- Generated annotation -->
+      <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>javax.annotation-api</artifactId>
+        <version>1.3.2</version>
+      </dependency>
+
+      <!-- NPM Packaging Dependencies -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.21</version>
+      </dependency>
+
+      <!-- BundleResources requirement -->
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.6</version>
+      </dependency>
+
+      <!-- Logging -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <!-- Test Dependencies -->
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
@@ -177,13 +248,6 @@
         <artifactId>jmh-core</artifactId>
         <version>${jmh.version}</version>
         <scope>test</scope>
-      </dependency>
-
-      <!-- Logging -->
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -198,6 +262,44 @@
         <optional>true</optional>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>0.10.2</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-all</artifactId>
+        <version>1.3</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>3.9.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>${caffeine.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- JSON Comparisons ignoring property order, whitespaces/tabs, etc. -->
+      <dependency>
+        <groupId>org.skyscreamer</groupId>
+        <artifactId>jsonassert</artifactId>
+        <version>1.5.1</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -210,6 +312,18 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <version>1.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>3.9.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

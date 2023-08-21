@@ -7,14 +7,14 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -25,7 +25,7 @@ public class ActivityDefinitionProcessorTests {
   private static final FhirContext fhirContext = FhirContext.forR4Cached();
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
-  @BeforeClass
+  @BeforeAll
   public void setup() {
     var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
     var content =
@@ -45,9 +45,9 @@ public class ActivityDefinitionProcessorTests {
     var result = this.activityDefinitionProcessor.apply(
         new IdType("ActivityDefinition", "activityDefinition-test"), null,
         null, "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
-    Assert.assertTrue(result instanceof MedicationRequest);
+    Assertions.assertTrue(result instanceof MedicationRequest);
     MedicationRequest request = (MedicationRequest) result;
-    Assert.assertTrue(request.getDoNotPerform());
+    Assertions.assertTrue(request.getDoNotPerform());
   }
 
   @Test
@@ -56,15 +56,15 @@ public class ActivityDefinitionProcessorTests {
 
     var result = this.activityDefinitionProcessor.apply(new IdType("ASLPCrd"), null,
         null, "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
-    Assert.assertTrue(result instanceof Task);
+    Assertions.assertTrue(result instanceof Task);
     var task = (Task) result;
-    Assert.assertTrue(task.hasInput());
+    Assertions.assertTrue(task.hasInput());
     var input = task.getInput().get(0);
-    Assert.assertEquals(input.getType().getCoding().get(0).getCode(), "collect-information");
-    Assert.assertEquals(((CanonicalType) input.getValue()).getValueAsString(),
+    Assertions.assertEquals(input.getType().getCoding().get(0).getCode(), "collect-information");
+    Assertions.assertEquals(((CanonicalType) input.getValue()).getValueAsString(),
         "http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1");
     var input2 = task.getInput().get(1);
-    Assert.assertEquals(((CanonicalType) input2.getValue()).getValueAsString(),
+    Assertions.assertEquals(((CanonicalType) input2.getValue()).getValueAsString(),
         "http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA2");
   }
 }

@@ -1,25 +1,28 @@
 
 package org.opencds.cqf.cql.evaluator.engine.retrieve;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
 
 public class PriorityRetrieveProviderTests {
 
-  @Test(expectedExceptions = NullPointerException.class)
+  @Test
   public void test_nullConstructorParameterThrowsException() {
-    new PriorityRetrieveProvider(null);
+    assertThrows(NullPointerException.class, () -> {
+      new PriorityRetrieveProvider(null);
+    });
   }
 
   @Test
@@ -32,23 +35,25 @@ public class PriorityRetrieveProviderTests {
     assertEquals(resultList.size(), 0);
   }
 
-  @Test(expectedExceptions = IllegalStateException.class)
+  @Test
   public void test_badProvider_throwsException() {
+    assertThrows(IllegalStateException.class, () -> {
 
-    RetrieveProvider badProvider = new RetrieveProvider() {
-      @Override
-      public Iterable<Object> retrieve(String context, String contextPath, Object contextValue,
-          String dataType, String templateId, String codePath, Iterable<Code> codes,
-          String valueSet, String datePath, String dateLowPath, String dateHighPath,
-          Interval dateRange) {
+      RetrieveProvider badProvider = new RetrieveProvider() {
+        @Override
+        public Iterable<Object> retrieve(String context, String contextPath, Object contextValue,
+            String dataType, String templateId, String codePath, Iterable<Code> codes,
+            String valueSet, String datePath, String dateLowPath, String dateHighPath,
+            Interval dateRange) {
 
-        // This is an invalid results. Providers should return an empty set.
-        return null;
-      }
-    };
-    RetrieveProvider retrieve =
-        new PriorityRetrieveProvider(Collections.singletonList(badProvider));
-    retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
+          // This is an invalid results. Providers should return an empty set.
+          return null;
+        }
+      };
+      RetrieveProvider retrieve =
+          new PriorityRetrieveProvider(Collections.singletonList(badProvider));
+      retrieve.retrieve(null, null, null, null, null, null, null, null, null, null, null, null);
+    });
   }
 
   @Test

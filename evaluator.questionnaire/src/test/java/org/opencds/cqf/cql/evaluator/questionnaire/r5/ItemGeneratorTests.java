@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r5;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class ItemGeneratorTests {
   @Test

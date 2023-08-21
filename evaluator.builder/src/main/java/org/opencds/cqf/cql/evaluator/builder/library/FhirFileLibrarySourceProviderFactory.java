@@ -9,11 +9,11 @@ import javax.inject.Named;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.BundleFhirLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.cql.cql2elm.content.BundleFhirLibrarySourceProvider;
+import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.DirectoryBundler;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 

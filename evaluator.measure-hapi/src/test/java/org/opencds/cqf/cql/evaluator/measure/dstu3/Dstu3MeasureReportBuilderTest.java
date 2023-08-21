@@ -1,12 +1,12 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.dstu3.model.Measure;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -17,7 +17,7 @@ public class Dstu3MeasureReportBuilderTest {
   protected Dstu3MeasureReportBuilder measureReportBuilder;
   protected FhirContext fhirContext;
 
-  @BeforeClass
+  @BeforeAll
   public void setup() {
     this.measureReportBuilder = new Dstu3MeasureReportBuilder();
     this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);

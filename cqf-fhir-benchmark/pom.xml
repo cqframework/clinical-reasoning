@@ -33,7 +33,11 @@
       <artifactId>cqf-fhir-utility</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-test</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.measure-hapi</artifactId>

@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,12 +28,13 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
 
@@ -52,7 +52,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     var baseQuestionnaire = theQuestionnaire;
     if (baseQuestionnaire == null) {
       baseQuestionnaire = theId != null ? this.repository.read(Questionnaire.class, theId)
-          : (Questionnaire) searchRepositoryByCanonical(repository, theCanonical);
+          : (Questionnaire) SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
     }
 
     return castOrThrow(baseQuestionnaire, Questionnaire.class,
@@ -214,7 +214,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         try {
           var canonical = artifact.getResource().getReferenceElement_();
           if (packableResources.contains(Canonicals.getResourceType(canonical))) {
-            var resource = searchRepositoryByCanonical(repository, canonical);
+            var resource = SearchHelper.searchRepositoryByCanonical(repository, canonical);
             if (resource != null
                 && theBundle.getEntry().stream()
                     .noneMatch(
@@ -241,7 +241,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     var libraryExtension = theQuestionnaire.getExtensionsByUrl(Constants.CQF_LIBRARY);
     if (libraryExtension != null && !libraryExtension.isEmpty()) {
       var libraryCanonical = (UriType) libraryExtension.get(0).getValue();
-      var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
+      var library =
+          (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
       if (library != null) {
         bundle.addEntry(new BundleEntryComponent().setResource(library));
         if (library.hasRelatedArtifact()) {

@@ -12,25 +12,16 @@
   <description>CQL Evaluator - Builder</description>
 
   <parent>
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.shared</artifactId>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.fhir-npm</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -46,6 +37,10 @@
     <dependency>
       <groupId>info.cqframework</groupId>
       <artifactId>cqf-fhir-npm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>cqf-fhir</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.inject</groupId>

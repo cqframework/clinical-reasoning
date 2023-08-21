@@ -7,12 +7,12 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.testng.Assert;
+import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
 class ElementHasDefaultValueTest {
@@ -32,11 +32,11 @@ class ElementHasDefaultValueTest {
     final QuestionnaireItemComponent actual =
         myFixture.addProperties(elementDefinition.getFixedOrPattern(), questionnaireItem);
     // validate
-    Assert.assertEquals(actual.getInitial().size(), 1);
-    Assert.assertEquals(actual.getInitial().get(0).getValue(), booleanType);
+    Assertions.assertEquals(actual.getInitial().size(), 1);
+    Assertions.assertEquals(actual.getInitial().get(0).getValue(), booleanType);
     final Extension urlExtension = actual.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_HIDDEN);
-    Assert.assertEquals(urlExtension.getValueAsPrimitive().getValueAsString(), "true");
-    Assert.assertTrue(actual.getReadOnly());
+    Assertions.assertEquals(urlExtension.getValueAsPrimitive().getValueAsString(), "true");
+    Assertions.assertTrue(actual.getReadOnly());
   }
 
 }

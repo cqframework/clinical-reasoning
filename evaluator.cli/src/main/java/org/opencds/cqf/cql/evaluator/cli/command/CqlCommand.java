@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -29,11 +30,11 @@ import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactor
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
-import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.DirectoryBundler;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.fhir.npm.NpmProcessor;
+import org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory;
+import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.DirectoryBundler;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -246,13 +247,13 @@ public class CqlCommand implements Callable<Integer> {
     return 0;
   }
 
-  private org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory createLibrarySourceProviderFactory(
+  private LibrarySourceProviderFactory createLibrarySourceProviderFactory(
       FhirContext fhirContext) {
     var af = adapterFactory(fhirContext);
     var lvs = new LibraryVersionSelector(af);
     var db = directoryBundler(fhirContext);
 
-    return new org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory(
+    return new LibrarySourceProviderFactory(
         fhirContext, adapterFactory(fhirContext),
         Set.of(new FhirFileLibrarySourceProviderFactory(fhirContext, db, af, lvs),
             new CqlFileLibrarySourceProviderFactory()),
@@ -275,11 +276,11 @@ public class CqlCommand implements Callable<Integer> {
     switch (fhirContext.getVersion().getVersion()) {
 
       case DSTU3:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
       case R4:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
       case R5:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
       case DSTU2:
       case DSTU2_1:
       case DSTU2_HL7ORG:

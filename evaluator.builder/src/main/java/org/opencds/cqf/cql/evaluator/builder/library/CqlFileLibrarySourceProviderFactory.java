@@ -23,7 +23,7 @@ import javax.inject.Named;
 import org.apache.commons.io.FileUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.fhir.utility.Constants;
 
 @Named
 public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourceProviderFactory {

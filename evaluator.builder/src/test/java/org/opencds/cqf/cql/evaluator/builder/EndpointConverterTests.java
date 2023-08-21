@@ -1,10 +1,10 @@
 package org.opencds.cqf.cql.evaluator.builder;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class EndpointConverterTests {
 
@@ -12,7 +12,7 @@ public class EndpointConverterTests {
   public void TestR4Endpoint() {
 
     EndpointConverter endpointConverter =
-        new EndpointConverter(new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory());
+        new EndpointConverter(new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory());
 
     org.hl7.fhir.r4.model.Endpoint endpoint = new org.hl7.fhir.r4.model.Endpoint();
     endpoint.setAddress("http://localhost");
@@ -48,7 +48,7 @@ public class EndpointConverterTests {
   public void TestDstu3Endpoint() {
 
     EndpointConverter endpointConverter = new EndpointConverter(
-        new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory());
+        new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory());
 
     org.hl7.fhir.dstu3.model.Endpoint endpoint = new org.hl7.fhir.dstu3.model.Endpoint();
     endpoint.setAddress("http://localhost");

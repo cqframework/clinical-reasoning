@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,13 +19,12 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.testng.TestException;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -175,7 +174,8 @@ public class Measure {
       try {
         report = this.operation.get();
       } catch (Exception e) {
-        throw new TestException("error when running 'then' and invoking the chosen operation", e);
+        throw new IllegalStateException(
+            "error when running 'then' and invoking the chosen operation", e);
       }
 
       return new SelectedReport(report);
@@ -299,7 +299,7 @@ public class Measure {
       public SelectedReference<P> hasPopulations(String... population) {
         var ex = this.value().getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
         if (ex.isEmpty()) {
-          throw new TestException(String.format(
+          throw new IllegalStateException(String.format(
               "no evaluated resource extensions were found, and expected %s", population.length));
         }
 

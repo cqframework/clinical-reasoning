@@ -23,10 +23,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersAdapter;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAdapter;
-import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;

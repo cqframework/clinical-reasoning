@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r5;
 
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;

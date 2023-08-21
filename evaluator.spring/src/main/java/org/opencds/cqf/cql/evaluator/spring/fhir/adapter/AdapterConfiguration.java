@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.spring.fhir.adapter;
 
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,11 +14,11 @@ public class AdapterConfiguration {
     switch (fhirContext.getVersion().getVersion()) {
 
       case DSTU3:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
       case R4:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
       case R5:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
       case DSTU2:
       case DSTU2_1:
       case DSTU2_HL7ORG:

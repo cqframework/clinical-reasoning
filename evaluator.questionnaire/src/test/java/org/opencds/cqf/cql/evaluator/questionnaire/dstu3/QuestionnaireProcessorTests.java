@@ -1,21 +1,23 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.stringPart;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart;
 
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessorTests {
-  @Test(enabled = false)
+  @Test
+  @Disabled
   void testPrePopulate() {
     TestQuestionnaire.Assert
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
@@ -60,7 +62,8 @@ public class QuestionnaireProcessorTests {
     });
   }
 
-  @Test(enabled = false)
+  @Test
+  @Disabled
   void testPopulate() {
     TestQuestionnaire.Assert
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")

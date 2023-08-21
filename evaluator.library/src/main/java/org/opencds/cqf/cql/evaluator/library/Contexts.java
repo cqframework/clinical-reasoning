@@ -23,16 +23,16 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.fhir.RepositoryFhirLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.RepositoryRetrieveProvider;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.RetrieveSettings;
-import org.opencds.cqf.cql.evaluator.engine.terminology.RepositoryTerminologyProvider;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
+import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.fhir.cql.engine.retrieve.BundleRetrieveProvider;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -172,11 +172,11 @@ public class Contexts {
   public static AdapterFactory getAdapterFactory(FhirContext fhirContext) {
     switch (fhirContext.getVersion().getVersion()) {
       case DSTU3:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
       case R4:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
       case R5:
-        return new org.opencds.cqf.cql.evaluator.fhir.adapter.r5.AdapterFactory();
+        return new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
       default:
         throw new IllegalArgumentException(
             String.format("unsupported FHIR version: %s", fhirContext));

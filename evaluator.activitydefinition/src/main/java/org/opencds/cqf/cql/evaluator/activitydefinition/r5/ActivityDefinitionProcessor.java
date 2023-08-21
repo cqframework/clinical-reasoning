@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.activitydefinition.r5;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r5.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +30,7 @@ import org.hl7.fhir.r5.model.Task;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class ActivityDefinitionProcessor
     var baseActivityDefinition = theActivityDefinition;
     if (baseActivityDefinition == null) {
       baseActivityDefinition = theId != null ? this.repository.read(ActivityDefinition.class, theId)
-          : (ActivityDefinition) searchRepositoryByCanonical(repository, theCanonical);
+          : (ActivityDefinition) SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
     }
 
     requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + theId);

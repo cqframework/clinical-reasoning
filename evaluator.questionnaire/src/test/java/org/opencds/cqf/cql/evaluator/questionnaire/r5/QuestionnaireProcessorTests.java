@@ -1,16 +1,17 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r5;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r5.Parameters.stringPart;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.stringPart;
 
 import java.util.List;
 
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -18,7 +19,8 @@ public class QuestionnaireProcessorTests {
 
   private final FhirContext fhirContext = FhirContext.forR5Cached();
 
-  @Test(enabled = false)
+  @Test
+  @Disabled("JP - Don't know why this one is disabled")
   void testPrePopulate() {
     TestQuestionnaire.Assert
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
@@ -61,7 +63,8 @@ public class QuestionnaireProcessorTests {
     });
   }
 
-  @Test(enabled = false)
+  @Test
+  @Disabled("JP - Don't know why this one is disabled")
   void testPopulate() {
     TestQuestionnaire.Assert
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")

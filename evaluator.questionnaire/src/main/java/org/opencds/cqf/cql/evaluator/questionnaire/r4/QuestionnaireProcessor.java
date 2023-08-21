@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.cql.evaluator.questionnaire.r4.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
@@ -29,12 +28,13 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComp
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.r4.PackageHelper;
+import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
   protected OperationOutcome oc;
@@ -54,7 +54,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     var baseQuestionnaire = theQuestionnaire;
     if (baseQuestionnaire == null) {
       baseQuestionnaire = theId != null ? this.repository.read(Questionnaire.class, theId)
-          : (Questionnaire) searchRepositoryByCanonical(repository, theCanonical);
+          : (Questionnaire) SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
     }
 
     return castOrThrow(baseQuestionnaire, Questionnaire.class,
@@ -295,7 +295,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     var libraryExtension = theQuestionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
     if (libraryExtension != null) {
       var libraryCanonical = (CanonicalType) libraryExtension.getValue();
-      var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
+      var library =
+          (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
       if (library != null) {
         bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
         if (library.hasRelatedArtifact()) {

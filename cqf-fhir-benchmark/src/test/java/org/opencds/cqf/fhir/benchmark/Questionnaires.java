@@ -1,17 +1,17 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessorTests;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestQuestionnaire;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestQuestionnaire.QuestionnaireResult;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -39,11 +39,12 @@ public class Questionnaires {
 
   @Setup(Level.Iteration)
   public void setupIteration() throws Exception {
-    this.result = TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
-        .withRepository(REPOSITORY)
-        .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
-            stringPart("Service Request Id", "SleepStudy2"),
-            stringPart("Coverage Id", "Coverage-positive")));
+    this.result =
+        TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
+            .withRepository(REPOSITORY)
+            .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
+                stringPart("Service Request Id", "SleepStudy2"),
+                stringPart("Coverage Id", "Coverage-positive")));
   }
 
   @Benchmark

@@ -12,17 +12,28 @@
   <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
 
   <parent>
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.shared</artifactId>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <description>CQL Evaluator - CLI</description>
 
   <dependencies>
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator</artifactId>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-api</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-utility</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-cql</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>

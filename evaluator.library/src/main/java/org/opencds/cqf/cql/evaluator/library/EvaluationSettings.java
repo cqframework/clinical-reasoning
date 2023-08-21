@@ -9,7 +9,7 @@ import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 
 public class EvaluationSettings {
 

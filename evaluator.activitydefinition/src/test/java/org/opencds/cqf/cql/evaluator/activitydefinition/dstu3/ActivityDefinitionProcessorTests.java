@@ -5,14 +5,14 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -22,7 +22,7 @@ public class ActivityDefinitionProcessorTests {
   private static final FhirContext fhirContext = FhirContext.forDstu3Cached();
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
-  @BeforeClass
+  @BeforeAll
   public void setup() {
     var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
     var content =
@@ -42,9 +42,9 @@ public class ActivityDefinitionProcessorTests {
     var result = this.activityDefinitionProcessor.apply(
         new IdType("ActivityDefinition", "activityDefinition-test"), null,
         null, "patient-1", null, null, null, null, null, null, null, null, null, libraryEngine);
-    Assert.assertTrue(result instanceof ProcedureRequest);
+    Assertions.assertTrue(result instanceof ProcedureRequest);
     var request = (ProcedureRequest) result;
-    Assert.assertTrue(request.getDoNotPerform());
+    Assertions.assertTrue(request.getDoNotPerform());
   }
 
 }

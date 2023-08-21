@@ -18,6 +18,10 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 
 public class ValueSets {
 
+  private ValueSets() {
+    // intentionally empty
+  }
+
   public static IBase getCompose(FhirContext fhirContext, IBaseResource valueSet) {
     BaseRuntimeChildDefinition composeChild = getComposeDefinition(fhirContext);
     List<IBase> compose = composeChild.getAccessor().getValues(valueSet);

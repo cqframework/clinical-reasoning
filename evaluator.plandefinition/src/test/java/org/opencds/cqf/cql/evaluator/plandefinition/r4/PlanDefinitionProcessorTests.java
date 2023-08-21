@@ -1,12 +1,13 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -76,7 +77,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("anc-dak/output-careplan.json");
   }
 
-  @Test(enabled = false) // Need patient data to test this
+  @Test
+  @Disabled("Need patient data to test this")
   public void testECRWithFhirPath() {
     var planDefinitionID = "us-ecr-specification";
     var patientID = "helloworld-patient-1";

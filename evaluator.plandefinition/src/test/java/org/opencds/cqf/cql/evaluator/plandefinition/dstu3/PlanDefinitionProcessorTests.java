@@ -1,13 +1,14 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -31,7 +32,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("hello-world/hello-world-careplan.json");
   }
 
-  @Test(enabled = false) // Unable to get the cql to run against dstu3
+  @Test
+  @Disabled("Unable to get the cql to run against dstu3")
   public void testOpioidRec10PatientView() {
     FhirContext fhirContext = FhirContext.forDstu3Cached();
     var data =
@@ -69,7 +71,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("rule-filters/ReportableCarePlan.json");
   }
 
-  @Test(enabled = false) // Need valid dstu3 content for this test
+  @Test
+  @Disabled("Need valid dstu3 content for this test")
   public void testQuestionnairePrepopulate() {
     PlanDefinition.Assert.that("prepopulate", "OPA-Patient1", null)
         .withAdditionalData("prepopulate/prepopulate-patient-data.json")
@@ -78,7 +81,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("prepopulate/prepopulate-careplan.json");
   }
 
-  @Test(enabled = false) // Need valid dstu3 content for this test
+  @Test
+  @Disabled("Need valid dstu3 content for this test")
   public void testQuestionnairePrepopulate_NoLibrary() {
     PlanDefinition.Assert.that("prepopulate", "OPA-Patient1", null)
         .withAdditionalData("prepopulate/prepopulate-patient-data.json")
@@ -96,7 +100,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("extract-questionnaireresponse/careplan.json");
   }
 
-  @Test(enabled = false) // Need valid dstu3 content for this test
+  @Test // Need valid dstu3 content for this test
+  @Disabled("Need valid dstu3 content for this test")
   public void testGenerateQuestionnaire() {
     PlanDefinition.Assert.that("generate-questionnaire", "OPA-Patient1", null)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply()

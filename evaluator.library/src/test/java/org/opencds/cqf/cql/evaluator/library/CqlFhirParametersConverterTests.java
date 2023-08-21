@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator.library;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,15 +18,15 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -35,12 +36,12 @@ public class CqlFhirParametersConverterTests {
 
   protected static CqlFhirParametersConverter cqlFhirParametersConverter;
 
-  @BeforeClass
-  public void setup() {
+  @BeforeAll
+  public static void setup() {
     FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
     AdapterFactory adapterFactory =
-        new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
     FhirTypeConverter fhirTypeConverter =
         new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
@@ -164,19 +165,21 @@ public class CqlFhirParametersConverterTests {
     assertEquals(encounters.size(), 1);
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class)
+  @Test
   public void TestInvalidParameterDefinitionThrowsException() {
-    Parameters testData = new Parameters();
-    ParametersParameterComponent ppc = testData.addParameter();
+    assertThrows(IllegalArgumentException.class, () -> {
+      Parameters testData = new Parameters();
+      ParametersParameterComponent ppc = testData.addParameter();
 
-    testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
+      testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
 
-    // This is a case where we'd expect a single value as a parameters, but two are passed.
-    ppc.setName("%encounters").setResource(new Encounter().setId("2"));
-    ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
-        new ParameterDefinition().setMax("1").setName("%encounters"));
+      // This is a case where we'd expect a single value as a parameters, but two are passed.
+      ppc.setName("%encounters").setResource(new Encounter().setId("2"));
+      ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+          new ParameterDefinition().setMax("1").setName("%encounters"));
 
-    cqlFhirParametersConverter.toCqlParameters(testData);
+      cqlFhirParametersConverter.toCqlParameters(testData);
+    });
   }
 
   @Test

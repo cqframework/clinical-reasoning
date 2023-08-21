@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,8 +48,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
@@ -59,6 +56,9 @@ import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireItemGenera
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.dstu3.ContainedHelper;
+import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +125,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var basePlanDefinition = thePlanDefinition;
     if (basePlanDefinition == null) {
       basePlanDefinition = theId != null ? this.repository.read(PlanDefinition.class, theId)
-          : searchRepositoryByCanonical(repository, theCanonical);
+          : SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
     }
 
     requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
@@ -348,7 +348,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       if (referenceToContained) {
         result = resolveContained(planDefinition, definition.getReference());
       } else {
-        result = searchRepositoryByCanonical(repository, new StringType(definition.getReference()));
+        result = SearchHelper.searchRepositoryByCanonical(repository,
+            new StringType(definition.getReference()));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -366,7 +367,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       var referenceToContained = definition.getReference().startsWith("#");
       var activityDefinition = (ActivityDefinition) (referenceToContained
           ? resolveContained(planDefinition, definition.getReference())
-          : searchRepositoryByCanonical(repository, new StringType(definition.getReference())));
+          : SearchHelper.searchRepositoryByCanonical(repository,
+              new StringType(definition.getReference())));
       result = this.activityDefinitionProcessor.apply(activityDefinition, patientId, encounterId,
           practitionerId, organizationId, userType, userLanguage, userTaskContext, setting,
           settingContext, parameters, libraryEngine);
@@ -382,7 +384,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   }
 
   private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup, Reference definition) {
-    var planDefinition = (PlanDefinition) searchRepositoryByCanonical(repository,
+    var planDefinition = (PlanDefinition) SearchHelper.searchRepositoryByCanonical(repository,
         new StringType(definition.getReference()));
     var result = (RequestGroup) applyPlanDefinition(planDefinition);
 
@@ -550,7 +552,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     if (questionnaireExtension.getValue().fhirType().equals(FHIRAllTypes.URI.toCode())) {
       var questionnaire =
-          searchRepositoryByCanonical(repository, (UriType) questionnaireExtension.getValue());
+          SearchHelper.searchRepositoryByCanonical(repository,
+              (UriType) questionnaireExtension.getValue());
       if (questionnaire != null) {
         bundle =
             new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(questionnaire));

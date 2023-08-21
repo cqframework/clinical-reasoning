@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,9 +50,6 @@ import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
-import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
@@ -63,7 +59,11 @@ import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
+import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
+import org.opencds.cqf.fhir.utility.r4.PackageHelper;
+import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -129,7 +129,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var libraryCanonical =
         thePlanDefinition.hasLibrary() ? thePlanDefinition.getLibrary().get(0) : null;
     if (libraryCanonical != null) {
-      var library = (Library) searchRepositoryByCanonical(repository, libraryCanonical);
+      var library =
+          (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
       if (library != null) {
         bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
         if (library.hasRelatedArtifact()) {
@@ -152,7 +153,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var basePlanDefinition = thePlanDefinition;
     if (basePlanDefinition == null) {
       basePlanDefinition = theId != null ? this.repository.read(PlanDefinition.class, theId)
-          : searchRepositoryByCanonical(repository, theCanonical);
+          : SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
     }
 
     requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
@@ -441,7 +442,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       if (referenceToContained) {
         result = resolveContained(planDefinition, definition.getValue());
       } else {
-        result = searchRepositoryByCanonical(repository, definition);
+        result = SearchHelper.searchRepositoryByCanonical(repository, definition);
       }
     } catch (Exception e) {
       var message =
@@ -462,7 +463,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       var referenceToContained = definition.getValue().startsWith("#");
       var activityDefinition = (ActivityDefinition) (referenceToContained
           ? resolveContained(planDefinition, definition.getValue())
-          : searchRepositoryByCanonical(repository, definition));
+          : SearchHelper.searchRepositoryByCanonical(repository, definition));
       var engine = bundle == null ? libraryEngine
           : new LibraryEngine(new FederatedRepository(repository,
               new InMemoryFhirRepository(fhirContext(), bundle)), evaluationSettings);
@@ -488,7 +489,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       CanonicalType definition) {
     RequestGroup result = null;
     try {
-      var planDefinition = (PlanDefinition) searchRepositoryByCanonical(repository, definition);
+      var planDefinition =
+          (PlanDefinition) SearchHelper.searchRepositoryByCanonical(repository, definition);
       result = (RequestGroup) applyPlanDefinition(planDefinition);
 
       for (var c : result.getInstantiatesCanonical()) {
@@ -636,7 +638,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     if (questionnaireExtension.getValue().hasType(FHIRAllTypes.CANONICAL.toCode())) {
-      var questionnaire = searchRepositoryByCanonical(repository,
+      var questionnaire = SearchHelper.searchRepositoryByCanonical(repository,
           (CanonicalType) questionnaireExtension.getValue());
       if (questionnaire != null) {
         bundle =

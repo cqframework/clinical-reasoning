@@ -2,23 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <artifactId>evaluator.shared</artifactId>
-    <groupId>org.opencds.cqf.cql</groupId>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
+
   <artifactId>evaluator.questionnaire</artifactId>
   <dependencies>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.expression</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.library</artifactId>
@@ -67,11 +60,6 @@
       <artifactId>mockito-junit-jupiter</artifactId>
       <version>4.6.1</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>compile</scope>
     </dependency>
 
     <dependency>

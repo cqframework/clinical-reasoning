@@ -50,7 +50,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     this.evaluationSettings =
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     this.repository = requireNonNull(repository, "repository can not be null");
-    this.fhirPath = org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache
+    this.fhirPath = org.opencds.cqf.fhir.utility.FhirPathCache
         .cachedForContext(repository.fhirContext());
     modelResolver = new FhirModelResolverFactory()
         .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());

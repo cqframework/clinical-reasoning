@@ -22,7 +22,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.fhir.cql.engine.utility.Codes;
+import org.opencds.cqf.fhir.cql.engine.utility.CodeExtractor;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +41,14 @@ import ca.uhn.fhir.util.ExtensionUtil;
 
 public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider {
   private static final Logger logger = LoggerFactory.getLogger(RetrieveProvider.class);
-  private final Codes codeUtil;
+  private final CodeExtractor codeUtil;
   private final IFhirPath fhirPath;
   private boolean filterBySearchParam = false;
   private boolean searchByTemplate = false;
 
   protected RetrieveProvider(final FhirContext fhirContext) {
     requireNonNull(fhirContext, "The FhirContext can not be null.");
-    this.codeUtil = new Codes(fhirContext);
+    this.codeUtil = new CodeExtractor(fhirContext);
     this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
   }
 
@@ -356,7 +356,7 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
     }
   }
 
-  public Codes getCodeUtil() {
+  public CodeExtractor getCodeUtil() {
     return codeUtil;
   }
 

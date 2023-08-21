@@ -1,15 +1,15 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 

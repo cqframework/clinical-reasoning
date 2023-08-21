@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Extension;
@@ -11,13 +12,13 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Type;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
-import org.testng.Assert;
+import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireItemServiceTest {
@@ -34,7 +35,7 @@ class QuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getProfileText(PROFILE_URL, withProfileWithTitle());
     // validate
-    Assert.assertEquals(actual, PROFILE_TITLE);
+    Assertions.assertEquals(actual, PROFILE_TITLE);
   }
 
   @Test
@@ -42,7 +43,7 @@ class QuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getProfileText(PROFILE_URL, withProfileWithNoTitle());
     // validate
-    Assert.assertEquals(actual, LINK_ID);
+    Assertions.assertEquals(actual, LINK_ID);
   }
 
   @Test
@@ -53,8 +54,7 @@ class QuestionnaireItemServiceTest {
     final QuestionnaireItemComponent actual = myFixture.createQuestionnaireItemComponent(
         PROFILE_TITLE,
         LINK_ID,
-        PROFILE_URL
-    );
+        PROFILE_URL);
     // validate
     assertEquals(actual, expected);
   }
@@ -66,7 +66,7 @@ class QuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getProfileUrl(actionInput);
     // validate
-    Assert.assertEquals(actual, PROFILE_URL);
+    Assertions.assertEquals(actual, PROFILE_URL);
   }
 
   @Test
@@ -81,30 +81,29 @@ class QuestionnaireItemServiceTest {
     doReturn(questionnaireItemComponent).when(myFixture).createQuestionnaireItemComponent(
         PROFILE_TITLE,
         LINK_ID,
-        PROFILE_URL
-    );
+        PROFILE_URL);
     // execute
-    final QuestionnaireItemComponent actual = myFixture.createQuestionnaireItem(actionInput, LINK_ID, profile);
+    final QuestionnaireItemComponent actual =
+        myFixture.createQuestionnaireItem(actionInput, LINK_ID, profile);
     // validate
     verify(myFixture).getProfileUrl(actionInput);
     verify(myFixture).getProfileText(PROFILE_URL, profile);
     verify(myFixture).createQuestionnaireItemComponent(
         PROFILE_TITLE,
         LINK_ID,
-        PROFILE_URL
-    );
+        PROFILE_URL);
     assertEquals(actual, expected);
   }
 
   void assertEquals(QuestionnaireItemComponent actual, QuestionnaireItemComponent expected) {
-    Assert.assertEquals(actual.getType(), expected.getType());
-    Assert.assertEquals(actual.getLinkId(), expected.getLinkId());
-    Assert.assertEquals(actual.getText(), expected.getText());
+    Assertions.assertEquals(actual.getType(), expected.getType());
+    Assertions.assertEquals(actual.getLinkId(), expected.getLinkId());
+    Assertions.assertEquals(actual.getText(), expected.getText());
   }
 
   void assertEquals(Extension actual, Extension expected) {
-    Assert.assertEquals(actual.getUrl(), expected.getUrl());
-    Assert.assertEquals(expected.getValue().toString(), actual.getValue().toString());
+    Assertions.assertEquals(actual.getUrl(), expected.getUrl());
+    Assertions.assertEquals(expected.getValue().toString(), actual.getValue().toString());
   }
 
   @Nonnull
@@ -142,6 +141,7 @@ class QuestionnaireItemServiceTest {
   @Nonnull
   Extension withExtension() {
     final Type codeType = new CodeType().setValue(PROFILE_TYPE);
-    return new Extension().setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT).setValue(codeType);
+    return new Extension().setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+        .setValue(codeType);
   }
 }

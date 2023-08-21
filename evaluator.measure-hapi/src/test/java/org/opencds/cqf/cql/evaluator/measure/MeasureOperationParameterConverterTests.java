@@ -1,19 +1,19 @@
 package org.opencds.cqf.cql.evaluator.measure;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Period;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -22,11 +22,11 @@ public class MeasureOperationParameterConverterTests {
 
   static MeasureOperationParameterConverter measureOperationParameterConverter;
 
-  @BeforeClass
+  @BeforeAll
   public void setup() {
     FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     AdapterFactory adapterFactory =
-        new org.opencds.cqf.cql.evaluator.fhir.adapter.r4.AdapterFactory();
+        new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
     FhirTypeConverter fhirTypeConverter =
         new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 

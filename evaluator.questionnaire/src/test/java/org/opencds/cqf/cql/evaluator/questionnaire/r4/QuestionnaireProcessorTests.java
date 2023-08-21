@@ -1,25 +1,27 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestQuestionnaire;
-import org.testng.annotations.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessorTests {
   final static String QUESTIONNAIRE_RESPONSE_POPULATED = "questionnaire-response-populated.json";
-  final static String QUESTIONNAIRE_RESPONSE_POPULATED_NO_LIBRARY = "questionnaire-response-populated-noLibrary.json";
+  final static String QUESTIONNAIRE_RESPONSE_POPULATED_NO_LIBRARY =
+      "questionnaire-response-populated-noLibrary.json";
   final static String QUESTIONNAIRE_INVALID_QUESTIONS = "questionnaire-invalid-questionnaire.json";
   final static String QUESTIONNAIRE_ORDER_POPULATED = "questionnaire-for-order-populated.json";
-  final static String QUESTIONNAIRE_ORDER_POPULATED_NO_LIBRARY = "questionnaire-for-order-populated-noLibrary.json";
+  final static String QUESTIONNAIRE_ORDER_POPULATED_NO_LIBRARY =
+      "questionnaire-for-order-populated-noLibrary.json";
 
   @Test
   void testPrePopulate() {
@@ -178,7 +180,7 @@ public class QuestionnaireProcessorTests {
         .that(new IdType("Questionnaire", "ASLPA1"), null).withRepository(repository)
         .questionnairePackage();
 
-    assertFalse(generatedPackage.getEntry().isEmpty(), null);
+    assertFalse(generatedPackage.getEntry().isEmpty());
     assertEquals(generatedPackage.getEntry().size(), 11);
   }
 }

@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3;
 
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;

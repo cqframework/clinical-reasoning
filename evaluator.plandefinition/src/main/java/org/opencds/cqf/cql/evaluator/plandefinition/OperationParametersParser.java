@@ -14,9 +14,9 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersAdapter;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.ParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter;
 
 /**
  * This class maps the standard input parameters of an Operation to key, value pairs.

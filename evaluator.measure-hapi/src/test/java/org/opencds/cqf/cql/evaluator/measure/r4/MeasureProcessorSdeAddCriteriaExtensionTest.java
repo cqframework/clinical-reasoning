@@ -1,14 +1,13 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Extension;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
-import org.testng.annotations.Test;
 
-@Test(singleThreaded = true)
 public class MeasureProcessorSdeAddCriteriaExtensionTest {
 
   protected static Given given = Measure.given().repositoryFor("InitialInpatientPopulation");

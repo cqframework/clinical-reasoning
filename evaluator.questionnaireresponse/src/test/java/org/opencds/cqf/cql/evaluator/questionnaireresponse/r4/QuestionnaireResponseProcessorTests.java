@@ -1,10 +1,11 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.r4;
 
-import static org.testng.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -50,7 +51,9 @@ public class QuestionnaireResponseProcessorTests {
         .extract().hasEntry(2);
   }
 
-  @Test(enabled = false)
+
+  @Test
+  @Disabled("JP - Don't know why this is disabled")
   void testDemographicsExtraction() {
     testExtract("demographics-qr");
   }

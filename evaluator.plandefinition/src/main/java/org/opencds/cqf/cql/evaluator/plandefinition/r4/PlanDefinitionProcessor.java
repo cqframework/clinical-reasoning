@@ -54,8 +54,6 @@ import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionPro
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.ContainedHelper;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
@@ -65,7 +63,9 @@ import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

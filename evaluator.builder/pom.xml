@@ -34,6 +34,16 @@
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-utility</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-cql</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>info.cqframework</groupId>
       <artifactId>cqf-fhir-npm</artifactId>
     </dependency>

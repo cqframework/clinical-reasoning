@@ -23,5 +23,22 @@
       <artifactId>cqf-fhir-api</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-utility</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>cql-to-elm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>engine-fhir</artifactId>
+    </dependency>
   </dependencies>
 </project>

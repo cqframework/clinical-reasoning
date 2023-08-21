@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.builder.library;
 
-import static org.opencds.cqf.fhir.utility.UriUtil.isUri;
+import static org.opencds.cqf.fhir.utility.Uris.isUri;
 
 import java.io.File;
 import java.io.IOException;

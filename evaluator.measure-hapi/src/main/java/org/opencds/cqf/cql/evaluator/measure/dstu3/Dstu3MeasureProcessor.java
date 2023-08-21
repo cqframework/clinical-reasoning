@@ -16,7 +16,6 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
@@ -25,6 +24,7 @@ import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.cql.evaluator.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 @Named
 public class Dstu3MeasureProcessor {

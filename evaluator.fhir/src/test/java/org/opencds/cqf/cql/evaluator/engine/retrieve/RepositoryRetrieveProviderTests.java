@@ -17,7 +17,7 @@ import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.RepositoryTerminologyProvider;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;

@@ -8,7 +8,7 @@ import static org.testng.Assert.assertThrows;
 import java.util.List;
 
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.testng.annotations.Test;
 

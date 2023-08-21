@@ -51,7 +51,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.ContainedHelper;
-import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
@@ -583,7 +582,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     Bundle bundle = null;
-    IGenericClient client = Clients.forUrl(repository.fhirContext(), baseUrl);
+    IGenericClient client =
+        org.opencds.cqf.fhir.utility.client.Clients.forUrl(repository.fhirContext(), baseUrl);
     // Clients.registerBasicAuth(client, user, password);
     try {
       // TODO: This is not currently in use, but if it ever is we will need to determine how the

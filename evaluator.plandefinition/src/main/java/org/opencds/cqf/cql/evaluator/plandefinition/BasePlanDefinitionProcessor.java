@@ -17,7 +17,6 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.util.FhirPathCache;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
@@ -122,7 +121,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
       IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
       IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository,
+        dataEndpoint, contentEndpoint, terminologyEndpoint);
     return apply(theId, theCanonical, thePlanDefinition, patientId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
         parameters, useServerData, bundle, prefetchData,
@@ -169,7 +169,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
       IBaseParameters parameters, Boolean useServerData, IBaseBundle bundle,
       IBaseParameters prefetchData, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository,
+        dataEndpoint, contentEndpoint, terminologyEndpoint);
     return applyR5(theId, theCanonical, thePlanDefinition, patientId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
         parameters, useServerData, bundle, prefetchData,

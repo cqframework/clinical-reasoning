@@ -50,7 +50,6 @@ import org.hl7.fhir.r5.model.UrlType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r5.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
@@ -59,6 +58,7 @@ import org.opencds.cqf.cql.evaluator.questionnaire.r5.QuestionnaireItemGenerator
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r5.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -12,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -60,7 +59,8 @@ public abstract class BaseQuestionnaireProcessor<T> {
       CanonicalType theCanonical, IBaseResource questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository,
+        dataEndpoint, contentEndpoint, terminologyEndpoint);
     return prePopulate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId,
         parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
   }
@@ -72,7 +72,8 @@ public abstract class BaseQuestionnaireProcessor<T> {
       CanonicalType theCanonical, IBaseResource questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
-    repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository,
+        dataEndpoint, contentEndpoint, terminologyEndpoint);
     return populate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId, parameters,
         bundle, new LibraryEngine(repository, this.evaluationSettings));
   }

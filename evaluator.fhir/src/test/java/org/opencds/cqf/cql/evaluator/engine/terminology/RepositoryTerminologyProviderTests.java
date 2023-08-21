@@ -12,8 +12,8 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;

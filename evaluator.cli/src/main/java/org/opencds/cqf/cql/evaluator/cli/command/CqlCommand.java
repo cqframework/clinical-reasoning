@@ -199,7 +199,7 @@ public class CqlCommand implements Callable<Integer> {
 
       cqlEvaluatorBuilder.withLibrarySourceProvider(librarySourceProvider);
 
-      // TODO: Replace with FileRepoository and proxied terminology provider
+      // TODO: Replace with FileRepository and proxied terminology provider
       // if (library.terminologyUrl != null) {
       // TerminologyProvider terminologyProvider =
       // this.terminologyProviderIndex.get(library.terminologyUrl);

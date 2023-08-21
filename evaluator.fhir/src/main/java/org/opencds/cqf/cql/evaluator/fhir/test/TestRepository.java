@@ -3,7 +3,7 @@ package org.opencds.cqf.cql.evaluator.fhir.test;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 

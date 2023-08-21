@@ -92,6 +92,78 @@
         <version>${hapi.version}</version>
       </dependency>
 
+      <!-- CQL dependencies -->
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>engine</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>cql-to-elm</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>model</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>model-jackson</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm-jackson</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>model-jaxb</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm-jaxb</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>engine-fhir</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>quick</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>fhir-r4</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm-fhir</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>cqf-fhir</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>cqf-fhir-npm</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+
       <!-- test dependencies -->
       <dependency>
         <groupId>org.junit</groupId>

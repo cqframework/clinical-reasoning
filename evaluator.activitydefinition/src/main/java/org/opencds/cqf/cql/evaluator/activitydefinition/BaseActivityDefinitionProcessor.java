@@ -11,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -74,7 +73,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       IBaseParameters parameters, IBaseResource contentEndpoint, IBaseResource terminologyEndpoint,
       IBaseResource dataEndpoint) {
     this.repository =
-        Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository, dataEndpoint,
+            contentEndpoint, terminologyEndpoint);
 
     return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,

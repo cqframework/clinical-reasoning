@@ -1,8 +1,7 @@
 package org.opencds.cqf.cql.evaluator.fhir.test;
 
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 import com.google.common.collect.Lists;
 
@@ -20,7 +19,7 @@ public class TestRepositoryFactory {
     var terminology =
         new InMemoryFhirRepository(fhirContext, clazz, Lists.newArrayList("vocabulary"), true);
 
-    return Repositories.proxy(data, content, terminology);
+    return org.opencds.cqf.fhir.utility.repository.Repositories.proxy(data, content, terminology);
   }
 
   public static Repository createRepository(FhirContext fhirContext, Class<?> clazz,
@@ -34,6 +33,6 @@ public class TestRepositoryFactory {
         new InMemoryFhirRepository(fhirContext, clazz, Lists.newArrayList(path + "/vocabulary"),
             true);
 
-    return Repositories.proxy(data, content, terminology);
+    return org.opencds.cqf.fhir.utility.repository.Repositories.proxy(data, content, terminology);
   }
 }

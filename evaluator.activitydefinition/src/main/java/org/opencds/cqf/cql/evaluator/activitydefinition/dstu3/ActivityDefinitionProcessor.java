@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.Communication;
 import org.hl7.fhir.dstu3.model.CommunicationRequest;
+import org.hl7.fhir.dstu3.model.CommunicationRequest.CommunicationRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
@@ -30,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.fhir.helper.dstu3.InputParameterResolver;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.fhir.api.Repository;
@@ -130,12 +132,14 @@ public class ActivityDefinitionProcessor
     var defaultLibraryUrl =
         activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getReference()
             : null;
+    var inputParams = new InputParameterResolver(subjectId, encounterId, practitionerId, parameters,
+        useServerData, bundle, repository).getParameters();
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
-        var expressionResult = libraryEngine.resolveExpression(subjectId, "Patient",
+        var expressionResult = libraryEngine.resolveExpression(subjectId,
             new CqfExpression(dynamicValue.getLanguage(), dynamicValue.getExpression(),
                 defaultLibraryUrl),
-            parameters, bundle);
+            inputParams, bundle);
         resolveDynamicValue(expressionResult, dynamicValue.getExpression(),
             dynamicValue.getPath(), result);
       }
@@ -434,8 +438,17 @@ public class ActivityDefinitionProcessor
   private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition) {
     var communicationRequest = new CommunicationRequest();
 
-    communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.UNKNOWN);
+    communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.DRAFT);
     communicationRequest.setSubject(new Reference(subjectId));
+
+    if (encounterId != null && !encounterId.isEmpty()) {
+      communicationRequest.setContext(new Reference(encounterId));
+    }
+
+    if (practitionerId != null && !practitionerId.isEmpty()) {
+      communicationRequest
+          .setRequester(new CommunicationRequestRequesterComponent(new Reference(practitionerId)));
+    }
 
     if (activityDefinition.hasCode() && activityDefinition.getCode().hasText()) {
       communicationRequest.addPayload()

@@ -1,29 +1,29 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.dstu3;
+package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.helpers;
 
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -32,7 +32,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
-public class TestItemGenerator {
+public class TestQuestionnaire {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
@@ -53,58 +53,55 @@ public class TestItemGenerator {
     return jsonParser.parseResource(open(asset));
   }
 
-  public static QuestionnaireItemGenerator buildGenerator(Repository repository, String patientId,
-      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-    return new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+  public static QuestionnaireProcessor buildProcessor(Repository repository) {
+    return new QuestionnaireProcessor(repository, evaluationSettings);
   }
 
   /** Fluent interface starts here **/
 
   public static class Assert {
-    public static GenerateResult that(String type, String profile, String patientId) {
-      return new GenerateResult(type, profile, patientId);
+    public static QuestionnaireResult that(String questionnaireName, String patientId) {
+      return new QuestionnaireResult(questionnaireName, patientId);
     }
   }
 
-  static class GenerateResult {
-    private DataRequirement input;
-    private String profileId;
+  static class QuestionnaireResult {
+    private Questionnaire questionnaire;
     private String patientId;
     private Repository repository;
     private Repository dataRepository;
     private Repository contentRepository;
     private Repository terminologyRepository;
-    private IBaseBundle bundle;
-    private IBaseParameters parameters;
+    private Bundle bundle;
+    private Parameters parameters;
 
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
 
-    public GenerateResult(String type, String profile, String patientId) {
-      this.input = new DataRequirement(new CodeType(type)).addProfile(profile);
-      this.profileId = profile.substring(profile.lastIndexOf("/") + 1);
+    public QuestionnaireResult(String questionnaireName, String patientId) {
+      questionnaire = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
       this.patientId = patientId;
     }
 
-    public GenerateResult withData(String dataAssetName) {
+    public QuestionnaireResult withData(String dataAssetName) {
       dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
-    public GenerateResult withContent(String dataAssetName) {
+    public QuestionnaireResult withContent(String dataAssetName) {
       contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
-    public GenerateResult withTerminology(String dataAssetName) {
+    public QuestionnaireResult withTerminology(String dataAssetName) {
       terminologyRepository =
           new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
 
       return this;
     }
 
-    public GenerateResult withAdditionalData(String dataAssetName) {
+    public QuestionnaireResult withAdditionalData(String dataAssetName) {
       var data = parse(dataAssetName);
       bundle =
           data.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode()) ? (Bundle) data
@@ -114,13 +111,13 @@ public class TestItemGenerator {
       return this;
     }
 
-    public GenerateResult withParameters(IBaseParameters params) {
+    public QuestionnaireResult withParameters(Parameters params) {
       parameters = params;
 
       return this;
     }
 
-    public GenerateResult withRepository(Repository repository) {
+    public QuestionnaireResult withRepository(Repository repository) {
       this.repository = repository;
 
       return this;
@@ -136,7 +133,7 @@ public class TestItemGenerator {
       }
       if (contentRepository == null) {
         contentRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources"), false);
+            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
       }
       if (terminologyRepository == null) {
         terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
@@ -146,30 +143,78 @@ public class TestItemGenerator {
       repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
     }
 
-    public GeneratedItem generateItem() {
+    public GeneratedQuestionnaire prePopulate() {
       buildRepository();
       var libraryEngine = new LibraryEngine(repository, evaluationSettings);
-      return new GeneratedItem(buildGenerator(this.repository, this.patientId, this.parameters,
-          this.bundle, libraryEngine).generateItem(input, 0), profileId);
+      return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(questionnaire,
+          patientId, parameters, bundle, libraryEngine));
+    }
+
+    public GeneratedQuestionnaireResponse populate() {
+      buildRepository();
+      var libraryEngine = new LibraryEngine(repository, evaluationSettings);
+      return new GeneratedQuestionnaireResponse(
+          (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire, patientId,
+              parameters, bundle, libraryEngine));
+    }
+
+    public Bundle questionnairePackage() {
+      buildRepository();
+      return buildProcessor(repository).packageQuestionnaire(questionnaire, true);
     }
   }
 
-  static class GeneratedItem {
+  static class GeneratedQuestionnaire {
     Questionnaire questionnaire;
 
-    public GeneratedItem(QuestionnaireItemComponent item, String id) {
-      this.questionnaire = new Questionnaire().setItem(Collections.singletonList(item));
-      this.questionnaire.setId(id);
+    public GeneratedQuestionnaire(Questionnaire questionnaire) {
+      this.questionnaire = questionnaire;
     }
 
-    public void isEqualsTo(String expectedItemAssetName) {
+    public void isEqualsTo(String expectedQuestionnaireAssetName) {
       try {
-        JSONAssert.assertEquals(load(expectedItemAssetName),
+        JSONAssert.assertEquals(load(expectedQuestionnaireAssetName),
             jsonParser.encodeResourceToString(questionnaire), true);
       } catch (JSONException | IOException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
+    }
+
+    public GeneratedQuestionnaire hasErrors() {
+      assertTrue(questionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaire.hasContained());
+      assertTrue(questionnaire.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
+    }
+  }
+
+  static class GeneratedQuestionnaireResponse {
+    QuestionnaireResponse questionnaireResponse;
+
+    public GeneratedQuestionnaireResponse(QuestionnaireResponse questionnaireResponse) {
+      this.questionnaireResponse = questionnaireResponse;
+    }
+
+    public void isEqualsTo(String expectedQuestionnaireResponseAssetName) {
+      try {
+        JSONAssert.assertEquals(load(expectedQuestionnaireResponseAssetName),
+            jsonParser.encodeResourceToString(questionnaireResponse), true);
+      } catch (JSONException | IOException e) {
+        e.printStackTrace();
+        fail("Unable to compare Jsons: " + e.getMessage());
+      }
+    }
+
+    public GeneratedQuestionnaireResponse hasErrors() {
+      assertTrue(questionnaireResponse.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaireResponse.hasContained());
+      assertTrue(questionnaireResponse.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
     }
   }
 }

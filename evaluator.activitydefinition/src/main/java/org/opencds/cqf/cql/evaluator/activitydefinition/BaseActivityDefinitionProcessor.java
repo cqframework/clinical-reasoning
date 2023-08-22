@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -15,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.fhir.helper.NestedValueResolver;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
@@ -22,7 +24,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
@@ -39,7 +40,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   public static final String MISSING_CODE_PROPERTY = "Missing required code property";
   protected static final List<String> EXCLUDED_EXTENSION_LIST = Arrays
       .asList(Constants.CPG_KNOWLEDGE_CAPABILITY, Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL);
-  private final ModelResolver modelResolver;
+  protected final ModelResolver modelResolver;
+  protected final NestedValueResolver nestedValueResolver;
   protected final EvaluationSettings evaluationSettings;
   protected Repository repository;
 
@@ -48,6 +50,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   protected String practitionerId;
   protected String organizationId;
   protected IBaseParameters parameters;
+  protected Boolean useServerData;
   protected IBaseBundle bundle;
   protected LibraryEngine libraryEngine;
 
@@ -57,7 +60,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     this.repository = requireNonNull(repository, "repository can not be null");
     modelResolver = new FhirModelResolverFactory()
-        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
+        .create(fhirContext().getVersion().getVersion().getFhirVersionString());
+    nestedValueResolver = new NestedValueResolver(fhirContext(), modelResolver);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -72,39 +76,54 @@ public abstract class BaseActivityDefinitionProcessor<T> {
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
       CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
-      String encounterId, String practitionerId, String organizationId, String userType,
-      String userLanguage, String userTaskContext, String setting, String settingContext,
-      IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
-      IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
+      String encounterId, String practitionerId, String organizationId, IBaseDatatype userType,
+      IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
+      IBaseDatatype settingContext) {
+    return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
+        organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
+        null, true, null, new LibraryEngine(this.repository, this.evaluationSettings));
+  }
+
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
+      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+      String encounterId, String practitionerId, String organizationId, IBaseDatatype userType,
+      IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
+      IBaseDatatype settingContext, IBaseParameters parameters, Boolean useServerData,
+      IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
+      IBaseResource terminologyEndpoint) {
     this.repository =
         Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
     return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
-        parameters, bundle, new LibraryEngine(this.repository, this.evaluationSettings));
+        parameters, useServerData, bundle,
+        new LibraryEngine(this.repository, this.evaluationSettings));
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
       CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
-      String encounterId, String practitionerId, String organizationId, String userType,
-      String userLanguage, String userTaskContext, String setting, String settingContext,
-      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+      String encounterId, String practitionerId, String organizationId, IBaseDatatype userType,
+      IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
+      IBaseDatatype settingContext, IBaseParameters parameters, Boolean useServerData,
+      IBaseBundle bundle, LibraryEngine libraryEngine) {
     return apply(resolveActivityDefinition(theId, theCanonical, theActivityDefinition), subjectId,
         encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext,
-        setting, settingContext, parameters, bundle, libraryEngine);
+        setting, settingContext, parameters, useServerData, bundle, libraryEngine);
   }
 
   public IBaseResource apply(T theActivityDefinition, String subjectId, String encounterId,
-      String practitionerId, String organizationId, String userType, String userLanguage,
-      String userTaskContext, String setting, String settingContext, IBaseParameters parameters,
+      String practitionerId, String organizationId, IBaseDatatype userType,
+      IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
+      IBaseDatatype settingContext, IBaseParameters parameters, Boolean useServerData,
       IBaseBundle bundle, LibraryEngine libraryEngine) {
     this.subjectId = subjectId;
     this.encounterId = encounterId;
     this.practitionerId = practitionerId;
     this.organizationId = organizationId;
     this.parameters = parameters;
-    this.libraryEngine = libraryEngine;
+    this.useServerData = useServerData;
     this.bundle = bundle;
+    this.libraryEngine = libraryEngine;
 
     return applyActivityDefinition(theActivityDefinition);
   }
@@ -125,43 +144,9 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     }
 
     if (path.contains(".")) {
-      setNestedValue(resource, path, result.get(0));
+      nestedValueResolver.setNestedValue(resource, path, result.get(0));
     } else {
       modelResolver.setValue(resource, path, result.get(0));
-    }
-  }
-
-  protected void setNestedValue(IBase target, String path, IBase value) {
-    var def = (BaseRuntimeElementCompositeDefinition<?>) fhirContext()
-        .getElementDefinition(target.getClass());
-    var identifiers = path.split("\\.");
-    for (int i = 0; i < identifiers.length; i++) {
-      var identifier = identifiers[i];
-      var isList = identifier.contains("[");
-      var isLast = i == identifiers.length - 1;
-      var index =
-          isList ? Character.getNumericValue(identifier.charAt(identifier.indexOf("[") + 1)) : 0;
-      var targetPath = isList ? identifier.replaceAll("\\[\\d\\]", "") : identifier;
-      var targetDef = def.getChildByName(targetPath);
-
-      var targetValues = targetDef.getAccessor().getValues(target);
-      IBase targetValue;
-      if (targetValues.size() >= index + 1 && !isLast) {
-        targetValue = targetValues.get(index);
-      } else {
-        var elementDef = targetDef.getChildByName(targetPath);
-        if (isLast) {
-          targetValue = (IBase) modelResolver.as(value, elementDef.getImplementingClass(), false);
-        } else {
-          targetValue = elementDef.newInstance(targetDef.getInstanceConstructorArguments());
-        }
-        targetDef.getMutator().addValue(target, targetValue);
-      }
-      target = targetValue;
-      if (!isLast) {
-        var nextDef = fhirContext().getElementDefinition(target.getClass());
-        def = (BaseRuntimeElementCompositeDefinition<?>) nextDef;
-      }
     }
   }
 

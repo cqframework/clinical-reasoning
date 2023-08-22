@@ -33,7 +33,6 @@ public class QuestionnaireItemGenerator {
   protected final String patientId;
   protected final IBaseBundle bundle;
   protected final IBaseParameters parameters;
-  protected final String subjectType = "Patient";
   protected final QuestionnaireItemService questionnaireItemService;
   protected final NestedQuestionnaireItemService nestedQuestionnaireItemService;
   protected QuestionnaireItemComponent questionnaireItem;
@@ -95,7 +94,7 @@ public class QuestionnaireItemGenerator {
       if (extValue instanceof Expression) {
         var expression = (Expression) extValue;
         var results =
-            libraryEngine.getExpressionResult(patientId, subjectType, expression.getExpression(),
+            libraryEngine.getExpressionResult(patientId, expression.getExpression(),
                 expression.getLanguage(), expression.getReference(), parameters, bundle);
         var result = results == null || results.isEmpty() ? null : results.get(0);
         if (result instanceof Resource) {

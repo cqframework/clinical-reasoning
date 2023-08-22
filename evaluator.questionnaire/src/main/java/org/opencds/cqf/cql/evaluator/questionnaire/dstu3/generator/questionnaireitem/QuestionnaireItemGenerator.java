@@ -1,23 +1,21 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem;
+package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.generator.questionnaireitem;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.SearchHelper.searchRepositoryByCanonical;
+import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.ElementDefinition;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.DataRequirement;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,7 @@ public class QuestionnaireItemGenerator {
       LibraryEngine libraryEngine) {
     QuestionnaireItemService questionnaireItemService = new QuestionnaireItemService();
     NestedQuestionnaireItemService nestedQuestionnaireItemService =
-        NestedQuestionnaireItemService.of(repository, patientId, parameters, bundle, libraryEngine);
+        NestedQuestionnaireItemService.of(repository);
     return new QuestionnaireItemGenerator(repository, libraryEngine, patientId, parameters, bundle,
         questionnaireItemService, nestedQuestionnaireItemService);
   }
@@ -88,31 +86,16 @@ public class QuestionnaireItemGenerator {
 
   protected void processElements(StructureDefinition profile) {
     int childCount = questionnaireItem.getItem().size();
-    Resource caseFeature = null;
-    if (profile.hasExtension(Constants.CPG_FEATURE_EXPRESSION)) {
-      var extValue = profile.getExtensionByUrl(Constants.CPG_FEATURE_EXPRESSION).getValue();
-      if (extValue instanceof Expression) {
-        var expression = (Expression) extValue;
-        var results =
-            libraryEngine.getExpressionResult(patientId, expression.getExpression(),
-                expression.getLanguage(), expression.getReference(), parameters, bundle);
-        var result = results == null || results.isEmpty() ? null : results.get(0);
-        if (result instanceof Resource) {
-          caseFeature = (Resource) result;
-        }
-      }
-    }
     for (ElementDefinition element : getElementsWithNonNullElementType(profile)) {
       childCount++;
-      processElement(profile, element, childCount, caseFeature);
+      processElement(profile, element, childCount);
     }
   }
 
   protected void processElement(
       StructureDefinition profile,
       ElementDefinition element,
-      int childCount,
-      Resource caseFeature) {
+      int childCount) {
     final String childLinkId =
         String.format(CHILD_LINK_ID_FORMAT, questionnaireItem.getLinkId(), childCount);
     try {
@@ -120,8 +103,7 @@ public class QuestionnaireItemGenerator {
           nestedQuestionnaireItemService.getNestedQuestionnaireItem(
               profile.getUrl(),
               element,
-              childLinkId,
-              caseFeature);
+              childLinkId);
       questionnaireItem.addItem(nestedQuestionnaireItem);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());

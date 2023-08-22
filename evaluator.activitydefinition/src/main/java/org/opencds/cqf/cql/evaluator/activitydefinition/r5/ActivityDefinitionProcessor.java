@@ -33,6 +33,7 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.SupplyRequest;
 import org.hl7.fhir.r5.model.Task;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.fhir.helper.r5.InputParameterResolver;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.fhir.api.Repository;
@@ -127,24 +128,18 @@ public class ActivityDefinitionProcessor
     resolveMeta(result, activityDefinition);
     resolveExtensions(result, activityDefinition);
 
-    String subjectCode = null;
-    if (activityDefinition.hasSubjectCodeableConcept()) {
-      var concept = activityDefinition.getSubjectCodeableConcept();
-      if (concept.hasCoding()) {
-        subjectCode = concept.getCoding().get(0).getCode();
-      }
-    }
-    var subjectType = subjectCode != null ? subjectCode : "Patient";
     var defaultLibraryUrl =
         activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getValueAsString()
             : null;
+    var inputParams = new InputParameterResolver(subjectId, encounterId, practitionerId, parameters,
+        useServerData, bundle, repository).getParameters();
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
         var expression = dynamicValue.getExpression();
-        var expressionResult = libraryEngine.resolveExpression(subjectId, subjectType,
+        var expressionResult = libraryEngine.resolveExpression(subjectId,
             new CqfExpression(expression.getLanguage(), expression.getExpression(),
                 expression.hasReference() ? expression.getReference() : defaultLibraryUrl),
-            parameters, bundle);
+            inputParams, bundle);
         resolveDynamicValue(expressionResult, expression.getExpression(),
             dynamicValue.getPath(), result);
       }
@@ -433,8 +428,16 @@ public class ActivityDefinitionProcessor
   private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition) {
     var communicationRequest = new CommunicationRequest();
 
-    communicationRequest.setStatus(RequestStatus.UNKNOWN);
+    communicationRequest.setStatus(RequestStatus.DRAFT);
     communicationRequest.setSubject(new Reference(subjectId));
+
+    if (encounterId != null && !encounterId.isEmpty()) {
+      communicationRequest.setEncounter(new Reference(encounterId));
+    }
+
+    if (practitionerId != null && !practitionerId.isEmpty()) {
+      communicationRequest.setRequester(new Reference(practitionerId));
+    }
 
     if (activityDefinition.hasDoNotPerform()) {
       communicationRequest.setDoNotPerform(activityDefinition.getDoNotPerform());

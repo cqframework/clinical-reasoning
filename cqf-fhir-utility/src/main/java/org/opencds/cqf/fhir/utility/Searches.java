@@ -58,7 +58,7 @@ public class Searches {
       return this.values;
     }
 
-    SearchBuilder withStringParam(String name, String value) {
+    public SearchBuilder withStringParam(String name, String value) {
       if (values == null) {
         values = new HashMap<>();
       }
@@ -67,7 +67,7 @@ public class Searches {
       return this;
     }
 
-    SearchBuilder withTokenParam(String name, String value) {
+    public SearchBuilder withTokenParam(String name, String value) {
       if (values == null) {
         values = new HashMap<>();
       }
@@ -76,7 +76,7 @@ public class Searches {
       return this;
     }
 
-    SearchBuilder withUriParam(String name, String value) {
+    public SearchBuilder withUriParam(String name, String value) {
       if (values == null) {
         values = new HashMap<>();
       }

@@ -63,7 +63,7 @@ public class LibraryEngine {
 
   public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
       IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
-    var libraryEvaluator = Contexts.forRepository(settings, repository, additionalData);
+    var libraryEvaluator = Contexts.forRepository(settings, repository, additionalData, true);
 
     return libraryEvaluator.evaluate(id, buildContextParameter(patientId), parameters,
         expressions);
@@ -82,18 +82,15 @@ public class LibraryEngine {
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
     var libraryEvaluator = Contexts.forRepository(settings, repository, bundle,
-        librarySourceProviders, cqlFhirParametersConverter);
+        librarySourceProviders, cqlFhirParametersConverter, false);
 
     return libraryEvaluator.evaluate(
         new VersionedIdentifier().withId("expression").withVersion("1.0.0"),
         buildContextParameter(patientId), parameters, expressions);
   }
 
-  // Likely no longer need subjectType, but won't be sure until after fhir path evaluation is
-  // resolved
-  public List<IBase> getExpressionResult(String subjectId, String subjectType,
-      String expression, String language, String libraryToBeEvaluated,
-      IBaseParameters parameters, IBaseBundle bundle) {
+  public List<IBase> getExpressionResult(String subjectId, String expression, String language,
+      String libraryToBeEvaluated, IBaseParameters parameters, IBaseBundle bundle) {
     validateExpression(language, expression);
     List<IBase> results = null;
     IBaseParameters parametersResult;
@@ -120,27 +117,6 @@ public class LibraryEngine {
         results = resolveParameterValues(ParametersUtil
             .getNamedParameters(fhirContext, parametersResult, expression));
         break;
-      // case "text/fhirpath":
-      // List<IBase> outputs;
-      // try {
-      // var fedRepo = theBundle == null ? repository
-      // : new FederatedRepository(repository,
-      // new InMemoryFhirRepository(repository.fhirContext(), theBundle));
-      // setEvaluationContext(theParameters);
-      // outputs =
-      // fhirPath.evaluate(getSubject(fedRepo, theSubjectId, theSubjectType),
-      // theExpression,
-      // IBase.class);
-      // } catch (Exception e) {
-      // throw new IllegalArgumentException("Error evaluating FHIRPath expression", e);
-      // }
-      // if (outputs != null && outputs.size() == 1) {
-      // results = Collections.singletonList(outputs.get(0));
-      // } else {
-      // throw new IllegalArgumentException(
-      // "Expected only one value when evaluating FHIRPath expression: " + theExpression);
-      // }
-      // break;
       default:
         logger.warn("An action language other than CQL was found: {}", language);
     }
@@ -210,14 +186,12 @@ public class LibraryEngine {
     return returnValues;
   }
 
-  public List<IBase> resolveExpression(String patientId, String subjectType,
+  public List<IBase> resolveExpression(String patientId,
       CqfExpression expression, IBaseParameters params, IBaseBundle bundle) {
-    var result = getExpressionResult(patientId, subjectType,
-        expression.getExpression(), expression.getLanguage(), expression.getLibraryUrl(), params,
-        bundle);
+    var result = getExpressionResult(patientId, expression.getExpression(),
+        expression.getLanguage(), expression.getLibraryUrl(), params, bundle);
     if (result == null && expression.getAltExpression() != null) {
-      result = getExpressionResult(patientId, null,
-          expression.getAltExpression(),
+      result = getExpressionResult(patientId, expression.getAltExpression(),
           expression.getAltLanguage(), expression.getAltLibraryUrl(), params, bundle);
     }
 

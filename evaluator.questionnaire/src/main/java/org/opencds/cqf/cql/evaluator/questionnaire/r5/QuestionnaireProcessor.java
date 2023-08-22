@@ -28,7 +28,6 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.r5.PackageHelper;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
@@ -100,19 +99,12 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return populatedQuestionnaire;
   }
 
-  private List<IBase> getExpressionResult(Expression expression, String itemLinkId,
-      IBase populationContext) {
+  private List<IBase> getExpressionResult(Expression expression, String itemLinkId) {
     if (expression == null || !expression.hasExpression()) {
       return null;
     }
     try {
-      var subjectId = patientId;
-      var expressionSubjectType = subjectType;
-      if (populationContext != null && !populationContext.isEmpty()) {
-        subjectId = ((Resource) populationContext).getIdPart();
-        expressionSubjectType = ((Resource) populationContext).fhirType();
-      }
-      return libraryEngine.resolveExpression(subjectId, expressionSubjectType,
+      return libraryEngine.resolveExpression(patientId,
           new CqfExpression(expression, libraryUrl, null),
           parameters, bundle);
     } catch (Exception ex) {
@@ -140,11 +132,11 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     return null;
   }
 
-  private void getInitial(QuestionnaireItemComponent item, IBase populationContext) {
+  private void getInitial(QuestionnaireItemComponent item) {
     var initialExpression = getInitialExpression(item);
     if (initialExpression != null) {
       // evaluate expression and set the result as the initialAnswer on the item
-      var results = getExpressionResult(initialExpression, item.getLinkId(), populationContext);
+      var results = getExpressionResult(initialExpression, item.getLinkId());
 
       // TODO: what to do with choice answerOptions of type valueCoding with an
       // expression that returns a valueString
@@ -167,8 +159,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     List<QuestionnaireItemComponent> populatedItems = new ArrayList<>();
     var contextExpression = (Expression) groupItem
         .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT).getValue();
-    var populationContext =
-        getExpressionResult(contextExpression, groupItem.getLinkId(), null);
+    var populationContext = getExpressionResult(contextExpression, groupItem.getLinkId());
     if (populationContext == null || populationContext.isEmpty()) {
       return Collections.singletonList(groupItem.copy());
     }
@@ -204,7 +195,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         if (item.hasItem()) {
           populatedItem.setItem(processItems(item.getItem()));
         } else {
-          getInitial(populatedItem, null);
+          getInitial(populatedItem);
         }
         populatedItems.add(populatedItem);
       }

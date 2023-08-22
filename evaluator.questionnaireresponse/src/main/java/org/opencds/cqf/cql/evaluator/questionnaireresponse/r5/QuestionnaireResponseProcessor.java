@@ -163,19 +163,12 @@ public class QuestionnaireResponseProcessor
     return property;
   }
 
-  private List<IBase> getExpressionResult(Expression expression, String itemLinkId,
-      IBase populationContext) {
+  private List<IBase> getExpressionResult(Expression expression, String itemLinkId) {
     if (expression == null || expression.getExpression().isEmpty()) {
       return null;
     }
     try {
-      var subjectId = patientId;
-      var expressionSubjectType = subjectType;
-      if (populationContext != null && !populationContext.isEmpty()) {
-        subjectId = ((Resource) populationContext).getIdPart();
-        expressionSubjectType = ((Resource) populationContext).fhirType();
-      }
-      return libraryEngine.resolveExpression(subjectId, expressionSubjectType,
+      return libraryEngine.resolveExpression(patientId,
           new CqfExpression(expression, libraryUrl, null), parameters, bundle);
     } catch (Exception ex) {
       var message =
@@ -205,7 +198,7 @@ public class QuestionnaireResponseProcessor
         : questionnaireResponse.getExtensionByUrl(contextExtension);
     if (itemExtractionContext != null) {
       var contextExpression = (Expression) itemExtractionContext.getValue();
-      var context = getExpressionResult(contextExpression, item.getLinkId(), null);
+      var context = getExpressionResult(contextExpression, item.getLinkId());
       if (context != null && !context.isEmpty()) {
         // TODO: edit context instead of creating new resources
       }

@@ -1,9 +1,8 @@
-package org.opencds.cqf.cql.evaluator;
+package org.opencds.cqf.fhir.cql;
 
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.LibraryBuilder.SignatureLevel;
-import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 
 // TODO: Migrate upstream to engine project. Or is it duplicated already?
 public class CqlOptions {

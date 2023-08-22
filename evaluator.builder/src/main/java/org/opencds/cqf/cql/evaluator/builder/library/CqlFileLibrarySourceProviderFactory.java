@@ -22,7 +22,7 @@ import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @Named
@@ -39,7 +39,7 @@ public class CqlFileLibrarySourceProviderFactory implements TypedLibrarySourcePr
   @Override
   public LibrarySourceProvider create(String url, List<String> headers) {
     List<String> libraries = this.getLibrariesFromPath(url);
-    return new InMemoryLibrarySourceProvider(libraries);
+    return new StringLibrarySourceProvider(libraries);
   }
 
   protected List<String> getLibrariesFromPath(String path) {

@@ -10,7 +10,7 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
  * This class is used to apply configuration to a RetrieveProvider
  */
 public class RetrieveProviderConfigurerImpl
-    implements org.opencds.cqf.fhir.cql.RetrieveProviderConfigurer {
+    implements RetrieveProviderConfigurer {
 
   RetrieveProviderConfig retrieveProviderConfig;
 

@@ -30,10 +30,8 @@ import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
+import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.RetrieveProviderConfig;
 import org.opencds.cqf.fhir.cql.engine.terminology.PriorityTerminologyProvider;
 import org.slf4j.Logger;
@@ -282,7 +280,7 @@ public class CqlEvaluatorBuilder {
       Collections.reverse(providers);
 
       if (providers.isEmpty()) {
-        providers.add(new NoOpRetrieveProvider());
+        providers.add(null);
       }
 
       RetrieveProviderConfigurer retrieveProviderConfigurer =
@@ -292,7 +290,7 @@ public class CqlEvaluatorBuilder {
       }
 
       dataProviders.put(entry.getKey(), this.decorate(
-          new CompositeDataProvider(modelResolver, new PriorityRetrieveProvider(providers))));
+          new CompositeDataProvider(modelResolver, providers.get(0))));
     }
 
     return dataProviders;

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.r4.model.Coding;
@@ -47,10 +48,9 @@ import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
@@ -238,7 +238,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     LibraryManager ll = new LibraryManager(new ModelManager());
     ll.getLibrarySourceLoader()
-        .registerProvider(new InMemoryLibrarySourceProvider(Collections.singletonList(cql)));
+        .registerProvider(new StringLibrarySourceProvider(Collections.singletonList(cql)));
 
     var modelResolver = new CachingModelResolverDecorator(new R4FhirModelResolver());
     DataProvider dataProvider = new CompositeDataProvider(modelResolver, retrieveProvider);

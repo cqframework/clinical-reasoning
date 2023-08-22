@@ -18,6 +18,8 @@
     <module>cqf-fhir-test</module>
     <module>cqf-fhir-cql</module>
     <module>cqf-fhir-cr</module>
+    <module>cqf-fhir-jackson</module>
+    <module>cqf-fhir-jaxb</module>
     <module>cqf-fhir-bom</module>
 
     <!-- doesn't publish a module, but ensures documentation snippets build correctly -->
@@ -25,7 +27,6 @@
     <module>cqf-fhir-benchmark</module>
 
     <!-- old modules we are replacing -->
-    <module>evaluator</module>
     <module>evaluator.library</module>
     <module>evaluator.builder</module>
     <module>evaluator.spring</module>

@@ -10,13 +10,13 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -91,7 +91,7 @@ public class LibraryEngine {
     expressions.add("return");
 
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-    librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
+    librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
     var libraryEvaluator = Evaluators.forRepository(settings, repository, theBundle,
         librarySourceProviders, cqlFhirParametersConverter);
 

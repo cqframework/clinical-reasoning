@@ -3,20 +3,19 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.opencds.cqf.cql</groupId>
-  <artifactId>evaluator.jaxb-deps</artifactId>
+  <groupId>org.opencds.cqf.fhir</groupId>
+  <artifactId>cqf-fhir-jaxb</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>evaluator.jaxb-deps</name>
-  <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
-
-  <description>CQL Evaluator - JAXB Dependencies</description>
+  <name>FHIR Clinical Reasoning (JAXB)</name>
+  <description>Aggregator module for JAXB dependencies</description>
 
   <parent>
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.shared</artifactId>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <dependencies>

@@ -17,7 +17,6 @@ import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.builder.ModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.fhir.utility.Constants;
 
@@ -102,7 +101,7 @@ public class DataProviderFactory
 
     RetrieveProvider retrieveProvider = null;
     if (url == null || connectionType == null) {
-      retrieveProvider = new NoOpRetrieveProvider();
+      retrieveProvider = null;
     } else {
 
       for (TypedRetrieveProviderFactory factory : this.retrieveProviderFactories) {

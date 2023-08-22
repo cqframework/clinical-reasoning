@@ -23,8 +23,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.jackson-deps</artifactId>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-jackson</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
       <type>pom</type>
     </dependency>
@@ -77,6 +77,13 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-jackson</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.skyscreamer</groupId>
@@ -89,18 +96,6 @@
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.version}</version>
       <optional>true</optional>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>model-jackson</artifactId>
-      <version>${cql.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>elm-jackson</artifactId>
-      <version>${cql.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

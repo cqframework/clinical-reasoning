@@ -652,7 +652,7 @@ public class R4MeasureReportBuilder
     } else if (measureDef.getDefaultMeasurementPeriod() != null) {
       report.setPeriod(getPeriod(measureDef.getDefaultMeasurementPeriod()));
     }
-    report.setMeasure(measure.getUrl());
+    report.setMeasure(getMeasure(measure));
     report.setDate(new java.util.Date());
     report.setImplicitRules(measure.getImplicitRules());
     report.setImprovementNotation(measure.getImprovementNotation());
@@ -720,6 +720,14 @@ public class R4MeasureReportBuilder
     return (item.getUrl() != null
         && StringUtils.equalsIgnoreCase(item.getUrl(), MeasureConstants.POPULATION_BASIS_URL)
         && StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
+  }
+
+  private String getMeasure(Measure measure) {
+    if (StringUtils.isNotBlank(measure.getUrl()) && !measure.getUrl().contains("|")
+        && measure.hasVersion()) {
+      return new StringBuffer(measure.getUrl()).append("|").append(measure.getVersion()).toString();
+    }
+    return measure.getUrl();
   }
 
   private Coding supplementalDataCoding;

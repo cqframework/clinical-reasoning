@@ -136,7 +136,7 @@ public class SimpleMeasureProcessorTest {
         .report();
 
     assertEquals(report.getType(), MeasureReportType.INDIVIDUAL);
-    assertEquals(report.getMeasure(), "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108");
+    assertEquals(report.getMeasure(), "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108|8.3.000");
     assertEquals(report.getSubject().getReference(), "Patient/numer-EXM108");
 
     // TODO: The MeasureProcessor assumes local timezone if none is specified.

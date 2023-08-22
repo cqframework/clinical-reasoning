@@ -723,7 +723,7 @@ public class R4MeasureReportBuilder
   }
 
   private String getMeasure(Measure measure) {
-    if (StringUtils.isNoneBlank(measure.getUrl()) && !measure.getUrl().contains("|")
+    if (StringUtils.isNotBlank(measure.getUrl()) && !measure.getUrl().contains("|")
         && measure.hasVersion()) {
       return new StringBuffer(measure.getUrl()).append("|").append(measure.getVersion()).toString();
     }

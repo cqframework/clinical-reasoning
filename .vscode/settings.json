@@ -127,7 +127,7 @@
   },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    // "source.organizeImports": true
   },
   "editor.detectIndentation": false,
   "editor.foldingImportsByDefault": true,

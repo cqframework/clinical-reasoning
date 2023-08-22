@@ -16,9 +16,12 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -47,8 +50,8 @@ public class LibraryEngine {
     this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     fhirContext = repository.fhirContext();
     fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    modelResolver = new FhirModelResolverFactory()
-        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
+    modelResolver = FhirModelResolverCache.resolverForVersion(
+        repository.fhirContext().getVersion().getVersion());
   }
 
   private Pair<String, Object> buildContextParameter(String thePatientId) {
@@ -71,7 +74,7 @@ public class LibraryEngine {
 
   public IBaseParameters evaluate(VersionedIdentifier theId, String thePatientId,
       IBaseParameters theParameters, IBaseBundle theAdditionalData, Set<String> theExpressions) {
-    var libraryEvaluator = Contexts.forRepository(settings, repository, theAdditionalData);
+    var libraryEvaluator = Evaluators.forRepository(settings, repository, theAdditionalData);
 
     return libraryEvaluator.evaluate(theId, buildContextParameter(thePatientId), theParameters,
         theExpressions);
@@ -80,7 +83,7 @@ public class LibraryEngine {
   public IBaseParameters evaluateExpression(String theExpression, IBaseParameters theParameters,
       String thePatientId, List<Pair<String, String>> theLibraries, IBaseBundle theBundle) {
     var libraryConstructor = new LibraryConstructor(fhirContext);
-    var cqlFhirParametersConverter = Contexts.getCqlFhirParametersConverter(fhirContext);
+    var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
     var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(theParameters);
     var cql = libraryConstructor.constructCqlLibrary(theExpression, theLibraries, cqlParameters);
 
@@ -89,7 +92,7 @@ public class LibraryEngine {
 
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
-    var libraryEvaluator = Contexts.forRepository(settings, repository, theBundle,
+    var libraryEvaluator = Evaluators.forRepository(settings, repository, theBundle,
         librarySourceProviders, cqlFhirParametersConverter);
 
     return libraryEvaluator.evaluate(

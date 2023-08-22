@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.library;
+package org.opencds.cqf.fhir.cql;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -20,13 +20,12 @@ import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.builder.RetrieveProviderConfig;
-import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
@@ -36,9 +35,9 @@ import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class Contexts {
+public class Engines {
 
-  private Contexts() {}
+  private Engines() {}
 
   public static CqlEngine forRepository(Repository repository) {
     return forRepository(repository, EvaluationSettings.getDefault());
@@ -74,38 +73,6 @@ public class Contexts {
         settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
-  public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
-      IBaseBundle additionalData) {
-    List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-    return forRepository(settings, repository, additionalData, librarySourceProviders,
-        null);
-  }
-
-  public static LibraryEvaluator forRepository(EvaluationSettings settings,
-      Repository repository,
-      IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
-      CqlFhirParametersConverter cqlFhirParametersConverter) {
-    checkNotNull(settings);
-    checkNotNull(repository);
-    checkNotNull(librarySourceProviders);
-
-    if (cqlFhirParametersConverter == null) {
-      cqlFhirParametersConverter = getCqlFhirParametersConverter(repository.fhirContext());
-    }
-
-    var terminologyProvider = new RepositoryTerminologyProvider(repository);
-    librarySourceProviders.add(buildLibrarySource(repository));
-
-    var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
-        settings.getRetrieveSettings());
-    var environment =
-        buildEnvironment(settings, librarySourceProviders, terminologyProvider, dataProviders);
-
-    var cqlEngine =
-        new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
-
-    return new LibraryEvaluator(cqlFhirParametersConverter, cqlEngine);
-  }
 
   private static LibrarySourceProvider buildLibrarySource(Repository repository) {
     AdapterFactory adapterFactory = getAdapterFactory(repository.fhirContext());
@@ -148,8 +115,8 @@ public class Contexts {
     Map<String, DataProvider> dataProviders = new HashMap<>();
 
     var providers = new ArrayList<RetrieveProvider>();
-    var modelResolver = new FhirModelResolverFactory()
-        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
+    var modelResolver = FhirModelResolverCache
+        .resolverForVersion(repository.fhirContext().getVersion().getVersion());
     var retrieveProvider =
         new RepositoryRetrieveProvider(repository, retrieveSettings);
     providers.add(retrieveProvider);
@@ -158,7 +125,7 @@ public class Contexts {
     }
 
     var retrieveProviderConfigurer =
-        new RetrieveProviderConfigurer(RetrieveProviderConfig.defaultConfig());
+        new RetrieveProviderConfigurerImpl(RetrieveProviderConfig.defaultConfig());
     for (RetrieveProvider provider : providers) {
       retrieveProviderConfigurer.configure(provider, theTerminologyProvider);
     }

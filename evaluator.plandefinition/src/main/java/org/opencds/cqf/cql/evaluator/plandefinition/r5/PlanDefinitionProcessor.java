@@ -1,12 +1,12 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r5;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -49,13 +49,13 @@ import org.hl7.fhir.r5.model.UrlType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r5.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r5.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.r5.SearchHelper;
@@ -84,7 +84,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     super(repository, evaluationSettings);
     this.activityDefinitionProcessor =
         new ActivityDefinitionProcessor(this.repository, evaluationSettings);
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
+    this.questionnaireProcessor = null; // new QuestionnaireProcessor(this.repository,
+                                        // evaluationSettings);
     this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
   }
 

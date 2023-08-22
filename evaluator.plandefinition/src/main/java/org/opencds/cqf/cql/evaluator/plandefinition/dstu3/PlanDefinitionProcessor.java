@@ -1,13 +1,12 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
-import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
-import static java.util.Objects.requireNonNull;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -49,13 +48,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.dstu3.ContainedHelper;
 import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
@@ -84,7 +83,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     super(repository, evaluationSettings);
     this.activityDefinitionProcessor =
         new ActivityDefinitionProcessor(this.repository, evaluationSettings);
-    this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
+    this.questionnaireProcessor = null; // new QuestionnaireProcessor(this.repository,
+                                        // evaluationSettings);
     this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository);
   }
 
@@ -261,7 +261,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       RequestGroup requestGroup,
       Map<String, PlanDefinition.PlanDefinitionActionComponent> metConditions,
       PlanDefinition.PlanDefinitionActionComponent action) {
-    if ((getExtensionByUrl(planDefinition, Constants.CPG_QUESTIONNAIRE_GENERATE) != null)
+    if ((planDefinition.getExtensionByUrl(Constants.CPG_QUESTIONNAIRE_GENERATE) != null)
         && action.hasInput()) {
       for (var actionInput : action.getInput()) {
         if (actionInput.hasProfile()) {
@@ -469,7 +469,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       RequestGroup requestGroup, Task task) {
     if (action.hasExtension(Constants.SDC_QUESTIONNAIRE_PREPOPULATE)) {
       var questionnaireBundles = getQuestionnairePackage(
-          (Extension) getExtensionByUrl(action, Constants.SDC_QUESTIONNAIRE_PREPOPULATE));
+          action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE));
       for (var questionnaireBundle : questionnaireBundles) {
         var questionnaire = (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
         // Each bundle should contain a Questionnaire and supporting Library and ValueSet
@@ -528,7 +528,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as
     // the order id to pass
     var parameterExtension =
-        getExtensionByUrl(prepopulateExtension, Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER);
+        prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER);
     if (parameterExtension == null) {
       throw new IllegalArgumentException(String.format("Required extension for %s not found.",
           Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER));
@@ -544,7 +544,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var orderId = prepopulateParameter.toString();
 
     var questionnaireExtension =
-        getExtensionByUrl(prepopulateExtension, Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE);
+        prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE);
     if (questionnaireExtension == null) {
       throw new IllegalArgumentException(String.format("Required extension for %s not found.",
           Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE));

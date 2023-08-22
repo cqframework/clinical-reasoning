@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.builder;
+package org.opencds.cqf.fhir.cql;
 
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 

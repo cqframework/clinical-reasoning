@@ -34,6 +34,7 @@ import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.data.RetrieveProviderConfigurer;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.NoOpRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.PriorityRetrieveProvider;
+import org.opencds.cqf.fhir.cql.RetrieveProviderConfig;
 import org.opencds.cqf.fhir.cql.engine.terminology.PriorityTerminologyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

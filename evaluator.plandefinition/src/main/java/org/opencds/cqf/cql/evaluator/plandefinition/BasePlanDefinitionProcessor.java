@@ -15,12 +15,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.library.Contexts;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,10 +67,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     this.fhirPath = FhirPathCache.cachedForContext(repository.fhirContext());
     this.operationParametersParser = new OperationParametersParser(
-        Contexts.getAdapterFactory(repository.fhirContext()),
+        Engines.getAdapterFactory(repository.fhirContext()),
         new FhirTypeConverterFactory().create(repository.fhirContext().getVersion().getVersion()));
-    this.modelResolver = new FhirModelResolverFactory()
-        .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString());
+    modelResolver = FhirModelResolverCache.resolverForVersion(
+        repository.fhirContext().getVersion().getVersion());
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,

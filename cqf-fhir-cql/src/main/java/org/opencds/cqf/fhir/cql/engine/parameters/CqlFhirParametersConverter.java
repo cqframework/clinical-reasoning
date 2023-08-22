@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.library;
+package org.opencds.cqf.fhir.cql.engine.parameters;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -32,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 
-@Named
 public class CqlFhirParametersConverter {
 
   org.slf4j.Logger logger = LoggerFactory.getLogger(CqlFhirParametersConverter.class);
@@ -42,7 +38,6 @@ public class CqlFhirParametersConverter {
   protected FhirContext fhirContext;
   private IFhirPath fhirPath;
 
-  @Inject
   public CqlFhirParametersConverter(FhirContext fhirContext, AdapterFactory adapterFactory,
       FhirTypeConverter fhirTypeConverter) {
     this.fhirContext = requireNonNull(fhirContext);

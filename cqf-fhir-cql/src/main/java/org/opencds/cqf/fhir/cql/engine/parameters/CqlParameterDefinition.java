@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.library;
+package org.opencds.cqf.fhir.cql.engine.parameters;
 
 public class CqlParameterDefinition {
 

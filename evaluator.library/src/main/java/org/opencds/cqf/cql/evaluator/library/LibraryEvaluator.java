@@ -10,6 +10,7 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 
 public class LibraryEvaluator {
 

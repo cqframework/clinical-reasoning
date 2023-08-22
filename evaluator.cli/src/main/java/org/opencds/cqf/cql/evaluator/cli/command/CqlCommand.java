@@ -26,8 +26,6 @@ import org.opencds.cqf.cql.evaluator.builder.CqlEvaluatorBuilder;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
-import org.opencds.cqf.cql.evaluator.builder.data.FhirFileRetrieveProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
 import org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory;
@@ -262,10 +260,12 @@ public class CqlCommand implements Callable<Integer> {
 
   private org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory createDataProviderFactory(
       FhirContext fhirContext) {
-    var db = directoryBundler(fhirContext);
-    return new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
-        Set.of(new FhirModelResolverFactory()),
-        Set.of(new FhirFileRetrieveProviderFactory(fhirContext, db)));
+
+    return null;
+    // var db = directoryBundler(fhirContext);
+    // return new org.opencds.cqf.cql.evaluator.builder.data.DataProviderFactory(fhirContext,
+    // Set.of(new FhirModelResolverFactory()),
+    // Set.of(new FhirFileRetrieveProviderFactory(fhirContext, db)));
   }
 
   private DirectoryBundler directoryBundler(FhirContext fhirContext) {

@@ -3,7 +3,7 @@ package org.opencds.cqf.cql.evaluator.measure;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
 
 public class MeasureEvaluationOptions {

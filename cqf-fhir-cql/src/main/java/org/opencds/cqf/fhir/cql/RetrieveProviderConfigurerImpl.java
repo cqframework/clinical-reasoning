@@ -1,26 +1,20 @@
-package org.opencds.cqf.cql.evaluator.builder.data;
-
-import javax.inject.Inject;
-import javax.inject.Named;
+package org.opencds.cqf.fhir.cql;
 
 import org.opencds.cqf.cql.engine.fhir.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.retrieve.SearchParamFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.fhir.cql.RetrieveProviderConfig;
 
 /**
  * This class is used to apply configuration to a RetrieveProvider
  */
-@Named
-public class RetrieveProviderConfigurer
+public class RetrieveProviderConfigurerImpl
     implements org.opencds.cqf.fhir.cql.RetrieveProviderConfigurer {
 
   RetrieveProviderConfig retrieveProviderConfig;
 
-  @Inject
-  public RetrieveProviderConfigurer(RetrieveProviderConfig dataProviderConfig) {
+  public RetrieveProviderConfigurerImpl(RetrieveProviderConfig dataProviderConfig) {
     this.retrieveProviderConfig = dataProviderConfig;
   }
 

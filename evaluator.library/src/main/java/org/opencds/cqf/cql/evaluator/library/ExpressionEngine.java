@@ -12,6 +12,9 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 
 import com.google.common.collect.Lists;
 
@@ -25,7 +28,7 @@ public class ExpressionEngine {
   public ExpressionEngine(Repository repository,
       EvaluationSettings evaluationSettings) {
     this.libraryConstructor = new LibraryConstructor(repository.fhirContext());
-    this.parametersConverter = Contexts.getCqlFhirParametersConverter(repository.fhirContext());
+    this.parametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
     this.repository = repository;
     this.evaluationSettings = evaluationSettings;
   }
@@ -48,7 +51,7 @@ public class ExpressionEngine {
 
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new InMemoryLibrarySourceProvider(Lists.newArrayList(cql)));
-    var libraryEvaluator = Contexts.forRepository(evaluationSettings, repository, theBundle,
+    var libraryEvaluator = Evaluators.forRepository(evaluationSettings, repository, theBundle,
         librarySourceProviders, parametersConverter);
 
     return libraryEvaluator.evaluate(

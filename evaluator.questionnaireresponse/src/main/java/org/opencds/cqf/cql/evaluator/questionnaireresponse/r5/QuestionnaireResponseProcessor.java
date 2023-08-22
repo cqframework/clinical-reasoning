@@ -98,18 +98,16 @@ public class QuestionnaireResponseProcessor
 
   @Override
   public List<IBaseResource> processItems(QuestionnaireResponse questionnaireResponse) {
-    var questionnaireCanonical = questionnaireResponse.getQuestionnaire();
-    if (questionnaireCanonical == null || questionnaireCanonical.isEmpty()) {
-      throw new IllegalArgumentException(
-          "The QuestionnaireResponse must have the source Questionnaire specified to do extraction");
-    }
-
     var resources = new ArrayList<IBaseResource>();
     var subject = questionnaireResponse.getSubject();
-    var results = this.repository.search(Bundle.class, Questionnaire.class,
-        Searches.byCanonical(questionnaireCanonical));
-    Questionnaire questionnaire =
-        results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
+    Questionnaire questionnaire = null;
+    var questionnaireCanonical = questionnaireResponse.getQuestionnaire();
+    if (questionnaireCanonical != null && !questionnaireCanonical.isEmpty()) {
+      var results = this.repository.search(Bundle.class, Questionnaire.class,
+          Searches.byCanonical(questionnaireCanonical));
+      questionnaire =
+          results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
+    }
 
     if (questionnaireResponse.hasExtension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)) {
       questionnaireResponse.getItem()
@@ -119,6 +117,8 @@ public class QuestionnaireResponseProcessor
       questionnaireResponse.getItem().forEach(item -> {
         if (item.hasItem()) {
           processGroupItem(item, questionnaireResponse, questionnaireCodeMap, resources, subject);
+        } else if (item.hasDefinition()) {
+          processDefinitionItem(item, questionnaireResponse, resources, subject);
         } else {
           processItem(item, questionnaireResponse, questionnaireCodeMap, resources, subject);
         }
@@ -300,14 +300,17 @@ public class QuestionnaireResponseProcessor
   private void processItem(QuestionnaireResponseItemComponent item,
       QuestionnaireResponse questionnaireResponse, Map<String, List<Coding>> questionnaireCodeMap,
       List<IBaseResource> resources, Reference subject) {
+    if (questionnaireCodeMap == null || questionnaireCodeMap.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Unable to retrieve Questionnaire code map for Observation based extraction");
+    }
     if (item.hasAnswer()) {
       item.getAnswer().forEach(answer -> {
         if (answer.hasItem()) {
           answer.getItem().forEach(answerItem -> processItem(answerItem, questionnaireResponse,
               questionnaireCodeMap, resources, subject));
         } else {
-          if (questionnaireCodeMap != null && !questionnaireCodeMap.isEmpty()
-              && questionnaireCodeMap.get(item.getLinkId()) != null
+          if (questionnaireCodeMap.get(item.getLinkId()) != null
               && !questionnaireCodeMap.get(item.getLinkId()).isEmpty()) {
             resources.add(createObservationFromItemAnswer(answer, item.getLinkId(),
                 questionnaireResponse, subject, questionnaireCodeMap));

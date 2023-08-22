@@ -225,6 +225,12 @@ public class Measure {
       return this;
     }
 
+    public SelectedReport hasMeasureVersion(String version) {
+      assertEquals(version,
+          report().getMeasure().substring(report().getMeasure().indexOf('|') + 1));
+      return this;
+    }
+
     public SelectedReport hasContainedResourceCount(int count) {
       assertEquals(count, report().getContained().size());
       return this;

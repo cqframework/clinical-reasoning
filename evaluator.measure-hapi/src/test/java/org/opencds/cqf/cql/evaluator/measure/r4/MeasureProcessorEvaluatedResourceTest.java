@@ -24,6 +24,7 @@ public class MeasureProcessorEvaluatedResourceTest {
         .then()
         .hasEvaluatedResourceCount(9)
         .hasContainedResourceCount(4)
+        .hasMeasureVersion("1.0.1")
         .evaluatedResource("Encounter/HTN1-patient-1-encounter-2")
         .hasPopulations("initial-population").up()
         .evaluatedResource("Observation/HTN1-patient-1-observation-3")

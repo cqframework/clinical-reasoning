@@ -49,7 +49,9 @@ public class MeasureProcessorEvaluateTest {
         .subject("Patient/980babd9-4979-4b76-978c-946719022dbb")
         .additionalData(additionalData)
         .evaluate()
-        .then().report();
+        .then()
+        .hasMeasureVersion("0.000.01")
+        .report();
 
     assertEquals(formatter.format(report.getPeriod().getStart()), "2022-01-01");
     assertEquals(formatter.format(report.getPeriod().getEnd()), "2022-01-31");

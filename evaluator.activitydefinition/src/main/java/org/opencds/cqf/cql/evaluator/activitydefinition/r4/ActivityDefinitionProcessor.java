@@ -31,6 +31,7 @@ import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionPr
 import org.opencds.cqf.cql.evaluator.fhir.helper.r4.InputParameterResolver;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ import org.slf4j.LoggerFactory;
 public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
+
+  protected InputParameterResolver inputParameterResolver;
 
   public ActivityDefinitionProcessor(Repository repository) {
     this(repository, EvaluationSettings.getDefault());
@@ -48,27 +51,36 @@ public class ActivityDefinitionProcessor
   }
 
   @Override
-  public <C extends IPrimitiveType<String>> ActivityDefinition resolveActivityDefinition(
-      IIdType theId, C theCanonical, IBaseResource theActivityDefinition) throws FHIRException {
-    var baseActivityDefinition = theActivityDefinition;
+  protected <C extends IPrimitiveType<String>> ActivityDefinition resolveActivityDefinition(
+      IIdType d, C canonical, IBaseResource activityDefinition) throws FHIRException {
+    var baseActivityDefinition = activityDefinition;
     if (baseActivityDefinition == null) {
-      baseActivityDefinition = theId != null ? this.repository.read(ActivityDefinition.class, theId)
-          : (ActivityDefinition) searchRepositoryByCanonical(repository, theCanonical);
+      baseActivityDefinition = d != null ? this.repository.read(ActivityDefinition.class, d)
+          : (ActivityDefinition) searchRepositoryByCanonical(repository, canonical);
     }
 
-    requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + theId);
+    requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + d);
 
-    var activityDefinition = castOrThrow(baseActivityDefinition, ActivityDefinition.class,
-        "The activityDefinition passed to Repository was not a valid instance of ActivityDefinition.class")
+    return castOrThrow(baseActivityDefinition, ActivityDefinition.class,
+        "The activityDefinition passed in was not a valid instance of ActivityDefinition.class")
             .orElse(null);
+  }
 
-    logger.info("Performing $apply operation on {}", theId);
+  @Override
+  protected ActivityDefinition initApply(ActivityDefinition activityDefinition) {
+    logger.info("Performing $apply operation on {}", activityDefinition.getId());
+
+    this.inputParameterResolver =
+        new InputParameterResolver(subjectId, encounterId, practitionerId, parameters,
+            useServerData, bundle, repository);
+    this.extensionResolver = new ExtensionResolver(subjectId,
+        inputParameterResolver.getParameters(), bundle, libraryEngine);
 
     return activityDefinition;
   }
 
   @Override
-  public IBaseResource applyActivityDefinition(ActivityDefinition activityDefinition) {
+  protected IBaseResource applyActivityDefinition(ActivityDefinition activityDefinition) {
     DomainResource result;
     try {
       result =
@@ -121,13 +133,11 @@ public class ActivityDefinitionProcessor
     }
 
     resolveMeta(result, activityDefinition);
-    resolveExtensions(result, activityDefinition);
-
     var defaultLibraryUrl =
         activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getValueAsString()
             : null;
-    var inputParams = new InputParameterResolver(subjectId, encounterId, practitionerId, parameters,
-        useServerData, bundle, repository).getParameters();
+    resolveExtensions(result, activityDefinition, defaultLibraryUrl);
+    var inputParams = inputParameterResolver.getParameters();
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
         var expression = dynamicValue.getExpression();
@@ -153,11 +163,12 @@ public class ActivityDefinitionProcessor
     }
   }
 
-  private void resolveExtensions(DomainResource resource, ActivityDefinition activityDefinition) {
+  private void resolveExtensions(DomainResource resource, ActivityDefinition activityDefinition,
+      String defaultLibraryUrl) {
     if (activityDefinition.hasExtension()) {
       resource.setExtension(activityDefinition.getExtension().stream()
           .filter(e -> !EXCLUDED_EXTENSION_LIST.contains(e.getUrl())).collect(Collectors.toList()));
-      // resolve expression extensions
+      extensionResolver.resolveExtensions(resource.getExtension(), defaultLibraryUrl);
     }
   }
 

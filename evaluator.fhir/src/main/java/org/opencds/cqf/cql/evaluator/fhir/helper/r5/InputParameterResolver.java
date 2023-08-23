@@ -28,6 +28,10 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
+/**
+ * This class provides the default parameters passed into an operation as CQL Resource parameters
+ * for evaluation. e.g. "%subject"
+ */
 public class InputParameterResolver {
   private static final Logger logger = LoggerFactory.getLogger(InputParameterResolver.class);
 

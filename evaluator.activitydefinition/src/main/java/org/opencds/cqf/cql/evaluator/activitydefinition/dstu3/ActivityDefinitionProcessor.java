@@ -42,6 +42,8 @@ public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
 
+  protected InputParameterResolver inputParameterResolver;
+
   public ActivityDefinitionProcessor(Repository repository) {
     this(repository, EvaluationSettings.getDefault());
   }
@@ -61,11 +63,18 @@ public class ActivityDefinitionProcessor
 
     requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + theId);
 
-    var activityDefinition = castOrThrow(baseActivityDefinition, ActivityDefinition.class,
-        "The activityDefinition passed to Repository was not a valid instance of ActivityDefinition.class")
+    return castOrThrow(baseActivityDefinition, ActivityDefinition.class,
+        "The activityDefinition passed in was not a valid instance of ActivityDefinition.class")
             .orElse(null);
+  }
 
-    logger.info("Performing $apply operation on {}", theId);
+  @Override
+  protected ActivityDefinition initApply(ActivityDefinition activityDefinition) {
+    logger.info("Performing $apply operation on {}", activityDefinition.getId());
+
+    this.inputParameterResolver =
+        new InputParameterResolver(subjectId, encounterId, practitionerId, parameters,
+            useServerData, bundle, repository);
 
     return activityDefinition;
   }
@@ -128,12 +137,10 @@ public class ActivityDefinitionProcessor
 
     // Dstu3 does not have a profile property on ActivityDefinition so we are not resolving meta
     resolveExtensions(result, activityDefinition);
-
     var defaultLibraryUrl =
         activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getReference()
             : null;
-    var inputParams = new InputParameterResolver(subjectId, encounterId, practitionerId, parameters,
-        useServerData, bundle, repository).getParameters();
+    var inputParams = inputParameterResolver.getParameters();
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
         var expressionResult = libraryEngine.resolveExpression(subjectId,
@@ -153,7 +160,7 @@ public class ActivityDefinitionProcessor
       resource.setExtension(activityDefinition.getExtension().stream()
           .filter(e -> !EXCLUDED_EXTENSION_LIST.contains(e.getUrl())).collect(Collectors.toList()));
     }
-    // resolve expression extensions
+    // Extension resolution is not supported in Dstu3
   }
 
   private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {

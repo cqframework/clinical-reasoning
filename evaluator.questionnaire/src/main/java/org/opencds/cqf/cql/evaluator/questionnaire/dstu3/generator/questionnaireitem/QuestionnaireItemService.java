@@ -21,11 +21,11 @@ public class QuestionnaireItemService {
       text = actionInput.getExtensionString(Constants.CPG_INPUT_TEXT);
     }
     var item = createQuestionnaireItemComponent(text, linkId, definition);
-    item.setExtension(resolveExtensions(actionInput.getExtension(), profile.getExtension()));
+    item.setExtension(copyExtensions(actionInput.getExtension(), profile.getExtension()));
     return item;
   }
 
-  protected List<Extension> resolveExtensions(List<Extension> inputExtensions,
+  protected List<Extension> copyExtensions(List<Extension> inputExtensions,
       List<Extension> profileExtensions) {
     var extensions = new ArrayList<Extension>();
     inputExtensions.forEach(ext -> {
@@ -35,8 +35,6 @@ public class QuestionnaireItemService {
       }
     });
     // profileExtensions.forEach(ext -> {
-    // });
-    // extensions.forEach(ext -> {
     // });
 
     return extensions.isEmpty() ? null : extensions;

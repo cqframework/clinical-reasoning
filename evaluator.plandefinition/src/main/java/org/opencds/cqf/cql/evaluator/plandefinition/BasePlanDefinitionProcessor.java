@@ -7,13 +7,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -26,7 +23,6 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.NestedValueResolver;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.Contexts;
-import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
@@ -256,52 +252,52 @@ public abstract class BasePlanDefinitionProcessor<T> {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  protected <E extends IBaseExtension> void resolveExtensions(List<E> extensions,
-      String defaultLibraryUrl) {
-    for (var extension : extensions) {
-      var nestedExtensions = extension.getExtension();
-      if (nestedExtensions != null && !nestedExtensions.isEmpty()) {
-        resolveExtensions(nestedExtensions, defaultLibraryUrl);
-      }
-      var value = extension.getValue();
-      if (value instanceof IBaseHasExtensions) {
-        var valueExtensions = ((IBaseHasExtensions) value).getExtension();
-        if (valueExtensions != null) {
-          var expressionExtensions = valueExtensions.stream()
-              .filter(e -> e.getUrl() != null && e.getUrl().equals(Constants.CQF_EXPRESSION))
-              .collect(Collectors.toList());
-          if (expressionExtensions != null && !expressionExtensions.isEmpty()) {
-            var expression = expressionExtensions.get(0).getValue();
-            if (expression != null) {
-              var result = getExpressionResult(expression, defaultLibraryUrl, null);
-              if (result != null) {
-                extension.setValue(result);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  // @SuppressWarnings({"unchecked", "rawtypes"})
+  // protected <E extends IBaseExtension> void resolveExtensions(List<E> extensions,
+  // String defaultLibraryUrl) {
+  // for (var extension : extensions) {
+  // var nestedExtensions = extension.getExtension();
+  // if (nestedExtensions != null && !nestedExtensions.isEmpty()) {
+  // resolveExtensions(nestedExtensions, defaultLibraryUrl);
+  // }
+  // var value = extension.getValue();
+  // if (value instanceof IBaseHasExtensions) {
+  // var valueExtensions = ((IBaseHasExtensions) value).getExtension();
+  // if (valueExtensions != null) {
+  // var expressionExtensions = valueExtensions.stream()
+  // .filter(e -> e.getUrl() != null && e.getUrl().equals(Constants.CQF_EXPRESSION))
+  // .collect(Collectors.toList());
+  // if (expressionExtensions != null && !expressionExtensions.isEmpty()) {
+  // var expression = expressionExtensions.get(0).getValue();
+  // if (expression != null) {
+  // var result = getExpressionResult(expression, defaultLibraryUrl, null);
+  // if (result != null) {
+  // extension.setValue(result);
+  // }
+  // }
+  // }
+  // }
+  // }
+  // }
+  // }
 
-  protected IBaseDatatype getExpressionResult(IBaseDatatype expression, String defaultLibraryUrl,
-      IBaseDatatype altExpression) {
-    List<IBase> result = null;
-    if (expression instanceof org.hl7.fhir.r4.model.Expression) {
-      result = libraryEngine.resolveExpression(subjectId,
-          new CqfExpression((org.hl7.fhir.r4.model.Expression) expression, defaultLibraryUrl,
-              (org.hl7.fhir.r4.model.Expression) altExpression),
-          parameters, bundle);
-    }
+  // protected IBaseDatatype getExpressionResult(IBaseDatatype expression, String defaultLibraryUrl,
+  // IBaseDatatype altExpression) {
+  // List<IBase> result = null;
+  // if (expression instanceof org.hl7.fhir.r4.model.Expression) {
+  // result = libraryEngine.resolveExpression(subjectId,
+  // new CqfExpression((org.hl7.fhir.r4.model.Expression) expression, defaultLibraryUrl,
+  // (org.hl7.fhir.r4.model.Expression) altExpression),
+  // parameters, bundle);
+  // }
 
-    if (expression instanceof org.hl7.fhir.r5.model.Expression) {
-      result = libraryEngine.resolveExpression(subjectId,
-          new CqfExpression((org.hl7.fhir.r5.model.Expression) expression, defaultLibraryUrl,
-              (org.hl7.fhir.r5.model.Expression) altExpression),
-          parameters, bundle);
-    }
+  // if (expression instanceof org.hl7.fhir.r5.model.Expression) {
+  // result = libraryEngine.resolveExpression(subjectId,
+  // new CqfExpression((org.hl7.fhir.r5.model.Expression) expression, defaultLibraryUrl,
+  // (org.hl7.fhir.r5.model.Expression) altExpression),
+  // parameters, bundle);
+  // }
 
-    return result != null && !result.isEmpty() ? (IBaseDatatype) result.get(0) : null;
-  }
+  // return result != null && !result.isEmpty() ? (IBaseDatatype) result.get(0) : null;
+  // }
 }

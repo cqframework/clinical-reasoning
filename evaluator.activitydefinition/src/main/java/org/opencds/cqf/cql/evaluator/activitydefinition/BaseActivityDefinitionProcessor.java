@@ -19,6 +19,7 @@ import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.helper.NestedValueResolver;
 import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   protected final ModelResolver modelResolver;
   protected final NestedValueResolver nestedValueResolver;
   protected final EvaluationSettings evaluationSettings;
+  protected ExtensionResolver extensionResolver;
   protected Repository repository;
 
   protected String subjectId;
@@ -74,18 +76,18 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     throw new IllegalArgumentException(errorMessage);
   }
 
-  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
-      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType id,
+      CanonicalType canonical, IBaseResource activityDefinition, String subjectId,
       String encounterId, String practitionerId, String organizationId, IBaseDatatype userType,
       IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
       IBaseDatatype settingContext) {
-    return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
+    return apply(id, canonical, activityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
         null, true, null, new LibraryEngine(this.repository, this.evaluationSettings));
   }
 
-  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
-      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType id,
+      CanonicalType canonical, IBaseResource activityDefinition, String subjectId,
       String encounterId, String practitionerId, String organizationId, IBaseDatatype userType,
       IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
       IBaseDatatype settingContext, IBaseParameters parameters, Boolean useServerData,
@@ -94,24 +96,24 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     this.repository =
         Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-    return apply(theId, theCanonical, theActivityDefinition, subjectId, encounterId, practitionerId,
+    return apply(id, canonical, activityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
         parameters, useServerData, bundle,
         new LibraryEngine(this.repository, this.evaluationSettings));
   }
 
-  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType theId,
-      CanonicalType theCanonical, IBaseResource theActivityDefinition, String subjectId,
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(IIdType id,
+      CanonicalType canonical, IBaseResource activityDefinition, String subjectId,
       String encounterId, String practitionerId, String organizationId, IBaseDatatype userType,
       IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
       IBaseDatatype settingContext, IBaseParameters parameters, Boolean useServerData,
       IBaseBundle bundle, LibraryEngine libraryEngine) {
-    return apply(resolveActivityDefinition(theId, theCanonical, theActivityDefinition), subjectId,
+    return apply(resolveActivityDefinition(id, canonical, activityDefinition), subjectId,
         encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext,
         setting, settingContext, parameters, useServerData, bundle, libraryEngine);
   }
 
-  public IBaseResource apply(T theActivityDefinition, String subjectId, String encounterId,
+  public IBaseResource apply(T activityDefinition, String subjectId, String encounterId,
       String practitionerId, String organizationId, IBaseDatatype userType,
       IBaseDatatype userLanguage, IBaseDatatype userTaskContext, IBaseDatatype setting,
       IBaseDatatype settingContext, IBaseParameters parameters, Boolean useServerData,
@@ -125,15 +127,17 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     this.bundle = bundle;
     this.libraryEngine = libraryEngine;
 
-    return applyActivityDefinition(theActivityDefinition);
+    return applyActivityDefinition(initApply(activityDefinition));
   }
 
-  public abstract <CanonicalType extends IPrimitiveType<String>> T resolveActivityDefinition(
-      IIdType theId, CanonicalType theCanonical, IBaseResource theActivityDefinition);
+  protected abstract <CanonicalType extends IPrimitiveType<String>> T resolveActivityDefinition(
+      IIdType id, CanonicalType canonical, IBaseResource activityDefinition);
 
-  public abstract IBaseResource applyActivityDefinition(T theActivityDefinition);
+  protected abstract T initApply(T activityDefinition);
 
-  public void resolveDynamicValue(List<IBase> result, String expression, String path,
+  protected abstract IBaseResource applyActivityDefinition(T activityDefinition);
+
+  protected void resolveDynamicValue(List<IBase> result, String expression, String path,
       IBaseResource resource) {
     if (result == null || result.isEmpty()) {
       return;

@@ -222,7 +222,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var defaultLibraryUrl =
         planDefinition.getLibrary() == null || planDefinition.getLibrary().isEmpty() ? null
             : planDefinition.getLibrary().get(0).getReference();
-    resolveExtensions(requestGroup.getExtension(), defaultLibraryUrl);
+    // Extension resolution is not supported in Dstu3
 
     for (int i = 0; i < planDefinition.getGoal().size(); i++) {
       var goal = convertGoal(planDefinition.getGoal().get(i));
@@ -369,7 +369,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       // }
       metConditions.put(action.getId(), action);
       var requestAction = createRequestAction(action);
-      resolveExtensions(requestAction.getExtension(), defaultLibraryUrl);
+      // Extension resolution is not supported in Dstu3
       if (action.hasAction()) {
         for (var containedAction : action.getAction()) {
           requestAction.addAction(

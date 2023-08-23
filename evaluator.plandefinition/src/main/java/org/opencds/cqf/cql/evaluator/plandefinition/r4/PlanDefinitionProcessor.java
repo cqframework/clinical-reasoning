@@ -59,6 +59,7 @@ import org.opencds.cqf.cql.evaluator.fhir.helper.r4.PackageHelper;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
+import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
@@ -78,6 +79,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
   private final ActivityDefinitionProcessor activityDefinitionProcessor;
   private final QuestionnaireProcessor questionnaireProcessor;
   private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
+  private ExtensionResolver extensionResolver;
   private InputParameterResolver inputParameterResolver;
   private QuestionnaireItemGenerator questionnaireItemGenerator;
 
@@ -183,6 +185,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         QuestionnaireItemGenerator.of(repository, subjectId, parameters, bundle, libraryEngine);
     this.inputParameterResolver = new InputParameterResolver(subjectId, encounterId, practitionerId,
         parameters, useServerData, bundle, repository);
+    this.extensionResolver = new ExtensionResolver(subjectId,
+        inputParameterResolver.getParameters(), bundle, libraryEngine);
 
     return planDefinition;
   }
@@ -221,7 +225,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     var defaultLibraryUrl =
         planDefinition.getLibrary() == null || planDefinition.getLibrary().isEmpty() ? null
             : planDefinition.getLibrary().get(0).getValue();
-    resolveExtensions(requestGroup.getExtension(), defaultLibraryUrl);
+    extensionResolver.resolveExtensions(requestGroup.getExtension(), defaultLibraryUrl);
 
     for (int i = 0; i < planDefinition.getGoal().size(); i++) {
       var goal = convertGoal(planDefinition.getGoal().get(i));
@@ -388,7 +392,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
       // }
       metConditions.put(action.getId(), action);
       var requestAction = createRequestAction(action);
-      resolveExtensions(requestAction.getExtension(), defaultLibraryUrl);
+      extensionResolver.resolveExtensions(requestAction.getExtension(), defaultLibraryUrl);
       if (action.hasAction()) {
         for (var containedAction : action.getAction()) {
           requestAction.addAction(

@@ -6,6 +6,11 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 
+/**
+ * This class provides functionality for setting child properties and properties within lists on a
+ * resource. For example, a path of "payload[0].text" will set the text property of the first object
+ * in the payload list.
+ */
 public class NestedValueResolver {
   private final FhirContext fhirContext;
   private final ModelResolver modelResolver;

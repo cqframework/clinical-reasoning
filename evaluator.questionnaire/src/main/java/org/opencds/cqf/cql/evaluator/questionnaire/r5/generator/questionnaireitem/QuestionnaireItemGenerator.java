@@ -16,6 +16,7 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
@@ -35,6 +36,7 @@ public class QuestionnaireItemGenerator {
   protected final IBaseParameters parameters;
   protected final QuestionnaireItemService questionnaireItemService;
   protected final NestedQuestionnaireItemService nestedQuestionnaireItemService;
+  protected final ExtensionResolver extensionResolver;
   protected QuestionnaireItemComponent questionnaireItem;
 
   public static QuestionnaireItemGenerator of(
@@ -65,6 +67,7 @@ public class QuestionnaireItemGenerator {
     this.bundle = bundle;
     this.questionnaireItemService = questionnaireItemService;
     this.nestedQuestionnaireItemService = nestedQuestionnaireItemService;
+    this.extensionResolver = new ExtensionResolver(patientId, parameters, bundle, libraryEngine);
   }
 
   public Questionnaire.QuestionnaireItemComponent generateItem(DataRequirement actionInput,
@@ -77,6 +80,7 @@ public class QuestionnaireItemGenerator {
       final StructureDefinition profile = (StructureDefinition) getProfileDefinition(actionInput);
       this.questionnaireItem =
           questionnaireItemService.createQuestionnaireItem(actionInput, linkId, profile);
+      extensionResolver.resolveExtensions(this.questionnaireItem.getExtension(), null);
       processElements(profile);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());

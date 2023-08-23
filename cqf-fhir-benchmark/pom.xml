@@ -78,14 +78,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-jackson</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-      <type>pom</type>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
       <version>1.5.1</version>
@@ -103,13 +95,6 @@
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>3.0.0-M1</version>
-          <configuration>
-            <skip>true</skip>
-          </configuration>
-        </plugin>
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>

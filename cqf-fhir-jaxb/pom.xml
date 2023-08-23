@@ -7,7 +7,6 @@
   <artifactId>cqf-fhir-jaxb</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>pom</packaging>
-
   <name>FHIR Clinical Reasoning (JAXB)</name>
   <description>Aggregator module for JAXB dependencies</description>
 

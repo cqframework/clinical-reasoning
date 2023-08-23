@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cql.engine.model;
 
+import org.opencds.cqf.cql.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 public class DynamicModelResolver extends CachingModelResolverDecorator {

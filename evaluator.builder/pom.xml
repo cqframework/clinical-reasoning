@@ -5,7 +5,6 @@
 
   <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.builder</artifactId>
-  <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>evaluator.builder</name>

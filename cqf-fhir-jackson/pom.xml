@@ -7,7 +7,6 @@
   <artifactId>cqf-fhir-jackson</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>pom</packaging>
-
   <name>FHIR Clinical Reasoning (Jackson)</name>
   <description>Aggregator module for Jackson dependencies</description>
 

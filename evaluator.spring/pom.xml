@@ -7,8 +7,6 @@
   <artifactId>evaluator.spring</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>jar</packaging>
-
-  <name>evaluator.spring</name>
   <description>CQL Evaluator - Spring Confguration</description>
 
   <parent>

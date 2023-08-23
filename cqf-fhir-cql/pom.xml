@@ -6,7 +6,6 @@
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-cql</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
-
   <name>FHIR Clinical Reasoning (CQL)</name>
   <description>Tools, utilities, code gen to support CQL in FHIR Clinical Reasoning operations</description>
 

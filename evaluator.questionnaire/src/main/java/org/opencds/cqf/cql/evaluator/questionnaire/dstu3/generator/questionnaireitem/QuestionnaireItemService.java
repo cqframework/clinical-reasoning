@@ -15,12 +15,12 @@ public class QuestionnaireItemService {
       DataRequirement actionInput,
       String linkId,
       StructureDefinition profile) {
-    final String profileUrl = getProfileUrl(actionInput);
-    String text = getProfileText(profileUrl, profile);
+    final String definition = getDefinition(profile);
+    String text = getProfileText(profile);
     if (actionInput.hasExtension(Constants.CPG_INPUT_TEXT)) {
       text = actionInput.getExtensionString(Constants.CPG_INPUT_TEXT);
     }
-    var item = createQuestionnaireItemComponent(text, linkId, profileUrl);
+    var item = createQuestionnaireItemComponent(text, linkId, definition);
     item.setExtension(resolveExtensions(actionInput.getExtension(), profile.getExtension()));
     return item;
   }
@@ -42,22 +42,21 @@ public class QuestionnaireItemService {
     return extensions.isEmpty() ? null : extensions;
   }
 
-  protected String getProfileText(String profileUrl,
-      StructureDefinition profile) {
+  protected String getProfileText(StructureDefinition profile) {
     return profile.hasTitle() ? profile.getTitle()
-        : profileUrl.substring(profileUrl.lastIndexOf("/") + 1);
+        : profile.getUrl().substring(profile.getUrl().lastIndexOf("/") + 1);
   }
 
   protected QuestionnaireItemComponent createQuestionnaireItemComponent(String text, String linkId,
-      String profileUrl) {
+      String definition) {
     return new QuestionnaireItemComponent()
         .setType(Questionnaire.QuestionnaireItemType.GROUP)
-        .setDefinition(profileUrl)
+        .setDefinition(definition)
         .setLinkId(linkId)
         .setText(text);
   }
 
-  protected String getProfileUrl(DataRequirement actionInput) {
-    return actionInput.getProfile().get(0).getValue();
+  protected String getDefinition(StructureDefinition profile) {
+    return String.format("%s#%s", profile.getUrl(), profile.getType());
   }
 }

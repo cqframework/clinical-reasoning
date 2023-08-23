@@ -80,7 +80,7 @@
         "item": [
           {
             "linkId": "1",
-            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim",
+            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim#Claim",
             "text": "Prior Auth Claim",
             "type": "group",
             "item": [
@@ -114,7 +114,7 @@
           },
           {
             "linkId": "2",
-            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization",
+            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization#Organization",
             "text": "Facility Information",
             "type": "group",
             "item": [
@@ -189,7 +189,7 @@
           },
           {
             "linkId": "3",
-            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient",
+            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient#Patient",
             "text": "Beneficiary Information",
             "type": "group",
             "item": [
@@ -299,7 +299,7 @@
           },
           {
             "linkId": "4",
-            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating",
+            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating#Practitioner",
             "text": "Operation Physician Information",
             "type": "group",
             "item": [
@@ -386,7 +386,7 @@
           },
           {
             "linkId": "5",
-            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending",
+            "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending#Practitioner",
             "text": "Attending Physician Information",
             "type": "group",
             "item": [

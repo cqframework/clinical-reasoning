@@ -158,10 +158,8 @@ public class QuestionnaireResponseProcessor
     return property;
   }
 
-  private String getResourceType(String definition) {
-    var profile = definition.split("#")[0];
-
-    return profile.substring(profile.lastIndexOf("/") + 1, profile.length());
+  private String getDefinitionType(String definition) {
+    return definition.split("#")[1];
   }
 
   private void processDefinitionItem(QuestionnaireResponseItemComponent item,
@@ -170,7 +168,7 @@ public class QuestionnaireResponseProcessor
     // Definition-based extraction -
     // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
 
-    var resourceType = getResourceType(item.getDefinition());
+    var resourceType = getDefinitionType(item.getDefinition());
     var resource = (Resource) newValue(resourceType);
     resource.setId(
         new IdType(resourceType, getExtractId(questionnaireResponse) + "." + item.getLinkId()));

@@ -23,17 +23,18 @@ import org.testng.Assert;
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireItemServiceTest {
   final static String PROFILE_URL = "http://www.sample.com/profile/profileId";
+  final static String DEFINITION = "http://www.sample.com/profile/profileId#Observation";
   final static String LINK_ID = "profileId";
   final static QuestionnaireItemType QUESTIONNAIRE_ITEM_TYPE = QuestionnaireItemType.GROUP;
   final static String PROFILE_TITLE = "Profile Title";
-  final static String PROFILE_TYPE = "ProfileType";
+  final static String PROFILE_TYPE = "Observation";
   @Spy
   private QuestionnaireItemService myFixture;
 
   @Test
   void getProfileTextShouldReturnTextWhenProfileHasTitle() {
     // execute
-    final String actual = myFixture.getProfileText(PROFILE_URL, withProfileWithTitle());
+    final String actual = myFixture.getProfileText(withProfileWithTitle());
     // validate
     Assert.assertEquals(actual, PROFILE_TITLE);
   }
@@ -41,7 +42,7 @@ class QuestionnaireItemServiceTest {
   @Test
   void getProfileTextShouldReturnTextWhenProfileHasNoTitle() {
     // execute
-    final String actual = myFixture.getProfileText(PROFILE_URL, withProfileWithNoTitle());
+    final String actual = myFixture.getProfileText(withProfileWithNoTitle());
     // validate
     Assert.assertEquals(actual, LINK_ID);
   }
@@ -61,12 +62,10 @@ class QuestionnaireItemServiceTest {
 
   @Test
   void getProfileUrlShouldReturnValue() {
-    // setup
-    final DataRequirement actionInput = TestingHelper.withActionInput();
     // execute
-    final String actual = myFixture.getProfileUrl(actionInput);
+    final String actual = myFixture.getDefinition(withProfileWithTitle());
     // validate
-    Assert.assertEquals(actual, PROFILE_URL);
+    Assert.assertEquals(actual, DEFINITION);
   }
 
   @Test
@@ -76,8 +75,8 @@ class QuestionnaireItemServiceTest {
     final StructureDefinition profile = withProfileWithTitle();
     final QuestionnaireItemComponent questionnaireItemComponent = withQuestionnaireItemComponent();
     final QuestionnaireItemComponent expected = withQuestionnaireItemComponentWithExtension();
-    doReturn(PROFILE_URL).when(myFixture).getProfileUrl(actionInput);
-    doReturn(PROFILE_TITLE).when(myFixture).getProfileText(PROFILE_URL, profile);
+    doReturn(PROFILE_URL).when(myFixture).getDefinition(profile);
+    doReturn(PROFILE_TITLE).when(myFixture).getProfileText(profile);
     doReturn(questionnaireItemComponent).when(myFixture).createQuestionnaireItemComponent(
         PROFILE_TITLE,
         LINK_ID,
@@ -86,8 +85,8 @@ class QuestionnaireItemServiceTest {
     final QuestionnaireItemComponent actual =
         myFixture.createQuestionnaireItem(actionInput, LINK_ID, profile);
     // validate
-    verify(myFixture).getProfileUrl(actionInput);
-    verify(myFixture).getProfileText(PROFILE_URL, profile);
+    verify(myFixture).getDefinition(profile);
+    verify(myFixture).getProfileText(profile);
     verify(myFixture).createQuestionnaireItemComponent(
         PROFILE_TITLE,
         LINK_ID,
@@ -108,15 +107,17 @@ class QuestionnaireItemServiceTest {
 
   @Nonnull
   StructureDefinition withProfileWithTitle() {
-    StructureDefinition profile = new StructureDefinition();
-    profile.setTitle(PROFILE_TITLE);
-    profile.setType(PROFILE_TYPE);
-    return profile;
+    return new StructureDefinition()
+        .setUrl(PROFILE_URL)
+        .setTitle(PROFILE_TITLE)
+        .setType(PROFILE_TYPE);
   }
 
   @Nonnull
   StructureDefinition withProfileWithNoTitle() {
-    return new StructureDefinition();
+    return new StructureDefinition()
+        .setUrl(PROFILE_URL)
+        .setType(PROFILE_TYPE);
   }
 
   @Nonnull

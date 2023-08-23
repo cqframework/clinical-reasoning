@@ -10,7 +10,7 @@
   "item": [
     {
       "linkId": "1",
-      "definition": "http://hl7.org/fhir/Organization",
+      "definition": "http://hl7.org/fhir/Organization#Organization",
       "text": "Facility Information",
       "item": [
         {
@@ -44,7 +44,7 @@
     },
     {
       "linkId": "2",
-      "definition": "http://hl7.org/fhir/Patient",
+      "definition": "http://hl7.org/fhir/Patient#Patient",
       "text": "Beneficiary Information",
       "item": [
         {

@@ -180,10 +180,12 @@ public class QuestionnaireResponseProcessor
     return null;
   }
 
-  private String getResourceType(String definition) {
-    var profile = definition.split("#")[0];
-
-    return profile.substring(profile.lastIndexOf("/") + 1, profile.length());
+  private String getDefinitionType(String definition) {
+    if (!definition.contains("#")) {
+      throw new IllegalArgumentException(
+          String.format("Unable to determine resource type from item definition: %s", definition));
+    }
+    return definition.split("#")[1];
   }
 
   private void processDefinitionItem(QuestionnaireResponseItemComponent item,
@@ -203,7 +205,7 @@ public class QuestionnaireResponseProcessor
       }
     }
 
-    var resourceType = getResourceType(item.getDefinition());
+    var resourceType = getDefinitionType(item.getDefinition());
     var resource = (Resource) newValue(resourceType);
     resource.setId(
         new IdType(resourceType, getExtractId(questionnaireResponse) + "." + item.getLinkId()));

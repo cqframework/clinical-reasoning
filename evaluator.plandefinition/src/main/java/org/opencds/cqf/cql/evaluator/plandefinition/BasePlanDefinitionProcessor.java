@@ -187,7 +187,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.containResources = true;
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
-    extractQuestionnaireResponse();
     return transformToCarePlan(
         applyPlanDefinition(initApply(resolvePlanDefinition(id, canonical, planDefinition))));
   }
@@ -229,7 +228,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
     this.containResources = false;
     this.requestResources = new ArrayList<>();
     this.extractedResources = new ArrayList<>();
-    extractQuestionnaireResponse();
     return transformToBundle(
         applyPlanDefinition(initApply(resolvePlanDefinition(id, canonical, planDefinition))));
   }

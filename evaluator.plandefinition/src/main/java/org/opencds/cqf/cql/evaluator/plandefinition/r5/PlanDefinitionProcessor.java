@@ -111,12 +111,18 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         .map(entry -> (QuestionnaireResponse) entry.getResource()).collect(Collectors.toList());
     if (questionnaireResponses != null && !questionnaireResponses.isEmpty()) {
       for (var questionnaireResponse : questionnaireResponses) {
-        var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse,
-            parameters, bundle, libraryEngine);
-        extractedResources.add(questionnaireResponse);
-        for (var entry : extractBundle.getEntry()) {
-          ((Bundle) bundle).addEntry(entry);
-          // extractedResources.add(entry.getResource());
+        try {
+          var extractBundle = (Bundle) questionnaireResponseProcessor.extract(questionnaireResponse,
+              parameters, bundle, libraryEngine);
+          extractedResources.add(questionnaireResponse);
+          for (var entry : extractBundle.getEntry()) {
+            ((Bundle) bundle).addEntry(entry);
+            // extractedResources.add(entry.getResource());
+          }
+        } catch (Exception e) {
+          addOperationOutcomeIssue(
+              String.format("Error encountered extracting %s",
+                  questionnaireResponse.getId()));
         }
       }
     }
@@ -170,6 +176,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     oc = new OperationOutcome();
     oc.setId("apply-outcome-" + planDefinition.getIdPart());
+
+    extractQuestionnaireResponse();
 
     this.questionnaire = new Questionnaire();
     this.questionnaire

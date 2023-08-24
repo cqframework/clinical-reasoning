@@ -1,5 +1,7 @@
 package org.opencds.cqf.cql.evaluator.library;
 
+import javax.annotation.Nonnull;
+
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that
  * it can be used in version agnostic logic.
@@ -12,6 +14,44 @@ public class CqfExpression {
   private String altLanguage;
   private String altExpression;
   private String altLibraryUrl;
+
+  public CqfExpression() {}
+
+  public CqfExpression(@Nonnull org.hl7.fhir.r4.model.Expression expression,
+      String defaultLibraryUrl,
+      org.hl7.fhir.r4.model.Expression altExpression) {
+    this(expression.getLanguage(), expression.getExpression(),
+        expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
+        altExpression != null ? altExpression.getLanguage() : null,
+        altExpression != null ? altExpression.getExpression() : null,
+        altExpression != null && altExpression.hasReference() ? altExpression.getReference()
+            : defaultLibraryUrl);
+  }
+
+  public CqfExpression(@Nonnull org.hl7.fhir.r5.model.Expression expression,
+      String defaultLibraryUrl,
+      org.hl7.fhir.r5.model.Expression altExpression) {
+    this(expression.getLanguage(), expression.getExpression(),
+        expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
+        altExpression != null ? altExpression.getLanguage() : null,
+        altExpression != null ? altExpression.getExpression() : null,
+        altExpression != null && altExpression.hasReference() ? altExpression.getReference()
+            : defaultLibraryUrl);
+  }
+
+  public CqfExpression(String language, String expression, String libraryUrl) {
+    this(language, expression, libraryUrl, null, null, null);
+  }
+
+  public CqfExpression(String language, String expression, String libraryUrl, String altLanguage,
+      String altExpression, String altLibraryUrl) {
+    this.language = language;
+    this.expression = expression;
+    this.libraryUrl = libraryUrl;
+    this.altLanguage = altLanguage;
+    this.altExpression = altExpression;
+    this.altLibraryUrl = altLibraryUrl;
+  }
 
   public String getLanguage() {
     return language;

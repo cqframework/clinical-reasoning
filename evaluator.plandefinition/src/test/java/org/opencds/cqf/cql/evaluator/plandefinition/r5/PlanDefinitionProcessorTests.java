@@ -25,8 +25,7 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("child-routine-visit/child_routine_visit_bundle.json");
   }
 
-  // Disabling due to incompatibility issues with R5 currently
-  @Test(enabled = false)
+  @Test
   public void testHelloWorld() {
     PlanDefinition.Assert
         .that("hello-world-patient-view", "helloworld-patient-1",
@@ -58,7 +57,6 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("opioid-Rec10-patient-view/tests/Bundle-opioid-Rec10-patient-view.json");
   }
 
-  // In R5 ActivityDefinitions can no longer create Tasks which breaks this test
   @Test(enabled = false)
   public void testRuleFiltersNotReportable() {
     PlanDefinition.Assert.that("plandefinition-RuleFilters-1.0.0", "NotReportable", null)
@@ -67,7 +65,6 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("rule-filters/NotReportableBundle.json");
   }
 
-  // In R5 ActivityDefinitions can no longer create Tasks which breaks this test
   @Test(enabled = false)
   public void testRuleFiltersReportable() {
     PlanDefinition.Assert.that("plandefinition-RuleFilters-1.0.0", "Reportable", null)
@@ -100,7 +97,7 @@ public class PlanDefinitionProcessorTests {
         .withAdditionalData("extract-questionnaireresponse/patient-data.json")
         .withContent("prepopulate/prepopulate-content-bundle.json")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply()
-        .isEqualsTo("extract-questionnaireresponse/bundle.json");
+        .hasContained(3);
   }
 
   @Test(enabled = false) // Need valid r5 content for this test

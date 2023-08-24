@@ -46,19 +46,29 @@ public class Contexts {
 
   public static CqlEngine forRepository(Repository repository,
       EvaluationSettings settings) {
+    return forRepository(repository, settings, true);
+  }
+
+  public static CqlEngine forRepository(Repository repository,
+      EvaluationSettings settings, Boolean useLibraryCache) {
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     var sources = Collections.singletonList(buildLibrarySource(repository));
 
     var dataProviders = buildDataProviders(repository, null, terminologyProvider,
         settings.getRetrieveSettings());
     var environment =
-        buildEnvironment(settings, sources, terminologyProvider, dataProviders);
+        buildEnvironment(settings, sources, terminologyProvider, dataProviders, useLibraryCache);
 
     return new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
   public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
       Repository repository, IBaseBundle additionalData) {
+    return forRepositoryAndSettings(settings, repository, additionalData, true);
+  }
+
+  public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
+      Repository repository, IBaseBundle additionalData, Boolean useLibraryCache) {
     checkNotNull(settings);
     checkNotNull(repository);
 
@@ -69,22 +79,22 @@ public class Contexts {
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
     var environment =
-        buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders);
+        buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders,
+            useLibraryCache);
     return new CqlEngine(environment,
         settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
   public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
-      IBaseBundle additionalData) {
+      IBaseBundle additionalData, Boolean useLibraryCache) {
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     return forRepository(settings, repository, additionalData, librarySourceProviders,
-        null);
+        null, useLibraryCache);
   }
 
-  public static LibraryEvaluator forRepository(EvaluationSettings settings,
-      Repository repository,
+  public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository repository,
       IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
-      CqlFhirParametersConverter cqlFhirParametersConverter) {
+      CqlFhirParametersConverter cqlFhirParametersConverter, Boolean useLibraryCache) {
     checkNotNull(settings);
     checkNotNull(repository);
     checkNotNull(librarySourceProviders);
@@ -99,7 +109,8 @@ public class Contexts {
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
     var environment =
-        buildEnvironment(settings, librarySourceProviders, terminologyProvider, dataProviders);
+        buildEnvironment(settings, librarySourceProviders, terminologyProvider, dataProviders,
+            useLibraryCache);
 
     var cqlEngine =
         new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
@@ -116,7 +127,7 @@ public class Contexts {
   // TODO: Add NPM library source loader support
   private static Environment buildEnvironment(EvaluationSettings settings,
       List<LibrarySourceProvider> librarySourceProviders, TerminologyProvider terminologyProvider,
-      Map<String, DataProvider> dataProviders) {
+      Map<String, DataProvider> dataProviders, Boolean useLibraryCache) {
     if (settings.getCqlOptions().useEmbeddedLibraries()) {
       librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
@@ -127,7 +138,7 @@ public class Contexts {
 
     LibraryManager libraryManager =
         new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions(),
-            settings.getLibraryCache());
+            Boolean.TRUE.equals(useLibraryCache) ? settings.getLibraryCache() : null);
     libraryManager.getLibrarySourceLoader().clearProviders();
 
 

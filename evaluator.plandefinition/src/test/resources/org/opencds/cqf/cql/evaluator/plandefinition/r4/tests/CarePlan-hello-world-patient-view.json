@@ -5,6 +5,11 @@
     {
       "resourceType": "RequestGroup",
       "id": "hello-world-patient-view",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+        ]
+      },
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
       ],
@@ -19,7 +24,17 @@
       "action": [
         {
           "title": "Hello World!",
-          "description": "The CDS Service is alive and communicating successfully!"
+          "description": "The CDS Service is alive and communicating successfully!",
+          "condition": [
+            {
+              "kind": "start",
+              "expression": {
+                "description": "Whether or not a Hello World! card should be returned",
+                "language": "text/cql.identifier",
+                "expression": "Main Action Condition Expression Is True"
+              }
+            }
+          ]
         }
       ]
     }

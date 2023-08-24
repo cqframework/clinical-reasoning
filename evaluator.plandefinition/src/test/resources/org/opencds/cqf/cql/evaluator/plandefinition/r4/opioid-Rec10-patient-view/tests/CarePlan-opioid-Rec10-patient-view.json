@@ -5,6 +5,11 @@
     {
       "resourceType": "RequestGroup",
       "id": "opioidcds-10-patient-view",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+        ]
+      },
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view|2022.1.0"
       ],
@@ -67,6 +72,25 @@
               }
             }
           ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "description": "Patient has not had a urine screening in the past 12 months",
+                "language": "text/cql.identifier",
+                "expression": "Is Perform Drug Screen Recommendation Applicable?"
+              }
+            }
+          ],
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/action-type",
+                "code": "create",
+                "display": "Create"
+              }
+            ]
+          },
           "resource": {
             "reference": "ServiceRequest/opioidcds-urine-screening-request"
           },
@@ -87,6 +111,9 @@
     {
       "resourceType": "ServiceRequest",
       "id": "opioidcds-urine-screening-request",
+      "instantiatesCanonical": [
+        "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/opioidcds-urine-screening-request"
+      ],
       "status": "draft",
       "intent": "order",
       "priority": "urgent",

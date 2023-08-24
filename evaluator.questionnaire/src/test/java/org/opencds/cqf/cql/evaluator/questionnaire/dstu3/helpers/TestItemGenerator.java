@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r5;
+package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.helpers;
 
 import static org.testng.Assert.fail;
 
@@ -8,21 +8,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r5.model.Bundle.BundleType;
-import org.hl7.fhir.r5.model.DataRequirement;
-import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
-import org.hl7.fhir.r5.model.Questionnaire;
-import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -32,7 +34,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class TestItemGenerator {
-  private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
+  private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
@@ -54,7 +56,7 @@ public class TestItemGenerator {
 
   public static QuestionnaireItemGenerator buildGenerator(Repository repository, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-    return new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+    return QuestionnaireItemGenerator.of(repository, patientId, parameters, bundle, libraryEngine);
   }
 
   /** Fluent interface starts here **/
@@ -65,7 +67,7 @@ public class TestItemGenerator {
     }
   }
 
-  static class GenerateResult {
+  public static class GenerateResult {
     private DataRequirement input;
     private String profileId;
     private String patientId;
@@ -76,10 +78,11 @@ public class TestItemGenerator {
     private IBaseBundle bundle;
     private IBaseParameters parameters;
 
-    private final FhirContext fhirContext = FhirContext.forR5Cached();
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+
 
     public GenerateResult(String type, String profile, String patientId) {
-      this.input = new DataRequirement(FHIRTypes.fromCode(type)).addProfile(profile);
+      this.input = new DataRequirement(new CodeType(type)).addProfile(profile);
       this.profileId = profile.substring(profile.lastIndexOf("/") + 1);
       this.patientId = patientId;
     }
@@ -106,7 +109,7 @@ public class TestItemGenerator {
     public GenerateResult withAdditionalData(String dataAssetName) {
       var data = parse(dataAssetName);
       bundle =
-          data.getIdElement().getResourceType().equals(FHIRTypes.BUNDLE.toCode()) ? (Bundle) data
+          data.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode()) ? (Bundle) data
               : new Bundle().setType(BundleType.COLLECTION)
                   .addEntry(new BundleEntryComponent().setResource((Resource) data));
 
@@ -138,9 +141,8 @@ public class TestItemGenerator {
             new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources"), false);
       }
       if (terminologyRepository == null) {
-        terminologyRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(),
-                List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
+            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
       }
 
       repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
@@ -154,7 +156,7 @@ public class TestItemGenerator {
     }
   }
 
-  static class GeneratedItem {
+  public static class GeneratedItem {
     Questionnaire questionnaire;
 
     public GeneratedItem(QuestionnaireItemComponent item, String id) {

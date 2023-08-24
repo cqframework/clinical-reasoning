@@ -37,7 +37,6 @@ class ElementHasCqfExpressionTest {
   final static String TYPE_CODE = "typeCode";
   final static String PATH_VALUE = "pathValue";
   final static String PATIENT_ID = "patientId";
-  final static String SUBJECT_TYPE = "subectType";
   final static String EXPRESSION_EXPRESSION = "expressionExpression";
   final static String EXPRESSION_LANGUAGE = "expressionLanguage";
   final static String EXPRESSION_REFERENCE = "expressionReference";
@@ -51,7 +50,6 @@ class ElementHasCqfExpressionTest {
   @BeforeEach
   void setUp() {
     myFixture.patientId = PATIENT_ID;
-    myFixture.subjectType = SUBJECT_TYPE;
   }
 
   @Test
@@ -65,7 +63,6 @@ class ElementHasCqfExpressionTest {
     myFixture.bundle = bundle;
     doReturn(expected).when(libraryEngine).getExpressionResult(
         PATIENT_ID,
-        SUBJECT_TYPE,
         EXPRESSION_EXPRESSION,
         EXPRESSION_LANGUAGE,
         EXPRESSION_REFERENCE,
@@ -75,7 +72,6 @@ class ElementHasCqfExpressionTest {
     final List<IBase> actual = myFixture.getExpressionResults(expression);
     // validate
     verify(libraryEngine).getExpressionResult(PATIENT_ID,
-        SUBJECT_TYPE,
         EXPRESSION_EXPRESSION,
         EXPRESSION_LANGUAGE,
         EXPRESSION_REFERENCE,

@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r5;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -156,6 +157,10 @@ public class PlanDefinition {
 
     public GeneratedBundle(Bundle bundle) {
       this.bundle = bundle;
+    }
+
+    public void hasContained(int theCount) {
+      assertEquals(bundle.getEntry().size(), theCount);
     }
 
     public void isEqualsTo(String expectedBundleAssetName) {

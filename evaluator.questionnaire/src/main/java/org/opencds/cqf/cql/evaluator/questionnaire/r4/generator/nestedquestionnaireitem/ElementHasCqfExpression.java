@@ -22,7 +22,6 @@ public class ElementHasCqfExpression {
   protected IBaseBundle bundle;
   protected IBaseParameters parameters;
   protected LibraryEngine libraryEngine;
-  protected String subjectType = "Patient";
 
   public ElementHasCqfExpression(
       String thePatientId,
@@ -61,14 +60,13 @@ public class ElementHasCqfExpression {
   }
 
   protected final List<IBase> getExpressionResults(Expression expression) {
-    return this.libraryEngine.getExpressionResult(
-        this.patientId,
-        subjectType,
+    return libraryEngine.getExpressionResult(
+        patientId,
         expression.getExpression(),
         expression.getLanguage(),
         expression.getReference(),
         parameters,
-        this.bundle);
+        bundle);
   }
 
   protected Expression getExpression(ElementDefinition element) {

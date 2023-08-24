@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -60,8 +61,9 @@ public class PlanDefinition {
   /** Fluent interface starts here **/
 
   public static class Assert {
-    public static Apply that(String planDefinitionID, String patientID, String encounterID) {
-      return new Apply(planDefinitionID, patientID, encounterID);
+    public static Apply that(String planDefinitionID, String patientID, String encounterID,
+        String practitionerID) {
+      return new Apply(planDefinitionID, patientID, encounterID, practitionerID);
     }
   }
 
@@ -70,6 +72,7 @@ public class PlanDefinition {
 
     private String patientID;
     private String encounterID;
+    private String practitionerID;
 
     private Repository repository;
     private Repository dataRepository;
@@ -81,10 +84,12 @@ public class PlanDefinition {
     private IdType expectedBundleId;
     private IdType expectedCarePlanId;
 
-    public Apply(String planDefinitionID, String patientID, String encounterID) {
+    public Apply(String planDefinitionID, String patientID, String encounterID,
+        String practitionerID) {
       this.planDefinitionID = planDefinitionID;
       this.patientID = patientID;
       this.encounterID = encounterID;
+      this.practitionerID = practitionerID;
     }
 
     public Apply withData(String dataAssetName) {
@@ -188,9 +193,9 @@ public class PlanDefinition {
         loadAdditionalData(resource);
       }
       return new GeneratedBundle((Bundle) buildProcessor(repository).applyR5(
-          new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
-          null, null, null, null, null, null, parameters, null, additionalData, null,
-          libraryEngine), expectedBundle);
+          new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID,
+          practitionerID, null, null, null, null, null, null, parameters, null, additionalData,
+          null, libraryEngine), expectedBundle);
     }
 
     public GeneratedCarePlan apply() {
@@ -210,9 +215,9 @@ public class PlanDefinition {
         loadAdditionalData(resource);
       }
       return new GeneratedCarePlan((CarePlan) buildProcessor(repository).apply(
-          new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID, null,
-          null, null, null, null, null, null, parameters, null, additionalData, null,
-          libraryEngine), expectedCarePlan);
+          new IdType("PlanDefinition", planDefinitionID), null, null, patientID, encounterID,
+          practitionerID, null, null, null, null, null, null, parameters, null, additionalData,
+          null, libraryEngine), expectedCarePlan);
     }
 
     public GeneratedPackage packagePlanDefinition() {
@@ -256,6 +261,12 @@ public class PlanDefinition {
 
     public void hasEntry(int theCount) {
       assertEquals(myGeneratedBundle.getEntry().size(), theCount);
+    }
+
+    public void hasCommunicationRequestPayload() {
+      assertTrue(myGeneratedBundle.getEntry().stream()
+          .filter(e -> e.getResource().getResourceType().equals(ResourceType.CommunicationRequest))
+          .map(e -> (CommunicationRequest) e.getResource()).allMatch(c -> c.hasPayload()));
     }
 
     public void hasQuestionnaireOperationOutcome() {

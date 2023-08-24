@@ -5,6 +5,11 @@
     {
       "resourceType": "RequestGroup",
       "id": "ChildRoutineVisit-PlanDefinition-1.0.0",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+        ]
+      },
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/ChildRoutineVisit-PlanDefinition-1.0.0"
       ],
@@ -17,6 +22,7 @@
         {
           "title": "Child Monthly Routine Visit",
           "description": "This action will performed every month for a patient < 5 years old. The start date with be next month after registration while the end date will be the 60th week after birth.",
+          "priority": "routine",
           "timingTiming": {
             "repeat": {
               "countMax": 59,
@@ -29,6 +35,14 @@
               "periodMax": 1,
               "periodUnit": "mo"
             }
+          },
+          "type": {
+            "coding": [
+              {
+                "code": "clinical-protocol",
+                "display": "Clinical Protocol"
+              }
+            ]
           },
           "resource": {
             "reference": "https://fhir.labs.smartregister.org/fhir/Questionnaire/105056"

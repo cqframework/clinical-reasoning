@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
@@ -96,22 +97,27 @@ public class QuestionnaireResponseProcessor
 
   @Override
   public List<IBaseResource> processItems(QuestionnaireResponse questionnaireResponse) {
-    var questionnaireCanonical = questionnaireResponse.getQuestionnaire();
-    if (questionnaireCanonical == null || questionnaireCanonical.isEmpty()) {
-      throw new IllegalArgumentException(
-          "The QuestionnaireResponse must have the source Questionnaire specified to do extraction");
-    }
-
     var resources = new ArrayList<IBaseResource>();
     var subject = questionnaireResponse.getSubject();
+    Questionnaire questionnaire = null;
+    var questionnaireCanonical = questionnaireResponse.getQuestionnaire();
+    if (questionnaireCanonical != null && !questionnaireCanonical.isEmpty()) {
+      var results = this.repository.search(Bundle.class, Questionnaire.class,
+          Searches.byCanonical(questionnaireCanonical));
+      questionnaire =
+          results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
+    }
+
     if (questionnaireResponse.hasExtension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)) {
       questionnaireResponse.getItem()
           .forEach(item -> processDefinitionItem(item, questionnaireResponse, resources, subject));
     } else {
-      var questionnaireCodeMap = getQuestionnaireCodeMap(questionnaireCanonical);
+      var questionnaireCodeMap = createCodeMap(questionnaire);
       questionnaireResponse.getItem().forEach(item -> {
         if (item.hasItem()) {
           processGroupItem(item, questionnaireResponse, questionnaireCodeMap, resources, subject);
+        } else if (item.hasDefinition()) {
+          processDefinitionItem(item, questionnaireResponse, resources, subject);
         } else {
           processItem(item, questionnaireResponse, questionnaireCodeMap, resources, subject);
         }
@@ -156,54 +162,30 @@ public class QuestionnaireResponseProcessor
     return property;
   }
 
-  private boolean verifyLibraryUrlForItemExpression(String url, String expression,
-      String itemLinkId) {
-    if (url == null || url.isEmpty()) {
-      var message =
-          String.format("No library specified for expression (%s) for item (%s)",
-              expression, itemLinkId);
-      logger.error(message);
-      // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-      // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-      return false;
+  private List<IBase> getExpressionResult(Expression expression, String itemLinkId) {
+    if (expression == null || expression.getExpression().isEmpty()) {
+      return null;
     }
-    return true;
-  }
-
-  private List<IBase> getExpressionResult(Expression expression, String itemLinkId,
-      IBase populationContext) {
-    var expressionLibrary =
-        expression.hasReference() ? expression.getReference() : libraryUrl;
-    if (verifyLibraryUrlForItemExpression(expressionLibrary, expression.getExpression(),
-        itemLinkId)) {
-      try {
-        var subjectId = patientId;
-        var expressionSubjectType = subjectType;
-        if (populationContext != null && !populationContext.isEmpty()) {
-          subjectId = ((Resource) populationContext).getIdPart();
-          expressionSubjectType = ((Resource) populationContext).fhirType();
-        }
-        return libraryEngine.getExpressionResult(subjectId, expressionSubjectType,
-            expression.getExpression(), expression.getLanguage(), expressionLibrary,
-            parameters, bundle);
-      } catch (Exception ex) {
-        var message =
-            String.format(
-                "Error encountered evaluating expression (%s) for item (%s): %s",
-                expression.getExpression(), itemLinkId, ex.getMessage());
-        logger.error(message);
-        // oc.addIssue().setCode(OperationOutcome.IssueType.EXCEPTION)
-        // .setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(message);
-      }
+    try {
+      return libraryEngine.resolveExpression(patientId,
+          new CqfExpression(expression, libraryUrl, null), parameters, bundle);
+    } catch (Exception ex) {
+      var message =
+          String.format(
+              "Error encountered evaluating expression (%s) for item (%s): %s",
+              expression.getExpression(), itemLinkId, ex.getMessage());
+      logger.error(message);
     }
 
     return null;
   }
 
-  private String getResourceType(String definition) {
-    var profile = definition.split("#")[0];
-
-    return profile.substring(profile.lastIndexOf("/") + 1, profile.length());
+  private String getDefinitionType(String definition) {
+    if (!definition.contains("#")) {
+      throw new IllegalArgumentException(
+          String.format("Unable to determine resource type from item definition: %s", definition));
+    }
+    return definition.split("#")[1];
   }
 
   private void processDefinitionItem(QuestionnaireResponseItemComponent item,
@@ -217,15 +199,14 @@ public class QuestionnaireResponseProcessor
         : questionnaireResponse.getExtensionByUrl(contextExtension);
     if (itemExtractionContext != null) {
       var contextExpression = (Expression) itemExtractionContext.getValue();
-      var context = getExpressionResult(contextExpression, item.getLinkId(), null);
+      var context = getExpressionResult(contextExpression, item.getLinkId());
       if (context != null && !context.isEmpty()) {
         // TODO: edit context instead of creating new resources
       }
     }
 
-    var resourceType = getResourceType(item.getDefinition());
-    var resource =
-        (Resource) this.repository.fhirContext().getResourceDefinition(resourceType).newInstance();
+    var resourceType = getDefinitionType(item.getDefinition());
+    var resource = (Resource) newValue(resourceType);
     resource.setId(
         new IdType(resourceType, getExtractId(questionnaireResponse) + "." + item.getLinkId()));
     var subjectProperty = getSubjectProperty(resource);
@@ -269,7 +250,8 @@ public class QuestionnaireResponseProcessor
       // var newValues = nestedProperty.getValues();
     } else {
       var hasExisting = nestedProperty.hasValues();
-      var newValue = hasExisting ? nestedProperty.getValues().get(0) : newValue(nestedProperty);
+      var newValue =
+          hasExisting ? nestedProperty.getValues().get(0) : newValue(nestedProperty.getTypeCode());
       if (nestedElements.size() == 1) {
         setProperty(newValue, pathElements[2], answerValue);
       } else {
@@ -286,10 +268,9 @@ public class QuestionnaireResponseProcessor
     base.setProperty(propertyName, transformAnswerValue(answerValue, property));
   }
 
-  private Base newValue(Property property) {
+  private Base newValue(String type) {
     try {
-      return (Base) Class.forName("org.hl7.fhir.r4.model." + property.getTypeCode())
-          .getConstructor().newInstance();
+      return (Base) Class.forName("org.hl7.fhir.r4.model." + type).getConstructor().newInstance();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -313,13 +294,17 @@ public class QuestionnaireResponseProcessor
   private void processItem(QuestionnaireResponseItemComponent item,
       QuestionnaireResponse questionnaireResponse, Map<String, List<Coding>> questionnaireCodeMap,
       List<IBaseResource> resources, Reference subject) {
+    if (questionnaireCodeMap == null || questionnaireCodeMap.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Unable to retrieve Questionnaire code map for Observation based extraction");
+    }
     if (item.hasAnswer()) {
       item.getAnswer().forEach(answer -> {
         if (answer.hasItem()) {
           answer.getItem().forEach(answerItem -> processItem(answerItem, questionnaireResponse,
               questionnaireCodeMap, resources, subject));
         } else {
-          if (questionnaireCodeMap != null && !questionnaireCodeMap.isEmpty()
+          if (questionnaireCodeMap.get(item.getLinkId()) != null
               && !questionnaireCodeMap.get(item.getLinkId()).isEmpty()) {
             resources.add(createObservationFromItemAnswer(answer, item.getLinkId(),
                 questionnaireResponse, subject, questionnaireCodeMap));
@@ -395,30 +380,12 @@ public class QuestionnaireResponseProcessor
   // return client.transaction().withBundle(observationsBundle).execute();
   // }
 
-  private Map<String, List<Coding>> getQuestionnaireCodeMap(String questionnaireUrl) {
-    Questionnaire questionnaire = null;
-    try {
-      var results = this.repository.search(Bundle.class, Questionnaire.class,
-          Searches.byUrl(questionnaireUrl));
-      questionnaire =
-          results.hasEntry() ? (Questionnaire) results.getEntryFirstRep().getResource() : null;
-      if (questionnaire == null) {
-        throw new RuntimeException(
-            String.format("Unable to find resource by URL %s", questionnaireUrl));
-      }
-    } catch (Exception e) {
-      logger.error(String.format(
-          "Error encountered searching for Questionnaire during extract operation: %s",
-          e.getMessage()));
-      return Collections.emptyMap();
-    }
-
-    return createCodeMap(questionnaire);
-  }
-
   // this is based on "if a questionnaire.item has items then this item is a
   // header and will not have a specific code to be used with an answer"
   private Map<String, List<Coding>> createCodeMap(Questionnaire questionnaire) {
+    if (questionnaire == null) {
+      return null;
+    }
     var questionnaireCodeMap = new HashMap<String, List<Coding>>();
     questionnaire.getItem().forEach(item -> processQuestionnaireItems(item, questionnaireCodeMap));
 

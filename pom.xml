@@ -15,7 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <cql.version>3.0.0-SNAPSHOT</cql.version>
+    <cql.version>3.0.0</cql.version>
     <spring.version>5.3.23</spring.version>
     <fhir-core.version>6.0.22</fhir-core.version>
     <hapi.version>6.8.0</hapi.version>

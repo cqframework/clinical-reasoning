@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.utility.repository;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.ConfigurationException;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -17,13 +19,15 @@ import org.opencds.cqf.fhir.api.Repository;
 import com.google.common.collect.ImmutableMap;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * This class implements the Repository interface on onto a directory structure that matches the
@@ -65,17 +69,6 @@ public class IGFileStructureRepository implements Repository {
     }
   }
 
-  protected String fileNameForLayoutAndEncoding(
-      String resourceType, String resourceId) {
-    var name = resourceId + fileExtensions.get(this.encodingEnum);
-    if (layoutMode == IGLayoutMode.DIRECTORY) {
-      // TODO: case sensitivity!!
-      return resourceType.toLowerCase() + "/" + name;
-    } else {
-      return resourceType + "-" + name;
-    }
-  }
-
   public IGFileStructureRepository(FhirContext fhirContext, String root) {
     this(fhirContext, root, IGLayoutMode.DIRECTORY, EncodingEnum.JSON);
   }
@@ -89,6 +82,23 @@ public class IGFileStructureRepository implements Repository {
     this.parser = parserForEncoding(fhirContext, encodingEnum);
   }
 
+  protected <T extends IBaseResource, I extends IIdType> String locationForResource(
+      Class<T> resourceType, I id) {
+    var directory = directoryForType(resourceType);
+    return directory + "/"
+        + fileNameForLayoutAndEncoding(resourceType.getSimpleName(), id.getIdPart());
+  }
+
+  protected String fileNameForLayoutAndEncoding(
+      String resourceType, String resourceId) {
+    var name = resourceId + fileExtensions.get(this.encodingEnum);
+    if (layoutMode == IGLayoutMode.DIRECTORY) {
+      // TODO: case sensitivity!!
+      return resourceType.toLowerCase() + "/" + name;
+    } else {
+      return resourceType + "-" + name;
+    }
+  }
 
   protected <T extends IBaseResource> String directoryForType(Class<T> resourceType) {
     var category = ResourceCategory.forType(resourceType.getSimpleName());
@@ -116,16 +126,29 @@ public class IGFileStructureRepository implements Repository {
     return r;
   }
 
-  protected <T extends IBaseResource, I extends IIdType> String locationForResource(
-      Class<T> resourceType, I id) {
-    var directory = directoryForType(resourceType);
-    return directory + "/"
-        + fileNameForLayoutAndEncoding(resourceType.getSimpleName(), id.getIdPart());
+  protected <T extends IBaseResource> MethodOutcome writeLocation(
+      T resource, String location) {
+    try (var os = new FileOutputStream(location)) {
+      String result = parser.encodeResourceToString(resource);
+      os.write(result.getBytes());
+    } catch (IOException e) {
+      throw new UnclassifiedServerFailureException(500,
+          String.format("unable to write resource to location %s", location));
+    }
+
+    return new MethodOutcome(resource.getIdElement());
+  }
+
+  @Override
+  public FhirContext fhirContext() {
+    return this.fhirContext;
   }
 
   @Override
   public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
       Map<String, String> headers) {
+    requireNonNull(resourceType, "resourceType can not be null");
+    requireNonNull(id, "id can not be null");
 
     var location = this.locationForResource(resourceType, id);
     return readLocation(resourceType, location, id);
@@ -133,8 +156,11 @@ public class IGFileStructureRepository implements Repository {
 
   @Override
   public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'create'");
+    requireNonNull(resource, "resource can not be null");
+    requireNonNull(resource.getIdElement(), "resource id can not be null");
+
+    var location = this.locationForResource(resource.getClass(), resource.getIdElement());
+    return writeLocation(resource, location);
   }
 
   @Override
@@ -146,15 +172,29 @@ public class IGFileStructureRepository implements Repository {
 
   @Override
   public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'update'");
+    requireNonNull(resource, "resource can not be null");
+    requireNonNull(resource.getIdElement(), "resource id can not be null");
+
+    var location = this.locationForResource(resource.getClass(), resource.getIdElement());
+    return writeLocation(resource, location);
   }
 
   @Override
   public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
       I id, Map<String, String> headers) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'delete'");
+    requireNonNull(resourceType, "resourceType can not be null");
+    requireNonNull(id, "id can not be null");
+
+    var location = this.locationForResource(resourceType, id);
+
+    try {
+      new File(location).delete();
+    } catch (Exception e) {
+      throw new UnclassifiedServerFailureException(500,
+          String.format("Couldn't delete %s", location));
+    }
+
+    return new MethodOutcome(id);
   }
 
   @Override
@@ -248,11 +288,4 @@ public class IGFileStructureRepository implements Repository {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'history'");
   }
-
-  @Override
-  public FhirContext fhirContext() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'fhirContext'");
-  }
-
 }

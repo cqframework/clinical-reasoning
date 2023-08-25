@@ -26,7 +26,9 @@ public class ResourceDirectoryCopier {
       final Path target)
       throws URISyntaxException, IOException {
     URI resource = clazz.getResource(sourceDirectory).toURI();
-    try (var pathReference = PathReference.getPath(resource)) {
+    PathReference pr = null;
+    try {
+      var pathReference = PathReference.getPath(resource);
       final Path jarPath = pathReference.getPath();
       Files.walkFileTree(jarPath, new SimpleFileVisitor<Path>() {
 
@@ -50,10 +52,14 @@ public class ResourceDirectoryCopier {
       });
     } catch (Exception e) {
       throw new RuntimeException("Unable to copy directory", e);
+    } finally {
+      if (pr != null) {
+        pr.close();
+      }
     }
   }
 
-  static class PathReference implements AutoCloseable {
+  static class PathReference {
 
     private final Path path;
     private final FileSystem fs;
@@ -63,8 +69,7 @@ public class ResourceDirectoryCopier {
       this.fs = fs;
     }
 
-    @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
       if (this.fs != null)
         this.fs.close();
     }

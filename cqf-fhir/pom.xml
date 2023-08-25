@@ -18,7 +18,7 @@
     <hapi.version>6.4.4</hapi.version>
     <junit.version>5.9.1</junit.version>
     <slf4j.version>2.0.4</slf4j.version>
-    <cql.version>3.0.0-SNAPSHOT</cql.version>
+    <cql.version>3.0.0</cql.version>
     <jmh.version>1.36</jmh.version>
   </properties>
   <licenses>

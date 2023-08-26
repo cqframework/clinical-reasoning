@@ -1,21 +1,27 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem;
 
+import static org.opencds.cqf.cql.evaluator.questionnaire.r4.ItemValueTransformer.transformValue;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NestedQuestionnaireItemService {
-  protected QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
-  protected ElementHasDefaultValue elementHasDefaultValue;
-  protected ElementHasCqfExpression elementHasCqfExpression;
+  protected final ModelResolver modelResolver;
+  protected final QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
+  protected final ElementHasDefaultValue elementHasDefaultValue;
+  protected final ElementHasCqfExpression elementHasCqfExpression;
   protected static final String ITEM_TYPE_ERROR = "Unable to determine type for element: %s";
   protected static final Logger logger =
       LoggerFactory.getLogger(NestedQuestionnaireItemService.class);
@@ -37,34 +43,45 @@ public class NestedQuestionnaireItemService {
     return new NestedQuestionnaireItemService(
         questionnaireTypeIsChoice,
         elementHasDefault,
-        elementHasCqfExpression);
+        elementHasCqfExpression,
+        FhirModelResolverCache
+            .resolverForVersion(repository.fhirContext().getVersion().getVersion()));
   }
 
   NestedQuestionnaireItemService(
       QuestionnaireTypeIsChoice questionnaireTypeIsChoice,
       ElementHasDefaultValue elementHasDefaultValue,
-      ElementHasCqfExpression elementHasCqfExpression) {
+      ElementHasCqfExpression elementHasCqfExpression,
+      ModelResolver modelResolver) {
     this.questionnaireTypeIsChoice = questionnaireTypeIsChoice;
     this.elementHasDefaultValue = elementHasDefaultValue;
     this.elementHasCqfExpression = elementHasCqfExpression;
+    this.modelResolver = modelResolver;
   }
 
   public QuestionnaireItemComponent getNestedQuestionnaireItem(
-      StructureDefinition profile,
+      String profileUrl,
       ElementDefinition element,
-      String childLinkId) {
+      String childLinkId,
+      Resource caseFeature) {
     final QuestionnaireItemType itemType = getItemType(element);
-    QuestionnaireItemComponent item =
-        initializeQuestionnaireItem(itemType, profile, element, childLinkId);
+    final QuestionnaireItemComponent item =
+        initializeQuestionnaireItem(itemType, profileUrl, element, childLinkId);
     if (itemType == QuestionnaireItemType.CHOICE) {
-      item = questionnaireTypeIsChoice.addProperties(element, item);
+      questionnaireTypeIsChoice.addProperties(element, item);
     }
     if (element.hasFixedOrPattern()) {
-      item = elementHasDefaultValue.addProperties(element.getFixedOrPattern(), item);
+      elementHasDefaultValue.addProperties(element.getFixedOrPattern(), item);
     } else if (element.hasDefaultValue()) {
-      item = elementHasDefaultValue.addProperties(element.getDefaultValue(), item);
+      elementHasDefaultValue.addProperties(element.getDefaultValue(), item);
     } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
-      item = elementHasCqfExpression.addProperties(element, item);
+      elementHasCqfExpression.addProperties(element, item);
+    } else if (caseFeature != null) {
+      var path = element.getPath().split("\\.")[1].replace("[x]", "");
+      var pathValue = modelResolver.resolvePath(caseFeature, path);
+      if (pathValue instanceof Type) {
+        item.addInitial().setValue(transformValue((Type) pathValue));
+      }
     }
     item.setRequired(element.hasMin() && element.getMin() == 1);
     // set repeat based on? if expression result type is a list?
@@ -75,16 +92,15 @@ public class NestedQuestionnaireItemService {
 
   protected QuestionnaireItemComponent initializeQuestionnaireItem(
       QuestionnaireItemType itemType,
-      StructureDefinition profile,
+      String profileUrl,
       ElementDefinition element,
       String childLinkId) {
-    final String definition = profile.getUrl() + "#" + element.getPath();
-    final String childText = getElementText(element);
+    final String definition = profileUrl + "#" + element.getPath();
     return new QuestionnaireItemComponent()
         .setType(itemType)
         .setDefinition(definition)
         .setLinkId(childLinkId)
-        .setText(childText);
+        .setText(getElementText(element));
   }
 
   public QuestionnaireItemType getItemType(ElementDefinition element) {
@@ -104,11 +120,16 @@ public class NestedQuestionnaireItemService {
     switch (elementType) {
       case "CodeableConcept":
         return QuestionnaireItemType.CHOICE;
-      case "Reference":
       case "uri":
-        return QuestionnaireItemType.STRING;
+        return QuestionnaireItemType.URL;
       case "BackboneElement":
         return QuestionnaireItemType.GROUP;
+      case "Quantity":
+        return QuestionnaireItemType.QUANTITY;
+      case "Reference":
+        return QuestionnaireItemType.REFERENCE;
+      case "code":
+        return QuestionnaireItemType.STRING;
       default:
         return QuestionnaireItemType.fromCode(elementType);
     }

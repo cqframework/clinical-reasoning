@@ -43,7 +43,8 @@ public class PlanDefinitions {
     this.apply = PlanDefinition.Assert.that(
         "ANCDT17",
         "Patient/5946f880-b197-400b-9caa-a3c661d23041",
-        "Encounter/helloworld-patient-1-encounter-1")
+        "Encounter/helloworld-patient-1-encounter-1",
+        null)
         .withRepository(REPOSITORY)
         .withParameters(parameters(part("encounter", "helloworld-patient-1-encounter-1")))
         .withExpectedBundleId(new IdType("Bundle", "ANCDT17"));

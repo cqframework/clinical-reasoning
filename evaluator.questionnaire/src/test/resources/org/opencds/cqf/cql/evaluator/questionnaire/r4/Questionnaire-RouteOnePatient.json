@@ -4,7 +4,7 @@
   "item": [
     {
       "linkId": "1",
-      "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient",
+      "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient#Patient",
       "text": "Beneficiary Information",
       "type": "group",
       "item": [
@@ -89,7 +89,7 @@
           "linkId": "1.5",
           "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient#Patient.identifier.system",
           "text": "Patient.identifier.system",
-          "type": "string",
+          "type": "url",
           "required": true,
           "readOnly": true,
           "initial": [

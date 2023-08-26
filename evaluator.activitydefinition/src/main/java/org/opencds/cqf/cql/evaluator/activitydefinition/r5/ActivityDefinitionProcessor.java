@@ -4,6 +4,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -11,25 +13,30 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeableReference;
 import org.hl7.fhir.r5.model.Communication;
 import org.hl7.fhir.r5.model.CommunicationRequest;
 import org.hl7.fhir.r5.model.DiagnosticReport;
+import org.hl7.fhir.r5.model.DomainResource;
 import org.hl7.fhir.r5.model.Enumerations.EventStatus;
 import org.hl7.fhir.r5.model.Enumerations.RequestIntent;
 import org.hl7.fhir.r5.model.Enumerations.RequestStatus;
 import org.hl7.fhir.r5.model.MedicationRequest;
-import org.hl7.fhir.r5.model.MedicationRequest.MedicationRequestDoseComponent;
+import org.hl7.fhir.r5.model.MedicationRequest.MedicationrequestStatus;
+import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.Procedure;
 import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ServiceRequest;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.SupplyRequest;
 import org.hl7.fhir.r5.model.Task;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.library.CqfExpression;
+import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.utility.r5.InputParameterResolver;
 import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +44,8 @@ import org.slf4j.LoggerFactory;
 public class ActivityDefinitionProcessor
     extends BaseActivityDefinitionProcessor<ActivityDefinition> {
   private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
+
+  protected InputParameterResolver inputParameterResolver;
 
   public ActivityDefinitionProcessor(Repository repository) {
     this(repository, EvaluationSettings.getDefault());
@@ -57,21 +66,31 @@ public class ActivityDefinitionProcessor
 
     requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + theId);
 
-    var activityDefinition = castOrThrow(baseActivityDefinition, ActivityDefinition.class,
-        "The activityDefinition passed to Repository was not a valid instance of ActivityDefinition.class")
+    return castOrThrow(baseActivityDefinition, ActivityDefinition.class,
+        "The activityDefinition passed in was not a valid instance of ActivityDefinition.class")
             .orElse(null);
+  }
 
-    logger.info("Performing $apply operation on {}", theId);
+  @Override
+  protected ActivityDefinition initApply(ActivityDefinition activityDefinition) {
+    logger.info("Performing $apply operation on {}", activityDefinition.getId());
+
+    this.inputParameterResolver =
+        new InputParameterResolver(subjectId, encounterId, practitionerId, parameters,
+            useServerData, bundle, repository);
+    this.extensionResolver = new ExtensionResolver(subjectId,
+        inputParameterResolver.getParameters(), bundle, libraryEngine);
 
     return activityDefinition;
   }
 
   @Override
   public IBaseResource applyActivityDefinition(ActivityDefinition activityDefinition) {
-    Resource result;
+    DomainResource result;
     try {
       result =
-          (Resource) Class.forName("org.hl7.fhir.r5.model." + activityDefinition.getKind().toCode())
+          (DomainResource) Class
+              .forName("org.hl7.fhir.r5.model." + activityDefinition.getKind().toCode())
               .getConstructor().newInstance();
     } catch (Exception e) {
       e.printStackTrace();
@@ -118,44 +137,68 @@ public class ActivityDefinitionProcessor
         throw new FHIRException(msg);
     }
 
-    String subjectCode = null;
-    if (activityDefinition.hasSubjectCodeableConcept()) {
-      var concept = activityDefinition.getSubjectCodeableConcept();
-      if (concept.hasCoding()) {
-        subjectCode = concept.getCoding().get(0).getCode();
-      }
-    }
-    var subjectType = subjectCode != null ? subjectCode : "Patient";
+    resolveMeta(result, activityDefinition);
     var defaultLibraryUrl =
         activityDefinition.hasLibrary() ? activityDefinition.getLibrary().get(0).getValueAsString()
             : null;
+    resolveExtensions(result, activityDefinition, defaultLibraryUrl);
+    var inputParams = inputParameterResolver.getParameters();
     for (var dynamicValue : activityDefinition.getDynamicValue()) {
       if (dynamicValue.hasExpression()) {
         var expression = dynamicValue.getExpression();
-        resolveDynamicValue(expression.getLanguage(), expression.getExpression(),
-            expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
-            dynamicValue.getPath(), result, subjectType);
+        var expressionResult = libraryEngine.resolveExpression(subjectId,
+            new CqfExpression(expression.getLanguage(), expression.getExpression(),
+                expression.hasReference() ? expression.getReference() : defaultLibraryUrl),
+            inputParams, bundle);
+        resolveDynamicValue(expressionResult, expression.getExpression(),
+            dynamicValue.getPath(), result);
       }
     }
 
     return result;
   }
 
-  private Task resolveTask(ActivityDefinition activityDefinition) throws FHIRException {
+  private void resolveMeta(DomainResource resource, ActivityDefinition activityDefinition) {
+    var meta = new Meta();
+    // Consider setting source and lastUpdated here?
+    // .setLastUpdated(new Date());
+    if (activityDefinition.hasProfile()) {
+      meta.addProfile(activityDefinition.getProfile());
+      resource.setMeta(meta);
+    }
+  }
+
+  private void resolveExtensions(DomainResource resource, ActivityDefinition activityDefinition,
+      String defaultLibraryUrl) {
+    if (activityDefinition.hasExtension()) {
+      resource.setExtension(activityDefinition.getExtension().stream()
+          .filter(e -> !EXCLUDED_EXTENSION_LIST.contains(e.getUrl())).collect(Collectors.toList()));
+      extensionResolver.resolveExtensions(resource.getExtension(), defaultLibraryUrl);
+    }
+  }
+
+  private Task resolveTask(ActivityDefinition activityDefinition) {
     var task = new Task();
-    if (activityDefinition.hasExtension(TARGET_STATUS_URL)) {
-      var value = activityDefinition.getExtensionByUrl(TARGET_STATUS_URL).getValue();
+    if (activityDefinition.hasExtension(BaseActivityDefinitionProcessor.TARGET_STATUS_URL)) {
+      var value = activityDefinition
+          .getExtensionByUrl(BaseActivityDefinitionProcessor.TARGET_STATUS_URL).getValue();
       if (value instanceof StringType) {
         task.setStatus(Task.TaskStatus.valueOf(((StringType) value).asStringValue().toUpperCase()));
       } else {
-        logger.debug("Extension {} should have a value of type {}", TARGET_STATUS_URL,
-            StringType.class.getName());
+        logger.debug("Extension {} should have a value of type {}",
+            BaseActivityDefinitionProcessor.TARGET_STATUS_URL, StringType.class.getName());
       }
     } else {
       task.setStatus(Task.TaskStatus.DRAFT);
     }
 
-    task.setIntent(Task.TaskIntent.PROPOSAL);
+    task.setIntent(activityDefinition.hasIntent()
+        ? Task.TaskIntent.fromCode(activityDefinition.getIntent().toCode())
+        : Task.TaskIntent.PROPOSAL);
+
+    if (activityDefinition.hasUrl()) {
+      task.setInstantiatesCanonical(activityDefinition.getUrl());
+    }
 
     if (activityDefinition.hasCode()) {
       task.setCode(activityDefinition.getCode());
@@ -171,13 +214,19 @@ public class ActivityDefinitionProcessor
     return task;
   }
 
-  private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition)
-      throws FHIRException {
+  private ServiceRequest resolveServiceRequest(ActivityDefinition activityDefinition) {
     // status, intent, code, and subject are required
     var serviceRequest = new ServiceRequest();
     serviceRequest.setStatus(RequestStatus.DRAFT);
-    serviceRequest.setIntent(RequestIntent.ORDER);
+    serviceRequest.setIntent(activityDefinition.hasIntent()
+        ? RequestIntent.fromCode(activityDefinition.getIntent().toCode())
+        : RequestIntent.ORDER);
     serviceRequest.setSubject(new Reference(subjectId));
+
+    if (activityDefinition.hasUrl()) {
+      serviceRequest.setInstantiatesCanonical(
+          Collections.singletonList(new CanonicalType(activityDefinition.getUrl())));
+    }
 
     if (practitionerId != null) {
       serviceRequest.setRequester(new Reference(practitionerId));
@@ -191,18 +240,20 @@ public class ActivityDefinitionProcessor
       serviceRequest.setExtension(activityDefinition.getExtension());
     }
 
-    serviceRequest.setCode(
-        new CodeableReference().setReference(new Reference(activityDefinition.getIdElement())));
-
-    // Is this still needed?
-    // // code can be set as a dynamicValue
-    // else if (!activityDefinition.hasCode() &&
-    // !activityDefinition.hasDynamicValue()) {
-    // throw new FHIRException(MISSING_CODE_PROPERTY);
-    // }
+    if (activityDefinition.hasCode()) {
+      serviceRequest.setCode(new CodeableReference(activityDefinition.getCode()));
+    }
+    // code can be set as a dynamicValue
+    else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
+      throw new FHIRException(MISSING_CODE_PROPERTY);
+    }
 
     if (activityDefinition.hasBodySite()) {
       serviceRequest.setBodySite(activityDefinition.getBodySite());
+    }
+
+    if (activityDefinition.hasDoNotPerform()) {
+      serviceRequest.setDoNotPerform(activityDefinition.getDoNotPerform());
     }
 
     if (activityDefinition.hasProduct()) {
@@ -216,30 +267,32 @@ public class ActivityDefinitionProcessor
     return serviceRequest;
   }
 
-  private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition)
-      throws FHIRException {
+  private MedicationRequest resolveMedicationRequest(ActivityDefinition activityDefinition) {
     // intent, medication, and subject are required
     var medicationRequest = new MedicationRequest();
-    medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
+    medicationRequest.setStatus(MedicationrequestStatus.DRAFT);
+    medicationRequest.setIntent(activityDefinition.hasIntent()
+        ? MedicationRequest.MedicationRequestIntent
+            .fromCode(activityDefinition.getIntent().toCode())
+        : MedicationRequest.MedicationRequestIntent.ORDER);
     medicationRequest.setSubject(new Reference(subjectId));
 
-    if (activityDefinition.hasProduct()) {
-      var medicationValue = new CodeableReference();
-      if (activityDefinition.hasProductCodeableConcept()) {
-        medicationValue.setConcept(activityDefinition.getProductCodeableConcept());
-      } else {
-        medicationValue.setReference(activityDefinition.getProductReference());
-      }
-      medicationRequest.setMedication(medicationValue);
-    }
-
-    else {
+    if (activityDefinition.hasProductCodeableConcept()) {
+      medicationRequest
+          .setMedication(new CodeableReference(activityDefinition.getProductCodeableConcept()));
+    } else if (activityDefinition.hasProductReference()) {
+      medicationRequest
+          .setMedication(new CodeableReference(activityDefinition.getProductReference()));
+    } else {
       throw new FHIRException(MISSING_CODE_PROPERTY);
     }
 
     if (activityDefinition.hasDosage()) {
-      medicationRequest.setDose(new MedicationRequestDoseComponent()
-          .setDosageInstruction(activityDefinition.getDosage()));
+      activityDefinition.getDosage().forEach(medicationRequest::addDosageInstruction);
+    }
+
+    if (activityDefinition.hasDoNotPerform()) {
+      medicationRequest.setDoNotPerform(activityDefinition.getDoNotPerform());
     }
 
     if (activityDefinition.hasBodySite()) {
@@ -257,9 +310,10 @@ public class ActivityDefinitionProcessor
     return medicationRequest;
   }
 
-  private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition)
-      throws FHIRException {
+  private SupplyRequest resolveSupplyRequest(ActivityDefinition activityDefinition) {
     var supplyRequest = new SupplyRequest();
+
+    supplyRequest.setStatus(SupplyRequest.SupplyRequestStatus.DRAFT);
 
     if (practitionerId != null) {
       supplyRequest.setRequester(new Reference(practitionerId));
@@ -271,14 +325,12 @@ public class ActivityDefinitionProcessor
 
     if (activityDefinition.hasQuantity()) {
       supplyRequest.setQuantity(activityDefinition.getQuantity());
-    }
-
-    else {
+    } else {
       throw new FHIRException("Missing required orderedItem.quantity property");
     }
 
     if (activityDefinition.hasCode()) {
-      supplyRequest.setItem(new CodeableReference().setConcept(activityDefinition.getCode()));
+      supplyRequest.setItem(new CodeableReference(activityDefinition.getCode()));
     }
 
     if (activityDefinition.hasProduct()) {
@@ -301,6 +353,11 @@ public class ActivityDefinitionProcessor
 
     procedure.setStatus(EventStatus.UNKNOWN);
     procedure.setSubject(new Reference(subjectId));
+
+    if (activityDefinition.hasUrl()) {
+      procedure.setInstantiatesCanonical(
+          Collections.singletonList(new CanonicalType(activityDefinition.getUrl())));
+    }
 
     if (activityDefinition.hasCode()) {
       procedure.setCode(activityDefinition.getCode());
@@ -329,12 +386,12 @@ public class ActivityDefinitionProcessor
     }
 
     if (activityDefinition.hasRelatedArtifact()) {
-      var presentedFormAttachments = new ArrayList<Attachment>();
+      List<Attachment> presentedFormAttachments = new ArrayList<>();
       for (var artifact : activityDefinition.getRelatedArtifact()) {
         var attachment = new Attachment();
 
-        if (artifact.hasResourceReference()) {
-          attachment.setUrl(artifact.getResourceReference().getReference());
+        if (artifact.hasResourceElement()) {
+          attachment.setUrl(artifact.getResourceElement().getValue());
         }
 
         if (artifact.hasDisplay()) {
@@ -355,14 +412,14 @@ public class ActivityDefinitionProcessor
     communication.setSubject(new Reference(subjectId));
 
     if (activityDefinition.hasCode()) {
-      communication.setReason(Collections
-          .singletonList(new CodeableReference().setConcept(activityDefinition.getCode())));
+      communication.setReason(
+          Collections.singletonList(new CodeableReference(activityDefinition.getCode())));
     }
 
     if (activityDefinition.hasRelatedArtifact()) {
       for (var artifact : activityDefinition.getRelatedArtifact()) {
-        if (artifact.hasResourceReference()) {
-          var attachment = new Attachment().setUrl(artifact.getResourceReference().getReference());
+        if (artifact.hasResourceElement()) {
+          var attachment = new Attachment().setUrl(artifact.getResourceElement().getValue());
           if (artifact.hasDisplay()) {
             attachment.setTitle(artifact.getDisplay());
           }
@@ -382,8 +439,20 @@ public class ActivityDefinitionProcessor
   private CommunicationRequest resolveCommunicationRequest(ActivityDefinition activityDefinition) {
     var communicationRequest = new CommunicationRequest();
 
-    communicationRequest.setStatus(RequestStatus.UNKNOWN);
+    communicationRequest.setStatus(RequestStatus.DRAFT);
     communicationRequest.setSubject(new Reference(subjectId));
+
+    if (encounterId != null && !encounterId.isEmpty()) {
+      communicationRequest.setEncounter(new Reference(encounterId));
+    }
+
+    if (practitionerId != null && !practitionerId.isEmpty()) {
+      communicationRequest.setRequester(new Reference(practitionerId));
+    }
+
+    if (activityDefinition.hasDoNotPerform()) {
+      communicationRequest.setDoNotPerform(activityDefinition.getDoNotPerform());
+    }
 
     if (activityDefinition.hasCode() && activityDefinition.getCode().hasText()) {
       communicationRequest.addPayload()

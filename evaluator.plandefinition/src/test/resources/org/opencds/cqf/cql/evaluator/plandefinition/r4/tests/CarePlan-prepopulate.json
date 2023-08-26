@@ -5,6 +5,11 @@
     {
       "resourceType": "RequestGroup",
       "id": "prepopulate",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+        ]
+      },
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate|1.0.0"
       ],
@@ -15,6 +20,21 @@
       },
       "action": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter",
+                  "valueString": "ClaimId"
+                },
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
+                  "valueCanonical": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+                }
+              ]
+            }
+          ],
           "title": "Prepopulate!",
           "description": "A simple recommendation to complete a prepopulated Questionnaire",
           "resource": {
@@ -813,6 +833,7 @@
     {
       "resourceType": "Task",
       "id": "complete-questionnaire",
+      "instantiatesCanonical": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire",
       "basedOn": [
         {
           "reference": "#RequestGroup/prepopulate",

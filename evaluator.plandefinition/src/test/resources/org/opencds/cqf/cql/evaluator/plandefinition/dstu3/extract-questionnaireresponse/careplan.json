@@ -5,9 +5,14 @@
     {
       "resourceType": "RequestGroup",
       "id": "prepopulate",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+        ]
+      },
       "definition": [
         {
-          "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
+          "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate|1.0.0"
         }
       ],
       "status": "draft",
@@ -17,6 +22,21 @@
       },
       "action": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter",
+                  "valueString": "ClaimId"
+                },
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
+                  "valueUri": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+                }
+              ]
+            }
+          ],
           "title": "Prepopulate!",
           "description": "A simple recommendation to complete a prepopulated Questionnaire",
           "resource": {
@@ -38,13 +58,8 @@
       "authored": "2021-12-01",
       "item": [
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-              "valueCode": "Organization"
-            }
-          ],
           "linkId": "1",
+          "definition": "http://hl7.org/fhir/Organization",
           "text": "Facility Information",
           "item": [
             {
@@ -74,13 +89,8 @@
           ]
         },
         {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-              "valueCode": "Patient"
-            }
-          ],
           "linkId": "2",
+          "definition": "http://hl7.org/fhir/Patient",
           "text": "Beneficiary Information",
           "item": [
             {
@@ -177,7 +187,7 @@
     },
     {
       "resourceType": "Questionnaire",
-      "id": "1903",
+      "id": "1903-OPA-Patient1",
       "meta": {
         "profile": [
           "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire-r4"
@@ -189,9 +199,15 @@
           "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
         },
         {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject",
+          "valueReference": {
+            "reference": "Patient/OPA-Patient1"
+          }
+        },
+        {
           "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
           "valueReference": {
-            "reference": "#prepopulate-outcome-1903"
+            "reference": "#populate-outcome-1903-OPA-Patient1"
           }
         }
       ],
@@ -287,6 +303,12 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
                   "valueString": "text/cql.identifier"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
                 }
               ],
               "linkId": "2.1",
@@ -304,6 +326,12 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
                   "valueString": "text/cql.identifier"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
                 }
               ],
               "linkId": "2.2",
@@ -321,6 +349,12 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
                   "valueString": "text/cql.identifier"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
                 }
               ],
               "linkId": "2.3",
@@ -354,6 +388,12 @@
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
                   "valueString": "text/cql.identifier"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
                 }
               ],
               "linkId": "2.5",
@@ -696,6 +736,7 @@
     {
       "resourceType": "Task",
       "id": "complete-questionnaire",
+      "definitionUri": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire",
       "basedOn": [
         {
           "reference": "#RequestGroup/prepopulate"
@@ -705,7 +746,7 @@
       "intent": "proposal",
       "description": "Create a task to complete a Questionnaire.",
       "focus": {
-        "reference": "Questionnaire/1903"
+        "reference": "Questionnaire/1903-OPA-Patient1"
       },
       "for": {
         "reference": "OPA-Patient1"
@@ -713,7 +754,7 @@
     },
     {
       "resourceType": "OperationOutcome",
-      "id": "prepopulate-outcome-1903",
+      "id": "populate-outcome-1903-OPA-Patient1",
       "issue": [
         {
           "severity": "error",
@@ -818,9 +859,17 @@
       ]
     }
   ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+      "valueReference": {
+        "reference": "#populate-outcome-1903-OPA-Patient1"
+      }
+    }
+  ],
   "definition": [
     {
-      "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
+      "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate|1.0.0"
     }
   ],
   "status": "draft",

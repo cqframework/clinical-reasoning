@@ -5,9 +5,14 @@
     {
       "resourceType": "RequestGroup",
       "id": "hello-world-patient-view",
+      "meta": {
+        "profile": [
+          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+        ]
+      },
       "definition": [
         {
-          "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
+          "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
         }
       ],
       "status": "draft",
@@ -21,14 +26,20 @@
       "action": [
         {
           "title": "Hello World!",
-          "description": "The CDS Service is alive and communicating successfully!"
+          "description": "The CDS Service is alive and communicating successfully!",
+          "condition": [
+            {
+              "kind": "start",
+              "expression": "Main Action Condition Expression Is True"
+            }
+          ]
         }
       ]
     }
   ],
   "definition": [
     {
-      "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
+      "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
     }
   ],
   "status": "draft",

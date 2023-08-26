@@ -21,7 +21,7 @@
     {
       "path": "doNotPerform",
       "expression": {
-        "language": "text/cql.name",
+        "language": "text/cql-identifier",
         "expression": "ActiveProcedureStatus"
       }
     }

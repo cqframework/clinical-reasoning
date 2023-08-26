@@ -178,7 +178,7 @@ public class QuestionnaireItemGenerator {
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
           var expression =
               (Expression) element.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
-          var results = this.libraryEngine.getExpressionResult(this.patientId, subjectType,
+          var results = this.libraryEngine.getExpressionResult(this.patientId,
               expression.getExpression(), expression.getLanguage(), expression.getReference(),
               parameters, this.bundle);
           for (var result : results) {

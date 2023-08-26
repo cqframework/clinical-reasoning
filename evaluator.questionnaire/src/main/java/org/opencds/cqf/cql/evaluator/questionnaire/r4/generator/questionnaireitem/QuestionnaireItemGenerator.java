@@ -7,14 +7,17 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +28,14 @@ public class QuestionnaireItemGenerator {
       "No profile defined for input. Unable to generate item.";
   protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
   protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
-  protected Repository repository;
-  protected QuestionnaireItemService questionnaireItemService;
-  protected NestedQuestionnaireItemService nestedQuestionnaireItemService;
+  protected final Repository repository;
+  protected final LibraryEngine libraryEngine;
+  protected final String patientId;
+  protected final IBaseBundle bundle;
+  protected final IBaseParameters parameters;
+  protected final QuestionnaireItemService questionnaireItemService;
+  protected final NestedQuestionnaireItemService nestedQuestionnaireItemService;
+  protected final ExtensionResolver extensionResolver;
   protected QuestionnaireItemComponent questionnaireItem;
 
   public static QuestionnaireItemGenerator of(
@@ -38,27 +46,30 @@ public class QuestionnaireItemGenerator {
       LibraryEngine libraryEngine) {
     QuestionnaireItemService questionnaireItemService = new QuestionnaireItemService();
     NestedQuestionnaireItemService nestedQuestionnaireItemService =
-        NestedQuestionnaireItemService.of(
-            repository,
-            patientId,
-            parameters,
-            bundle,
-            libraryEngine);
-    return new QuestionnaireItemGenerator(repository, questionnaireItemService,
-        nestedQuestionnaireItemService);
+        NestedQuestionnaireItemService.of(repository, patientId, parameters, bundle, libraryEngine);
+    return new QuestionnaireItemGenerator(repository, libraryEngine, patientId, parameters, bundle,
+        questionnaireItemService, nestedQuestionnaireItemService);
   }
 
   QuestionnaireItemGenerator(
       Repository repository,
+      LibraryEngine libraryEngine,
+      String patientId,
+      IBaseParameters parameters,
+      IBaseBundle bundle,
       QuestionnaireItemService questionnaireItemService,
       NestedQuestionnaireItemService nestedQuestionnaireItemService) {
     this.repository = repository;
+    this.libraryEngine = libraryEngine;
+    this.patientId = patientId;
+    this.parameters = parameters;
+    this.bundle = bundle;
     this.questionnaireItemService = questionnaireItemService;
     this.nestedQuestionnaireItemService = nestedQuestionnaireItemService;
+    this.extensionResolver = new ExtensionResolver(patientId, parameters, bundle, libraryEngine);
   }
 
-  public Questionnaire.QuestionnaireItemComponent generateItem(
-      DataRequirement actionInput,
+  public Questionnaire.QuestionnaireItemComponent generateItem(DataRequirement actionInput,
       int itemCount) {
     if (!actionInput.hasProfile()) {
       throw new IllegalArgumentException(NO_PROFILE_ERROR);
@@ -68,6 +79,7 @@ public class QuestionnaireItemGenerator {
       final StructureDefinition profile = (StructureDefinition) getProfileDefinition(actionInput);
       this.questionnaireItem =
           questionnaireItemService.createQuestionnaireItem(actionInput, linkId, profile);
+      extensionResolver.resolveExtensions(this.questionnaireItem.getExtension(), null);
       processElements(profile);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
@@ -79,24 +91,40 @@ public class QuestionnaireItemGenerator {
 
   protected void processElements(StructureDefinition profile) {
     int childCount = questionnaireItem.getItem().size();
+    Resource caseFeature = null;
+    if (profile.hasExtension(Constants.CPG_FEATURE_EXPRESSION)) {
+      var extValue = profile.getExtensionByUrl(Constants.CPG_FEATURE_EXPRESSION).getValue();
+      if (extValue instanceof Expression) {
+        var expression = (Expression) extValue;
+        var results =
+            libraryEngine.getExpressionResult(patientId, expression.getExpression(),
+                expression.getLanguage(), expression.getReference(), parameters, bundle);
+        var result = results == null || results.isEmpty() ? null : results.get(0);
+        if (result instanceof Resource) {
+          caseFeature = (Resource) result;
+        }
+      }
+    }
     for (ElementDefinition element : getElementsWithNonNullElementType(profile)) {
       childCount++;
-      processElement(profile, element, childCount);
+      processElement(profile, element, childCount, caseFeature);
     }
   }
 
   protected void processElement(
       StructureDefinition profile,
       ElementDefinition element,
-      int childCount) {
+      int childCount,
+      Resource caseFeature) {
     final String childLinkId =
         String.format(CHILD_LINK_ID_FORMAT, questionnaireItem.getLinkId(), childCount);
     try {
       final QuestionnaireItemComponent nestedQuestionnaireItem =
           nestedQuestionnaireItemService.getNestedQuestionnaireItem(
-              profile,
+              profile.getUrl(),
               element,
-              childLinkId);
+              childLinkId,
+              caseFeature);
       questionnaireItem.addItem(nestedQuestionnaireItem);
     } catch (Exception ex) {
       final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());

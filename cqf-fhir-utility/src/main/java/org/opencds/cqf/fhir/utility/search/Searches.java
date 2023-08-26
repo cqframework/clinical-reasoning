@@ -26,6 +26,15 @@ public class Searches {
     return new SearchBuilder();
   }
 
+  public static Map<String, List<IQueryParameterType>> byCanonical(String canonical) {
+    if (canonical.contains("|")) {
+      var split = canonical.split("|");
+      return byUrlAndVersion(split[0], split[1]);
+    } else {
+      return byUrl(canonical);
+    }
+  }
+
   public static Map<String, List<IQueryParameterType>> byUrl(String url) {
     return builder().withUriParam("url", url).build();
   }
@@ -50,7 +59,7 @@ public class Searches {
       return this.values;
     }
 
-    SearchBuilder withStringParam(String name, String value) {
+    public SearchBuilder withStringParam(String name, String value) {
       if (values == null) {
         values = new HashMap<>();
       }
@@ -59,7 +68,7 @@ public class Searches {
       return this;
     }
 
-    SearchBuilder withTokenParam(String name, String value) {
+    public SearchBuilder withTokenParam(String name, String value) {
       if (values == null) {
         values = new HashMap<>();
       }
@@ -68,7 +77,7 @@ public class Searches {
       return this;
     }
 
-    SearchBuilder withUriParam(String name, String value) {
+    public SearchBuilder withUriParam(String name, String value) {
       if (values == null) {
         values = new HashMap<>();
       }

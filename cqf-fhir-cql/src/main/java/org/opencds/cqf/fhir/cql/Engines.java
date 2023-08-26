@@ -44,19 +44,29 @@ public class Engines {
 
   public static CqlEngine forRepository(Repository repository,
       EvaluationSettings settings) {
+    return forRepository(repository, settings, true);
+  }
+
+  public static CqlEngine forRepository(Repository repository,
+      EvaluationSettings settings, Boolean useLibraryCache) {
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     var sources = Collections.singletonList(buildLibrarySource(repository));
 
     var dataProviders = buildDataProviders(repository, null, terminologyProvider,
         settings.getRetrieveSettings());
     var environment =
-        buildEnvironment(settings, sources, terminologyProvider, dataProviders);
+        buildEnvironment(settings, sources, terminologyProvider, dataProviders, useLibraryCache);
 
     return new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
   public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
       Repository repository, IBaseBundle additionalData) {
+    return forRepositoryAndSettings(settings, repository, additionalData, true);
+  }
+
+  public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
+      Repository repository, IBaseBundle additionalData, Boolean useLibraryCache) {
     checkNotNull(settings);
     checkNotNull(repository);
 
@@ -67,11 +77,46 @@ public class Engines {
     var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
         settings.getRetrieveSettings());
     var environment =
-        buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders);
+        buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders,
+            useLibraryCache);
     return new CqlEngine(environment,
         settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
+  // public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository
+  // repository,
+  // IBaseBundle additionalData, Boolean useLibraryCache) {
+  // List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
+  // return forRepository(settings, repository, additionalData, librarySourceProviders,
+  // null, useLibraryCache);
+  // }
+
+  // public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository
+  // repository,
+  // IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
+  // CqlFhirParametersConverter cqlFhirParametersConverter, Boolean useLibraryCache) {
+  // checkNotNull(settings);
+  // checkNotNull(repository);
+  // checkNotNull(librarySourceProviders);
+
+  // if (cqlFhirParametersConverter == null) {
+  // cqlFhirParametersConverter = getCqlFhirParametersConverter(repository.fhirContext());
+  // }
+
+  // var terminologyProvider = new RepositoryTerminologyProvider(repository);
+  // librarySourceProviders.add(buildLibrarySource(repository));
+
+  // var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
+  // settings.getRetrieveSettings());
+  // var environment =
+  // buildEnvironment(settings, librarySourceProviders, terminologyProvider, dataProviders,
+  // useLibraryCache);
+
+  // var cqlEngine =
+  // new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
+
+  // return new LibraryEvaluator(cqlFhirParametersConverter, cqlEngine);
+  // }
 
   private static LibrarySourceProvider buildLibrarySource(Repository repository) {
     AdapterFactory adapterFactory = getAdapterFactory(repository.fhirContext());
@@ -82,7 +127,7 @@ public class Engines {
   // TODO: Add NPM library source loader support
   private static Environment buildEnvironment(EvaluationSettings settings,
       List<LibrarySourceProvider> librarySourceProviders, TerminologyProvider terminologyProvider,
-      Map<String, DataProvider> dataProviders) {
+      Map<String, DataProvider> dataProviders, Boolean useLibraryCache) {
     if (settings.getCqlOptions().useEmbeddedLibraries()) {
       librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
@@ -93,7 +138,7 @@ public class Engines {
 
     LibraryManager libraryManager =
         new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions(),
-            settings.getLibraryCache());
+            Boolean.TRUE.equals(useLibraryCache) ? settings.getLibraryCache() : null);
     libraryManager.getLibrarySourceLoader().clearProviders();
 
 

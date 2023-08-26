@@ -10,6 +10,21 @@
     {
       "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate",
       "valueBoolean": true
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-rationale",
+      "_valueMarkdown": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+            "valueExpression": {
+              "description": "Rationale for the absence of a  recommendation.",
+              "language": "text/cql-identifier",
+              "expression": "Exclusion Detail"
+            }
+          }
+        ]
+      }
     }
   ],
   "url": "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1",

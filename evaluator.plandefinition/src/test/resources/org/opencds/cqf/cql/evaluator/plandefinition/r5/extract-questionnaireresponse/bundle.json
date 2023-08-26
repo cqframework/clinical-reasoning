@@ -7,8 +7,13 @@
       "resource": {
         "resourceType": "RequestOrchestration",
         "id": "prepopulate",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+          ]
+        },
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate"
+          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate|1.0.0"
         ],
         "status": "draft",
         "intent": "proposal",
@@ -17,10 +22,42 @@
         },
         "action": [
           {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter",
+                "valueString": "ClaimId"
+              },
+              {
+                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-lookupQuestionnaire",
+                "valueCanonical": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
+              }
+            ],
             "title": "Prepopulate!",
-            "description": "A simple recommendation to complete a prepopulated Questionnaire"
+            "description": "A simple recommendation to complete a prepopulated Questionnaire",
+            "resource": {
+              "reference": "Task/complete-questionnaire"
+            }
           }
         ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Task",
+        "id": "complete-questionnaire",
+        "instantiatesCanonical": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire",
+        "basedOn": [
+          {
+            "reference": "RequestOrchestration/prepopulate",
+            "type": "RequestOrchestration"
+          }
+        ],
+        "status": "draft",
+        "intent": "proposal",
+        "description": "Create a task to complete a Questionnaire.",
+        "for": {
+          "reference": "OPA-Patient1"
+        }
       }
     },
     {
@@ -35,13 +72,8 @@
         "authored": "2021-12-01",
         "item": [
           {
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-                "valueCode": "Organization"
-              }
-            ],
             "linkId": "1",
+            "definition": "http://hl7.org/fhir/Organization",
             "text": "Facility Information",
             "item": [
               {
@@ -71,13 +103,8 @@
             ]
           },
           {
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
-                "valueCode": "Patient"
-              }
-            ],
             "linkId": "2",
+            "definition": "http://hl7.org/fhir/Patient",
             "text": "Beneficiary Information",
             "item": [
               {

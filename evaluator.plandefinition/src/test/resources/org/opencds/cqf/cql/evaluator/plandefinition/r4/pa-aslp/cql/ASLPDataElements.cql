@@ -142,3 +142,6 @@ define "Weight":
 
 define "Is Authorized":
   true
+
+define "Exclusion Detail":
+  'I am just a string to test evaluating expressions in extensions!!!!!!'

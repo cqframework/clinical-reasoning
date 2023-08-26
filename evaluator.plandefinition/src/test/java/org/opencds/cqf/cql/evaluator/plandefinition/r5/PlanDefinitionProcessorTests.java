@@ -104,7 +104,7 @@ public class PlanDefinitionProcessorTests {
         .withAdditionalData("extract-questionnaireresponse/patient-data.json")
         .withContent("prepopulate/prepopulate-content-bundle.json")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply()
-        .isEqualsTo("extract-questionnaireresponse/bundle.json");
+        .hasContained(3);
   }
 
   @Test

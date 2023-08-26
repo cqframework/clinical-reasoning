@@ -1,13 +1,40 @@
 {
   "resourceType": "Bundle",
+  "id": "hello-world-patient-view",
   "type": "collection",
   "entry": [
     {
       "resource": {
         "resourceType": "RequestOrchestration",
         "id": "hello-world-patient-view",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
+          ]
+        },
+        "contained": [
+          {
+            "resourceType": "OperationOutcome",
+            "id": "apply-outcome-hello-world-patient-view",
+            "issue": [
+              {
+                "severity": "error",
+                "code": "exception",
+                "diagnostics": "Condition expression Main Action Condition Expression Is True encountered exception: library HelloWorld loaded, but had errors"
+              }
+            ]
+          }
+        ],
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+            "valueReference": {
+              "reference": "#apply-outcome-hello-world-patient-view"
+            }
+          }
+        ],
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view"
+          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
         ],
         "status": "draft",
         "intent": "proposal",
@@ -16,13 +43,7 @@
         },
         "encounter": {
           "reference": "helloworld-patient-1-encounter-1"
-        },
-        "action": [
-          {
-            "title": "Hello World!",
-            "description": "The CDS Service is alive and communicating successfully!"
-          }
-        ]
+        }
       }
     }
   ]

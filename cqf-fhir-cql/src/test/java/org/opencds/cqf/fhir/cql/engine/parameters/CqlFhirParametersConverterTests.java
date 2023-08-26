@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cql.engine.parameter;
+package org.opencds.cqf.fhir.cql.engine.parameters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

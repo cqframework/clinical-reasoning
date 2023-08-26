@@ -39,5 +39,11 @@
       <groupId>info.cqframework</groupId>
       <artifactId>engine-fhir</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-test</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -16,8 +16,6 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.parser.IParser;
-
 /*
  * https://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse- extract.html
  *
@@ -41,7 +39,6 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected static final Logger logger =
       LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
   protected final EvaluationSettings evaluationSettings;
-  protected final IParser parser;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
 
@@ -56,8 +53,6 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
     this.repository = requireNonNull(repository, "repository can not be null");
     this.evaluationSettings =
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-
-    parser = this.repository.fhirContext().newJsonParser();
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,

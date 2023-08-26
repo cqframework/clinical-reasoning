@@ -1,5 +1,6 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r5;
+package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.helpers;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -7,19 +8,22 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r5.model.Bundle.BundleType;
-import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
-import org.hl7.fhir.r5.model.Parameters;
-import org.hl7.fhir.r5.model.Questionnaire;
-import org.hl7.fhir.r5.model.QuestionnaireResponse;
-import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -29,7 +33,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 
 public class TestQuestionnaire {
-  private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
+  private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
@@ -71,7 +75,7 @@ public class TestQuestionnaire {
     private Bundle bundle;
     private Parameters parameters;
 
-    private final FhirContext fhirContext = FhirContext.forR5Cached();
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
 
     public QuestionnaireResult(String questionnaireName, String patientId) {
       questionnaire = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
@@ -100,7 +104,7 @@ public class TestQuestionnaire {
     public QuestionnaireResult withAdditionalData(String dataAssetName) {
       var data = parse(dataAssetName);
       bundle =
-          data.getIdElement().getResourceType().equals(FHIRTypes.BUNDLE.toCode()) ? (Bundle) data
+          data.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode()) ? (Bundle) data
               : new Bundle().setType(BundleType.COLLECTION)
                   .addEntry(new BundleEntryComponent().setResource((Resource) data));
 
@@ -176,6 +180,15 @@ public class TestQuestionnaire {
         fail("Unable to compare Jsons: " + e.getMessage());
       }
     }
+
+    public GeneratedQuestionnaire hasErrors() {
+      assertTrue(questionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaire.hasContained());
+      assertTrue(questionnaire.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
+    }
   }
 
   static class GeneratedQuestionnaireResponse {
@@ -193,6 +206,15 @@ public class TestQuestionnaire {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
+    }
+
+    public GeneratedQuestionnaireResponse hasErrors() {
+      assertTrue(questionnaireResponse.hasExtension(Constants.EXT_CRMI_MESSAGES));
+      assertTrue(questionnaireResponse.hasContained());
+      assertTrue(questionnaireResponse.getContained().stream()
+          .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+
+      return this;
     }
   }
 }

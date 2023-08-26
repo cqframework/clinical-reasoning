@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.questionnaire.r5;
+package org.opencds.cqf.cql.evaluator.questionnaire.r5.helpers;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -21,6 +21,7 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.evaluator.questionnaire.r5.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -54,7 +55,7 @@ public class TestItemGenerator {
 
   public static QuestionnaireItemGenerator buildGenerator(Repository repository, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-    return new QuestionnaireItemGenerator(repository, patientId, parameters, bundle, libraryEngine);
+    return QuestionnaireItemGenerator.of(repository, patientId, parameters, bundle, libraryEngine);
   }
 
   /** Fluent interface starts here **/
@@ -65,7 +66,7 @@ public class TestItemGenerator {
     }
   }
 
-  static class GenerateResult {
+  public static class GenerateResult {
     private DataRequirement input;
     private String profileId;
     private String patientId;
@@ -77,6 +78,7 @@ public class TestItemGenerator {
     private IBaseParameters parameters;
 
     private final FhirContext fhirContext = FhirContext.forR5Cached();
+
 
     public GenerateResult(String type, String profile, String patientId) {
       this.input = new DataRequirement(FHIRTypes.fromCode(type)).addProfile(profile);
@@ -138,9 +140,8 @@ public class TestItemGenerator {
             new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources"), false);
       }
       if (terminologyRepository == null) {
-        terminologyRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(),
-                List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
+        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
+            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
       }
 
       repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
@@ -154,7 +155,7 @@ public class TestItemGenerator {
     }
   }
 
-  static class GeneratedItem {
+  public static class GeneratedItem {
     Questionnaire questionnaire;
 
     public GeneratedItem(QuestionnaireItemComponent item, String id) {

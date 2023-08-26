@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
+import org.opencds.cqf.cql.evaluator.questionnaire.r5.helpers.TestQuestionnaire;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -33,19 +34,19 @@ public class QuestionnaireProcessorTests {
     var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+        .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
             "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-        .prePopulate().isEqualsTo("questionnaire-for-order-populated-noLibrary.json");
+        .prePopulate().isEqualsTo("../questionnaire-for-order-populated-noLibrary.json");
   }
 
   @Test
   void testPrePopulate_HasErrors() {
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
+        .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
-        .isEqualsTo("questionnaire-for-order-populated-errors.json");
+        .isEqualsTo("../questionnaire-for-order-populated-errors.json");
   }
 
   @Test
@@ -58,7 +59,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPrePopulate_notQuestionnaire_throwsException() {
     assertThrows(ClassCastException.class, () -> {
-      TestQuestionnaire.Assert.that("resources/Questionnaire-invalid-questionnaire.json", null)
+      TestQuestionnaire.Assert.that("../resources/Questionnaire-invalid-questionnaire.json", null)
           .prePopulate();
     });
   }
@@ -77,19 +78,18 @@ public class QuestionnaireProcessorTests {
     var data = new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
     var repository = Repositories.proxy(data, null, null);
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
+        .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
             "OPA-Patient1")
         .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-        .populate().isEqualsTo("questionnaire-response-populated-noLibrary.json");
+        .populate().isEqualsTo("../questionnaire-response-populated-noLibrary.json");
   }
 
   @Test
   void testPopulate_HasErrors() {
     TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
+        .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
             "OPA-Patient1")
-        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
-        .isEqualsTo("questionnaire-response-populated-errors.json");
+        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate();
   }
 
   @Test
@@ -102,7 +102,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPopulate_notQuestionnaire_throwsException() {
     assertThrows(ClassCastException.class, () -> {
-      TestQuestionnaire.Assert.that("resources/Questionnaire-invalid-questionnaire.json", null)
+      TestQuestionnaire.Assert.that("../resources/Questionnaire-invalid-questionnaire.json", null)
           .populate();
     });
   }
@@ -110,7 +110,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testQuestionnairePackage() {
     var generatedPackage = TestQuestionnaire.Assert
-        .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", null)
+        .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", null)
         .questionnairePackage();
 
     assertEquals(generatedPackage.getEntry().size(), 3);

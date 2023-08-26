@@ -83,41 +83,6 @@ public class Engines {
         settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
-  // public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository
-  // repository,
-  // IBaseBundle additionalData, Boolean useLibraryCache) {
-  // List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-  // return forRepository(settings, repository, additionalData, librarySourceProviders,
-  // null, useLibraryCache);
-  // }
-
-  // public static LibraryEvaluator forRepository(EvaluationSettings settings, Repository
-  // repository,
-  // IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders,
-  // CqlFhirParametersConverter cqlFhirParametersConverter, Boolean useLibraryCache) {
-  // checkNotNull(settings);
-  // checkNotNull(repository);
-  // checkNotNull(librarySourceProviders);
-
-  // if (cqlFhirParametersConverter == null) {
-  // cqlFhirParametersConverter = getCqlFhirParametersConverter(repository.fhirContext());
-  // }
-
-  // var terminologyProvider = new RepositoryTerminologyProvider(repository);
-  // librarySourceProviders.add(buildLibrarySource(repository));
-
-  // var dataProviders = buildDataProviders(repository, additionalData, terminologyProvider,
-  // settings.getRetrieveSettings());
-  // var environment =
-  // buildEnvironment(settings, librarySourceProviders, terminologyProvider, dataProviders,
-  // useLibraryCache);
-
-  // var cqlEngine =
-  // new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
-
-  // return new LibraryEvaluator(cqlFhirParametersConverter, cqlEngine);
-  // }
-
   private static LibrarySourceProvider buildLibrarySource(Repository repository) {
     AdapterFactory adapterFactory = getAdapterFactory(repository.fhirContext());
     return new RepositoryFhirLibrarySourceProvider(repository, adapterFactory,

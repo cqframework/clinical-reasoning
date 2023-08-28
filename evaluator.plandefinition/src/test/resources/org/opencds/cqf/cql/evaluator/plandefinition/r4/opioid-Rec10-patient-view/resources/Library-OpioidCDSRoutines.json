@@ -403,7 +403,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/OpioidCDSRoutines.cql"
+      "url": "cql/OpioidCDSRoutines.cql"
     }
   ]
 }

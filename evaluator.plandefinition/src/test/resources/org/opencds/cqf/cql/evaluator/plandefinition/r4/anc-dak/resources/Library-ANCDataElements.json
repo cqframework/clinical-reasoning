@@ -8127,7 +8127,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/ANCDataElements.cql"
+      "url": "cql/ANCDataElements.cql"
     }
   ]
 }

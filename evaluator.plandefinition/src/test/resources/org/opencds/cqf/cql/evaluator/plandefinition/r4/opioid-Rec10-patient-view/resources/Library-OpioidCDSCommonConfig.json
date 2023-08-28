@@ -153,7 +153,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/OpioidCDSCommonConfig.cql"
+      "url": "cql/OpioidCDSCommonConfig.cql"
     }
   ]
 }

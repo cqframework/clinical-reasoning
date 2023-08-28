@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,6 +24,8 @@ import org.json.JSONException;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -32,6 +33,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class PlanDefinition {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -126,8 +128,8 @@ public class PlanDefinition {
       return this;
     }
 
-    public Apply withAdditionalDataId(IdType theId) {
-      additionalDataId = theId;
+    public Apply withAdditionalDataId(IdType id) {
+      additionalDataId = id;
 
       return this;
     }
@@ -144,14 +146,14 @@ public class PlanDefinition {
       return this;
     }
 
-    public Apply withExpectedBundleId(IdType theId) {
-      expectedBundleId = theId;
+    public Apply withExpectedBundleId(IdType id) {
+      expectedBundleId = id;
 
       return this;
     }
 
-    public Apply withExpectedCarePlanId(IdType theId) {
-      expectedCarePlanId = theId;
+    public Apply withExpectedCarePlanId(IdType id) {
+      expectedCarePlanId = id;
 
       return this;
     }
@@ -160,17 +162,18 @@ public class PlanDefinition {
       if (repository != null) {
         return;
       }
+      var local = new IGFileStructureRepository(fhirContext,
+          this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+              + "org/opencds/cqf/cql/evaluator/plandefinition/r4",
+          IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       if (dataRepository == null) {
-        dataRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+        dataRepository = local;
       }
       if (contentRepository == null) {
-        contentRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources"), false);
+        contentRepository = local;
       }
       if (terminologyRepository == null) {
-        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem", "vocabulary/ValueSet"), false);
+        terminologyRepository = local;
       }
 
       repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
@@ -231,18 +234,18 @@ public class PlanDefinition {
   }
 
   static class GeneratedBundle {
-    Bundle myGeneratedBundle;
-    Bundle myExpectedBundle;
+    Bundle generatedBundle;
+    Bundle expectedBundle;
 
-    public GeneratedBundle(Bundle theGeneratedBundle, Bundle theExpectedBundle) {
-      myGeneratedBundle = theGeneratedBundle;
-      myExpectedBundle = theExpectedBundle;
+    public GeneratedBundle(Bundle generatedBundle, Bundle expectedBundle) {
+      this.generatedBundle = generatedBundle;
+      this.expectedBundle = expectedBundle;
     }
 
     public void isEqualsTo(String expectedBundleAssetName) {
       try {
         JSONAssert.assertEquals(load(expectedBundleAssetName),
-            jsonParser.encodeResourceToString(myGeneratedBundle), true);
+            jsonParser.encodeResourceToString(generatedBundle), true);
       } catch (JSONException | IOException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
@@ -251,26 +254,26 @@ public class PlanDefinition {
 
     public void isEqualsToExpected() {
       try {
-        JSONAssert.assertEquals(jsonParser.encodeResourceToString(myExpectedBundle),
-            jsonParser.encodeResourceToString(myGeneratedBundle), true);
+        JSONAssert.assertEquals(jsonParser.encodeResourceToString(expectedBundle),
+            jsonParser.encodeResourceToString(generatedBundle), true);
       } catch (JSONException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
     }
 
-    public void hasEntry(int theCount) {
-      assertEquals(myGeneratedBundle.getEntry().size(), theCount);
+    public void hasEntry(int count) {
+      assertEquals(count, generatedBundle.getEntry().size());
     }
 
     public void hasCommunicationRequestPayload() {
-      assertTrue(myGeneratedBundle.getEntry().stream()
+      assertTrue(generatedBundle.getEntry().stream()
           .filter(e -> e.getResource().getResourceType().equals(ResourceType.CommunicationRequest))
           .map(e -> (CommunicationRequest) e.getResource()).allMatch(c -> c.hasPayload()));
     }
 
     public void hasQuestionnaireOperationOutcome() {
-      assertTrue(myGeneratedBundle.getEntry().stream().map(e -> e.getResource())
+      assertTrue(generatedBundle.getEntry().stream().map(e -> e.getResource())
           .anyMatch(r -> r.getResourceType().equals(ResourceType.Questionnaire)
               && ((Questionnaire) r).getContained().stream()
                   .anyMatch(c -> c.getResourceType().equals(ResourceType.OperationOutcome))));
@@ -278,18 +281,18 @@ public class PlanDefinition {
   }
 
   static class GeneratedCarePlan {
-    CarePlan myGeneratedCarePlan;
-    CarePlan myExpectedCarePlan;
+    CarePlan generatedCarePlan;
+    CarePlan expectedCarePlan;
 
-    public GeneratedCarePlan(CarePlan theGeneratedCarePlan, CarePlan theExpectedCarePlan) {
-      myGeneratedCarePlan = theGeneratedCarePlan;
-      myExpectedCarePlan = theExpectedCarePlan;
+    public GeneratedCarePlan(CarePlan generatedCarePlan, CarePlan expectedCarePlan) {
+      this.generatedCarePlan = generatedCarePlan;
+      this.expectedCarePlan = expectedCarePlan;
     }
 
     public void isEqualsTo(String expectedCarePlanAssetName) {
       try {
         JSONAssert.assertEquals(load(expectedCarePlanAssetName),
-            jsonParser.encodeResourceToString(myGeneratedCarePlan), true);
+            jsonParser.encodeResourceToString(generatedCarePlan), true);
       } catch (JSONException | IOException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
@@ -298,35 +301,35 @@ public class PlanDefinition {
 
     public void isEqualsToExpected() {
       try {
-        JSONAssert.assertEquals(jsonParser.encodeResourceToString(myExpectedCarePlan),
-            jsonParser.encodeResourceToString(myGeneratedCarePlan), true);
+        JSONAssert.assertEquals(jsonParser.encodeResourceToString(expectedCarePlan),
+            jsonParser.encodeResourceToString(generatedCarePlan), true);
       } catch (JSONException e) {
         e.printStackTrace();
         fail("Unable to compare Jsons: " + e.getMessage());
       }
     }
 
-    public void hasContained(int theCount) {
-      assertEquals(myGeneratedCarePlan.getContained().size(), theCount);
+    public void hasContained(int count) {
+      assertEquals(count, generatedCarePlan.getContained().size());
     }
 
     public void hasOperationOutcome() {
-      assertTrue(myGeneratedCarePlan.getContained().stream()
+      assertTrue(generatedCarePlan.getContained().stream()
           .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
     }
   }
 
   static class GeneratedPackage {
-    Bundle myGeneratedBundle;
-    Bundle myExpectedBundle;
+    Bundle generatedBundle;
+    Bundle expectedBundle;
 
-    public GeneratedPackage(Bundle theGeneratedBundle, Bundle theExpectedBundle) {
-      myGeneratedBundle = theGeneratedBundle;
-      myExpectedBundle = theExpectedBundle;
+    public GeneratedPackage(Bundle generatedBundle, Bundle expectedBundle) {
+      this.generatedBundle = generatedBundle;
+      this.expectedBundle = expectedBundle;
     }
 
-    public void hasEntry(int theCount) {
-      assertEquals(myGeneratedBundle.getEntry().size(), theCount);
+    public void hasEntry(int count) {
+      assertEquals(count, generatedBundle.getEntry().size());
     }
   }
 }

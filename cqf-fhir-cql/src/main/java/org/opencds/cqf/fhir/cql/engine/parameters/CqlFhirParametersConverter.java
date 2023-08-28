@@ -266,7 +266,6 @@ public class CqlFhirParametersConverter {
   }
 
   private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-    @SuppressWarnings("rawtypes")
     var type = modelResolver.resolvePath(parameterDefinitionExtension, "type");
     // Optional<IPrimitiveType> type = this.fhirPath
     // .evaluateFirst(parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
@@ -278,8 +277,8 @@ public class CqlFhirParametersConverter {
     return null;
   }
 
+  @SuppressWarnings("unchecked")
   private Boolean isListType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-    @SuppressWarnings("rawtypes")
     var max = modelResolver.resolvePath(parameterDefinitionExtension, "max");
     // Optional<IPrimitiveType> max = this.fhirPath
     // .evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);

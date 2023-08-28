@@ -8618,7 +8618,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/ANCContactDataElements.cql"
+      "url": "cql/ANCContactDataElements.cql"
     }
   ]
 }

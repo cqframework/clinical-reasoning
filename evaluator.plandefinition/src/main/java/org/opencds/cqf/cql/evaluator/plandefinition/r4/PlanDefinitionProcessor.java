@@ -126,8 +126,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           }
         } catch (Exception e) {
           addOperationOutcomeIssue(
-              String.format("Error encountered extracting %s",
-                  questionnaireResponse.getId()));
+              String.format("Error encountered extracting %s: %s",
+                  questionnaireResponse.getId(), e.getMessage()));
         }
       }
     }

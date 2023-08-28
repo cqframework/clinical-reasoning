@@ -14,7 +14,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,45 +53,59 @@ public abstract class BaseQuestionnaireProcessor<T> {
   }
 
   public abstract <CanonicalType extends IPrimitiveType<String>> T resolveQuestionnaire(
-      IIdType theId, CanonicalType theCanonical, IBaseResource theQuestionnaire);
+      IIdType id, CanonicalType canonical, IBaseResource questionnaire);
 
-  public <CanonicalType extends IPrimitiveType<String>> T prePopulate(IIdType theId,
-      CanonicalType theCanonical, IBaseResource questionnaire, String patientId,
+  public <CanonicalType extends IPrimitiveType<String>> T prePopulate(IIdType id,
+      CanonicalType canonical, IBaseResource questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository,
         dataEndpoint, contentEndpoint, terminologyEndpoint);
-    return prePopulate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId,
+    return prePopulate(resolveQuestionnaire(id, canonical, questionnaire), patientId,
         parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
   }
 
-  public abstract T prePopulate(T theQuestionnaire, String thePatientId,
-      IBaseParameters theParameters, IBaseBundle theBundle, LibraryEngine theLibraryEngine);
+  public <CanonicalType extends IPrimitiveType<String>> T prePopulate(IIdType id,
+      CanonicalType canonical, IBaseResource questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+    return prePopulate(resolveQuestionnaire(id, canonical, questionnaire), patientId,
+        parameters, bundle, libraryEngine);
+  }
 
-  public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(IIdType theId,
-      CanonicalType theCanonical, IBaseResource questionnaire, String patientId,
+  public abstract T prePopulate(T questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine);
+
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(IIdType id,
+      CanonicalType canonical, IBaseResource questionnaire, String patientId,
       IBaseParameters parameters, IBaseBundle bundle, IBaseResource dataEndpoint,
       IBaseResource contentEndpoint, IBaseResource terminologyEndpoint) {
     repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository,
         dataEndpoint, contentEndpoint, terminologyEndpoint);
-    return populate(resolveQuestionnaire(theId, theCanonical, questionnaire), patientId, parameters,
+    return populate(resolveQuestionnaire(id, canonical, questionnaire), patientId, parameters,
         bundle, new LibraryEngine(repository, this.evaluationSettings));
   }
 
-  public abstract IBaseResource populate(T theQuestionnaire, String thePatientId,
-      IBaseParameters theParameters, IBaseBundle theBundle, LibraryEngine theLibraryEngine);
+  public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(IIdType id,
+      CanonicalType canonical, IBaseResource questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+    return populate(resolveQuestionnaire(id, canonical, questionnaire), patientId, parameters,
+        bundle, libraryEngine);
+  }
 
-  public abstract T generateQuestionnaire(String theId);
+  public abstract IBaseResource populate(T questionnaire, String patientId,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine);
 
-  public abstract IBaseBundle packageQuestionnaire(T theQuestionnaire, boolean theIsPut);
+  public abstract T generateQuestionnaire(String id);
 
-  public IBaseBundle packageQuestionnaire(T theQuestionnaire) {
-    return packageQuestionnaire(theQuestionnaire, false);
+  public abstract IBaseBundle packageQuestionnaire(T questionnaire, boolean isPut);
+
+  public IBaseBundle packageQuestionnaire(T questionnaire) {
+    return packageQuestionnaire(questionnaire, false);
   }
 
   public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
-      IIdType theId, CanonicalType theCanonical, IBaseResource theQuestionnaire, boolean theIsPut) {
-    return packageQuestionnaire(resolveQuestionnaire(theId, theCanonical, theQuestionnaire),
-        theIsPut);
+      IIdType id, CanonicalType canonical, IBaseResource questionnaire, boolean isPut) {
+    return packageQuestionnaire(resolveQuestionnaire(id, canonical, questionnaire),
+        isPut);
   }
 }

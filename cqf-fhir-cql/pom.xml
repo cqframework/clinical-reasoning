@@ -33,6 +33,10 @@
     </dependency>
     <dependency>
       <groupId>info.cqframework</groupId>
+      <artifactId>quick</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
       <artifactId>engine</artifactId>
     </dependency>
     <dependency>

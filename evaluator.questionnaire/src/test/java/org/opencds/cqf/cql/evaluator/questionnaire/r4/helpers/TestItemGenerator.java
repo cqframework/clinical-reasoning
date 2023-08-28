@@ -25,6 +25,8 @@ import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -32,6 +34,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestItemGenerator {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -72,9 +75,6 @@ public class TestItemGenerator {
     private String profileId;
     private String patientId;
     private Repository repository;
-    private Repository dataRepository;
-    private Repository contentRepository;
-    private Repository terminologyRepository;
     private IBaseBundle bundle;
     private IBaseParameters parameters;
 
@@ -85,25 +85,6 @@ public class TestItemGenerator {
       this.input = new DataRequirement(new CodeType(type)).addProfile(profile);
       this.profileId = profile.substring(profile.lastIndexOf("/") + 1);
       this.patientId = patientId;
-    }
-
-    public GenerateResult withData(String dataAssetName) {
-      dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
-    }
-
-    public GenerateResult withContent(String dataAssetName) {
-      contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
-    }
-
-    public GenerateResult withTerminology(String dataAssetName) {
-      terminologyRepository =
-          new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
     }
 
     public GenerateResult withAdditionalData(String dataAssetName) {
@@ -132,20 +113,10 @@ public class TestItemGenerator {
       if (repository != null) {
         return;
       }
-      if (dataRepository == null) {
-        dataRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
-      }
-      if (contentRepository == null) {
-        contentRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources"), false);
-      }
-      if (terminologyRepository == null) {
-        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
-      }
-
-      repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
+      repository = new IGFileStructureRepository(this.fhirContext,
+          this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+              + "org/opencds/cqf/cql/evaluator/questionnaire/r4",
+          IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
     }
 
     public GeneratedItem generateItem() {

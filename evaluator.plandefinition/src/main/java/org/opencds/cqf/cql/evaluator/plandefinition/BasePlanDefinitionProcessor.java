@@ -23,10 +23,9 @@ import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.NestedValueResolver;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   protected final OperationParametersParser operationParametersParser;
   protected final ModelResolver modelResolver;
-  protected final NestedValueResolver nestedValueResolver;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
   protected Repository federatedRepository;
@@ -80,7 +78,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
         new FhirTypeConverterFactory().create(fhirVersion()));
     modelResolver = FhirModelResolverCache.resolverForVersion(
         repository.fhirContext().getVersion().getVersion());
-    this.nestedValueResolver = new NestedValueResolver(fhirContext(), modelResolver);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -248,8 +245,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
       resolveDynamicExtension(requestAction, resource, value, path);
     } else if (path.startsWith("action.") || resource == null) {
       modelResolver.setValue(requestAction, path.replace("action.", ""), value);
-    } else if (path.contains(".")) {
-      nestedValueResolver.setNestedValue(resource, path, result.get(0));
     } else {
       modelResolver.setValue(resource, path, value);
     }

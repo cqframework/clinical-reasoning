@@ -16,7 +16,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/TestActivityDefinition.cql"
+      "url": "cql/TestActivityDefinition.cql"
     }
   ]
 }

@@ -191,7 +191,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/FHIRCommon.cql"
+      "url": "cql/FHIRCommon.cql"
     }
   ]
 }

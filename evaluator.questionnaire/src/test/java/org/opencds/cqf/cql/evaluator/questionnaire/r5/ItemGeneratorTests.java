@@ -16,11 +16,8 @@ public class ItemGeneratorTests {
 
   @Test
   void testGenerateItem() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR5Cached(), this.getClass());
     TestItemGenerator.Assert.that("Patient",
         "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient", "OPA-Patient1")
-        .withRepository(repository)
         .generateItem()
         .isEqualsTo("../" + QUESTIONNAIRE_PATIENT_FILE_NAME);
   }
@@ -30,7 +27,7 @@ public class ItemGeneratorTests {
     var repository = TestRepositoryFactory.createRepository(
         FhirContext.forR5Cached(),
         this.getClass(),
-        "pa-aslp");
+        "org/opencds/cqf/cql/evaluator/questionnaire/r5/pa-aslp");
     TestItemGenerator.Assert.that(
         "ServiceRequest",
         "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",

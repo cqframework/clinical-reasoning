@@ -19,14 +19,12 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.ParametersUtil;
 
 public class LibraryEngine {
@@ -36,13 +34,11 @@ public class LibraryEngine {
   protected final Repository repository;
   protected final FhirContext fhirContext;
   protected final EvaluationSettings settings;
-  protected final IFhirPath fhirPath;
 
   public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
     this.repository = requireNonNull(repository, "repository can not be null");
     this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     fhirContext = repository.fhirContext();
-    fhirPath = FhirPathCache.cachedForContext(fhirContext);
   }
 
   private Pair<String, Object> buildContextParameter(String patientId) {
@@ -63,12 +59,12 @@ public class LibraryEngine {
         expressions);
   }
 
-  public IBaseParameters evaluate(VersionedIdentifier theId, String thePatientId,
-      IBaseParameters theParameters, IBaseBundle theAdditionalData, Set<String> theExpressions) {
-    var libraryEvaluator = Evaluators.forRepository(settings, repository, theAdditionalData);
+  public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
+      IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
+    var libraryEvaluator = Evaluators.forRepository(settings, repository, additionalData);
 
-    return libraryEvaluator.evaluate(theId, buildContextParameter(thePatientId), theParameters,
-        theExpressions);
+    return libraryEvaluator.evaluate(id, buildContextParameter(patientId), parameters,
+        expressions);
   }
 
   public IBaseParameters evaluateExpression(String expression, IBaseParameters parameters,
@@ -126,32 +122,32 @@ public class LibraryEngine {
     return results;
   }
 
-  public void validateExpression(String theLanguage, String theExpression) {
-    if (theLanguage == null) {
+  public void validateExpression(String language, String expression) {
+    if (language == null) {
       logger.error("Missing language type for the Expression");
       throw new IllegalArgumentException("Missing language type for the Expression");
-    } else if (theExpression == null) {
+    } else if (expression == null) {
       logger.error("Missing expression for the Expression");
       throw new IllegalArgumentException("Missing expression for the Expression");
     }
   }
 
-  public void validateLibrary(String theLibraryUrl) {
-    if (theLibraryUrl == null) {
+  public void validateLibrary(String libraryUrl) {
+    if (libraryUrl == null) {
       logger.error("Missing library for the Expression");
       throw new IllegalArgumentException("Missing library for the Expression");
     }
   }
 
-  public List<IBase> resolveParameterValues(List<IBase> theValues) {
-    if (theValues == null || theValues.isEmpty()) {
+  public List<IBase> resolveParameterValues(List<IBase> values) {
+    if (values == null || values.isEmpty()) {
       return null;
     }
 
     List<IBase> returnValues = new ArrayList<>();
     switch (fhirContext.getVersion().getVersion()) {
       case DSTU3:
-        theValues.forEach(v -> {
+        values.forEach(v -> {
           var param = (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) v;
           if (param.hasValue()) {
             returnValues.add(param.getValue());
@@ -161,7 +157,7 @@ public class LibraryEngine {
         });
         break;
       case R4:
-        theValues.forEach(v -> {
+        values.forEach(v -> {
           var param = (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) v;
           if (param.hasValue()) {
             returnValues.add(param.getValue());
@@ -171,7 +167,7 @@ public class LibraryEngine {
         });
         break;
       case R5:
-        theValues.forEach(v -> {
+        values.forEach(v -> {
           var param = (org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent) v;
           if (param.hasValue()) {
             returnValues.add(param.getValue());

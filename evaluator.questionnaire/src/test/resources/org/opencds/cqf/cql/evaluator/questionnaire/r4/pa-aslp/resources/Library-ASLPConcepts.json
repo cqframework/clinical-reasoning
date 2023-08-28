@@ -102,7 +102,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/ASLPConcepts.cql"
+      "url": "cql/ASLPConcepts.cql"
     }
   ]
 }

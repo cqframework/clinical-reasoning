@@ -86,7 +86,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/FHIRHelpers.cql"
+      "url": "cql/FHIRHelpers.cql"
     }
   ]
 }

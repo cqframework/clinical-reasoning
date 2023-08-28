@@ -21,8 +21,8 @@
     <cql.version>3.0.0</cql.version>
     <jmh.version>1.36</jmh.version>
     <spring.version>5.3.23</spring.version>
-    <fhir-core.version>5.6.971</fhir-core.version>
-    <hapi.version>6.4.4</hapi.version>
+    <fhir-core.version>6.0.22</fhir-core.version>
+    <hapi.version>6.8.0</hapi.version>
     <picocli.version>4.6.1</picocli.version>
     <caffeine.version>2.9.0</caffeine.version>
     <guava.version>31.0.1-jre</guava.version>

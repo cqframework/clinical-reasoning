@@ -5,12 +5,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -22,12 +21,12 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 
 public interface BaseResourceMatcher {
+  public ModelResolver getModelResolver();
+
   default boolean matches(String path, List<IQueryParameterType> params, IBaseResource resource) {
     boolean match = false;
     path = path.replaceFirst("_", "");
-    var pathResult = path.equals("profile") ? resource.getMeta().getProfile()
-        : FhirPathCache.cachedForVersion(resource.getStructureFhirVersionEnum()).evaluate(resource,
-            path, IBase.class);
+    var pathResult = getModelResolver().resolvePath(resource, path);
     if (pathResult == null) {
       return false;
     }

@@ -29,8 +29,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.helpers.TestingHelper;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
 class ElementHasCqfExpressionTest {

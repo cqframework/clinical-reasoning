@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -20,23 +19,20 @@ import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestItemGenerator {
-  private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
+  public static final FhirContext fhirContext = FhirContext.forR5Cached();
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 

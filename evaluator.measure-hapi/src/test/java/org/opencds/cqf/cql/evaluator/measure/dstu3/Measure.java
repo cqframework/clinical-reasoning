@@ -22,10 +22,12 @@ import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class Measure {
+  public static final String CLASS_PATH = "org/opencds/cqf/cql/evaluator/measure/dstu3";
 
   @FunctionalInterface
   interface Validator<T> {
@@ -62,7 +64,7 @@ public class Measure {
 
     public Given repositoryFor(String repositoryPath) {
       this.repository = TestRepositoryFactory.createRepository(FhirContext.forDstu3Cached(),
-          this.getClass(), repositoryPath);
+          this.getClass(), CLASS_PATH + "/" + repositoryPath, IGLayoutMode.DIRECTORY);
       return this;
     }
 

@@ -505,7 +505,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "cql/OpioidCDSCommon.cql"
+      "url": "../cql/OpioidCDSCommon.cql"
     }
   ]
 }

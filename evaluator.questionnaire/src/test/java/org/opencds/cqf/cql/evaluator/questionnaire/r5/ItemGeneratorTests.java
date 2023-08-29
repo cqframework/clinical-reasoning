@@ -25,7 +25,7 @@ public class ItemGeneratorTests {
   @Test
   void testSleepStudyOrder() {
     var repository = TestRepositoryFactory.createRepository(
-        FhirContext.forR5Cached(),
+        TestItemGenerator.fhirContext,
         this.getClass(),
         "org/opencds/cqf/cql/evaluator/questionnaire/r5/pa-aslp");
     TestItemGenerator.Assert.that(

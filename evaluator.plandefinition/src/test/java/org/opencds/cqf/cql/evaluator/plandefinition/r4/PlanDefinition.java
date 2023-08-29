@@ -21,9 +21,9 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -36,6 +36,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class PlanDefinition {
+  public static final String CLASS_PATH = "org/opencds/cqf/cql/evaluator/plandefinition/r4";
+
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
@@ -164,7 +166,7 @@ public class PlanDefinition {
       }
       var local = new IGFileStructureRepository(fhirContext,
           this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
-              + "org/opencds/cqf/cql/evaluator/plandefinition/r4",
+              + CLASS_PATH,
           IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       if (dataRepository == null) {
         dataRepository = local;

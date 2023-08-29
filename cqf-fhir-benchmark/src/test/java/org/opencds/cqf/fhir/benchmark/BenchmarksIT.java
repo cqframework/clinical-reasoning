@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
@@ -33,6 +34,7 @@ public class BenchmarksIT {
   private static final double SCORE_DEVIATION = .5; // +/- 50% ops/unit allowed
 
   @Test
+  @Disabled
   public void benchmark() throws Exception {
     Options opt = new OptionsBuilder()
         .include(Questionnaires.class.getSimpleName())

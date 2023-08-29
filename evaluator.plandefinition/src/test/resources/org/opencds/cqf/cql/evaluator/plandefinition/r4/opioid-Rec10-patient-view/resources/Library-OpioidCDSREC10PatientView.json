@@ -428,7 +428,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "cql/OpioidCDSREC10PatientView.cql"
+      "url": "../cql/OpioidCDSREC10PatientView.cql"
     }
   ]
 }

@@ -1,4 +1,4 @@
-package org.opencds.cqf.cql.evaluator.library;
+package org.opencds.cqf.fhir.cql;
 
 import static java.util.Objects.requireNonNull;
 
@@ -16,9 +16,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.Engines;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +58,14 @@ public class LibraryEngine {
 
   public IBaseParameters evaluate(VersionedIdentifier id, String patientId,
       IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
-    var libraryEvaluator = Evaluators.forRepository(settings, repository, additionalData);
+    var cqlFhirParametersConverter =
+        Engines.getCqlFhirParametersConverter(repository.fhirContext());
+    var engine = Engines.forRepositoryAndSettings(settings, repository, additionalData);
+    var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
+    var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId),
+        evaluationParameters);
 
-    return libraryEvaluator.evaluate(id, buildContextParameter(patientId), parameters,
-        expressions);
+    return cqlFhirParametersConverter.toFhirParameters(result);
   }
 
   public IBaseParameters evaluateExpression(String expression, IBaseParameters parameters,
@@ -79,12 +80,18 @@ public class LibraryEngine {
 
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-    var libraryEvaluator = Evaluators.forRepository(settings, repository, bundle,
-        librarySourceProviders, cqlFhirParametersConverter);
 
-    return libraryEvaluator.evaluate(
-        new VersionedIdentifier().withId("expression").withVersion("1.0.0"),
-        buildContextParameter(patientId), parameters, expressions);
+    var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, false);
+    var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
+    for (var source : librarySourceProviders) {
+      providers.registerProvider(source);
+    }
+    var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
+    var id = new VersionedIdentifier().withId("expression").withVersion("1.0.0");
+    var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId),
+        evaluationParameters);
+
+    return cqlFhirParametersConverter.toFhirParameters(result);
   }
 
   public List<IBase> getExpressionResult(String subjectId, String expression, String language,

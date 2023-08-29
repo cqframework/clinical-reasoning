@@ -33,7 +33,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class PlanDefinitions {
   private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
   private static final Repository REPOSITORY = TestRepositoryFactory.createRepository(FHIR_CONTEXT,
-      PlanDefinition.Assert.class, "anc-dak");
+      PlanDefinition.Assert.class, PlanDefinition.CLASS_PATH + "/anc-dak");
 
   private Apply apply;
 

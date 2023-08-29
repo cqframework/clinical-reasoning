@@ -16,19 +16,18 @@ public class TestRepositoryFactory {
   }
 
   public static Repository createRepository(FhirContext fhirContext, Class<?> clazz) {
-    var data = new InMemoryFhirRepository(fhirContext, clazz, Lists.newArrayList("tests"), true);
-    var content =
-        new InMemoryFhirRepository(fhirContext, clazz, Lists.newArrayList("resources"), true);
-    var terminology =
-        new InMemoryFhirRepository(fhirContext, clazz, Lists.newArrayList("vocabulary"), true);
-
-    return org.opencds.cqf.fhir.utility.repository.Repositories.proxy(data, content, terminology);
+    return createRepository(fhirContext, clazz, "");
   }
 
   public static Repository createRepository(FhirContext fhirContext, Class<?> clazz,
       String path) {
+    return createRepository(fhirContext, clazz, path, IGLayoutMode.TYPE_PREFIX);
+  }
+
+  public static Repository createRepository(FhirContext fhirContext, Class<?> clazz,
+      String path, IGLayoutMode layoutMode) {
     return new IGFileStructureRepository(fhirContext,
         clazz.getProtectionDomain().getCodeSource().getLocation().getPath() + path,
-        IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
+        layoutMode, EncodingEnum.JSON);
   }
 }

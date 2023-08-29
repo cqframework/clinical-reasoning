@@ -55,7 +55,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "cql/ANCCommon.cql"
+      "url": "../cql/ANCCommon.cql"
     }
   ]
 }

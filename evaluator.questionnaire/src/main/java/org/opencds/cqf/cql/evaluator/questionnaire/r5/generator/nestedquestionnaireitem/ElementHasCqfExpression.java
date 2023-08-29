@@ -14,7 +14,7 @@ import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class ElementHasCqfExpression {

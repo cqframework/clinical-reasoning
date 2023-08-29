@@ -207,11 +207,12 @@ public class IGFileStructureRepository implements Repository {
     var inputDir = new File(location);
     if (inputDir.isDirectory()) {
       for (var file : inputDir.listFiles()) {
-        if (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
-            && file.getName().startsWith(resourceClass.getSimpleName() + "-")) {
+        if ((this.layoutMode.equals(IGLayoutMode.DIRECTORY)) ||
+            (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
+                && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
           try {
             var r = parser.parseResource(resourceClass, new FileInputStream(file));
-            resources.add(handleLibrary(r, location));
+            resources.add(handleLibrary(r, file.getPath()));
           } catch (FileNotFoundException e) {
           }
         }

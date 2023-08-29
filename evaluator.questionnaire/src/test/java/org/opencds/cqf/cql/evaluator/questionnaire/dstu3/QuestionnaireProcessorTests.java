@@ -18,6 +18,8 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
 import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessorTests {
+  final static String QUESTIONNAIRE_INVALID_QUESTIONS = "questionnaire-invalid-questionnaire.json";
+
   @Test
   @Disabled
   void testPrePopulate() {
@@ -56,7 +58,7 @@ public class QuestionnaireProcessorTests {
   void testPrePopulate_notQuestionnaire_throwsException() {
     assertThrows(ClassCastException.class, () -> {
       TestQuestionnaire.Assert
-          .that(new IdType("Questionnaire", "Questionnaire-invalid-questionnaire"), null)
+          .that("../" + QUESTIONNAIRE_INVALID_QUESTIONS, null)
           .prePopulate();
     });
   }
@@ -99,7 +101,7 @@ public class QuestionnaireProcessorTests {
   void testPopulate_notQuestionnaire_throwsException() {
     assertThrows(ClassCastException.class, () -> {
       TestQuestionnaire.Assert
-          .that(new IdType("QuestionnaireResponse", "invalid-questionnaire"), null)
+          .that("../" + QUESTIONNAIRE_INVALID_QUESTIONS, null)
           .populate();
     });
   }

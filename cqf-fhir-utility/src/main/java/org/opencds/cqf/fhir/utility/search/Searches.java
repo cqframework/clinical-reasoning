@@ -35,6 +35,10 @@ public class Searches {
     }
   }
 
+  public static Map<String, List<IQueryParameterType>> byCodeAndSystem(String code, String system) {
+    return builder().withTokenParam("code", code, system).build();
+  }
+
   public static Map<String, List<IQueryParameterType>> byUrl(String url) {
     return builder().withUriParam("url", url).build();
   }
@@ -73,6 +77,15 @@ public class Searches {
         values = new HashMap<>();
       }
       values.put(name, Collections.singletonList(new TokenParam(value)));
+
+      return this;
+    }
+
+    public SearchBuilder withTokenParam(String name, String value, String system) {
+      if (values == null) {
+        values = new HashMap<>();
+      }
+      values.put(name, Collections.singletonList(new TokenParam(system, value)));
 
       return this;
     }

@@ -1,5 +1,6 @@
-package org.opencds.cqf.fhir.cql.engine.parameters;
+package org.opencds.cqf.fhir.cql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -8,7 +9,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,13 +31,13 @@ public class LibraryEngineTests {
         null);
 
     var result = libraryEngine.resolveExpression(patientId, expression, params, null);
-    assertTrue(((StringType) result.get(0)).getValue().equals(
-        "Greeting: Hello! Alice Message: Test message Practitioner: Michael"));
+    assertEquals("Greeting: Hello! Alice Message: Test message Practitioner: Michael",
+        ((StringType) result.get(0)).getValue());
 
     var expression2 = new CqfExpression("text/fhirpath",
         "'Provide discharge instructions for ' + %subject.name.given.first()", null);
     var result2 = libraryEngine.resolveExpression(patientId, expression2, params, null);
-    assertTrue(((StringType) result2.get(0)).getValue().equals(
-        "Provide discharge instructions for Alice"));
+    assertEquals("Provide discharge instructions for Alice",
+        ((StringType) result2.get(0)).getValue());
   }
 }

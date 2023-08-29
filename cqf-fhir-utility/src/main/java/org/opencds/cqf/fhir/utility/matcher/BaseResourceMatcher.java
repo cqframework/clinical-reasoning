@@ -16,6 +16,7 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -44,6 +45,8 @@ public interface BaseResourceMatcher {
         }
       } else if (param instanceof UriParam) {
         match = isMatchUri((UriParam) param, pathResult);
+      } else if (param instanceof StringParam) {
+        match = isMatchString((StringParam) param, pathResult);
       } else {
         throw new NotImplementedException(
             "Resource matching not implemented for search params of type "
@@ -132,6 +135,14 @@ public interface BaseResourceMatcher {
     }
     throw new UnsupportedOperationException(
         "Expected element of type url or uri, found " + pathResult.getClass().getSimpleName());
+  }
+
+  default boolean isMatchString(StringParam param, Object pathResult) {
+    if (pathResult instanceof IPrimitiveType) {
+      return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+    }
+    throw new UnsupportedOperationException(
+        "Expected element of type string, found " + pathResult.getClass().getSimpleName());
   }
 
   default boolean matchesDateBounds(DateRangeParam theResourceRange, DateRangeParam theParamRange) {

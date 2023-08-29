@@ -266,7 +266,7 @@ public class CqlFhirParametersConverter {
   }
 
   private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-    var type = modelResolver.resolvePath(parameterDefinitionExtension, "type");
+    var type = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "type");
     // Optional<IPrimitiveType> type = this.fhirPath
     // .evaluateFirst(parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
     // if (type.isPresent()) {
@@ -279,7 +279,7 @@ public class CqlFhirParametersConverter {
 
   @SuppressWarnings("unchecked")
   private Boolean isListType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-    var max = modelResolver.resolvePath(parameterDefinitionExtension, "max");
+    var max = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "max");
     // Optional<IPrimitiveType> max = this.fhirPath
     // .evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
     // if (max.isPresent()) {
@@ -289,7 +289,7 @@ public class CqlFhirParametersConverter {
       return !maxString.equals("1");
     }
 
-    var min = modelResolver.resolvePath(parameterDefinitionExtension, "min");
+    var min = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "min");
     // Optional<IBaseIntegerDatatype> min = this.fhirPath
     // .evaluateFirst(parameterDefinitionExtension.getValue(), "min", IBaseIntegerDatatype.class);
     // if (min.isPresent()) {

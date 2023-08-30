@@ -15,7 +15,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <hapi.version>6.4.4</hapi.version>
     <junit.version>5.9.1</junit.version>
     <slf4j.version>2.0.4</slf4j.version>
     <cql.version>3.0.0</cql.version>
@@ -80,23 +79,6 @@
         <version>${hapi.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-
-      <!-- Stuff missing from the HAPI bom-->
-      <dependency>
-        <groupId>ca.uhn.hapi.fhir</groupId>
-        <artifactId>hapi-fhir-structures-r4b</artifactId>
-        <version>${hapi.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ca.uhn.hapi.fhir</groupId>
-        <artifactId>hapi-fhir-structures-r5</artifactId>
-        <version>${hapi.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ca.uhn.hapi.fhir</groupId>
-        <artifactId>hapi-fhir-validation-resources-r5</artifactId>
-        <version>${hapi.version}</version>
       </dependency>
 
       <!--UCUM-->

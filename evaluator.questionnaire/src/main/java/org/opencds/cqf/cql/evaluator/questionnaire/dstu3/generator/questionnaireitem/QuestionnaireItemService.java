@@ -7,8 +7,8 @@ import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
 
 public class QuestionnaireItemService {
   public QuestionnaireItemComponent createQuestionnaireItem(

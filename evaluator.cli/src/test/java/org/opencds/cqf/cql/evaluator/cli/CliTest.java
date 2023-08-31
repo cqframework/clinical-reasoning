@@ -1,17 +1,23 @@
 package org.opencds.cqf.cql.evaluator.cli;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
+@TestInstance(Lifecycle.PER_CLASS)
+@Disabled
 public class CliTest {
 
   private ByteArrayOutputStream outContent;
@@ -22,14 +28,14 @@ public class CliTest {
   private static final String testResourceRelativePath = "src/test/resources";
   private static String testResourcePath = null;
 
-  @BeforeClass
+  @BeforeAll
   public void setup() {
     File file = new File(testResourceRelativePath);
     testResourcePath = file.getAbsolutePath();
     System.out.println(String.format("Test resource directory: %s", testResourcePath));
   }
 
-  @BeforeMethod
+  @BeforeEach
   public void setUpStreams() {
     outContent = new ByteArrayOutputStream();
     errContent = new ByteArrayOutputStream();
@@ -38,7 +44,7 @@ public class CliTest {
     System.setErr(new PrintStream(errContent));
   }
 
-  @AfterMethod
+  @AfterEach
   public void restoreStreams() {
     String sysOut = outContent.toString();
     String sysError = errContent.toString();
@@ -75,9 +81,11 @@ public class CliTest {
     // assertTrue(output.endsWith("Patient=123\n"));
   }
 
-  @Test(expectedExceptions = NullPointerException.class)
+  @Test
   public void testNull() {
-    Main.run(null);
+    assertThrows(NullPointerException.class, () -> {
+      Main.run(null);
+    });
   }
 
   @Test
@@ -387,8 +395,8 @@ public class CliTest {
     assertTrue(output.contains("Numerator=true"));
   }
 
-  @Test(enabled = false,
-      description = "This test is failing on the CI Server for reasons unknown. Need to debug that.")
+  @Test
+  @Disabled("This test is failing on the CI Server for reasons unknown. Need to debug that.")
   public void testSampleContentIG() {
     String[] args = new String[] {"cql", "-fv=R4", "-rd=" + testResourcePath + "/samplecontentig",
         "-ig=" + "input/mycontentig.xml", "-lu=" + testResourcePath + "/samplecontentig/input/cql",

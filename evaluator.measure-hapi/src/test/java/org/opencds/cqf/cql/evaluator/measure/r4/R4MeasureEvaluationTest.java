@@ -1,14 +1,14 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.r4.model.Coding;
@@ -41,25 +42,23 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.measure.BaseMeasureEvaluationTest;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasurePopulationType;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-@Test(singleThreaded = true)
 public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
   public String getFhirVersion() {
@@ -239,7 +238,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     LibraryManager ll = new LibraryManager(new ModelManager());
     ll.getLibrarySourceLoader()
-        .registerProvider(new InMemoryLibrarySourceProvider(Collections.singletonList(cql)));
+        .registerProvider(new StringLibrarySourceProvider(Collections.singletonList(cql)));
 
     var modelResolver = new CachingModelResolverDecorator(new R4FhirModelResolver());
     DataProvider dataProvider = new CompositeDataProvider(modelResolver, retrieveProvider);

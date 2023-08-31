@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 

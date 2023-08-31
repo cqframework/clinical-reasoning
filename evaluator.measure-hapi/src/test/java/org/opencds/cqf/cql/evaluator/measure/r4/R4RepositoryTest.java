@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,10 +16,11 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Repositories;
-import org.testng.annotations.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -29,17 +30,8 @@ public class R4RepositoryTest {
   Repository repository;
 
   public R4RepositoryTest() {
-    var fhirContext = FhirContext.forR4Cached();
-
-
-    var data =
-        new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("res/tests"), false);
-    var content =
-        new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("res/resources/"), false);
-    var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
-        List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
-
-    repository = Repositories.proxy(data, content, terminology);
+    repository = TestRepositoryFactory.createRepository(FhirContext.forR4Cached(),
+        this.getClass(), Measure.CLASS_PATH + "/res");
   }
 
   @Test

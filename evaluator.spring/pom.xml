@@ -7,38 +7,16 @@
   <artifactId>evaluator.spring</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>jar</packaging>
-
-  <name>evaluator.spring</name>
   <description>CQL Evaluator - Spring Confguration</description>
 
   <parent>
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.shared</artifactId>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <dependencies>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.builder</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.library</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.expression</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.measure</artifactId>

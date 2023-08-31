@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3;
 
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,16 +11,19 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Repositories;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaireResponse {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
@@ -63,14 +66,10 @@ public class TestQuestionnaireResponse {
 
     public Extract(String questionnaireResponseName) {
       baseResource = (QuestionnaireResponse) parse(questionnaireResponseName);
-      var data =
-          new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
-      var content =
-          new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
-      var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
-          List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
-
-      this.repository = Repositories.proxy(data, content, terminology);
+      repository = new IGFileStructureRepository(this.fhirContext,
+          this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+              + "org/opencds/cqf/cql/evaluator/questionnaireresponse/dstu3",
+          IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
     }
 
     public GeneratedBundle extract() {

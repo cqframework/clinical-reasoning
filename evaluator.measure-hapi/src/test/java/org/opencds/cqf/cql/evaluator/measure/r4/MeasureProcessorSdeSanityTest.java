@@ -1,11 +1,11 @@
 package org.opencds.cqf.cql.evaluator.measure.r4;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.SimpleDateFormat;
 
 import org.opencds.cqf.cql.evaluator.measure.r4.Measure.Given;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class MeasureProcessorSdeSanityTest {
 

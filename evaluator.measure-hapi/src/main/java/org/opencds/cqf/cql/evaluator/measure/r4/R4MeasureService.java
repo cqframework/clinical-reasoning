@@ -8,12 +8,11 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.opencds.cqf.cql.evaluator.fhir.repository.BundleFhirRepository;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.FederatedRepository;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.BundleFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 
 public class R4MeasureService {
 
@@ -62,7 +61,8 @@ public class R4MeasureService {
 
   public Repository proxyAndFederate(Endpoint contentEndpoint,
       Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
-    var proxy = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+    var proxy = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository, dataEndpoint,
+        contentEndpoint, terminologyEndpoint);
 
     return new FederatedRepository(proxy,
         new BundleFhirRepository(proxy.fhirContext(), additionalData));

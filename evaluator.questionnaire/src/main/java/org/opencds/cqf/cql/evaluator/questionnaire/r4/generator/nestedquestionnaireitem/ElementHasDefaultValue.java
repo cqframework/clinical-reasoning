@@ -5,7 +5,7 @@ import static org.opencds.cqf.cql.evaluator.questionnaire.r4.ItemValueTransforme
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
+import org.opencds.cqf.fhir.utility.Constants;
 
 public class ElementHasDefaultValue {
   public QuestionnaireItemComponent addProperties(

@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,20 +25,23 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComp
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Repositories;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaire {
+  public static final String CLASS_PATH = "org/opencds/cqf/cql/evaluator/questionnaire/r4";
+
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
@@ -80,9 +83,6 @@ public class TestQuestionnaire {
     private Questionnaire questionnaire;
     private String patientId;
     private Repository repository;
-    private Repository dataRepository;
-    private Repository contentRepository;
-    private Repository terminologyRepository;
     private Bundle bundle;
     private Parameters parameters;
 
@@ -98,25 +98,6 @@ public class TestQuestionnaire {
       questionnaire = null;
       questionnaireId = theId;
       patientId = thePatientId;
-    }
-
-    public QuestionnaireResult withData(String dataAssetName) {
-      dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
-    }
-
-    public QuestionnaireResult withContent(String dataAssetName) {
-      contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
-    }
-
-    public QuestionnaireResult withTerminology(String dataAssetName) {
-      terminologyRepository =
-          new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
     }
 
     public QuestionnaireResult withAdditionalData(String dataAssetName) {
@@ -143,21 +124,10 @@ public class TestQuestionnaire {
 
     private void buildRepository() {
       if (repository == null) {
-        if (dataRepository == null) {
-          dataRepository =
-              new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
-        }
-        if (contentRepository == null) {
-          contentRepository =
-              new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"),
-                  false);
-        }
-        if (terminologyRepository == null) {
-          terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
-              List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
-        }
-
-        repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
+        repository = new IGFileStructureRepository(this.fhirContext,
+            this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+                + CLASS_PATH,
+            IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       }
 
       if (questionnaire == null) {

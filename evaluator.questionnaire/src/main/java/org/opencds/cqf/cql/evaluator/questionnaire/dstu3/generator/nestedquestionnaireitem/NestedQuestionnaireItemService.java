@@ -4,8 +4,8 @@ import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +24,8 @@ public class NestedQuestionnaireItemService {
     return new NestedQuestionnaireItemService(
         questionnaireTypeIsChoice,
         elementHasDefault,
-        new FhirModelResolverFactory()
-            .create(repository.fhirContext().getVersion().getVersion().getFhirVersionString()));
+        FhirModelResolverCache
+            .resolverForVersion(repository.fhirContext().getVersion().getVersion()));
   }
 
   NestedQuestionnaireItemService(

@@ -1,12 +1,13 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r4;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -48,7 +49,8 @@ public class PlanDefinitionProcessorTests {
     var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
     var encounterID = "Encounter/helloworld-patient-1-encounter-1";
     var repository =
-        TestRepositoryFactory.createRepository(fhirContext, this.getClass(), "anc-dak");
+        TestRepositoryFactory.createRepository(fhirContext, this.getClass(),
+            "org/opencds/cqf/cql/evaluator/plandefinition/r4/anc-dak");
     var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID, null)
         .withRepository(repository)
@@ -82,15 +84,14 @@ public class PlanDefinitionProcessorTests {
     var patientID = "Patient/Patient1";
     var practitionerID = "Practitioner/Practitioner1";
     var data = "tests/Bundle-DischargeInstructions-Patient-Data.json";
-    var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null, practitionerID)
-        .withRepository(repository)
         .withAdditionalData(data)
         .applyR5()
         .hasCommunicationRequestPayload();
   }
 
-  @Test(enabled = false) // Need patient data to test this
+  @Test
+  @Disabled // Need patient data to test this
   public void testECRWithFhirPath() {
     var planDefinitionID = "us-ecr-specification";
     var patientID = "helloworld-patient-1";
@@ -111,13 +112,10 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "hello-world-patient-view";
     var patientID = "helloworld-patient-1";
     var encounterID = "helloworld-patient-1-encounter-1";
-    var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID, null)
-        .withRepository(repository)
         .withExpectedCarePlanId(new IdType("CarePlan", "hello-world-patient-view")).apply()
         .isEqualsToExpected();
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID, null)
-        .withRepository(repository)
         .withExpectedBundleId(new IdType("Bundle", "hello-world-patient-view")).applyR5()
         .isEqualsToExpected();
   }
@@ -129,7 +127,7 @@ public class PlanDefinitionProcessorTests {
     var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
 
     var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass(),
-        "opioid-Rec10-patient-view");
+        "org/opencds/cqf/cql/evaluator/plandefinition/r4/opioid-Rec10-patient-view");
     PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID, null)
         .withRepository(repository)
         .withExpectedCarePlanId(new IdType("CarePlan", "opioidcds-10-patient-view")).apply()
@@ -140,7 +138,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsToExpected();
   }
 
-  @Test(enabled = false)
+  @Test
+  @Disabled
   public void testRuleFiltersNotReportable() {
     var planDefinitionID = "plandefinition-RuleFilters-1.0.0";
     var patientID = "NotReportable";
@@ -157,7 +156,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("rule-filters/NotReportableBundle.json");
   }
 
-  @Test(enabled = false)
+  @Test
+  @Disabled
   public void testRuleFiltersReportable() {
     var planDefinitionID = "plandefinition-RuleFilters-1.0.0";
     var patientID = "Reportable";
@@ -190,13 +190,12 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "prepopulate";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass());
     PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
-        .withRepository(repository).withParameters(parameters)
+        .withParameters(parameters)
         .withExpectedCarePlanId(new IdType("CarePlan", "prepopulate"))
         .apply().isEqualsToExpected();
     PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
-        .withRepository(repository).withParameters(parameters)
+        .withParameters(parameters)
         .withExpectedBundleId(new IdType("Bundle", "prepopulate"))
         .applyR5().isEqualsToExpected();
   }
@@ -206,11 +205,10 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "prepopulate-noLibrary";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass());
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
         .withParameters(parameters)
         .apply().hasOperationOutcome();
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
         .withParameters(parameters)
         .applyR5().hasQuestionnaireOperationOutcome();
   }
@@ -222,11 +220,10 @@ public class PlanDefinitionProcessorTests {
     var dataId =
         new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1");
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass());
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
         .withAdditionalDataId(dataId).withParameters(parameters).apply()
         .hasContained(4);
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
         .withAdditionalDataId(dataId).withParameters(parameters)
         .applyR5().hasEntry(4);
   }
@@ -236,12 +233,11 @@ public class PlanDefinitionProcessorTests {
     var planDefinitionID = "generate-questionnaire";
     var patientID = "OPA-Patient1";
     var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-    var repository = TestRepositoryFactory.createRepository(fhirContext, this.getClass());
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
         .withParameters(parameters)
         .withExpectedCarePlanId(new IdType("CarePlan", "generate-questionnaire"))
         .apply().isEqualsToExpected();
-    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null).withRepository(repository)
+    PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
         .withParameters(parameters)
         .withExpectedBundleId(new IdType("Bundle", "generate-questionnaire"))
         .applyR5().isEqualsToExpected();
@@ -255,7 +251,8 @@ public class PlanDefinitionProcessorTests {
         stringPart("Service Request Id", "SleepStudy2"),
         stringPart("Coverage Id", "Coverage-positive"));
     var repository =
-        TestRepositoryFactory.createRepository(fhirContext, this.getClass(), "pa-aslp");
+        TestRepositoryFactory.createRepository(fhirContext, this.getClass(),
+            "org/opencds/cqf/cql/evaluator/plandefinition/r4/pa-aslp");
     PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
         .withParameters(parameters).withRepository(repository).applyR5()
         .hasEntry(2);
@@ -265,7 +262,8 @@ public class PlanDefinitionProcessorTests {
   public void testPackageASLPA1() {
     var planDefinitionID = "ASLPA1";
     var repository =
-        TestRepositoryFactory.createRepository(fhirContext, this.getClass(), "pa-aslp");
+        TestRepositoryFactory.createRepository(fhirContext, this.getClass(),
+            "org/opencds/cqf/cql/evaluator/plandefinition/r4/pa-aslp");
     PlanDefinition.Assert.that(planDefinitionID, null, null, null)
         .withRepository(repository).packagePlanDefinition().hasEntry(20);
   }

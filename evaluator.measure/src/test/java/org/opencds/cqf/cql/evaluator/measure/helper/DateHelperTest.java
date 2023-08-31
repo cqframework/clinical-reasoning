@@ -1,11 +1,11 @@
 package org.opencds.cqf.cql.evaluator.measure.helper;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 // TODO: These tests are only partially complete. We need to actually verify that resolved dates are
 // correct.

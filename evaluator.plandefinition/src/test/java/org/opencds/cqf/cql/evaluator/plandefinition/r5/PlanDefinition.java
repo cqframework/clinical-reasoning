@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.r5;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,16 +17,19 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Repositories;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class PlanDefinition {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
@@ -126,17 +129,18 @@ public class PlanDefinition {
       if (repository != null) {
         return;
       }
+      var local = new IGFileStructureRepository(fhirContext,
+          this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+              + "org/opencds/cqf/cql/evaluator/plandefinition/r4",
+          IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       if (dataRepository == null) {
-        dataRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+        dataRepository = local;
       }
       if (contentRepository == null) {
-        contentRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources"), false);
+        contentRepository = local;
       }
       if (terminologyRepository == null) {
-        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem", "vocabulary/ValueSet"), false);
+        terminologyRepository = local;
       }
 
       repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);

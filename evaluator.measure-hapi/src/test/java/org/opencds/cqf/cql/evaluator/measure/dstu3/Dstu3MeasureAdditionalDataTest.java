@@ -2,7 +2,7 @@ package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.Given;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 

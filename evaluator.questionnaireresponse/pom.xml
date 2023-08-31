@@ -1,28 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>evaluator.shared</artifactId>
-    <groupId>org.opencds.cqf.cql</groupId>
-    <version>3.0.0-PRE6-SNAPSHOT</version>
-  </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>org.opencds.cqf.cql</groupId>
   <artifactId>evaluator.questionnaireresponse</artifactId>
+  <version>3.0.0-PRE6-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
+    <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
+  </parent>
+
   <dependencies>
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.builder</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.library</artifactId>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-cql</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -33,19 +29,6 @@
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>model-jackson</artifactId>
-      <version>${cql.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>elm-jackson</artifactId>
-      <version>${cql.version}</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

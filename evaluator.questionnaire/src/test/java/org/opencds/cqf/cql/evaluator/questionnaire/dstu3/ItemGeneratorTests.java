@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3;
 
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.helpers.TestItemGenerator;
-import org.testng.annotations.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -13,11 +13,8 @@ public class ItemGeneratorTests {
 
   @Test
   void testGenerateItem() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forDstu3Cached(), this.getClass());
     TestItemGenerator.Assert.that("Patient",
         "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient", "OPA-Patient1")
-        .withRepository(repository)
         .generateItem()
         .isEqualsTo("../" + QUESTIONNAIRE_PATIENT_FILE_NAME);
   }

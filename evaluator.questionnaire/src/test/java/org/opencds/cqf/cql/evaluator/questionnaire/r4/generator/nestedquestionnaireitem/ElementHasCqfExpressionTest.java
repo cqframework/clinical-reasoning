@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,9 +29,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestingHelper;
-import org.testng.Assert;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
 class ElementHasCqfExpressionTest {
@@ -77,7 +77,7 @@ class ElementHasCqfExpressionTest {
         EXPRESSION_REFERENCE,
         parameters,
         bundle);
-    Assert.assertEquals(actual, expected);
+    Assertions.assertEquals(actual, expected);
   }
 
   @Test
@@ -95,9 +95,9 @@ class ElementHasCqfExpressionTest {
     verify(myFixture).getExpression(element);
     verify(myFixture).getExpressionResults(expression);
     final List<QuestionnaireItemInitialComponent> initial = actual.getInitial();
-    Assert.assertEquals(initial.size(), results.size());
+    Assertions.assertEquals(initial.size(), results.size());
     for (int i = 0; i < results.size(); i++) {
-      Assert.assertEquals(initial.get(i).getValue(), results.get(i));
+      Assertions.assertEquals(initial.get(i).getValue(), results.get(i));
     }
   }
 
@@ -116,12 +116,12 @@ class ElementHasCqfExpressionTest {
     verify(myFixture).getExpression(element);
     verify(myFixture).getExpressionResults(expression);
     final List<QuestionnaireItemInitialComponent> initial = actual.getInitial();
-    Assert.assertEquals(initial.size(), results.size());
+    Assertions.assertEquals(initial.size(), results.size());
     for (int i = 0; i < results.size(); i++) {
       final IBase expected = results.get(i);
       final Type actualType = initial.get(i).getValue();
       final Reference actualRef = (Reference) actualType;
-      Assert.assertEquals(actualRef.getResource(), expected);
+      Assertions.assertEquals(actualRef.getResource(), expected);
     }
   }
 
@@ -133,12 +133,12 @@ class ElementHasCqfExpressionTest {
     // execute
     myFixture.addTypeValue(result, questionnaireItem);
     // validate
-    Assert.assertTrue(Type.class.isAssignableFrom(result.getClass()));
-    Assert.assertFalse(questionnaireItem.getInitial().isEmpty());
+    Assertions.assertTrue(Type.class.isAssignableFrom(result.getClass()));
+    Assertions.assertFalse(questionnaireItem.getInitial().isEmpty());
     final QuestionnaireItemInitialComponent actual = questionnaireItem.getInitial().get(0);
-    Assert.assertNotNull(actual.getValue());
+    Assertions.assertNotNull(actual.getValue());
     final Type type = actual.getValue();
-    Assert.assertEquals(type, result);
+    Assertions.assertEquals(type, result);
   }
 
   @Test
@@ -149,15 +149,15 @@ class ElementHasCqfExpressionTest {
     // execute
     myFixture.addResourceValue(result, questionnaireItem);
     // validate
-    Assert.assertTrue(Resource.class.isAssignableFrom(result.getClass()));
-    Assert.assertFalse(questionnaireItem.getInitial().isEmpty());
+    Assertions.assertTrue(Resource.class.isAssignableFrom(result.getClass()));
+    Assertions.assertFalse(questionnaireItem.getInitial().isEmpty());
     final QuestionnaireItemInitialComponent actual = questionnaireItem.getInitial().get(0);
-    Assert.assertNotNull(actual.getValue());
+    Assertions.assertNotNull(actual.getValue());
     final Type type = actual.getValue();
-    Assert.assertTrue(Reference.class.isAssignableFrom(type.getClass()));
+    Assertions.assertTrue(Reference.class.isAssignableFrom(type.getClass()));
     final Reference typeAsRef = (Reference) type;
     final IBaseResource resource = typeAsRef.getResource();
-    Assert.assertEquals(resource, result);
+    Assertions.assertEquals(resource, result);
   }
 
   @Nonnull

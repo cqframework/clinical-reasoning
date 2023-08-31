@@ -14,14 +14,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.builder.data.FhirModelResolverFactory;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.helper.NestedValueResolver;
-import org.opencds.cqf.cql.evaluator.fhir.util.Repositories;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
-import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.ExtensionResolver;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,6 @@ public abstract class BaseActivityDefinitionProcessor<T> {
   protected static final List<String> EXCLUDED_EXTENSION_LIST = Arrays
       .asList(Constants.CPG_KNOWLEDGE_CAPABILITY, Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL);
   protected final ModelResolver modelResolver;
-  protected final NestedValueResolver nestedValueResolver;
   protected final EvaluationSettings evaluationSettings;
   protected ExtensionResolver extensionResolver;
   protected Repository repository;
@@ -61,9 +58,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
     this.evaluationSettings =
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     this.repository = requireNonNull(repository, "repository can not be null");
-    modelResolver = new FhirModelResolverFactory()
-        .create(fhirContext().getVersion().getVersion().getFhirVersionString());
-    nestedValueResolver = new NestedValueResolver(fhirContext(), modelResolver);
+    modelResolver = FhirModelResolverCache.resolverForVersion(
+        repository.fhirContext().getVersion().getVersion());
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -94,7 +90,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       IBaseBundle bundle, IBaseResource dataEndpoint, IBaseResource contentEndpoint,
       IBaseResource terminologyEndpoint) {
     this.repository =
-        Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        org.opencds.cqf.fhir.utility.repository.Repositories.proxy(repository, dataEndpoint,
+            contentEndpoint, terminologyEndpoint);
 
     return apply(id, canonical, activityDefinition, subjectId, encounterId, practitionerId,
         organizationId, userType, userLanguage, userTaskContext, setting, settingContext,
@@ -146,12 +143,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
       throw new IllegalArgumentException(String.format(
           "Dynamic value resolution received multiple values for expression: %s", expression));
     }
-
-    if (path.contains(".")) {
-      nestedValueResolver.setNestedValue(resource, path, result.get(0));
-    } else {
-      modelResolver.setValue(resource, path, result.get(0));
-    }
+    modelResolver.setValue(resource, path, result.get(0));
   }
 
   protected FhirContext fhirContext() {

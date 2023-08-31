@@ -1,14 +1,14 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.helpers;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
@@ -19,18 +19,19 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.cql.evaluator.library.EvaluationSettings;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Repositories;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaire {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
@@ -63,15 +64,17 @@ public class TestQuestionnaire {
     public static QuestionnaireResult that(String questionnaireName, String patientId) {
       return new QuestionnaireResult(questionnaireName, patientId);
     }
+
+    public static QuestionnaireResult that(IdType theId, String thePatientId) {
+      return new QuestionnaireResult(theId, thePatientId);
+    }
   }
 
-  static class QuestionnaireResult {
+  public static class QuestionnaireResult {
+    private IdType questionnaireId;
     private Questionnaire questionnaire;
     private String patientId;
     private Repository repository;
-    private Repository dataRepository;
-    private Repository contentRepository;
-    private Repository terminologyRepository;
     private Bundle bundle;
     private Parameters parameters;
 
@@ -79,26 +82,14 @@ public class TestQuestionnaire {
 
     public QuestionnaireResult(String questionnaireName, String patientId) {
       questionnaire = questionnaireName.isEmpty() ? null : (Questionnaire) parse(questionnaireName);
+      questionnaireId = null;
       this.patientId = patientId;
     }
 
-    public QuestionnaireResult withData(String dataAssetName) {
-      dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
-    }
-
-    public QuestionnaireResult withContent(String dataAssetName) {
-      contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
-    }
-
-    public QuestionnaireResult withTerminology(String dataAssetName) {
-      terminologyRepository =
-          new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
-      return this;
+    public QuestionnaireResult(IdType theId, String thePatientId) {
+      questionnaire = null;
+      questionnaireId = theId;
+      patientId = thePatientId;
     }
 
     public QuestionnaireResult withAdditionalData(String dataAssetName) {
@@ -124,23 +115,18 @@ public class TestQuestionnaire {
     }
 
     private void buildRepository() {
-      if (repository != null) {
-        return;
+      if (repository == null) {
+        repository = new IGFileStructureRepository(this.fhirContext,
+            this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+                + "org/opencds/cqf/cql/evaluator/questionnaire/dstu3",
+            IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       }
-      if (dataRepository == null) {
-        dataRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
+      if (questionnaire == null) {
+        try {
+          questionnaire = repository.read(Questionnaire.class, questionnaireId);
+        } catch (Exception e) {
+        }
       }
-      if (contentRepository == null) {
-        contentRepository =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
-      }
-      if (terminologyRepository == null) {
-        terminologyRepository = new InMemoryFhirRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
-      }
-
-      repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
     }
 
     public GeneratedQuestionnaire prePopulate() {
@@ -154,8 +140,8 @@ public class TestQuestionnaire {
       buildRepository();
       var libraryEngine = new LibraryEngine(repository, evaluationSettings);
       return new GeneratedQuestionnaireResponse(
-          (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire, patientId,
-              parameters, bundle, libraryEngine));
+          (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire,
+              patientId, parameters, bundle, libraryEngine));
     }
 
     public Bundle questionnairePackage() {
@@ -164,7 +150,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class GeneratedQuestionnaire {
+  public static class GeneratedQuestionnaire {
     Questionnaire questionnaire;
 
     public GeneratedQuestionnaire(Questionnaire questionnaire) {
@@ -191,7 +177,7 @@ public class TestQuestionnaire {
     }
   }
 
-  static class GeneratedQuestionnaireResponse {
+  public static class GeneratedQuestionnaireResponse {
     QuestionnaireResponse questionnaireResponse;
 
     public GeneratedQuestionnaireResponse(QuestionnaireResponse questionnaireResponse) {

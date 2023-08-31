@@ -23,6 +23,7 @@ import org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
-import org.testng.Assert;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireTypeIsChoiceTest {
@@ -62,7 +62,7 @@ class QuestionnaireTypeIsChoiceTest {
     final QuestionnaireItemComponent actual =
         myFixture.addProperties(elementDefinition, questionnaireItem);
     // validate
-    Assert.assertTrue(valueSet.hasExpansion());
+    Assertions.assertTrue(valueSet.hasExpansion());
     verify(myFixture).getValueSet(elementDefinition);
     assertQuestionnaireItemsGetAppendedFromExpansionComponent(valueSet, actual);
   }
@@ -78,7 +78,7 @@ class QuestionnaireTypeIsChoiceTest {
     final QuestionnaireItemComponent actual =
         myFixture.addProperties(elementDefinition, questionnaireItem);
     // validate
-    Assert.assertFalse(valueSet.hasExpansion());
+    Assertions.assertFalse(valueSet.hasExpansion());
     verify(myFixture).getValueSet(elementDefinition);
     assertQuestionnaireItemsGetAppendedFromConceptSets(valueSet, actual);
   }
@@ -98,15 +98,15 @@ class QuestionnaireTypeIsChoiceTest {
       QuestionnaireItemComponent questionnaireItem) {
     final List<ValueSetExpansionContainsComponent> expansion =
         valueSet.getExpansion().getContains();
-    Assert.assertEquals(expansion.size(), questionnaireItem.getAnswerOption().size());
+    Assertions.assertEquals(expansion.size(), questionnaireItem.getAnswerOption().size());
     for (int i = 0; i < expansion.size(); i++) {
       final ValueSetExpansionContainsComponent containsComponent = expansion.get(i);
       final QuestionnaireItemAnswerOptionComponent answerOptionComponent =
           questionnaireItem.getAnswerOption().get(i);
       final Coding coding = (Coding) answerOptionComponent.getValue();
-      Assert.assertEquals(containsComponent.getCode(), coding.getCode());
-      Assert.assertEquals(containsComponent.getSystem(), coding.getSystem());
-      Assert.assertEquals(containsComponent.getDisplay(), coding.getDisplay());
+      Assertions.assertEquals(containsComponent.getCode(), coding.getCode());
+      Assertions.assertEquals(containsComponent.getSystem(), coding.getSystem());
+      Assertions.assertEquals(containsComponent.getDisplay(), coding.getDisplay());
     }
   }
 
@@ -134,12 +134,12 @@ class QuestionnaireTypeIsChoiceTest {
             .getAnswerOption()
             .get(totalItems - 1);
         final Coding coding = (Coding) answerOptionComponent.getValue();
-        Assert.assertEquals(theConceptReferenceComponent.getCode(), coding.getCode());
-        Assert.assertEquals(theConceptReferenceComponent.getDisplay(), coding.getDisplay());
-        Assert.assertEquals(systemUri, coding.getSystem());
+        Assertions.assertEquals(theConceptReferenceComponent.getCode(), coding.getCode());
+        Assertions.assertEquals(theConceptReferenceComponent.getDisplay(), coding.getDisplay());
+        Assertions.assertEquals(systemUri, coding.getSystem());
       }
     }
-    Assert.assertEquals(totalItems, questionnaireItem.getAnswerOption().size());
+    Assertions.assertEquals(totalItems, questionnaireItem.getAnswerOption().size());
   }
 
   @Test
@@ -147,9 +147,9 @@ class QuestionnaireTypeIsChoiceTest {
     // execute
     final Coding actual = myFixture.getCoding(withBaseValueSetExpansion());
     // validate
-    Assert.assertEquals(actual.getCode(), CODE_VALUE);
-    Assert.assertEquals(actual.getSystem(), SYSTEM_VALUE);
-    Assert.assertEquals(actual.getDisplay(), DISPLAY_VALUE);
+    Assertions.assertEquals(actual.getCode(), CODE_VALUE);
+    Assertions.assertEquals(actual.getSystem(), SYSTEM_VALUE);
+    Assertions.assertEquals(actual.getDisplay(), DISPLAY_VALUE);
   }
 
   @Test
@@ -157,9 +157,9 @@ class QuestionnaireTypeIsChoiceTest {
     // execute
     final Coding actual = myFixture.getCoding(withConceptReferenceComponent(), SYSTEM_VALUE);
     // validate
-    Assert.assertEquals(actual.getCode(), CODE_VALUE);
-    Assert.assertEquals(actual.getSystem(), SYSTEM_VALUE);
-    Assert.assertEquals(actual.getDisplay(), DISPLAY_VALUE);
+    Assertions.assertEquals(actual.getCode(), CODE_VALUE);
+    Assertions.assertEquals(actual.getSystem(), SYSTEM_VALUE);
+    Assertions.assertEquals(actual.getDisplay(), DISPLAY_VALUE);
   }
 
   @Nonnull

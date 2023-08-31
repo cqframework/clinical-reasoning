@@ -10,6 +10,7 @@
     "cdshooks",
     "clinicalreasoning",
     "Codeable",
+    "CODEABLECONCEPT",
     "codesystems",
     "Configurer",
     "connectathon",
@@ -27,6 +28,7 @@
     "Fhir",
     "fhirpath",
     "Gson",
+    "hamcrest",
     "helloworld",
     "INITIALPOPULATION",
     "INPROGRESS",
@@ -48,6 +50,7 @@
     "opioidcds",
     "PATIENTLIST",
     "plandefinition",
+    "Pointcut",
     "ppca",
     "prepopulate",
     "proxying",
@@ -127,7 +130,7 @@
   },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    // "source.organizeImports": true
   },
   "editor.detectIndentation": false,
   "editor.foldingImportsByDefault": true,

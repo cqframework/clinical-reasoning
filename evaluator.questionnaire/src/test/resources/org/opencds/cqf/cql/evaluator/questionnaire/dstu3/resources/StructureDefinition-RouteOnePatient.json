@@ -2388,7 +2388,7 @@
         ],
         "binding": {
           "strength": "extensible",
-          "valueSet": "http://hl7.org/fhir/us/vrdr/ValueSet/AdministrativeGender"
+          "valueSetUri": "http://hl7.org/fhir/us/vrdr/ValueSet/AdministrativeGender"
         }
       },
       {

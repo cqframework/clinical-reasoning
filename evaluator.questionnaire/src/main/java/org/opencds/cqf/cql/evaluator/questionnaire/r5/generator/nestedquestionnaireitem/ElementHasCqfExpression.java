@@ -14,8 +14,8 @@ import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.Constants;
 
 public class ElementHasCqfExpression {
   protected String patientId;
@@ -24,14 +24,14 @@ public class ElementHasCqfExpression {
   protected LibraryEngine libraryEngine;
 
   public ElementHasCqfExpression(
-      String thePatientId,
-      IBaseParameters theParameters,
-      IBaseBundle theBundle,
-      LibraryEngine theLibraryEngine) {
-    patientId = thePatientId;
-    parameters = theParameters;
-    bundle = theBundle;
-    libraryEngine = theLibraryEngine;
+      String patientId,
+      IBaseParameters parameters,
+      IBaseBundle bundle,
+      LibraryEngine libraryEngine) {
+    this.patientId = patientId;
+    this.parameters = parameters;
+    this.bundle = bundle;
+    this.libraryEngine = libraryEngine;
   }
 
   public QuestionnaireItemComponent addProperties(ElementDefinition element,

@@ -1,8 +1,9 @@
 package org.opencds.cqf.cql.evaluator.questionnaireresponse.r5;
 
-import static org.testng.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class QuestionnaireResponseProcessorTests {
   private void testExtract(String questionnaireResponse) {
@@ -33,7 +34,8 @@ public class QuestionnaireResponseProcessorTests {
     testExtract("OutpatientPriorAuthorizationRequest");
   }
 
-  @Test(enabled = false)
+  @Test
+  @Disabled("JP - Don't know why this is disabled")
   void testDemographicsExtraction() {
     testExtract("demographics-qr");
   }

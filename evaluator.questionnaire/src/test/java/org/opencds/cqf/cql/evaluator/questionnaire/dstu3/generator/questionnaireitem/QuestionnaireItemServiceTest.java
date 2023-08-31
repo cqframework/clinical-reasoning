@@ -12,13 +12,13 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Type;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.helpers.TestingHelper;
-import org.testng.Assert;
+import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireItemServiceTest {
@@ -36,7 +36,7 @@ class QuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getProfileText(withProfileWithTitle());
     // validate
-    Assert.assertEquals(actual, PROFILE_TITLE);
+    Assertions.assertEquals(actual, PROFILE_TITLE);
   }
 
   @Test
@@ -44,7 +44,7 @@ class QuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getProfileText(withProfileWithNoTitle());
     // validate
-    Assert.assertEquals(actual, LINK_ID);
+    Assertions.assertEquals(actual, LINK_ID);
   }
 
   @Test
@@ -65,7 +65,7 @@ class QuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getDefinition(withProfileWithTitle());
     // validate
-    Assert.assertEquals(actual, DEFINITION);
+    Assertions.assertEquals(actual, DEFINITION);
   }
 
   @Test
@@ -95,14 +95,14 @@ class QuestionnaireItemServiceTest {
   }
 
   void assertEquals(QuestionnaireItemComponent actual, QuestionnaireItemComponent expected) {
-    Assert.assertEquals(actual.getType(), expected.getType());
-    Assert.assertEquals(actual.getLinkId(), expected.getLinkId());
-    Assert.assertEquals(actual.getText(), expected.getText());
+    Assertions.assertEquals(actual.getType(), expected.getType());
+    Assertions.assertEquals(actual.getLinkId(), expected.getLinkId());
+    Assertions.assertEquals(actual.getText(), expected.getText());
   }
 
   void assertEquals(Extension actual, Extension expected) {
-    Assert.assertEquals(actual.getUrl(), expected.getUrl());
-    Assert.assertEquals(expected.getValue().toString(), actual.getValue().toString());
+    Assertions.assertEquals(actual.getUrl(), expected.getUrl());
+    Assertions.assertEquals(expected.getValue().toString(), actual.getValue().toString());
   }
 
   @Nonnull

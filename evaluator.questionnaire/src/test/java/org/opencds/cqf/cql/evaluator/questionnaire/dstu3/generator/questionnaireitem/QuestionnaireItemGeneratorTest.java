@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionDifferentialComponent;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.helpers.TestingHelper;
 import org.opencds.cqf.fhir.api.Repository;
-import org.testng.Assert;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireItemGeneratorTest {
@@ -91,7 +91,7 @@ class QuestionnaireItemGeneratorTest {
     // execute
     final String actual = myFixture.getElementType(elementDefinition);
     // validate
-    Assert.assertEquals(actual, TYPE_CODE);
+    Assertions.assertEquals(actual, TYPE_CODE);
   }
 
   @Test
@@ -101,7 +101,7 @@ class QuestionnaireItemGeneratorTest {
     // execute
     final String actual = myFixture.getElementType(elementDefinition);
     // validate
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
   }
 
   @Test
@@ -115,7 +115,7 @@ class QuestionnaireItemGeneratorTest {
     // execute
     final List<ElementDefinition> actual = myFixture.getElementsWithNonNullElementType(profile);
     // validate
-    Assert.assertEquals(actual.size(), expected.size());
+    Assertions.assertEquals(actual.size(), expected.size());
     assertEquals(actual, expected);
   }
 
@@ -188,7 +188,7 @@ class QuestionnaireItemGeneratorTest {
     IllegalArgumentException actual = assertThrows(
         IllegalArgumentException.class, () -> myFixture.generateItem(actionInput, itemCount));
     // validate
-    Assert.assertEquals(actual.getMessage(), NO_PROFILE_ERROR);
+    Assertions.assertEquals(actual.getMessage(), NO_PROFILE_ERROR);
   }
 
   @Test
@@ -243,7 +243,7 @@ class QuestionnaireItemGeneratorTest {
   // // execute
   // final Resource actual = myFixture.getProfileDefinition(actionInput);
   // // validate
-  // Assert.assertEquals(actual, expected);
+  // Assertions.assertEquals(actual, expected);
   // verify(myFixture).getResource(canonicalType);
   // }
 
@@ -255,21 +255,21 @@ class QuestionnaireItemGeneratorTest {
   }
 
   void assertEquals(QuestionnaireItemComponent actual, QuestionnaireItemComponent expected) {
-    Assert.assertEquals(actual.getType(), expected.getType());
-    Assert.assertEquals(actual.getLinkId(), expected.getLinkId());
-    Assert.assertEquals(actual.getText(), expected.getText());
+    Assertions.assertEquals(actual.getType(), expected.getType());
+    Assertions.assertEquals(actual.getLinkId(), expected.getLinkId());
+    Assertions.assertEquals(actual.getText(), expected.getText());
   }
 
   void assertEquals(List<ElementDefinition> actual, List<ElementDefinition> expected) {
     for (int i = 0; i < expected.size(); i++) {
       final ElementDefinition actualElement = actual.get(i);
       final ElementDefinition expectedElement = expected.get(i);
-      Assert.assertEquals(actualElement.getPath(), expectedElement.getPath());
-      Assert.assertEquals(actualElement.getType().size(), expectedElement.getType().size());
+      Assertions.assertEquals(actualElement.getPath(), expectedElement.getPath());
+      Assertions.assertEquals(actualElement.getType().size(), expectedElement.getType().size());
       for (int q = 0; q < expectedElement.getType().size(); q++) {
         final TypeRefComponent actualType = actualElement.getType().get(q);
         final TypeRefComponent expectedType = expectedElement.getType().get(q);
-        Assert.assertEquals(actualType.getCode(), expectedType.getCode());
+        Assertions.assertEquals(actualType.getCode(), expectedType.getCode());
       }
     }
   }

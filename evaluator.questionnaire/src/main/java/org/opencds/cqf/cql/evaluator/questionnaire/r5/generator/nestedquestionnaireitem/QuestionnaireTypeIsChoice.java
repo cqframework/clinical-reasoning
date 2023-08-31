@@ -1,7 +1,5 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r5.generator.nestedquestionnaireitem;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r5.SearchHelper.searchRepositoryByCanonical;
-
 import java.util.List;
 
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -13,6 +11,7 @@ import org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +69,7 @@ public class QuestionnaireTypeIsChoice {
 
   protected ValueSet getValueSet(ElementDefinition element) {
     final String valueSetUrl = element.getBinding().getValueSet();
-    return (ValueSet) searchRepositoryByCanonical(repository,
+    return (ValueSet) SearchHelper.searchRepositoryByCanonical(repository,
         new CanonicalType().setValue(valueSetUrl));
   }
 }

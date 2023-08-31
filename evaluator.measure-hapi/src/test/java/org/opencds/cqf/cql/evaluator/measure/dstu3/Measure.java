@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.function.Predicate;
@@ -17,16 +17,17 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierCompon
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureConstants;
 import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.api.Repository;
-import org.testng.TestException;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class Measure {
+  public static final String CLASS_PATH = "org/opencds/cqf/cql/evaluator/measure/dstu3";
 
   @FunctionalInterface
   interface Validator<T> {
@@ -63,7 +64,7 @@ public class Measure {
 
     public Given repositoryFor(String repositoryPath) {
       this.repository = TestRepositoryFactory.createRepository(FhirContext.forDstu3Cached(),
-          this.getClass(), repositoryPath);
+          this.getClass(), CLASS_PATH + "/" + repositoryPath, IGLayoutMode.DIRECTORY);
       return this;
     }
 
@@ -151,7 +152,8 @@ public class Measure {
       try {
         report = this.operation.get();
       } catch (Exception e) {
-        throw new TestException("error when running 'then' and invoking the chosen operation", e);
+        throw new IllegalStateException(
+            "error when running 'then' and invoking the chosen operation", e);
       }
 
       return new SelectedReport(report);
@@ -311,7 +313,7 @@ public class Measure {
       public SelectedReference<T> hasPopulations(String... population) {
         var ex = this.reference.getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
         if (ex.isEmpty()) {
-          throw new TestException(String.format(
+          throw new IllegalStateException(String.format(
               "no evaluated resource extensions were found, and expected %s", population.length));
         }
 

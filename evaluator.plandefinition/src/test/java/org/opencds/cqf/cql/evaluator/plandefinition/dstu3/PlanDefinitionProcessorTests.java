@@ -1,13 +1,14 @@
 package org.opencds.cqf.cql.evaluator.plandefinition.dstu3;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart;
 
 import java.util.List;
 
-import org.opencds.cqf.cql.evaluator.fhir.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.Repositories;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -31,7 +32,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("hello-world/hello-world-careplan.json");
   }
 
-  @Test(enabled = false) // Unable to get the cql to run against dstu3
+  @Test
+  @Disabled("Unable to get the cql to run against dstu3")
   public void testOpioidRec10PatientView() {
     FhirContext fhirContext = FhirContext.forDstu3Cached();
     var data =
@@ -53,7 +55,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("opioid-Rec10-patient-view/tests/CarePlan-opioid-Rec10-patient-view.json");
   }
 
-  @Test(enabled = false)
+  @Test
+  @Disabled
   public void testRuleFiltersNotReportable() {
     PlanDefinition.Assert.that("plandefinition-RuleFilters-1.0.0", "NotReportable", null)
         .withAdditionalData("rule-filters/tests-NotReportable-bundle.json")
@@ -61,7 +64,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("rule-filters/NotReportableCarePlan.json");
   }
 
-  @Test(enabled = false)
+  @Test
+  @Disabled
   public void testRuleFiltersReportable() {
     PlanDefinition.Assert.that("plandefinition-RuleFilters-1.0.0", "Reportable", null)
         .withAdditionalData("rule-filters/tests-Reportable-bundle.json")
@@ -69,7 +73,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("rule-filters/ReportableCarePlan.json");
   }
 
-  @Test(enabled = false) // Need valid dstu3 content for this test
+  @Test
+  @Disabled("Need valid dstu3 content for this test")
   public void testQuestionnairePrepopulate() {
     PlanDefinition.Assert.that("prepopulate", "OPA-Patient1", null)
         .withAdditionalData("prepopulate/prepopulate-patient-data.json")
@@ -78,7 +83,8 @@ public class PlanDefinitionProcessorTests {
         .isEqualsTo("prepopulate/prepopulate-careplan.json");
   }
 
-  @Test(enabled = false) // Need valid dstu3 content for this test
+  @Test
+  @Disabled("Need valid dstu3 content for this test")
   public void testQuestionnairePrepopulate_NoLibrary() {
     PlanDefinition.Assert.that("prepopulate", "OPA-Patient1", null)
         .withAdditionalData("prepopulate/prepopulate-patient-data.json")
@@ -95,7 +101,8 @@ public class PlanDefinitionProcessorTests {
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply().hasContained(6);
   }
 
-  @Test(enabled = false) // Need valid dstu3 content for this test
+  @Test // Need valid dstu3 content for this test
+  @Disabled("Need valid dstu3 content for this test")
   public void testGenerateQuestionnaire() {
     PlanDefinition.Assert.that("generate-questionnaire", "OPA-Patient1", null)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).apply()

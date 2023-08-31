@@ -7,45 +7,24 @@
   <artifactId>evaluator.plandefinition</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
   <packaging>jar</packaging>
-
-  <name>evaluator.plandefinition</name>
   <description>CQL Evaluator - PlanDefinition Evaluation</description>
 
   <parent>
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.shared</artifactId>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator</artifactId>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-cql</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.cql</groupId>
       <artifactId>evaluator.activitydefinition</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.expression</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.fhir</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.library</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.builder</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -58,10 +37,9 @@
       <artifactId>evaluator.questionnaireresponse</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
-
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.jackson-deps</artifactId>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-jackson</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
@@ -75,18 +53,6 @@
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>model-jackson</artifactId>
-      <version>${cql.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>elm-jackson</artifactId>
-      <version>${cql.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

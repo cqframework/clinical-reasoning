@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.evaluator.measure.dstu3;
 
 import org.opencds.cqf.cql.evaluator.measure.dstu3.Measure.Given;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class Dstu3MeasureProcessorTest {
 

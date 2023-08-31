@@ -15,11 +15,16 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <hapi.version>6.4.4</hapi.version>
     <junit.version>5.9.1</junit.version>
     <slf4j.version>2.0.4</slf4j.version>
     <cql.version>3.0.0</cql.version>
     <jmh.version>1.36</jmh.version>
+    <spring.version>5.3.23</spring.version>
+    <fhir-core.version>6.0.22</fhir-core.version>
+    <hapi.version>6.8.0</hapi.version>
+    <picocli.version>4.6.1</picocli.version>
+    <caffeine.version>2.9.0</caffeine.version>
+    <guava.version>31.0.1-jre</guava.version>
   </properties>
   <licenses>
     <license>
@@ -75,24 +80,156 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- Stuff missing from the HAPI bom-->
+
+      <!--UCUM-->
       <dependency>
-        <groupId>ca.uhn.hapi.fhir</groupId>
-        <artifactId>hapi-fhir-structures-r4b</artifactId>
-        <version>${hapi.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ca.uhn.hapi.fhir</groupId>
-        <artifactId>hapi-fhir-structures-r5</artifactId>
-        <version>${hapi.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ca.uhn.hapi.fhir</groupId>
-        <artifactId>hapi-fhir-validation-resources-r5</artifactId>
-        <version>${hapi.version}</version>
+        <groupId>org.fhir</groupId>
+        <artifactId>ucum</artifactId>
+        <version>1.0.3</version>
       </dependency>
 
-      <!-- test dependencies -->
+
+      <!-- CQL dependencies -->
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>engine</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>cql-to-elm</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>model</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>model-jackson</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm-jackson</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>model-jaxb</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm-jaxb</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>engine-fhir</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>quick</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>fhir-r4</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>elm-fhir</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>cqf-fhir</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.cqframework</groupId>
+        <artifactId>cqf-fhir-npm</artifactId>
+        <version>${cql.version}</version>
+      </dependency>
+
+      <!-- Engine JAXB -->
+      <dependency>
+        <groupId>org.eclipse.persistence</groupId>
+        <artifactId>org.eclipse.persistence.moxy</artifactId>
+        <version>2.7.13</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish</groupId>
+        <artifactId>javax.json</artifactId>
+        <version>1.1.4</version>
+      </dependency>
+
+      <!-- Guava-->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <!-- Spring -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <!-- CLI -->
+      <dependency>
+        <groupId>info.picocli</groupId>
+        <artifactId>picocli</artifactId>
+        <version>${picocli.version}</version>
+      </dependency>
+
+      <!-- DI APIs -->
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+      </dependency>
+
+      <!-- Generated annotation -->
+      <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>javax.annotation-api</artifactId>
+        <version>1.3.2</version>
+      </dependency>
+
+      <!-- NPM Packaging Dependencies -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.21</version>
+      </dependency>
+
+      <!-- BundleResources requirement -->
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.6</version>
+      </dependency>
+
+      <!-- Logging -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <!-- Test Dependencies -->
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
@@ -105,13 +242,6 @@
         <artifactId>jmh-core</artifactId>
         <version>${jmh.version}</version>
         <scope>test</scope>
-      </dependency>
-
-      <!-- Logging -->
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -126,6 +256,44 @@
         <optional>true</optional>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>0.10.2</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-all</artifactId>
+        <version>1.3</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>3.9.0</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>${caffeine.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- JSON Comparisons ignoring property order, whitespaces/tabs, etc. -->
+      <dependency>
+        <groupId>org.skyscreamer</groupId>
+        <artifactId>jsonassert</artifactId>
+        <version>1.5.1</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -136,8 +304,25 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <version>1.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>3.9.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

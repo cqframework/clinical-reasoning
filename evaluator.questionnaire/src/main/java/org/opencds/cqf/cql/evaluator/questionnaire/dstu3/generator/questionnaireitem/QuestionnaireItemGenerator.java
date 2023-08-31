@@ -1,7 +1,5 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.dstu3.generator.questionnaireitem;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.dstu3.SearchHelper.searchRepositoryByCanonical;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,9 +12,10 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,6 +129,6 @@ public class QuestionnaireItemGenerator {
   }
 
   protected Resource getProfileDefinition(DataRequirement actionInput) {
-    return searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));
+    return SearchHelper.searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));
   }
 }

@@ -6,7 +6,6 @@
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-cr</artifactId>
   <version>3.0.0-PRE6-SNAPSHOT</version>
-
   <name>FHIR Clinical Reasoning (Operations)</name>
   <description>Implementations of clinical reasoning operations</description>
 

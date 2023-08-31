@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r5.generator.questionnaireitem;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r5.SearchHelper.searchRepositoryByCanonical;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,11 +14,12 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.opencds.cqf.cql.evaluator.fhir.Constants;
-import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.generator.nestedquestionnaireitem.NestedQuestionnaireItemService;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.ExtensionResolver;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,6 +152,6 @@ public class QuestionnaireItemGenerator {
   }
 
   protected Resource getProfileDefinition(DataRequirement actionInput) {
-    return searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));
+    return SearchHelper.searchRepositoryByCanonical(repository, actionInput.getProfile().get(0));
   }
 }

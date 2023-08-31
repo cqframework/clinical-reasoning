@@ -17,8 +17,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
 import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Searches;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;

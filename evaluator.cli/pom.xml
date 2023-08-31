@@ -12,35 +12,35 @@
   <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
 
   <parent>
-    <groupId>org.opencds.cqf.cql</groupId>
-    <artifactId>evaluator.shared</artifactId>
+    <groupId>org.opencds.cqf.fhir</groupId>
+    <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
+    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <description>CQL Evaluator - CLI</description>
 
   <dependencies>
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator</artifactId>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-api</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.builder</artifactId>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-utility</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>model-jackson</artifactId>
-      <version>${cql.version}</version>
-      <scope>test</scope>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-cql</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>elm-jackson</artifactId>
-      <version>${cql.version}</version>
-      <scope>test</scope>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-jackson</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>info.picocli</groupId>

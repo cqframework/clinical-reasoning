@@ -1,11 +1,11 @@
 package org.opencds.cqf.cql.evaluator.questionnaire.r4;
 
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
-import org.opencds.cqf.cql.evaluator.fhir.test.TestRepositoryFactory;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestItemGenerator;
-import org.testng.annotations.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -16,11 +16,8 @@ public class ItemGeneratorTests {
 
   @Test
   void testGenerateItem() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestItemGenerator.Assert.that("Patient",
         "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient", "OPA-Patient1")
-        .withRepository(repository)
         .generateItem()
         .isEqualsTo("../" + QUESTIONNAIRE_PATIENT_FILE_NAME);
   }
@@ -30,7 +27,7 @@ public class ItemGeneratorTests {
     var repository = TestRepositoryFactory.createRepository(
         FhirContext.forR4Cached(),
         this.getClass(),
-        "pa-aslp");
+        "org/opencds/cqf/cql/evaluator/questionnaire/r4/pa-aslp");
     TestItemGenerator.Assert.that(
         "ServiceRequest",
         "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",

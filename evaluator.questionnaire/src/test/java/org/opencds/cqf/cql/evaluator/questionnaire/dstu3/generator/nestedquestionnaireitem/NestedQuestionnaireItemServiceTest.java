@@ -26,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
-import org.testng.Assert;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -179,11 +178,11 @@ class NestedQuestionnaireItemServiceTest {
         elementDefinition,
         CHILD_LINK_ID);
     // validate
-    Assert.assertEquals(actual.getType(), QuestionnaireItemType.GROUP);
-    Assert.assertEquals(actual.getDefinition(),
+    Assertions.assertEquals(actual.getType(), QuestionnaireItemType.GROUP);
+    Assertions.assertEquals(actual.getDefinition(),
         "http://www.sample.com/profile/profileId#pathValue");
-    Assert.assertEquals(actual.getLinkId(), CHILD_LINK_ID);
-    Assert.assertEquals(actual.getText(), LABEL);
+    Assertions.assertEquals(actual.getLinkId(), CHILD_LINK_ID);
+    Assertions.assertEquals(actual.getText(), LABEL);
   }
 
   @Test
@@ -193,7 +192,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.getItemType(elementDefinition);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.CHOICE);
+    Assertions.assertEquals(actual, QuestionnaireItemType.CHOICE);
   }
 
   @Test
@@ -204,7 +203,7 @@ class NestedQuestionnaireItemServiceTest {
     final IllegalArgumentException actual = Assertions.assertThrows(
         IllegalArgumentException.class, () -> myFixture.getItemType(elementDefinition));
     // validate
-    Assert.assertEquals(actual.getMessage(), "Unable to determine type for element: null");
+    Assertions.assertEquals(actual.getMessage(), "Unable to determine type for element: null");
   }
 
   @Test
@@ -214,7 +213,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, true);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.CHOICE);
+    Assertions.assertEquals(actual, QuestionnaireItemType.CHOICE);
   }
 
   @Test
@@ -224,7 +223,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.CHOICE);
+    Assertions.assertEquals(actual, QuestionnaireItemType.CHOICE);
   }
 
   @Test
@@ -234,7 +233,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.QUANTITY);
+    Assertions.assertEquals(actual, QuestionnaireItemType.QUANTITY);
   }
 
   @Test
@@ -244,7 +243,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.REFERENCE);
+    Assertions.assertEquals(actual, QuestionnaireItemType.REFERENCE);
   }
 
   @Test
@@ -254,7 +253,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.URL);
+    Assertions.assertEquals(actual, QuestionnaireItemType.URL);
   }
 
   @Test
@@ -264,7 +263,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.GROUP);
+    Assertions.assertEquals(actual, QuestionnaireItemType.GROUP);
   }
 
   @Test
@@ -275,7 +274,7 @@ class NestedQuestionnaireItemServiceTest {
     final FHIRException actual = Assertions.assertThrows(
         FHIRException.class, () -> myFixture.parseItemType(elementType, false));
     // validate
-    Assert.assertEquals(actual.getMessage(),
+    Assertions.assertEquals(actual.getMessage(),
         "Unknown QuestionnaireItemType code 'UnknownElementType'");
   }
 
@@ -286,7 +285,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final QuestionnaireItemType actual = myFixture.parseItemType(elementType, false);
     // validate
-    Assert.assertEquals(actual, QuestionnaireItemType.GROUP);
+    Assertions.assertEquals(actual, QuestionnaireItemType.GROUP);
   }
 
   @Test
@@ -297,7 +296,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getElementText(elementDefinition);
     // validate
-    Assert.assertEquals(actual, LABEL);
+    Assertions.assertEquals(actual, LABEL);
   }
 
   @Test
@@ -309,7 +308,7 @@ class NestedQuestionnaireItemServiceTest {
     final String actual = myFixture.getElementText(elementDefinition);
     // validate
     verify(myFixture).getElementDescription(elementDefinition);
-    Assert.assertEquals(actual, SHORT_DEFINITION);
+    Assertions.assertEquals(actual, SHORT_DEFINITION);
   }
 
   @Test
@@ -320,7 +319,7 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getElementDescription(elementDefinition);
     // validate
-    Assert.assertEquals(actual, SHORT_DEFINITION);
+    Assertions.assertEquals(actual, SHORT_DEFINITION);
   }
 
   @Test
@@ -330,6 +329,6 @@ class NestedQuestionnaireItemServiceTest {
     // execute
     final String actual = myFixture.getElementDescription(elementDefinition);
     // validate
-    Assert.assertEquals(actual, PATH_VALUE);
+    Assertions.assertEquals(actual, PATH_VALUE);
   }
 }

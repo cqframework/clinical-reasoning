@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
+import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
@@ -167,9 +168,10 @@ public class Engines {
         new RetrieveProviderConfigurerImpl(RetrieveProviderConfig.defaultConfig());
     for (var provider : providers) {
       retrieveProviderConfigurer.configure(provider, theTerminologyProvider);
-      dataProviders.put(Constants.FHIR_MODEL_URI,
-          new CompositeDataProvider(modelResolver, provider));
     }
+
+    dataProviders.put(Constants.FHIR_MODEL_URI,
+        new FederatedDataProvider(modelResolver, providers));
 
     return dataProviders;
   }

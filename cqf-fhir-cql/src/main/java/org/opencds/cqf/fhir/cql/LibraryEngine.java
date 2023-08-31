@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmProcessor;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -31,11 +32,18 @@ public class LibraryEngine {
   protected final Repository repository;
   protected final FhirContext fhirContext;
   protected final EvaluationSettings settings;
+  protected NpmProcessor npmProcessor;
 
   public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
+    this(repository, evaluationSettings, null);
+  }
+
+  public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings,
+      NpmProcessor npmProcessor) {
     this.repository = requireNonNull(repository, "repository can not be null");
     this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
     fhirContext = repository.fhirContext();
+    this.npmProcessor = npmProcessor;
   }
 
   private Pair<String, Object> buildContextParameter(String patientId) {
@@ -60,7 +68,8 @@ public class LibraryEngine {
       IBaseParameters parameters, IBaseBundle additionalData, Set<String> expressions) {
     var cqlFhirParametersConverter =
         Engines.getCqlFhirParametersConverter(repository.fhirContext());
-    var engine = Engines.forRepositoryAndSettings(settings, repository, additionalData);
+    var engine =
+        Engines.forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, true);
     var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
     var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId),
         evaluationParameters);
@@ -81,7 +90,8 @@ public class LibraryEngine {
     List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
     librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
-    var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, false);
+    var engine =
+        Engines.forRepositoryAndSettings(settings, repository, bundle, npmProcessor, false);
     var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
     for (var source : librarySourceProviders) {
       providers.registerProvider(source);

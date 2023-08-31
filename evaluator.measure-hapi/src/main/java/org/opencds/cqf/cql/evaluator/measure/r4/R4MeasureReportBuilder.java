@@ -527,7 +527,8 @@ public class R4MeasureReportBuilder
     CodeableConcept concept = conceptDefToConcept(sde.code());
 
     Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
-        .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream()).map(ValueWrapper::new)
+        .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream()).filter(v -> v != null)
+        .map(ValueWrapper::new)
         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
     for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {

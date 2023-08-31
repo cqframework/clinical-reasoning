@@ -61,7 +61,6 @@ public class IGFileStructureRepositoryDirectoryTest {
 
     assertNotNull(libs);
     assertEquals(4, libs.getEntry().size());
-
   }
 
   @Test
@@ -71,7 +70,6 @@ public class IGFileStructureRepositoryDirectoryTest {
 
     assertNotNull(libs);
     assertEquals(1, libs.getEntry().size());
-
   }
 
   @Test

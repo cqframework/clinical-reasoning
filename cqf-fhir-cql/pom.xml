@@ -44,6 +44,14 @@
       <artifactId>engine-fhir</artifactId>
     </dependency>
     <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>cqf-fhir</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>cqf-fhir-npm</artifactId>
+    </dependency>
+    <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
     </dependency>

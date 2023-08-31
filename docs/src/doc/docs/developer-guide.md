@@ -11,8 +11,11 @@ This is a table of current artifacts in this project, and short description of w
 | `cqf-fhir-bom` | Maven "Bill of Materials" for this repository, simplifying dependency management in downstream projects. |
 | `cqf-fhir-utility` | Utilities to assist in the creation of FHIR clinical reasoning operations. Implementations of the above APIs for REST and in-memory use cases also live here, and act as a reference for how to implement the above APIs. |
 | `cqf-fhir-test`| Utilities to assist writing unit tests for clinical reasoning operations. |
-| `cqf-fhir-cql` | Core project for compile-time FHIR and CQL interop. Code generators for CQL ModelInfos, and for FHIRHelpers libraries. Tools for packaging CQL into FHIR libraries. Data-requirements analysis for CQL. Implementations of the CQL compiler interfaces against the FHIR repository APIs |
+| `cqf-fhir-cql` | Core project for FHIR / CQL interop |
 | `cqf-fhir-cr` | FHIR clinical reasoning operation implementations, such as `Measure/$evaluate-measure` and `PlanDefinition/$apply` |
+| `cqf-fhir-cr-cli` | CLI tool for running FHIR clinical reasoning operations |
+| `cqf-fhir-jaxb` | Aggregator project for JAXB dependencies |
+| `cqf-fhir-jackson` | Aggregator project for Jackson dependencies |
 
 ## Contributing
 

@@ -63,7 +63,7 @@
       "type": "java",
       "name": "Debug (EXM 124)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--lu",
@@ -82,7 +82,7 @@
       "type": "java",
       "name": "Debug (EXM 130)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--lu",
@@ -101,7 +101,7 @@
       "type": "java",
       "name": "Debug (EXM 130 R4)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--lu",
@@ -120,7 +120,7 @@
       "type": "java",
       "name": "Debug (EXM 105 R4)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--lu",
@@ -139,7 +139,7 @@
       "type": "java",
       "name": "Debug (EXM 104)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--lu",
@@ -158,7 +158,7 @@
       "type": "java",
       "name": "Debug (EXM 104 R4)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--lu",
@@ -177,7 +177,7 @@
       "type": "java",
       "name": "Debug (EXM 104 R401)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--fv",
@@ -198,7 +198,7 @@
       "type": "java",
       "name": "Debug (APHL - Reportable)",
       "request": "launch",
-      "mainClass": "org.opencds.cqf.cql.evaluator.cli.Main",
+      "mainClass": "org.opencds.cqf.fhir.cr.cli.Main",
       "projectName": "evaluator.cli",
       "args": [
         "--fv",

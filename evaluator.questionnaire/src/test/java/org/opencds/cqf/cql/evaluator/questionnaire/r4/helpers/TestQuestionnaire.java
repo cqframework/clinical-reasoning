@@ -40,6 +40,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaire {
+  public static final String CLASS_PATH = "org/opencds/cqf/cql/evaluator/questionnaire/r4";
+
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
   private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
   private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
@@ -124,7 +126,7 @@ public class TestQuestionnaire {
       if (repository == null) {
         repository = new IGFileStructureRepository(this.fhirContext,
             this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
-                + "org/opencds/cqf/cql/evaluator/questionnaire/r4",
+                + CLASS_PATH,
             IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       }
 

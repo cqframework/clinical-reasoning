@@ -33,7 +33,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class Questionnaires {
   private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
   private static final Repository REPOSITORY = TestRepositoryFactory.createRepository(FHIR_CONTEXT,
-      QuestionnaireProcessorTests.class, "pa-aslp");
+      QuestionnaireProcessorTests.class, TestQuestionnaire.CLASS_PATH + "/pa-aslp");
 
   private QuestionnaireResult result;
 

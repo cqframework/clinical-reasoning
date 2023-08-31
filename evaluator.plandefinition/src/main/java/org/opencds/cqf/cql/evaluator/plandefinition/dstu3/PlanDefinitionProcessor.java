@@ -52,7 +52,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.generator.questionnaireitem.QuestionnaireItemGenerator;

@@ -1,4 +1,8 @@
+<<<<<<< HEAD:cqf-fhir-utility/src/main/java/org/opencds/cqf/fhir/utility/adapter/dstu3/AdapterFactory.java
+package org.opencds.cqf.fhir.utility.adapter.dstu3;
+=======
 package org.opencds.cqf.fhir.utility.adapter.r4;
+>>>>>>> master:cqf-fhir-utility/src/main/java/org/opencds/cqf/fhir/utility/adapter/r4/AdapterFactory.java
 
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;

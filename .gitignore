@@ -24,3 +24,5 @@ jitdump.*
 *.iml
 
 .apt_generated
+
+input

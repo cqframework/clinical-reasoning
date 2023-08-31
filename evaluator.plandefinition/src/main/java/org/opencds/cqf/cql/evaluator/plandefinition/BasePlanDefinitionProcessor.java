@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -46,7 +45,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected final ModelResolver modelResolver;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
-  protected ExpressionEngine expressionEvaluator;
   protected EvaluationSettings evaluationSettings;
 
   protected String subjectId;

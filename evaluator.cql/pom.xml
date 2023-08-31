@@ -18,11 +18,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.opencds.cqf.cql</groupId>
-      <artifactId>evaluator.measure</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-jackson</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
@@ -32,18 +27,6 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cql</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-api</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-utility</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>

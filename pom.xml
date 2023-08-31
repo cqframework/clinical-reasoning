@@ -29,6 +29,7 @@
 
     <!-- old modules we are replacing -->
     <module>evaluator.spring</module>
+    <module>evaluator.cql</module>
     <module>evaluator.measure</module>
     <module>evaluator.measure-hapi</module>
     <module>evaluator.activitydefinition</module>

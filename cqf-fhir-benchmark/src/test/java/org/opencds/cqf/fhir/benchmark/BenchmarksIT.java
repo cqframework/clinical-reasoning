@@ -34,7 +34,6 @@ public class BenchmarksIT {
   private static final double SCORE_DEVIATION = .5; // +/- 50% ops/unit allowed
 
   @Test
-  @Disabled
   public void benchmark() throws Exception {
     Options opt = new OptionsBuilder()
         .include(Questionnaires.class.getSimpleName())

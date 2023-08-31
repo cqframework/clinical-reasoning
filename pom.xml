@@ -37,6 +37,7 @@
     <module>evaluator.plandefinition</module>
     <module>evaluator.questionnaireresponse</module>
     <module>evaluator.questionnaire</module>
+    <module>evaluator.cql</module>
   </modules>
 
   <!--

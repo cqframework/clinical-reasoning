@@ -18,6 +18,7 @@
     <module>cqf-fhir-test</module>
     <module>cqf-fhir-cql</module>
     <module>cqf-fhir-cr</module>
+    <module>cqf-fhir-cr-cli</module>
     <module>cqf-fhir-jackson</module>
     <module>cqf-fhir-jaxb</module>
     <module>cqf-fhir-bom</module>
@@ -28,7 +29,6 @@
 
     <!-- old modules we are replacing -->
     <module>evaluator.spring</module>
-    <module>evaluator.cli</module>
     <module>evaluator.measure</module>
     <module>evaluator.measure-hapi</module>
     <module>evaluator.activitydefinition</module>

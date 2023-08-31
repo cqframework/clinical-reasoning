@@ -45,7 +45,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
   protected final ModelResolver modelResolver;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
-  protected ExpressionEngine expressionEvaluator;
   protected EvaluationSettings evaluationSettings;
 
   protected String subjectId;

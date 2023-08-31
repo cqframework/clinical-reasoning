@@ -13,11 +13,8 @@ public class ItemGeneratorTests {
 
   @Test
   void testGenerateItem() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forDstu3Cached(), this.getClass());
     TestItemGenerator.Assert.that("Patient",
         "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient", "OPA-Patient1")
-        .withRepository(repository)
         .generateItem()
         .isEqualsTo("../" + QUESTIONNAIRE_PATIENT_FILE_NAME);
   }

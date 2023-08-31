@@ -11,6 +11,8 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
@@ -18,6 +20,7 @@ import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
+@TestInstance(Lifecycle.PER_CLASS)
 public class MeasureOperationParameterConverterTests {
 
   static MeasureOperationParameterConverter measureOperationParameterConverter;

@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cql.engine.model;
+package org.opencds.cqf.fhir.utility.engine.model;
 
 import static java.util.Objects.requireNonNull;
 
@@ -8,6 +8,7 @@ import java.util.Map;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.R5FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -36,9 +37,9 @@ public class FhirModelResolverCache {
         case R4:
           resolver = new DynamicModelResolver(new R4FhirModelResolver());
           break;
-        // case R5:
-        // resolver = new DynamicModelResolver(new R5FhirModelResolver());
-        // break;
+        case R5:
+          resolver = new DynamicModelResolver(new R5FhirModelResolver());
+          break;
         default:
           throw new IllegalArgumentException("unknown or unsupported FHIR version");
       }

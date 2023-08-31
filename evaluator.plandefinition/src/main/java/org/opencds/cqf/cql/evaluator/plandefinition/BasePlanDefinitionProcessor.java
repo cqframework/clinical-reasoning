@@ -17,16 +17,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.NestedValueResolver;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,10 +44,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
 
   protected final OperationParametersParser operationParametersParser;
   protected final ModelResolver modelResolver;
-  protected final NestedValueResolver nestedValueResolver;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
-  protected Repository federatedRepository;
   protected ExpressionEngine expressionEvaluator;
   protected EvaluationSettings evaluationSettings;
 
@@ -80,7 +77,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
         new FhirTypeConverterFactory().create(fhirVersion()));
     modelResolver = FhirModelResolverCache.resolverForVersion(
         repository.fhirContext().getVersion().getVersion());
-    this.nestedValueResolver = new NestedValueResolver(fhirContext(), modelResolver);
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -248,59 +244,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
       resolveDynamicExtension(requestAction, resource, value, path);
     } else if (path.startsWith("action.") || resource == null) {
       modelResolver.setValue(requestAction, path.replace("action.", ""), value);
-    } else if (path.contains(".")) {
-      nestedValueResolver.setNestedValue(resource, path, result.get(0));
     } else {
       modelResolver.setValue(resource, path, value);
     }
   }
-
-  // @SuppressWarnings({"unchecked", "rawtypes"})
-  // protected <E extends IBaseExtension> void resolveExtensions(List<E> extensions,
-  // String defaultLibraryUrl) {
-  // for (var extension : extensions) {
-  // var nestedExtensions = extension.getExtension();
-  // if (nestedExtensions != null && !nestedExtensions.isEmpty()) {
-  // resolveExtensions(nestedExtensions, defaultLibraryUrl);
-  // }
-  // var value = extension.getValue();
-  // if (value instanceof IBaseHasExtensions) {
-  // var valueExtensions = ((IBaseHasExtensions) value).getExtension();
-  // if (valueExtensions != null) {
-  // var expressionExtensions = valueExtensions.stream()
-  // .filter(e -> e.getUrl() != null && e.getUrl().equals(Constants.CQF_EXPRESSION))
-  // .collect(Collectors.toList());
-  // if (expressionExtensions != null && !expressionExtensions.isEmpty()) {
-  // var expression = expressionExtensions.get(0).getValue();
-  // if (expression != null) {
-  // var result = getExpressionResult(expression, defaultLibraryUrl, null);
-  // if (result != null) {
-  // extension.setValue(result);
-  // }
-  // }
-  // }
-  // }
-  // }
-  // }
-  // }
-
-  // protected IBaseDatatype getExpressionResult(IBaseDatatype expression, String defaultLibraryUrl,
-  // IBaseDatatype altExpression) {
-  // List<IBase> result = null;
-  // if (expression instanceof org.hl7.fhir.r4.model.Expression) {
-  // result = libraryEngine.resolveExpression(subjectId,
-  // new CqfExpression((org.hl7.fhir.r4.model.Expression) expression, defaultLibraryUrl,
-  // (org.hl7.fhir.r4.model.Expression) altExpression),
-  // parameters, bundle);
-  // }
-
-  // if (expression instanceof org.hl7.fhir.r5.model.Expression) {
-  // result = libraryEngine.resolveExpression(subjectId,
-  // new CqfExpression((org.hl7.fhir.r5.model.Expression) expression, defaultLibraryUrl,
-  // (org.hl7.fhir.r5.model.Expression) altExpression),
-  // parameters, bundle);
-  // }
-
-  // return result != null && !result.isEmpty() ? (IBaseDatatype) result.get(0) : null;
-  // }
 }

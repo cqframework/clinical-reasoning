@@ -12,6 +12,11 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
+import org.cqframework.fhir.npm.ILibraryReader;
+import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmModelInfoProvider;
+import org.cqframework.fhir.npm.NpmProcessor;
+import org.cqframework.fhir.utilities.LoggerAdapter;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
@@ -23,18 +28,23 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
-import org.opencds.cqf.fhir.cql.engine.retrieve.BundleRetrieveProvider;
+import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class Engines {
+
+  private static Logger logger = LoggerFactory.getLogger(Engines.class);
 
   private Engines() {}
 
@@ -44,29 +54,31 @@ public class Engines {
 
   public static CqlEngine forRepository(Repository repository,
       EvaluationSettings settings) {
-    return forRepository(repository, settings, true);
+    return forRepository(repository, settings, null, true);
   }
 
   public static CqlEngine forRepository(Repository repository,
-      EvaluationSettings settings, Boolean useLibraryCache) {
+      EvaluationSettings settings, NpmProcessor npmProcessor, Boolean useLibraryCache) {
     var terminologyProvider = new RepositoryTerminologyProvider(repository);
     var sources = Collections.singletonList(buildLibrarySource(repository));
 
     var dataProviders = buildDataProviders(repository, null, terminologyProvider,
         settings.getRetrieveSettings());
     var environment =
-        buildEnvironment(settings, sources, terminologyProvider, dataProviders, useLibraryCache);
+        buildEnvironment(settings, sources, terminologyProvider, dataProviders, npmProcessor,
+            useLibraryCache);
 
     return new CqlEngine(environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
 
   public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
       Repository repository, IBaseBundle additionalData) {
-    return forRepositoryAndSettings(settings, repository, additionalData, true);
+    return forRepositoryAndSettings(settings, repository, additionalData, null, true);
   }
 
   public static CqlEngine forRepositoryAndSettings(EvaluationSettings settings,
-      Repository repository, IBaseBundle additionalData, Boolean useLibraryCache) {
+      Repository repository, IBaseBundle additionalData, NpmProcessor npmProcessor,
+      Boolean useLibraryCache) {
     checkNotNull(settings);
     checkNotNull(repository);
 
@@ -78,7 +90,7 @@ public class Engines {
         settings.getRetrieveSettings());
     var environment =
         buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders,
-            useLibraryCache);
+            npmProcessor, useLibraryCache);
     return new CqlEngine(environment,
         settings.getCqlOptions().getCqlEngineOptions().getOptions());
   }
@@ -92,7 +104,7 @@ public class Engines {
   // TODO: Add NPM library source loader support
   private static Environment buildEnvironment(EvaluationSettings settings,
       List<LibrarySourceProvider> librarySourceProviders, TerminologyProvider terminologyProvider,
-      Map<String, DataProvider> dataProviders, Boolean useLibraryCache) {
+      Map<String, DataProvider> dataProviders, NpmProcessor npmProcessor, Boolean useLibraryCache) {
     if (settings.getCqlOptions().useEmbeddedLibraries()) {
       librarySourceProviders.add(new FhirLibrarySourceProvider());
     }
@@ -101,11 +113,27 @@ public class Engines {
         settings.getModelCache() != null ? new ModelManager(settings.getModelCache())
             : new ModelManager();
 
+    if (npmProcessor != null && npmProcessor.getIgContext() != null
+        && npmProcessor.getPackageManager() != null) {
+      ILibraryReader reader =
+          new org.cqframework.fhir.npm.LibraryLoader(npmProcessor.getIgContext().getFhirVersion());
+      LoggerAdapter adapter = new LoggerAdapter(logger);
+      librarySourceProviders.add(new NpmLibrarySourceProvider(
+          npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+      modelManager.getModelInfoLoader().registerModelInfoProvider(
+          new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+    }
+
     LibraryManager libraryManager =
         new LibraryManager(modelManager, settings.getCqlOptions().getCqlCompilerOptions(),
             Boolean.TRUE.equals(useLibraryCache) ? settings.getLibraryCache() : null);
     libraryManager.getLibrarySourceLoader().clearProviders();
 
+    if (npmProcessor != null) {
+      for (var n : npmProcessor.getNamespaces()) {
+        libraryManager.getNamespaceManager().addNamespace(n);
+      }
+    }
 
     librarySourceProviders.forEach(lsp -> {
       libraryManager.getLibrarySourceLoader().registerProvider(lsp);
@@ -126,22 +154,24 @@ public class Engines {
     var providers = new ArrayList<RetrieveProvider>();
     var modelResolver = FhirModelResolverCache
         .resolverForVersion(repository.fhirContext().getVersion().getVersion());
+    // TODO: Make a federated repository here once that is ready for sure
+    // var fedRepo = new FederatedRepository(repository, bundleRepo);
     var retrieveProvider =
         new RepositoryRetrieveProvider(repository, retrieveSettings);
     providers.add(retrieveProvider);
-    if (additionalData != null) {
-      providers.add(new BundleRetrieveProvider(repository.fhirContext(), additionalData));
+    if (additionalData != null && modelResolver.resolvePath(additionalData, "entry") != null) {
+      var bundleRepo = new InMemoryFhirRepository(repository.fhirContext(), additionalData);
+      providers.add(new RepositoryRetrieveProvider(bundleRepo, retrieveSettings));
     }
 
     var retrieveProviderConfigurer =
         new RetrieveProviderConfigurerImpl(RetrieveProviderConfig.defaultConfig());
-    for (RetrieveProvider provider : providers) {
+    for (var provider : providers) {
       retrieveProviderConfigurer.configure(provider, theTerminologyProvider);
     }
 
-    // TODO: Next repositories instead
     dataProviders.put(Constants.FHIR_MODEL_URI,
-        new CompositeDataProvider(modelResolver, providers.get(0)));
+        new FederatedDataProvider(modelResolver, providers));
 
     return dataProviders;
   }

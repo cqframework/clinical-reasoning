@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
@@ -29,17 +30,8 @@ public class R4RepositoryTest {
   Repository repository;
 
   public R4RepositoryTest() {
-    var fhirContext = FhirContext.forR4Cached();
-
-
-    var data =
-        new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("res/tests"), false);
-    var content =
-        new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("res/resources/"), false);
-    var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
-        List.of("res/vocabulary/CodeSystem/", "res/vocabulary/ValueSet/"), false);
-
-    repository = Repositories.proxy(data, content, terminology);
+    repository = TestRepositoryFactory.createRepository(FhirContext.forR4Cached(),
+        this.getClass(), Measure.CLASS_PATH + "/res");
   }
 
   @Test

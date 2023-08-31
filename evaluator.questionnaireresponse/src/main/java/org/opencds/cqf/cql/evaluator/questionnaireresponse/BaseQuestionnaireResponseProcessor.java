@@ -10,11 +10,16 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 /*
  * https://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse- extract.html
@@ -39,6 +44,7 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
   protected static final Logger logger =
       LoggerFactory.getLogger(BaseQuestionnaireResponseProcessor.class);
   protected final EvaluationSettings evaluationSettings;
+  protected final ModelResolver modelResolver;
   protected Repository repository;
   protected LibraryEngine libraryEngine;
 
@@ -53,6 +59,16 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
     this.repository = requireNonNull(repository, "repository can not be null");
     this.evaluationSettings =
         requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+    this.modelResolver =
+        FhirModelResolverCache.resolverForVersion(fhirVersion());
+  }
+
+  public FhirContext fhirContext() {
+    return this.repository.fhirContext();
+  }
+
+  public FhirVersionEnum fhirVersion() {
+    return this.fhirContext().getVersion().getVersion();
   }
 
   public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type,
@@ -70,33 +86,33 @@ public abstract class BaseQuestionnaireResponseProcessor<T> {
 
   public abstract List<IBaseResource> processItems(T questionnaireResponse);
 
-  public abstract T resolveQuestionnaireResponse(IIdType theId,
-      IBaseResource theQuestionnaireResponse);
+  public abstract T resolveQuestionnaireResponse(IIdType id,
+      IBaseResource questionnaireResponse);
 
-  protected abstract void setup(T theQuestionnaireResponse);
+  protected abstract void setup(T questionnaireResponse);
 
-  public IBaseBundle extract(IIdType theId, IBaseResource theQuestionnaireResponse,
-      IBaseParameters theParameters, IBaseBundle theBundle, LibraryEngine theLibraryEngine) {
-    return extract(resolveQuestionnaireResponse(theId, theQuestionnaireResponse), theParameters,
-        theBundle, theLibraryEngine == null ? new LibraryEngine(repository, evaluationSettings)
-            : theLibraryEngine);
+  public IBaseBundle extract(IIdType id, IBaseResource questionnaireResponse,
+      IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+    return extract(resolveQuestionnaireResponse(id, questionnaireResponse), parameters,
+        bundle, libraryEngine == null ? new LibraryEngine(repository, evaluationSettings)
+            : libraryEngine);
   }
 
-  public IBaseBundle extract(T theQuestionnaireResponse, IBaseParameters theParameters,
-      IBaseBundle theBundle, LibraryEngine theLibraryEngine) {
-    if (theQuestionnaireResponse == null) {
+  public IBaseBundle extract(T questionnaireResponse, IBaseParameters parameters,
+      IBaseBundle bundle, LibraryEngine libraryEngine) {
+    if (questionnaireResponse == null) {
       var message = "Unable to perform operation $extract.  The QuestionnaireResponse was null";
       logger.error(message);
       throw new IllegalArgumentException(message);
     }
-    parameters = theParameters;
-    bundle = theBundle;
-    libraryEngine = theLibraryEngine;
-    setup(theQuestionnaireResponse);
+    this.parameters = parameters;
+    this.bundle = bundle;
+    this.libraryEngine = libraryEngine;
+    setup(questionnaireResponse);
 
-    var resources = processItems(theQuestionnaireResponse);
+    var resources = processItems(questionnaireResponse);
 
-    return createResourceBundle(theQuestionnaireResponse, resources);
+    return createResourceBundle(questionnaireResponse, resources);
   }
 
   protected String getExtractId(T questionnaireResponse) {

@@ -32,10 +32,10 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.SupplyRequest;
 import org.hl7.fhir.r5.model.Task;
 import org.opencds.cqf.cql.evaluator.activitydefinition.BaseActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.library.CqfExpression;
-import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.utility.r5.InputParameterResolver;
 import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 import org.slf4j.Logger;
@@ -57,14 +57,14 @@ public class ActivityDefinitionProcessor
 
   @Override
   public <C extends IPrimitiveType<String>> ActivityDefinition resolveActivityDefinition(
-      IIdType theId, C theCanonical, IBaseResource theActivityDefinition) throws FHIRException {
-    var baseActivityDefinition = theActivityDefinition;
+      IIdType id, C canonical, IBaseResource activityDefinition) throws FHIRException {
+    var baseActivityDefinition = activityDefinition;
     if (baseActivityDefinition == null) {
-      baseActivityDefinition = theId != null ? this.repository.read(ActivityDefinition.class, theId)
-          : (ActivityDefinition) SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
+      baseActivityDefinition = id != null ? this.repository.read(ActivityDefinition.class, id)
+          : (ActivityDefinition) SearchHelper.searchRepositoryByCanonical(repository, canonical);
     }
 
-    requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + theId);
+    requireNonNull(baseActivityDefinition, "Couldn't find ActivityDefinition " + id);
 
     return castOrThrow(baseActivityDefinition, ActivityDefinition.class,
         "The activityDefinition passed in was not a valid instance of ActivityDefinition.class")

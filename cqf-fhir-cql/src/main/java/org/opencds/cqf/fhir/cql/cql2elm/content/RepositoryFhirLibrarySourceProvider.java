@@ -12,6 +12,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleUtil;
@@ -39,13 +40,14 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
     return this.fhirContext;
   }
 
-  // TODO: add parameter to search for specific library instead of all libraries
   @Override
   protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
     List<? extends IBaseResource> resources = BundleUtil.toListOfResources(this.fhirContext,
         Repositories.searchRepositoryWithPaging(
             fhirContext, repository,
-            this.fhirContext.getResourceDefinition("Library").getImplementingClass(), null, null));
+            this.fhirContext.getResourceDefinition("Library").getImplementingClass(),
+            Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()),
+            null));
 
     if (resources == null || resources.isEmpty()) {
       return null;

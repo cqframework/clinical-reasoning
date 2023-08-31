@@ -1,6 +1,6 @@
-package org.opencds.cqf.fhir.cql.engine.parameters;
+package org.opencds.cqf.fhir.cql;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -13,8 +13,8 @@ import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -28,8 +28,7 @@ public class ExtensionResolverTests {
   @Test
   public void testExtensionResolution() {
     var patientId = "Patient/Patient1";
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
+    var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
     var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
 
     var params = parameters();
@@ -41,7 +40,7 @@ public class ExtensionResolverTests {
     var extensions = Collections.singletonList(new Extension(EXTENSION_URL, extensionValue));
     var extensionResolver = new ExtensionResolver(patientId, params, null, libraryEngine);
     extensionResolver.resolveExtensions(extensions, null);
-    assertTrue(extensions.get(0).getValueAsPrimitive().getValueAsString().equals("Alice"));
+    assertEquals("Alice", extensions.get(0).getValueAsPrimitive().getValueAsString());
   }
 
 }

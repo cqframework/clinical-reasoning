@@ -25,120 +25,91 @@ public class QuestionnaireProcessorTests {
 
   @Test
   void testPrePopulate() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
-        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
         .isEqualsTo("../" + QUESTIONNAIRE_ORDER_POPULATED);
   }
 
   @Test
   void testPrePopulate_NoLibrary() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
             "OPA-Patient1")
-        .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .prePopulate().isEqualsTo("../" + QUESTIONNAIRE_ORDER_POPULATED_NO_LIBRARY);
   }
 
   @Test
   void testPrePopulate_HasErrors() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"),
             "OPA-Patient1")
-        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).prePopulate()
         .hasErrors();
   }
 
   @Test
   void testPrePopulate_noQuestionnaire_throwsException() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     assertThrows(IllegalArgumentException.class, () -> {
-      TestQuestionnaire.Assert.that("", null).withRepository(repository).prePopulate();
+      TestQuestionnaire.Assert.that("", null).prePopulate();
     });
   }
 
   @Test
   void testPrePopulate_notQuestionnaire_throwsException() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     assertThrows(ClassCastException.class, () -> {
       TestQuestionnaire.Assert
           .that("../" + QUESTIONNAIRE_INVALID_QUESTIONS, null)
-          .withRepository(repository)
           .prePopulate();
     });
   }
 
   @Test
   void testPopulate() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), "OPA-Patient1")
-        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
         .isEqualsTo("../" + QUESTIONNAIRE_RESPONSE_POPULATED);
   }
 
   @Test
   void testPopulate_NoLibrary() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"),
             "OPA-Patient1")
-        .withRepository(repository).withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+        .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
         .populate().isEqualsTo("../" + QUESTIONNAIRE_RESPONSE_POPULATED_NO_LIBRARY);
   }
 
   @Test
   void testPopulate_HasErrors() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"),
             "OPA-Patient1")
-        .withRepository(repository)
         .withParameters(parameters(stringPart("ClaimId", "OPA-Claim1"))).populate()
         .hasErrors();
   }
 
   @Test
   void testPopulate_noQuestionnaire_throwsException() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     assertThrows(IllegalArgumentException.class, () -> {
-      TestQuestionnaire.Assert.that("", null).withRepository(repository).populate();
+      TestQuestionnaire.Assert.that("", null).populate();
     });
   }
 
   @Test
   void testPopulate_notQuestionnaire_throwsException() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     assertThrows(ClassCastException.class, () -> {
       TestQuestionnaire.Assert.that("../" + QUESTIONNAIRE_INVALID_QUESTIONS, null)
-          .withRepository(repository)
           .populate();
     });
   }
 
   @Test
   void testQuestionnairePackage() {
-    var repository =
-        TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
     var generatedPackage = TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"), null)
-        .withRepository(repository)
         .questionnairePackage();
 
     assertEquals(generatedPackage.getEntry().size(), 3);
@@ -150,7 +121,7 @@ public class QuestionnaireProcessorTests {
   void testPA_ASLP_PrePopulate() {
     var repository =
         TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass(),
-            "pa-aslp");
+            "org/opencds/cqf/cql/evaluator/questionnaire/r4/pa-aslp");
     TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
         .withRepository(repository)
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
@@ -162,7 +133,7 @@ public class QuestionnaireProcessorTests {
   @Test
   void testPA_ASLP_Populate() {
     var repository = TestRepositoryFactory.createRepository(FhirContext.forR4Cached(),
-        this.getClass(), "pa-aslp");
+        this.getClass(), "org/opencds/cqf/cql/evaluator/questionnaire/r4/pa-aslp");
     TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
         .withRepository(repository)
         .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
@@ -175,7 +146,7 @@ public class QuestionnaireProcessorTests {
   void testPA_ASLP_Package() {
     var repository =
         TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass(),
-            "pa-aslp");
+            "org/opencds/cqf/cql/evaluator/questionnaire/r4/pa-aslp");
     var generatedPackage = TestQuestionnaire.Assert
         .that(new IdType("Questionnaire", "ASLPA1"), null).withRepository(repository)
         .questionnairePackage();

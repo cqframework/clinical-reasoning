@@ -13,9 +13,11 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -23,6 +25,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaireResponse {
   private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -81,14 +84,10 @@ public class TestQuestionnaireResponse {
 
     private void buildRepository() {
       if (repository == null) {
-        var data =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("tests"), false);
-        var content =
-            new InMemoryFhirRepository(fhirContext, this.getClass(), List.of("resources/"), false);
-        var terminology = new InMemoryFhirRepository(fhirContext, this.getClass(),
-            List.of("vocabulary/CodeSystem/", "vocabulary/ValueSet/"), false);
-
-        repository = Repositories.proxy(data, content, terminology);
+        repository = new IGFileStructureRepository(this.fhirContext,
+            this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+                + "org/opencds/cqf/cql/evaluator/questionnaireresponse/r4",
+            IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       }
 
       if (questionnaireResponse == null) {

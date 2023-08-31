@@ -35,6 +35,10 @@ public class Searches {
     }
   }
 
+  public static Map<String, List<IQueryParameterType>> byCodeAndSystem(String code, String system) {
+    return builder().withTokenParam("code", code, system).build();
+  }
+
   public static Map<String, List<IQueryParameterType>> byUrl(String url) {
     return builder().withUriParam("url", url).build();
   }
@@ -44,12 +48,17 @@ public class Searches {
   }
 
   public static Map<String, List<IQueryParameterType>> byName(String name) {
-    return builder().withTokenParam("name", name).build();
+    return builder().withStringParam("name", name).build();
   }
 
   public static Map<String, List<IQueryParameterType>> byNameAndVersion(String name,
       String version) {
-    return builder().withTokenParam("name", name).withTokenParam("version", version).build();
+    if (version == null || version.isEmpty()) {
+      return builder().withStringParam("name", name).build();
+    } else {
+
+      return builder().withStringParam("name", name).withTokenParam("version", version).build();
+    }
   }
 
   public static class SearchBuilder {
@@ -73,6 +82,15 @@ public class Searches {
         values = new HashMap<>();
       }
       values.put(name, Collections.singletonList(new TokenParam(value)));
+
+      return this;
+    }
+
+    public SearchBuilder withTokenParam(String name, String value, String system) {
+      if (values == null) {
+        values = new HashMap<>();
+      }
+      values.put(name, Collections.singletonList(new TokenParam(system, value)));
 
       return this;
     }

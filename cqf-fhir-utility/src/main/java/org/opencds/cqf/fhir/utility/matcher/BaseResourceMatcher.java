@@ -5,29 +5,29 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 
 public interface BaseResourceMatcher {
+  public ModelResolver getModelResolver();
+
   default boolean matches(String path, List<IQueryParameterType> params, IBaseResource resource) {
     boolean match = false;
     path = path.replaceFirst("_", "");
-    var pathResult = path.equals("profile") ? resource.getMeta().getProfile()
-        : FhirPathCache.cachedForVersion(resource.getStructureFhirVersionEnum()).evaluate(resource,
-            path, IBase.class);
+    var pathResult = getModelResolver().resolvePath(resource, path);
     if (pathResult == null) {
       return false;
     }
@@ -45,6 +45,8 @@ public interface BaseResourceMatcher {
         }
       } else if (param instanceof UriParam) {
         match = isMatchUri((UriParam) param, pathResult);
+      } else if (param instanceof StringParam) {
+        match = isMatchString((StringParam) param, pathResult);
       } else {
         throw new NotImplementedException(
             "Resource matching not implemented for search params of type "
@@ -133,6 +135,14 @@ public interface BaseResourceMatcher {
     }
     throw new UnsupportedOperationException(
         "Expected element of type url or uri, found " + pathResult.getClass().getSimpleName());
+  }
+
+  default boolean isMatchString(StringParam param, Object pathResult) {
+    if (pathResult instanceof IPrimitiveType) {
+      return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+    }
+    throw new UnsupportedOperationException(
+        "Expected element of type string, found " + pathResult.getClass().getSimpleName());
   }
 
   default boolean matchesDateBounds(DateRangeParam theResourceRange, DateRangeParam theParamRange) {

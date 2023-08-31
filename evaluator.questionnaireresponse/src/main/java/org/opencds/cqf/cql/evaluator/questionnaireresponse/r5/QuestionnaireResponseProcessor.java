@@ -17,7 +17,6 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
@@ -35,9 +34,9 @@ import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComp
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StringType;
-import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.BaseQuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -55,11 +54,11 @@ public class QuestionnaireResponseProcessor
   }
 
   @Override
-  public QuestionnaireResponse resolveQuestionnaireResponse(IIdType theId,
-      IBaseResource theQuestionnaireResponse) {
-    var baseQuestionnaireResponse = theQuestionnaireResponse;
-    if (baseQuestionnaireResponse == null && theId != null) {
-      baseQuestionnaireResponse = this.repository.read(QuestionnaireResponse.class, theId);
+  public QuestionnaireResponse resolveQuestionnaireResponse(IIdType id,
+      IBaseResource questionnaireResponse) {
+    var baseQuestionnaireResponse = questionnaireResponse;
+    if (baseQuestionnaireResponse == null && id != null) {
+      baseQuestionnaireResponse = this.repository.read(QuestionnaireResponse.class, id);
     }
 
     return castOrThrow(baseQuestionnaireResponse, QuestionnaireResponse.class,
@@ -88,10 +87,10 @@ public class QuestionnaireResponseProcessor
   }
 
   @Override
-  protected void setup(QuestionnaireResponse theQuestionnaireResponse) {
-    patientId = theQuestionnaireResponse.getSubject().getId();
-    libraryUrl = theQuestionnaireResponse.hasExtension(Constants.CQF_LIBRARY)
-        ? ((CanonicalType) theQuestionnaireResponse.getExtensionByUrl(Constants.CQF_LIBRARY)
+  protected void setup(QuestionnaireResponse questionnaireResponse) {
+    patientId = questionnaireResponse.getSubject().getId();
+    libraryUrl = questionnaireResponse.hasExtension(Constants.CQF_LIBRARY)
+        ? ((CanonicalType) questionnaireResponse.getExtensionByUrl(Constants.CQF_LIBRARY)
             .getValue()).getValue()
         : null;
   }
@@ -214,19 +213,15 @@ public class QuestionnaireResponseProcessor
       if (childItem.hasDefinition()) {
         var definition = childItem.getDefinition().split("#");
         var path = definition[1];
-        var pathElements = path.split("\\.");
-        if (pathElements.length < 2) {
-          throw new RuntimeException(String.format("Unable to determine path from definition: %s",
-              childItem.getDefinition()));
-        }
+        // First element is always the resource type, so it can be ignored
+        path = path.replace(resourceType + ".", "");
         var answerValue = childItem.getAnswerFirstRep().getValue();
         if (answerValue != null) {
-          // First element is always the resource type, so it can be ignored
-          if (pathElements.length == 2) {
-            setProperty(resource, pathElements[1], answerValue);
-          } else {
-            processNestedItem(pathElements, resource, answerValue);
-          }
+          // if (path.contains(".")) {
+          // nestedValueResolver.setNestedValue(resource, path, answerValue);
+          // } else {
+          modelResolver.setValue(resource, path, answerValue);
+          // }
         }
       }
     });
@@ -234,58 +229,13 @@ public class QuestionnaireResponseProcessor
     resources.add(resource);
   }
 
-  private void processNestedItem(String[] pathElements, Base base, DataType answerValue) {
-    var nestedPropertyName = pathElements[1];
-    var nestedElements = new ArrayList<String>();
-    for (int i = 2; i < pathElements.length; i++) {
-      nestedElements.add(pathElements[i]);
-    }
-    var nestedProperty = base.getNamedProperty(nestedPropertyName);
-    if (nestedProperty.getMaxCardinality() > 1 && nestedProperty.hasValues()
-        && nestedProperty.getValues().size() > 1) {
-      // TODO: Resolve multiple nested values
-      // var newValues = nestedProperty.getValues();
-    } else {
-      var hasExisting = nestedProperty.hasValues();
-      var newValue =
-          hasExisting ? nestedProperty.getValues().get(0) : newValue(nestedProperty.getTypeCode());
-      if (nestedElements.size() == 1) {
-        setProperty(newValue, pathElements[2], answerValue);
-      } else {
-        processNestedItem(nestedElements.toArray(new String[0]), newValue, answerValue);
-      }
-      if (!hasExisting) {
-        setProperty(base, nestedPropertyName, newValue);
-      }
-    }
-  }
-
-  private void setProperty(Base base, String propertyName, Base answerValue) {
-    var property = base.getNamedProperty(propertyName);
-    base.setProperty(propertyName, transformAnswerValue(answerValue, property));
-  }
-
   private Base newValue(String type) {
     try {
-      return (Base) Class.forName("org.hl7.fhir.r5.model." + type).getConstructor().newInstance();
+      return (Base) Class.forName("org.hl7.fhir.r5.model." + type).getConstructor()
+          .newInstance();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private Base transformAnswerValue(Base answerValue, Property property) {
-    if (answerValue.fhirType().equals(property.getTypeCode())) {
-      return answerValue;
-    }
-
-    // TODO: Need to define each of these potential cases?
-    if (answerValue.fhirType().equals("Coding") && property.getTypeCode().equals("code")) {
-      return ((Coding) answerValue).getCodeElement();
-    }
-
-    throw new RuntimeException(
-        String.format("Unable to transform answer of type (%s) to value of type (%s)",
-            answerValue.fhirType(), property.getTypeCode()));
   }
 
   private void processItem(QuestionnaireResponseItemComponent item,

@@ -20,16 +20,19 @@ public class SearchHelper {
   private SearchHelper() {}
 
   public static <CanonicalType extends IPrimitiveType<String>> Resource searchRepositoryByCanonical(
-      Repository theRepository, CanonicalType theCanonical) {
-    var url = Canonicals.getUrl(theCanonical);
-    var version = Canonicals.getVersion(theCanonical);
-    var resourceType = theRepository.fhirContext()
-        .getResourceDefinition(Canonicals.getResourceType(theCanonical)).getImplementingClass();
+      Repository repository, CanonicalType canonical) {
+    if (canonical == null) {
+      return null;
+    }
+    var url = Canonicals.getUrl(canonical);
+    var version = Canonicals.getVersion(canonical);
+    var resourceType = repository.fhirContext()
+        .getResourceDefinition(Canonicals.getResourceType(canonical)).getImplementingClass();
 
     var searchParams =
         version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
     var searchResult =
-        theRepository.search(Bundle.class, resourceType, searchParams);
+        repository.search(Bundle.class, resourceType, searchParams);
     if (!searchResult.hasEntry()) {
       throw new FHIRException(String.format("No resource of type %s found for url: %s|%s",
           resourceType.getSimpleName(), url, version));

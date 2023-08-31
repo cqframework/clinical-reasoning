@@ -11,12 +11,23 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.Timing;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 
 public class ResourceMatcherR5 implements BaseResourceMatcher {
+  public final ModelResolver modelResolver;
+
+  public ResourceMatcherR5(ModelResolver modelResolver) {
+    this.modelResolver = modelResolver;
+  }
+
+  public ModelResolver getModelResolver() {
+    return this.modelResolver;
+  }
+
   @Override
   public DateRangeParam getDateRange(ICompositeType type) {
     if (type instanceof Period) {

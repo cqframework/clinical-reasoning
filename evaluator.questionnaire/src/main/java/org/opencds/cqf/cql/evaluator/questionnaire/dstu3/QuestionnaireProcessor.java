@@ -28,11 +28,11 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.evaluator.library.CqfExpression;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
 import org.opencds.cqf.cql.evaluator.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.dstu3.PackageHelper;
@@ -51,12 +51,12 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   }
 
   @Override
-  public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(IIdType theId,
-      C theCanonical, IBaseResource theQuestionnaire) {
-    var baseQuestionnaire = theQuestionnaire;
+  public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(IIdType id,
+      C canonical, IBaseResource questionnaire) {
+    var baseQuestionnaire = questionnaire;
     if (baseQuestionnaire == null) {
-      baseQuestionnaire = theId != null ? this.repository.read(Questionnaire.class, theId)
-          : (Questionnaire) SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
+      baseQuestionnaire = id != null ? this.repository.read(Questionnaire.class, id)
+          : (Questionnaire) SearchHelper.searchRepositoryByCanonical(repository, canonical);
     }
 
     return castOrThrow(baseQuestionnaire, Questionnaire.class,
@@ -267,29 +267,29 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
   }
 
   @Override
-  public Questionnaire generateQuestionnaire(String theId) {
+  public Questionnaire generateQuestionnaire(String id) {
 
     var questionnaire = new Questionnaire();
-    questionnaire.setId(new IdType("Questionnaire", theId));
+    questionnaire.setId(new IdType("Questionnaire", id));
 
     return questionnaire;
   }
 
   @Override
-  public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean theIsPut) {
+  public Bundle packageQuestionnaire(Questionnaire questionnaire, boolean isPut) {
     var bundle = new Bundle();
     bundle.setType(BundleType.TRANSACTION);
-    bundle.addEntry(PackageHelper.createEntry(theQuestionnaire, theIsPut));
-    var libraryExtension = theQuestionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
+    bundle.addEntry(PackageHelper.createEntry(questionnaire, isPut));
+    var libraryExtension = questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
     if (libraryExtension != null) {
       var libraryCanonical = (UriType) libraryExtension.getValue();
       var library =
           (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
       if (library != null) {
-        bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
+        bundle.addEntry(PackageHelper.createEntry(library, isPut));
         if (library.hasRelatedArtifact()) {
           PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository,
-              theIsPut);
+              isPut);
         }
       }
     }

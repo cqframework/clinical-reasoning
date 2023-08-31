@@ -61,16 +61,15 @@ public class IGFileStructureRepositoryDirectoryTest {
 
     assertNotNull(libs);
     assertEquals(4, libs.getEntry().size());
-
   }
 
   @Test
   public void searchLibraryWithFilter() {
-    var libs = repository.search(Bundle.class, Library.class, Searches.byUrl("test.example"));
+    var libs = repository.search(Bundle.class, Library.class,
+        Searches.byUrl("http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers"));
 
     assertNotNull(libs);
     assertEquals(1, libs.getEntry().size());
-
   }
 
   @Test
@@ -92,9 +91,10 @@ public class IGFileStructureRepositoryDirectoryTest {
 
   @Test
   public void searchCondition() {
-    var cons = repository.search(Bundle.class, Condition.class, Searches.byUrl("not-exists"));
+    var cons = repository.search(Bundle.class, Condition.class,
+        Searches.byCodeAndSystem("111475002", "http://snomed.info/sct"));
     assertNotNull(cons);
-    assertEquals(1, cons.getEntry().size());
+    assertEquals(2, cons.getEntry().size());
   }
 
   @Test

@@ -51,25 +51,22 @@ import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.library.CqfExpression;
 import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
-import org.opencds.cqf.cql.evaluator.library.LibraryEngine;
-import org.opencds.cqf.cql.evaluator.library.CqfExpression;
-import org.opencds.cqf.cql.evaluator.library.ExtensionResolver;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.ExtensionResolver;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.r4.InputParameterResolver;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,8 +123,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
           }
         } catch (Exception e) {
           addOperationOutcomeIssue(
-              String.format("Error encountered extracting %s",
-                  questionnaireResponse.getId()));
+              String.format("Error encountered extracting %s: %s",
+                  questionnaireResponse.getId(), e.getMessage()));
         }
       }
     }

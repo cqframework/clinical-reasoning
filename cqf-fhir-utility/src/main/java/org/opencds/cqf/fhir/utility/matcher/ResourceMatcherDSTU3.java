@@ -11,12 +11,23 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 
 public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
+  public final ModelResolver modelResolver;
+
+  public ResourceMatcherDSTU3(ModelResolver modelResolver) {
+    this.modelResolver = modelResolver;
+  }
+
+  public ModelResolver getModelResolver() {
+    return this.modelResolver;
+  }
+
   @Override
   public DateRangeParam getDateRange(ICompositeType type) {
     if (type instanceof Period) {

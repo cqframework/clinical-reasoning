@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.matcher.BaseResourceMatcher;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR4;
@@ -57,17 +58,18 @@ public class InMemoryFhirRepository implements Repository {
   }
 
   public BaseResourceMatcher getResourceMatcher() {
-    switch (this.context.getVersion().getVersion()) {
+    var fhirVersion = context.getVersion().getVersion();
+    switch (fhirVersion) {
       case DSTU3:
-        return new ResourceMatcherDSTU3();
+        return new ResourceMatcherDSTU3(FhirModelResolverCache.resolverForVersion(fhirVersion));
       case R4:
-        return new ResourceMatcherR4();
+        return new ResourceMatcherR4(FhirModelResolverCache.resolverForVersion(fhirVersion));
       case R5:
-        return new ResourceMatcherR5();
+        return new ResourceMatcherR5(FhirModelResolverCache.resolverForVersion(fhirVersion));
       default:
         throw new NotImplementedException(
             "Resource matching is not implemented for FHIR version "
-                + this.context.getVersion().getVersion());
+                + fhirVersion.getFhirVersionString());
     }
   }
 

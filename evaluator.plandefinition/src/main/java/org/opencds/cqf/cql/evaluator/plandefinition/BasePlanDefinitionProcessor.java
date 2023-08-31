@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.Engines;

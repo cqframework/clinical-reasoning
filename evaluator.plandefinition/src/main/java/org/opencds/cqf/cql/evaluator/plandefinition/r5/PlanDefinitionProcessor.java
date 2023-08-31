@@ -55,7 +55,6 @@ import org.hl7.fhir.r5.model.Task;
 import org.hl7.fhir.r5.model.UrlType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.activitydefinition.r5.ActivityDefinitionProcessor;
-import org.opencds.cqf.cql.evaluator.library.ExpressionEngine;
 import org.opencds.cqf.cql.evaluator.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.QuestionnaireProcessor;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.generator.questionnaireitem.QuestionnaireItemGenerator;

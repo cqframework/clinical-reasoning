@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.evaluator.cli.command;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,15 +16,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.cql.evaluator.builder.library.CqlFileLibrarySourceProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.FhirFileLibrarySourceProviderFactory;
-import org.opencds.cqf.cql.evaluator.builder.library.LibrarySourceProviderFactory;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.fhir.utility.DirectoryBundler;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.slf4j.LoggerFactory;
@@ -192,41 +185,6 @@ public class CqlCommand implements Callable<Integer> {
     }
 
     return 0;
-  }
-
-  private LibrarySourceProviderFactory createLibrarySourceProviderFactory(
-      FhirContext fhirContext) {
-    var af = adapterFactory(fhirContext);
-    var lvs = new LibraryVersionSelector(af);
-    var db = directoryBundler(fhirContext);
-
-    return new LibrarySourceProviderFactory(
-        fhirContext, adapterFactory(fhirContext),
-        Set.of(new FhirFileLibrarySourceProviderFactory(fhirContext, db, af, lvs),
-            new CqlFileLibrarySourceProviderFactory()),
-        lvs);
-  }
-
-  private DirectoryBundler directoryBundler(FhirContext fhirContext) {
-    return new DirectoryBundler(fhirContext);
-  }
-
-  private AdapterFactory adapterFactory(FhirContext fhirContext) {
-    switch (fhirContext.getVersion().getVersion()) {
-
-      case DSTU3:
-        return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
-      case R4:
-        return new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
-      case R5:
-        return new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
-      case DSTU2:
-      case DSTU2_1:
-      case DSTU2_HL7ORG:
-      default:
-        throw new UnsupportedOperationException(String.format("FHIR version %s is not supported.",
-            fhirContext.getVersion().getVersion().toString()));
-    }
   }
 
   @SuppressWarnings("java:S106") // We are intending to output to the console here as a CLI tool

@@ -27,8 +27,6 @@
     <module>cqf-fhir-benchmark</module>
 
     <!-- old modules we are replacing -->
-    <module>evaluator.library</module>
-    <module>evaluator.builder</module>
     <module>evaluator.spring</module>
     <module>evaluator.cli</module>
     <module>evaluator.measure</module>

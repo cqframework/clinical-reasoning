@@ -36,6 +36,12 @@
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-cql</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-api</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
       <scope>compile</scope>

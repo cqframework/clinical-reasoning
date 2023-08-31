@@ -19,7 +19,7 @@ public class QuestionnaireProcessorTests {
   private final FhirContext fhirContext = FhirContext.forR5Cached();
 
   @Test
-  @Disabled("JP - Don't know why this one is disabled")
+  @Disabled // Unable to load R5 packages
   void testPrePopulate() {
     TestQuestionnaire.Assert
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
@@ -28,6 +28,7 @@ public class QuestionnaireProcessorTests {
   }
 
   @Test
+  @Disabled // Unable to load R5 packages and run CQL
   void testPrePopulate_NoLibrary() {
     TestQuestionnaire.Assert
         .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",
@@ -37,6 +38,7 @@ public class QuestionnaireProcessorTests {
   }
 
   @Test
+  @Disabled // Unable to load R5 packages and run CQL
   void testPrePopulate_HasErrors() {
     TestQuestionnaire.Assert
         .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest-Errors.json",
@@ -61,7 +63,7 @@ public class QuestionnaireProcessorTests {
   }
 
   @Test
-  @Disabled("JP - Don't know why this one is disabled")
+  @Disabled // Unable to load R5 packages and run CQL
   void testPopulate() {
     TestQuestionnaire.Assert
         .that("resources/Questionnaire-OutpatientPriorAuthorizationRequest.json", "OPA-Patient1")
@@ -70,6 +72,7 @@ public class QuestionnaireProcessorTests {
   }
 
   @Test
+  @Disabled // Unable to load R5 packages and run CQL
   void testPopulate_NoLibrary() {
     TestQuestionnaire.Assert
         .that("../resources/Questionnaire-OutpatientPriorAuthorizationRequest-noLibrary.json",

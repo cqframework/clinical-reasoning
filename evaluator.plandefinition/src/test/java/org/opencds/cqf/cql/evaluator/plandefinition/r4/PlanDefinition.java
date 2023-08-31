@@ -168,6 +168,11 @@ public class PlanDefinition {
           this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
               + CLASS_PATH,
           IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
+      if (dataRepository == null && contentRepository == null && terminologyRepository == null) {
+        repository = local;
+        return;
+      }
+
       if (dataRepository == null) {
         dataRepository = local;
       }

@@ -70,5 +70,10 @@
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-validation</artifactId>
     </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>org.hl7.fhir.r5</artifactId>
+      <version>${fhir-core.version}</version>
+    </dependency>
   </dependencies>
 </project>

@@ -67,8 +67,6 @@ import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.r4.InputParameterResolver;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

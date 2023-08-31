@@ -115,50 +115,38 @@ public class TestQuestionnaire {
     }
 
     private void buildRepository() {
-      if (repository != null) {
-        return;
+      if (repository == null) {
+        repository = new IGFileStructureRepository(this.fhirContext,
+            this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+                + "org/opencds/cqf/cql/evaluator/questionnaire/dstu3",
+            IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
       }
-      repository = new IGFileStructureRepository(this.fhirContext,
-          this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
-              + "org/opencds/cqf/cql/evaluator/questionnaire/dstu3",
-          IGLayoutMode.TYPE_PREFIX, EncodingEnum.JSON);
+      if (questionnaire == null) {
+        try {
+          questionnaire = repository.read(Questionnaire.class, questionnaireId);
+        } catch (Exception e) {
+        }
+      }
     }
 
     public GeneratedQuestionnaire prePopulate() {
       buildRepository();
       var libraryEngine = new LibraryEngine(repository, evaluationSettings);
-      if (questionnaire == null) {
-        return new GeneratedQuestionnaire(
-            buildProcessor(this.repository).prePopulate(questionnaireId, null, null,
-                patientId, parameters, bundle, libraryEngine));
-      } else {
-        return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(questionnaire,
-            patientId, parameters, bundle, libraryEngine));
-      }
+      return new GeneratedQuestionnaire(buildProcessor(this.repository).prePopulate(questionnaire,
+          patientId, parameters, bundle, libraryEngine));
     }
 
     public GeneratedQuestionnaireResponse populate() {
       buildRepository();
       var libraryEngine = new LibraryEngine(repository, evaluationSettings);
-      if (questionnaire == null) {
-        return new GeneratedQuestionnaireResponse(
-            (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaireId, null,
-                null, patientId, parameters, bundle, libraryEngine));
-      } else {
-        return new GeneratedQuestionnaireResponse(
-            (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire,
-                patientId, parameters, bundle, libraryEngine));
-      }
+      return new GeneratedQuestionnaireResponse(
+          (QuestionnaireResponse) buildProcessor(this.repository).populate(questionnaire,
+              patientId, parameters, bundle, libraryEngine));
     }
 
     public Bundle questionnairePackage() {
       buildRepository();
-      if (questionnaire == null) {
-        return (Bundle) buildProcessor(repository).packageQuestionnaire(questionnaireId, null, null,
-            true);
-      } else {
-        return buildProcessor(repository).packageQuestionnaire(questionnaire, true);
-      }
+      return buildProcessor(repository).packageQuestionnaire(questionnaire, true);
     }
   }
 

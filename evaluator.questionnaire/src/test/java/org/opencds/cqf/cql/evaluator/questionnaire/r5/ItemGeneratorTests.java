@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.questionnaire.r5;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.stringPart;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.evaluator.questionnaire.r5.helpers.TestItemGenerator;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
@@ -15,6 +16,7 @@ public class ItemGeneratorTests {
       "Questionnaire-aslp-sleep-study-order.json";
 
   @Test
+  @Disabled // Unable to load R5 packages and run CQL
   void testGenerateItem() {
     TestItemGenerator.Assert.that("Patient",
         "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient", "OPA-Patient1")

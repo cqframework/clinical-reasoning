@@ -160,7 +160,8 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
         if (childDef != null) {
           var elementDef = childDef.getChildByName(path);
           if (elementDef != null
-              && elementDef.getImplementingClass().getSimpleName().equals(ENUMERATION)) {
+              && elementDef.getImplementingClass().getSimpleName().equals(ENUMERATION)
+              && value != null && !value.getClass().getSimpleName().equals(ENUMERATION)) {
             value = getEnumValue(
                 (RuntimeChildPrimitiveEnumerationDatatypeDefinition) childDef,
                 ((IPrimitiveType<?>) this.as(value, IPrimitiveType.class, false))

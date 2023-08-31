@@ -24,13 +24,13 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
-import org.opencds.cqf.fhir.cql.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -126,22 +126,23 @@ public class Engines {
     var providers = new ArrayList<RetrieveProvider>();
     var modelResolver = FhirModelResolverCache
         .resolverForVersion(repository.fhirContext().getVersion().getVersion());
+    // TODO: Make a federated repository here once that is ready for sure
+    // var fedRepo = new FederatedRepository(repository, bundleRepo);
     var retrieveProvider =
         new RepositoryRetrieveProvider(repository, retrieveSettings);
     providers.add(retrieveProvider);
-    if (additionalData != null) {
-      providers.add(new BundleRetrieveProvider(repository.fhirContext(), additionalData));
+    if (additionalData != null && modelResolver.resolvePath(additionalData, "entry") != null) {
+      var bundleRepo = new InMemoryFhirRepository(repository.fhirContext(), additionalData);
+      providers.add(new RepositoryRetrieveProvider(bundleRepo, retrieveSettings));
     }
 
     var retrieveProviderConfigurer =
         new RetrieveProviderConfigurerImpl(RetrieveProviderConfig.defaultConfig());
-    for (RetrieveProvider provider : providers) {
+    for (var provider : providers) {
       retrieveProviderConfigurer.configure(provider, theTerminologyProvider);
+      dataProviders.put(Constants.FHIR_MODEL_URI,
+          new CompositeDataProvider(modelResolver, provider));
     }
-
-    // TODO: Next repositories instead
-    dataProviders.put(Constants.FHIR_MODEL_URI,
-        new CompositeDataProvider(modelResolver, providers.get(0)));
 
     return dataProviders;
   }

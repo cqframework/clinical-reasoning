@@ -1,0 +1,29 @@
+name: mvn spotless:check (Formatting)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+      - name: spotless:check
+        run: mvnw spotless:check
+      - uses: mshick/add-pr-comment@v2
+        if: always()
+        with:
+          message-success: |
+            Formatting check succeeded!
+          message-failure: |
+            **This Pull Request has failed the formatting check**
+
+            Please run `mvnw spotless:apply` or `mvnw clean install -DskipTests` to fix the formatting issues.

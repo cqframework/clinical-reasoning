@@ -5,5 +5,4 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan("org.opencds.cqf.fhir.cr.fhir.npm")
-public class NpmConfiguration {
-}
+public class NpmConfiguration {}

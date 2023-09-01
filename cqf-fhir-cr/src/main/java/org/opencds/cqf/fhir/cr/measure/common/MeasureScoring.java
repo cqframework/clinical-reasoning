@@ -4,54 +4,53 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum MeasureScoring {
-  PROPORTION("proportion", "Proportion", "The measure score is defined using a proportion"),
-  RATIO("ratio", "Ratio", "The measure score is defined using a ratio"),
-  CONTINUOUSVARIABLE("continuous-variable", "Continuous Variable",
-      "The score is defined by a calculation of some quantity"),
-  COHORT("cohort", "Cohort", "The measure is a cohort definition");
+    PROPORTION("proportion", "Proportion", "The measure score is defined using a proportion"),
+    RATIO("ratio", "Ratio", "The measure score is defined using a ratio"),
+    CONTINUOUSVARIABLE(
+            "continuous-variable", "Continuous Variable", "The score is defined by a calculation of some quantity"),
+    COHORT("cohort", "Cohort", "The measure is a cohort definition");
 
-  private String code;
-  private String display;
-  private String definition;
+    private String code;
+    private String display;
+    private String definition;
 
-  MeasureScoring(String code, String display, String definition) {
-    this.code = code;
-    this.display = display;
-    this.definition = definition;
-  }
-
-  private static final Map<String, MeasureScoring> lookup = new HashMap<>();
-
-  static {
-    for (MeasureScoring ms : MeasureScoring.values()) {
-      lookup.put(ms.toCode(), ms);
-    }
-  }
-
-  public static MeasureScoring fromCode(String code) {
-    if (code != null && !code.isEmpty()) {
-      if (lookup.containsKey(code)) {
-        return lookup.get(code);
-      }
+    MeasureScoring(String code, String display, String definition) {
+        this.code = code;
+        this.display = display;
+        this.definition = definition;
     }
 
-    return null;
-  }
+    private static final Map<String, MeasureScoring> lookup = new HashMap<>();
 
-  public String toCode() {
-    return this.code;
-  }
+    static {
+        for (MeasureScoring ms : MeasureScoring.values()) {
+            lookup.put(ms.toCode(), ms);
+        }
+    }
 
-  public String getSystem() {
-    return "http://hl7.org/fhir/measure-scoring";
-  }
+    public static MeasureScoring fromCode(String code) {
+        if (code != null && !code.isEmpty()) {
+            if (lookup.containsKey(code)) {
+                return lookup.get(code);
+            }
+        }
 
-  public String getDefinition() {
-    return this.definition;
+        return null;
+    }
 
-  }
+    public String toCode() {
+        return this.code;
+    }
 
-  public String getDisplay() {
-    return this.display;
-  }
+    public String getSystem() {
+        return "http://hl7.org/fhir/measure-scoring";
+    }
+
+    public String getDefinition() {
+        return this.definition;
+    }
+
+    public String getDisplay() {
+        return this.display;
+    }
 }

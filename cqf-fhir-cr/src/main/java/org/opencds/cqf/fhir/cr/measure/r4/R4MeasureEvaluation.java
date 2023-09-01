@@ -9,10 +9,9 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
 /**
  * Implementation of MeasureEvaluation on top of HAPI FHIR R4 structures.
  */
-public class R4MeasureEvaluation
-    extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
+public class R4MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
 
-  public R4MeasureEvaluation(CqlEngine context, Measure measure) {
-    super(context, measure, new R4MeasureDefBuilder(), new R4MeasureReportBuilder());
-  }
+    public R4MeasureEvaluation(CqlEngine context, Measure measure) {
+        super(context, measure, new R4MeasureDefBuilder(), new R4MeasureReportBuilder());
+    }
 }

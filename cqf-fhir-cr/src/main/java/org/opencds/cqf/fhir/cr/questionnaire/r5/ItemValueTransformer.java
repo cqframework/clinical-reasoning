@@ -4,13 +4,13 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DataType;
 
 public class ItemValueTransformer {
-  private ItemValueTransformer() {}
+    private ItemValueTransformer() {}
 
-  public static DataType transformValue(DataType value) {
-    if (value instanceof CodeableConcept) {
-      return ((CodeableConcept) value).getCoding().get(0);
+    public static DataType transformValue(DataType value) {
+        if (value instanceof CodeableConcept) {
+            return ((CodeableConcept) value).getCoding().get(0);
+        }
+
+        return value;
     }
-
-    return value;
-  }
 }

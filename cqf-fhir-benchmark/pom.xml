@@ -13,7 +13,6 @@
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
-    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <dependencies>
@@ -22,7 +21,17 @@
       <artifactId>cqf-fhir-cr</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-test</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-cr</artifactId>
+      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <type>test-jar</type>
+    </dependency>
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-core</artifactId>
@@ -30,28 +39,9 @@
 
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-test</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-cr</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-jackson</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
       <type>pom</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.skyscreamer</groupId>
-      <artifactId>jsonassert</artifactId>
-      <version>1.5.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>

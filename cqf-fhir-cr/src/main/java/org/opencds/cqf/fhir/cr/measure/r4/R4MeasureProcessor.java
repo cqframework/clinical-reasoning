@@ -1,13 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javax.inject.Named;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
@@ -33,102 +30,111 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 
 @Named
 public class R4MeasureProcessor {
-  private final Repository repository;
-  private final MeasureEvaluationOptions measureEvaluationOptions;
-  private final SubjectProvider subjectProvider;
+    private final Repository repository;
+    private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final SubjectProvider subjectProvider;
 
-  public R4MeasureProcessor(Repository repository,
-      MeasureEvaluationOptions measureEvaluationOptions) {
-    this(repository, measureEvaluationOptions, new R4RepositorySubjectProvider());
-  }
-
-  public R4MeasureProcessor(Repository repository,
-      MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
-    this.repository = Objects.requireNonNull(repository);
-    this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions
-        : MeasureEvaluationOptions.defaultOptions();
-    this.subjectProvider = subjectProvider;
-  }
-
-  public MeasureReport evaluateMeasure(Either3<CanonicalType, IdType, Measure> measure,
-      String periodStart, String periodEnd,
-      String reportType, List<String> subjectIds, IBaseBundle additionalData) {
-    var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-    return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, additionalData);
-  }
-
-  protected MeasureReport evaluateMeasure(Measure measure, String periodStart, String periodEnd,
-      String reportType, List<String> subjectIds, IBaseBundle additionalData) {
-
-    if (!measure.hasLibrary()) {
-      throw new IllegalArgumentException(
-          String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+    public R4MeasureProcessor(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+        this(repository, measureEvaluationOptions, new R4RepositorySubjectProvider());
     }
 
-    Interval measurementPeriod = null;
-    if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
-      measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
+    public R4MeasureProcessor(
+            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
+        this.repository = Objects.requireNonNull(repository);
+        this.measureEvaluationOptions =
+                measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
+        this.subjectProvider = subjectProvider;
     }
 
-    var id = VersionedIdentifiers.forUrl(measure.getLibrary().get(0).asStringValue());
-    var context = Engines.forRepositoryAndSettings(
-        this.measureEvaluationOptions.getEvaluationSettings(), this.repository, additionalData);
-
-    var lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
-
-    context.getState().init(lib.getLibrary());
-
-    var evalType = MeasureEvalType.fromCode(reportType)
-        .orElse(subjectIds == null || subjectIds.isEmpty() ? MeasureEvalType.POPULATION
-            : MeasureEvalType.SUBJECT);
-
-    var actualRepo = this.repository;
-    if (additionalData != null) {
-      actualRepo = new FederatedRepository(this.repository,
-          new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+    public MeasureReport evaluateMeasure(
+            Either3<CanonicalType, IdType, Measure> measure,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            IBaseBundle additionalData) {
+        var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
+        return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, additionalData);
     }
 
-    var subjects =
-        subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+    protected MeasureReport evaluateMeasure(
+            Measure measure,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            IBaseBundle additionalData) {
 
-    R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
-    return measureEvaluator.evaluate(evalType, subjects, measurementPeriod);
-  }
+        if (!measure.hasLibrary()) {
+            throw new IllegalArgumentException(
+                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+        }
 
-  protected Measure resolveByUrl(CanonicalType url) {
-    var parts = Canonicals.getParts(url);
-    var result = this.repository.search(
-        Bundle.class,
-        Measure.class,
-        Searches.byNameAndVersion(
-            parts.idPart(),
-            parts.version()));
-    return (Measure) result.getEntryFirstRep().getResource();
-  }
+        Interval measurementPeriod = null;
+        if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
+            measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
+        }
 
-  protected Measure resolveById(IdType id) {
-    return this.repository.read(Measure.class, id);
-  }
+        var id = VersionedIdentifiers.forUrl(measure.getLibrary().get(0).asStringValue());
+        var context = Engines.forRepositoryAndSettings(
+                this.measureEvaluationOptions.getEvaluationSettings(), this.repository, additionalData);
 
-  protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
-    switch (measureEvalType) {
-      case PATIENT:
-      case SUBJECT:
-        return MeasureReportType.INDIVIDUAL;
-      case PATIENTLIST:
-      case SUBJECTLIST:
-        return MeasureReportType.PATIENTLIST;
-      case POPULATION:
-        return MeasureReportType.SUMMARY;
-      default:
-        throw new IllegalArgumentException(
-            String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+        var lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
+
+        context.getState().init(lib.getLibrary());
+
+        var evalType = MeasureEvalType.fromCode(reportType)
+                .orElse(
+                        subjectIds == null || subjectIds.isEmpty()
+                                ? MeasureEvalType.POPULATION
+                                : MeasureEvalType.SUBJECT);
+
+        var actualRepo = this.repository;
+        if (additionalData != null) {
+            actualRepo = new FederatedRepository(
+                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+        }
+
+        var subjects =
+                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+
+        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
+        return measureEvaluator.evaluate(evalType, subjects, measurementPeriod);
     }
-  }
 
-  private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
-    // resolve the measurement period
-    return new Interval(DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
-        true, DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)), true);
-  }
+    protected Measure resolveByUrl(CanonicalType url) {
+        var parts = Canonicals.getParts(url);
+        var result = this.repository.search(
+                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
+        return (Measure) result.getEntryFirstRep().getResource();
+    }
+
+    protected Measure resolveById(IdType id) {
+        return this.repository.read(Measure.class, id);
+    }
+
+    protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
+        switch (measureEvalType) {
+            case PATIENT:
+            case SUBJECT:
+                return MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST:
+            case SUBJECTLIST:
+                return MeasureReportType.PATIENTLIST;
+            case POPULATION:
+                return MeasureReportType.SUMMARY;
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+        }
+    }
+
+    private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
+        // resolve the measurement period
+        return new Interval(
+                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
+                true,
+                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)),
+                true);
+    }
 }

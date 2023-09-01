@@ -80,48 +80,6 @@
     "checkstyle.xml",
     "**/test/resources/**"
   ],
-  "commandOnAllFiles.commands": {
-    "Format Java File": {
-      "command": "editor.action.formatDocument",
-      "includeFileExtensions": [
-        ".java"
-      ],
-      "excludeFolders": [
-        "target",
-        "generated-sources"
-      ]
-    },
-    "Format XML Files": {
-      "command": "editor.action.formatDocument",
-      "includeFileExtensions": [
-        ".xml"
-      ],
-      "excludeFolders": [
-        "target",
-        "generated-sources"
-      ]
-    },
-    "Format JSON Files": {
-      "command": "editor.action.formatDocument",
-      "includeFileExtensions": [
-        ".json"
-      ],
-      "excludeFolders": [
-        "target",
-        "generated-sources"
-      ]
-    },
-    "Format Markdown Files": {
-      "command": "editor.action.formatDocument",
-      "includeFileExtensions": [
-        ".md"
-      ],
-      "excludeFolders": [
-        "target",
-        "generated-sources"
-      ]
-    }
-  },
   "files.exclude": {
     "**/.classpath": true,
     "**/.project": true,
@@ -138,18 +96,7 @@
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.dependency.packagePresentation": "hierarchical",
   "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
-  // "java.test.defaultConfig": "show-inline",
-  // "java.test.config": {
-  //   "name": "show-inline",
-  //   "vmArgs": [
-  //     "-XX:+PrintCompilation",
-  //     "-XX:+UnlockDiagnosticVMOptions",
-  //     "-XX:+PrintInlining"
-  //   ]
-  // },
   "java.compile.nullAnalysis.mode": "automatic",
-  "java.format.settings.url": ".vscode/config/eclipse-java-google-style.xml",
-  "java.format.settings.profile": "GoogleStyle",
   "json.schemaDownload.enable": true,
   "[cql]": {
     "editor.formatOnSave": false

@@ -12,31 +12,30 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.cr.questionnaire.dstu3.generator.nestedquestionnaireitem.ElementHasDefaultValue;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
 class ElementHasDefaultValueTest {
-  final static String TYPE_CODE = "typeCode";
-  final static String PATH_VALUE = "pathValue";
-  @InjectMocks
-  private ElementHasDefaultValue myFixture;
+    static final String TYPE_CODE = "typeCode";
+    static final String PATH_VALUE = "pathValue";
 
-  @Test
-  void addPropertiesShouldAddAllPropertiesToQuestionnaireItem() {
-    // setup
-    final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
-    final BooleanType booleanType = new BooleanType(true);
-    elementDefinition.setFixed(booleanType);
-    final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
-    // execute
-    final QuestionnaireItemComponent actual =
-        myFixture.addProperties(elementDefinition.getFixed(), questionnaireItem);
-    // validate
-    Assertions.assertEquals(actual.getInitial(), booleanType);
-    final Extension urlExtension = actual.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_HIDDEN);
-    Assertions.assertEquals(urlExtension.getValueAsPrimitive().getValueAsString(), "true");
-    Assertions.assertTrue(actual.getReadOnly());
-  }
+    @InjectMocks
+    private ElementHasDefaultValue myFixture;
 
+    @Test
+    void addPropertiesShouldAddAllPropertiesToQuestionnaireItem() {
+        // setup
+        final ElementDefinition elementDefinition = withElementDefinition(TYPE_CODE, PATH_VALUE);
+        final BooleanType booleanType = new BooleanType(true);
+        elementDefinition.setFixed(booleanType);
+        final QuestionnaireItemComponent questionnaireItem = withQuestionnaireItemComponent();
+        // execute
+        final QuestionnaireItemComponent actual =
+                myFixture.addProperties(elementDefinition.getFixed(), questionnaireItem);
+        // validate
+        Assertions.assertEquals(actual.getInitial(), booleanType);
+        final Extension urlExtension = actual.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_HIDDEN);
+        Assertions.assertEquals(urlExtension.getValueAsPrimitive().getValueAsString(), "true");
+        Assertions.assertTrue(actual.getReadOnly());
+    }
 }

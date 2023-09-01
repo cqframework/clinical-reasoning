@@ -3,9 +3,9 @@ package org.opencds.cqf.fhir.benchmark;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessorTests;
@@ -27,41 +27,39 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import ca.uhn.fhir.context.FhirContext;
-
 @State(Scope.Benchmark)
 public class Questionnaires {
-  private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
-  private static final Repository REPOSITORY = TestRepositoryFactory.createRepository(FHIR_CONTEXT,
-      QuestionnaireProcessorTests.class, TestQuestionnaire.CLASS_PATH + "/pa-aslp");
+    private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
+    private static final Repository REPOSITORY = TestRepositoryFactory.createRepository(
+            FHIR_CONTEXT, QuestionnaireProcessorTests.class, TestQuestionnaire.CLASS_PATH + "/pa-aslp");
 
-  private QuestionnaireResult result;
+    private QuestionnaireResult result;
 
-  @Setup(Level.Iteration)
-  public void setupIteration() throws Exception {
-    this.result =
-        TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
-            .withRepository(REPOSITORY)
-            .withParameters(parameters(stringPart("Service Request Id", "SleepStudy"),
-                stringPart("Service Request Id", "SleepStudy2"),
-                stringPart("Coverage Id", "Coverage-positive")));
-  }
+    @Setup(Level.Iteration)
+    public void setupIteration() throws Exception {
+        this.result = TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
+                .withRepository(REPOSITORY)
+                .withParameters(parameters(
+                        stringPart("Service Request Id", "SleepStudy"),
+                        stringPart("Service Request Id", "SleepStudy2"),
+                        stringPart("Coverage Id", "Coverage-positive")));
+    }
 
-  @Benchmark
-  @Fork(warmups = 1, value = 1)
-  @Measurement(iterations = 2, timeUnit = TimeUnit.SECONDS)
-  @OutputTimeUnit(TimeUnit.SECONDS)
-  public void test(Blackhole bh) throws Exception {
-    // The Blackhole ensures that the compiler doesn't optimize
-    // away this call, which does nothing with the result of the evaluation
-    bh.consume(this.result.populate());
-  }
+    @Benchmark
+    @Fork(warmups = 1, value = 1)
+    @Measurement(iterations = 2, timeUnit = TimeUnit.SECONDS)
+    @OutputTimeUnit(TimeUnit.SECONDS)
+    public void test(Blackhole bh) throws Exception {
+        // The Blackhole ensures that the compiler doesn't optimize
+        // away this call, which does nothing with the result of the evaluation
+        bh.consume(this.result.populate());
+    }
 
-  @SuppressWarnings("unused")
-  public static void main(String[] args) throws RunnerException {
-    Options opt = new OptionsBuilder()
-        .include(Questionnaires.class.getSimpleName())
-        .build();
-    Collection<RunResult> runResults = new Runner(opt).run();
-  }
+    @SuppressWarnings("unused")
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(Questionnaires.class.getSimpleName())
+                .build();
+        Collection<RunResult> runResults = new Runner(opt).run();
+    }
 }

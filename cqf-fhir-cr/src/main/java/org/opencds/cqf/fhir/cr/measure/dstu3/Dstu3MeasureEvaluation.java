@@ -9,11 +9,9 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
 /**
  * Implementation of MeasureEvaluation on top of HAPI FHIR DSTU3 structures.
  */
-public class Dstu3MeasureEvaluation
-    extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
+public class Dstu3MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
 
-  public Dstu3MeasureEvaluation(CqlEngine context, Measure measure) {
-    super(context, measure, new Dstu3MeasureDefBuilder(), new Dstu3MeasureReportBuilder());
-  }
-
+    public Dstu3MeasureEvaluation(CqlEngine context, Measure measure) {
+        super(context, measure, new Dstu3MeasureDefBuilder(), new Dstu3MeasureReportBuilder());
+    }
 }

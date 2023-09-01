@@ -9,6 +9,4 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ComponentScan("org.opencds.cqf.fhir.cr.fhir")
 @Import({AdapterConfiguration.class, NpmConfiguration.class})
-public class FhirConfiguration {
-
-}
+public class FhirConfiguration {}

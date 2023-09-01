@@ -14,7 +14,6 @@
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
-    <relativePath>../cqf-fhir/pom.xml</relativePath>
   </parent>
 
   <dependencyManagement>
@@ -22,44 +21,44 @@
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-api</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-test</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-utility</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cql</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-jackson</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-jaxb</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr-cli</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

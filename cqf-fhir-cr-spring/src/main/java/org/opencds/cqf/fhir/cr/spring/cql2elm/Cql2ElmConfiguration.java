@@ -5,6 +5,4 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan("org.opencds.cqf.fhir.cr.cql2elm")
-public class Cql2ElmConfiguration {
-
-}
+public class Cql2ElmConfiguration {}

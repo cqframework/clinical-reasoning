@@ -14,7 +14,7 @@
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6-SNAPSHOT</version>
-    <relativePath>../cqf-fhir/pom.xml</relativePath>
+
   </parent>
 
   <dependencyManagement>
@@ -24,7 +24,7 @@
         <artifactId>cqf-fhir-bom</artifactId>
         <type>pom</type>
         <scope>import</scope>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE6-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

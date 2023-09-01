@@ -22,78 +22,76 @@ import java.util.Map;
  */
 public class ResourceDirectoryCopier {
 
-  public static void copyFromJar(final Class<?> clazz, final String sourceDirectory,
-      final Path target)
-      throws URISyntaxException, IOException {
-    URI resource = clazz.getResource(sourceDirectory).toURI();
-    PathReference pr = null;
-    try {
-      var pathReference = PathReference.getPath(resource);
-      final Path jarPath = pathReference.getPath();
-      Files.walkFileTree(jarPath, new SimpleFileVisitor<Path>() {
+    public static void copyFromJar(final Class<?> clazz, final String sourceDirectory, final Path target)
+            throws URISyntaxException, IOException {
+        URI resource = clazz.getResource(sourceDirectory).toURI();
+        PathReference pr = null;
+        try {
+            var pathReference = PathReference.getPath(resource);
+            final Path jarPath = pathReference.getPath();
+            Files.walkFileTree(jarPath, new SimpleFileVisitor<Path>() {
 
-        private Path currentTarget;
+                private Path currentTarget;
 
-        @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-            throws IOException {
-          currentTarget = target.resolve(jarPath.relativize(dir).toString());
-          Files.createDirectories(currentTarget);
-          return FileVisitResult.CONTINUE;
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    currentTarget = target.resolve(jarPath.relativize(dir).toString());
+                    Files.createDirectories(currentTarget);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.copy(
+                            file,
+                            target.resolve(jarPath.relativize(file).toString()),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to copy directory", e);
+        } finally {
+            if (pr != null) {
+                pr.close();
+            }
+        }
+    }
+
+    static class PathReference {
+
+        private final Path path;
+        private final FileSystem fs;
+
+        public PathReference(Path path, FileSystem fs) {
+            this.path = path;
+            this.fs = fs;
         }
 
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-          Files.copy(file, target.resolve(jarPath.relativize(file).toString()),
-              StandardCopyOption.REPLACE_EXISTING);
-          return FileVisitResult.CONTINUE;
+        public void close() throws IOException {
+            if (this.fs != null) this.fs.close();
         }
 
-      });
-    } catch (Exception e) {
-      throw new RuntimeException("Unable to copy directory", e);
-    } finally {
-      if (pr != null) {
-        pr.close();
-      }
+        public Path getPath() {
+            return this.path;
+        }
+
+        public FileSystem getFileSystem() {
+            return this.fs;
+        }
+
+        public static PathReference getPath(final URI resPath) throws IOException {
+            try {
+                // first try getting a path via existing file systems
+                return new PathReference(Paths.get(resPath), null);
+            } catch (final FileSystemNotFoundException e) {
+                /*
+                 * not directly on file system, so then it's somewhere else (e.g.: JAR)
+                 */
+                final Map<String, ?> env = Collections.emptyMap();
+                final FileSystem fs = FileSystems.newFileSystem(resPath, env);
+                return new PathReference(fs.provider().getPath(resPath), fs);
+            }
+        }
     }
-  }
-
-  static class PathReference {
-
-    private final Path path;
-    private final FileSystem fs;
-
-    public PathReference(Path path, FileSystem fs) {
-      this.path = path;
-      this.fs = fs;
-    }
-
-    public void close() throws IOException {
-      if (this.fs != null)
-        this.fs.close();
-    }
-
-    public Path getPath() {
-      return this.path;
-    }
-
-    public FileSystem getFileSystem() {
-      return this.fs;
-    }
-
-    public static PathReference getPath(final URI resPath) throws IOException {
-      try {
-        // first try getting a path via existing file systems
-        return new PathReference(Paths.get(resPath), null);
-      } catch (final FileSystemNotFoundException e) {
-        /*
-         * not directly on file system, so then it's somewhere else (e.g.: JAR)
-         */
-        final Map<String, ?> env = Collections.emptyMap();
-        final FileSystem fs = FileSystems.newFileSystem(resPath, env);
-        return new PathReference(fs.provider().getPath(resPath), fs);
-      }
-    }
-  }
 }

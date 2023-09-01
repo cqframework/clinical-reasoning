@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -11,29 +10,29 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 public interface LibraryAdapter extends ResourceAdapter {
 
-  IBaseResource get();
+    IBaseResource get();
 
-  IIdType getId();
+    IIdType getId();
 
-  void setId(IIdType id);
+    void setId(IIdType id);
 
-  String getName();
+    String getName();
 
-  void setName(String name);
+    void setName(String name);
 
-  String getUrl();
+    String getUrl();
 
-  void setUrl(String url);
+    void setUrl(String url);
 
-  String getVersion();
+    String getVersion();
 
-  void setVersion(String version);
+    void setVersion(String version);
 
-  boolean hasContent();
+    boolean hasContent();
 
-  List<ICompositeType> getContent();
+    List<ICompositeType> getContent();
 
-  void setContent(List<ICompositeType> attachments);
+    void setContent(List<ICompositeType> attachments);
 
-  ICompositeType addContent();
+    ICompositeType addContent();
 }

@@ -8,12 +8,10 @@ import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class ElementHasDefaultValue {
-  public QuestionnaireItemComponent addProperties(
-      DataType value,
-      QuestionnaireItemComponent questionnaireItem) {
-    questionnaireItem.addInitial().setValue(transformValue(value));
-    questionnaireItem.addExtension(Constants.SDC_QUESTIONNAIRE_HIDDEN, new BooleanType(true));
-    questionnaireItem.setReadOnly(true);
-    return questionnaireItem;
-  }
+    public QuestionnaireItemComponent addProperties(DataType value, QuestionnaireItemComponent questionnaireItem) {
+        questionnaireItem.addInitial().setValue(transformValue(value));
+        questionnaireItem.addExtension(Constants.SDC_QUESTIONNAIRE_HIDDEN, new BooleanType(true));
+        questionnaireItem.setReadOnly(true);
+        return questionnaireItem;
+    }
 }

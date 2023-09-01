@@ -6,6 +6,6 @@ package org.opencds.cqf.fhir.utility.repository;
  * the path
  */
 public enum IGLayoutMode {
-  DIRECTORY,
-  TYPE_PREFIX
+    DIRECTORY,
+    TYPE_PREFIX
 }

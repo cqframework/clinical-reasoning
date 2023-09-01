@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.generator.nestedquestionnaireitem;
 
 import java.util.List;
-
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -16,60 +15,56 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QuestionnaireTypeIsChoice {
-  protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireTypeIsChoice.class);
-  protected Repository repository;
+    protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireTypeIsChoice.class);
+    protected Repository repository;
 
-  public static QuestionnaireTypeIsChoice of(Repository repository) {
-    return new QuestionnaireTypeIsChoice(repository);
-  }
-
-  QuestionnaireTypeIsChoice(Repository repository) {
-    this.repository = repository;
-  }
-
-  public QuestionnaireItemComponent addProperties(
-      ElementDefinition element,
-      QuestionnaireItemComponent item) {
-    final ValueSet valueSet = getValueSet(element);
-    if (valueSet.hasExpansion()) {
-      addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
-    } else {
-      addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
+    public static QuestionnaireTypeIsChoice of(Repository repository) {
+        return new QuestionnaireTypeIsChoice(repository);
     }
-    return item;
-  }
 
-  protected void addAnswerOptionsForValueSetWithExpansionComponent(ValueSet valueSet,
-      QuestionnaireItemComponent item) {
-    final List<ValueSetExpansionContainsComponent> expansionList =
-        valueSet.getExpansion().getContains();
-    expansionList.forEach(expansion -> {
-      final Coding coding = getCoding(expansion);
-      item.addAnswerOption().setValue(coding);
-    });
-  }
+    QuestionnaireTypeIsChoice(Repository repository) {
+        this.repository = repository;
+    }
 
-  protected void addAnswerOptionsForValueSetWithComposeComponent(ValueSet valueSet,
-      QuestionnaireItemComponent item) {
-    final List<ConceptSetComponent> systems = valueSet.getCompose().getInclude();
-    systems.forEach(system -> system.getConcept().forEach(concept -> {
-      final Coding coding = getCoding(concept, system.getSystem());
-      item.addAnswerOption().setValue(coding);
-    }));
-  }
+    public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent item) {
+        final ValueSet valueSet = getValueSet(element);
+        if (valueSet.hasExpansion()) {
+            addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
+        } else {
+            addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
+        }
+        return item;
+    }
 
-  protected Coding getCoding(ConceptReferenceComponent code, String systemUri) {
-    return new Coding().setCode(code.getCode()).setSystem(systemUri).setDisplay(code.getDisplay());
-  }
+    protected void addAnswerOptionsForValueSetWithExpansionComponent(
+            ValueSet valueSet, QuestionnaireItemComponent item) {
+        final List<ValueSetExpansionContainsComponent> expansionList =
+                valueSet.getExpansion().getContains();
+        expansionList.forEach(expansion -> {
+            final Coding coding = getCoding(expansion);
+            item.addAnswerOption().setValue(coding);
+        });
+    }
 
-  protected Coding getCoding(ValueSetExpansionContainsComponent code) {
-    return new Coding().setCode(code.getCode()).setSystem(code.getSystem())
-        .setDisplay(code.getDisplay());
-  }
+    protected void addAnswerOptionsForValueSetWithComposeComponent(ValueSet valueSet, QuestionnaireItemComponent item) {
+        final List<ConceptSetComponent> systems = valueSet.getCompose().getInclude();
+        systems.forEach(system -> system.getConcept().forEach(concept -> {
+            final Coding coding = getCoding(concept, system.getSystem());
+            item.addAnswerOption().setValue(coding);
+        }));
+    }
 
-  protected ValueSet getValueSet(ElementDefinition element) {
-    final String valueSetUrl = element.getBinding().getValueSet();
-    return (ValueSet) SearchHelper.searchRepositoryByCanonical(repository,
-        new CanonicalType().setValue(valueSetUrl));
-  }
+    protected Coding getCoding(ConceptReferenceComponent code, String systemUri) {
+        return new Coding().setCode(code.getCode()).setSystem(systemUri).setDisplay(code.getDisplay());
+    }
+
+    protected Coding getCoding(ValueSetExpansionContainsComponent code) {
+        return new Coding().setCode(code.getCode()).setSystem(code.getSystem()).setDisplay(code.getDisplay());
+    }
+
+    protected ValueSet getValueSet(ElementDefinition element) {
+        final String valueSetUrl = element.getBinding().getValueSet();
+        return (ValueSet)
+                SearchHelper.searchRepositoryByCanonical(repository, new CanonicalType().setValue(valueSetUrl));
+    }
 }

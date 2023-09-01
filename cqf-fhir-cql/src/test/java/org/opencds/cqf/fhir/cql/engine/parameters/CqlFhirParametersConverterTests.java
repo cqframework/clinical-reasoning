@@ -5,10 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
@@ -26,184 +27,177 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class CqlFhirParametersConverterTests {
 
+    protected static CqlFhirParametersConverter cqlFhirParametersConverter;
 
-  protected static CqlFhirParametersConverter cqlFhirParametersConverter;
+    @BeforeAll
+    public static void setup() {
+        FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-  @BeforeAll
-  public static void setup() {
-    FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+        AdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
+        FhirTypeConverter fhirTypeConverter =
+                new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 
-    AdapterFactory adapterFactory =
-        new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
-    FhirTypeConverter fhirTypeConverter =
-        new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
+        cqlFhirParametersConverter = new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+    }
 
-    cqlFhirParametersConverter =
-        new CqlFhirParametersConverter(fhirContext, adapterFactory, fhirTypeConverter);
+    @Test
+    public void TestEvaluationResultToParameters() {
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("Patient").setResource(new Patient());
+        expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
 
-  }
+        EvaluationResult testData = new EvaluationResult();
+        testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
+        testData.expressionResults.put("Numerator", new ExpressionResult(true, null));
 
-  @Test
-  public void TestEvaluationResultToParameters() {
-    Parameters expected = new Parameters();
-    expected.addParameter().setName("Patient").setResource(new Patient());
-    expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
+        Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
-    EvaluationResult testData = new EvaluationResult();
-    testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
-    testData.expressionResults.put("Numerator", new ExpressionResult(true, null));
+        assertTrue(expected.equalsDeep(actual));
+    }
 
-    Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
+    @Test
+    public void TestFhirParametersToCqlParameters() {
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("Measurement Period", new Interval(new Date("2020-01-01"), true, new Date("2021-01-01"), true));
+        expected.put("Product Line", "Medicare");
 
-    assertTrue(expected.equalsDeep(actual));
-  }
+        Parameters testData = new Parameters();
+        testData.addParameter().setName("Product Line").setValue(new StringType("Medicare"));
 
-  @Test
-  public void TestFhirParametersToCqlParameters() {
-    Map<String, Object> expected = new HashMap<>();
-    expected.put("Measurement Period",
-        new Interval(new Date("2020-01-01"), true, new Date("2021-01-01"), true));
-    expected.put("Product Line", "Medicare");
+        Period testPeriod = new Period();
+        testPeriod.setStartElement(new DateTimeType("2020-01-01"));
+        testPeriod.setEndElement(new DateTimeType("2021-01-01"));
 
-    Parameters testData = new Parameters();
-    testData.addParameter().setName("Product Line").setValue(new StringType("Medicare"));
+        testData.addParameter().setName("Measurement Period").setValue(testPeriod);
 
-    Period testPeriod = new Period();
-    testPeriod.setStartElement(new DateTimeType("2020-01-01"));
-    testPeriod.setEndElement(new DateTimeType("2021-01-01"));
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-    testData.addParameter().setName("Measurement Period").setValue(testPeriod);
+        assertNotNull(actual);
+        assertEquals(expected.size(), actual.size());
 
-    Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
+        assertEquals(expected.get("Product Line"), actual.get("Product Line"));
 
-    assertNotNull(actual);
-    assertEquals(expected.size(), actual.size());
+        assertTrue(((Interval) expected.get("Measurement Period")).equal(actual.get("Measurement Period")));
+    }
 
-    assertEquals(expected.get("Product Line"), actual.get("Product Line"));
+    @Test
+    public void TestFhirParametersListToCqlParameters() {
 
-    assertTrue(
-        ((Interval) expected.get("Measurement Period")).equal(actual.get("Measurement Period")));
-  }
+        Parameters testData = new Parameters();
+        testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
+        testData.addParameter().setName("%encounters").setResource(new Encounter().setId("2"));
 
-  @Test
-  public void TestFhirParametersListToCqlParameters() {
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-    Parameters testData = new Parameters();
-    testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
-    testData.addParameter().setName("%encounters").setResource(new Encounter().setId("2"));
+        assertEquals(actual.size(), 1);
+        assertTrue(actual.containsKey("%encounters"));
 
-    Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
+        Object value = actual.get("%encounters");
 
-    assertEquals(actual.size(), 1);
-    assertTrue(actual.containsKey("%encounters"));
+        assertTrue(value instanceof List);
 
-    Object value = actual.get("%encounters");
+        @SuppressWarnings("unchecked")
+        List<Encounter> encounters = (List<Encounter>) value;
 
-    assertTrue(value instanceof List);
+        assertEquals(encounters.size(), 2);
+    }
 
-    @SuppressWarnings("unchecked")
-    List<Encounter> encounters = (List<Encounter>) value;
+    @Test
+    public void TestMaxParameterDefinitionCreatesList() {
 
-    assertEquals(encounters.size(), 2);
-  }
+        Parameters testData = new Parameters();
+        ParametersParameterComponent ppc = testData.addParameter();
+        ppc.setName("%encounters").setResource(new Encounter().setId("1"));
+        ppc.addExtension(
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMax("*").setName("%encounters"));
 
-  @Test
-  public void TestMaxParameterDefinitionCreatesList() {
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-    Parameters testData = new Parameters();
-    ParametersParameterComponent ppc = testData.addParameter();
-    ppc.setName("%encounters").setResource(new Encounter().setId("1"));
-    ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
-        new ParameterDefinition().setMax("*").setName("%encounters"));
+        assertEquals(actual.size(), 1);
+        assertTrue(actual.containsKey("%encounters"));
 
-    Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
+        Object value = actual.get("%encounters");
 
-    assertEquals(actual.size(), 1);
-    assertTrue(actual.containsKey("%encounters"));
+        assertTrue(value instanceof List);
 
-    Object value = actual.get("%encounters");
+        @SuppressWarnings("unchecked")
+        List<Encounter> encounters = (List<Encounter>) value;
 
-    assertTrue(value instanceof List);
+        assertEquals(encounters.size(), 1);
+    }
 
-    @SuppressWarnings("unchecked")
-    List<Encounter> encounters = (List<Encounter>) value;
+    @Test
+    public void TestMinParameterDefinitionCreatesList() {
+        Parameters testData = new Parameters();
+        ParametersParameterComponent ppc = testData.addParameter();
 
-    assertEquals(encounters.size(), 1);
-  }
+        // This is technically still an invalid state since there's only one value and the parameter
+        // definition
+        // requires 2, but that type of validation would happen at the FHIR API level.
+        ppc.setName("%encounters").setResource(new Encounter().setId("1"));
+        ppc.addExtension(
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMin(2).setName("%encounters"));
 
-  @Test
-  public void TestMinParameterDefinitionCreatesList() {
-    Parameters testData = new Parameters();
-    ParametersParameterComponent ppc = testData.addParameter();
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-    // This is technically still an invalid state since there's only one value and the parameter
-    // definition
-    // requires 2, but that type of validation would happen at the FHIR API level.
-    ppc.setName("%encounters").setResource(new Encounter().setId("1"));
-    ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
-        new ParameterDefinition().setMin(2).setName("%encounters"));
+        assertEquals(actual.size(), 1);
+        assertTrue(actual.containsKey("%encounters"));
 
-    Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
+        Object value = actual.get("%encounters");
 
-    assertEquals(actual.size(), 1);
-    assertTrue(actual.containsKey("%encounters"));
+        assertTrue(value instanceof List);
 
-    Object value = actual.get("%encounters");
+        @SuppressWarnings("unchecked")
+        List<Encounter> encounters = (List<Encounter>) value;
 
-    assertTrue(value instanceof List);
+        assertEquals(encounters.size(), 1);
+    }
 
-    @SuppressWarnings("unchecked")
-    List<Encounter> encounters = (List<Encounter>) value;
+    @Test
+    public void TestInvalidParameterDefinitionThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Parameters testData = new Parameters();
+            ParametersParameterComponent ppc = testData.addParameter();
 
-    assertEquals(encounters.size(), 1);
-  }
+            testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
 
-  @Test
-  public void TestInvalidParameterDefinitionThrowsException() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      Parameters testData = new Parameters();
-      ParametersParameterComponent ppc = testData.addParameter();
+            // This is a case where we'd expect a single value as a parameters, but two are passed.
+            ppc.setName("%encounters").setResource(new Encounter().setId("2"));
+            ppc.addExtension(
+                    "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                    new ParameterDefinition().setMax("1").setName("%encounters"));
 
-      testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
+            cqlFhirParametersConverter.toCqlParameters(testData);
+        });
+    }
 
-      // This is a case where we'd expect a single value as a parameters, but two are passed.
-      ppc.setName("%encounters").setResource(new Encounter().setId("2"));
-      ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
-          new ParameterDefinition().setMax("1").setName("%encounters"));
+    @Test
+    public void TestParameterDefinitionCreatesList() {
+        Parameters testData = new Parameters();
+        ParametersParameterComponent ppc = testData.addParameter();
+        ppc.setName("%encounters");
+        ppc.addExtension(
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
+                new ParameterDefinition().setMax("*").setName("%encounters").setType("Encounter"));
 
-      cqlFhirParametersConverter.toCqlParameters(testData);
-    });
-  }
+        Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-  @Test
-  public void TestParameterDefinitionCreatesList() {
-    Parameters testData = new Parameters();
-    ParametersParameterComponent ppc = testData.addParameter();
-    ppc.setName("%encounters");
-    ppc.addExtension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition",
-        new ParameterDefinition().setMax("*").setName("%encounters").setType("Encounter"));
+        assertEquals(actual.size(), 1);
+        assertTrue(actual.containsKey("%encounters"));
 
-    Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
+        Object value = actual.get("%encounters");
 
-    assertEquals(actual.size(), 1);
-    assertTrue(actual.containsKey("%encounters"));
+        assertTrue(value instanceof List);
 
-    Object value = actual.get("%encounters");
+        @SuppressWarnings("unchecked")
+        List<Encounter> encounters = (List<Encounter>) value;
 
-    assertTrue(value instanceof List);
-
-    @SuppressWarnings("unchecked")
-    List<Encounter> encounters = (List<Encounter>) value;
-
-    assertEquals(encounters.size(), 0);
-  }
+        assertEquals(encounters.size(), 0);
+    }
 }
-

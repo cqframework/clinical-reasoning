@@ -5,52 +5,50 @@ import org.hl7.fhir.r4.model.Attachment;
 
 class AttachmentAdapter implements org.opencds.cqf.fhir.utility.adapter.AttachmentAdapter {
 
-  private Attachment attachment;
+    private Attachment attachment;
 
-  public AttachmentAdapter(ICompositeType attachment) {
-    if (attachment == null) {
-      throw new IllegalArgumentException("attachment can not be null");
+    public AttachmentAdapter(ICompositeType attachment) {
+        if (attachment == null) {
+            throw new IllegalArgumentException("attachment can not be null");
+        }
+
+        if (!attachment.fhirType().equals("Attachment")) {
+            throw new IllegalArgumentException("resource passed as attachment argument is not an Attachment resource");
+        }
+
+        if (!(attachment instanceof Attachment)) {
+            throw new IllegalArgumentException("attachment is incorrect fhir version for this adapter");
+        }
+
+        this.attachment = (Attachment) attachment;
     }
 
-    if (!attachment.fhirType().equals("Attachment")) {
-      throw new IllegalArgumentException(
-          "resource passed as attachment argument is not an Attachment resource");
+    protected Attachment getAttachment() {
+        return this.attachment;
     }
 
-    if (!(attachment instanceof Attachment)) {
-      throw new IllegalArgumentException("attachment is incorrect fhir version for this adapter");
+    @Override
+    public ICompositeType get() {
+        return this.attachment;
     }
 
-    this.attachment = (Attachment) attachment;
-  }
+    @Override
+    public String getContentType() {
+        return this.getAttachment().getContentType();
+    }
 
-  protected Attachment getAttachment() {
-    return this.attachment;
-  }
+    @Override
+    public void setContentType(String contentType) {
+        this.getAttachment().setContentType(contentType);
+    }
 
-  @Override
-  public ICompositeType get() {
-    return this.attachment;
-  }
+    @Override
+    public byte[] getData() {
+        return this.getAttachment().getData();
+    }
 
-  @Override
-  public String getContentType() {
-    return this.getAttachment().getContentType();
-  }
-
-  @Override
-  public void setContentType(String contentType) {
-    this.getAttachment().setContentType(contentType);
-  }
-
-  @Override
-  public byte[] getData() {
-    return this.getAttachment().getData();
-  }
-
-  @Override
-  public void setData(byte[] data) {
-    this.getAttachment().setData(data);
-  }
-
+    @Override
+    public void setData(byte[] data) {
+        this.getAttachment().setData(data);
+    }
 }

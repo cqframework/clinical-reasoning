@@ -16,7 +16,7 @@ Inquires for commercial support can be directed to [info@alphora.com](info@alpho
 
 ## Related Projects
 
-[Clinical Quality Language](https://github.com/cqframework/clinical_quality_language) - Tooling in support of the CQL specification, including the CQL verifier/translator and runtime used in this project.
+[Clinical Quality Language](https://github.com/cqframework/clinical_quality_language) - Tooling in support of the CQL specification, including the CQL compiler and runtime used in this project.
 
 [CQL Support for VS Code](https://marketplace.visualstudio.com/items?itemName=cqframework.cql) - Open source CQL IDE with syntax highlighting, linting, and local CQL evaluation provided by this project.
 

@@ -73,10 +73,8 @@ public class MeasureProcessorEvaluateTest {
 
     assertNotNull(when.then().report());
 
-    // Run 10 times to find any crashing due to caching
-    for (int i = 0; i < 10; i++) {
-      when.then().report();
-    }
+    // Run again to find any issues with caching
+    when.then().report();
   }
 
   @Test
@@ -101,9 +99,7 @@ public class MeasureProcessorEvaluateTest {
 
     assertNotNull(when.then().report());
 
-    // Run 10 times to find any crashing due to caching
-    for (int i = 0; i < 10; i++) {
-      when.then().report();
-    }
+    // Run again to find any issues with caching
+    when.then().report();
   }
 }

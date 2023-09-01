@@ -11,7 +11,6 @@
   <description>Root pom to build multi-module project</description>
 
   <modules>
-    <!-- new modules we are building -->
     <module>cqf-fhir</module>
     <module>cqf-fhir-api</module>
     <module>cqf-fhir-utility</module>
@@ -29,7 +28,27 @@
     <!-- These don't publish a module, but ensures documentation snippets build correctly -->
     <module>docs</module>
     <module>cqf-fhir-benchmark</module>
-
-
   </modules>
+
+  <!-- This root project just sets up the multi-module build. It's not intended to be published-->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.13</version>
+        <configuration>
+          <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

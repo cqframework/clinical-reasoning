@@ -7,10 +7,10 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessorTests;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestQuestionnaire;
-import org.opencds.cqf.cql.evaluator.questionnaire.r4.helpers.TestQuestionnaire.QuestionnaireResult;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessorTests;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire.QuestionnaireResult;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;

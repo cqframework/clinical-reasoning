@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.cql.evaluator.measure.r4.MeasureProcessorEvaluateTest;
+import org.opencds.cqf.fhir.cr.measure.r4.MeasureProcessorEvaluateTest;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.openjdk.jmh.annotations.Benchmark;

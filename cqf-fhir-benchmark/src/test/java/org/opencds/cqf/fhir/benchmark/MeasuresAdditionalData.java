@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.cql.evaluator.measure.r4.Measure;
-import org.opencds.cqf.cql.evaluator.measure.r4.Measure.When;
-import org.opencds.cqf.cql.evaluator.measure.r4.MeasureProcessorEvaluateTest;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.MeasureProcessorEvaluateTest;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;

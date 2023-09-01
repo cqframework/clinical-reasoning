@@ -5,31 +5,31 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-benchmark</artifactId>
-  <version>3.0.0-PRE6-SNAPSHOT</version>
+  <version>3.0.0-PRE6</version>
   <name>FHIR Clinical Reasoning (Benchmarks)</name>
   <description>Tests validating performance of FHIR Clinical Reasoning operations</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE6-SNAPSHOT</version>
+    <version>3.0.0-PRE6</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cr</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <version>3.0.0-PRE6</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <version>3.0.0-PRE6</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cr</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <version>3.0.0-PRE6</version>
       <type>test-jar</type>
     </dependency>
     <dependency>
@@ -40,7 +40,7 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-jackson</artifactId>
-      <version>3.0.0-PRE6-SNAPSHOT</version>
+      <version>3.0.0-PRE6</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>

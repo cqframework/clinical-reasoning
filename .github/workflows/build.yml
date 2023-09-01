@@ -1,4 +1,4 @@
-name: Publish Snapshot
+name: Build
 on:
   push:
     branches:
@@ -20,7 +20,7 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Publish snapshot
-        run: mvn --batch-mode -no-transfer-progress --update-snapshots deploy -Ppackage
+        run: ./mvnw --batch-mode -no-transfer-progress --update-snapshots deploy -Ppackage
         env:
           MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

@@ -60,7 +60,7 @@ public class CliTest {
   public void testVersion() {
     String[] args = new String[] {"-V"};
     Main.run(args);
-    assertTrue(outContent.toString().startsWith("cql-evaluator cli version:"));
+    assertTrue(outContent.toString().startsWith("cqf-fhir-cr-cli version:"));
   }
 
   @Test

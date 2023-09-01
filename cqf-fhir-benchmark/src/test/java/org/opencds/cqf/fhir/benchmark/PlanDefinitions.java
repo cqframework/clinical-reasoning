@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinition;
-import org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinition.Apply;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition;
+import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition.Apply;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;

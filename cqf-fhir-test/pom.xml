@@ -27,5 +27,9 @@
       <artifactId>cqf-fhir-utility</artifactId>
       <version>3.0.0-PRE6-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.skyscreamer</groupId>
+      <artifactId>jsonassert</artifactId>
+    </dependency>
   </dependencies>
 </project>

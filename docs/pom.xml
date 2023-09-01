@@ -14,7 +14,6 @@
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
     <version>3.0.0-PRE6</version>
-
   </parent>
 
   <dependencyManagement>
@@ -55,10 +54,10 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
-          <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+          <skip>true</skip>
         </configuration>
       </plugin>
     </plugins>

@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cql.engine.utility;
+package org.opencds.cqf.fhir.utility.iterable;
 
 import java.util.Iterator;
 import java.util.stream.Stream;

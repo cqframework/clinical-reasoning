@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cql.engine.retrieve;
 
 public class RetrieveSettings {
-    private boolean filterBySearchParam = false;
+    private boolean filterBySearchParam = true;
     private boolean searchByTemplate = false;
 
     public boolean getFilterBySearchParam() {

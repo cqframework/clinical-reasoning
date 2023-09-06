@@ -9,14 +9,14 @@ import java.util.NoSuchElementException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.fhir.api.Repository;
 
-public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEntryParts> {
+public class BundleObjectIterator<B extends IBaseBundle> implements Iterator<Object> {
 
     protected Repository repository;
     protected B bundle;
     protected int index = 0;
     protected List<BundleEntryParts> parts;
 
-    public BundleIterator(Repository repository, B bundle) {
+    public BundleObjectIterator(Repository repository, B bundle) {
         this.repository = repository;
         this.bundle = bundle;
         this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle);
@@ -28,7 +28,7 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
     }
 
     @Override
-    public BundleEntryParts next() {
+    public Object next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
@@ -40,7 +40,7 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
             getNextBundle();
         }
 
-        return next;
+        return next.getResource();
     }
 
     protected void getNextBundle() {

@@ -7,12 +7,13 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.engine.utility.StreamIterable;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
+import org.opencds.cqf.fhir.utility.iterable.BundleObjectIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class RepositoryRetrieveProvider extends RetrieveProvider {
@@ -44,7 +45,7 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
         var resourceType = fhirContext.getResourceDefinition(dataType).getImplementingClass();
 
         @SuppressWarnings("unchecked")
-        var bt = (Class<IBaseBundle>)
+        var bt = (Class<? extends IBaseBundle>)
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
 
         if (isFilterBySearchParam()) {
@@ -55,20 +56,17 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
             populateDateSearchParams(searchParams, datePath, dateLowPath, dateHighPath, dateRange);
             var resources = this.repository.search(bt, resourceType, searchParams);
 
-            var iter = new BundleIterable<IBaseBundle>(repository, resources);
-            return new StreamIterable<>(iter.toStream().map(x -> x.getResource()));
+            return new BundleObjectIterable<>(repository, resources);
         } else {
-
             var resources = this.repository.search(bt, resourceType, Searches.ALL);
             var iter = new BundleIterable<IBaseBundle>(repository, resources);
-            var result = iter.toStream()
+            return iter.toStream()
                     .map(x -> x.getResource())
                     .filter(filterByTemplateId(dataType, templateId))
                     .filter(filterByContext(dataType, context, contextPath, contextValue))
                     .filter(filterByTerminology(dataType, codePath, codes, valueSet))
-                    .map(x -> (Object) x);
-
-            return new StreamIterable<>(result);
+                    // TODO: filter by date search
+                    .collect(Collectors.toList());
         }
     }
 }

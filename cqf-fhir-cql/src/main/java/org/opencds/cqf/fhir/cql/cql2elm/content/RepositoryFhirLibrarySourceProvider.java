@@ -2,12 +2,11 @@ package org.opencds.cqf.fhir.cql.cql2elm.content;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
-
 import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
@@ -40,15 +39,12 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
     protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
 
         @SuppressWarnings("unchecked")
-        var bt = (Class<IBaseBundle>) this.fhirContext
-                .getResourceDefinition("Bundle")
-                .getImplementingClass();
-        var lt = this.fhirContext
-                .getResourceDefinition("Library")
-                .getImplementingClass();
+        var bt = (Class<IBaseBundle>)
+                this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
+        var lt = this.fhirContext.getResourceDefinition("Library").getImplementingClass();
 
-        var libs = repository.search(bt, lt,
-                Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));
+        var libs = repository.search(
+                bt, lt, Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));
 
         var iter = new BundleIterable<IBaseBundle>(repository, libs).iterator();
 

@@ -4,24 +4,15 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.util.BundleUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.utility.StreamIterable;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class RepositoryRetrieveProvider extends RetrieveProvider {
@@ -53,9 +44,8 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
         var resourceType = fhirContext.getResourceDefinition(dataType).getImplementingClass();
 
         @SuppressWarnings("unchecked")
-        var bt = (Class<IBaseBundle>) this.fhirContext
-                .getResourceDefinition("Bundle")
-                .getImplementingClass();
+        var bt = (Class<IBaseBundle>)
+                this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
 
         if (isFilterBySearchParam()) {
             Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();

@@ -41,7 +41,7 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
     private static final Logger logger = LoggerFactory.getLogger(RetrieveProvider.class);
     private final CodeExtractor codeUtil;
     private final IFhirPath fhirPath;
-    private boolean filterBySearchParam = false;
+    private boolean filterBySearchParam = true;
     private boolean searchByTemplate = false;
 
     protected RetrieveProvider(final FhirContext fhirContext) {

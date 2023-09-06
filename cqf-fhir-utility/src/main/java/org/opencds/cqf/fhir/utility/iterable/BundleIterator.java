@@ -15,12 +15,10 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
     protected B bundle;
     protected int index = 0;
     protected List<BundleEntryParts> parts;
-    protected Class<B> bundleType;
 
-    public BundleIterator(Repository repository, Class<B> bundleType, B bundle) {
+    public BundleIterator(Repository repository, B bundle) {
         this.repository = repository;
         this.bundle = bundle;
-        this.bundleType = bundleType;
         this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle);
     }
 
@@ -52,7 +50,9 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
         }
 
         index = 0;
-        this.bundle = this.repository.link(bundleType, nextLink);
+        @SuppressWarnings("unchecked")
+        var clazz = (Class<B>) bundle.getClass();
+        this.bundle = this.repository.link(clazz, nextLink);
         if (bundle == null) {
             this.parts = Collections.emptyList();
         } else {

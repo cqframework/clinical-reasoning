@@ -35,7 +35,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 || subjectIds.get(0) == null
                 || subjectIds.get(0).isEmpty()) {
             var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
-            var iterator = new BundleIterator<>(repository, Bundle.class, bundle);
+            var iterator = new BundleIterator<>(repository, bundle);
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false)
                     .map(BundleEntryParts::getResource)
                     .map(x -> x.getIdElement().toUnqualifiedVersionless().getValue());

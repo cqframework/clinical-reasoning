@@ -57,28 +57,6 @@ public class Repositories {
         return new ProxyRepository(localRepository, data, content, terminology);
     }
 
-    public static <T extends IBaseResource> IBaseBundle searchRepositoryWithPaging(
-            FhirContext fhirContext,
-            Repository repository,
-            Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                return org.opencds.cqf.fhir.utility.dstu3.SearchHelper.searchRepositoryWithPaging(
-                        repository, resourceType, searchParameters, headers);
-            case R4:
-                return org.opencds.cqf.fhir.utility.r4.SearchHelper.searchRepositoryWithPaging(
-                        repository, resourceType, searchParameters, headers);
-            case R5:
-                return org.opencds.cqf.fhir.utility.r5.SearchHelper.searchRepositoryWithPaging(
-                        repository, resourceType, searchParameters, headers);
-
-            default:
-                return null;
-        }
-    }
-
     public static BaseResourceMatcher getResourceMatcher(FhirContext context) {
         var fhirVersion = context.getVersion().getVersion();
         switch (fhirVersion) {

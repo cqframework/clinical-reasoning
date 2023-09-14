@@ -86,7 +86,6 @@
     "**/.settings": true,
     "**/.factorypath": true
   },
-  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     // "source.organizeImports": true
   },

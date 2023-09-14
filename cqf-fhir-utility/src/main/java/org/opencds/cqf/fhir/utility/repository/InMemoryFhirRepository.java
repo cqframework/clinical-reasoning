@@ -6,11 +6,10 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
-import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -20,78 +19,63 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.utility.matcher.BaseResourceMatcher;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR4;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR5;
 
 public class InMemoryFhirRepository implements Repository {
 
-    private final Map<IIdType, IBaseResource> resourceMap;
+    private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
     private final FhirContext context;
 
     public InMemoryFhirRepository(FhirContext context) {
         this.context = context;
-        this.resourceMap = new LinkedHashMap<>();
+        this.resourceMap = new HashMap<>();
     }
 
     public InMemoryFhirRepository(FhirContext context, Class<?> clazz, List<String> directoryList, boolean recursive) {
         this.context = context;
         // TODO: Resource loader.
-        this.resourceMap = new LinkedHashMap<>();
-        // var resourceLoader = new FhirResourceLoader(context, clazz, directoryList, recursive);
+        this.resourceMap = new HashMap<>();
+        // var resourceLoader = new FhirResourceLoader(context, clazz, directoryList,
+        // recursive);
         // this.resourceMap = Maps.uniqueIndex(resourceLoader.getResources(),
-        // r -> Ids.newId(this.context, r.getIdElement().getResourceType(),
+        // r -> Ids.newId(this.context, r.fhirType(),
         // r.getIdElement().getIdPart()));
     }
 
     public InMemoryFhirRepository(FhirContext context, IBaseBundle bundle) {
         this.context = context;
-        this.resourceMap = Maps.uniqueIndex(
-                BundleUtil.toListOfResources(this.context, bundle),
-                r -> Ids.newId(
-                        this.context,
-                        r.getIdElement().getResourceType(),
-                        r.getIdElement().getIdPart()));
-    }
-
-    public BaseResourceMatcher getResourceMatcher() {
-        var fhirVersion = context.getVersion().getVersion();
-        switch (fhirVersion) {
-            case DSTU3:
-                return new ResourceMatcherDSTU3(FhirModelResolverCache.resolverForVersion(fhirVersion));
-            case R4:
-                return new ResourceMatcherR4(FhirModelResolverCache.resolverForVersion(fhirVersion));
-            case R5:
-                return new ResourceMatcherR5(FhirModelResolverCache.resolverForVersion(fhirVersion));
-            default:
-                throw new NotImplementedException(
-                        "Resource matching is not implemented for FHIR version " + fhirVersion.getFhirVersionString());
-        }
+        var resources = BundleUtil.toListOfResources(this.context, bundle);
+        this.resourceMap = resources.stream()
+                .collect(Collectors.groupingBy(
+                        IBaseResource::fhirType,
+                        Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless(), Function.identity())));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IBaseResource, I extends IIdType> T read(
             Class<T> resourceType, I id, Map<String, String> headers) {
-        var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
-        if (resourceMap.containsKey(theId)) {
-            return (T) resourceMap.get(theId);
+        var resources = this.resourceMap.computeIfAbsent(resourceType.getSimpleName(), x -> new HashMap<>());
+
+        var resource = resources.get(id.toUnqualifiedVersionless());
+
+        if (resource == null) {
+            throw new ResourceNotFoundException(id);
         }
-        throw new ResourceNotFoundException("Resource not found with id " + theId);
+
+        return (T) resource;
     }
 
     @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
         var outcome = new MethodOutcome();
-        var theId = Ids.newRandomId(context, resource.getIdElement().getResourceType());
-        while (resourceMap.containsKey(theId)) {
-            theId = Ids.newRandomId(context, resource.getIdElement().getResourceType());
+        var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
+        var theId = Ids.newRandomId(context, resource.fhirType());
+        while (resources.containsKey(theId)) {
+            theId = Ids.newRandomId(context, resource.fhirType());
         }
         resource.setId(theId);
-        resourceMap.put(theId, resource);
         outcome.setCreated(true);
+        resources.put(theId.toUnqualifiedVersionless(), resource);
         return outcome;
     }
 
@@ -104,14 +88,12 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
         var outcome = new MethodOutcome();
-        var theId = Ids.newId(
-                context,
-                resource.getIdElement().getResourceType(),
-                resource.getIdElement().getIdPart());
-        if (!resourceMap.containsKey(theId)) {
+        var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
+        var theId = resource.getIdElement().toUnqualifiedVersionless();
+        if (!resources.containsKey(theId)) {
             outcome.setCreated(true);
         }
-        resourceMap.put(theId, resource);
+        resources.put(theId, resource);
         return outcome;
     }
 
@@ -119,11 +101,12 @@ public class InMemoryFhirRepository implements Repository {
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
         var outcome = new MethodOutcome();
-        var theId = Ids.newId(context, resourceType.getSimpleName(), id.getIdPart());
-        if (resourceMap.containsKey(theId)) {
-            resourceMap.remove(theId);
+        var resources = resourceMap.computeIfAbsent(id.getResourceType(), r -> new HashMap<>());
+        var keyId = id.toUnqualifiedVersionless();
+        if (resources.containsKey(keyId)) {
+            resources.remove(keyId);
         } else {
-            throw new ResourceNotFoundException("Resource not found with id " + theId);
+            throw new ResourceNotFoundException("Resource not found with id " + id);
         }
         return outcome;
     }
@@ -137,31 +120,27 @@ public class InMemoryFhirRepository implements Repository {
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.context);
 
-        var resourceList = resourceMap.values().stream()
-                .filter(resource -> resource.getIdElement().getResourceType().equals(resourceType.getSimpleName()))
-                .collect(Collectors.toList());
-
-        List<IBaseResource> filteredResources = new ArrayList<>();
-        if (searchParameters != null && !searchParameters.isEmpty()) {
-            var resourceMatcher = getResourceMatcher();
+        var resourceList = resourceMap
+                .computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>())
+                .values();
+        if (searchParameters == null || searchParameters.isEmpty()) {
+            resourceList.forEach(builder::addCollectionEntry);
+        } else {
+            var resourceMatcher = Repositories.getResourceMatcher(this.context);
             for (var resource : resourceList) {
-                boolean include = false;
+                boolean include = true;
                 for (var nextEntry : searchParameters.entrySet()) {
                     var paramName = nextEntry.getKey();
-                    if (resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
-                        include = true;
-                    } else {
+                    if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
                         include = false;
                         break;
                     }
                 }
+
                 if (include) {
-                    filteredResources.add(resource);
+                    builder.addCollectionEntry(resource);
                 }
             }
-            filteredResources.forEach(builder::addCollectionEntry);
-        } else {
-            resourceList.forEach(builder::addCollectionEntry);
         }
 
         builder.setType("searchset");

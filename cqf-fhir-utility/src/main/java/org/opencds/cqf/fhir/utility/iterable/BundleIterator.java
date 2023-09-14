@@ -11,7 +11,7 @@ import org.opencds.cqf.fhir.api.Repository;
 
 public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEntryParts> {
 
-    protected Repository repository;
+    protected final Repository repository;
     protected B bundle;
     protected int index = 0;
     protected List<BundleEntryParts> parts;
@@ -44,21 +44,33 @@ public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEnt
     }
 
     protected void getNextBundle() {
+        // Reset internal counter
+        index = 0;
+
         var nextLink = BundleUtil.getLinkUrlOfType(this.repository.fhirContext(), bundle, IBaseBundle.LINK_NEXT);
+
+        // No next Bundle, no parts.
         if (nextLink == null) {
+            this.parts = Collections.emptyList();
             return;
         }
 
-        // Reset the iterator
-        index = 0;
-
         @SuppressWarnings("unchecked")
         var clazz = (Class<B>) bundle.getClass();
+
         this.bundle = this.repository.link(clazz, nextLink);
+
+        // No Bundle returned, no parts
         if (bundle == null) {
             this.parts = Collections.emptyList();
-        } else {
-            this.parts = BundleUtil.toListOfEntries(this.repository.fhirContext(), bundle);
+            return;
+        }
+
+        this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle);
+
+        // Bundle returned an empty set, try the next one.
+        if (this.parts.isEmpty()) {
+            getNextBundle();
         }
     }
 }

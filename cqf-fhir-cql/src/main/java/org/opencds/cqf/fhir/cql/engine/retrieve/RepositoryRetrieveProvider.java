@@ -13,7 +13,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
-import org.opencds.cqf.fhir.utility.iterable.BundleObjectIterable;
+import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class RepositoryRetrieveProvider extends RetrieveProvider {
@@ -56,7 +56,7 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
             populateDateSearchParams(searchParams, datePath, dateLowPath, dateHighPath, dateRange);
             var resources = this.repository.search(bt, resourceType, searchParams);
 
-            return new BundleObjectIterable<>(repository, resources);
+            return new BundleMappingIterable<>(repository, resources, p -> p.getResource());
         } else {
             var resources = this.repository.search(bt, resourceType, Searches.ALL);
             var iter = new BundleIterable<IBaseBundle>(repository, resources);

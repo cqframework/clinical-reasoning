@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
@@ -12,18 +14,13 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Timing;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 
 public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
-    public final ModelResolver modelResolver;
-
-    public ResourceMatcherDSTU3(ModelResolver modelResolver) {
-        this.modelResolver = modelResolver;
-    }
-
-    public ModelResolver getModelResolver() {
-        return this.modelResolver;
+    public IFhirPath getEngine() {
+        return FhirPathCache.cachedForVersion(FhirVersionEnum.DSTU3);
     }
 
     @Override
@@ -39,7 +36,7 @@ public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
     }
 
     @Override
-    public List<BaseCodingDt> getCodes(Object codeElement) {
+    public List<BaseCodingDt> getCodes(IBase codeElement) {
         List<BaseCodingDt> resolvedCodes = new ArrayList<>();
         if (codeElement instanceof Coding) {
             resolvedCodes.add(

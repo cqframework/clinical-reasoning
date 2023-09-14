@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
@@ -7,23 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Timing;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 
 public class ResourceMatcherR4 implements BaseResourceMatcher {
-    public final ModelResolver modelResolver;
-
-    public ResourceMatcherR4(ModelResolver modelResolver) {
-        this.modelResolver = modelResolver;
-    }
-
-    public ModelResolver getModelResolver() {
-        return this.modelResolver;
+    public IFhirPath getEngine() {
+        return FhirPathCache.cachedForVersion(FhirVersionEnum.R4);
     }
 
     @Override
@@ -39,7 +36,7 @@ public class ResourceMatcherR4 implements BaseResourceMatcher {
     }
 
     @Override
-    public List<BaseCodingDt> getCodes(Object codeElement) {
+    public List<BaseCodingDt> getCodes(IBase codeElement) {
         List<BaseCodingDt> resolvedCodes = new ArrayList<>();
         if (codeElement instanceof Coding) {
             resolvedCodes.add(

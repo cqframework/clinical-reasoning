@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -31,7 +32,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
 /**
- * This class implements the Repository interface on onto a directory structure that matches the
+ * This class implements the Repository interface on onto a directory structure
+ * that matches the
  * standard IG layout.
  */
 public class IGFileStructureRepository implements Repository {
@@ -42,8 +44,9 @@ public class IGFileStructureRepository implements Repository {
     private final EncodingEnum encodingEnum;
     private final IParser parser;
 
-    private static final Map<ResourceCategory, String> categoryDirectories = new ImmutableMap.Builder<
-                    ResourceCategory, String>()
+    private final Map<String, IBaseResource> resourceCache = new HashMap<>();
+
+    private static final Map<ResourceCategory, String> categoryDirectories = new ImmutableMap.Builder<ResourceCategory, String>()
             .put(ResourceCategory.CONTENT, "resources")
             .put(ResourceCategory.DATA, "tests")
             .put(ResourceCategory.TERMINOLOGY, "vocabulary")
@@ -82,6 +85,10 @@ public class IGFileStructureRepository implements Repository {
         this.parser = parserForEncoding(fhirContext, encodingEnum);
     }
 
+    public void clearCache() {
+        this.resourceCache.clear();
+    }
+
     protected <T extends IBaseResource, I extends IIdType> String locationForResource(Class<T> resourceType, I id) {
         var directory = directoryForType(resourceType);
         return directory + "/" + fileNameForLayoutAndEncoding(resourceType.getSimpleName(), id.getIdPart());
@@ -114,22 +121,20 @@ public class IGFileStructureRepository implements Repository {
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected <T extends IBaseResource, I extends IIdType> T readLocation(
-            Class<T> resourceClass, String location, I idType) {
-        T r = null;
-        try {
-            r = parser.parseResource(resourceClass, new FileInputStream(location));
-        } catch (FileNotFoundException e) {
-            throw new ResourceNotFoundException(idType);
-        }
+            Class<T> resourceClass, String location) {
 
-        if (!r.getIdElement().hasIdPart() || !r.getIdElement().getIdPart().equals(idType.getIdPart())) {
-            throw new InternalErrorException(String.format(
-                    "Expected to read Resource with id %s, but found resource %s at location %s. The IG structure may not be consistent",
-                    idType.toString(), r.getIdElement().toString(), location));
-        }
-
-        return handleLibrary(r, location);
+        return (T) this.resourceCache.computeIfAbsent(
+                location,
+                l -> {
+                    try {
+                        var x = parser.parseResource(resourceClass, new FileInputStream(l));
+                        return handleLibrary(x, l);
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     @SuppressWarnings("unchecked")
@@ -179,6 +184,7 @@ public class IGFileStructureRepository implements Repository {
         try (var os = new FileOutputStream(location)) {
             String result = parser.encodeResourceToString(resource);
             os.write(result.getBytes());
+            this.resourceCache.put(location, resource);
         } catch (IOException e) {
             throw new UnclassifiedServerFailureException(
                     500, String.format("unable to write resource to location %s", location));
@@ -197,9 +203,12 @@ public class IGFileStructureRepository implements Repository {
                         || (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
                                 && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
                     try {
-                        var r = parser.parseResource(resourceClass, new FileInputStream(file));
-                        resources.add(handleLibrary(r, file.getPath()));
-                    } catch (FileNotFoundException e) {
+                        var r = this.readLocation(resourceClass, file.getPath());
+                        if (r.fhirType().equals(resourceClass.getSimpleName())) {
+                            resources.add(r);
+                        }
+                    } catch (RuntimeException e) {
+                        // intentionally empty
                     }
                 }
             }
@@ -220,7 +229,26 @@ public class IGFileStructureRepository implements Repository {
         requireNonNull(id, "id can not be null");
 
         var location = this.locationForResource(resourceType, id);
-        return readLocation(resourceType, location, id);
+        T r = null;
+        try {
+            r = readLocation(resourceType, location);
+        }
+        catch(RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                throw new ResourceNotFoundException(id);
+            }
+        }
+
+
+        if (r == null) {
+            throw new ResourceNotFoundException(id);
+        }
+
+        if (r.getIdElement() == null || !r.getIdElement().toUnqualifiedVersionless().equals(id.toUnqualifiedVersionless())) {
+            throw new ResourceNotFoundException(String.format("Expected to find a resource with id: %s at location: %s. Found resource with id: %s instead.", id.toUnqualifiedVersionless(), location, r.getIdElement()));
+        }
+
+        return r;
     }
 
     @Override
@@ -275,28 +303,24 @@ public class IGFileStructureRepository implements Repository {
         BundleBuilder builder = new BundleBuilder(this.fhirContext);
 
         var resourceList = readLocation(resourceType);
-
-        List<IBaseResource> filteredResources = new ArrayList<>();
-        if (searchParameters != null && !searchParameters.isEmpty()) {
+        if (searchParameters == null || searchParameters.isEmpty()) {
+            resourceList.forEach(builder::addCollectionEntry);
+        } else {
             var resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
             for (var resource : resourceList) {
-                boolean include = false;
+                boolean include = true;
                 for (var nextEntry : searchParameters.entrySet()) {
                     var paramName = nextEntry.getKey();
-                    if (resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
-                        include = true;
-                    } else {
+                    if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
                         include = false;
                         break;
                     }
                 }
+
                 if (include) {
-                    filteredResources.add(resource);
+                    builder.addCollectionEntry(resource);
                 }
             }
-            filteredResources.forEach(builder::addCollectionEntry);
-        } else {
-            resourceList.forEach(builder::addCollectionEntry);
         }
 
         builder.setType("searchset");

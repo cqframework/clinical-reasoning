@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -13,47 +14,55 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 public interface BaseResourceMatcher {
-    public ModelResolver getModelResolver();
+    public IFhirPath getEngine();
 
+    // The list here is an OR list. Meaning, if any element matches it's a match
     default boolean matches(String path, List<IQueryParameterType> params, IBaseResource resource) {
-        boolean match = false;
+        boolean match = true;
         path = path.replaceFirst("_", "");
-        var pathResult = getModelResolver().resolvePath(resource, path);
-        if (pathResult == null) {
+        var pathResult = getEngine().evaluate(resource, path, IBase.class);
+        if (pathResult == null || pathResult.isEmpty()) {
             return false;
         }
         for (IQueryParameterType param : params) {
-            if (param instanceof ReferenceParam) {
-                match = isMatchReference(param, pathResult);
-            } else if (param instanceof DateParam) {
-                match = isMatchDate((DateParam) param, pathResult);
-            } else if (param instanceof TokenParam) {
-                var codes = getCodes(pathResult);
-                if (codes == null) {
-                    match = isMatchToken((TokenParam) param, pathResult);
-                } else if (isMatchCoding((TokenParam) param, pathResult, codes)) {
+            for (var r : pathResult) {
+                if (param instanceof ReferenceParam) {
+                    match = isMatchReference(param, r);
+                } else if (param instanceof DateParam) {
+                    match = isMatchDate((DateParam) param, r);
+                } else if (param instanceof TokenParam) {
+                    var codes = getCodes(r);
+                    if (codes == null) {
+                        match = isMatchToken((TokenParam) param, r);
+                    } else {
+                        match = isMatchCoding((TokenParam) param, r, codes);
+                    }
+                } else if (param instanceof UriParam) {
+                    match = isMatchUri((UriParam) param, r);
+                } else if (param instanceof StringParam) {
+                    match = isMatchString((StringParam) param, r);
+                } else {
+                    throw new NotImplementedException("Resource matching not implemented for search params of type "
+                            + param.getClass().getSimpleName());
+                }
+
+                if (match) {
                     return true;
                 }
-            } else if (param instanceof UriParam) {
-                match = isMatchUri((UriParam) param, pathResult);
-            } else if (param instanceof StringParam) {
-                match = isMatchString((StringParam) param, pathResult);
-            } else {
-                throw new NotImplementedException("Resource matching not implemented for search params of type "
-                        + param.getClass().getSimpleName());
             }
         }
-        return match;
+
+        return false;
     }
 
-    default boolean isMatchReference(IQueryParameterType param, Object pathResult) {
+    default boolean isMatchReference(IQueryParameterType param, IBase pathResult) {
         if (pathResult instanceof IBaseReference) {
             return ((IBaseReference) pathResult)
                     .getReferenceElement()
@@ -84,7 +93,7 @@ public interface BaseResourceMatcher {
         return false;
     }
 
-    default boolean isMatchDate(DateParam param, Object pathResult) {
+    default boolean isMatchDate(DateParam param, IBase pathResult) {
         DateRangeParam dateRange;
         // date, dateTime and instant are PrimitiveType<Date>
         if (pathResult instanceof IPrimitiveType) {
@@ -105,24 +114,18 @@ public interface BaseResourceMatcher {
         return matchesDateBounds(dateRange, new DateRangeParam(param));
     }
 
-    default boolean isMatchToken(TokenParam param, Object pathResult) {
+    default boolean isMatchToken(TokenParam param, IBase pathResult) {
         if (param.getValue() == null) {
             return true;
         }
         if (pathResult instanceof IPrimitiveType) {
             return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
         }
-        if (pathResult instanceof ArrayList) {
-            var firstValue = ((ArrayList<?>) pathResult).get(0);
-            var codes = getCodes(firstValue);
-            if (codes != null) {
-                return isMatchCoding(param, pathResult, codes);
-            }
-        }
+
         return false;
     }
 
-    default boolean isMatchCoding(TokenParam param, Object pathResult, List<BaseCodingDt> codes) {
+    default boolean isMatchCoding(TokenParam param, IBase pathResult, List<BaseCodingDt> codes) {
         // in value set
         if (param.getModifier() == TokenParamModifier.IN) {
             return inValueSet(codes);
@@ -130,7 +133,7 @@ public interface BaseResourceMatcher {
         return codes.stream().anyMatch((param.getValueAsCoding())::matchesToken);
     }
 
-    default boolean isMatchUri(UriParam param, Object pathResult) {
+    default boolean isMatchUri(UriParam param, IBase pathResult) {
         if (pathResult instanceof IPrimitiveType) {
             return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
         }
@@ -171,7 +174,7 @@ public interface BaseResourceMatcher {
 
     DateRangeParam getDateRange(ICompositeType type);
 
-    List<BaseCodingDt> getCodes(Object codeElement);
+    List<BaseCodingDt> getCodes(IBase codeElement);
 
     boolean inValueSet(List<BaseCodingDt> codes);
 }

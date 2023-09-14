@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
-import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
+import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class Dstu3RepositorySubjectProvider implements SubjectProvider {
@@ -31,11 +31,11 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                 || subjectIds.get(0) == null
                 || subjectIds.get(0).isEmpty()) {
             var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
-            var iterator = new BundleIterable<>(repository, bundle);
-            return iterator.toStream().map(x -> x.getResource()
-                    .getIdElement()
-                    .toUnqualifiedVersionless()
-                    .getValue());
+            return new BundleMappingIterable<>(repository, bundle, x -> x.getResource()
+                            .getIdElement()
+                            .toUnqualifiedVersionless()
+                            .getValue())
+                    .toStream();
         }
 
         List<String> subjects = new ArrayList<>();

@@ -6,7 +6,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.client.Clients;
-import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.matcher.BaseResourceMatcher;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR4;
@@ -57,11 +56,11 @@ public class Repositories {
         var fhirVersion = context.getVersion().getVersion();
         switch (fhirVersion) {
             case DSTU3:
-                return new ResourceMatcherDSTU3(FhirModelResolverCache.resolverForVersion(fhirVersion));
+                return new ResourceMatcherDSTU3();
             case R4:
-                return new ResourceMatcherR4(FhirModelResolverCache.resolverForVersion(fhirVersion));
+                return new ResourceMatcherR4();
             case R5:
-                return new ResourceMatcherR5(FhirModelResolverCache.resolverForVersion(fhirVersion));
+                return new ResourceMatcherR5();
             default:
                 throw new NotImplementedException(
                         "Resource matching is not implemented for FHIR version " + fhirVersion.getFhirVersionString());

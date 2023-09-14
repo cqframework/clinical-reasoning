@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -19,8 +20,14 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 
 public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
+    @Override
     public IFhirPath getEngine() {
         return FhirPathCache.cachedForVersion(FhirVersionEnum.DSTU3);
+    }
+
+    @Override
+    public FhirContext getContext() {
+        return FhirContext.forDstu3Cached();
     }
 
     @Override

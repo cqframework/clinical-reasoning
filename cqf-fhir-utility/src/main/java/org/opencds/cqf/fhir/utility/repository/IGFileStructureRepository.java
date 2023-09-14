@@ -7,7 +7,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -46,7 +45,8 @@ public class IGFileStructureRepository implements Repository {
 
     private final Map<String, IBaseResource> resourceCache = new HashMap<>();
 
-    private static final Map<ResourceCategory, String> categoryDirectories = new ImmutableMap.Builder<ResourceCategory, String>()
+    private static final Map<ResourceCategory, String> categoryDirectories = new ImmutableMap.Builder<
+                    ResourceCategory, String>()
             .put(ResourceCategory.CONTENT, "resources")
             .put(ResourceCategory.DATA, "tests")
             .put(ResourceCategory.TERMINOLOGY, "vocabulary")
@@ -122,19 +122,16 @@ public class IGFileStructureRepository implements Repository {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends IBaseResource, I extends IIdType> T readLocation(
-            Class<T> resourceClass, String location) {
+    protected <T extends IBaseResource, I extends IIdType> T readLocation(Class<T> resourceClass, String location) {
 
-        return (T) this.resourceCache.computeIfAbsent(
-                location,
-                l -> {
-                    try {
-                        var x = parser.parseResource(resourceClass, new FileInputStream(l));
-                        return handleLibrary(x, l);
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+        return (T) this.resourceCache.computeIfAbsent(location, l -> {
+            try {
+                var x = parser.parseResource(resourceClass, new FileInputStream(l));
+                return handleLibrary(x, l);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -232,20 +229,21 @@ public class IGFileStructureRepository implements Repository {
         T r = null;
         try {
             r = readLocation(resourceType, location);
-        }
-        catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             if (e.getCause() instanceof FileNotFoundException) {
                 throw new ResourceNotFoundException(id);
             }
         }
 
-
         if (r == null) {
             throw new ResourceNotFoundException(id);
         }
 
-        if (r.getIdElement() == null || !r.getIdElement().toUnqualifiedVersionless().equals(id.toUnqualifiedVersionless())) {
-            throw new ResourceNotFoundException(String.format("Expected to find a resource with id: %s at location: %s. Found resource with id: %s instead.", id.toUnqualifiedVersionless(), location, r.getIdElement()));
+        if (r.getIdElement() == null
+                || !r.getIdElement().toUnqualifiedVersionless().equals(id.toUnqualifiedVersionless())) {
+            throw new ResourceNotFoundException(String.format(
+                    "Expected to find a resource with id: %s at location: %s. Found resource with id: %s instead.",
+                    id.toUnqualifiedVersionless(), location, r.getIdElement()));
         }
 
         return r;

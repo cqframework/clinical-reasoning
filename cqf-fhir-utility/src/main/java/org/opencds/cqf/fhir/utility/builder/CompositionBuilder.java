@@ -3,19 +3,9 @@ package org.opencds.cqf.fhir.utility.builder;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.valueset.CompositionStatusEnum;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.dstu2016may.model.CodeableConcept;
-import org.hl7.fhir.dstu2016may.model.Coding;
-import org.hl7.fhir.dstu2016may.model.Identifier;
-import org.hl7.fhir.dstu2016may.model.Reference;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Enumerations.CompositionStatus;
 
@@ -122,76 +112,6 @@ public class CompositionBuilder<T extends IDomainResource> extends DomainResourc
 
     private CodingSettings getTypeSetting() {
         return myType.getCodingSettingsArray()[0];
-    }
-
-    @Override
-    protected void initializeDstu2(T theResource) {
-        super.initializeDstu2(theResource);
-        ca.uhn.fhir.model.dstu2.resource.Composition composition =
-                (ca.uhn.fhir.model.dstu2.resource.Composition) theResource;
-
-        List<ResourceReferenceDt> author = new ArrayList<>();
-        author.add(new ResourceReferenceDt(myAuthor));
-
-        composition
-                .setDate(new DateTimeDt(myDate))
-                .setIdentifier(new IdentifierDt(
-                        getIdentifier().getKey(), getIdentifier().getValue()))
-                .setStatus(CompositionStatusEnum.forCode(myStatus))
-                .setSubject(new ResourceReferenceDt(mySubject))
-                .setTitle(myTitle)
-                .setType(new CodeableConceptDt()
-                        .addCoding(new CodingDt()
-                                .setSystem(getTypeSetting().getSystem())
-                                .setCode(getTypeSetting().getCode())
-                                .setDisplay(getTypeSetting().getDisplay())))
-                .setAuthor(author)
-                .setCustodian(new ResourceReferenceDt(myCustodian));
-    }
-
-    @Override
-    protected void initializeDstu2_1(T theResource) {
-        super.initializeDstu2_1(theResource);
-        org.hl7.fhir.dstu2016may.model.Composition composition =
-                (org.hl7.fhir.dstu2016may.model.Composition) theResource;
-
-        composition
-                .setDate(myDate)
-                .setIdentifier(new Identifier()
-                        .setSystem(getIdentifier().getKey())
-                        .setValue(getIdentifier().getValue()))
-                .setStatus(org.hl7.fhir.dstu2016may.model.Composition.CompositionStatus.valueOf(myStatus))
-                .setSubject(new Reference(mySubject))
-                .setTitle(myTitle)
-                .setType(new CodeableConcept()
-                        .addCoding(new Coding()
-                                .setSystem(getTypeSetting().getSystem())
-                                .setCode(getTypeSetting().getCode())
-                                .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new Reference(myAuthor))
-                .setCustodian(new Reference(myCustodian));
-    }
-
-    @Override
-    protected void initializeDstu2_HL7Org(T theResource) {
-        super.initializeDstu2_HL7Org(theResource);
-        org.hl7.fhir.dstu2.model.Composition composition = (org.hl7.fhir.dstu2.model.Composition) theResource;
-
-        composition
-                .setDate(myDate)
-                .setIdentifier(new org.hl7.fhir.dstu2.model.Identifier()
-                        .setSystem(getIdentifier().getKey())
-                        .setValue(getIdentifier().getValue()))
-                .setStatus(org.hl7.fhir.dstu2.model.Composition.CompositionStatus.valueOf(myStatus))
-                .setSubject(new org.hl7.fhir.dstu2.model.Reference(mySubject))
-                .setTitle(myTitle)
-                .setType(new org.hl7.fhir.dstu2.model.CodeableConcept()
-                        .addCoding(new org.hl7.fhir.dstu2.model.Coding()
-                                .setSystem(getTypeSetting().getSystem())
-                                .setCode(getTypeSetting().getCode())
-                                .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new org.hl7.fhir.dstu2.model.Reference(myAuthor))
-                .setCustodian(new org.hl7.fhir.dstu2.model.Reference(myCustodian));
     }
 
     @Override

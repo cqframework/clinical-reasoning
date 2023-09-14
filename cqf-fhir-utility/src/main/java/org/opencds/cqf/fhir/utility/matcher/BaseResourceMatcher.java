@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -10,7 +11,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.NotImplementedException;
@@ -23,14 +23,42 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 public interface BaseResourceMatcher {
     public IFhirPath getEngine();
 
+    public FhirContext getContext();
+
     // The list here is an OR list. Meaning, if any element matches it's a match
-    default boolean matches(String path, List<IQueryParameterType> params, IBaseResource resource) {
+    default boolean matches(String name, List<IQueryParameterType> params, IBaseResource resource) {
         boolean match = true;
-        path = path.replaceFirst("_", "");
-        var pathResult = getEngine().evaluate(resource, path, IBase.class);
+
+        var context = getContext();
+        var s = context.getResourceDefinition(resource).getSearchParam(name);
+        if (s == null) {
+            throw new RuntimeException(String.format(
+                    "The SearchParameter %s for Resource %s is not supported.", name, resource.fhirType()));
+        }
+
+        var path = s.getPath();
+
+        // System search parameters...
+        if (path.isEmpty() && name.startsWith("_")) {
+            path = name.substring(1);
+        }
+
+        List<IBase> pathResult = null;
+        try {
+            var parsed = getEngine().parse(path);
+            pathResult = getEngine().evaluate(resource, parsed, IBase.class);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format(
+                            "Evaluating SearchParameter %s for Resource %s resulted in an error.",
+                            name, resource.fhirType()),
+                    e);
+        }
+
         if (pathResult == null || pathResult.isEmpty()) {
             return false;
         }
+
         for (IQueryParameterType param : params) {
             for (var r : pathResult) {
                 if (param instanceof ReferenceParam) {

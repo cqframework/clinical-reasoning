@@ -51,9 +51,9 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
         if (isFilterBySearchParam()) {
             Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
             populateTemplateSearchParams(searchParams, templateId);
-            populateContextSearchParams(searchParams, contextPath, context, contextValue);
-            populateTerminologySearchParams(searchParams, codePath, codes, valueSet);
-            populateDateSearchParams(searchParams, datePath, dateLowPath, dateHighPath, dateRange);
+            populateContextSearchParams(searchParams, dataType, contextPath, context, contextValue);
+            populateTerminologySearchParams(searchParams, dataType, codePath, codes, valueSet);
+            populateDateSearchParams(searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
             var resources = this.repository.search(bt, resourceType, searchParams);
 
             return new BundleMappingIterable<>(repository, resources, p -> p.getResource());

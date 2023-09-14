@@ -108,15 +108,6 @@ public abstract class ResourceBuilder<SELF, T extends IBaseResource> {
         T resource = Resources.newResource(myResourceClass, myId);
 
         switch (resource.getStructureFhirVersionEnum()) {
-            case DSTU2:
-                initializeDstu2(resource);
-                break;
-            case DSTU2_1:
-                initializeDstu2_1(resource);
-                break;
-            case DSTU2_HL7ORG:
-                initializeDstu2_HL7Org(resource);
-                break;
             case DSTU3:
                 initializeDstu3(resource);
                 break;
@@ -137,21 +128,6 @@ public abstract class ResourceBuilder<SELF, T extends IBaseResource> {
 
     private void addProfiles(T theResource) {
         getProfiles().forEach(profile -> theResource.getMeta().addProfile(profile));
-    }
-
-    protected void initializeDstu2(T theResource) {
-        addProfiles(theResource);
-        // no identifier
-    }
-
-    protected void initializeDstu2_1(T theResource) {
-        addProfiles(theResource);
-        // no identifier
-    }
-
-    protected void initializeDstu2_HL7Org(T theResource) {
-        addProfiles(theResource);
-        // no identifier
     }
 
     protected void initializeDstu3(T theResource) {

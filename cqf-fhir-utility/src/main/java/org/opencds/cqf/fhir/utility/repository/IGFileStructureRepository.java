@@ -239,11 +239,16 @@ public class IGFileStructureRepository implements Repository {
             throw new ResourceNotFoundException(id);
         }
 
-        if (r.getIdElement() == null
-                || !r.getIdElement().toUnqualifiedVersionless().equals(id.toUnqualifiedVersionless())) {
+        if (r.getIdElement() == null) {
             throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with id: %s at location: %s. Found resource with id: %s instead.",
-                    id.toUnqualifiedVersionless(), location, r.getIdElement()));
+                    "Expected to find a resource with id: %s at location: %s. Found resource without an id instead.",
+                    id.toUnqualifiedVersionless(), location));
+        }
+
+        if (!r.getIdElement().toUnqualifiedVersionless().equals(id.toUnqualifiedVersionless())) {
+            throw new ResourceNotFoundException(String.format(
+                    "Expected to find a resource with id: %s at location: %s. Found resource with an id %s instead.",
+                    id.toUnqualifiedVersionless(), location, r.getIdElement().toUnqualifiedVersionless()));
         }
 
         return r;

@@ -291,7 +291,14 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
                 ? new IdDt((String) contextValue).withResourceType(context)
                 : new IdDt((String) contextValue);
         var sp = this.resolver.getSearchParameterDefinition(dataType, contextPath);
-        searchParams.put(sp.getName(), Collections.singletonList(new ReferenceParam(ref)));
+
+        // Self-references are token params.
+        if (sp.getName().equals("_id")) {
+            searchParams.put(sp.getName(), Collections.singletonList(new TokenParam((String)contextValue)));
+        }
+        else {
+            searchParams.put(sp.getName(), Collections.singletonList(new ReferenceParam(ref)));
+        }
     }
 
     public void populateTerminologySearchParams(

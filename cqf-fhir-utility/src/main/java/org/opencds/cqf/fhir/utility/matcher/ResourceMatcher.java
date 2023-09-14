@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -13,6 +14,8 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -20,10 +23,59 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public interface BaseResourceMatcher {
+public interface ResourceMatcher {
+
+    public static class SPPathKey {
+        private final String resourceType;
+        private final String resourcePath;
+
+        public SPPathKey(String resourceType, String resourcePath) {
+            this.resourceType = resourceType;
+            this.resourcePath = resourcePath;
+        }
+
+        public String path() {
+            return resourcePath;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((resourceType == null) ? 0 : resourceType.hashCode());
+            result = prime * result + ((resourcePath == null) ? 0 : resourcePath.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            SPPathKey other = (SPPathKey) obj;
+            if (resourceType == null) {
+                if (other.resourceType != null)
+                    return false;
+            } else if (!resourceType.equals(other.resourceType))
+                return false;
+            if (resourcePath == null) {
+                if (other.resourcePath != null)
+                    return false;
+            } else if (!resourcePath.equals(other.resourcePath))
+                return false;
+            return true;
+        }
+
+    }
+
     public IFhirPath getEngine();
 
     public FhirContext getContext();
+
+    public Map<SPPathKey, IParsedExpression> getPathCache();
 
     // The list here is an OR list. Meaning, if any element matches it's a match
     default boolean matches(String name, List<IQueryParameterType> params, IBaseResource resource) {
@@ -45,7 +97,18 @@ public interface BaseResourceMatcher {
 
         List<IBase> pathResult = null;
         try {
-            var parsed = getEngine().parse(path);
+            var parsed = getPathCache().computeIfAbsent(new SPPathKey(resource.fhirType(), path), p -> {
+                try {
+                    return getEngine().parse(p.path());
+                } catch (Exception e) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "Parsing SearchParameter %s for Resource %s resulted in an error.",
+                                    name, resource.fhirType()),
+                            e);
+
+                }
+            });
             pathResult = getEngine().evaluate(resource, parsed, IBase.class);
         } catch (Exception e) {
             throw new RuntimeException(

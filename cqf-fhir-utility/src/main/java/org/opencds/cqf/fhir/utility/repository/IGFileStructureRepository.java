@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 
 /**
  * This class implements the Repository interface on onto a directory structure
@@ -42,6 +43,7 @@ public class IGFileStructureRepository implements Repository {
     private final IGLayoutMode layoutMode;
     private final EncodingEnum encodingEnum;
     private final IParser parser;
+    private final ResourceMatcher resourceMatcher;
 
     private final Map<String, IBaseResource> resourceCache = new HashMap<>();
 
@@ -83,6 +85,7 @@ public class IGFileStructureRepository implements Repository {
         this.layoutMode = layoutMode;
         this.encodingEnum = encodingEnum;
         this.parser = parserForEncoding(fhirContext, encodingEnum);
+        this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
     }
 
     public void clearCache() {
@@ -309,7 +312,6 @@ public class IGFileStructureRepository implements Repository {
         if (searchParameters == null || searchParameters.isEmpty()) {
             resourceList.forEach(builder::addCollectionEntry);
         } else {
-            var resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
             for (var resource : resourceList) {
                 boolean include = true;
                 for (var nextEntry : searchParameters.entrySet()) {

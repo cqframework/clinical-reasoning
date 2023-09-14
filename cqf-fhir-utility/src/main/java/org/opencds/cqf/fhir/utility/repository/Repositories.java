@@ -6,7 +6,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.client.Clients;
-import org.opencds.cqf.fhir.utility.matcher.BaseResourceMatcher;
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR4;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR5;
@@ -52,7 +52,7 @@ public class Repositories {
         return new ProxyRepository(localRepository, data, content, terminology);
     }
 
-    public static BaseResourceMatcher getResourceMatcher(FhirContext context) {
+    public static ResourceMatcher getResourceMatcher(FhirContext context) {
         var fhirVersion = context.getVersion().getVersion();
         switch (fhirVersion) {
             case DSTU3:

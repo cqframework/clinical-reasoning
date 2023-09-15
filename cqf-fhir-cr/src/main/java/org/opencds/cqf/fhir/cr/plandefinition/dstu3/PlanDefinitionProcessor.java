@@ -22,7 +22,6 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Goal;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -439,8 +438,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     private IBaseResource resolveDefinition(
-            PlanDefinition planDefinition,
-            PlanDefinition.PlanDefinitionActionComponent action) {
+            PlanDefinition planDefinition, PlanDefinition.PlanDefinitionActionComponent action) {
         logger.debug("Resolving definition {}", action.getDefinition().getReference());
         var definition = new StringType(action.getDefinition().getReference());
         var resourceName = resolveResourceName(definition, planDefinition);

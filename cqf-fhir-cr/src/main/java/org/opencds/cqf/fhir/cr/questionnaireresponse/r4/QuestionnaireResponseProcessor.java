@@ -60,9 +60,9 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         }
 
         return castOrThrow(
-                baseQuestionnaireResponse,
-                QuestionnaireResponse.class,
-                "The QuestionnaireResponse passed to repository was not a valid instance of QuestionnaireResponse.class")
+                        baseQuestionnaireResponse,
+                        QuestionnaireResponse.class,
+                        "The QuestionnaireResponse passed to repository was not a valid instance of QuestionnaireResponse.class")
                 .orElse(null);
     }
 
@@ -91,8 +91,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         patientId = questionnaireResponse.getSubject().getId();
         libraryUrl = questionnaireResponse.hasExtension(Constants.CQF_LIBRARY)
                 ? ((CanonicalType) questionnaireResponse
-                        .getExtensionByUrl(Constants.CQF_LIBRARY)
-                        .getValue())
+                                .getExtensionByUrl(Constants.CQF_LIBRARY)
+                                .getValue())
                         .getValue()
                 : null;
     }
@@ -140,8 +140,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         var subjectItems = item.getItem().stream()
                 .filter(child -> child.hasExtension(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))
                 .collect(Collectors.toList());
-        var groupSubject = !subjectItems.isEmpty() ? subjectItems.get(0).getAnswer().get(0).getValueReference()
-                : subject.copy();
+        var groupSubject =
+                !subjectItems.isEmpty() ? subjectItems.get(0).getAnswer().get(0).getValueReference() : subject.copy();
         if (item.hasDefinition()) {
             processDefinitionItem(item, questionnaireResponse, resources, groupSubject);
         } else {
@@ -255,11 +255,19 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         if (dateProperties != null && !dateProperties.isEmpty() && questionnaireResponse.hasAuthored()) {
             dateProperties.forEach(p -> {
                 try {
-                    var propertyDef = fhirContext().getElementDefinition(
-                            p.getTypeCode().contains("|") ? p.getTypeCode().split("\\|")[0] : p.getTypeCode());
+                    var propertyDef = fhirContext()
+                            .getElementDefinition(
+                                    p.getTypeCode().contains("|")
+                                            ? p.getTypeCode().split("\\|")[0]
+                                            : p.getTypeCode());
                     if (propertyDef != null) {
-                        modelResolver.setValue(resource, p.getName(), propertyDef.getImplementingClass()
-                                .getConstructor(Date.class).newInstance(questionnaireResponse.getAuthored()));
+                        modelResolver.setValue(
+                                resource,
+                                p.getName(),
+                                propertyDef
+                                        .getImplementingClass()
+                                        .getConstructor(Date.class)
+                                        .newInstance(questionnaireResponse.getAuthored()));
                     }
                 } catch (Exception ex) {
                     var message = String.format(
@@ -346,8 +354,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         // obs.setFocus();
         obs.setEncounter(questionnaireResponse.getEncounter());
         var authoredDate = new DateTimeType((questionnaireResponse.hasAuthored()
-                ? questionnaireResponse.getAuthored().toInstant()
-                : Instant.now())
+                        ? questionnaireResponse.getAuthored().toInstant()
+                        : Instant.now())
                 .toString());
         obs.setEffective(authoredDate);
         obs.setIssuedElement(new InstantType(authoredDate));

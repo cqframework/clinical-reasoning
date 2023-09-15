@@ -34,7 +34,7 @@ public class QuestionnaireResponseProcessorTests {
     @Test
     void testDefinitionBasedExtraction() {
         TestQuestionnaireResponse.Assert.that(
-                new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1"))
+                        new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1"))
                 .withExpectedBundleId(new IdType("Bundle", "extract-OutpatientPriorAuthorizationRequest-OPA-Patient1"))
                 .extract()
                 .hasEntry(2);
@@ -43,7 +43,7 @@ public class QuestionnaireResponseProcessorTests {
     @Test
     void testNestedDefinitionBaseExtraction() {
         TestQuestionnaireResponse.Assert.that(
-                new IdType("QuestionnaireResponse", "cc-screening-pathway-definition-answers"))
+                        new IdType("QuestionnaireResponse", "cc-screening-pathway-definition-answers"))
                 .withExpectedBundleId(new IdType("Bundle", "extract-cc-screening-pathway-definition-answers"))
                 .extract()
                 .hasEntry(3);

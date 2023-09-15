@@ -37,7 +37,6 @@ import org.hl7.fhir.r5.model.Goal;
 import org.hl7.fhir.r5.model.Goal.GoalLifecycleStatus;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Parameters;
@@ -417,8 +416,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     private IBaseResource resolveDefinition(
-            PlanDefinition planDefinition,
-            PlanDefinition.PlanDefinitionActionComponent action) {
+            PlanDefinition planDefinition, PlanDefinition.PlanDefinitionActionComponent action) {
         logger.debug(
                 "Resolving definition {}", action.getDefinitionCanonicalType().getValue());
         var definition = action.getDefinitionCanonicalType();

@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface ResourceMatcher {
@@ -209,6 +210,12 @@ public interface ResourceMatcher {
         if (param.getValue() == null) {
             return true;
         }
+
+        if (pathResult instanceof IIdType) {
+            var id = (IIdType)pathResult;
+            return param.getValue().equals(id.getIdPart());
+        }
+
         if (pathResult instanceof IPrimitiveType) {
             return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
         }

@@ -23,7 +23,6 @@ import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.DomainResource;
-import org.hl7.fhir.r5.model.Element;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.ActionConditionKind;
 import org.hl7.fhir.r5.model.Enumerations.ActionRelationshipType;

@@ -60,7 +60,18 @@ public class ActivityDefinitionProcessorTests {
     @Test
     public void testDynamicValueWithNestedPath() {
         var result = this.activityDefinitionProcessor.apply(
-                new IdType("ActivityDefinition", "ASLPCrd"), null, null, "patient-1", null, null, null, null, null, null, null, null);
+                new IdType("ActivityDefinition", "ASLPCrd"),
+                null,
+                null,
+                "patient-1",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
         Assertions.assertTrue(result instanceof Task);
         var task = (Task) result;
         Assertions.assertTrue(task.hasInput());

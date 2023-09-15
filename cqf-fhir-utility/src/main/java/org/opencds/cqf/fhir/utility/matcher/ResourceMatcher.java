@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -50,26 +49,18 @@ public interface ResourceMatcher {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
             SPPathKey other = (SPPathKey) obj;
             if (resourceType == null) {
-                if (other.resourceType != null)
-                    return false;
-            } else if (!resourceType.equals(other.resourceType))
-                return false;
+                if (other.resourceType != null) return false;
+            } else if (!resourceType.equals(other.resourceType)) return false;
             if (resourcePath == null) {
-                if (other.resourcePath != null)
-                    return false;
-            } else if (!resourcePath.equals(other.resourcePath))
-                return false;
+                if (other.resourcePath != null) return false;
+            } else if (!resourcePath.equals(other.resourcePath)) return false;
             return true;
         }
-
     }
 
     public IFhirPath getEngine();
@@ -107,7 +98,6 @@ public interface ResourceMatcher {
                                     "Parsing SearchParameter %s for Resource %s resulted in an error.",
                                     name, resource.fhirType()),
                             e);
-
                 }
             });
             pathResult = getEngine().evaluate(resource, parsed, IBase.class);
@@ -212,7 +202,7 @@ public interface ResourceMatcher {
         }
 
         if (pathResult instanceof IIdType) {
-            var id = (IIdType)pathResult;
+            var id = (IIdType) pathResult;
             return param.getValue().equals(id.getIdPart());
         }
 

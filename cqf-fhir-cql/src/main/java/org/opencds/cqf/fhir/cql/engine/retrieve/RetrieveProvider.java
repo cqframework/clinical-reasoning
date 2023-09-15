@@ -294,9 +294,8 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
 
         // Self-references are token params.
         if (sp.getName().equals("_id")) {
-            searchParams.put(sp.getName(), Collections.singletonList(new TokenParam((String)contextValue)));
-        }
-        else {
+            searchParams.put(sp.getName(), Collections.singletonList(new TokenParam((String) contextValue)));
+        } else {
             searchParams.put(sp.getName(), Collections.singletonList(new ReferenceParam(ref)));
         }
     }

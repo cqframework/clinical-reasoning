@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -99,8 +100,6 @@ public abstract class BasePlanDefinitionProcessor<T> {
     public abstract IBaseResource transformToCarePlan(IBaseResource requestGroup);
 
     public abstract IBaseResource transformToBundle(IBaseResource requestGroup);
-
-    protected abstract void resolveDynamicExtension(IElement requestAction, IBase resource, Object value, String path);
 
     protected abstract void extractQuestionnaireResponse();
 
@@ -338,11 +337,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
         path = path.replace("%", "");
         var value = result.size() == 1 ? result.get(0) : result;
         if (path.startsWith("activity.extension") || path.startsWith("action.extension")) {
-            if (repository.fhirContext().getVersion().getVersion() == FhirVersionEnum.R5) {
+            // Custom logic to handle setting the indicator of a CDS Card because RequestGroup.action does not have a priority property in DSTU3
+            if (repository.fhirContext().getVersion().getVersion() != FhirVersionEnum.DSTU3) {
                 throw new IllegalArgumentException(
-                        "Please use the priority path when setting indicator values when using FHIR R5 for CDS Hooks evaluation");
+                        "Please use the priority path when setting indicator values when using FHIR R4 or higher for CDS Hooks evaluation");
             }
-            resolveDynamicExtension(requestAction, resource, value, path);
+            // default to adding extension to last action
+            ((org.hl7.fhir.dstu3.model.Element) requestAction).addExtension().setValue((org.hl7.fhir.dstu3.model.Type) value);
         } else if (path.startsWith("action.") || resource == null) {
             modelResolver.setValue(requestAction, path.replace("action.", ""), value);
         } else {

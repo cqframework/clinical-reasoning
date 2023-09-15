@@ -312,14 +312,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     @Override
-    public void resolveDynamicExtension(IElement requestAction, IBase resource, Object value, String path) {
-        if (path.equals("activity.extension") || path.equals("action.extension")) {
-            // default to adding extension to last action
-            ((Element) requestAction).addExtension().setValue((Type) value);
-        }
-    }
-
-    @Override
     public void addOperationOutcomeIssue(String issue) {
         oc.addIssue()
                 .setCode(OperationOutcome.IssueType.EXCEPTION)

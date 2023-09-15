@@ -8,8 +8,7 @@
         "resourceType": "RequestOrchestration",
         "id": "generate-questionnaire",
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire"
         ],
         "status": "draft",
         "intent": "proposal",

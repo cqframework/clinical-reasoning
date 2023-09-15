@@ -7,14 +7,8 @@
       "resource": {
         "resourceType": "RequestGroup",
         "id": "generate-questionnaire",
-        "meta": {
-          "profile": [
-            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
-          ]
-        },
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire|1.0.0",
-          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
+          "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire|1.0.0"
         ],
         "status": "draft",
         "intent": "proposal",
@@ -44,11 +38,6 @@
       "resource": {
         "resourceType": "RequestGroup",
         "id": "route-one",
-        "meta": {
-          "profile": [
-            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
-          ]
-        },
         "instantiatesCanonical": [
           "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one|1.0.0"
         ],

@@ -22,7 +22,6 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Goal;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -197,7 +196,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 .setSubject(new Reference(subjectId));
         requestGroup.setId(new IdType(
                 requestGroup.fhirType(), planDefinition.getIdElement().getIdPart()));
-        requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
+        // requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
         if (encounterId != null) {
             requestGroup.setContext(new Reference(encounterId));
         }
@@ -384,7 +383,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
             IBaseResource resource = null;
             if (action.hasDefinition()) {
-                resource = resolveDefinition(planDefinition, requestGroup, action);
+                resource = resolveDefinition(planDefinition, action);
                 if (resource != null) {
                     applyAction(requestGroup, resource, action);
                     requestAction.setResource(new Reference(resource.getIdElement()));
@@ -439,15 +438,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     private IBaseResource resolveDefinition(
-            PlanDefinition planDefinition,
-            RequestGroup requestGroup,
-            PlanDefinition.PlanDefinitionActionComponent action) {
+            PlanDefinition planDefinition, PlanDefinition.PlanDefinitionActionComponent action) {
         logger.debug("Resolving definition {}", action.getDefinition().getReference());
         var definition = new StringType(action.getDefinition().getReference());
         var resourceName = resolveResourceName(definition, planDefinition);
         switch (FHIRAllTypes.fromCode(requireNonNull(resourceName))) {
             case PLANDEFINITION:
-                return applyNestedPlanDefinition(requestGroup, definition);
+                return applyNestedPlanDefinition(planDefinition, definition);
             case ACTIVITYDEFINITION:
                 return applyActivityDefinition(planDefinition, definition);
             case QUESTIONNAIRE:
@@ -517,14 +514,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         return result;
     }
 
-    private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup, StringType definition) {
+    private IBaseResource applyNestedPlanDefinition(PlanDefinition planDefinition, StringType definition) {
         RequestGroup result = null;
         try {
-            var planDefinition = (PlanDefinition) SearchHelper.searchRepositoryByCanonical(repository, definition);
-            result = (RequestGroup) applyPlanDefinition(planDefinition);
-            for (var c : result.getDefinition()) {
-                requestGroup.addDefinition(c);
-            }
+            var referenceToContained = definition.getValue().startsWith("#");
+            var nextPlanDefinition = (PlanDefinition)
+                    (referenceToContained
+                            ? resolveContained(planDefinition, definition.getValue())
+                            : SearchHelper.searchRepositoryByCanonical(repository, definition));
+            result = (RequestGroup) applyPlanDefinition(nextPlanDefinition);
         } catch (Exception e) {
             var message = String.format(
                     "ERROR: PlanDefinition %s could not be applied and threw exception %s",

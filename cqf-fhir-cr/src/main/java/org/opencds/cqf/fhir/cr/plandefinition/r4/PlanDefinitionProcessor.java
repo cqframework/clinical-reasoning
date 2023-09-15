@@ -30,7 +30,6 @@ import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Goal.GoalLifecycleStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
@@ -202,7 +201,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 .setSubject(new Reference(subjectId));
         requestGroup.setId(new IdType(
                 requestGroup.fhirType(), planDefinition.getIdElement().getIdPart()));
-        requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
+        // requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
         if (encounterId != null) {
             requestGroup.setEncounter(new Reference(encounterId));
         }
@@ -240,7 +239,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                         .setUrl(Constants.PERTAINS_TO_GOAL)
                         .setValue(new Reference(goal.getIdElement()));
             }
-            // Always add goals to the resource list so they can be added to the CarePlan if needed
+            // Always add goals to the resource list so they can be added to the CarePlan if
+            // needed
             requestResources.add(goal);
         }
 
@@ -386,7 +386,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             // TODO: Figure out why this was here and what it was trying to do
             // if (action.hasRelatedAction()) {
             // for (var relatedActionComponent : action.getRelatedAction()) {
-            // if (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
+            // if
+            // (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
             // && metConditions.containsKey(relatedActionComponent.getActionId())) {
             // metConditions.put(action.getId(), action);
             // resolveDefinition(planDefinition, requestGroup, action);
@@ -405,7 +406,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
             IBaseResource resource = null;
             if (action.hasDefinitionCanonicalType()) {
-                resource = resolveDefinition(planDefinition, requestGroup, action);
+                resource = resolveDefinition(planDefinition, action);
                 if (resource != null) {
                     applyAction(requestGroup, resource, action);
                     requestAction.setResource(new Reference(resource.getIdElement()));
@@ -469,16 +470,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     private IBaseResource resolveDefinition(
-            PlanDefinition planDefinition,
-            RequestGroup requestGroup,
-            PlanDefinition.PlanDefinitionActionComponent action) {
+            PlanDefinition planDefinition, PlanDefinition.PlanDefinitionActionComponent action) {
         logger.debug(
                 "Resolving definition {}", action.getDefinitionCanonicalType().getValue());
         var definition = action.getDefinitionCanonicalType();
         var resourceName = resolveResourceName(definition, planDefinition);
         switch (FHIRAllTypes.fromCode(requireNonNull(resourceName))) {
             case PLANDEFINITION:
-                return applyNestedPlanDefinition(requestGroup, definition);
+                return applyNestedPlanDefinition(planDefinition, definition);
             case ACTIVITYDEFINITION:
                 return applyActivityDefinition(planDefinition, definition);
             case QUESTIONNAIRE:
@@ -548,15 +547,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         return result;
     }
 
-    private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup, CanonicalType definition) {
+    private IBaseResource applyNestedPlanDefinition(PlanDefinition planDefinition, CanonicalType definition) {
         RequestGroup result = null;
         try {
-            var planDefinition = (PlanDefinition) SearchHelper.searchRepositoryByCanonical(repository, definition);
-            result = (RequestGroup) applyPlanDefinition(planDefinition);
-
-            for (var c : result.getInstantiatesCanonical()) {
-                requestGroup.addInstantiatesCanonical(c.getValueAsString());
-            }
+            var referenceToContained = definition.getValue().startsWith("#");
+            var nextPlanDefinition = (PlanDefinition)
+                    (referenceToContained
+                            ? resolveContained(planDefinition, definition.getValue())
+                            : SearchHelper.searchRepositoryByCanonical(repository, definition));
+            result = (RequestGroup) applyPlanDefinition(nextPlanDefinition);
         } catch (Exception e) {
             var message = String.format(
                     "ERROR: PlanDefinition %s could not be applied and threw exception %s",
@@ -576,7 +575,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     /*
-     * offset -> Duration timing -> Timing ( just our use case for connectathon period periodUnit
+     * offset -> Duration timing -> Timing ( just our use case for connectathon
+     * period periodUnit
      * frequency count ) use task code
      */
     private void resolveTask(
@@ -641,7 +641,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             for (var questionnaireBundle : questionnaireBundles) {
                 var toPopulate =
                         (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
-                // Bundle should contain a Questionnaire and supporting Library and ValueSet resources
+                // Bundle should contain a Questionnaire and supporting Library and ValueSet
+                // resources
                 var libraries = questionnaireBundle.getEntry().stream()
                         .filter(e -> e.hasResource()
                                 && (e.getResource().fhirType().equals(Enumerations.FHIRAllTypes.LIBRARY.toCode())))
@@ -675,7 +676,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     private List<Bundle> getQuestionnairePackage(Extension prepopulateExtension) {
         Bundle bundle = null;
-        // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as
+        // PlanDef action should provide endpoint for $questionnaire-for-order operation
+        // as well as
         // the order id to pass
         var parameterExtension =
                 prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER);
@@ -705,7 +707,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 bundle = new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(questionnaire));
             }
         } else if (questionnaireExtension.getValue().hasType(FHIRAllTypes.URL.toCode())) {
-            // Assuming package operation endpoint if the extension is using valueUrl instead of
+            // Assuming package operation endpoint if the extension is using valueUrl
+            // instead of
             // valueCanonical
             bundle =
                     callQuestionnairePackageOperation(((UrlType) questionnaireExtension.getValue()).getValueAsString());
@@ -734,7 +737,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         IGenericClient client = Clients.forUrl(repository.fhirContext(), baseUrl);
         // Clients.registerBasicAuth(client, user, password);
         try {
-            // TODO: This is not currently in use, but if it ever is we will need to determine how the
+            // TODO: This is not currently in use, but if it ever is we will need to
+            // determine how the
             // order and coverage resources are passed in
             Type order = null;
             Type coverage = null;

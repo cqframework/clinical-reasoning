@@ -6,18 +6,18 @@
     {
       "resource": {
         "resourceType": "Organization",
-        "id": "extract-OutpatientPriorAuthorizationRequest.1",
+        "id": "extract-OutpatientPriorAuthorizationRequest-1",
         "name": "Test Facility"
       },
       "request": {
         "method": "PUT",
-        "url": "Organization/extract-OutpatientPriorAuthorizationRequest.1"
+        "url": "Organization/extract-OutpatientPriorAuthorizationRequest-1"
       }
     },
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "extract-OutpatientPriorAuthorizationRequest.2",
+        "id": "extract-OutpatientPriorAuthorizationRequest-2",
         "identifier": [
           {
             "system": "http://hl7.org/fhir/sid/us-medicare",
@@ -37,7 +37,7 @@
       },
       "request": {
         "method": "PUT",
-        "url": "Patient/extract-OutpatientPriorAuthorizationRequest.2"
+        "url": "Patient/extract-OutpatientPriorAuthorizationRequest-2"
       }
     }
   ]

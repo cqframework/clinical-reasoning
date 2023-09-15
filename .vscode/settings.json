@@ -92,11 +92,24 @@
   "editor.detectIndentation": false,
   "editor.foldingImportsByDefault": true,
   "editor.tabSize": 4,
+  "editor.formatOnSave": true,
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.dependency.packagePresentation": "hierarchical",
   "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
   "java.compile.nullAnalysis.mode": "automatic",
   "json.schemaDownload.enable": true,
+  "runOnSave.commands": [
+    {
+      "match": ".*\\.java$",
+      "command": "./mvnw spotless:apply -DspotlessFiles=${file}",
+      "runIn": "backend",
+      "runningStatusMessage": "Formatting ${fileBasename}",
+      "finishStatusMessage": "${fileBasename} formatted"
+    },
+  ],
+  "[java]": {
+    "editor.formatOnSave": false
+  },
   "[cql]": {
     "editor.formatOnSave": false
   },

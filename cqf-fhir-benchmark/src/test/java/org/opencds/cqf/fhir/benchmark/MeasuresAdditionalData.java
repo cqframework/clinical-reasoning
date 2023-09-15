@@ -52,7 +52,7 @@ public class MeasuresAdditionalData {
 
     @Benchmark
     @Fork(warmups = 1, value = 1)
-    @Measurement(iterations = 2, timeUnit = TimeUnit.SECONDS)
+    @Measurement(iterations = 10, timeUnit = TimeUnit.SECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void test(Blackhole bh) throws Exception {
         // The Blackhole ensures that the compiler doesn't optimize

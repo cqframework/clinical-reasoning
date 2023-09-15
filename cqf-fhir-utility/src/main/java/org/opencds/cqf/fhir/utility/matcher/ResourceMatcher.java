@@ -218,7 +218,15 @@ public interface ResourceMatcher {
         if (param.getModifier() == TokenParamModifier.IN) {
             return inValueSet(codes);
         }
-        return codes.stream().anyMatch((param.getValueAsCoding())::matchesToken);
+
+        for (var c : codes) {
+            var matches = c.matchesToken(param.getValueAsCoding());
+            if (matches) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     default boolean isMatchUri(UriParam param, IBase pathResult) {

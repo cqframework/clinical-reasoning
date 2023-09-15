@@ -10,8 +10,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.repository.BundleFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4MeasureService {
 
@@ -35,30 +34,10 @@ public class R4MeasureService {
             Endpoint dataEndpoint,
             Bundle additionalData) {
 
-        var repo = this.proxyAndFederate(contentEndpoint, terminologyEndpoint, dataEndpoint, additionalData);
-
-        // var evalType = MeasureEvalType.fromCode(reportType)
-        // .orElse(MeasureEvalType.POPULATION);
-
-        // var subjects = this.getSubjects(repo, evalType, subjectId);
-
+        var repo = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, new R4RepositorySubjectProvider());
 
         return processor.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, Collections.singletonList(subjectId), null);
-    }
-
-    // public Stream<String> getSubjects(Repository repo, MeasureEvalType evalType, String subjectId)
-    // {
-    // var subjectProvider = new R4RepositorySubjectProvider(repo);
-    // return subjectProvider.getSubjects(evalType, subjectId);
-    // }
-
-    public Repository proxyAndFederate(
-            Endpoint contentEndpoint, Endpoint terminologyEndpoint, Endpoint dataEndpoint, Bundle additionalData) {
-        var proxy = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(
-                repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
-
-        return new FederatedRepository(proxy, new BundleFhirRepository(proxy.fhirContext(), additionalData));
+                measure, periodStart, periodEnd, reportType, Collections.singletonList(subjectId), additionalData);
     }
 }

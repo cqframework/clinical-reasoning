@@ -1,10 +1,16 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -12,18 +18,22 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Timing;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 
-public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
-    public final ModelResolver modelResolver;
+public class ResourceMatcherDSTU3 implements ResourceMatcher {
 
-    public ResourceMatcherDSTU3(ModelResolver modelResolver) {
-        this.modelResolver = modelResolver;
+    private Map<SPPathKey, IParsedExpression> pathCache = new HashMap<>();
+
+    @Override
+    public IFhirPath getEngine() {
+        return FhirPathCache.cachedForVersion(FhirVersionEnum.DSTU3);
     }
 
-    public ModelResolver getModelResolver() {
-        return this.modelResolver;
+    @Override
+    public FhirContext getContext() {
+        return FhirContext.forDstu3Cached();
     }
 
     @Override
@@ -39,7 +49,7 @@ public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
     }
 
     @Override
-    public List<BaseCodingDt> getCodes(Object codeElement) {
+    public List<BaseCodingDt> getCodes(IBase codeElement) {
         List<BaseCodingDt> resolvedCodes = new ArrayList<>();
         if (codeElement instanceof Coding) {
             resolvedCodes.add(
@@ -60,5 +70,10 @@ public class ResourceMatcherDSTU3 implements BaseResourceMatcher {
     @Override
     public boolean inValueSet(List<BaseCodingDt> codes) {
         throw new UnsupportedOperationException("InValueSet operation is not available");
+    }
+
+    @Override
+    public Map<SPPathKey, IParsedExpression> getPathCache() {
+        return pathCache;
     }
 }

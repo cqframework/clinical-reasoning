@@ -97,7 +97,7 @@ public class FederatedRepository implements Repository {
             Map<String, String> headers) {
         List<T> results = new ArrayList<>();
         var bundle = repository.search(bundleType, resourceType, searchParameters, headers);
-        var iterator = new BundleIterator<>(repository, bundleType, bundle);
+        var iterator = new BundleIterator<>(repository, bundle);
         iterator.forEachRemaining(b -> results.add((T) b.getResource()));
         return results;
     }

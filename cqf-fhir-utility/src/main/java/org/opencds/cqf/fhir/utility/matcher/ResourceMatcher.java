@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -9,51 +12,139 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 
-public interface BaseResourceMatcher {
-    public ModelResolver getModelResolver();
+public interface ResourceMatcher {
 
-    default boolean matches(String path, List<IQueryParameterType> params, IBaseResource resource) {
-        boolean match = false;
-        path = path.replaceFirst("_", "");
-        var pathResult = getModelResolver().resolvePath(resource, path);
-        if (pathResult == null) {
-            return false;
+    public static class SPPathKey {
+        private final String resourceType;
+        private final String resourcePath;
+
+        public SPPathKey(String resourceType, String resourcePath) {
+            this.resourceType = resourceType;
+            this.resourcePath = resourcePath;
         }
-        for (IQueryParameterType param : params) {
-            if (param instanceof ReferenceParam) {
-                match = isMatchReference(param, pathResult);
-            } else if (param instanceof DateParam) {
-                match = isMatchDate((DateParam) param, pathResult);
-            } else if (param instanceof TokenParam) {
-                var codes = getCodes(pathResult);
-                if (codes == null) {
-                    match = isMatchToken((TokenParam) param, pathResult);
-                } else if (isMatchCoding((TokenParam) param, pathResult, codes)) {
-                    return true;
-                }
-            } else if (param instanceof UriParam) {
-                match = isMatchUri((UriParam) param, pathResult);
-            } else if (param instanceof StringParam) {
-                match = isMatchString((StringParam) param, pathResult);
-            } else {
-                throw new NotImplementedException("Resource matching not implemented for search params of type "
-                        + param.getClass().getSimpleName());
-            }
+
+        public String path() {
+            return resourcePath;
         }
-        return match;
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((resourceType == null) ? 0 : resourceType.hashCode());
+            result = prime * result + ((resourcePath == null) ? 0 : resourcePath.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            SPPathKey other = (SPPathKey) obj;
+            if (resourceType == null) {
+                if (other.resourceType != null) return false;
+            } else if (!resourceType.equals(other.resourceType)) return false;
+            if (resourcePath == null) {
+                if (other.resourcePath != null) return false;
+            } else if (!resourcePath.equals(other.resourcePath)) return false;
+            return true;
+        }
     }
 
-    default boolean isMatchReference(IQueryParameterType param, Object pathResult) {
+    public IFhirPath getEngine();
+
+    public FhirContext getContext();
+
+    public Map<SPPathKey, IParsedExpression> getPathCache();
+
+    // The list here is an OR list. Meaning, if any element matches it's a match
+    default boolean matches(String name, List<IQueryParameterType> params, IBaseResource resource) {
+        boolean match = true;
+
+        var context = getContext();
+        var s = context.getResourceDefinition(resource).getSearchParam(name);
+        if (s == null) {
+            throw new RuntimeException(String.format(
+                    "The SearchParameter %s for Resource %s is not supported.", name, resource.fhirType()));
+        }
+
+        var path = s.getPath();
+
+        // System search parameters...
+        if (path.isEmpty() && name.startsWith("_")) {
+            path = name.substring(1);
+        }
+
+        List<IBase> pathResult = null;
+        try {
+            var parsed = getPathCache().computeIfAbsent(new SPPathKey(resource.fhirType(), path), p -> {
+                try {
+                    return getEngine().parse(p.path());
+                } catch (Exception e) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "Parsing SearchParameter %s for Resource %s resulted in an error.",
+                                    name, resource.fhirType()),
+                            e);
+                }
+            });
+            pathResult = getEngine().evaluate(resource, parsed, IBase.class);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format(
+                            "Evaluating SearchParameter %s for Resource %s resulted in an error.",
+                            name, resource.fhirType()),
+                    e);
+        }
+
+        if (pathResult == null || pathResult.isEmpty()) {
+            return false;
+        }
+
+        for (IQueryParameterType param : params) {
+            for (var r : pathResult) {
+                if (param instanceof ReferenceParam) {
+                    match = isMatchReference(param, r);
+                } else if (param instanceof DateParam) {
+                    match = isMatchDate((DateParam) param, r);
+                } else if (param instanceof TokenParam) {
+                    var codes = getCodes(r);
+                    if (codes == null) {
+                        match = isMatchToken((TokenParam) param, r);
+                    } else {
+                        match = isMatchCoding((TokenParam) param, r, codes);
+                    }
+                } else if (param instanceof UriParam) {
+                    match = isMatchUri((UriParam) param, r);
+                } else if (param instanceof StringParam) {
+                    match = isMatchString((StringParam) param, r);
+                } else {
+                    throw new NotImplementedException("Resource matching not implemented for search params of type "
+                            + param.getClass().getSimpleName());
+                }
+
+                if (match) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    default boolean isMatchReference(IQueryParameterType param, IBase pathResult) {
         if (pathResult instanceof IBaseReference) {
             return ((IBaseReference) pathResult)
                     .getReferenceElement()
@@ -84,7 +175,7 @@ public interface BaseResourceMatcher {
         return false;
     }
 
-    default boolean isMatchDate(DateParam param, Object pathResult) {
+    default boolean isMatchDate(DateParam param, IBase pathResult) {
         DateRangeParam dateRange;
         // date, dateTime and instant are PrimitiveType<Date>
         if (pathResult instanceof IPrimitiveType) {
@@ -105,24 +196,24 @@ public interface BaseResourceMatcher {
         return matchesDateBounds(dateRange, new DateRangeParam(param));
     }
 
-    default boolean isMatchToken(TokenParam param, Object pathResult) {
+    default boolean isMatchToken(TokenParam param, IBase pathResult) {
         if (param.getValue() == null) {
             return true;
         }
+
+        if (pathResult instanceof IIdType) {
+            var id = (IIdType) pathResult;
+            return param.getValue().equals(id.getIdPart());
+        }
+
         if (pathResult instanceof IPrimitiveType) {
             return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
         }
-        if (pathResult instanceof ArrayList) {
-            var firstValue = ((ArrayList<?>) pathResult).get(0);
-            var codes = getCodes(firstValue);
-            if (codes != null) {
-                return isMatchCoding(param, pathResult, codes);
-            }
-        }
+
         return false;
     }
 
-    default boolean isMatchCoding(TokenParam param, Object pathResult, List<BaseCodingDt> codes) {
+    default boolean isMatchCoding(TokenParam param, IBase pathResult, List<BaseCodingDt> codes) {
         // in value set
         if (param.getModifier() == TokenParamModifier.IN) {
             return inValueSet(codes);
@@ -130,7 +221,7 @@ public interface BaseResourceMatcher {
         return codes.stream().anyMatch((param.getValueAsCoding())::matchesToken);
     }
 
-    default boolean isMatchUri(UriParam param, Object pathResult) {
+    default boolean isMatchUri(UriParam param, IBase pathResult) {
         if (pathResult instanceof IPrimitiveType) {
             return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
         }
@@ -171,7 +262,7 @@ public interface BaseResourceMatcher {
 
     DateRangeParam getDateRange(ICompositeType type);
 
-    List<BaseCodingDt> getCodes(Object codeElement);
+    List<BaseCodingDt> getCodes(IBase codeElement);
 
     boolean inValueSet(List<BaseCodingDt> codes);
 }

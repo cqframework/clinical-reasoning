@@ -48,27 +48,6 @@ public class BundleBuilder<T extends IBaseBundle> extends ResourceBuilder<Bundle
     }
 
     @Override
-    protected void initializeDstu2(T theResource) {
-        super.initializeDstu2(theResource);
-        ca.uhn.fhir.model.dstu2.resource.Bundle bundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) theResource;
-        bundle.setType(ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum.forCode(myType));
-    }
-
-    @Override
-    protected void initializeDstu2_1(T theResource) {
-        super.initializeDstu2_1(theResource);
-        org.hl7.fhir.dstu2016may.model.Bundle bundle = (org.hl7.fhir.dstu2016may.model.Bundle) theResource;
-        bundle.setType(org.hl7.fhir.dstu2016may.model.Bundle.BundleType.valueOf(myType));
-    }
-
-    @Override
-    protected void initializeDstu2_HL7Org(T theResource) {
-        super.initializeDstu2_HL7Org(theResource);
-        org.hl7.fhir.dstu2.model.Bundle bundle = (org.hl7.fhir.dstu2.model.Bundle) theResource;
-        bundle.setType(org.hl7.fhir.dstu2.model.Bundle.BundleType.valueOf(myType));
-    }
-
-    @Override
     protected void initializeDstu3(T theResource) {
         super.initializeDstu3(theResource);
         org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) theResource;

@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.engine.model;
+package org.opencds.cqf.fhir.cql.engine.model;
 
 import static java.util.Objects.requireNonNull;
 

@@ -3,14 +3,9 @@ package org.opencds.cqf.fhir.utility.builder;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.hl7.fhir.dstu2016may.model.Narrative;
-import org.hl7.fhir.dstu2016may.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
 public class CompositionSectionComponentBuilder<T extends IBaseBackboneElement>
@@ -92,55 +87,6 @@ public class CompositionSectionComponentBuilder<T extends IBaseBackboneElement>
         checkArgument(!myEntry.isEmpty());
 
         return super.build();
-    }
-
-    @Override
-    protected void initializeDstu2(T theResource) {
-        super.initializeDstu2(theResource);
-        ca.uhn.fhir.model.dstu2.resource.Composition.Section section =
-                (ca.uhn.fhir.model.dstu2.resource.Composition.Section) theResource;
-
-        section.setTitle(myTitle).setElementSpecificId(getId());
-        getEntries().forEach(entry -> section.addEntry().setReference(entry));
-        if (myText != null) {
-            section.setText(
-                    new NarrativeDt(new XhtmlDt(myText.getText()), NarrativeStatusEnum.valueOf(myText.getStatus())));
-        }
-        // no focus
-    }
-
-    @Override
-    protected void initializeDstu2_1(T theResource) {
-        super.initializeDstu2_1(theResource);
-        org.hl7.fhir.dstu2016may.model.Composition.SectionComponent section =
-                (org.hl7.fhir.dstu2016may.model.Composition.SectionComponent) theResource;
-
-        section.setTitle(myTitle).setId(getId());
-        getEntries().forEach(entry -> section.addEntry(new Reference(entry)));
-        if (myText != null) {
-            Narrative narrative = new Narrative();
-            narrative.setStatusAsString(myText.getStatus());
-            narrative.setDivAsString(myText.getText());
-            section.setText(narrative);
-        }
-        // no focus
-    }
-
-    @Override
-    protected void initializeDstu2_HL7Org(T theResource) {
-        super.initializeDstu2_HL7Org(theResource);
-        org.hl7.fhir.dstu2.model.Composition.SectionComponent section =
-                (org.hl7.fhir.dstu2.model.Composition.SectionComponent) theResource;
-
-        section.setTitle(myTitle).setId(getId());
-        getEntries().forEach(entry -> section.addEntry(new org.hl7.fhir.dstu2.model.Reference(entry)));
-        if (myText != null) {
-            org.hl7.fhir.dstu2.model.Narrative narrative = new org.hl7.fhir.dstu2.model.Narrative();
-            narrative.setStatusAsString(myText.getStatus());
-            narrative.setDivAsString(myText.getText());
-            section.setText(narrative);
-        }
-        // no focus
     }
 
     @Override

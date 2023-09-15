@@ -10,6 +10,14 @@
           "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
         ]
       },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+          "valueReference": {
+            "reference": "#apply-outcome-opioidcds-10-patient-view"
+          }
+        }
+      ],
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/opioidcds-10-patient-view|2022.1.0"
       ],
@@ -23,12 +31,6 @@
       },
       "action": [
         {
-          "extension": [
-            {
-              "url": null,
-              "valueString": "warning"
-            }
-          ],
           "title": "Annual Urine Screening Check",
           "description": "Patients on opioid therapy should have a urine drug test performed every 12 months. For guidance on counseling patients regarding the purpose of urine toxicology test, review the draft CDC 2022 Opioid Prescribing Guideline Recommendation 10 page 140 lines 3441 - 3446.",
           "documentation": [
@@ -128,6 +130,25 @@
       },
       "subject": {
         "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+      }
+    },
+    {
+      "resourceType": "OperationOutcome",
+      "id": "apply-outcome-opioidcds-10-patient-view",
+      "issue": [
+        {
+          "severity": "error",
+          "code": "exception",
+          "diagnostics": "DynamicValue expression Indicator encountered exception: Please use the priority path when setting indicator values when using FHIR R4 or higher for CDS Hooks evaluation"
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+      "valueReference": {
+        "reference": "#apply-outcome-opioidcds-10-patient-view"
       }
     }
   ],

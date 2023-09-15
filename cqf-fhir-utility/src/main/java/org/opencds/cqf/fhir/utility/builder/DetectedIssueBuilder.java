@@ -3,13 +3,9 @@ package org.opencds.cqf.fhir.utility.builder;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.hl7.fhir.dstu2016may.model.Identifier;
-import org.hl7.fhir.dstu2016may.model.Reference;
 import org.hl7.fhir.dstu3.model.DetectedIssue.DetectedIssueStatus;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -94,46 +90,6 @@ public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResou
 
     private CodingSettings getCodeSetting() {
         return myCode.getCodingSettingsArray()[0];
-    }
-
-    @Override
-    protected void initializeDstu2(T theResource) {
-        super.initializeDstu2(theResource);
-        ca.uhn.fhir.model.dstu2.resource.DetectedIssue detectedIssue =
-                (ca.uhn.fhir.model.dstu2.resource.DetectedIssue) theResource;
-
-        detectedIssue
-                .setIdentifier(new IdentifierDt(
-                        getIdentifier().getKey(), getIdentifier().getValue()))
-                .setPatient(new ResourceReferenceDt(myPatient));
-        getEvidenceDetails().forEach(detectedIssue::setReference);
-    }
-
-    @Override
-    protected void initializeDstu2_1(T theResource) {
-        super.initializeDstu2_1(theResource);
-        org.hl7.fhir.dstu2016may.model.DetectedIssue detectedIssue =
-                (org.hl7.fhir.dstu2016may.model.DetectedIssue) theResource;
-
-        detectedIssue
-                .setIdentifier(new Identifier()
-                        .setSystem(getIdentifier().getKey())
-                        .setValue(getIdentifier().getValue()))
-                .setPatient(new Reference(myPatient));
-        getEvidenceDetails().forEach(detectedIssue::setReference);
-    }
-
-    @Override
-    protected void initializeDstu2_HL7Org(T theResource) {
-        super.initializeDstu2_HL7Org(theResource);
-        org.hl7.fhir.dstu2.model.DetectedIssue detectedIssue = (org.hl7.fhir.dstu2.model.DetectedIssue) theResource;
-
-        detectedIssue
-                .setIdentifier(new org.hl7.fhir.dstu2.model.Identifier()
-                        .setSystem(getIdentifier().getKey())
-                        .setValue(getIdentifier().getValue()))
-                .setPatient(new org.hl7.fhir.dstu2.model.Reference(myPatient));
-        getEvidenceDetails().forEach(detectedIssue::setReference);
     }
 
     @Override

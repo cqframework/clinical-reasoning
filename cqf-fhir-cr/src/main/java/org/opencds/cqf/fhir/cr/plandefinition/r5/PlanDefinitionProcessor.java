@@ -23,7 +23,6 @@ import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.DomainResource;
-import org.hl7.fhir.r5.model.Element;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.ActionConditionKind;
 import org.hl7.fhir.r5.model.Enumerations.ActionRelationshipType;
@@ -283,14 +282,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
 
         return resultBundle;
-    }
-
-    @Override
-    public void resolveDynamicExtension(IElement requestAction, IBase resource, Object value, String path) {
-        if (path.equals("activity.extension") || path.equals("action.extension")) {
-            // default to adding extension to last action
-            ((Element) requestAction).addExtension().setValue((DataType) value);
-        }
     }
 
     @Override

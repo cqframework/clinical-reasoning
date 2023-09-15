@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -27,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -41,13 +43,15 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
     private static final Logger logger = LoggerFactory.getLogger(RetrieveProvider.class);
     private final CodeExtractor codeUtil;
     private final IFhirPath fhirPath;
-    private boolean filterBySearchParam = false;
+    private boolean filterBySearchParam = true;
     private boolean searchByTemplate = false;
+    private SearchParameterResolver resolver;
 
     protected RetrieveProvider(final FhirContext fhirContext) {
         requireNonNull(fhirContext, "The FhirContext can not be null.");
         this.codeUtil = new CodeExtractor(fhirContext);
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
+        this.resolver = new SearchParameterResolver(fhirContext);
     }
 
     public Predicate<IBaseResource> filterByTemplateId(final String dataType, final String templateId) {
@@ -275,96 +279,114 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
 
     public void populateContextSearchParams(
             Map<String, List<IQueryParameterType>> searchParams,
+            final String dataType,
             final String contextPath,
             final String context,
             final Object contextValue) {
-        if (StringUtils.isNotBlank(contextPath) && contextValue != null) {
-            IdDt ref = StringUtils.isNotBlank(context)
-                    ? new IdDt((String) contextValue).withResourceType(context)
-                    : new IdDt((String) contextValue);
-            var path = contextPath.equals("id") ? "_id" : contextPath;
-            searchParams.put(path, Collections.singletonList(new ReferenceParam(ref)));
+        if (contextPath == null || contextPath.isEmpty() || contextValue == null) {
+            return;
+        }
+
+        IdDt ref = StringUtils.isNotBlank(context)
+                ? new IdDt((String) contextValue).withResourceType(context)
+                : new IdDt((String) contextValue);
+        var sp = this.resolver.getSearchParameterDefinition(dataType, contextPath);
+
+        // Self-references are token params.
+        if (sp.getName().equals("_id")) {
+            searchParams.put(sp.getName(), Collections.singletonList(new TokenParam((String) contextValue)));
+        } else {
+            searchParams.put(sp.getName(), Collections.singletonList(new ReferenceParam(ref)));
         }
     }
 
     public void populateTerminologySearchParams(
             Map<String, List<IQueryParameterType>> searchParams,
+            final String dataType,
             final String codePath,
             final Iterable<Code> codes,
             final String valueSet) {
-        if (StringUtils.isNotBlank(codePath)) {
-            if (codes != null) {
+        if (codePath == null || codePath.isEmpty()) {
+            return;
+        }
+
+        var sp = this.resolver.getSearchParameterDefinition(dataType, codePath, RestSearchParameterTypeEnum.TOKEN);
+        if (codes != null) {
+            List<IQueryParameterType> codeList = new ArrayList<>();
+            for (Code code : codes) {
+                codeList.add(new TokenParam(
+                        new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode())));
+            }
+            searchParams.put(sp.getName(), codeList);
+        } else if (valueSet != null) {
+            if (this.terminologyProvider != null && this.isExpandValueSets()) {
                 List<IQueryParameterType> codeList = new ArrayList<>();
-                for (Code code : codes) {
+                for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
                     codeList.add(new TokenParam(
                             new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode())));
                 }
-                searchParams.put(codePath, codeList);
-            } else if (valueSet != null) {
-                if (this.terminologyProvider != null && this.isExpandValueSets()) {
-                    List<IQueryParameterType> codeList = new ArrayList<>();
-                    for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
-                        codeList.add(new TokenParam(new InternalCodingDt()
-                                .setSystem(code.getSystem())
-                                .setCode(code.getCode())));
-                    }
-                    searchParams.put(codePath, codeList);
-                } else {
-                    searchParams.put(
-                            codePath,
-                            Collections.singletonList(new TokenParam()
-                                    .setModifier(TokenParamModifier.IN)
-                                    .setValue(valueSet)));
-                }
+                searchParams.put(sp.getName(), codeList);
+            } else {
+                searchParams.put(
+                        sp.getName(),
+                        Collections.singletonList(new TokenParam()
+                                .setModifier(TokenParamModifier.IN)
+                                .setValue(valueSet)));
             }
         }
     }
 
     public void populateDateSearchParams(
             Map<String, List<IQueryParameterType>> searchParams,
+            final String dataType,
             final String datePath,
             final String dateLowPath,
             final String dateHighPath,
             final Interval dateRange) {
-        if (!StringUtils.isAllBlank(datePath, dateLowPath, dateHighPath)) {
-            if (dateRange == null) {
-                throw new IllegalStateException("A date range must be provided when filtering using date parameters");
-            }
+        if (datePath == null && dateHighPath == null && dateRange == null) {
+            return;
+        }
 
-            Date start;
-            Date end;
-            if (dateRange.getStart() instanceof DateTime) {
-                start = ((DateTime) dateRange.getStart()).toJavaDate();
-                end = ((DateTime) dateRange.getEnd()).toJavaDate();
-            } else if (dateRange.getStart() instanceof org.opencds.cqf.cql.engine.runtime.Date) {
-                start = ((org.opencds.cqf.cql.engine.runtime.Date) dateRange.getStart()).toJavaDate();
-                end = ((org.opencds.cqf.cql.engine.runtime.Date) dateRange.getEnd()).toJavaDate();
-            } else {
-                throw new UnsupportedOperationException(
-                        "Expected Interval of type org.opencds.cqf.cql.engine.runtime.Date or org.opencds.cqf.cql.engine.runtime.DateTime, found "
-                                + dateRange.getStart().getClass().getSimpleName());
-            }
+        if (dateRange == null) {
+            throw new IllegalStateException("A date range must be provided when filtering using date parameters");
+        }
 
-            if (StringUtils.isNotBlank(datePath)) {
-                List<IQueryParameterType> dateRangeParam = new ArrayList<>();
-                DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
-                dateRangeParam.add(dateParam);
-                dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
-                dateRangeParam.add(dateParam);
-                searchParams.put(datePath, dateRangeParam);
-            } else if (StringUtils.isNotBlank(dateLowPath)) {
-                List<IQueryParameterType> dateRangeParam = new ArrayList<>();
-                DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
-                dateRangeParam.add(dateParam);
-                searchParams.put(dateLowPath, dateRangeParam);
-            } else if (StringUtils.isNotBlank(dateHighPath)) {
-                List<IQueryParameterType> dateRangeParam = new ArrayList<>();
-                DateParam dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
-                dateRangeParam.add(dateParam);
-                searchParams.put(dateHighPath, dateRangeParam);
-            } else {
-                throw new IllegalStateException("A date path must be provided when filtering using date parameters");
-            }
+        Date start;
+        Date end;
+        if (dateRange.getStart() instanceof DateTime) {
+            start = ((DateTime) dateRange.getStart()).toJavaDate();
+            end = ((DateTime) dateRange.getEnd()).toJavaDate();
+        } else if (dateRange.getStart() instanceof org.opencds.cqf.cql.engine.runtime.Date) {
+            start = ((org.opencds.cqf.cql.engine.runtime.Date) dateRange.getStart()).toJavaDate();
+            end = ((org.opencds.cqf.cql.engine.runtime.Date) dateRange.getEnd()).toJavaDate();
+        } else {
+            throw new UnsupportedOperationException(
+                    "Expected Interval of type org.opencds.cqf.cql.engine.runtime.Date or org.opencds.cqf.cql.engine.runtime.DateTime, found "
+                            + dateRange.getStart().getClass().getSimpleName());
+        }
+
+        if (StringUtils.isNotBlank(datePath)) {
+            List<IQueryParameterType> dateRangeParam = new ArrayList<>();
+            DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
+            dateRangeParam.add(dateParam);
+            dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
+            dateRangeParam.add(dateParam);
+            var sp = this.resolver.getSearchParameterDefinition(dataType, datePath);
+            searchParams.put(sp.getName(), dateRangeParam);
+        } else if (StringUtils.isNotBlank(dateLowPath)) {
+            List<IQueryParameterType> dateRangeParam = new ArrayList<>();
+            DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
+            dateRangeParam.add(dateParam);
+            var sp = this.resolver.getSearchParameterDefinition(dataType, dateLowPath);
+            searchParams.put(sp.getName(), dateRangeParam);
+        } else if (StringUtils.isNotBlank(dateHighPath)) {
+            List<IQueryParameterType> dateRangeParam = new ArrayList<>();
+            DateParam dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
+            dateRangeParam.add(dateParam);
+            var sp = this.resolver.getSearchParameterDefinition(dataType, dateHighPath);
+            searchParams.put(sp.getName(), dateRangeParam);
+        } else {
+            throw new IllegalStateException("A date path must be provided when filtering using date parameters");
         }
     }
 

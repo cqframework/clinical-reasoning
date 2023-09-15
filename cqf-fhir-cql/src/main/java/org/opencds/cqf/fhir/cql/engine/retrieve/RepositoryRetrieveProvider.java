@@ -4,16 +4,17 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.util.BundleUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
+import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
+import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class RepositoryRetrieveProvider extends RetrieveProvider {
     private final Repository repository;
@@ -41,30 +42,31 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
             final String dateLowPath,
             final String dateHighPath,
             final Interval dateRange) {
-
-        List<? extends IBaseResource> resources;
         var resourceType = fhirContext.getResourceDefinition(dataType).getImplementingClass();
+
+        @SuppressWarnings("unchecked")
+        var bt = (Class<? extends IBaseBundle>)
+                this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
 
         if (isFilterBySearchParam()) {
             Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
             populateTemplateSearchParams(searchParams, templateId);
-            populateContextSearchParams(searchParams, contextPath, context, contextValue);
-            populateTerminologySearchParams(searchParams, codePath, codes, valueSet);
-            populateDateSearchParams(searchParams, datePath, dateLowPath, dateHighPath, dateRange);
-            resources = BundleUtil.toListOfResources(
-                    fhirContext,
-                    Repositories.searchRepositoryWithPaging(fhirContext, repository, resourceType, searchParams, null));
+            populateContextSearchParams(searchParams, dataType, contextPath, context, contextValue);
+            populateTerminologySearchParams(searchParams, dataType, codePath, codes, valueSet);
+            populateDateSearchParams(searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
+            var resources = this.repository.search(bt, resourceType, searchParams);
+
+            return new BundleMappingIterable<>(repository, resources, p -> p.getResource());
         } else {
-            resources = BundleUtil.toListOfResources(
-                            fhirContext,
-                            Repositories.searchRepositoryWithPaging(fhirContext, repository, resourceType, null, null))
-                    .stream()
+            var resources = this.repository.search(bt, resourceType, Searches.ALL);
+            var iter = new BundleIterable<IBaseBundle>(repository, resources);
+            return iter.toStream()
+                    .map(x -> x.getResource())
                     .filter(filterByTemplateId(dataType, templateId))
                     .filter(filterByContext(dataType, context, contextPath, contextValue))
                     .filter(filterByTerminology(dataType, codePath, codes, valueSet))
+                    // TODO: filter by date search
                     .collect(Collectors.toList());
         }
-
-        return resources.stream().map(Object.class::cast).collect(Collectors.toList());
     }
 }

@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
@@ -335,14 +334,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     @Override
-    public void resolveDynamicExtension(IElement requestAction, IBase resource, Object value, String path) {
-        if (path.equals("activity.extension") || path.equals("action.extension")) {
-            // default to adding extension to last action
-            ((Element) requestAction).addExtension().setValue((Type) value);
-        }
-    }
-
-    @Override
     public void addOperationOutcomeIssue(String issue) {
         oc.addIssue()
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
@@ -446,7 +437,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 .setTiming(action.getTiming())
                 .setType(action.getType());
         requestAction.setId(action.getId());
-        requestAction.setExtension(action.getExtension());
+        if (action.hasExtension()) {
+            requestAction.setExtension(action.getExtension());
+        }
 
         if (action.hasCondition()) {
             action.getCondition()

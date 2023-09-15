@@ -1,17 +1,12 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.client.Clients;
-import org.opencds.cqf.fhir.utility.engine.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.utility.matcher.BaseResourceMatcher;
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR4;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR5;
@@ -57,37 +52,15 @@ public class Repositories {
         return new ProxyRepository(localRepository, data, content, terminology);
     }
 
-    public static <T extends IBaseResource> IBaseBundle searchRepositoryWithPaging(
-            FhirContext fhirContext,
-            Repository repository,
-            Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                return org.opencds.cqf.fhir.utility.dstu3.SearchHelper.searchRepositoryWithPaging(
-                        repository, resourceType, searchParameters, headers);
-            case R4:
-                return org.opencds.cqf.fhir.utility.r4.SearchHelper.searchRepositoryWithPaging(
-                        repository, resourceType, searchParameters, headers);
-            case R5:
-                return org.opencds.cqf.fhir.utility.r5.SearchHelper.searchRepositoryWithPaging(
-                        repository, resourceType, searchParameters, headers);
-
-            default:
-                return null;
-        }
-    }
-
-    public static BaseResourceMatcher getResourceMatcher(FhirContext context) {
+    public static ResourceMatcher getResourceMatcher(FhirContext context) {
         var fhirVersion = context.getVersion().getVersion();
         switch (fhirVersion) {
             case DSTU3:
-                return new ResourceMatcherDSTU3(FhirModelResolverCache.resolverForVersion(fhirVersion));
+                return new ResourceMatcherDSTU3();
             case R4:
-                return new ResourceMatcherR4(FhirModelResolverCache.resolverForVersion(fhirVersion));
+                return new ResourceMatcherR4();
             case R5:
-                return new ResourceMatcherR5(FhirModelResolverCache.resolverForVersion(fhirVersion));
+                return new ResourceMatcherR5();
             default:
                 throw new NotImplementedException(
                         "Resource matching is not implemented for FHIR version " + fhirVersion.getFhirVersionString());

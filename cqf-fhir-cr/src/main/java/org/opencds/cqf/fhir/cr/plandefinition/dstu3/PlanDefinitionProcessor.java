@@ -16,7 +16,6 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.DomainResource;
-import org.hl7.fhir.dstu3.model.Element;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -309,14 +308,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     @Override
     public IBaseResource transformToBundle(IBaseResource rg) {
         return null;
-    }
-
-    @Override
-    public void resolveDynamicExtension(IElement requestAction, IBase resource, Object value, String path) {
-        if (path.equals("activity.extension") || path.equals("action.extension")) {
-            // default to adding extension to last action
-            ((Element) requestAction).addExtension().setValue((Type) value);
-        }
     }
 
     @Override

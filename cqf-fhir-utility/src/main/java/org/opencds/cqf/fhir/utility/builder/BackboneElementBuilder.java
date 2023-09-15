@@ -38,15 +38,6 @@ public abstract class BackboneElementBuilder<
         T backboneElement = Resources.newBackboneElement(myResourceClass);
 
         switch (FhirVersions.forClass(myResourceClass)) {
-            case DSTU2:
-                initializeDstu2(backboneElement);
-                break;
-            case DSTU2_1:
-                initializeDstu2_1(backboneElement);
-                break;
-            case DSTU2_HL7ORG:
-                initializeDstu2_HL7Org(backboneElement);
-                break;
             case DSTU3:
                 initializeDstu3(backboneElement);
                 break;
@@ -124,103 +115,6 @@ public abstract class BackboneElementBuilder<
     @SuppressWarnings("unchecked")
     protected SELF self() {
         return (SELF) this;
-    }
-
-    // TODO: these are duplicated in DomainResourceBuilder. Refactor and reuse.
-    protected void initializeDstu2(T theResource) {
-        getExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt codeableConcept =
-                            new ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt()
-                                    .addCoding(new ca.uhn.fhir.model.dstu2.composite.CodingDt()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = theResource.addModifierExtension();
-                    extension.setUrl(extensionSetting.getKey());
-                    extension.setValue(codeableConcept);
-                }));
-
-        getModifierExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt codeableConcept =
-                            new ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt()
-                                    .addCoding(new ca.uhn.fhir.model.dstu2.composite.CodingDt()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = theResource.addModifierExtension();
-                    modifierExtension.setUrl(extensionSetting.getKey());
-                    modifierExtension.setValue(codeableConcept);
-                }));
-    }
-
-    protected void initializeDstu2_1(T theResource) {
-        getExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.dstu2016may.model.CodeableConcept codeableConcept =
-                            new org.hl7.fhir.dstu2016may.model.CodeableConcept()
-                                    .addCoding(new org.hl7.fhir.dstu2016may.model.Coding()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = theResource.addExtension();
-                    extension.setUrl(extensionSetting.getKey());
-                    extension.setValue(codeableConcept);
-                }));
-
-        getModifierExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.dstu2016may.model.CodeableConcept codeableConcept =
-                            new org.hl7.fhir.dstu2016may.model.CodeableConcept()
-                                    .addCoding(new org.hl7.fhir.dstu2016may.model.Coding()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = theResource.addModifierExtension();
-                    modifierExtension.setUrl(extensionSetting.getKey());
-                    modifierExtension.setValue(codeableConcept);
-                }));
-    }
-
-    protected void initializeDstu2_HL7Org(T theResource) {
-        getExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.dstu2.model.CodeableConcept codeableConcept =
-                            new org.hl7.fhir.dstu2.model.CodeableConcept()
-                                    .addCoding(new org.hl7.fhir.dstu2.model.Coding()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = theResource.addExtension();
-                    extension.setUrl(extensionSetting.getKey());
-                    extension.setValue(codeableConcept);
-                }));
-
-        getModifierExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.dstu2.model.CodeableConcept codeableConcept =
-                            new org.hl7.fhir.dstu2.model.CodeableConcept()
-                                    .addCoding(new org.hl7.fhir.dstu2.model.Coding()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = theResource.addModifierExtension();
-                    modifierExtension.setUrl(extensionSetting.getKey());
-                    modifierExtension.setValue(codeableConcept);
-                }));
     }
 
     protected void initializeDstu3(T theResource) {

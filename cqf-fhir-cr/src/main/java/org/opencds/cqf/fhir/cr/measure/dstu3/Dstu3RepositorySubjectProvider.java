@@ -1,14 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Group.GroupMemberComponent;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -18,7 +14,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
-import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
+import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class Dstu3RepositorySubjectProvider implements SubjectProvider {
@@ -35,10 +31,11 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                 || subjectIds.get(0) == null
                 || subjectIds.get(0).isEmpty()) {
             var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
-            var iterator = new BundleIterator<>(repository, Bundle.class, bundle);
-            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false)
-                    .map(BundleEntryParts::getResource)
-                    .map(x -> x.getIdElement().toUnqualifiedVersionless().getValue());
+            return new BundleMappingIterable<>(repository, bundle, x -> x.getResource()
+                            .getIdElement()
+                            .toUnqualifiedVersionless()
+                            .getValue())
+                    .toStream();
         }
 
         List<String> subjects = new ArrayList<>();

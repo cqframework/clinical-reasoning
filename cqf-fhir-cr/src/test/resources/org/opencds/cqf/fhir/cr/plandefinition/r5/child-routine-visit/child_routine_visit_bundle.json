@@ -7,11 +7,6 @@
       "resource": {
         "resourceType": "RequestOrchestration",
         "id": "ChildRoutineVisit-PlanDefinition-1.0.0",
-        "meta": {
-          "profile": [
-            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
-          ]
-        },
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal",

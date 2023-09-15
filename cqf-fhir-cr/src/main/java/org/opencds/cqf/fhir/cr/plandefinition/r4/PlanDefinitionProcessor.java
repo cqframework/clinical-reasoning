@@ -68,7 +68,7 @@ import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"unused", "squid:S107"})
+@SuppressWarnings({ "unused", "squid:S107" })
 public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDefinition> {
 
     private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
@@ -101,11 +101,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
         var questionnaireResponses = ((Bundle) bundle)
                 .getEntry().stream()
-                        .filter(entry -> entry.getResource()
-                                .fhirType()
-                                .equals(Enumerations.FHIRAllTypes.QUESTIONNAIRERESPONSE.toCode()))
-                        .map(entry -> (QuestionnaireResponse) entry.getResource())
-                        .collect(Collectors.toList());
+                .filter(entry -> entry.getResource()
+                        .fhirType()
+                        .equals(Enumerations.FHIRAllTypes.QUESTIONNAIRERESPONSE.toCode()))
+                .map(entry -> (QuestionnaireResponse) entry.getResource())
+                .collect(Collectors.toList());
         if (questionnaireResponses != null && !questionnaireResponses.isEmpty()) {
             for (var questionnaireResponse : questionnaireResponses) {
                 try {
@@ -130,8 +130,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         bundle.setType(BundleType.TRANSACTION);
         bundle.addEntry(PackageHelper.createEntry(thePlanDefinition, theIsPut));
         // The CPG IG specifies a main cql library for a PlanDefinition
-        var libraryCanonical =
-                thePlanDefinition.hasLibrary() ? thePlanDefinition.getLibrary().get(0) : null;
+        var libraryCanonical = thePlanDefinition.hasLibrary() ? thePlanDefinition.getLibrary().get(0) : null;
         if (libraryCanonical != null) {
             var library = (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
             if (library != null) {
@@ -161,9 +160,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
 
         return castOrThrow(
-                        basePlanDefinition,
-                        PlanDefinition.class,
-                        "The planDefinition passed in was not a valid instance of PlanDefinition.class")
+                basePlanDefinition,
+                PlanDefinition.class,
+                "The planDefinition passed in was not a valid instance of PlanDefinition.class")
                 .orElse(null);
     }
 
@@ -178,12 +177,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
         this.questionnaire = new Questionnaire();
         this.questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), planDefinition.getIdPart()));
-        this.questionnaireItemGenerator =
-                QuestionnaireItemGenerator.of(repository, subjectId, parameters, bundle, libraryEngine);
+        this.questionnaireItemGenerator = QuestionnaireItemGenerator.of(repository, subjectId, parameters, bundle,
+                libraryEngine);
         this.inputParameterResolver = new InputParameterResolver(
                 subjectId, encounterId, practitionerId, parameters, useServerData, bundle, repository);
-        this.extensionResolver =
-                new ExtensionResolver(subjectId, inputParameterResolver.getParameters(), bundle, libraryEngine);
+        this.extensionResolver = new ExtensionResolver(subjectId, inputParameterResolver.getParameters(), bundle,
+                libraryEngine);
 
         return planDefinition;
     }
@@ -202,7 +201,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 .setSubject(new Reference(subjectId));
         requestGroup.setId(new IdType(
                 requestGroup.fhirType(), planDefinition.getIdElement().getIdPart()));
-        requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
+        // requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
         if (encounterId != null) {
             requestGroup.setEncounter(new Reference(encounterId));
         }
@@ -224,9 +223,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
 
         var defaultLibraryUrl = planDefinition.getLibrary() == null
-                        || planDefinition.getLibrary().isEmpty()
-                ? null
-                : planDefinition.getLibrary().get(0).getValue();
+                || planDefinition.getLibrary().isEmpty()
+                        ? null
+                        : planDefinition.getLibrary().get(0).getValue();
         extensionResolver.resolveExtensions(requestGroup.getExtension(), defaultLibraryUrl);
 
         for (int i = 0; i < planDefinition.getGoal().size(); i++) {
@@ -240,7 +239,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                         .setUrl(Constants.PERTAINS_TO_GOAL)
                         .setValue(new Reference(goal.getIdElement()));
             }
-            // Always add goals to the resource list so they can be added to the CarePlan if needed
+            // Always add goals to the resource list so they can be added to the CarePlan if
+            // needed
             requestResources.add(goal);
         }
 
@@ -386,7 +386,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             // TODO: Figure out why this was here and what it was trying to do
             // if (action.hasRelatedAction()) {
             // for (var relatedActionComponent : action.getRelatedAction()) {
-            // if (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
+            // if
+            // (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
             // && metConditions.containsKey(relatedActionComponent.getActionId())) {
             // metConditions.put(action.getId(), action);
             // resolveDefinition(planDefinition, requestGroup, action);
@@ -405,7 +406,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
             IBaseResource resource = null;
             if (action.hasDefinitionCanonicalType()) {
-                resource = resolveDefinition(planDefinition, requestGroup, action);
+                resource = resolveDefinition(planDefinition, action);
                 if (resource != null) {
                     applyAction(requestGroup, resource, action);
                     requestAction.setResource(new Reference(resource.getIdElement()));
@@ -470,7 +471,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     private IBaseResource resolveDefinition(
             PlanDefinition planDefinition,
-            RequestGroup requestGroup,
             PlanDefinition.PlanDefinitionActionComponent action) {
         logger.debug(
                 "Resolving definition {}", action.getDefinitionCanonicalType().getValue());
@@ -478,7 +478,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var resourceName = resolveResourceName(definition, planDefinition);
         switch (FHIRAllTypes.fromCode(requireNonNull(resourceName))) {
             case PLANDEFINITION:
-                return applyNestedPlanDefinition(requestGroup, definition);
+                return applyNestedPlanDefinition(planDefinition, definition);
             case ACTIVITYDEFINITION:
                 return applyActivityDefinition(planDefinition, definition);
             case QUESTIONNAIRE:
@@ -512,10 +512,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         IBaseResource result = null;
         try {
             var referenceToContained = definition.getValue().startsWith("#");
-            var activityDefinition = (ActivityDefinition)
-                    (referenceToContained
-                            ? resolveContained(planDefinition, definition.getValue())
-                            : SearchHelper.searchRepositoryByCanonical(repository, definition));
+            var activityDefinition = (ActivityDefinition) (referenceToContained
+                    ? resolveContained(planDefinition, definition.getValue())
+                    : SearchHelper.searchRepositoryByCanonical(repository, definition));
             result = this.activityDefinitionProcessor.apply(
                     activityDefinition,
                     subjectId,
@@ -548,15 +547,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         return result;
     }
 
-    private IBaseResource applyNestedPlanDefinition(RequestGroup requestGroup, CanonicalType definition) {
+    private IBaseResource applyNestedPlanDefinition(PlanDefinition planDefinition, CanonicalType definition) {
         RequestGroup result = null;
         try {
-            var planDefinition = (PlanDefinition) SearchHelper.searchRepositoryByCanonical(repository, definition);
-            result = (RequestGroup) applyPlanDefinition(planDefinition);
-
-            for (var c : result.getInstantiatesCanonical()) {
-                requestGroup.addInstantiatesCanonical(c.getValueAsString());
-            }
+            var referenceToContained = definition.getValue().startsWith("#");
+            var nextPlanDefinition = (PlanDefinition)
+                    (referenceToContained
+                            ? resolveContained(planDefinition, definition.getValue())
+                            : SearchHelper.searchRepositoryByCanonical(repository, definition));
+            result = (RequestGroup) applyPlanDefinition(nextPlanDefinition);
         } catch (Exception e) {
             var message = String.format(
                     "ERROR: PlanDefinition %s could not be applied and threw exception %s",
@@ -576,7 +575,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     /*
-     * offset -> Duration timing -> Timing ( just our use case for connectathon period periodUnit
+     * offset -> Duration timing -> Timing ( just our use case for connectathon
+     * period periodUnit
      * frequency count ) use task code
      */
     private void resolveTask(
@@ -636,12 +636,12 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     private void resolvePrepopulateAction(
             PlanDefinition.PlanDefinitionActionComponent action, RequestGroup requestGroup, Task task) {
         if (action.hasExtension(Constants.SDC_QUESTIONNAIRE_PREPOPULATE)) {
-            var questionnaireBundles =
-                    getQuestionnairePackage(action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE));
+            var questionnaireBundles = getQuestionnairePackage(
+                    action.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE));
             for (var questionnaireBundle : questionnaireBundles) {
-                var toPopulate =
-                        (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
-                // Bundle should contain a Questionnaire and supporting Library and ValueSet resources
+                var toPopulate = (Questionnaire) questionnaireBundle.getEntryFirstRep().getResource();
+                // Bundle should contain a Questionnaire and supporting Library and ValueSet
+                // resources
                 var libraries = questionnaireBundle.getEntry().stream()
                         .filter(e -> e.hasResource()
                                 && (e.getResource().fhirType().equals(Enumerations.FHIRAllTypes.LIBRARY.toCode())))
@@ -652,8 +652,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                                 && (e.getResource().fhirType().equals(Enumerations.FHIRAllTypes.VALUESET.toCode())))
                         .map(e -> (ValueSet) e.getResource())
                         .collect(Collectors.toList());
-                var additionalData =
-                        bundle == null ? new Bundle().setType(BundleType.COLLECTION) : ((Bundle) bundle).copy();
+                var additionalData = bundle == null ? new Bundle().setType(BundleType.COLLECTION)
+                        : ((Bundle) bundle).copy();
                 libraries.forEach(
                         library -> additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(library)));
                 valueSets.forEach(
@@ -675,24 +675,25 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     private List<Bundle> getQuestionnairePackage(Extension prepopulateExtension) {
         Bundle bundle = null;
-        // PlanDef action should provide endpoint for $questionnaire-for-order operation as well as
+        // PlanDef action should provide endpoint for $questionnaire-for-order operation
+        // as well as
         // the order id to pass
-        var parameterExtension =
-                prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER);
+        var parameterExtension = prepopulateExtension
+                .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER);
         if (parameterExtension == null) {
             throw new IllegalArgumentException(String.format(
                     "Required extension for %s not found.", Constants.SDC_QUESTIONNAIRE_PREPOPULATE_PARAMETER));
         }
         var parameterName = parameterExtension.getValue().toString();
-        var prepopulateParameter =
-                this.parameters != null ? ((Parameters) this.parameters).getParameter(parameterName) : null;
+        var prepopulateParameter = this.parameters != null ? ((Parameters) this.parameters).getParameter(parameterName)
+                : null;
         if (prepopulateParameter == null) {
             throw new IllegalArgumentException(String.format("Parameter not found: %s ", parameterName));
         }
         var orderId = prepopulateParameter.toString();
 
-        var questionnaireExtension =
-                prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE);
+        var questionnaireExtension = prepopulateExtension
+                .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE);
         if (questionnaireExtension == null) {
             throw new IllegalArgumentException(String.format(
                     "Required extension for %s not found.", Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE));
@@ -705,10 +706,11 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 bundle = new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(questionnaire));
             }
         } else if (questionnaireExtension.getValue().hasType(FHIRAllTypes.URL.toCode())) {
-            // Assuming package operation endpoint if the extension is using valueUrl instead of
+            // Assuming package operation endpoint if the extension is using valueUrl
+            // instead of
             // valueCanonical
-            bundle =
-                    callQuestionnairePackageOperation(((UrlType) questionnaireExtension.getValue()).getValueAsString());
+            bundle = callQuestionnairePackageOperation(
+                    ((UrlType) questionnaireExtension.getValue()).getValueAsString());
         }
 
         if (bundle == null) {
@@ -734,7 +736,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         IGenericClient client = Clients.forUrl(repository.fhirContext(), baseUrl);
         // Clients.registerBasicAuth(client, user, password);
         try {
-            // TODO: This is not currently in use, but if it ever is we will need to determine how the
+            // TODO: This is not currently in use, but if it ever is we will need to
+            // determine how the
             // order and coverage resources are passed in
             Type order = null;
             Type coverage = null;

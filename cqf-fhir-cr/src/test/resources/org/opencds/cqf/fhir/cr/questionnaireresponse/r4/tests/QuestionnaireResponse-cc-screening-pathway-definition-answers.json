@@ -3,7 +3,13 @@
   "id": "cc-screening-pathway-definition-answers",
   "questionnaire": "http://example.org/sdh/demo/Questionnaire/cc-screening-pathway-definition",
   "status": "completed",
+  "subject": {
+    "reference": "Patient/coverage-concern"
+  },
   "authored": "2023-08-24",
+  "author": {
+    "reference": "Practitioner/practitioner1"
+  },
   "item": [
     {
       "linkId": "1",

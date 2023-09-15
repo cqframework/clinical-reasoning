@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +19,13 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -57,9 +60,9 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         }
 
         return castOrThrow(
-                        baseQuestionnaireResponse,
-                        QuestionnaireResponse.class,
-                        "The QuestionnaireResponse passed to repository was not a valid instance of QuestionnaireResponse.class")
+                baseQuestionnaireResponse,
+                QuestionnaireResponse.class,
+                "The QuestionnaireResponse passed to repository was not a valid instance of QuestionnaireResponse.class")
                 .orElse(null);
     }
 
@@ -88,8 +91,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         patientId = questionnaireResponse.getSubject().getId();
         libraryUrl = questionnaireResponse.hasExtension(Constants.CQF_LIBRARY)
                 ? ((CanonicalType) questionnaireResponse
-                                .getExtensionByUrl(Constants.CQF_LIBRARY)
-                                .getValue())
+                        .getExtensionByUrl(Constants.CQF_LIBRARY)
+                        .getValue())
                         .getValue()
                 : null;
     }
@@ -137,8 +140,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         var subjectItems = item.getItem().stream()
                 .filter(child -> child.hasExtension(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))
                 .collect(Collectors.toList());
-        var groupSubject =
-                !subjectItems.isEmpty() ? subjectItems.get(0).getAnswer().get(0).getValueReference() : subject.copy();
+        var groupSubject = !subjectItems.isEmpty() ? subjectItems.get(0).getAnswer().get(0).getValueReference()
+                : subject.copy();
         if (item.hasDefinition()) {
             processDefinitionItem(item, questionnaireResponse, resources, groupSubject);
         } else {
@@ -162,6 +165,34 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         }
 
         return property;
+    }
+
+    private Property getAuthorProperty(Resource resource) {
+        var property = resource.getNamedProperty("recorder");
+        if (property == null && resource.fhirType().equals(FHIRAllTypes.OBSERVATION.toCode())) {
+            property = resource.getNamedProperty("performer");
+        }
+
+        return property;
+    }
+
+    private List<Property> getDateProperties(Resource resource) {
+        List<Property> results = new ArrayList<>();
+        results.add(resource.getNamedProperty("onset"));
+        results.add(resource.getNamedProperty("issued"));
+        results.add(resource.getNamedProperty("effective"));
+        results.add(resource.getNamedProperty("recordDate"));
+
+        return results.stream().filter(p -> p != null).collect(Collectors.toList());
+    }
+
+    private void resolveMeta(DomainResource resource, String definition) {
+        var meta = new Meta();
+        // Consider setting source and lastUpdated here?
+        if (definition != null && !definition.isEmpty()) {
+            meta.addProfile(definition.split("#")[0]);
+            resource.setMeta(meta);
+        }
     }
 
     private List<IBase> getExpressionResult(Expression expression, String itemLinkId) {
@@ -210,10 +241,33 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
 
         var resourceType = getDefinitionType(item.getDefinition());
         var resource = (Resource) newValue(resourceType);
-        resource.setId(new IdType(resourceType, getExtractId(questionnaireResponse) + "." + item.getLinkId()));
+        resource.setId(new IdType(resourceType, getExtractId(questionnaireResponse) + "-" + item.getLinkId()));
+        resolveMeta((DomainResource) resource, item.getDefinition());
         var subjectProperty = getSubjectProperty(resource);
         if (subjectProperty != null) {
             resource.setProperty(subjectProperty.getName(), subject);
+        }
+        var authorProperty = getAuthorProperty(resource);
+        if (authorProperty != null && questionnaireResponse.hasAuthor()) {
+            resource.setProperty(authorProperty.getName(), questionnaireResponse.getAuthor());
+        }
+        var dateProperties = getDateProperties(resource);
+        if (dateProperties != null && !dateProperties.isEmpty() && questionnaireResponse.hasAuthored()) {
+            dateProperties.forEach(p -> {
+                try {
+                    var propertyDef = fhirContext().getElementDefinition(
+                            p.getTypeCode().contains("|") ? p.getTypeCode().split("\\|")[0] : p.getTypeCode());
+                    if (propertyDef != null) {
+                        modelResolver.setValue(resource, p.getName(), propertyDef.getImplementingClass()
+                                .getConstructor(Date.class).newInstance(questionnaireResponse.getAuthored()));
+                    }
+                } catch (Exception ex) {
+                    var message = String.format(
+                            "Error encountered attempting to set property (%s) on resource type (%s): %s",
+                            p.getName(), resource.fhirType(), ex.getMessage());
+                    logger.error(message);
+                }
+            });
         }
         item.getItem().forEach(childItem -> {
             if (childItem.hasDefinition()) {
@@ -223,11 +277,7 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
                 path = path.replace(resourceType + ".", "");
                 var answerValue = childItem.getAnswerFirstRep().getValue();
                 if (answerValue != null) {
-                    // if (path.contains(".")) {
-                    // nestedValueResolver.setNestedValue(resource, path, answerValue);
-                    // } else {
                     modelResolver.setValue(resource, path, answerValue);
-                    // }
                 }
             }
         });
@@ -296,8 +346,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
         // obs.setFocus();
         obs.setEncounter(questionnaireResponse.getEncounter());
         var authoredDate = new DateTimeType((questionnaireResponse.hasAuthored()
-                        ? questionnaireResponse.getAuthored().toInstant()
-                        : Instant.now())
+                ? questionnaireResponse.getAuthored().toInstant()
+                : Instant.now())
                 .toString());
         obs.setEffective(authoredDate);
         obs.setIssuedElement(new InstantType(authoredDate));
@@ -331,7 +381,8 @@ public class QuestionnaireResponseProcessor extends BaseQuestionnaireResponsePro
     // String url = mySdcProperties.getExtract().getEndpoint();
     // if (null == url || url.length() < 1) {
     // throw new IllegalArgumentException(
-    // "Unable to transmit observation bundle. No observation.endpoint defined in sdc properties.");
+    // "Unable to transmit observation bundle. No observation.endpoint defined in
+    // sdc properties.");
     // }
     // String user = mySdcProperties.getExtract().getUsername();
     // String password = mySdcProperties.getExtract().getPassword();

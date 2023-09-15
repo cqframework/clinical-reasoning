@@ -205,7 +205,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 .setSubject(new Reference(subjectId));
         requestOrchestration.setId(new IdType(
                 requestOrchestration.fhirType(), planDefinition.getIdElement().getIdPart()));
-        requestOrchestration.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
+        // requestOrchestration.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
         if (encounterId != null) {
             requestOrchestration.setEncounter(new Reference(encounterId));
         }
@@ -356,7 +356,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
             IBaseResource resource = null;
             if (action.hasDefinitionCanonicalType()) {
-                resource = resolveDefinition(planDefinition, requestOrchestration, action);
+                resource = resolveDefinition(planDefinition, action);
                 if (resource != null) {
                     applyAction(requestOrchestration, resource, action);
                     requestAction.setResource(new Reference(resource.getIdElement()));
@@ -418,7 +418,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     private IBaseResource resolveDefinition(
             PlanDefinition planDefinition,
-            RequestOrchestration requestOrchestration,
             PlanDefinition.PlanDefinitionActionComponent action) {
         logger.debug(
                 "Resolving definition {}", action.getDefinitionCanonicalType().getValue());
@@ -426,7 +425,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var resourceName = resolveResourceName(definition, planDefinition);
         switch (FHIRTypes.fromCode(requireNonNull(resourceName))) {
             case PLANDEFINITION:
-                return applyNestedPlanDefinition(requestOrchestration, definition);
+                return applyNestedPlanDefinition(planDefinition, definition);
             case ACTIVITYDEFINITION:
                 return applyActivityDefinition(planDefinition, definition);
             case QUESTIONNAIRE:
@@ -496,16 +495,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         return result;
     }
 
-    private IBaseResource applyNestedPlanDefinition(
-            RequestOrchestration requestOrchestration, CanonicalType definition) {
+    private IBaseResource applyNestedPlanDefinition(PlanDefinition planDefinition, CanonicalType definition) {
         RequestOrchestration result = null;
         try {
-            var planDefinition = (PlanDefinition) SearchHelper.searchRepositoryByCanonical(repository, definition);
-            result = (RequestOrchestration) applyPlanDefinition(planDefinition);
-
-            for (var c : result.getInstantiatesCanonical()) {
-                requestOrchestration.addInstantiatesCanonical(c.getValueAsString());
-            }
+            var referenceToContained = definition.getValue().startsWith("#");
+            var nextPlanDefinition = (PlanDefinition)
+                    (referenceToContained
+                            ? resolveContained(planDefinition, definition.getValue())
+                            : SearchHelper.searchRepositoryByCanonical(repository, definition));
+            result = (RequestOrchestration) applyPlanDefinition(nextPlanDefinition);
         } catch (Exception e) {
             var message = String.format(
                     "ERROR: PlanDefinition %s could not be applied and threw exception %s",

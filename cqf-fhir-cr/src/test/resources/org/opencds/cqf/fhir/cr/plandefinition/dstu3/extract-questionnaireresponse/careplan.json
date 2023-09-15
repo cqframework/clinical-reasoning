@@ -5,11 +5,6 @@
     {
       "resourceType": "RequestGroup",
       "id": "prepopulate",
-      "meta": {
-        "profile": [
-          "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
-        ]
-      },
       "definition": [
         {
           "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate|1.0.0"

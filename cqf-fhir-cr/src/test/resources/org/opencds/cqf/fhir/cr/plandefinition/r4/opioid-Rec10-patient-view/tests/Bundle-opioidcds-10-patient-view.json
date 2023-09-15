@@ -7,11 +7,6 @@
       "resource": {
         "resourceType": "RequestGroup",
         "id": "opioidcds-10-patient-view",
-        "meta": {
-          "profile": [
-            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy"
-          ]
-        },
         "contained": [
           {
             "resourceType": "OperationOutcome",

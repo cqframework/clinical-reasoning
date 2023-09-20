@@ -1,4 +1,9 @@
 coverage:
+  ignore:
+   - "cqf-fhir-benchmark"
+   - "cqf-fhir-bom"
+   - "docs"
+   - "scripts"
   status:
     project:
       default:

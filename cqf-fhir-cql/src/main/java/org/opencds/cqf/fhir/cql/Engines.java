@@ -33,7 +33,6 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
-import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider.EXPANSION_MODE;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -56,7 +55,8 @@ public class Engines {
 
     public static CqlEngine forRepository(
             Repository repository, EvaluationSettings settings, NpmProcessor npmProcessor, Boolean useLibraryCache) {
-        var terminologyProvider = new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
+        var terminologyProvider =
+                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
         var sources = Collections.singletonList(buildLibrarySource(repository));
 
         var dataProviders = buildDataProviders(repository, null, terminologyProvider, settings.getRetrieveSettings());
@@ -81,7 +81,8 @@ public class Engines {
         checkNotNull(settings);
         checkNotNull(repository);
 
-        var terminologyProvider = new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
+        var terminologyProvider =
+                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
         var sourceProviders = new ArrayList<LibrarySourceProvider>();
         sourceProviders.add(buildLibrarySource(repository));
 

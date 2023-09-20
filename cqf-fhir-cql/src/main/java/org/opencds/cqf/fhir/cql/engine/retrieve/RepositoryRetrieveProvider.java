@@ -49,10 +49,9 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
 
         // TODO: Like TerminologyMode, we should detect supported search parameters from the underlying repository if
-        // possible
-        // And then offload only the supported ones.
+        // possible. And then offload only the supported ones.
         var filterMode = this.getRetrieveSettings().getFilterMode();
-        if (filterMode == FILTER_MODE.REPOSITORY || filterMode == FILTER_MODE.AUTO) {
+        if (filterMode == FILTER_MODE.REPOSITORY || filterMode == FILTER_MODE.AUTO) { // TODO: The auto logic here..
             Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
             populateTemplateSearchParams(searchParams, templateId);
             populateContextSearchParams(searchParams, dataType, contextPath, context, contextValue);

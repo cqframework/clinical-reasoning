@@ -349,7 +349,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             searchParams.put(sp.getName(), codeList);
         } else if (valueSet != null) {
             boolean shouldInline = this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.INLINE
-                    || this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.AUTO && canInline(valueSet);
+                    || (this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.AUTO && canInline(valueSet));
 
             if (shouldInline) {
                 searchParams.put(
@@ -358,11 +358,6 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                                 .setModifier(TokenParamModifier.IN)
                                 .setValue(valueSet)));
             } else {
-                searchParams.put(
-                        sp.getName(),
-                        Collections.singletonList(new TokenParam()
-                                .setModifier(TokenParamModifier.IN)
-                                .setValue(valueSet)));
                 List<IQueryParameterType> codeList = new ArrayList<>();
                 for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
                     codeList.add(new TokenParam(

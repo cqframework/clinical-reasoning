@@ -36,9 +36,10 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     // eventually, we want to be able to detect expansion capabilities from the
     // capability statement. For now, we hard code based on the our knowledge
     // of where we set this terminology provider up.
-    public enum EXPANSION_CAPABILITIES {
-        NO,
-        YES
+    public enum EXPANSION_MODE {
+        INTERNAL,
+        REPOSITORY,
+        AUTO
     }
 
     private static final Logger logger = LoggerFactory.getLogger(RepositoryTerminologyProvider.class);
@@ -49,7 +50,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     private final FhirContext fhirContext;
     private final IFhirPath fhirPath;
     private final Map<String, List<Code>> valueSetIndex;
-    private final EXPANSION_CAPABILITIES repoExpansionCapabilities;
+    private final EXPANSION_MODE expansionMode;
 
     // The cached expansions are sorted by code order
     // This is used determine the range of codes to check
@@ -66,25 +67,25 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         public final int end;
     }
 
-    public RepositoryTerminologyProvider(Repository repository, EXPANSION_CAPABILITIES repoExpansionCapabilities) {
-        this(repository, new HashMap<>(), repoExpansionCapabilities);
+    public RepositoryTerminologyProvider(Repository repository, EXPANSION_MODE expansionMode) {
+        this(repository, new HashMap<>(), expansionMode);
     }
 
     public RepositoryTerminologyProvider(
             Repository repository,
             Map<String, List<Code>> valueSetIndex,
-            EXPANSION_CAPABILITIES repoExpansionCapabilities) {
+            EXPANSION_MODE expansionMode) {
         this.repository = requireNonNull(repository, "repository can not be null.");
         this.valueSetIndex = requireNonNull(valueSetIndex, "valueSetIndex can not be null.");
-        this.repoExpansionCapabilities =
-                requireNonNull(repoExpansionCapabilities, "repoExpansionCapabilities can not be null.");
+        this.expansionMode =
+                requireNonNull(expansionMode, "expansionMode can not be null.");
 
         this.fhirContext = repository.fhirContext();
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
     public RepositoryTerminologyProvider(Repository repository) {
-        this(repository, new HashMap<>(), EXPANSION_CAPABILITIES.NO);
+        this(repository, new HashMap<>(), EXPANSION_MODE.AUTO);
     }
 
     /**
@@ -180,9 +181,9 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
                     valueSet.getId());
         }
 
-        // ValueSet didn't return with an expansion, and the underlying repository
-        // supports expansion, so try to expand it.
-        if (codes == null && this.repoExpansionCapabilities == EXPANSION_CAPABILITIES.YES) {
+        boolean shouldUseRepoExpansion = this.expansionMode == EXPANSION_MODE.INTERNAL ||
+            (this.expansionMode == EXPANSION_MODE.REPOSITORY && canRepositoryExpand(valueSet));
+        if (codes == null && shouldUseRepoExpansion) {
             vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
             codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
         }
@@ -297,5 +298,10 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
             return true;
         }
         return false;
+    }
+
+    private boolean canRepositoryExpand(ValueSetInfo valueSetInfo) {
+        // TODO: check capabilities statement to see if expansion is supported.
+        return true;
     }
 }

@@ -19,6 +19,15 @@
       ],
       "problemMatcher": []
     },
+    // {
+    //   "type": "shell",
+    //   "group": "none",
+    //   "label": "generate code coverage report",
+    //   "command": [
+    //     "./mvnw org.jacoco:jacoco-maven-plugin:report"
+    //   ],
+    //   "problemMatcher": []
+    // },
     {
       "type": "java (build)",
       "paths": [

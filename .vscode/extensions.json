@@ -10,7 +10,8 @@
     "streetsidesoftware.code-spell-checker-medical-terms",
     "sonarsource.sonarlint-vscode",
     "redhat.fabric8-analytics",
-    "pucelle.run-on-save"
+    "pucelle.run-on-save",
+    "codecov.codecov"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": [

@@ -25,3 +25,7 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: "**/junitreports/TEST-*.xml"
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -11,21 +11,21 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class RepositoryRetrieveProvider extends RetrieveProvider {
+public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
     private final Repository repository;
     private final FhirContext fhirContext;
 
-    public RepositoryRetrieveProvider(final Repository repository, RetrieveSettings settings) {
-        super(repository.fhirContext());
+    public RepositoryRetrieveProvider(
+            final Repository repository, final TerminologyProvider terminologyProvider, RetrieveSettings settings) {
+        super(repository.fhirContext(), terminologyProvider, settings);
         this.repository = requireNonNull(repository, "repository can not be null.");
         this.fhirContext = repository.fhirContext();
-        this.setSearchByTemplate(settings.getSearchByTemplate());
-        this.setFilterBySearchParam(settings.getFilterBySearchParam());
     }
 
     @Override
@@ -48,7 +48,11 @@ public class RepositoryRetrieveProvider extends RetrieveProvider {
         var bt = (Class<? extends IBaseBundle>)
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
 
-        if (isFilterBySearchParam()) {
+        // TODO: Like TerminologyMode, we should detect supported search parameters from the underlying repository if
+        // possible
+        // And then offload only the supported ones.
+        var filterMode = this.getRetrieveSettings().getFilterMode();
+        if (filterMode == FILTER_MODE.REPOSITORY || filterMode == FILTER_MODE.AUTO) {
             Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
             populateTemplateSearchParams(searchParams, templateId);
             populateContextSearchParams(searchParams, dataType, contextPath, context, contextValue);

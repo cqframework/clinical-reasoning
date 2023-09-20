@@ -72,13 +72,10 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     }
 
     public RepositoryTerminologyProvider(
-            Repository repository,
-            Map<String, List<Code>> valueSetIndex,
-            EXPANSION_MODE expansionMode) {
+            Repository repository, Map<String, List<Code>> valueSetIndex, EXPANSION_MODE expansionMode) {
         this.repository = requireNonNull(repository, "repository can not be null.");
         this.valueSetIndex = requireNonNull(valueSetIndex, "valueSetIndex can not be null.");
-        this.expansionMode =
-                requireNonNull(expansionMode, "expansionMode can not be null.");
+        this.expansionMode = requireNonNull(expansionMode, "expansionMode can not be null.");
 
         this.fhirContext = repository.fhirContext();
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
@@ -181,8 +178,8 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
                     valueSet.getId());
         }
 
-        boolean shouldUseRepoExpansion = this.expansionMode == EXPANSION_MODE.INTERNAL ||
-            (this.expansionMode == EXPANSION_MODE.REPOSITORY && canRepositoryExpand(valueSet));
+        boolean shouldUseRepoExpansion = this.expansionMode == EXPANSION_MODE.INTERNAL
+                || (this.expansionMode == EXPANSION_MODE.REPOSITORY && canRepositoryExpand(valueSet));
         if (codes == null && shouldUseRepoExpansion) {
             vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
             codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);

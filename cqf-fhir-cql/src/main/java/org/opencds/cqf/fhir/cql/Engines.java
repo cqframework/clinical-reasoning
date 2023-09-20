@@ -33,7 +33,6 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
-import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider.EXPANSION_MODE;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -56,7 +55,8 @@ public class Engines {
 
     public static CqlEngine forRepository(
             Repository repository, EvaluationSettings settings, NpmProcessor npmProcessor, Boolean useLibraryCache) {
-        var terminologyProvider = new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
+        var terminologyProvider =
+                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
         var sources = Collections.singletonList(buildLibrarySource(repository));
 
         var dataProviders = buildDataProviders(repository, null, terminologyProvider, settings.getRetrieveSettings());
@@ -81,7 +81,8 @@ public class Engines {
         checkNotNull(settings);
         checkNotNull(repository);
 
-        var terminologyProvider = new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
+        var terminologyProvider =
+                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
         var sourceProviders = new ArrayList<LibrarySourceProvider>();
         sourceProviders.add(buildLibrarySource(repository));
 
@@ -152,7 +153,7 @@ public class Engines {
     private static Map<String, DataProvider> buildDataProviders(
             Repository repository,
             IBaseBundle additionalData,
-            TerminologyProvider theTerminologyProvider,
+            TerminologyProvider terminologyProvider,
             RetrieveSettings retrieveSettings) {
         Map<String, DataProvider> dataProviders = new HashMap<>();
 
@@ -161,16 +162,12 @@ public class Engines {
                 repository.fhirContext().getVersion().getVersion());
         // TODO: Make a federated repository here once that is ready for sure
         // var fedRepo = new FederatedRepository(repository, bundleRepo);
-        var retrieveProvider = new RepositoryRetrieveProvider(repository, retrieveSettings);
+        var retrieveProvider = new RepositoryRetrieveProvider(repository, terminologyProvider, retrieveSettings);
         providers.add(retrieveProvider);
         if (additionalData != null && modelResolver.resolvePath(additionalData, "entry") != null) {
             var bundleRepo = new InMemoryFhirRepository(repository.fhirContext(), additionalData);
-            providers.add(new RepositoryRetrieveProvider(bundleRepo, retrieveSettings));
-        }
-
-        var retrieveProviderConfigurer = new RetrieveProviderConfigurerImpl(RetrieveProviderConfig.defaultConfig());
-        for (var provider : providers) {
-            retrieveProviderConfigurer.configure(provider, theTerminologyProvider);
+            var provider = new RepositoryRetrieveProvider(bundleRepo, terminologyProvider, retrieveSettings);
+            providers.add(provider);
         }
 
         dataProviders.put(Constants.FHIR_MODEL_URI, new FederatedDataProvider(modelResolver, providers));

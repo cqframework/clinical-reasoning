@@ -29,38 +29,69 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
-import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
+import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.engine.utility.CodeExtractor;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider {
-    private static final Logger logger = LoggerFactory.getLogger(RetrieveProvider.class);
+public abstract class BaseRetrieveProvider implements RetrieveProvider {
+    private static final Logger logger = LoggerFactory.getLogger(BaseRetrieveProvider.class);
     private final CodeExtractor codeUtil;
     private final IFhirPath fhirPath;
-    private boolean filterBySearchParam = true;
-    private boolean searchByTemplate = false;
-    private SearchParameterResolver resolver;
+    private final RetrieveSettings retrieveSettings;
+    private final TerminologyProvider terminologyProvider;
+    private final SearchParameterResolver resolver;
 
-    protected RetrieveProvider(final FhirContext fhirContext) {
-        requireNonNull(fhirContext, "The FhirContext can not be null.");
+    public enum TERMINOLOGY_MODE {
+        INLINE,
+        EXPAND,
+        AUTO
+    }
+
+    public enum FILTER_MODE {
+        INTERNAL,
+        REPOSITORY,
+        AUTO
+    }
+
+    public enum PROFILE_MODE {
+        OFF, // Don't check resource profile
+        ENFORCED, // Always check resource profile (and error if unable to do so or if resource fails validation)
+        OPTIONAL, // Check resource profile if possible, and error if validation fails (but don't error if not possible)
+        TRUST // Believe the underlying repository will validate profiles correctly
+    }
+
+    protected BaseRetrieveProvider(
+            final FhirContext fhirContext,
+            final TerminologyProvider terminologyProvider,
+            final RetrieveSettings retrieveSettings) {
+        requireNonNull(fhirContext, "fhirContext can not be null.");
+        this.retrieveSettings = requireNonNull(retrieveSettings, "retrieveSettings can not be null");
+        this.terminologyProvider = requireNonNull(terminologyProvider, "terminologyProvider can not be null");
         this.codeUtil = new CodeExtractor(fhirContext);
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
         this.resolver = new SearchParameterResolver(fhirContext);
     }
 
     public Predicate<IBaseResource> filterByTemplateId(final String dataType, final String templateId) {
+
+        if (this.getRetrieveSettings().getProfileMode() == PROFILE_MODE.OFF) {
+            return resource -> true;
+        }
+
         if (templateId == null
                 || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
             logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
             return resource -> true;
         }
 
+        // TODO: If profile mode is TRUST, this works. But for ENFORCED we should use the validator
         return (IBaseResource res) -> {
             if (res.getMeta() != null && res.getMeta().getProfile() != null) {
                 for (IPrimitiveType<?> profile : res.getMeta().getProfile()) {
@@ -223,11 +254,6 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
             return false;
         }
 
-        if (this.terminologyProvider == null) {
-            throw new IllegalStateException(String.format(
-                    "Unable to check code membership for in ValueSet %s. terminologyProvider is null.", valueSet));
-        }
-
         final ValueSetInfo valueSetInfo = new ValueSetInfo().withId(valueSet);
         for (final Code code : codes) {
             if (this.terminologyProvider.in(code, valueSetInfo)) {
@@ -272,7 +298,10 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
 
     public void populateTemplateSearchParams(
             Map<String, List<IQueryParameterType>> searchParams, final String templateId) {
-        if (Boolean.TRUE.equals(this.searchByTemplate) && StringUtils.isNotBlank(templateId)) {
+
+        // TODO: If profile mode is optional, trust, or enforced AND the repository supports the _profile
+        // parameter, we should add it.
+        if (this.getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF && StringUtils.isNotBlank(templateId)) {
             searchParams.put("_profile", Collections.singletonList(new ReferenceParam(templateId)));
         }
     }
@@ -319,21 +348,34 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
             }
             searchParams.put(sp.getName(), codeList);
         } else if (valueSet != null) {
-            if (this.terminologyProvider != null && this.isExpandValueSets()) {
-                List<IQueryParameterType> codeList = new ArrayList<>();
-                for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
-                    codeList.add(new TokenParam(
-                            new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode())));
-                }
-                searchParams.put(sp.getName(), codeList);
+            boolean shouldInline = this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.INLINE
+                    || this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.AUTO && canInline(valueSet);
+
+            if (shouldInline) {
+                searchParams.put(
+                        sp.getName(),
+                        Collections.singletonList(new TokenParam()
+                                .setModifier(TokenParamModifier.IN)
+                                .setValue(valueSet)));
             } else {
                 searchParams.put(
                         sp.getName(),
                         Collections.singletonList(new TokenParam()
                                 .setModifier(TokenParamModifier.IN)
                                 .setValue(valueSet)));
+                List<IQueryParameterType> codeList = new ArrayList<>();
+                for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
+                    codeList.add(new TokenParam(
+                            new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode())));
+                }
+                searchParams.put(sp.getName(), codeList);
             }
         }
+    }
+
+    protected boolean canInline(String valueSet) {
+        // TODO: Check capability statement for inlineability
+        return true;
     }
 
     public void populateDateSearchParams(
@@ -390,25 +432,19 @@ public abstract class RetrieveProvider extends TerminologyAwareRetrieveProvider 
         }
     }
 
-    public CodeExtractor getCodeUtil() {
+    protected CodeExtractor getCodeUtil() {
         return codeUtil;
     }
 
-    public IFhirPath getFhirPath() {
+    protected IFhirPath getFhirPath() {
         return fhirPath;
     }
 
-    public boolean isFilterBySearchParam() {
-        return filterBySearchParam;
+    protected TerminologyProvider getTerminologyProvider() {
+        return this.terminologyProvider;
     }
 
-    public RetrieveProvider setFilterBySearchParam(boolean filterBySearchParam) {
-        this.filterBySearchParam = filterBySearchParam;
-        return this;
-    }
-
-    public RetrieveProvider setSearchByTemplate(boolean searchByTemplate) {
-        this.searchByTemplate = searchByTemplate;
-        return this;
+    protected RetrieveSettings getRetrieveSettings() {
+        return this.retrieveSettings;
     }
 }

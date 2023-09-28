@@ -61,18 +61,17 @@ define "Most Recent Practitioner ID":
       or Common.GetRelativeType(Participant.reference) = 'Practitioner'
     )
 
-define "Most Recent Practitioner Name":
+define function "Get Practitioner"(ids List<FHIR.Reference>)
+returns FHIR.Practitioner:
   First(
-    [Practitioner] P
-      with "Most Recent Practitioner ID" ID
-        such that P.id ~ Common.GetId(ID.reference)
-    return First(P.name.given) + ' ' + First(P.name.family)
+    [Practitioner: id in (ids id return Common.GetId(id.reference))] P
   )
 
+define "Most Recent Practitioner Name":
+  First("Most Recent Practitioner".name.given) + ' ' + First("Most Recent Practitioner".name.family)
+
 define "Most Recent Practitioner":
-  First([Practitioner] P
-    with "Most Recent Practitioner ID" ID
-      such that P.id ~ Common.GetId(ID.reference))
+  "Get Practitioner"("Most Recent Practitioner ID")
 
 // define "Most Recent Practitioner Primitive":
 //   if "Most Recent Practitioner Name" is null then 'None' else "Most Recent Practitioner Name"

@@ -81,6 +81,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         this.parameters = parameters;
         this.bundle = bundle;
         this.libraryEngine = libraryEngine;
+
         libraryUrl = questionnaire.hasExtension(Constants.CQF_LIBRARY)
                 ? ((CanonicalType) questionnaire
                                 .getExtensionByUrl(Constants.CQF_LIBRARY)
@@ -237,7 +238,6 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         var responseItems = new ArrayList<QuestionnaireResponseItemComponent>();
         processResponseItems(populatedQuestionnaire.getItem(), responseItems);
         response.setItem(responseItems);
-
         return response;
     }
 
@@ -267,10 +267,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
 
     @Override
     public Questionnaire generateQuestionnaire(String id) {
-
         var questionnaire = new Questionnaire();
         questionnaire.setId(new IdType("Questionnaire", id));
-
         return questionnaire;
     }
 
@@ -290,7 +288,6 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
                 }
             }
         }
-
         return bundle;
     }
 }

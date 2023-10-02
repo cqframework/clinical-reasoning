@@ -24,27 +24,33 @@ public class InMemoryRepositoryTest {
     Repository repository;
 
     public InMemoryRepositoryTest() {
-        IBaseBundle bundle = (IBaseBundle) FhirContext.forR4Cached()
-                .newJsonParser()
-                .parseResource(InMemoryRepositoryTest.class.getResourceAsStream("bundle/test-bundle.json"));
-        repository = new InMemoryFhirRepository(FhirContext.forR4Cached(), bundle);
+        repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
+        Library library1 = new Library();
+        library1.setId(new IdType("Library","example1"));
+        repository.update(library1);
+        Library library2 = new Library();
+        library2.setId(new IdType("Library/example2"));
+        repository.update(library2);
+        Encounter encounter1 = new Encounter();
+        encounter1.setId(new IdType("Encounter", "example1"));
+        repository.update(encounter1);
     }
 
     @Test
     public void testRead() {
-        IBaseResource res = repository.read(Library.class, new IdType("Library/Example1"), null);
-        assertEquals(res.getIdElement().getIdPart(), "Example1");
+        IBaseResource res = repository.read(Library.class, new IdType("Library/example1"), null);
+        assertEquals(res.getIdElement().getIdPart(), "example1");
     }
 
     @Test
     public void testSearchWithId() {
         Map<String, List<IQueryParameterType>> mapLibrary = new HashMap<>();
-        mapLibrary.put("id", Collections.singletonList(new ReferenceParam("Library/Example1")));
+        mapLibrary.put("_id", Collections.singletonList(new ReferenceParam("Library/example1")));
         IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, mapLibrary, null);
         assertEquals(((Bundle) bundle).getEntry().size(), 1);
 
         Map<String, List<IQueryParameterType>> mapEncounter = new HashMap<>();
-        mapEncounter.put("id", Collections.singletonList(new ReferenceParam("Encounter/Example1")));
+        mapEncounter.put("_id", Collections.singletonList(new ReferenceParam("Encounter/example1")));
         IBaseBundle bundleEncounter = repository.search(IBaseBundle.class, Encounter.class, mapEncounter, null);
         assertEquals(((Bundle) bundleEncounter).getEntry().size(), 1);
     }

@@ -125,7 +125,7 @@ public class InMemoryFhirRepository implements Repository {
                 .values();
         if (searchParameters == null || searchParameters.isEmpty()) {
             resourceList.forEach(builder::addCollectionEntry);
-        } else if (!searchParameters.isEmpty() && searchParameters.containsKey("id")) {
+        } else if (searchParameters.containsKey("id")) {
             for (IBaseResource resource : resourceList) {
                 String id = resource.getIdElement().getIdPart();
                 String searchParamValue = searchParameters.get("id").get(0).getValueAsQueryToken(this.context);

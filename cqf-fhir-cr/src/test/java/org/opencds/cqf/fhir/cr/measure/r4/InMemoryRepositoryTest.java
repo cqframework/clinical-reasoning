@@ -31,14 +31,14 @@ public class InMemoryRepositoryTest {
 
     @Test
     public void testRead() {
-        IBaseResource res = repository.read(Library.class, new IdType("Library/LibraryEvaluationTest"), null);
-        assertEquals(res.getIdElement().getIdPart(), "LibraryEvaluationTest");
+        IBaseResource res = repository.read(Library.class, new IdType("Library/Example1"), null);
+        assertEquals(res.getIdElement().getIdPart(), "Example1");
     }
 
     @Test
     public void testSearchWithId() {
         Map<String, List<IQueryParameterType>> map = new HashMap<>();
-        map.put("id", Collections.singletonList(new ReferenceParam("LibraryEvaluationTest")));
+        map.put("id", Collections.singletonList(new ReferenceParam("Library/Example1")));
         IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, map, null);
         assertEquals(((Bundle) bundle).getEntry().size(), 1);
     }

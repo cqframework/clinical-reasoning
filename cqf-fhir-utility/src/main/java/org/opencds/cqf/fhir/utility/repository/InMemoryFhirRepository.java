@@ -17,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 
@@ -120,22 +121,19 @@ public class InMemoryFhirRepository implements Repository {
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.context);
 
-        var resourceList = resourceMap
-                .computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>())
-                .values();
+        var resourceIdMap = resourceMap.computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>());
+
         if (searchParameters == null || searchParameters.isEmpty()) {
-            resourceList.forEach(builder::addCollectionEntry);
+            resourceIdMap.values().forEach(builder::addCollectionEntry);
         } else if (searchParameters.containsKey("id")) {
-            for (IBaseResource resource : resourceList) {
-                String id = resource.getIdElement().getIdPart();
-                String searchParamValue = searchParameters.get("id").get(0).getValueAsQueryToken(this.context);
-                if (id.equalsIgnoreCase(searchParamValue)) {
-                    builder.addCollectionEntry(resource);
-                }
+            IdType searchParamValue =
+                    new IdType(searchParameters.get("id").get(0).getValueAsQueryToken(this.context));
+            if (resourceIdMap.containsKey(searchParamValue)) {
+                builder.addCollectionEntry(resourceIdMap.get(searchParamValue));
             }
         } else {
             var resourceMatcher = Repositories.getResourceMatcher(this.context);
-            for (var resource : resourceList) {
+            for (var resource : resourceIdMap.values()) {
                 boolean include = true;
                 for (var nextEntry : searchParameters.entrySet()) {
                     var paramName = nextEntry.getKey();

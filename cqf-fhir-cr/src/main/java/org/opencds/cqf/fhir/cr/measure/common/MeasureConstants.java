@@ -6,14 +6,14 @@ public class MeasureConstants {
 
     public static final String URL_CODESYSTEM_MEASURE_POPULATION =
             "http://teminology.hl7.org/CodeSystem/measure-population";
-    //http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-populationReference.html
+    // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-populationReference.html
     public static final String EXT_DAVINCI_POPULATION_REFERENCE =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference";
-    //http://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-extension-supplementalData.html
+    // http://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-extension-supplementalData.html
     public static final String EXT_SDE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData";
 
-    //http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-criteriaReference.html
+    // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-criteriaReference.html
     public static final String EXT_CRITERIA_REFERENCE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference";
     public static final String EXT_SDE_DISAGGREGATE_URL =

@@ -10,6 +10,12 @@
 			"name": "Example1"
 		}
 	}, {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "Example1",
+        "status": "in-progress"
+      }
+    },{
 		"resource": {
 			"resourceType": "Library",
 			"id": "Example2",

@@ -26,7 +26,7 @@ public class InMemoryRepositoryTest {
     public InMemoryRepositoryTest() {
         repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         Library library1 = new Library();
-        library1.setId(new IdType("Library","example1"));
+        library1.setId(new IdType("Library", "example1"));
         repository.update(library1);
         Library library2 = new Library();
         library2.setId(new IdType("Library/example2"));

@@ -126,8 +126,7 @@ public class InMemoryFhirRepository implements Repository {
         if (searchParameters == null || searchParameters.isEmpty()) {
             resourceIdMap.values().forEach(builder::addCollectionEntry);
         } else if (searchParameters.containsKey("_id")) {
-            var searchParamValue =
-                 new IdType(searchParameters.get("_id").get(0).getValueAsQueryToken(this.context));
+            var searchParamValue = new IdType(searchParameters.get("_id").get(0).getValueAsQueryToken(this.context));
             if (resourceIdMap.containsKey(searchParamValue)) {
                 builder.addCollectionEntry(resourceIdMap.get(searchParamValue));
             }

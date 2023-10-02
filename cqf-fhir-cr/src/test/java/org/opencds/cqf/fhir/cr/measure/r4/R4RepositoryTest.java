@@ -7,6 +7,12 @@ import ca.uhn.fhir.context.FhirContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,5 +63,16 @@ public class R4RepositoryTest {
     public void testSearch() {
         IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, null, null);
         assertEquals(((Bundle) bundle).getEntry().size(), 6);
+    }
+
+    @Test
+    public void testSearchWithId() {
+        Map<String, List<IQueryParameterType>> map = new HashMap<>();
+        map.put(
+            "id",
+            Collections.singletonList(new ReferenceParam(
+                "Library/first-example")));
+        IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, map, null);
+        assertEquals(((Bundle) bundle).getEntry().size(), 1);
     }
 }

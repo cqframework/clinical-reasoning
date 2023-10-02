@@ -125,6 +125,13 @@ public class InMemoryFhirRepository implements Repository {
                 .values();
         if (searchParameters == null || searchParameters.isEmpty()) {
             resourceList.forEach(builder::addCollectionEntry);
+        } else if (!searchParameters.isEmpty() && (searchParameters.containsKey("id"))) {
+            for (IBaseResource resource : resourceList) {
+                if (resource.getIdElement().getIdPart().equalsIgnoreCase(
+                    searchParameters.get("id").get(0).getValueAsQueryToken(this.context))) {
+                    builder.addCollectionEntry(resource);
+                }
+            }
         } else {
             var resourceMatcher = Repositories.getResourceMatcher(this.context);
             for (var resource : resourceList) {

@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.generator.nestedquestionnaireitem;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.r4.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ItemValueTransformer.transformValue;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;

@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.r4.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
 import java.util.Collections;

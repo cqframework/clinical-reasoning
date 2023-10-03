@@ -97,9 +97,7 @@ public class Dstu3MeasureProcessor {
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
-        if (StringUtils.isNotBlank(reportType)) {
-            evalType = MeasureEvalType.fromCode(reportType).get();
-        } else if (subjects.size() > 1) {
+        if (subjects.size() > 1) {
             evalType = MeasureEvalType.POPULATION;
         } else {
             evalType = MeasureEvalType.SUBJECT;

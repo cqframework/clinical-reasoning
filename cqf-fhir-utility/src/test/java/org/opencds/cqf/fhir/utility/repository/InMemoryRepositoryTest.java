@@ -4,12 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.TokenParam;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -17,6 +11,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class InMemoryRepositoryTest {
 
@@ -25,8 +20,8 @@ public class InMemoryRepositoryTest {
     public InMemoryRepositoryTest() {
         repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         repository.update(new Library().setId("Library/example1"));
-        repository.update(new Library().setId("Library/example2"));
-        repository.update(new Encounter().setId("Encounter/example1"));
+        repository.update(new Library().setUrl("http://example.com/123").setId("Library/example2"));
+        repository.update(new Encounter().setId("Encounter/example3"));
     }
 
     @Test
@@ -37,21 +32,32 @@ public class InMemoryRepositoryTest {
 
     @Test
     public void testSearchWithId() {
-        Map<String, List<IQueryParameterType>> search = new HashMap<>();
-        search.put("_id", Collections.singletonList(new TokenParam("example1")));
+
+        var search = Searches.byId("example1");
         var resources = repository.search(Bundle.class, Library.class, search);
         // The _id parameter will be consumed if the index is being used.
         assertTrue(search.isEmpty());
         assertEquals(1, resources.getEntry().size());
 
-        search.put("_id", Collections.singletonList(new TokenParam("example1")));
+        search = Searches.byId("example3");
         resources = repository.search(Bundle.class, Encounter.class, search);
         assertTrue(search.isEmpty());
         assertEquals(1, resources.getEntry().size());
 
-        search.put("_id", Collections.singletonList(new TokenParam("example2345")));
+        search = Searches.byId("2345");
         resources = repository.search(Bundle.class, Encounter.class, search);
         assertTrue(search.isEmpty());
         assertEquals(0, resources.getEntry().size());
+
+        search = Searches.byId("example1", "example2");
+        resources = repository.search(Bundle.class, Library.class, search);
+        assertTrue(search.isEmpty());
+        assertEquals(2, resources.getEntry().size());
+    }
+
+    @Test
+    public void testSearchWithUrl() {
+        var resources = repository.search(Bundle.class, Library.class, Searches.byUrl("http://example.com/123"));
+        assertEquals(1, resources.getEntry().size());
     }
 }

@@ -85,8 +85,6 @@ public class R4MeasureProcessor {
 
         MeasureEvalType evalType = null;
 
-
-
         var actualRepo = this.repository;
         if (additionalData != null) {
             actualRepo = new FederatedRepository(
@@ -96,7 +94,7 @@ public class R4MeasureProcessor {
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
-        if (subjects.size()>1){
+        if (subjects.size() > 1) {
             evalType = MeasureEvalType.POPULATION;
         } else {
             evalType = MeasureEvalType.SUBJECT;

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -110,7 +108,7 @@ public class Measure {
     }
 
     public static class When {
-        //private final R4MeasureProcessor processor;
+        // private final R4MeasureProcessor processor;
         private final R4MeasureService service;
 
         When(R4MeasureService service) {
@@ -163,13 +161,13 @@ public class Measure {
             return this;
         }
 
-        public When practitoner(String practitioner){
-            this.practitioner=practitioner;
+        public When practitoner(String practitioner) {
+            this.practitioner = practitioner;
             return this;
         }
 
-        public When productLine(String productLine){
-            this.productLine=productLine;
+        public When productLine(String productLine) {
+            this.productLine = productLine;
             return this;
         }
 
@@ -281,7 +279,7 @@ public class Measure {
             return this;
         }
 
-        public SelectedReport hasSubjectReference(String subjectReference){
+        public SelectedReport hasSubjectReference(String subjectReference) {
             var ref = this.report().getSubject();
             assertEquals(ref.getReference(), subjectReference);
             return this;

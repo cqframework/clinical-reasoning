@@ -9,145 +9,148 @@ public class R4MeasureServiceTest {
     @Test
     public void exm108_individualPractitionerParam() {
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .practitoner("Practitioner/exm108-practitioner-2")
-            .reportType("population")
-            .evaluate()
-            .then()
-            .hasSubjectReference("Practitioner/exm108-practitioner-2")
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(1);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .practitoner("Practitioner/exm108-practitioner-2")
+                .reportType("population")
+                .evaluate()
+                .then()
+                .hasSubjectReference("Practitioner/exm108-practitioner-2")
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1);
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .practitoner("Practitioner/exm108-practitioner-1")
-            .reportType("population")
-            .evaluate()
-            .then()
-            .hasSubjectReference("Practitioner/exm108-practitioner-1")
-            .firstGroup()
-            .population("numerator")
-            .hasCount(0)
-            .up()
-            .population("denominator")
-            .hasCount(1);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .practitoner("Practitioner/exm108-practitioner-1")
+                .reportType("population")
+                .evaluate()
+                .then()
+                .hasSubjectReference("Practitioner/exm108-practitioner-1")
+                .firstGroup()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .population("denominator")
+                .hasCount(1);
     }
 
     @Test
     public void exm108_groupPatientsParam() {
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .subject("Group/patient-group-108")
-            .reportType("population")
-            .evaluate()
-            .then()
-            .hasSubjectReference("Group/patient-group-108")
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(2);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .subject("Group/patient-group-108")
+                .reportType("population")
+                .evaluate()
+                .then()
+                .hasSubjectReference("Group/patient-group-108")
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(2);
     }
+
     @Test
     public void exm108_allPatients() {
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .practitoner(null)
-            .reportType("population")
-            .evaluate()
-            .then()
-            .hasSubjectReference(null)
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(2);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .practitoner(null)
+                .reportType("population")
+                .evaluate()
+                .then()
+                .hasSubjectReference(null)
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(2);
     }
 
     @Test
     public void exm108_noReportTypePopulation() {
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(2);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(2);
     }
+
     @Test
     public void exm108_noReportTypeIndividual() {
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .subject("Patient/numer-EXM108")
-            .evaluate()
-            .then()
-            .hasSubjectReference("Patient/numer-EXM108")
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(1);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .subject("Patient/numer-EXM108")
+                .evaluate()
+                .then()
+                .hasSubjectReference("Patient/numer-EXM108")
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1);
     }
 
     @Test
     public void exm108_wrongReportTypePassed1() {
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .reportType("individual")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(2);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .reportType("individual")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(2);
     }
+
     @Test
     public void exm108_wrongReportTypePassed2() {
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .reportType("summary")
-            .subject("Patient/numer-EXM108")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(1);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .reportType("summary")
+                .subject("Patient/numer-EXM108")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1);
     }
 }

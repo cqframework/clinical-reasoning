@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -44,7 +43,6 @@ public class SimpleMeasureProcessorTest {
                 .population("denominator")
                 .hasCount(1);
     }
-
 
     @Test
     public void exm108_fullSubjectId() {

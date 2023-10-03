@@ -61,12 +61,12 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 }
 
                 subjects.add(r.getIdElement().toUnqualifiedVersionless().getValue());
-            // Single Practitioner
-            } else if (subjectId.startsWith("Practitioner")){
+                // Single Practitioner
+            } else if (subjectId.startsWith("Practitioner")) {
 
                 addPractitionerSubjectIds(subjectId, repository, subjects);
 
-            // Group Subject
+                // Group Subject
             } else if (subjectId.startsWith("Group")) {
                 IdType id = new IdType(subjectId);
                 Group r = repository.read(Group.class, id);
@@ -74,21 +74,20 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 if (r == null) {
                     throw new ResourceNotFoundException(id);
                 }
-                //Group of Patients
+                // Group of Patients
                 if (r.getType().equals(GroupType.PERSON)) {
                     for (GroupMemberComponent gmc : r.getMember()) {
                         IIdType ref = gmc.getEntity().getReferenceElement();
                         subjects.add(ref.getResourceType() + "/" + ref.getIdPart());
                     }
                 }
-                //Group of Practitioners
-                else if (r.getType().equals(GroupType.PRACTITIONER)){
+                // Group of Practitioners
+                else if (r.getType().equals(GroupType.PRACTITIONER)) {
                     var practitionerGroupMembers = getMembersInGroup(r);
 
-                    //Loop through each practitioner in group
-                    for (String practitioner : practitionerGroupMembers)
-                    {
-                        //add patients associated with practitioner to subjects list
+                    // Loop through each practitioner in group
+                    for (String practitioner : practitionerGroupMembers) {
+                        // add patients associated with practitioner to subjects list
                         addPractitionerSubjectIds(practitioner, repository, subjects);
                     }
                 }
@@ -111,15 +110,15 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return members;
     }
 
-    public void addPractitionerSubjectIds(String thePractitioner, Repository repository, List<String> patients){
+    public void addPractitionerSubjectIds(String thePractitioner, Repository repository, List<String> patients) {
         Map<String, List<IQueryParameterType>> map = new HashMap<>();
 
         map.put(
-            "general-practitioner",
-            Collections.singletonList(new ReferenceParam(
-                thePractitioner.startsWith("Practitioner/")
-                    ? thePractitioner
-                    : "Practitioner/" + thePractitioner)));
+                "general-practitioner",
+                Collections.singletonList(new ReferenceParam(
+                        thePractitioner.startsWith("Practitioner/")
+                                ? thePractitioner
+                                : "Practitioner/" + thePractitioner)));
 
         var bundle = repository.search(Bundle.class, Patient.class, map);
         var iterator = new BundleIterator<>(repository, bundle);
@@ -127,7 +126,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         while (iterator.hasNext()) {
             var patient = iterator.next().getResource();
             var refString = patient.getIdElement().getResourceType() + "/"
-                + patient.getIdElement().getIdPart();
+                    + patient.getIdElement().getIdPart();
             patients.add(refString);
         }
     }

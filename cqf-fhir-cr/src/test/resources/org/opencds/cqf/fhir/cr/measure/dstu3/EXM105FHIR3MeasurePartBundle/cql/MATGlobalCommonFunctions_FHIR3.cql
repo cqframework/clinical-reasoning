@@ -175,18 +175,18 @@ define function "GetId"(uri String):
 
 define function "EncounterDiagnosis"(Encounter Encounter):
   Encounter.diagnosis D
-    return singleton from ([Condition: id in {"GetId"(D.condition.reference)}])
+    return singleton from ([Condition] Condition where Condition.id.value = "GetId"(D.condition.reference))
 
 // Returns the condition that is specified as the principal diagnosis for the encounter
 define function "PrincipalDiagnosis"(Encounter Encounter):
 	(singleton from (Encounter.diagnosis D where D.role ~ ToConcept("Billing") and D.rank = 1)) PD
 	//"GetId"(uri String): returns the last String of a Split by / List therefor cannot use in
-		return singleton from ([Condition: id in {"GetId"(PD.condition.reference)}])
+		return singleton from ([Condition] Condition where Condition.id.value = "GetId"(PD.condition.reference))
 
 // Returns the location for the given location reference
 define function GetLocation(reference Reference):
   singleton from (
-    [Location: id in {GetId(reference.reference)}]
+    [Location] Location where Location.id.value = GetId(reference.reference)
   )
 
 /*

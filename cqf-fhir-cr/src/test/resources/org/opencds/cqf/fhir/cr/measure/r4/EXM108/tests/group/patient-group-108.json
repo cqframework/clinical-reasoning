@@ -1,0 +1,10 @@
+{
+  "resourceType": "Group",
+  "id": "patient-group-108",
+  "type": "person",
+  "actual": true,
+  "member": [
+    {  "entity": {  "reference": "Patient/denom-EXM108" } },
+    {  "entity": {  "reference": "Patient/numer-EXM108" } }
+  ]
+}

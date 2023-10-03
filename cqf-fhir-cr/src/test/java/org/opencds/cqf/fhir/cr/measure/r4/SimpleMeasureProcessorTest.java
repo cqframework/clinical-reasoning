@@ -13,7 +13,6 @@ public class SimpleMeasureProcessorTest {
     protected static Given given = Measure.given().repositoryFor("EXM108");
 
     @Test
-    @Disabled("Need to test at the service level to enable this")
     public void exm108_partialSubjectId() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -45,6 +44,7 @@ public class SimpleMeasureProcessorTest {
                 .population("denominator")
                 .hasCount(1);
     }
+
 
     @Test
     public void exm108_fullSubjectId() {

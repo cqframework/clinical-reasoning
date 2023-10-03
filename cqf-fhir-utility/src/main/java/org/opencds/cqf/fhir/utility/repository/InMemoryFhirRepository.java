@@ -122,12 +122,11 @@ public class InMemoryFhirRepository implements Repository {
             Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.context);
-        builder.setType("searchset");
-
         var resourceIdMap = resourceMap.computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>());
 
         if (searchParameters == null || searchParameters.isEmpty()) {
             resourceIdMap.values().forEach(builder::addCollectionEntry);
+            builder.setType("searchset");
             return (B) builder.getBundle();
         }
 
@@ -172,6 +171,7 @@ public class InMemoryFhirRepository implements Repository {
             }
         }
 
+        builder.setType("searchset");
         return (B) builder.getBundle();
     }
 

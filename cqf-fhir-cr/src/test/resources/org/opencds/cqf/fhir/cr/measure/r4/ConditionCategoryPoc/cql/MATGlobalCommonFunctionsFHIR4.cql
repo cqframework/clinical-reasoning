@@ -270,10 +270,10 @@ define function "GetId"(uri String ):
 /*Returns the Condition resources referenced by the diagnosis element of the Encounter*/
 define function "EncounterDiagnosis"(Encounter Encounter ):
   Encounter.diagnosis D
-    return singleton from ([Condition: id in {"GetId"(D.condition.reference)}])
+    return singleton from ([Condition] C where C.id = "GetId"(D.condition.reference))
 
 define function "GetCondition"(reference Reference):
-  singleton from ([Condition: id in {"GetId"(reference.reference)}])
+  singleton from ([Condition] C where C.id = "GetId"(reference.reference))
 
 define function "PresentOnAdmissionIndicator"(element Element):
   GetExtension(element, 'http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter-diagnosisPresentOnAdmission').value as FHIR.CodeableConcept
@@ -282,13 +282,13 @@ define function "PresentOnAdmissionIndicator"(element Element):
 // TODO: BTR 2019-07-30: Shouldn't need the FHIRHelpers reference here, investigate
 define function "PrincipalDiagnosis"(Encounter Encounter ):
   (singleton from (Encounter.diagnosis D where FHIRHelpers.ToInteger(D.rank) = 1)) PD
-  		return singleton from ([Condition: id in {"GetId"(PD.condition.reference)}])
+  		return singleton from ([Condition] C where C.id = "GetId"(PD.condition.reference))
   // Returns the location for the given location reference
 
 /*Returns the Location resource specified by the given reference*/
 define function "GetLocation"(reference Reference ):
   singleton from (
-    [Location: id in {GetId(reference.reference)}]
+    [Location] L where L.id = GetId(reference.reference)
   )
 
 /*NOTE: Extensions are not the preferred approach, but are used as a way to access
@@ -347,7 +347,7 @@ define function "GetMedicationCode"(request MedicationRequest ):
   if request.medication is CodeableConcept then
   	  request.medication as CodeableConcept
   	else
-  	  (singleton from ([Medication: id in {GetId((request.medication as Reference).reference)}])).code
+  	  (singleton from ([Medication] M where M.id = GetId((request.medication as Reference).reference))).code
 
 /*Given an interval, return true if the interval has a starting boundary specified (i.e. the start of the interval is not null and not the minimum DateTime value)*/
 define function "HasStart"(period Interval<DateTime> ):
